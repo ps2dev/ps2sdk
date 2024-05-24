@@ -8,6 +8,84 @@
 
 #include <tamtypes.h>
 
+// clang-format off
+/*
+ * Slightly modified from "Basic AIF driver set" by sp193 ("[140524]AIF.7z")
+ * The Sony PlayStation 2 TOOL DTL-T10000(H) units have a slightly different SSBUSC design from the SCPH-10000 unit:
+ * its expansion interface (the PC CARD slot) seems to be connected and managed from an interface known as the "AIF".
+ * Nothing too much is known about this interface, other than the fact that it's only present on TOOL units.
+ * 
+ * Every TOOL unit has two ATA disks: one which is connected to the SBC PCI card,
+ * while the other is connected to a PCB that has the PC CARD slot on it.
+ * 
+ * While the HDD that is connected to the SBC card obviously has a purpose (it contains the PC-side Linux installation),
+ * the purpose of the other unit is not very clear because it was never used for any official applications.
+ * 
+ * That HDD unit, which is accessible via the AIF on the PlayStation 2 side of the TOOL,
+ * was reported to have contained a pristine copy of the PC-side Linux installation.
+ * However, it does not seem possible to restore the SBC HDD unit without external help because the AIF HDD is not directly accessible from the SBC.
+ * 
+ * The AIF is known to have support for only three devices: ATA HDD unit 0, a Motorola MC146818A RTC, and the PC CARD interface.
+ * 
+ * While the AIF seems to have support for ATA HDD unit 1, there isn't a physical port to connect a second HDD unit to.
+ * 
+ * The lack of DMA support in the official Sony code (within the PS2 Linux kernel) and the apparent lack of hardware registers for DMA support
+ * suggests that it might be indeed incapable of any DMA transfer modes.
+ *
+ * Memory seems to be mirrored after offset 0x200.
+ * 
+ * Legend:
+ *  R   Read-only
+ *  W   Write-only
+ *  X   R/W
+ *  .   Unused
+ * 
+ * Offset:      Register:   Detected bits:      Default value:
+ * 0x0000       IDENT       RRRRRRRRRRRRRRRR    0x0061
+ * 0x0002       REVISION    RRRRRRRRRRRRRRRR    0x0003
+ * 0x0004       INTSR/INTCL .............XXX    0x0002
+ * 0x0006       INTEN       .............XXX    0x0000
+ * 0x0008       TIMCFG      ...............X    0x0000
+ * 0x000A       unknown     ...............R    0x0001
+ * 0x000C       unknown     ...............R    0x0001
+ * 0x0010       COUNT_L     RRRRRRRRRRRRRRRR    ??????
+ * 0x0012       COUNT_H     RRRRRRRRRRRRRRRR    ??????
+ * 0x0014-0x003E    unknown     ...............R    0x0001
+ * 0x0040       ATA_TCFG    ........XXXXXXXX    0x0000
+ * 0x0042-0x005E    unknown     ...............R    0x0001
+ * 0x0060       ATA_DATA    ........XXXXXXXX    0xFF50
+ * 0x0062       ATA_FEATURE ........XXXXXXXX    0xFF00
+ * 0x0064       ATA_NSECTOR ........XXXXXXXX    0xFF00
+ * 0x0066       ATA_SECTOR  ........XXXXXXXX    0xFF01
+ * 0x0068       ATA_LCYL    ........XXXXXXXX    0xFF01
+ * 0x006A       ATA_HCYL    ........XXXXXXXX    0xFF01
+ * 0x006C       ATA_SELECT  ........XXXXXXXX    0xFF00
+ * 0x006E       ATA_COMMAND ........XXXXXXXX    0xFF00
+ * 0x0070       unknown     ...............X    0xFF00
+ * 0x0072       unknown     ...............X    0xFF00
+ * 0x0074       unknown     ...............X    0xFF00
+ * 0x0076       unknown     ...............X    0xFF01
+ * 0x0078       unknown     ...............X    0xFF01
+ * 0x007A       unknown     ...............X    0xFF00
+ * 0x007C       ATA_CONTROL ........XXXXXXXX    0xFF00
+ * 0x007E       unknown     ........XXXXXXXX    0xFF50
+ * 0x0080-0x00DE    unknown     ...............R    0x0001
+ * 0x00E0-0x00FE    A second ATA port? The power-on defaults appear to be the same as the ATA registers above.
+ * 0x0100-0x011A    MC146818A RTC registers.
+ * 0x011C-0x01FE    unknown     Probably the RTC's user RAM region. Seems to be fully readable from and writable to.
+ * 
+ * Reading from all the unknown seems to be wonky, as it takes the second read from the register to read in the written value.
+ * Sometimes, it even feels as if the value that is read was from elsewhere. Are they possibly write-only or unmapped?
+ * 
+ * The purpose of TIMCFG, COUNT_L and COUNT_H is not known because the official Sony code within the PS2 Linux kernel does not seem to use these registers anywhere.
+ * 
+ * INTEN, INTSR and INTCL bits:
+ * Bit 1: ATA0
+ * Bit 2: RTC? The purpose of the bit here isn't known because it isn't used, but it seems likely to be the RTC's because the RTC doesn't have a known interrupt even bit for itself.
+ * Bit 3: PCMCIA interrupt.
+*/
+// clang-format on
+
 #define AIF_REGBASE (SPD_REGBASE + 0x4000000)
 
 #define USE_AIF_REGS volatile u16 *aif_regs = \

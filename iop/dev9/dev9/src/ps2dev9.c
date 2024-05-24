@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <sysclib.h>
 #include <dev9.h>
+#ifdef DEV9_ENABLE_AIF
+#include <aifdev9.h>
+#endif
 
 #include <aifregs.h>
 #include <dev9regs.h>
@@ -80,8 +83,14 @@ static void dev9RegisterIntrDispatchCb(dev9IntrDispatchCb_t callback);
 /* Each driver can register callbacks that correspond to each bit of the
    SMAP interrupt status register (0xbx000028).  */
 static dev9_intr_cb_t dev9_intr_cbs[16];
+#ifdef DEV9_ENABLE_AIF
+static aif_intr_cb_t aif_intr_cbs[AIF_INUM_COUNT];
+#endif
 
 static dev9_shutdown_cb_t dev9_shutdown_cbs[16];
+#ifdef DEV9_ENABLE_AIF
+static dev9_shutdown_cb_t aif_shutdown_cbs[AIF_INUM_COUNT];
+#endif
 
 static dev9_dma_cb_t dev9_predma_cbs[4], dev9_postdma_cbs[4];
 
@@ -129,7 +138,7 @@ static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, un
         case DDIOC_MODEL:
             return dev9type;
         case DDIOC_OFF:
-            dev9Shutdown();
+            Dev9CardStop();
             return 0;
         case DDIOC_SETPIO3:
             dev9ControlPIO3(((u32 *)args)[0]);
@@ -180,7 +189,7 @@ static iop_device_t dev9x_device =
         1,
         "DEV9",
         &dev9x_ops,
-    };
+};
 
 static int print_help(void)
 { // The original made a printf() call for each line.
@@ -233,6 +242,11 @@ int _start(int argc, char *argv[])
     for (idx = 0; idx < 16; idx++)
         dev9_shutdown_cbs[idx] = NULL;
 
+#ifdef DEV9_ENABLE_AIF
+    for (idx = 0; idx < AIF_INUM_COUNT; idx++)
+        aif_shutdown_cbs[idx] = NULL;
+#endif
+
     dev9hw = DEV9_REG(DEV9_R_REV) & 0xf0;
     if (dev9hw == 0x20) { /* CXD9566 (PCMCIA) */
         dev9type = DEV9_TYPE_PCMCIA;
@@ -261,7 +275,7 @@ int _start(int argc, char *argv[])
 int _exit(void) { return MODULE_RESIDENT_END; }
 
 /* Export 4 */
-void dev9RegisterIntrCb(int intr, dev9_intr_cb_t cb)
+void SpdRegisterIntrHandler(int intr, dev9_intr_cb_t cb)
 {
     dev9_intr_cbs[intr] = cb;
 }
@@ -354,7 +368,7 @@ static int dev9_device_reset(void)
 }
 
 /* Export 6 */
-void dev9Shutdown(void)
+void Dev9CardStop(void)
 {
     int idx;
     USE_DEV9_REGS;
@@ -362,6 +376,12 @@ void dev9Shutdown(void)
     for (idx = 0; idx < 16; idx++)
         if (dev9_shutdown_cbs[idx])
             dev9_shutdown_cbs[idx]();
+
+#ifdef DEV9_ENABLE_AIF
+    for (idx = 0; idx < AIF_INUM_COUNT; idx++)
+        if (aif_shutdown_cbs[idx])
+            aif_shutdown_cbs[idx]();
+#endif
 
     if (dev9type == DEV9_TYPE_PCMCIA) { /* PCMCIA */
         DEV9_REG(DEV9_R_POWER) = 0;
@@ -389,7 +409,7 @@ static int dev9_card_find_manfid(u32 manfid)
 }
 
 /* Export 7 */
-void dev9IntrEnable(int mask)
+void SpdIntrEnable(int mask)
 {
     USE_SPD_REGS;
     int flags;
@@ -400,7 +420,7 @@ void dev9IntrEnable(int mask)
 }
 
 /* Export 8 */
-void dev9IntrDisable(int mask)
+void SpdIntrDisable(int mask)
 {
     USE_SPD_REGS;
     int flags;
@@ -411,7 +431,7 @@ void dev9IntrDisable(int mask)
 }
 
 /* Export 5 */
-int dev9DmaTransfer(int device, void *buf, int bcr, int dir)
+int SpdDmaTransfer(int device, void *buf, int bcr, int dir)
 {
     USE_SPD_REGS;
     volatile iop_dmac_chan_t *dev9_chan = (iop_dmac_chan_t *)DEV9_DMAC_BASE;
@@ -540,7 +560,7 @@ out:
 }
 
 /* Export 9 */
-int dev9GetEEPROM(u16 *buf)
+int SpdGetEthernetID(u16 *buf)
 {
     int i;
 
@@ -568,7 +588,7 @@ int dev9GetEEPROM(u16 *buf)
 // The specific LED part used is the Citizen CITILED CL-200TLY-C, which has a "Lemon Yellow" color.
 
 /* Export 10 */
-void dev9LEDCtl(int ctl)
+void SpdSetLED(int ctl)
 {
     USE_SPD_REGS;
     if (dev9_has_dvr_capability) {
@@ -613,7 +633,7 @@ static void dev9RegisterIntrDispatchCb(dev9IntrDispatchCb_t callback)
 }
 
 /* Export 11 */
-int dev9RegisterShutdownCb(int idx, dev9_shutdown_cb_t cb)
+int Dev9RegisterPowerOffHandler(int idx, dev9_shutdown_cb_t cb)
 {
     if (idx < 16) {
         dev9_shutdown_cbs[idx] = cb;
@@ -642,7 +662,12 @@ static int dev9_init(int sema_attr)
     dev9_set_stat(0x103);
 
     /* Disable all device interrupts.  */
-    dev9IntrDisable(0xffff);
+    SpdIntrDisable(0xffff);
+
+#ifdef DEV9_ENABLE_AIF
+    if (using_aif)
+        aifIntrDisable(0xffff);
+#endif
 
     /* Register interrupt dispatch callback handler. */
     dev9RegisterIntrDispatchCb(&dev9_intr_dispatch);
@@ -650,6 +675,10 @@ static int dev9_init(int sema_attr)
     /* Reset the SMAP interrupt callback table. */
     for (i = 0; i < 16; i++)
         dev9_intr_cbs[i] = NULL;
+#ifdef DEV9_ENABLE_AIF
+    for (i = 0; i < AIF_INUM_COUNT; i++)
+        aif_intr_cbs[i] = NULL;
+#endif
 
     for (i = 0; i < 4; i++) {
         dev9_predma_cbs[i]  = NULL;
@@ -663,7 +692,7 @@ static int dev9_init(int sema_attr)
     dev9ControlPIO3(0);
 
     /* Turn the LED off.  */
-    dev9LEDCtl(0);
+    SpdSetLED(0);
     return 0;
 }
 
@@ -853,7 +882,11 @@ static int speed_device_init(void)
 #endif
         if (dev9_device_probe() < 0) {
             M_PRINTF("No device.\n");
-            return -1;
+#ifdef DEV9_ENABLE_AIF
+            return (using_aif ? 0 : -1);
+#else
+        return -1;
+#endif
         }
 
         dev9_device_reset();
@@ -867,7 +900,7 @@ static int speed_device_init(void)
             M_PRINTF("Unable to change SSBUS mode.\n");
 
         if (res) {
-            dev9Shutdown();
+            Dev9CardStop();
             return -1;
         }
 
@@ -876,7 +909,7 @@ static int speed_device_init(void)
             break;
         }
 
-        dev9Shutdown();
+        Dev9CardStop();
         DelayThread(4500000);
     }
 
@@ -1144,6 +1177,35 @@ static int pcmcia_intr(void *unused)
     return 1;
 }
 
+#ifdef DEV9_ENABLE_AIF
+static int aif_pcmcia_intr_handler(void)
+{
+    USE_AIF_REGS;
+
+    aif_regs[AIF_INTCL] = AIF_INTR_PCMCIA;
+    pcmcia_intr(NULL);
+
+    return 1;
+}
+
+static int aif_intr(void *unused)
+{
+    USE_AIF_REGS;
+    unsigned int i;
+
+    while ((aif_regs[AIF_INTSR] & aif_regs[AIF_INTEN]) != 0) {
+        for (i = 0; i < AIF_INUM_COUNT; i++) {
+            if ((aif_intr_cbs[i] != NULL) && ((aif_regs[AIF_INTSR] & aif_regs[AIF_INTEN]) & (1 << i))) {
+                aif_intr_cbs[i]();
+            }
+        }
+    }
+
+    return 1;
+}
+#endif
+
+
 static int pcmcia_init(int sema_attr)
 {
     USE_DEV9_REGS;
@@ -1162,8 +1224,13 @@ static int pcmcia_init(int sema_attr)
             M_PRINTF("T10K detected.\n");
 
             if (aif_regs[AIF_IDENT] == 0xa1) {
+#ifdef DEV9_ENABLE_AIF
+                M_PRINTF("AIF controller revision: %d.\n", aif_regs[AIF_REVISION]);
+                aif_regs[AIF_INTCL] = 7; // Clear interrupts.
+#else
                 aif_regs[AIF_INTEN] = AIF_INTR_PCMCIA;
-                using_aif           = 1;
+#endif
+                using_aif = 1;
             } else {
                 M_PRINTF("AIF not detected.\n");
                 return 1;
@@ -1196,7 +1263,16 @@ static int pcmcia_init(int sema_attr)
         return 1;
 
     CpuSuspendIntr(&flags);
-    RegisterIntrHandler(IOP_IRQ_DEV9, 1, &pcmcia_intr, NULL);
+#ifdef DEV9_ENABLE_AIF
+    if (using_aif) {
+        RegisterIntrHandler(IOP_IRQ_DEV9, 1, &aif_intr, NULL);
+        aifRegisterIntrCb(AIF_INUM_PCMCIA, &aif_pcmcia_intr_handler);
+        aifIntrEnable(AIF_INTR_PCMCIA);
+    } else
+#endif
+    {
+        RegisterIntrHandler(IOP_IRQ_DEV9, 1, &pcmcia_intr, NULL);
+    }
     EnableIntr(IOP_IRQ_DEV9);
     CpuResumeIntr(flags);
 
@@ -1291,3 +1367,62 @@ static int expbay_init(int sema_attr)
     M_PRINTF("CXD9611 (SSBUS Buffer) driver start.\n");
     return 0;
 }
+
+#ifdef DEV9_ENABLE_AIF
+int aifIsDetected(void)
+{
+    return using_aif;
+}
+
+void aifIntrEnable(int mask)
+{
+    USE_AIF_REGS;
+    int OldState;
+
+    CpuSuspendIntr(&OldState);
+    aif_regs[AIF_INTEN] |= mask;
+    CpuResumeIntr(OldState);
+}
+
+void aifIntrDisable(int mask)
+{
+    USE_AIF_REGS;
+    int OldState;
+
+    CpuSuspendIntr(&OldState);
+    aif_regs[AIF_INTEN] &= ~mask;
+    CpuResumeIntr(OldState);
+}
+
+void aifRegisterIntrCb(int intr, aif_intr_cb_t cb)
+{
+    if (intr < AIF_INUM_COUNT) {
+        aif_intr_cbs[intr] = cb;
+    }
+}
+
+int aifRegisterShutdownCb(int idx, dev9_shutdown_cb_t cb)
+{
+    if (idx < AIF_INUM_COUNT) {
+        aif_shutdown_cbs[idx] = cb;
+        return 0;
+    }
+    return -1;
+}
+
+unsigned char aifRTCReadData(unsigned short int address)
+{
+    USE_AIF_REGS;
+    USE_AIF_RTC_REGS;
+
+    return aif_rtc_regs[address & 0x7F];
+}
+
+void aifRTCWriteData(unsigned char data, unsigned short int address)
+{
+    USE_AIF_REGS;
+    USE_AIF_RTC_REGS;
+
+    aif_rtc_regs[address & 0x7F] = data;
+}
+#endif

@@ -1,0 +1,18 @@
+
+DECLARE_EXPORT_TABLE(dev9, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(sceDev9Terminate)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(SpdRegisterIntrHandler)
+DECLARE_EXPORT(SpdDmaTransfer)
+DECLARE_EXPORT(Dev9CardStop)
+DECLARE_EXPORT(SpdIntrEnable)
+DECLARE_EXPORT(SpdIntrDisable)
+DECLARE_EXPORT(SpdGetEthernetID)
+DECLARE_EXPORT(SpdSetLED)
+DECLARE_EXPORT(Dev9RegisterPowerOffHandler)
+END_EXPORT_TABLE
+
+
+void _retonly() {}

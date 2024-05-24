@@ -1,9 +1,9 @@
 
 dev9_IMPORTS_start
-I_dev9RegisterIntrCb
-I_dev9DmaTransfer
-I_dev9IntrEnable
-I_dev9IntrDisable
+I_SpdRegisterIntrHandler
+I_SpdDmaTransfer
+I_SpdIntrEnable
+I_SpdIntrDisable
 I_dev9RegisterPreDmaCb
 I_dev9RegisterPostDmaCb
 dev9_IMPORTS_end

@@ -1,0 +1,18 @@
+
+DECLARE_EXPORT_TABLE(acram, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(acRamModuleRestart)
+DECLARE_EXPORT(acRamModuleStart)
+DECLARE_EXPORT(acRamModuleStatus)
+DECLARE_EXPORT(acRamModuleStop)
+DECLARE_EXPORT(acRamSetup)
+DECLARE_EXPORT(acRamRead)
+DECLARE_EXPORT(acRamReadI)
+DECLARE_EXPORT(acRamWrite)
+DECLARE_EXPORT(acRamWriteI)
+END_EXPORT_TABLE
+
+void _retonly() {}

@@ -51,19 +51,19 @@ typedef struct _ata_devinfo
 
 ata_devinfo_t *sceAtaInit(int device);
 
-int ata_reset_devices(void);
+int sceAtaSoftReset(void);
 
-int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, u16 lcyl, u16 hcyl, u16 select, u16 command);
-int ata_io_finish(void);
+int sceAtaExecCmd(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, u16 lcyl, u16 hcyl, u16 select, u16 command);
+int sceAtaWaitResult(void);
 
-int ata_get_error(void);
+int sceAtaGetError(void);
 
 int sceAtaDmaTransfer(int device, void *buf, u32 lba, u32 nsectors, int dir);
 
 // DRM functions that were meant to keep users from sharing disks (and hence the contained content). Supported by only Sony-modified HDDs (e.g. the SCPH-20400).
-int ata_device_sce_sec_set_password(int device, void *password);
+int sceAtaSecuritySetPassword(int device, void *password);
 int sceAtaSecurityUnLock(int device, void *password);
-int ata_device_sce_sec_erase(int device);
+int sceAtaSecurityEraseUnit(int device);
 
 int sceAtaIdle(int device, int period);
 int sceAtaGetSceId(int device, void *data);
@@ -78,14 +78,14 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
 #define atad_IMPORTS_end   END_IMPORT_TABLE
 
 #define I_sceAtaInit                      DECLARE_IMPORT(4, sceAtaInit)
-#define I_ata_reset_devices               DECLARE_IMPORT(5, ata_reset_devices)
-#define I_ata_io_start                    DECLARE_IMPORT(6, ata_io_start)
-#define I_ata_io_finish                   DECLARE_IMPORT(7, ata_io_finish)
-#define I_ata_get_error                   DECLARE_IMPORT(8, ata_get_error)
+#define I_sceAtaSoftReset                 DECLARE_IMPORT(5, sceAtaSoftReset)
+#define I_sceAtaExecCmd                   DECLARE_IMPORT(6, sceAtaExecCmd)
+#define I_sceAtaWaitResult                DECLARE_IMPORT(7, sceAtaWaitResult)
+#define I_sceAtaGetError                  DECLARE_IMPORT(8, sceAtaGetError)
 #define I_sceAtaDmaTransfer               DECLARE_IMPORT(9, sceAtaDmaTransfer)
-#define I_ata_device_sce_sec_set_password DECLARE_IMPORT(10, ata_device_sce_sec_set_password)
+#define I_sceAtaSecuritySetPassword       DECLARE_IMPORT(10, sceAtaSecuritySetPassword)
 #define I_sceAtaSecurityUnLock            DECLARE_IMPORT(11, sceAtaSecurityUnLock)
-#define I_ata_device_sce_sec_erase        DECLARE_IMPORT(12, ata_device_sce_sec_erase)
+#define I_sceAtaSecurityEraseUnit         DECLARE_IMPORT(12, sceAtaSecurityEraseUnit)
 #define I_sceAtaIdle                      DECLARE_IMPORT(13, sceAtaIdle)
 #define I_sceAtaGetSceId                  DECLARE_IMPORT(14, sceAtaGetSceId)
 #define I_sceAtaSmartReturnStatus         DECLARE_IMPORT(15, sceAtaSmartReturnStatus)
@@ -96,8 +96,14 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
 
 // Backward-compatibility definitions
 #define ata_get_devinfo sceAtaInit
+#define ata_reset_devices sceAtaSoftReset
+#define ata_io_start sceAtaExecCmd
+#define ata_io_finish sceAtaWaitResult
+#define ata_get_error sceAtaGetError
 #define ata_device_sector_io sceAtaDmaTransfer
+#define ata_device_sce_sec_set_password sceAtaSecuritySetPassword
 #define ata_device_sce_sec_unlock sceAtaSecurityUnLock
+#define ata_device_sce_sec_erase sceAtaSecurityEraseUnit
 #define ata_device_idle sceAtaIdle
 #define ata_device_sce_identify_drive sceAtaGetSceId
 #define ata_device_smart_get_status sceAtaSmartReturnStatus
@@ -107,8 +113,14 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
 #define ata_device_dma_transfer sceAtaDmaTransfer
 
 #define I_ata_get_devinfo I_sceAtaInit
+#define I_ata_reset_devices I_sceAtaSoftReset
+#define I_ata_io_start I_sceAtaExecCmd
+#define I_ata_io_finish I_sceAtaWaitResult
+#define I_ata_get_error I_sceAtaGetError
 #define I_ata_device_sector_io I_sceAtaDmaTransfer
+#define I_ata_device_sce_sec_set_password I_sceAtaSecuritySetPassword
 #define I_ata_device_sce_sec_unlock I_sceAtaSecurityUnLock
+#define I_ata_device_sce_sec_erase I_sceAtaSecurityEraseUnit
 #define I_ata_device_idle I_sceAtaIdle
 #define I_ata_device_sce_identify_drive I_sceAtaGetSceId
 #define I_ata_device_smart_get_status I_sceAtaSmartReturnStatus

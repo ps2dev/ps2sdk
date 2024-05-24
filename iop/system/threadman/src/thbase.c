@@ -229,7 +229,7 @@ int ExitThread()
     thread_leave(0, 0, state, 1);
 
     Kprintf("panic ! Thread DORMANT !\n");
-    asm __volatile__("break 1");
+    __builtin_trap();
 
     return KE_OK;
 }
@@ -249,7 +249,7 @@ int ExitDeleteThread()
     thread_leave(0, 0, state, 1);
 
     Kprintf("panic ! Thread ExitDeleted !\n");
-    asm __volatile__("break 1");
+   __builtin_trap();
 
     return KE_OK;
 }

@@ -34,6 +34,7 @@ stdio_IMPORTS_end
 #endif
 
 sysclib_IMPORTS_start
+I_memcpy
 I_memset
 sysclib_IMPORTS_end
 

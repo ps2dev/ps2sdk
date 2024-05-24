@@ -10,8 +10,6 @@
 
 #include "module_debug.h"
 
-#define U64_2XU32(val)  ((u32*)val)[1], ((u32*)val)[0]
-
 struct partition g_part[MAX_PARTITIONS];
 struct block_device g_part_bd[MAX_PARTITIONS];
 
@@ -58,7 +56,8 @@ static int part_read(struct block_device *bd, u64 sector, void *buffer, u16 coun
 
 #ifdef DEBUG
     u64 finalSector = sector + bd->sectorOffset;
-    M_DEBUG("%s (%s %d %d) 0x%08x%08x %d\n", __func__, bd->name, bd->devNr, bd->parNr, U64_2XU32(&finalSector), count);
+    DEBUG_U64_2XU32(finalSector);
+    M_DEBUG("%s (%s %d %d) 0x%08x%08x %d\n", __func__, bd->name, bd->devNr, bd->parNr, finalSector_u32[1], finalSector_u32[0], count);
 #endif
 
     return part->bd->read(part->bd, sector + bd->sectorOffset, buffer, count);
@@ -73,7 +72,8 @@ static int part_write(struct block_device *bd, u64 sector, const void *buffer, u
 
 #ifdef DEBUG
     u64 finalSector = sector + bd->sectorOffset;
-    M_DEBUG("%s (%s %d %d) 0x%08x%08x %d\n", __func__, bd->name, bd->devNr, bd->parNr, U64_2XU32(&finalSector), count);
+    DEBUG_U64_2XU32(finalSector);
+    M_DEBUG("%s (%s %d %d) 0x%08x%08x %d\n", __func__, bd->name, bd->devNr, bd->parNr, finalSector_u32[1], finalSector_u32[0], count);
 #endif
 
     return part->bd->write(part->bd, sector + bd->sectorOffset, buffer, count);

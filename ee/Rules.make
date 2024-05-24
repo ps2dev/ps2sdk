@@ -83,6 +83,8 @@ EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS)
 # Command for ensuring the output directory for the rule exists.
 DIR_GUARD = @$(MKDIR) -p $(@D)
 
+MAKE_CURPID := $(shell printf '%s' $$PPID)
+
 PS2SDK_CRT0 = $(PS2SDKSRC)/ee/startup/obj/crt0.o
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c
@@ -101,6 +103,8 @@ $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.s
 	$(DIR_GUARD)
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
+.INTERMEDIATE:: $(EE_LIB)_tmp$(MAKE_CURPID)
+
 $(EE_BIN): $(EE_OBJS) $(EE_LIB_ARCHIVES) $(EE_ADDITIONAL_DEPS) $(PS2SDK_CRT0)
 	$(DIR_GUARD)
 	$(EE_CC) -T$(EE_LINKFILE) -Wl,-Map,$(EE_BIN_MAPFILE) $(EE_OPTFLAGS) \
@@ -111,9 +115,13 @@ $(EE_ERL) : $(EE_OBJS)
 	$(EE_CC) -nostdlib -o $(EE_ERL) $(EE_OBJS) $(EE_CFLAGS) $(EE_LDFLAGS) -Wl,-r -Wl,-d
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_ERL)
 
-$(EE_LIB): $(EE_OBJS) $(EE_LIB:%.a=%.erl)
+$(EE_LIB)_tmp$(MAKE_CURPID): $(EE_OBJS) $(EE_LIB:%.a=%.erl)
 	$(DIR_GUARD)
-	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
+	$(EE_AR) cru $@ $(EE_OBJS)
+
+$(EE_LIB): $(EE_LIB)_tmp$(MAKE_CURPID)
+	$(DIR_GUARD)
+	mv $< $@
 
 $(EE_LIB:%.a=%.erl): $(EE_OBJS)
 	$(DIR_GUARD)

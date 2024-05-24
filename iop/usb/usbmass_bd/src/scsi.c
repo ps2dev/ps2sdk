@@ -103,7 +103,8 @@ static int scsi_cmd_rw_sector(struct block_device *bd, u64 lba, const void *buff
     unsigned char comData[12]   = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
 
-    M_DEBUG("scsi_cmd_rw_sector - 0x%08x%08x %p 0x%04x\n", U64_2XU32(&lba), buffer, sectorCount);
+    DEBUG_U64_2XU32(lba);
+    M_DEBUG("scsi_cmd_rw_sector - 0x%08x%08x %p 0x%04x\n", lba_u32[1], lba_u32[0], buffer, sectorCount);
 
     // Note: LBA from bdm is 64bit but SCSI commands being used are 32bit. These need to be updated to 64bit LBA SCSI
     // commands to work with large capacity drives. For now the 32bit LBA will only support up to 2TB drives.
@@ -187,7 +188,8 @@ static int scsi_read(struct block_device *bd, u64 sector, void *buffer, u16 coun
     u16 sc_remaining            = count;
     int retries;
 
-    M_DEBUG("%s: sector=0x%08x%08x, count=%d\n", __func__, U64_2XU32(&sector), count);
+    DEBUG_U64_2XU32(sector);
+    M_DEBUG("%s: sector=0x%08x%08x, count=%d\n", __func__, sector_u32[1], sector_u32[0], count);
 
     while (sc_remaining > 0) {
         u16 sc = sc_remaining > scsi->max_sectors ? scsi->max_sectors : sc_remaining;
@@ -198,7 +200,8 @@ static int scsi_read(struct block_device *bd, u64 sector, void *buffer, u16 coun
         }
 
         if (retries == 0) {
-            M_PRINTF("ERROR: unable to read sector after %d tries (sector=0x%08x%08x, count=%d)\n", SCSI_MAX_RETRIES, U64_2XU32(&sector), count);
+            U64_2XU32(sector);
+            M_PRINTF("ERROR: unable to read sector after %d tries (sector=0x%08x%08x, count=%d)\n", SCSI_MAX_RETRIES, sector_u32[1], sector_u32[0], count);
             return -EIO;
         }
 
@@ -214,26 +217,47 @@ static int scsi_write(struct block_device *bd, u64 sector, const void *buffer, u
 {
     struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
     u16 sc_remaining            = count;
+    unsigned int sectorSize     = bd->sectorSize;
+    void *misalign_buffer       = NULL;
     int retries;
 
-    M_DEBUG("%s: sector=0x%08x%08x, count=%d\n", __func__, U64_2XU32(&sector), count);
+    DEBUG_U64_2XU32(sector);
+    M_DEBUG("%s: sector=0x%08x%08x, count=%d\n", __func__, sector_u32[1], sector_u32[0], count);
+
+    if (((uiptr)buffer & 3) != 0) {
+        /* Slow misalignment workaround */
+        misalign_buffer = __builtin_alloca(sectorSize + 4);
+
+        if (((uiptr)misalign_buffer & 3) != 0)
+        {
+            misalign_buffer = (u8 *)misalign_buffer + (4 - ((uiptr)misalign_buffer & 3));
+        }
+    }
 
     while (sc_remaining > 0) {
         u16 sc = sc_remaining > scsi->max_sectors ? scsi->max_sectors : sc_remaining;
+        const void *dst_buffer = buffer;
+
+        if (misalign_buffer != NULL) {
+            memcpy(misalign_buffer, buffer, sectorSize);
+            dst_buffer = misalign_buffer;
+            sc = 1;
+        }
 
         for (retries = SCSI_MAX_RETRIES; retries > 0; retries--) {
-            if (scsi_cmd_rw_sector(bd, sector, buffer, sc, 1) == 0)
+            if (scsi_cmd_rw_sector(bd, sector, dst_buffer, sc, 1) == 0)
                 break;
         }
 
         if (retries == 0) {
-            M_PRINTF("ERROR: unable to write sector after %d tries (sector=0x%08x%08x, count=%d)\n", SCSI_MAX_RETRIES, U64_2XU32(&sector), count);
+            U64_2XU32(sector);
+            M_PRINTF("ERROR: unable to write sector after %d tries (sector=0x%08x%08x, count=%d)\n", SCSI_MAX_RETRIES, sector_u32[1], sector_u32[0], count);
             return -EIO;
         }
 
         sc_remaining -= sc;
         sector += sc;
-        buffer = (u8 *)buffer + (sc * bd->sectorSize);
+        buffer = (u8 *)buffer + (sc * sectorSize);
     }
 
     return count;
