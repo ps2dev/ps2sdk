@@ -261,14 +261,6 @@ static DIR *fs_find_free_dir_structure(void)
 }
 
 //---------------------------------------------------------------------------
-static int fs_dummy(void)
-{
-    M_DEBUG("%s\n", __func__);
-
-    return -5;
-}
-
-//---------------------------------------------------------------------------
 static int fs_init(iop_device_t *driver)
 {
     M_DEBUG("%s\n", __func__);
@@ -799,10 +791,12 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
     return ret;
 }
 
+DECL_NOT_SUPPORTED_OP()
+
 static iop_device_ops_t fs_functarray = {
     &fs_init,
-    (void *)&fs_dummy,
-    (void *)&fs_dummy,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
     &fs_open,
     &fs_close,
     &fs_read,
@@ -816,16 +810,16 @@ static iop_device_ops_t fs_functarray = {
     &fs_dclose,
     &fs_dread,
     &fs_getstat,
-    (void *)&fs_dummy,
+    NOT_SUPPORTED,
     &fs_rename,
-    (void *)&fs_dummy,
-    (void *)&fs_dummy,
-    (void *)&fs_dummy,
-    (void *)&fs_dummy,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
     &fs_lseek64,
     &fs_devctl,
-    (void *)&fs_dummy,
-    (void *)&fs_dummy,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
     &fs_ioctl2,
 };
 static iop_device_t fs_driver = {

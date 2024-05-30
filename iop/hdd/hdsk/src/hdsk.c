@@ -593,11 +593,6 @@ static int HdskInit(iomanX_iop_device_t *device)
     return 0;
 }
 
-static int HdskUnsupported(void)
-{
-    return -1;
-}
-
 int BitmapUsed;
 u32 TotalCopied;
 struct hdskBitmap hdskBitmap[HDSK_BITMAP_SIZE];
@@ -729,34 +724,36 @@ static int HdskDevctl(iomanX_iop_file_t *fd, const char *name, int cmd, void *ar
     return result;
 }
 
+DECL_NOT_SUPPORTED_OP()
+
 static iomanX_iop_device_ops_t HdskDeviceOps = {
     &HdskInit,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
     &HdskDevctl,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
-    (void *)&HdskUnsupported,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
 };
 
 static iomanX_iop_device_t HdskDevice = {
