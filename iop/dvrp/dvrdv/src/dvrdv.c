@@ -32,7 +32,6 @@ extern int dvrdv_df_exit(iomanX_iop_device_t *dev);
 extern int dvrdv_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
 extern int dvrdv_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrdv_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrdv_df_null();
 extern s64 dvrdv_df_null_long();
 extern int dvrioctl2_dv_dubb_start(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrioctl2_dv_dubb_stop(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
@@ -54,34 +53,35 @@ struct DevctlCmdTbl_t
         {0x5607, &dvrioctl2_get_dvcam_info},
         {0x5608, &dvrioctl2_get_dvcam_name},
 };
+
 static iomanX_iop_device_ops_t DvrFuncTbl =
     {
         &dvrdv_df_init,
         &dvrdv_df_exit,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
         &dvrdv_df_ioctl,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
         (void *)&dvrdv_df_null_long,
         &dvrdv_df_devctl,
-        (void *)&dvrdv_df_null,
-        (void *)&dvrdv_df_null,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
         &dvrdv_df_ioctl2,
     };
 static iomanX_iop_device_t DVR = {
@@ -233,14 +233,9 @@ int dvrdv_df_ioctl2(
     return -22;
 }
 
-int dvrdv_df_null()
-{
-    return -48;
-}
-
 s64 dvrdv_df_null_long()
 {
-    return -48LL;
+    return -134LL;
 }
 
 int dvrioctl2_dv_dubb_start(
