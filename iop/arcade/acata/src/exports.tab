@@ -1,0 +1,23 @@
+
+DECLARE_EXPORT_TABLE(acata, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(acAtaModuleRestart)
+DECLARE_EXPORT(acAtaModuleStart)
+DECLARE_EXPORT(acAtaModuleStatus)
+DECLARE_EXPORT(acAtaModuleStop)
+DECLARE_EXPORT(acAtaSetup)
+DECLARE_EXPORT(acAtaRequest)
+DECLARE_EXPORT(acAtaRequestI)
+DECLARE_EXPORT(acAtaReply)
+DECLARE_EXPORT(acAtaStatus)
+DECLARE_EXPORT(acAtapiSetup)
+DECLARE_EXPORT(acAtapiRequest)
+DECLARE_EXPORT(acAtapiRequestI)
+DECLARE_EXPORT(acAtapiStatus)
+DECLARE_EXPORT(ata_probe)
+END_EXPORT_TABLE
+
+void _retonly() {}

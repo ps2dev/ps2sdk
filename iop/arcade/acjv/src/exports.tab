@@ -1,0 +1,17 @@
+
+DECLARE_EXPORT_TABLE(acjv, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(acJvModuleRestart)
+DECLARE_EXPORT(acJvModuleStart)
+DECLARE_EXPORT(acJvModuleStatus)
+DECLARE_EXPORT(acJvModuleStop)
+DECLARE_EXPORT(acJvRead)
+DECLARE_EXPORT(acJvWrite)
+DECLARE_EXPORT(acJvGet)
+DECLARE_EXPORT(acJvPut)
+END_EXPORT_TABLE
+
+void _retonly() {}

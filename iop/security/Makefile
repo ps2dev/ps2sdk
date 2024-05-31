@@ -8,6 +8,7 @@
 
 SUBDIRS = \
 	secrman \
+	secrman_arcade \
 	secrsif
 
 include $(PS2SDKSRC)/Defs.make

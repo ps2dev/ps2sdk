@@ -1,0 +1,27 @@
+
+DECLARE_EXPORT_TABLE(accore, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(acDmaModuleRestart)
+DECLARE_EXPORT(acDmaModuleStart)
+DECLARE_EXPORT(acDmaModuleStatus)
+DECLARE_EXPORT(acDmaModuleStop)
+DECLARE_EXPORT(acDmaSetup)
+DECLARE_EXPORT(acDmaRequest)
+DECLARE_EXPORT(acDmaRequestI)
+DECLARE_EXPORT(acDmaCancel)
+DECLARE_EXPORT(acDmaCancelI)
+DECLARE_EXPORT(acIntrModuleRestart)
+DECLARE_EXPORT(acIntrModuleStart)
+DECLARE_EXPORT(acIntrModuleStatus)
+DECLARE_EXPORT(acIntrModuleStop)
+DECLARE_EXPORT(acIntrRegister)
+DECLARE_EXPORT(acIntrRelease)
+DECLARE_EXPORT(acIntrEnable)
+DECLARE_EXPORT(acIntrDisable)
+DECLARE_EXPORT(acIntrClear)
+END_EXPORT_TABLE
+
+void _retonly() {}

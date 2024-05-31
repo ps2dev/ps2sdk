@@ -90,7 +90,7 @@ int main ( void ) {
   goto end;
  }  /* end if */
 
- s_pMPEGData = ( unsigned char* )malloc ( lSize = lSize > MAX_SIZE ? MAX_SIZE : lSize );
+ s_pMPEGData = ( unsigned char* )memalign ( 64, lSize = lSize > MAX_SIZE ? MAX_SIZE : lSize );
 
  if ( !s_pMPEGData ) {
   printf ( "test_mpeg: could not allocate enough memory (%ld)\n", lSize );
@@ -218,7 +218,7 @@ static int SetDMA ( void* apUserData ) {
 static void* InitCB ( void* apParam, MPEGSequenceInfo* apInfo ) {
 
  int          lDataSize = apInfo -> m_Width * apInfo -> m_Height * 4;
- char*        retVal    = ( char* )malloc ( lDataSize );
+ char*        retVal    = ( char* )memalign ( 64, lDataSize );
  InitCBParam* lpParam   = ( InitCBParam* )apParam;
  int          lMBW      = ( apInfo -> m_Width  ) >> 4;
  int          lMBH      = ( apInfo -> m_Height ) >> 4;

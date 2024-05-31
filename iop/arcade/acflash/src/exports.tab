@@ -1,0 +1,21 @@
+
+DECLARE_EXPORT_TABLE(acflash, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(acFlashModuleRestart)
+DECLARE_EXPORT(acFlashModuleStart)
+DECLARE_EXPORT(acFlashModuleStatus)
+DECLARE_EXPORT(acFlashModuleStop)
+DECLARE_EXPORT(acFlashStart)
+DECLARE_EXPORT(acFlashStatus)
+DECLARE_EXPORT(acFlashStop)
+DECLARE_EXPORT(acFlashInfo)
+DECLARE_EXPORT(acFlashErase)
+DECLARE_EXPORT(acFlashProgram)
+DECLARE_EXPORT(acFlashRead)
+DECLARE_EXPORT(acFlashVerify)
+END_EXPORT_TABLE
+
+void _retonly() {}

@@ -1,12 +1,13 @@
 void _funcret(){};
 
-DECLARE_EXPORT_TABLE(secrman, 0x01, 0x03)
+// El_isra: this was 0x1, 0x3 originally. but the IRX_ID macro on source code has 0x1, 0x4. just like arcade SECRMAN...
+DECLARE_EXPORT_TABLE(secrman, 0x01, 0x04)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_funcret)
 	DECLARE_EXPORT(_exit)
 	DECLARE_EXPORT(_funcret)
-	DECLARE_EXPORT(SecrSetMcCommandHandler)		/* 004 */
-	DECLARE_EXPORT(SecrSetMcDevIDHandler)		/* 005 */
+	DECLARE_EXPORT(SecrSetMcCommandHandler)	/* 004 */
+	DECLARE_EXPORT(SecrSetMcDevIDHandler)	/* 005 */
 	DECLARE_EXPORT(SecrAuthCard)			/* 006 */
 	DECLARE_EXPORT(SecrResetAuthCard)		/* 007 */
 	DECLARE_EXPORT(SecrCardBootHeader)		/* 008 */
@@ -20,5 +21,8 @@ DECLARE_EXPORT_TABLE(secrman, 0x01, 0x03)
 	DECLARE_EXPORT(SecrDownloadFile)		/* 016 */
 	DECLARE_EXPORT(SecrDownloadGetKbit)		/* 017 */
 	DECLARE_EXPORT(SecrDownloadGetKc)		/* 018 */
-	DECLARE_EXPORT(SecrDownloadGetICVPS2)		/* 019 */
+	DECLARE_EXPORT(SecrDownloadGetICVPS2)	/* 019 */
+#ifdef BUILDING_ARCADE_SECRMAN
+	DECLARE_EXPORT(SecrAuthDongle)			/* 020 */
+#endif
 END_EXPORT_TABLE
