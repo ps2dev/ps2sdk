@@ -45,12 +45,12 @@ $(subdir_release): dummy
 # and causing output file corruption
 .NOTPARALLEL: $(subdir_list) $(subdir_clean) $(subdir_release)
 
-build: $(subdir_list) | env_build_check download_dependencies
+build: download_dependencies $(subdir_list) | env_build_check
 
 debug:
 	$(MAKE) DEBUG=1 all
 
-clean: $(subdir_clean) | env_build_check clean_dependencies
+clean: clean_dependencies $(subdir_clean) | env_build_check
 
 release-clean:
 	+$(MAKE) -C common release-clean
@@ -107,6 +107,7 @@ download_dependencies:
 	@if test $(ONLY_HOST_TOOLS) -eq 0 ; \
 	then \
 	  $(MAKEREC) $(PS2SDKSRC)/common/external_deps all ; \
+	  $(MAKEREC) $(PS2SDKSRC)/common/external_deps/libsmb2/lib install -f Makefile.PS2_IOP; \
 	fi
 	
 # Don't do anything if ONLY_HOST_TOOLS is set.
@@ -114,6 +115,7 @@ clean_dependencies:
 	@if test $(ONLY_HOST_TOOLS) -eq 0 ; \
 	then \
 	  $(MAKEREC) $(PS2SDKSRC)/common/external_deps clean ; \
+	  $(MAKEREC) $(PS2SDKSRC)/common/external_deps/libsmb2/lib clean -f Makefile.PS2_IOP; \
 	fi
 
 docs:

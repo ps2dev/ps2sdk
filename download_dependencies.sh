@@ -23,3 +23,14 @@ if test ! -d "$LWIP_REPO_FOLDER"; then
 else
   (cd "$LWIP_REPO_FOLDER" && git fetch origin && git reset --hard "origin/${LWIP_BRANCH_NAME}" && git checkout "$LWIP_BRANCH_NAME" && cd - )|| exit 1
 fi
+
+## Download libsmb2
+LIBSMB2_REPO_URL="https://github.com/Wolf3s/libsmb2.git"
+LIBSMB2_REPO_FOLDER="common/external_deps/libsmb2"
+LIBSMB2_BRANCH_NAME="cmake"
+if test ! -d "$LIBSMB2_REPO_FOLDER"; then
+  git clone --depth 1 -b $LIBSMB2_BRANCH_NAME $LIBSMB2_REPO_URL "$LIBSMB2_REPO_FOLDER"_inprogress || exit 1
+  mv "$LIBSMB2_REPO_FOLDER"_inprogress "$LIBSMB2_REPO_FOLDER"
+else
+  (cd "$LIBSMB2_REPO_FOLDER" && git fetch origin && git reset --hard "origin/${LIBSMB2_BRANCH_NAME}" && git checkout "$LIBSMB2_BRANCH_NAME" && cd - )|| exit 1
+fi

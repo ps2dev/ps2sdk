@@ -1,5 +1,6 @@
 
 LWIP := $(PS2SDKSRC)/common/external_deps/lwip
+LIBSMB2 := $(PS2SDKSRC)/common/external_deps/libsmb2
 
 all: $(LWIP)
 

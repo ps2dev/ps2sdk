@@ -19,7 +19,6 @@
 #include "sysmem.h"
 
 #include "smb2_fio.h"
-#include "lib/compat.h"
 
 #define MODNAME 	"smb2man"
 #define VER_MAJOR	2
@@ -37,4 +36,36 @@ int _start(int argc, char *argv[])
 	SMB2_initdev();
 
 	return MODULE_RESIDENT_END;
+}
+
+void *malloc(int size)
+{
+    void* result;
+    int OldState;
+
+    CpuSuspendIntr(&OldState);
+    result = AllocSysMemory(ALLOC_FIRST, size, NULL);
+    CpuResumeIntr(OldState);
+
+    return result;
+}
+
+void free(void *ptr)
+{
+    int OldState;
+
+    CpuSuspendIntr(&OldState);
+    FreeSysMemory(ptr);
+    CpuResumeIntr(OldState);
+}
+
+void *calloc(size_t nmemb, size_t size)
+{
+    size_t s = nmemb * size;
+    void *ptr;
+
+    ptr = malloc(s);
+    memset(ptr, 0, s);
+  
+    return ptr;
 }
