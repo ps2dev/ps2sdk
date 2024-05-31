@@ -1191,3 +1191,37 @@ int unlinkat(int dirfd, const char *pathname, int flags)
 	}
 }
 #endif /* F_unlinkat  */
+
+#ifdef F_dup
+int dup(int oldfd)
+{
+	if (!__IS_FD_VALID(oldfd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	return __fdman_get_dup_descriptor(oldfd);
+}
+#endif /* F_dup  */
+
+#ifdef F_dup2
+int dup2(int oldfd, int newfd)
+{
+	if (!__IS_FD_VALID(oldfd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	if (oldfd == newfd) {
+		return oldfd;
+	}
+	if (newfd < 0) {
+		errno = EBADF;
+		return -1;
+	}
+	if (__descriptormap[newfd]) {
+		close(newfd);
+	}
+	return __fdman_get_dup2_descriptor(oldfd, newfd);
+}
+#endif /* F_dup2  */

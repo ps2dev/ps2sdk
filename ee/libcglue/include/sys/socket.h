@@ -82,6 +82,13 @@
 #include <tcpip.h>
 #endif
 
+/*
+ * Maximum queue length specifiable by listen(2).
+ */
+#ifndef SOMAXCONN
+#define	SOMAXCONN	128
+#endif
+
 #if 0
 #include <sys/featuretest.h>
 
