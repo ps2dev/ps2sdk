@@ -8,6 +8,8 @@
 
 DEBUG ?= 0
 
+IOP_CFLAGS += -Wno-error=address
+
 ifeq ($(DEBUG),1)
 	IOP_CFLAGS += -DDEBUG
 endif
