@@ -158,6 +158,10 @@ int __path_absolute(const char *in, char *out, int len);
 	void __libpthreadglue_init() {} \
     void __libpthreadglue_deinit() {}
 
+/* Namco system 246/256 dont have CDVDFSV module loaded on iop reboot. therefore, any libcglue code calling CDVDMAN RPCs will freeze*/
+#define LIBCGLUE_SUPPORT_NAMCO_SYSTEM_2x6() \
+    void _libcglue_rtc_update() {}
+
 typedef uint64_t ps2_clock_t;
 static inline ps2_clock_t ps2_clock(void) {
     // DEPRECATED VERSION USE INSTEAD GetTimerSystemTime
