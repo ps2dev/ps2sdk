@@ -11,6 +11,8 @@ clean:
 	@$(PRINTF) 'Cleaning PS2SDK dependencies.\n'
 	@$(PRINTF) 'Cleaning lwip.\n'
 	rm -rf $(LWIP) $(LWIP)_inprogress
+	@$(PRINTF) 'Cleaning libsmb2.\n'
+	rm -rf $(LIBSMB2) $(LIBSMB2)_inprogress
 
 release:
 	@cd .
