@@ -25,9 +25,9 @@ else
 fi
 
 ## Download libsmb2
-LIBSMB2_REPO_URL="https://github.com/Wolf3s/libsmb2.git"
+LIBSMB2_REPO_URL="https://github.com/sahlberg/libsmb2.git"
 LIBSMB2_REPO_FOLDER="common/external_deps/libsmb2"
-LIBSMB2_BRANCH_NAME="cmake"
+LIBSMB2_BRANCH_NAME="master"
 if test ! -d "$LIBSMB2_REPO_FOLDER"; then
   git clone --depth 1 -b $LIBSMB2_BRANCH_NAME $LIBSMB2_REPO_URL "$LIBSMB2_REPO_FOLDER"_inprogress || exit 1
   mv "$LIBSMB2_REPO_FOLDER"_inprogress "$LIBSMB2_REPO_FOLDER"
