@@ -45,12 +45,12 @@ $(subdir_release): dummy
 # and causing output file corruption
 .NOTPARALLEL: $(subdir_list) $(subdir_clean) $(subdir_release)
 
-build: $(subdir_list) |  download_dependencies env_build_check
+build: $(subdir_list) | env_build_check download_dependencies 
 
 debug:
 	$(MAKE) DEBUG=1 all
 
-clean: $(subdir_clean) | clean_dependencies env_build_check
+clean: $(subdir_clean) | env_build_check clean_dependencies
 
 release-clean:
 	+$(MAKE) -C common release-clean

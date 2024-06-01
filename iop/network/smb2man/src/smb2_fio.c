@@ -117,7 +117,7 @@ static char *prepare_path(const char *path)
 {
 	int i, len;
 	char *p, *p2;
-    len = strlen(path) + 1 + smb2_curdir ? strlen(smb2_curdir) + 1 : 0;
+	len = strlen(path) + 1 + smb2_curdir ? strlen(smb2_curdir) + 1 : 0;
 	p = malloc(len);
 	if (p == NULL) {
 		return NULL;
