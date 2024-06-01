@@ -17,7 +17,7 @@ sha384-512.o smb2-cmd-close.o smb2-cmd-create.o smb2-cmd-echo.o smb2-cmd-error.o
 smb2-cmd-query-info.o smb2-cmd-read.o smb2-cmd-session-setup.o smb2-cmd-set-info.o smb2-cmd-tree-connect.o smb2-cmd-tree-disconnect.o smb2-cmd-write.o smb2-data-file-info.o smb2-data-filesystem-info.o \
 smb2-data-security-descriptor.o smb2-data-reparse-point.o smb2-share-enum.o smb3-seal.o smb2-signing.o socket.o sync.o timestamps.o unicode.o usha.o
 
-IOP_CFLAGS += $(SMB2_CFLAGS) -Wno-error=address
+IOP_CFLAGS += $(SMB2_CFLAGS)
 
 ifeq ($(DEBUG),1)
 	IOP_CFLAGS += -DDEBUG

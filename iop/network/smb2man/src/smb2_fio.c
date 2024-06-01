@@ -119,7 +119,7 @@ static char *prepare_path(const char *path)
 {
     int i, len;
     char *p, *p2;
-    len = strlen(path) + 1 + smb2_curdir ? strlen(smb2_curdir) + 1 : 0;
+    len = strlen(path) + 1 + (smb2_curdir ? strlen(smb2_curdir) + 1 : 0);
     p   = malloc(len);
     if (p == NULL) {
         return NULL;
@@ -701,9 +701,11 @@ int SMB2_rename(iop_file_t *f, const char *oldname, const char *newname)
     int rc = 0;
 
     SMBLOG("SMB2_rename %s -> %s\n", oldname, newname);
-    if (!oldpath || !newpath)
-        return -ENOENT;
-
+    /*
+        if (!oldpath || !newpath) { TODO CLANG-FORMAT
+            return -ENOENT;
+        }
+    */
     oldpath = prepare_path(oldname);
     if (oldpath == NULL) {
         rc = -ENOMEM;
