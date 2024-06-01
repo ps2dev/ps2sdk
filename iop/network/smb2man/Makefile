@@ -10,7 +10,7 @@ DEBUG ?= 0
 
 LIBSMB2 := $(PS2SDKSRC)/common/external_deps/libsmb2
 
-SMB2_CFLAGS += -DPS2SDK_IOP -D__PS2__ -DHAVE_CONFIG_H -DNEED_BE64TOH -DNEED_STRDUP -DNEED_READV -DNEED_WRITEV -DNEED_POLL -DNEED_GETPID -DNEED_RANDOM -DNEED_SRANDOM -DNEED_GETLOGIN_R -D_U_=/**/ -Wall -Os -I. -I$(LIBSMB2)/include -I$(LIBSMB2)/include/ps2 -I$(LIBSMB2)/include/smb2
+SMB2_CFLAGS += -D__PS2SDK_IOP__ -D__PS2__ -DHAVE_CONFIG_H -DNEED_BE64TOH -DNEED_STRDUP -DNEED_READV -DNEED_WRITEV -DNEED_POLL -DNEED_GETPID -DNEED_RANDOM -DNEED_SRANDOM -DNEED_GETLOGIN_R -D_U_=/**/ -Wall -Os -I. -I$(LIBSMB2)/include -I$(LIBSMB2)/include/ps2 -I$(LIBSMB2)/include/smb2
 
 SMB2_OBJS = aes.o aes128ccm.o alloc.o compat.o dcerpc.o dcerpc-lsa.o dcerpc-srvsvc.o errors.o init.o hmac.o hmac-md5.o krb5-wrapper.o libsmb2.o md4c.o md5.o ntlmssp.o pdu.o sha1.o sha224-256.o \
 sha384-512.o smb2-cmd-close.o smb2-cmd-create.o smb2-cmd-echo.o smb2-cmd-error.o smb2-cmd-flush.o smb2-cmd-ioctl.o smb2-cmd-logoff.o smb2-cmd-negotiate.o smb2-cmd-query-directory.o \
