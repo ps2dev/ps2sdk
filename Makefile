@@ -45,7 +45,7 @@ $(subdir_release): dummy
 # and causing output file corruption
 .NOTPARALLEL: $(subdir_list) $(subdir_clean) $(subdir_release)
 
-build: $(subdir_list) | env_build_check download_dependencies 
+build: $(subdir_list) | env_build_check download_dependencies
 
 debug:
 	$(MAKE) DEBUG=1 all
