@@ -23,6 +23,7 @@
 #include "errno.h"
 #include "ps2smb2.h"
 #include "smb2_fio.h"
+#include "loadcore.h"
 
 #define int64_t  u64
 #define uint64_t u64
@@ -827,7 +828,7 @@ int SMB2_initdev(void)
 {
     DelDrv(smb2dev.name);
     if (AddDrv((iop_device_t *)&smb2dev))
-        return 1;
+        return MODULE_NO_RESIDENT_END;
 
-    return 0;
+    return MODULE_RESIDENT_END;
 }

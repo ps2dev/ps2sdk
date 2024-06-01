@@ -33,9 +33,7 @@ int _start(int argc, char *argv[])
 
     printf("%s version 0x%01x%02x - Copyright(c) 2021-2024 Ronnie Sahlberg and André Guilherme\n", MODNAME, VER_MAJOR, VER_MINOR);
 
-    SMB2_initdev();
-
-    return MODULE_RESIDENT_END;
+    return SMB2_initdev();
 }
 
 void *malloc(int size)
