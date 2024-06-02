@@ -19,7 +19,7 @@ ifeq ($(DEBUG_EXTREME),1)
 	IOP_CFLAGS += -DDEBUG_EXTREME
 endif
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include -I$(PS2SDKSRC)/common/external_deps/fatfs/source/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include -I$(FATFS)/source/include
 
 FATFS_OBJS = diskio.o ff.o ffsystem.o ffunicode.o 
 
