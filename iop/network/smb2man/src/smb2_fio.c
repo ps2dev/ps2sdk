@@ -3,6 +3,7 @@
   SMB2MAN
   Ronnie Sahlberg <ronniesahlberg@gmail.com> 2021
   André Guilherme <andregui17@outlook.com> 2023-2024
+  ps2dev - http://www.ps2dev.org 2024-present
 
   Based on SMBMAN:
   Copyright 2009-2010, jimmikaelkael
@@ -24,12 +25,8 @@
 #include "ps2smb2.h"
 #include "smb2_fio.h"
 #include "loadcore.h"
-
-#define int64_t  u64
-#define uint64_t u64
-#define uint32_t u32
-#define uint16_t u16
-#define uint8_t  u8
+#include <stdint.h>
+#include <stdbool.h>
 
 #include <smb2/smb2.h>
 #include <smb2/libsmb2.h>
@@ -45,16 +42,16 @@ struct smb2_context *log_smb2;
 struct smb2fh *log_fh;
 char log_buf[1024];
 
-#define SMBLOG(...)                                                    \
+#define SMB2LOG(...)                                                   \
     {                                                                  \
         int l;                                                         \
         if (log_fh) {                                                  \
             l = sprintf(log_buf, __VA_ARGS__);                         \
-            smb2_write(log_smb2, log_fh, (const uint8_t *)log_buf, l); \
+            smb2_write(log_smb2, log_fh, (const u8 *)log_buf, l); \
         }                                                              \
     }
 #else
-#define SMBLOG(...) /* */
+#define SMB2LOG(...)
 #endif
 
 void free(void *);
@@ -62,6 +59,7 @@ void *malloc(int);
 
 int smb2man_io_sema;
 static char *smb2_curdir;
+
 
 /*
  * Linked list of all connected shares.
@@ -75,16 +73,8 @@ struct smb2_share_list
 };
 struct smb2_share_list *shares;
 
-
-static void smb_io_lock(void)
-{
-    WaitSema(smb2man_io_sema);
-}
-
-static void smb_io_unlock(void)
-{
-    SignalSema(smb2man_io_sema);
-}
+#define smb2_io_lock()   WaitSema(smb2man_io_sema)
+#define smb2_io_unlock() SignalSema(smb2man_io_sema)
 
 /*
  * Takes a path of the form <share>/<path> and returns the context that
@@ -120,7 +110,7 @@ static char *prepare_path(const char *path)
     int i, len;
     char *p, *p2;
     len = strlen(path) + 1 + (smb2_curdir ? strlen(smb2_curdir) + 1 : 0);
-    p   = malloc(len);
+    p = malloc(len);
     if (p == NULL) {
         return NULL;
     }
@@ -186,15 +176,14 @@ static int smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
         log_fh = smb2_open(log_smb2, url->path, O_RDWR | O_CREAT);
         smb2_ftruncate(log_smb2, log_fh, 0);
         smb2_destroy_url(url);
-        SMBLOG("Logging started\n");
+        SMB2LOG("Logging started\n");
     }
 #endif
 
-    SMBLOG("smb2_Connect: Try to connect %s as smb:/%s\n",
-           in->url, in->name);
+    SMB2LOG("smb2_Connect: Try to connect %s as smb:/%s\n", in->url, in->name);
     share = malloc(sizeof(struct smb2_share_list));
     if (share == NULL) {
-        SMBLOG("Failed to malloc share\n");
+        SMB2LOG("Failed to malloc share\n");
         return -ENOMEM;
     }
     memset(share, 0, sizeof(struct smb2_share_list));
@@ -203,32 +192,30 @@ static int smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
     share->smb2 = smb2_init_context();
     smb2_set_timeout(share->smb2, 30);
     if (share->smb2 == NULL) {
-        SMBLOG("Failed to initialize smb2 context\n");
+        SMB2LOG("Failed to initialize smb2 context\n");
         free(share);
         return -ENOMEM;
     }
     url = smb2_parse_url(share->smb2, in->url);
     if (url == NULL) {
-        SMBLOG("Failed to parse URL: %s\n", in->url);
+        SMB2LOG("Failed to parse URL: %s\n", in->url);
         free(share);
         return -EINVAL;
     }
     smb2_set_password(share->smb2, in->password);
-    rc = smb2_connect_share(share->smb2, url->server, url->share,
-                            in->username);
+    rc = smb2_connect_share(share->smb2, url->server, url->share, in->username);
     smb2_destroy_url(url);
     if (rc) {
         smb2_destroy_context(share->smb2);
         free(share);
-        SMBLOG("Failed to connect to share: %s %s\n", in->url,
-               smb2_get_error(share->smb2));
+        SMB2LOG("Failed to connect to share: %s %s\n", in->url, smb2_get_error(share->smb2));
         return -EIO;
     }
     shares = share;
     if (out) {
         out->ctx = share->smb2;
     }
-    SMBLOG("Connected to share %s\n", in->url);
+    SMB2LOG("Connected to share %s\n", in->url);
     return 0;
 }
 
@@ -238,21 +225,20 @@ int SMB2_devctl(iop_file_t *f, const char *devname, int cmd,
 {
     int r = 0;
 
-    SMBLOG("SMB2_devctl cmd:%d\n", cmd);
+    SMB2LOG("SMB2_devctl cmd:%d\n", cmd);
 
-    smb_io_lock();
+    smb2_io_lock();
 
     switch (cmd) {
         case SMB2_DEVCTL_CONNECT:
-            r = smb2_Connect((smb2Connect_in_t *)arg,
-                             (smb2Connect_out_t *)bufp);
+            r = smb2_Connect((smb2Connect_in_t *)arg, (smb2Connect_out_t *)bufp);
             break;
 
         default:
             r = -EINVAL;
     }
 
-    smb_io_unlock();
+    smb2_io_unlock();
 
     return r;
 }
@@ -276,9 +262,9 @@ int SMB2_open(iop_file_t *f, const char *filename, int flags, int mode)
     char *path = NULL, *p;
     struct smb2_context *smb2;
     struct file_fh *ffh = NULL;
-    int rc              = 0;
+    int rc = 0;
 
-    SMBLOG("SMB2_OPEN %s flags:%x\n", filename, flags);
+    SMB2LOG("SMB2_OPEN %s flags:%x\n", filename, flags);
 
     /* no writing, yet */
     if (flags != O_RDONLY) {
@@ -305,10 +291,10 @@ int SMB2_open(iop_file_t *f, const char *filename, int flags, int mode)
         goto out;
     }
 
-    smb_io_lock();
+    smb2_io_lock();
     ffh->smb2 = smb2;
-    ffh->fh   = smb2_open(smb2, p, flags);
-    smb_io_unlock();
+    ffh->fh = smb2_open(smb2, p, flags);
+    smb2_io_unlock();
     if (ffh->fh == NULL) {
         rc = -EINVAL;
         goto out;
@@ -327,16 +313,16 @@ out:
 
 int SMB2_close(iop_file_t *f)
 {
-    SMBLOG("SMB2_CLOSE\n");
+    SMB2LOG("SMB2_CLOSE\n");
     struct file_fh *ffh = f->privdata;
 
     if (ffh == NULL) {
         return -EBADF;
     }
 
-    smb_io_lock();
+    smb2_io_lock();
     smb2_close(ffh->smb2, ffh->fh);
-    smb_io_unlock();
+    smb2_io_unlock();
 
     free(ffh);
     f->privdata = NULL;
@@ -349,9 +335,9 @@ int SMB2_dopen(iop_file_t *f, const char *dirname)
     char *path = NULL, *p;
     struct smb2_context *smb2;
     struct dir_fh *dfh = NULL;
-    int rc             = 0;
+    int rc = 0;
 
-    SMBLOG("SMB2_DOPEN %s\n", dirname);
+    SMB2LOG("SMB2_DOPEN %s\n", dirname);
 
     if (!dirname)
         return -ENOENT;
@@ -379,12 +365,12 @@ int SMB2_dopen(iop_file_t *f, const char *dirname)
 
     dfh->smb2 = smb2;
     if (p[0]) {
-        dfh->is_root = 0;
-        smb_io_lock();
+        dfh->is_root = false;
+        smb2_io_lock();
         dfh->fh = smb2_opendir(smb2, p);
-        smb_io_unlock();
+        smb2_io_unlock();
     } else {
-        dfh->is_root = 1;
+        dfh->is_root = true;
         dfh->shares  = shares;
     }
     if (dfh->fh == NULL) {
@@ -436,7 +422,7 @@ static void FileTimeToDate(u64 t, u8 *datetime)
     years += 1601; /* add base year from FILETIME struct; */
 
     days = (u16)(time / (60 * 60 * 24));
-    time -= (unsigned int)days * (60 * 60 * 24);
+    time -= (u32)days * (60 * 60 * 24);
     days -= leapdays;
 
     if ((years % 4) == 0 && ((years % 100) != 0 || (years % 400) == 0))
@@ -510,7 +496,7 @@ int SMB2_dread(iop_file_t *f, iox_dirent_t *dirent)
         return 1;
     }
 
-    SMBLOG("SMB2_DREAD %s\n", de->name);
+    SMB2LOG("SMB2_DREAD %s\n", de->name);
     strncpy(dirent->name, de->name, 256);
     smb2_statFiller(&de->st, &dirent->stat);
 
@@ -524,7 +510,7 @@ int SMB2_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
     struct smb2_stat_64 st;
     int rc = 0;
 
-    SMBLOG("SMB2_GETSTAT %s\n", filename);
+    SMB2LOG("SMB2_GETSTAT %s\n", filename);
     if (!filename)
         return -ENOENT;
 
@@ -541,9 +527,9 @@ int SMB2_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
 
     memset((void *)stat, 0, sizeof(iox_stat_t));
 
-    smb_io_lock();
+    smb2_io_lock();
     rc = smb2_stat(smb2, p, &st);
-    smb_io_unlock();
+    smb2_io_unlock();
     if (rc) {
         goto out;
     }
@@ -559,9 +545,9 @@ out:
 s64 SMB2_lseek64(iop_file_t *f, s64 pos, int whence)
 {
     struct file_fh *ffh = f->privdata;
-    int rc              = 0;
+    int rc = 0;
 
-    SMBLOG("SMB2_LSEEK64 pos:%d whence:%d\n", (int)pos, whence);
+    SMB2LOG("SMB2_LSEEK64 pos:%d whence:%d\n", (int)pos, whence);
 
     rc = smb2_lseek(ffh->smb2, ffh->fh, pos, whence, NULL);
 
@@ -578,14 +564,14 @@ int SMB2_read(iop_file_t *f, void *buf, int size)
     struct file_fh *ffh = f->privdata;
     int rc;
 
-    SMBLOG("SMB2_READ len:%d\n", size);
+    SMB2LOG("SMB2_READ len:%d\n", size);
     if (ffh == NULL) {
         return -EBADF;
     }
 
-    smb_io_lock();
+    smb2_io_lock();
     rc = smb2_read(ffh->smb2, ffh->fh, buf, size);
-    smb_io_unlock();
+    smb2_io_unlock();
 
     return rc;
 }
@@ -595,11 +581,11 @@ int SMB2_write(iop_file_t *f, void *buf, int size)
     struct file_fh *ffh = f->privdata;
     int rc;
 
-    SMBLOG("SMB2_write %d\n", size);
+    SMB2LOG("SMB2_write %d\n", size);
 
-    smb_io_lock();
+    smb2_io_lock();
     rc = smb2_write(ffh->smb2, ffh->fh, buf, size);
-    smb_io_unlock();
+    smb2_io_unlock();
 
     return rc;
 }
@@ -610,7 +596,7 @@ int SMB2_mkdir(iop_file_t *f, const char *dirname, int mode)
     struct smb2_context *smb2;
     int rc;
 
-    SMBLOG("SMB2_mkdir %s\n", dirname);
+    SMB2LOG("SMB2_mkdir %s\n", dirname);
 
     if (!dirname)
         return -ENOENT;
@@ -626,9 +612,9 @@ int SMB2_mkdir(iop_file_t *f, const char *dirname, int mode)
         goto out;
     }
 
-    smb_io_lock();
+    smb2_io_lock();
     rc = smb2_mkdir(smb2, p);
-    smb_io_unlock();
+    smb2_io_unlock();
 out:
     free(path);
     return rc;
@@ -640,7 +626,7 @@ int SMB2_rmdir(iop_file_t *f, const char *dirname)
     struct smb2_context *smb2;
     int rc;
 
-    SMBLOG("SMB2_rmdir %s\n", dirname);
+    SMB2LOG("SMB2_rmdir %s\n", dirname);
 
     if (!dirname)
         return -ENOENT;
@@ -656,9 +642,9 @@ int SMB2_rmdir(iop_file_t *f, const char *dirname)
         goto out;
     }
 
-    smb_io_lock();
+    smb2_io_lock();
     rc = smb2_rmdir(smb2, p);
-    smb_io_unlock();
+    smb2_io_unlock();
 out:
     free(path);
     return rc;
@@ -670,7 +656,7 @@ int SMB2_remove(iop_file_t *f, const char *filename)
     struct smb2_context *smb2;
     int rc;
 
-    SMBLOG("SMB2_remove %s\n", filename);
+    SMB2LOG("SMB2_remove %s\n", filename);
 
     if (!filename)
         return -ENOENT;
@@ -686,9 +672,9 @@ int SMB2_remove(iop_file_t *f, const char *filename)
         goto out;
     }
 
-    smb_io_lock();
+    smb2_io_lock();
     rc = smb2_unlink(smb2, p);
-    smb_io_unlock();
+    smb2_io_unlock();
 out:
     free(path);
     return rc;
@@ -700,12 +686,8 @@ int SMB2_rename(iop_file_t *f, const char *oldname, const char *newname)
     struct smb2_context *oldsmb2, *newsmb2;
     int rc = 0;
 
-    SMBLOG("SMB2_rename %s -> %s\n", oldname, newname);
-    /*
-        if (!oldpath || !newpath) { TODO CLANG-FORMAT
-            return -ENOENT;
-        }
-    */
+    SMB2LOG("SMB2_rename %s -> %s\n", oldname, newname);
+
     oldpath = prepare_path(oldname);
     if (oldpath == NULL) {
         rc = -ENOMEM;
@@ -735,9 +717,9 @@ int SMB2_rename(iop_file_t *f, const char *oldname, const char *newname)
         goto out;
     }
 
-    smb_io_lock();
+    smb2_io_lock();
     rc = smb2_rename(oldsmb2, oldp, newp);
-    smb_io_unlock();
+    smb2_io_unlock();
 out:
     free(oldpath);
     free(newpath);
@@ -747,8 +729,7 @@ out:
 
 int SMB2_dummy(void)
 {
-
-    SMBLOG("SMB2_dummy\n");
+    SMB2LOG("SMB2_dummy\n");
     return -EIO;
 }
 
@@ -756,7 +737,7 @@ int SMB2_chdir(iop_file_t *f, const char *dirname)
 {
     char *path;
 
-    SMBLOG("SMB2_chdir %s\n", dirname);
+    SMB2LOG("SMB2_chdir %s\n", dirname);
     if (!dirname)
         return -ENOENT;
 
@@ -773,7 +754,7 @@ int SMB2_chdir(iop_file_t *f, const char *dirname)
 
 int SMB2_deinit(iop_device_t *dev)
 {
-    SMBLOG("SMB2_deinit\n");
+    SMB2LOG("SMB2_deinit\n");
 
     DeleteSema(smb2man_io_sema);
 
@@ -782,7 +763,7 @@ int SMB2_deinit(iop_device_t *dev)
 
 int SMB2_init(iop_device_t *dev)
 {
-    SMBLOG("SMB2_init\n");
+    SMB2LOG("SMB2_init\n");
 
     smb2man_io_sema = CreateMutex(IOP_MUTEX_UNLOCKED);
 

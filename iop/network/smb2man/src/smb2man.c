@@ -2,6 +2,7 @@
   SMB2MAN
   Ronnie Sahlberg <ronniesahlberg@gmail.com> 2021
   André Guilherme <andregui17@outlook.com> 2023-2024
+  ps2dev - http://www.ps2dev.org 2024-present
 
   Based on SMBMAN:
   Copyright 2009-2010, jimmikaelkael
@@ -31,7 +32,7 @@ int _start(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    printf("%s version 0x%01x%02x - Copyright(c) 2021-2024 Ronnie Sahlberg and André Guilherme\n", MODNAME, VER_MAJOR, VER_MINOR);
+    printf("%s version 0x%01x%02x - Copyright(c) 2021 Ronnie Sahlberg, Copyright(c) 2023-2024 André Guilherme, Copyright(c) 2024-Present PS2DEV \n", MODNAME, VER_MAJOR, VER_MINOR);
 
     return SMB2_initdev();
 }
