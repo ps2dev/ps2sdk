@@ -392,6 +392,11 @@ int __ps2ipeeWriteHelper(void *userdata, const void *mem, int len)
     return res;
 }
 
+struct hostent *ps2ip_gethostbyaddr(const void *addr, int len, int type) {
+    // TODO
+    return NULL;
+}
+
 void __ps2ipeeOpsInitializeImpl(void)
 {
     memset(&__ps2ipee_fdman_socket_ops, 0, sizeof(__ps2ipee_fdman_socket_ops));
@@ -401,6 +406,7 @@ void __ps2ipeeOpsInitializeImpl(void)
     __ps2ipee_fdman_socket_ops.dns_getserver = dns_getserver;
     __ps2ipee_fdman_socket_ops.socket = __ps2ipeeSocketHelper;
     __ps2ipee_fdman_socket_ops.select = lwip_select;
+    __ps2ipee_fdman_socket_ops.gethostbyaddr = ps2ip_gethostbyaddr;
     __ps2ipee_fdman_socket_ops.gethostbyname = lwip_gethostbyname;
     __ps2ipee_fdman_socket_ops.gethostbyname_r = lwip_gethostbyname_r;
     __ps2ipee_fdman_socket_ops.freeaddrinfo = lwip_freeaddrinfo;

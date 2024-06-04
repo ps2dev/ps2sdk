@@ -110,6 +110,7 @@ typedef void (*_libcglue_fdman_dns_setserver_cb_t)(u8 numdns, const ip_addr_t *d
 typedef const ip_addr_t *(*_libcglue_fdman_dns_getserver_cb_t)(u8 numdns);
 typedef int (*_libcglue_fdman_socket_cb_t)(_libcglue_fdman_fd_info_t *info, int domain, int type, int protocol);
 typedef int (*_libcglue_fdman_select_cb_t)(int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+typedef struct hostent *(*_libcglue_fdman_gethostbyaddr_cb_t)(const void *addr, int len, int type);
 typedef struct hostent *(*_libcglue_fdman_gethostbyname_cb_t)(const char *name);
 typedef int (*_libcglue_fdman_gethostbyname_r_cb_t)(const char *name, struct hostent *ret, char *buf, size_t buflen, struct hostent **result, int *h_errnop);
 typedef void (*_libcglue_fdman_freeaddrinfo_cb_t)(struct addrinfo *ai);
@@ -123,6 +124,7 @@ typedef struct _libcglue_fdman_socket_ops_
 	_libcglue_fdman_dns_getserver_cb_t dns_getserver;
 	_libcglue_fdman_socket_cb_t socket;
 	_libcglue_fdman_select_cb_t select;
+	_libcglue_fdman_gethostbyaddr_cb_t gethostbyaddr;
 	_libcglue_fdman_gethostbyname_cb_t gethostbyname;
 	_libcglue_fdman_gethostbyname_r_cb_t gethostbyname_r;
 	_libcglue_fdman_freeaddrinfo_cb_t freeaddrinfo;

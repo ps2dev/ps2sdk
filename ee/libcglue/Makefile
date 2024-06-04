@@ -152,6 +152,7 @@ LOCK_OBJS = \
 	__locks_deinit.o
 
 NETDB_OBJS = \
+	gethostbyaddr.o \
 	gethostbyname.o \
 	gethostbyname_r.o \
 	freeaddrinfo.o \

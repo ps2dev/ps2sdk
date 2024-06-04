@@ -334,6 +334,11 @@ int __ps2ipcSetsockoptHelper(void *userdata, int level, int optname, const void 
     return res;
 }
 
+struct hostent *ps2ipc_gethostbyaddr(const void *addr, int len, int type) {
+    // TODO
+    return NULL;
+}
+
 void __ps2ipcOpsInitializeImpl(void)
 {
     memset(&__ps2ipc_fdman_socket_ops, 0, sizeof(__ps2ipc_fdman_socket_ops));
@@ -343,6 +348,7 @@ void __ps2ipcOpsInitializeImpl(void)
     __ps2ipc_fdman_socket_ops.dns_getserver = ps2ipc_dns_getserver;
     __ps2ipc_fdman_socket_ops.socket = __ps2ipcSocketHelper;
     __ps2ipc_fdman_socket_ops.select = ps2ipc_select;
+    __ps2ipc_fdman_socket_ops.gethostbyaddr = ps2ipc_gethostbyaddr;
     __ps2ipc_fdman_socket_ops.gethostbyname = ps2ipc_gethostbyname;
 
     memset(&__ps2ipc_fdman_ops_socket, 0, sizeof(__ps2ipc_fdman_ops_socket));
