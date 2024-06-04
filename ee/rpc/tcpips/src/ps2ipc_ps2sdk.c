@@ -201,6 +201,12 @@ int __ps2ipcRecvfromHelper(void *userdata, void *mem, size_t len, int flags, str
     return res;
 }
 
+int __ps2ipcRecvmsgHelper(void *userdata, struct msghdr *msg, int flags)
+{
+    // TODO
+    return -1;
+}
+
 int __ps2ipcSendHelper(void *userdata, const void *dataptr, size_t len, int flags)
 {
     int fd, res;
@@ -367,6 +373,7 @@ void __ps2ipcOpsInitializeImpl(void)
     __ps2ipc_fdman_ops_socket.listen = __ps2ipcListenHelper;
     __ps2ipc_fdman_ops_socket.recv = __ps2ipcRecvHelper;
     __ps2ipc_fdman_ops_socket.recvfrom = __ps2ipcRecvfromHelper;
+    __ps2ipc_fdman_ops_socket.recvmsg = __ps2ipcRecvmsgHelper;
     __ps2ipc_fdman_ops_socket.send = __ps2ipcSendHelper;
     __ps2ipc_fdman_ops_socket.sendto = __ps2ipcSendtoHelper;
     __ps2ipc_fdman_ops_socket.sendmsg = __ps2ipcSendmsgHelper;

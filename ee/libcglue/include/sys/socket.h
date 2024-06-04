@@ -680,9 +680,7 @@ int	paccept(int, struct sockaddr * __restrict, socklen_t * __restrict,
 ssize_t	recv(int, void *, size_t, int);
 ssize_t	recvfrom(int, void *__restrict, size_t, int,
 	    struct sockaddr * __restrict, socklen_t * __restrict);
-#if 0
 ssize_t	recvmsg(int, struct msghdr *, int);
-#endif
 ssize_t	send(int, const void *, size_t, int);
 ssize_t	sendto(int, const void *,
 	    size_t, int, const struct sockaddr *, socklen_t);

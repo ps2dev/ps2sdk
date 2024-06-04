@@ -39,6 +39,7 @@ typedef int (*_libcglue_fdman_connect_cb_t)(void *userdata, const struct sockadd
 typedef int (*_libcglue_fdman_listen_cb_t)(void *userdata, int backlog);
 typedef ssize_t (*_libcglue_fdman_recv_cb_t)(void *userdata, void *buf, size_t len, int flags);
 typedef ssize_t (*_libcglue_fdman_recvfrom_cb_t)(void *userdata, void *buf, size_t len, int flags, struct sockaddr *from, socklen_t *fromlen);
+typedef ssize_t (*_libcglue_fdman_recvmsg_cb_t)(void *userdata, struct msghdr *msg, int flags);
 typedef ssize_t (*_libcglue_fdman_send_cb_t)(void *userdata, const void *buf, size_t len, int flags);
 typedef ssize_t (*_libcglue_fdman_sendto_cb_t)(void *userdata, const void *buf, size_t len, int flags, const struct sockaddr *to, socklen_t tolen);
 typedef ssize_t (*_libcglue_fdman_sendmsg_cb_t)(void *userdata, const struct msghdr *msg, int flags);
@@ -67,8 +68,10 @@ typedef struct _libcglue_fdman_fd_ops_
 	_libcglue_fdman_listen_cb_t listen;
 	_libcglue_fdman_recv_cb_t recv;
 	_libcglue_fdman_recvfrom_cb_t recvfrom;
+	_libcglue_fdman_recvmsg_cb_t recvmsg;
 	_libcglue_fdman_send_cb_t send;
 	_libcglue_fdman_sendto_cb_t sendto;
+	_libcglue_fdman_sendmsg_cb_t sendmsg;
 	_libcglue_fdman_getsockopt_cb_t getsockopt;
 	_libcglue_fdman_setsockopt_cb_t setsockopt;
 	_libcglue_fdman_shutdown_cb_t shutdown;

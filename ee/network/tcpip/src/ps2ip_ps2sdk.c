@@ -202,6 +202,12 @@ int __ps2ipeeRecvfromHelper(void *userdata, void *mem, size_t len, int flags, st
     return res;
 }
 
+int __ps2ipeeRecvmsgHelper(void *userdata, struct msghdr *msg, int flags)
+{
+    // TODO
+    return -1;
+}
+
 int __ps2ipeeSendHelper(void *userdata, const void *dataptr, size_t size, int flags)
 {
     int fd, res;
@@ -402,6 +408,7 @@ struct hostent *ps2ip_gethostbyaddr(const void *addr, int len, int type) {
     return NULL;
 }
 
+
 void __ps2ipeeOpsInitializeImpl(void)
 {
     memset(&__ps2ipee_fdman_socket_ops, 0, sizeof(__ps2ipee_fdman_socket_ops));
@@ -434,8 +441,10 @@ void __ps2ipeeOpsInitializeImpl(void)
     __ps2ipee_fdman_ops_socket.listen = __ps2ipeeListenHelper;
     __ps2ipee_fdman_ops_socket.recv = __ps2ipeeRecvHelper;
     __ps2ipee_fdman_ops_socket.recvfrom = __ps2ipeeRecvfromHelper;
+    __ps2ipee_fdman_ops_socket.recvmsg = __ps2ipeeRecvmsgHelper;
     __ps2ipee_fdman_ops_socket.send = __ps2ipeeSendHelper;
     __ps2ipee_fdman_ops_socket.sendto = __ps2ipeeSendtoHelper;
+    __ps2ipee_fdman_ops_socket.sendmsg = __ps2ipeeSendmsgHelper;
     __ps2ipee_fdman_ops_socket.ioctl = __ps2ipeeIoctlHelper;
     __ps2ipee_fdman_ops_socket.getsockname = __ps2ipeeGetsocknameHelper;
     __ps2ipee_fdman_ops_socket.getpeername = __ps2ipeeGetpeernameHelper;

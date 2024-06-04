@@ -169,6 +169,7 @@ SOCKET_OBJS = \
 	listen.o \
 	recv.o \
 	recvfrom.o \
+	recvmsg.o \
 	send.o \
 	sendto.o \
 	sendmsg.o \
