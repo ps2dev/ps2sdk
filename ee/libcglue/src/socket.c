@@ -234,6 +234,26 @@ ssize_t	sendto(int fd, const void *buf, size_t len, int flags, const struct sock
 }
 #endif
 
+#ifdef F_sendmsg
+ssize_t sendmsg(int fd, const struct msghdr *msg, int flags)
+{
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	_libcglue_fdman_fd_info_t *fdinfo;
+
+	fdinfo = &(__descriptormap[fd]->info);
+	if (fdinfo->ops == NULL || fdinfo->ops->sendmsg == NULL)
+	{
+		errno = ENOSYS;
+		return -1;
+	}
+	return __transform_errno(fdinfo->ops->sendmsg(fdinfo->userdata, msg, flags));
+}
+#endif
+
 #ifdef F_getsockopt
 int	getsockopt(int fd, int level, int optname, void *optval, socklen_t *optlen)
 {

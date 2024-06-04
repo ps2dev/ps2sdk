@@ -240,6 +240,11 @@ int __ps2ipeeSendtoHelper(void *userdata, const void *dataptr, size_t size, int 
     return res;
 }
 
+int __ps2ipeeSendmsgHelper(void *userdata, const struct msghdr *msg, int flags) {
+    // TODO
+    return -1;
+}
+
 int __ps2ipeeIoctlHelper(void *userdata, int cmd, void *argp)
 {
     int fd, res;

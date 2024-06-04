@@ -171,6 +171,7 @@ SOCKET_OBJS = \
 	recvfrom.o \
 	send.o \
 	sendto.o \
+	sendmsg.o \
 	getsockopt.o \
 	setsockopt.o \
 	shutdown.o \

@@ -239,6 +239,12 @@ int __ps2ipcSendtoHelper(void *userdata, const void *dataptr, size_t len, int fl
     return res;
 }
 
+int __ps2ipcSendmsgHelper(void *userdata, const struct msghdr *msg, int flags) {
+    // TODO
+    return -1;
+}
+
+
 int __ps2ipcIoctlHelper(void *userdata, int cmd, void *argp)
 {
     int fd, res;
@@ -363,6 +369,7 @@ void __ps2ipcOpsInitializeImpl(void)
     __ps2ipc_fdman_ops_socket.recvfrom = __ps2ipcRecvfromHelper;
     __ps2ipc_fdman_ops_socket.send = __ps2ipcSendHelper;
     __ps2ipc_fdman_ops_socket.sendto = __ps2ipcSendtoHelper;
+    __ps2ipc_fdman_ops_socket.sendmsg = __ps2ipcSendmsgHelper;
     __ps2ipc_fdman_ops_socket.ioctl = __ps2ipcIoctlHelper;
     __ps2ipc_fdman_ops_socket.getsockname = __ps2ipcGetsocknameHelper;
     __ps2ipc_fdman_ops_socket.getpeername = __ps2ipcGetpeernameHelper;

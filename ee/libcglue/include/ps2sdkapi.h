@@ -41,6 +41,7 @@ typedef ssize_t (*_libcglue_fdman_recv_cb_t)(void *userdata, void *buf, size_t l
 typedef ssize_t (*_libcglue_fdman_recvfrom_cb_t)(void *userdata, void *buf, size_t len, int flags, struct sockaddr *from, socklen_t *fromlen);
 typedef ssize_t (*_libcglue_fdman_send_cb_t)(void *userdata, const void *buf, size_t len, int flags);
 typedef ssize_t (*_libcglue_fdman_sendto_cb_t)(void *userdata, const void *buf, size_t len, int flags, const struct sockaddr *to, socklen_t tolen);
+typedef ssize_t (*_libcglue_fdman_sendmsg_cb_t)(void *userdata, const struct msghdr *msg, int flags);
 typedef int (*_libcglue_fdman_getsockopt_cb_t)(void *userdata, int level, int optname, void *optval, socklen_t *optlen);
 typedef int (*_libcglue_fdman_setsockopt_cb_t)(void *userdata, int level, int optname, const void *optval, socklen_t optlen);
 typedef int (*_libcglue_fdman_shutdown_cb_t)(void *userdata, int how);
