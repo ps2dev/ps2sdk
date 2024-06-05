@@ -194,6 +194,26 @@ ssize_t	recvfrom(int fd, void *buf, size_t len, int flags, struct sockaddr *from
 }
 #endif
 
+#ifdef F_recvmsg
+ssize_t recvmsg(int fd, struct msghdr *msg, int flags)
+{
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	_libcglue_fdman_fd_info_t *fdinfo;
+
+	fdinfo = &(__descriptormap[fd]->info);
+	if (fdinfo->ops == NULL || fdinfo->ops->recvmsg == NULL)
+	{
+		errno = ENOSYS;
+		return -1;
+	}
+	return __transform_errno(fdinfo->ops->recvmsg(fdinfo->userdata, msg, flags));
+}
+#endif
+
 #ifdef F_send
 ssize_t	send(int fd, const void *buf, size_t len, int flags)
 {
@@ -231,6 +251,26 @@ ssize_t	sendto(int fd, const void *buf, size_t len, int flags, const struct sock
 		return -1;
 	}
 	return __transform_errno(fdinfo->ops->sendto(fdinfo->userdata, buf, len, flags, to, tolen));
+}
+#endif
+
+#ifdef F_sendmsg
+ssize_t sendmsg(int fd, const struct msghdr *msg, int flags)
+{
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	_libcglue_fdman_fd_info_t *fdinfo;
+
+	fdinfo = &(__descriptormap[fd]->info);
+	if (fdinfo->ops == NULL || fdinfo->ops->sendmsg == NULL)
+	{
+		errno = ENOSYS;
+		return -1;
+	}
+	return __transform_errno(fdinfo->ops->sendmsg(fdinfo->userdata, msg, flags));
 }
 #endif
 

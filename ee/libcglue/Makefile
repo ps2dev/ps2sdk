@@ -152,6 +152,7 @@ LOCK_OBJS = \
 	__locks_deinit.o
 
 NETDB_OBJS = \
+	gethostbyaddr.o \
 	gethostbyname.o \
 	gethostbyname_r.o \
 	freeaddrinfo.o \
@@ -168,8 +169,10 @@ SOCKET_OBJS = \
 	listen.o \
 	recv.o \
 	recvfrom.o \
+	recvmsg.o \
 	send.o \
 	sendto.o \
+	sendmsg.o \
 	getsockopt.o \
 	setsockopt.o \
 	shutdown.o \
