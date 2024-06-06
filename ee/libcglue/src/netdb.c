@@ -15,6 +15,18 @@
 
 #include "ps2sdkapi.h"
 
+#ifdef F_gethostbyaddr
+struct hostent *gethostbyaddr(const void *addr, int len, int type)
+{
+	if (_libcglue_fdman_socket_ops == NULL || _libcglue_fdman_socket_ops->gethostbyaddr == NULL)
+	{
+		return NULL;
+	}
+
+	return _libcglue_fdman_socket_ops->gethostbyaddr(addr, len, type);	
+}
+#endif
+
 #ifdef F_gethostbyname
 struct hostent *gethostbyname(const char *name)
 {
