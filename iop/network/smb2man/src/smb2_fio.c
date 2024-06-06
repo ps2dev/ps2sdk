@@ -3,7 +3,7 @@
   SMB2MAN
   Ronnie Sahlberg <ronniesahlberg@gmail.com> 2021
   André Guilherme <andregui17@outlook.com> 2023-2024
-  ps2dev - http://www.ps2dev.org 2024-present
+  ps2dev <http://www.ps2dev.org> 2024-present
 
   Based on SMBMAN:
   Copyright 2009-2010, jimmikaelkael
