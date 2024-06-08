@@ -103,6 +103,9 @@ struct msghdr {
 	int		msg_flags;	/* flags on received message */
 };
 
+// TODO: Not available in LWIP
+#define	MSG_TRUNC	0x0000		/* data discarded before delivery */
+
 #if 0
 #include <sys/featuretest.h>
 
