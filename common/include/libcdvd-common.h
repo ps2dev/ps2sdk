@@ -129,6 +129,8 @@ enum SCECdvdMediaType {
     /** PS2 DVD */
     SCECdPS2DVD,
 
+    /** DVD-VR (Minimum mechacon firmware version: 50000) */
+    SCECdDVDVR = 0xFC,
     /** CDDA */
     SCECdCDDA = 0xFD,
     /** DVD Video */
