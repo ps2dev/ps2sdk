@@ -311,6 +311,18 @@ enum SCECdvdFanSpeed {
 /** Light up the blue LED on the eject button. */
 #define CdlLEDEjectBlue 8
 
+// Remote control disable definitions for sceRemote2_7()
+/** Disable the power/reset functionalty. (RM_PS2_POWER) */
+#define CdlRCDisablePowerReset 1
+/** Disable the power off functionality. (RM_PS2_POWEROFF) */
+#define CdlRCDisablePowerOff 2
+/** Disable the reset functionalty. (RM_PS2_RESET) */
+#define CdlRCDisableReset 4
+/** Disable the eject functionalty. (RM_PS2_EJECT) */
+#define CdlRCDisableEject 8
+/** Disable the power on functionality. (RM_PS2_POWERON) */
+#define CdlRCDisablePowerOn 0x10
+
 // For streaming operations (Use with sceCdStRead())
 enum SCECdvdStreamMode {
     /** Stream without blocking. */
@@ -954,13 +966,15 @@ int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *arg2, u32 *arg3, int *arg4);
  */
 int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 arg2, int arg3);
 
-/** Remote control 2_7.
+/** Disables Mechacon actions performed using the remote control.
+ * The actions that can be specified are poweron, poweroff, reset and eject.
+ * The action performed by RM_PS2_NOLIGHT cannot be disabled.
  * Minimum Mechacon firmware version: 50000
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
  * @return 1 on success, 0 on failure
  */
-int sceRemote2_7(u16 a1, u32 *a2);
+int sceRemote2_7(u16 param, u32 *status);
 
 /** Set the LED state of the face buttons of the console.
  * The state of the buttons will be reset when the power or eject button is pressed.
