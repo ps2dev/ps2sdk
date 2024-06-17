@@ -12,10 +12,10 @@ RUN cd /src && \
     make -j $(getconf _NPROCESSORS_ONLN) && \
     make -j $(getconf _NPROCESSORS_ONLN) install
 # Create symbolink links using relative paths
-RUN (cd $PS2DEV && ln -sf ps2sdk/ee/lib/libcglue.a ee/mips64r5900el-ps2-elf/lib/libcglue.a && cd -)
-RUN (cd $PS2DEV && ln -sf ps2sdk/ee/lib/libpthreadglue.a ee/mips64r5900el-ps2-elf/lib/libpthreadglue.a && cd -)
-RUN (cd $PS2DEV && ln -sf ps2sdk/ee/lib/libkernel.a ee/mips64r5900el-ps2-elf/lib/libkernel.a && cd -)
-RUN (cd $PS2DEV && ln -sf ps2sdk/ee/lib/libcdvd.a ee/mips64r5900el-ps2-elf/lib/libcdvd.a && cd -)
+RUN (cd $PS2DEV/ee/mips64r5900el-ps2-elf/lib && ln -sf ../../../ps2sdk/ee/lib/libcglue.a libcglue.a && cd -)
+RUN (cd $PS2DEV/ee/mips64r5900el-ps2-elf/lib && ln -sf ../../../ps2sdk/ee/lib/libpthreadglue.a libpthreadglue.a && cd -)
+RUN (cd $PS2DEV/ee/mips64r5900el-ps2-elf/lib && ln -sf ../../../ps2sdk/ee/lib/libkernel.a libkernel.a && cd -)
+RUN (cd $PS2DEV/ee/mips64r5900el-ps2-elf/lib && ln -sf ../../../ps2sdk/ee/lib/libcdvd.a libcdvd.a && cd -)
 
 # Second stage of Dockerfile
 FROM alpine:latest
