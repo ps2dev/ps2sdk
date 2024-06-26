@@ -15,3 +15,7 @@ all:: $(IOP_BIN)
 
 clean::
 	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
+
+IMPORT_CHECK_SCRIPT=$(PS2SDKSRC)/iop/check_imports.sh
+check-import::
+	exec $(IMPORT_CHECK_SCRIPT)
