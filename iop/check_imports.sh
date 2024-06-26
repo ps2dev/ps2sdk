@@ -21,14 +21,14 @@ do
   fi
 done
 
+printf " %s\n" $(pwd | xargs basename)
 if [ -f "$IOP_SRC_DIR/imports.lst" ]; then
-  
   IMPORTS=$(grep -Eo "^I_[a-zA-Z0-9_-]*" $IOP_SRC_DIR/imports.lst | sed 's/^I_//')
   #echo $IMPORTS
   U=0
   for a in $IMPORTS
   do
-      grep -r -q --include="*.c" --include="*.h" "$a" "src/"
+      grep -r -q --include="*.c" --include="*.h" "$a" "."
       if [ $? -eq 1 ];
       then
           printf "${RED}-- IMPORT ${YELLOW}$a${RED} NOT FOUND IN C SOURCE${NC}\n"
