@@ -13,6 +13,7 @@ SUBDIRS = \
 	smap-modular-none \
 	smap-none \
 	smap-ps2ip \
+	smb2man \
 	smbman \
 	spduart \
 	udptty

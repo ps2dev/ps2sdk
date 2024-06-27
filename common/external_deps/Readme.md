@@ -5,4 +5,5 @@ Inside of this folder during `make` process it will download by using `git clone
 
 Dependencies:
 *   lwip ps2-v2.0.3
+*   libsmb2 master
 *   FatFS iop-r0.15

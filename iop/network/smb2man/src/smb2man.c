@@ -1,6 +1,8 @@
 /*
   SMB2MAN
   Ronnie Sahlberg <ronniesahlberg@gmail.com> 2021
+  André Guilherme <andregui17@outlook.com> 2023-2024
+  ps2dev <http://www.ps2dev.org> 2024-present
 
   Based on SMBMAN:
   Copyright 2009-2010, jimmikaelkael
@@ -19,22 +21,25 @@
 
 #include "smb2_fio.h"
 
-#define MODNAME 	"smbman"
-#define VER_MAJOR	2
-#define VER_MINOR	2
+#define MODNAME   "smb2man"
+#define VER_MAJOR 2
+#define VER_MINOR 2
 
 IRX_ID(MODNAME, VER_MAJOR, VER_MINOR);
 
-int _start(int argc, char** argv)
+int _start(int argc, char *argv[])
 {
-	SMB2_initdev();
+    (void)argc;
+    (void)argv;
 
-	return MODULE_RESIDENT_END;
+    printf("%s version 0x%01x%02x - Copyright(c) 2021 Ronnie Sahlberg, Copyright(c) 2023-2024 André Guilherme, Copyright(c) 2024-Present PS2DEV \n", MODNAME, VER_MAJOR, VER_MINOR);
+
+    return SMB2_initdev();
 }
 
 void *malloc(int size)
 {
-    void* result;
+    void *result;
     int OldState;
 
     CpuSuspendIntr(&OldState);
@@ -60,6 +65,6 @@ void *calloc(size_t nmemb, size_t size)
 
     ptr = malloc(s);
     memset(ptr, 0, s);
-  
+
     return ptr;
 }
