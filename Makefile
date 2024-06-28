@@ -69,6 +69,9 @@ $(PS2SDK)/common/include:
 $(PS2SDK)/ports:
 	$(MKDIR) -p $(PS2SDK)/ports
 
+$(PS2SDK)/ports_iop:
+	$(MKDIR) -p $(PS2SDK)/ports_iop
+
 install: | release
 
 release: | build
@@ -76,6 +79,7 @@ release: | build
 	$(MAKE) release-clean
 	$(MAKE) $(PS2SDK)/common/include
 	$(MAKE) $(PS2SDK)/ports
+	$(MAKE) $(PS2SDK)/ports_iop
 	$(MAKE) $(subdir_release)
 
 release_base: | env_release_check
