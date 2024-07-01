@@ -25,9 +25,11 @@ SET(CMAKE_SYSTEM_VERSION 1)
 SET(CMAKE_SYSTEM_PROCESSOR mips)
 SET(CMAKE_C_COMPILER mipsel-ps2-irx-gcc)
 SET(CMAKE_CXX_COMPILER mipsel-ps2-irx-g++)
-SET(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
+SET(CMAKE_ASM_COMPILER mipsel-ps2-irx-as)
 SET(CMAKE_C_COMPILER_WORKS 1) #Hack by f0bes
 SET(CMAKE_CXX_COMPILER_WORKS 1) #Hack by f0bes
+SET(CMAKE_ASM_COMPILER_WORKS 1) #Hack by f0bes
+
 
 #
 # set arch flags depending on gcc version
