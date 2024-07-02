@@ -299,6 +299,10 @@ void scr_vprintf(const char *format, va_list opt)
                     X++;
                 }
                 break;
+            case '\r':
+                X = 0;
+                // scr_clearline(Y); //Should we clear the line?
+                break;
             default:
                 scr_putchar(X * 7, Y * 8, fontcolor, c);
                 X++;
