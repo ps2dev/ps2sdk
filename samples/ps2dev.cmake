@@ -28,8 +28,12 @@ SET(CMAKE_SYSTEM_PROCESSOR mips)
 SET(CMAKE_C_COMPILER mips64r5900el-ps2-elf-gcc)
 SET(CMAKE_CXX_COMPILER mips64r5900el-ps2-elf-g++)
 
-SET(EE_CFLAGS "-I$ENV{PS2SDK}/ee/include -I$ENV{PS2SDK}/common/include -I$ENV{PS2SDK}/ports/include -D_EE -DPS2 -D__PS2__ -O2 -G0" CACHE STRING "EE C compiler flags" FORCE)
-SET(EE_LDFLAGS "-L$ENV{PS2SDK}/ee/lib -L$ENV{PS2DEV}/gsKit/lib -L$ENV{PS2SDK}/ports/lib -Wl,-zmax-page-size=128 -T$ENV{PS2SDK}/ee/startup/linkfile" CACHE STRING "EE linker flags" FORCE)
+INCLUDE_DIRECTORIES($ENV{PS2SDK}/ee/include $ENV{PS2SDK}/common/include $ENV{PS2SDK}/ports/include)
+LINK_DIRECTORIES($ENV{PS2SDK}/ee/lib $ENV{PS2DEV}/gsKit/lib $ENV{PS2SDK}/ports/lib)
+ADD_DEFINITIONS(-D_EE -DPS2 -D__PS2__)
+
+SET(EE_CFLAGS "-O2 -G0" CACHE STRING "EE C compiler flags" FORCE)
+SET(EE_LDFLAGS "-Wl,-zmax-page-size=128 -T$ENV{PS2SDK}/ee/startup/linkfile" CACHE STRING "EE linker flags" FORCE)
 
 SET(CMAKE_TARGET_INSTALL_PREFIX $ENV{PS2DEV}/ports)
 
