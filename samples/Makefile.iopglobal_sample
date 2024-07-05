@@ -12,6 +12,14 @@ IOP_OBJS_DIR ?= obj/
 IOP_SRC_DIR ?= ./
 IOP_INC_DIR ?= include/
 
+ifeq ($(IOP_CC_VERSION),3.2.2)
+ASFLAGS_TARGET = -march=r3000
+endif
+
+ifeq ($(IOP_CC_VERSION),3.2.3)
+ASFLAGS_TARGET = -march=r3000
+endif
+
 # include dir
 IOP_INCS := $(IOP_INCS) -I$(PS2SDK)/iop/include -I$(PS2SDK)/common/include \
 	-I. -I$(IOP_INC_DIR)
@@ -32,9 +40,28 @@ IOP_CFLAGS := -D_IOP -fno-builtin -G0 $(IOP_OPTFLAGS) $(IOP_WARNFLAGS) $(IOP_DBG
 # linker flags
 IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 
+# Additional C compiler flags for GCC >=v5.3.0
+# -msoft-float is to "remind" GCC/Binutils that the soft-float ABI is to be used. This is due to a bug, which
+#   results in the ABI not being passed correctly to binutils and iop-as defaults to the hard-float ABI instead.
+# -mno-explicit-relocs is required to work around the fact that GCC is now known to
+#   output multiple LO relocs after one HI reloc (which the IOP kernel cannot deal with).
+# -fno-toplevel-reorder (for IOP import and export tables only) disables toplevel reordering by GCC v4.2 and later.
+#   Without it, the import and export tables can be broken apart by GCC's optimizations.
+ifneq ($(IOP_CC_VERSION),3.2.2)
+ifneq ($(IOP_CC_VERSION),3.2.3)
+IOP_CFLAGS += -msoft-float -mno-explicit-relocs
+IOP_IETABLE_CFLAGS := -fno-toplevel-reorder
+endif
+endif
+
 # If gpopt is requested, use it if the GCC version is compatible
 ifneq (x$(IOP_PREFER_GPOPT),x)
+ifeq ($(IOP_CC_VERSION),3.2.2)
 IOP_CFLAGS += -DUSE_GP_REGISTER=1 -mgpopt -G$(IOP_PREFER_GPOPT)
+endif
+ifeq ($(IOP_CC_VERSION),3.2.3)
+IOP_CFLAGS += -DUSE_GP_REGISTER=1 -mgpopt -G$(IOP_PREFER_GPOPT)
+endif
 endif
 
 # Assembler flags
