@@ -1,6 +1,7 @@
-typedef unsigned char u8;
-typedef unsigned short int u16;
-typedef unsigned int u32;
+#ifndef __ELF_H__
+#define __ELF_H__
+
+#include <stdint.h>
 
 /* ELF-loading stuff */
 #define ELF_MAGIC 0x464c457f
@@ -11,59 +12,59 @@ typedef unsigned int u32;
 /*------------------------------*/
 typedef struct
 {
-	u8 ident[16]; /* Structure of a ELF header */
-	u16 type;
-	u16 machine;
-	u32 version;
-	u32 entry;
-	u32 phoff;
-	u32 shoff;
-	u32 flags;
-	u16 ehsize;
-	u16 phentsize;
-	u16 phnum;
-	u16 shentsize;
-	u16 shnum;
-	u16 shstrndx;
+	uint8_t ident[16]; /* Structure of a ELF header */
+	uint16_t type;
+	uint16_t machine;
+	uint32_t version;
+	uint32_t entry;
+	uint32_t phoff;
+	uint32_t shoff;
+	uint32_t flags;
+	uint16_t ehsize;
+	uint16_t phentsize;
+	uint16_t phnum;
+	uint16_t shentsize;
+	uint16_t shnum;
+	uint16_t shstrndx;
 } elf_header_t;
 /*------------------------------*/
 typedef struct
 {
-	u32 type; /* Structure of a header a sections in an ELF */
-	u32 offset;
+	uint32_t type; /* Structure of a header a sections in an ELF */
+	uint32_t offset;
 	void *vaddr;
-	u32 paddr;
-	u32 filesz;
-	u32 memsz;
-	u32 flags;
-	u32 align;
+	uint32_t paddr;
+	uint32_t filesz;
+	uint32_t memsz;
+	uint32_t flags;
+	uint32_t align;
 } elf_pheader_t;
 
 typedef struct
 {
-	u32 name;
-	u32 type;
-	u32 flags;
-	u32 addr;
-	u32 offset;
-	u32 size;
-	u32 link;
-	u32 info;
-	u32 addralign;
-	u32 entsize;
+	uint32_t name;
+	uint32_t type;
+	uint32_t flags;
+	uint32_t addr;
+	uint32_t offset;
+	uint32_t size;
+	uint32_t link;
+	uint32_t info;
+	uint32_t addralign;
+	uint32_t entsize;
 } elf_shdr_t;
 
 typedef struct
 {
-	u32 offset;
-	u32 info;
+	uint32_t offset;
+	uint32_t info;
 } elf_rel;
 
 typedef struct
 {
-	u32 offset;
-	u32 info;
-	u32 addend;
+	uint32_t offset;
+	uint32_t info;
+	uint32_t addend;
 } elf_rela;
 
 enum ELF_SHT_types {
@@ -83,29 +84,29 @@ enum ELF_SHT_types {
 
 typedef struct iopmod_struct
 {
-	u32 moduleinfo;
-	u32 entry;
-	u32 gp_value;
-	u32 text_size;
-	u32 data_size;
-	u32 bss_size;
-	u16 version;
+	uint32_t moduleinfo;
+	uint32_t entry;
+	uint32_t gp_value;
+	uint32_t text_size;
+	uint32_t data_size;
+	uint32_t bss_size;
+	uint16_t version;
 	char modname[];
 } iopmod_t;
 
 typedef struct eemod_struct
 {
-	u32 moduleinfo;
-	u32 entry;
-	u32 gp_value;
-	u32 text_size;
-	u32 data_size;
-	u32 bss_size;
-	u32 ERX_lib_addr;
-	u32 ERX_lib_size;
-	u32 ERX_stub_addr;
-	u32 ERX_stub_size;
-	u16 version;
+	uint32_t moduleinfo;
+	uint32_t entry;
+	uint32_t gp_value;
+	uint32_t text_size;
+	uint32_t data_size;
+	uint32_t bss_size;
+	uint32_t ERX_lib_addr;
+	uint32_t ERX_lib_size;
+	uint32_t ERX_stub_addr;
+	uint32_t ERX_stub_size;
+	uint16_t version;
 	char modname[];
 } eemod_t;
 
@@ -120,3 +121,5 @@ typedef struct eemod_struct
 #define SHF_ALLOC 0x2
 #define SHF_EXECINSTR 0x4
 #define SHF_MASKPROC 0xf0000000
+
+#endif /* __ELF_H__ */
