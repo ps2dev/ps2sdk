@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_OBJS = ioplib.o
+IOP_OBJS = modhook.o
 IOP_LIB = libmodhook.a
 
 include $(PS2SDKSRC)/Defs.make
