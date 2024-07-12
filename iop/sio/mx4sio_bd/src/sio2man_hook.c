@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <thsemap.h>
+#include <ioplib.h>
 
-#include "ioplib.h"
 #include "sio2man.h"
 #include "sio2man_hook.h"
 

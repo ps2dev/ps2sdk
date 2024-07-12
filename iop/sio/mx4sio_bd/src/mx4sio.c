@@ -7,9 +7,10 @@
 #include <thsemap.h>
 #include <xsio2man.h>
 
+#include <ioplib.h>
+
 #include "mx4sio.h"
 #include "crc16.h"
-#include "ioplib.h"
 #include "sio2man_hook.h"
 #include "sio2regs.h"
 #include "spi_sdcard_driver.h"
