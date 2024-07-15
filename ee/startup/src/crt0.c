@@ -112,12 +112,12 @@ static void _main()
     // initialize libcglue
     _libcglue_init();
 
+    // Enable interruts
+    EI();
+
     // call global constructors (weak)
     if (_init)
         _init();
-
-    // Enable interruts
-    EI();
 
     // call main
     retval = main(pa->argc, pa->argv);
