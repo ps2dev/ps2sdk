@@ -78,6 +78,7 @@ extern int _etext;
 
 /** Internal timer handler
  */
+__attribute__((__no_instrument_function__, __no_profile_instrument_function__))
 static uint64_t timer_handler(int id, uint64_t scheduled_time, uint64_t actual_time, void *arg, void *pc_value)
 {
     struct gmonparam *current_gp = (struct gmonparam *)arg;
@@ -104,6 +105,7 @@ static uint64_t timer_handler(int id, uint64_t scheduled_time, uint64_t actual_t
     for sampling statistics. Note that this also installs a timer that
     runs at 1000 hert.
 */
+__attribute__((__no_instrument_function__, __no_profile_instrument_function__))
 void __gprof_init()
 {
     memset(&gp, '\0', sizeof(gp));
@@ -142,6 +144,7 @@ void __gprof_init()
     Called from atexit() handler; will dump out a host:gmon.out file
     with all collected information.
 */
+__attribute__((__no_instrument_function__, __no_profile_instrument_function__))
 void __gprof_cleanup()
 {
     FILE *fp;
@@ -192,6 +195,7 @@ void __gprof_cleanup()
     beginning of each compiled routine, which eventually brings the
     control to here.
 */
+__attribute__((__no_instrument_function__, __no_profile_instrument_function__))
 void __mcount(unsigned int frompc, unsigned int selfpc)
 {
     int e;
