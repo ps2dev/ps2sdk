@@ -87,6 +87,11 @@ typedef struct _iomanX_iop_device {
 	struct _iomanX_iop_device_ops *ops;
 } iomanX_iop_device_t;
 
+
+#define DECL_NOT_SUPPORTED_OP() \
+	static int not_supported_op (void) {return -134;} // reuturn errno -ENOTSUP
+#define NOT_SUPPORTED (void*)&not_supported_op
+
 typedef struct _iomanX_iop_device_ops {
 	int	(*init)(iomanX_iop_device_t *);
 	int	(*deinit)(iomanX_iop_device_t *);

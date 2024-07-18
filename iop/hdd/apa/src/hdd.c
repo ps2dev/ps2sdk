@@ -39,6 +39,8 @@
 IRX_ID("hdd_driver", APA_MODVER_MAJOR, APA_MODVER_MINOR);
 #endif
 
+DECL_NOT_SUPPORTED_OP()
+
 static iomanX_iop_device_ops_t hddOps={
 	&hddInit,
 	&hddDeinit,
@@ -48,24 +50,24 @@ static iomanX_iop_device_ops_t hddOps={
 	&hddRead,
 	&hddWrite,
 	&hddLseek,
-	(void*)&hddUnsupported,
+	NOT_SUPPORTED,
 	&hddRemove,
-	(void*)&hddUnsupported,
-	(void*)&hddUnsupported,
+	NOT_SUPPORTED,
+	NOT_SUPPORTED,
 	&hddDopen,
 	&hddClose,
 	&hddDread,
 	&hddGetStat,
-	(void*)&hddUnsupported,
+	NOT_SUPPORTED,
 	&hddReName,
-	(void*)&hddUnsupported,
-	(void*)&hddUnsupported,
+	NOT_SUPPORTED,
+	NOT_SUPPORTED,
 	hddMount,
 	hddUmount,
-	(void*)&hddUnsupported,
+	NOT_SUPPORTED,
 	&hddDevctl,
-	(void*)&hddUnsupported,
-	(void*)&hddUnsupported,
+	NOT_SUPPORTED,
+	NOT_SUPPORTED,
 	&hddIoctl2,
 };
 static iomanX_iop_device_t hddFioDev={

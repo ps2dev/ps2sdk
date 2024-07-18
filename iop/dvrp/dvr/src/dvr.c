@@ -33,7 +33,6 @@ extern int dvr_df_exit(iomanX_iop_device_t *dev);
 extern int dvr_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
 extern int dvr_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvr_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvr_df_null();
 extern s64 dvr_df_null_long();
 extern int dvrioctl2_rec_start(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrioctl2_rec_pause(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
@@ -110,34 +109,36 @@ struct DevctlCmdTbl_t
         {0x5650, &dvrioctl2_rec_pictclip},
 };
 
+DECL_NOT_SUPPORTED_OP()
+
 static iomanX_iop_device_ops_t DvrFuncTbl =
     {
         &dvr_df_init,
         &dvr_df_exit,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
         &dvr_df_ioctl,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
         (void *)&dvr_df_null_long,
         &dvr_df_devctl,
-        (void *)&dvr_df_null,
-        (void *)&dvr_df_null,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
         &dvr_df_ioctl2,
     };
 char TEVENT_BUF[6144];
@@ -286,14 +287,9 @@ int dvr_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen,
     return -22;
 }
 
-int dvr_df_null()
-{
-    return -48;
-}
-
 s64 dvr_df_null_long()
 {
-    return -48LL;
+    return -134LL;
 }
 
 int dvrioctl2_rec_start(

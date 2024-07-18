@@ -70,6 +70,10 @@ typedef struct _iop_device {
 	struct _iop_device_ops *ops;
 } iop_device_t;
 
+#define DECL_NOT_SUPPORTED_OP() \
+	static int not_supported_op (void) {return -134;} // reuturn errno -ENOTSUP
+#define NOT_SUPPORTED (void*)&not_supported_op
+
 typedef struct _iop_device_ops {
 	int	(*init)(iop_device_t *);
 	int	(*deinit)(iop_device_t *);
