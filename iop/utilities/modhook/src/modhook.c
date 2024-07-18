@@ -1,7 +1,8 @@
-#include "ioplib.h"
+#include "modhook.h"
 #include <intrman.h>
+#include <stdint.h>
 
-iop_library_t *ioplib_getByName(const char *name)
+iop_library_t *modhook_getModule(const char *name)
 {
     iop_library_t *libptr;
     int i;
@@ -27,7 +28,7 @@ iop_library_t *ioplib_getByName(const char *name)
     return NULL;
 }
 
-unsigned int ioplib_getTableSize(iop_library_t *lib)
+unsigned int modhook_getTableSize(iop_library_t *lib)
 {
     void **exp;
     unsigned int size;
@@ -45,9 +46,9 @@ unsigned int ioplib_getTableSize(iop_library_t *lib)
     return size;
 }
 
-void *ioplib_hookExportEntry(iop_library_t *lib, unsigned int entry, void *func)
+void *modhook_hookExportEntry(iop_library_t *lib, unsigned int entry, void *func)
 {
-    if (entry < ioplib_getTableSize(lib)) {
+    if (entry < modhook_getTableSize(lib)) {
         int oldstate;
         void **exp, *temp;
 
@@ -65,7 +66,7 @@ void *ioplib_hookExportEntry(iop_library_t *lib, unsigned int entry, void *func)
     return NULL;
 }
 
-void ioplib_relinkExports(iop_library_t *lib)
+void modhook_relinkExports(iop_library_t *lib)
 {
     struct irx_import_table *table;
     struct irx_import_stub *stub;
@@ -75,7 +76,7 @@ void ioplib_relinkExports(iop_library_t *lib)
         // go through each import in the table
         for (stub = (struct irx_import_stub *)table->stubs; stub->jump != 0; stub++) {
             // patch the stub to jump to the address specified in the library export table for "fno"
-            stub->jump = 0x08000000 | (((u32)lib->exports[stub->fno] << 4) >> 6);
+            stub->jump = 0x08000000 | (((uint32_t)lib->exports[stub->fno] << 4) >> 6);
         }
     }
 }
