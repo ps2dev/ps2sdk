@@ -1,0 +1,21 @@
+<map id="iop/kernel/include/iomanX.h" name="iop/kernel/include/iomanX.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="229,5,351,46"/>
+<area shape="rect" id="Node000002" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="108,94,170,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="253,49,177,89,174,84,251,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="203,94,270,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="279,48,255,83,251,80,274,45"/>
+<area shape="rect" id="Node000006" href="$io__common_8h.html" title=" " alt="" coords="294,94,392,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="305,45,329,80,324,83,301,48"/>
+<area shape="rect" id="Node000009" href="$iox__stat_8h.html" title=" " alt="" coords="421,94,497,120"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="333,44,421,85,418,90,331,49"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,168,73,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="124,122,70,160,67,156,120,118"/>
+<area shape="rect" id="Node000004" href="$tamtypes_8h.html" title=" " alt="" coords="97,168,181,193"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="142,120,142,152,136,152,136,120"/>
+<area shape="rect" id="Node000007" href="$fcntl_8h_source.html" title=" " alt="" coords="206,168,286,193"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="328,122,276,161,272,156,325,118"/>
+<area shape="rect" id="Node000008" href="$unistd_8h_source.html" title=" " alt="" coords="310,168,400,193"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="348,119,353,152,348,153,342,120"/>
+<area shape="rect" id="Node000010" href="$time_8h.html" title=" " alt="" coords="424,168,505,193"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="463,120,465,152,460,152,457,120"/>
+</map>

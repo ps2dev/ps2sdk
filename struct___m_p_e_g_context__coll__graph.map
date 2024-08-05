@@ -1,0 +1,13 @@
+<map id="_MPEGContext" name="_MPEGContext">
+<area shape="rect" id="Node000001" title=" " alt="" coords="259,228,369,253"/>
+<area shape="rect" id="Node000002" href="$libmpeg_8h.html#struct_m_p_e_g_sequence_info" title=" " alt="" coords="5,94,145,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,128,151,165,210,201,270,225,268,230,208,206,148,169,99,132"/>
+<area shape="rect" id="Node000003" href="$libmpeg__internal_8h.html#struct___m_p_e_g_macro_block8" title=" " alt="" coords="169,94,312,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="248,134,258,168,274,202,297,225,294,229,270,205,253,170,243,136"/>
+<area shape="rect" id="Node000004" href="$libmpeg__internal_8h.html#struct___m_p_e_g_m_b_x_y" title=" " alt="" coords="336,94,441,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="387,135,378,170,361,205,336,229,332,225,357,202,373,168,382,134"/>
+<area shape="rect" id="Node000005" href="$struct___m_p_e_g_motions.html" title=" " alt="" coords="464,94,577,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="511,135,489,172,473,190,455,206,413,226,370,237,369,232,412,221,452,201,470,187,485,169,507,132"/>
+<area shape="rect" id="Node000006" href="$struct___m_p_e_g_motion.html" title=" " alt="" coords="468,5,573,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="523,47,523,94,518,94,518,47"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="iop/usb/usbd/src/hcd.h" name="iop/usb/usbd/src/hcd.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="196,5,348,31"/>
+<area shape="rect" id="Node000002" href="$hub_8c.html" title=" " alt="" coords="5,79,158,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,39,115,81,113,76,225,34"/>
+<area shape="rect" id="Node000003" href="$interface_8c.html" title=" " alt="" coords="182,79,363,105"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="275,46,275,79,270,79,270,46"/>
+<area shape="rect" id="Node000004" href="$usbd_8c.html" title=" " alt="" coords="387,79,547,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="320,34,435,76,433,81,319,39"/>
+</map>

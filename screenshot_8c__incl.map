@@ -1,0 +1,20 @@
+<map id="ee/debug/src/screenshot.c" name="ee/debug/src/screenshot.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="122,5,296,31"/>
+<area shape="rect" id="Node000002" href="$screenshot_8h.html" title=" " alt="" coords="5,79,101,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,34,94,75,92,70,181,29"/>
+<area shape="rect" id="Node000003" href="$tamtypes_8h.html" title=" " alt="" coords="224,226,309,252"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="198,33,180,54,166,80,157,107,153,130,155,152,166,177,187,201,214,218,211,222,183,205,161,180,150,153,147,130,152,106,161,78,176,51,194,30"/>
+<area shape="rect" id="Node000004" href="$kernel_8h.html" title=" " alt="" coords="176,79,242,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="212,31,212,63,206,63,206,31"/>
+<area shape="rect" id="Node000008" href="$fcntl_8h_source.html" title=" " alt="" coords="266,79,323,105"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="225,29,270,67,267,71,222,34"/>
+<area shape="rect" id="Node000009" href="$unistd_8h_source.html" title=" " alt="" coords="347,79,413,105"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="239,29,338,70,336,75,237,34"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="175,153,243,178"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="212,105,212,137,206,137,206,105"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="267,153,335,178"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="226,103,275,141,272,145,223,107"/>
+<area shape="rect" id="Node000007" href="$sifdma_8h.html" title=" " alt="" coords="359,153,430,178"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="241,103,350,144,348,149,239,108"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="374,181,303,221,300,216,371,177"/>
+</map>

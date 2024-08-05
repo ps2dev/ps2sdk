@@ -1,0 +1,31 @@
+<map id="iop/kernel/include/excepman.h" name="iop/kernel/include/excepman.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1049,5,1171,46"/>
+<area shape="rect" id="Node000002" href="$common_2sbus_2src_2irx__imports_8h_source.html" title=" " alt="" coords="5,94,148,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1033,31,874,36,657,47,409,67,160,97,148,98,148,93,159,91,409,61,656,42,874,31,1033,26"/>
+<area shape="rect" id="Node000003" href="$iop_2debug_2iop__sbusdbg_2src_2irx__imports_8h_source.html" title=" " alt="" coords="171,94,326,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1034,33,729,53,534,72,338,97,326,99,325,93,337,91,534,66,728,48,1033,28"/>
+<area shape="rect" id="Node000004" href="$iop_2debug_2iop__sbusdbg_2src_2main_8c_source.html" title=" " alt="" coords="350,94,504,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1033,36,802,59,659,76,517,97,505,99,504,93,516,91,659,71,801,53,1033,31"/>
+<area shape="rect" id="Node000005" href="$sbus__dbg_8c_source.html" title=" " alt="" coords="529,94,683,135"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1034,41,696,97,684,99,683,94,695,91,1033,36"/>
+<area shape="rect" id="Node000006" href="$sbus__tty_8c_source.html" title=" " alt="" coords="707,94,862,135"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1034,50,859,96,858,91,1033,45"/>
+<area shape="rect" id="Node000007" href="$iop__debug_8c.html" title=" " alt="" coords="886,94,1019,135"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1062,56,989,96,987,91,1060,51"/>
+<area shape="rect" id="Node000008" href="$iop_2debug_2iopdebug_2src_2irx__imports_8h_source.html" title=" " alt="" coords="1043,94,1177,135"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="1113,62,1113,94,1107,94,1107,62"/>
+<area shape="rect" id="Node000009" href="$ioptrap_8c.html" title=" " alt="" coords="1200,94,1342,135"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="1161,51,1236,91,1233,96,1158,56"/>
+<area shape="rect" id="Node000010" href="$iop_2debug_2ioptrap_2src_2irx__imports_8h_source.html" title=" " alt="" coords="1367,94,1509,135"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="1187,44,1367,92,1365,97,1186,50"/>
+<area shape="rect" id="Node000011" href="$iop_2debug_2ppctty_2src_2main_8c_source.html" title=" " alt="" coords="1533,94,1671,135"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="1187,35,1341,59,1521,91,1533,94,1532,99,1520,97,1341,65,1186,41"/>
+<area shape="rect" id="Node000012" href="$tty_8c_source.html" title=" " alt="" coords="1695,94,1834,135"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="1187,31,1410,53,1547,70,1684,91,1695,94,1694,99,1683,97,1546,75,1410,58,1186,36"/>
+<area shape="rect" id="Node000013" href="$excepman_8c_source.html" title=" " alt="" coords="1858,94,2005,135"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="1187,28,1477,48,1661,67,1846,91,1858,93,1857,99,1845,97,1661,72,1477,54,1186,33"/>
+<area shape="rect" id="Node000014" href="$iop_2system_2intrman_2src_2irx__imports_8h_source.html" title=" " alt="" coords="2030,94,2161,135"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="1186,26,1339,31,1546,42,1780,61,2017,91,2030,94,2029,99,2016,97,1780,67,1545,47,1339,36,1186,31"/>
+<area shape="rect" id="Node000015" href="$intrman_8c_source.html" title=" " alt="" coords="2030,183,2161,223"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="2098,150,2098,182,2093,182,2093,150"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="iop/usb/usbd/src/usbdpriv.h" name="iop/usb/usbd/src/usbdpriv.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,186,31"/>
+<area shape="rect" id="Node000002" href="$usbd_8h.html" title=" " alt="" coords="99,79,159,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,30,119,64,114,66,99,32"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="31,153,93,178"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="95,32,71,138,66,137,90,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="120,107,86,143,82,139,116,103"/>
+<area shape="rect" id="Node000004" href="$irx_8h.html" title=" " alt="" coords="117,153,162,178"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="133,104,138,137,133,138,128,105"/>
+<area shape="rect" id="Node000005" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="108,226,171,252"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="142,179,142,211,137,211,137,179"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="57,300,124,326"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="134,254,109,289,105,286,129,251"/>
+<area shape="rect" id="Node000007" href="$tamtypes_8h.html" title=" " alt="" coords="148,300,232,326"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="150,251,175,286,171,289,146,254"/>
+</map>

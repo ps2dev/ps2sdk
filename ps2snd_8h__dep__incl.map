@@ -1,0 +1,9 @@
+<map id="common/include/ps2snd.h" name="common/include/ps2snd.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="198,5,370,31"/>
+<area shape="rect" id="Node000002" href="$ee_2rpc_2ps2snd_2src_2ps2snd_8c_source.html" title=" " alt="" coords="5,87,187,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="242,40,126,88,124,84,240,35"/>
+<area shape="rect" id="Node000003" href="$adpcm-stream_8c_source.html" title=" " alt="" coords="211,79,357,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="287,46,287,79,281,79,281,46"/>
+<area shape="rect" id="Node000004" href="$iop_2sound_2ps2snd_2src_2ps2snd_8c_source.html" title=" " alt="" coords="381,79,526,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="325,35,412,76,410,81,323,40"/>
+</map>

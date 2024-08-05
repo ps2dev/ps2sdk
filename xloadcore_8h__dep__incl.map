@@ -1,0 +1,9 @@
+<map id="iop/kernel/include/xloadcore.h" name="iop/kernel/include/xloadcore.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="93,5,215,46"/>
+<area shape="rect" id="Node000002" href="$loadcore_8c_source.html" title=" " alt="" coords="5,94,143,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,59,94,95,90,92,124,56"/>
+<area shape="rect" id="Node000003" href="$iop_2system_2modload_2src_2irx__imports_8h_source.html" title=" " alt="" coords="167,94,304,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,56,219,92,215,95,181,59"/>
+<area shape="rect" id="Node000004" href="$modload_8c_source.html" title=" " alt="" coords="167,183,304,223"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="238,150,238,182,233,182,233,150"/>
+</map>
