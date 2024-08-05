@@ -58,8 +58,8 @@ SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
 
 FUNCTION(BUILD_IOP_IMPORTS out_f in_f)
     ADD_CUSTOM_COMMAND(OUTPUT ${out_f}
-        COMMAND echo "#include \"irx_imports.h\"" > ${out_f}
-        COMMAND cat ${in_f} >> ${out_f}
+        COMMAND ${CMAKE_COMMAND} -E echo \#include \"irx_imports.h\" > ${out_f}
+        COMMAND ${CMAKE_COMMAND} -E cat ${in_f} >> ${out_f}
         DEPENDS ${in_f}
         COMMENT "Creating ${out_f}" VERBATIM
     )
@@ -67,8 +67,8 @@ ENDFUNCTION()
 
 FUNCTION(BUILD_IOP_EXPORTS out_f in_f)
     ADD_CUSTOM_COMMAND(OUTPUT ${out_f}
-        COMMAND echo "#include \"irx.h\"" > ${out_f}
-        COMMAND cat ${in_f} >> ${out_f}
+        COMMAND ${CMAKE_COMMAND} -E echo \#include \"irx.h\" > ${out_f}
+        COMMAND ${CMAKE_COMMAND} -E cat ${in_f} >> ${out_f}
         DEPENDS ${in_f}
         COMMENT "Creating ${out_f}" VERBATIM
     )
