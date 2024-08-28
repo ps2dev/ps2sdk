@@ -15,6 +15,9 @@
 
 #include <accore.h>
 #include <intrman.h>
+#ifdef TTY_DEVICE
+#include <ioman.h>
+#endif
 #include <loadcore.h>
 #include <stdio.h>
 #include <sysclib.h>
