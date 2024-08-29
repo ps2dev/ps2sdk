@@ -20,7 +20,8 @@ SUBDIRS = \
 	http \
 	libbdm \
 	netfs \
-	romdrv
+	romdrv \
+	subfile
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
