@@ -13,6 +13,7 @@ SUBDIRS = \
 	bdmfs_fatfs \
 	bdmfs_vfat \
 	devfs \
+	eromdrv \
 	fakehost \
 	fileio \
 	filexio \
