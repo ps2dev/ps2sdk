@@ -2,6 +2,7 @@
 #include <errno.h>
 #endif
 #include <stdio.h>
+#include <defs.h>
 #ifdef BUILDING_SMAP_PS2IP
 #include <sysclib.h>
 #endif
@@ -274,7 +275,7 @@ extern struct irx_export_table _exp_smap __attribute__((section("data")));
 #endif
 
 #ifdef BUILDING_SMAP_MODULAR
-extern struct irx_export_table _exp_smapmodu;
+extern struct irx_export_table _exp_smapmodu __attribute__((section("data")));
 #endif
 
 int _start(int argc, char *argv[])
