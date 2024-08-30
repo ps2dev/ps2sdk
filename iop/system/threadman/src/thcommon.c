@@ -314,7 +314,7 @@ void report_stack_overflow(struct thread *thread)
         }
     }
 
-    asm __volatile__("break 1");
+    __builtin_trap();
 }
 
 void do_delete_thread()

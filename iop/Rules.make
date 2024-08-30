@@ -79,6 +79,8 @@ IOP_C_COMPILE = $(IOP_CC) $(IOP_CFLAGS)
 # Command for ensuring the output directory for the rule exists.
 DIR_GUARD = @$(MKDIR) -p $(@D)
 
+MAKE_CURPID := $(shell printf '%s' $$PPID)
+
 $(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.c
 	$(DIR_GUARD)
 	$(IOP_C_COMPILE) -c $< -o $@
@@ -91,7 +93,7 @@ $(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.s
 	$(DIR_GUARD)
 	$(IOP_AS) $(IOP_ASFLAGS) $< -o $@
 
-.INTERMEDIATE: $(IOP_OBJS_DIR)build-imports.c $(IOP_OBJS_DIR)build-exports.c
+.INTERMEDIATE:: $(IOP_LIB)_tmp$(MAKE_CURPID) $(IOP_OBJS_DIR)build-imports.c $(IOP_OBJS_DIR)build-exports.c
 
 $(IOP_OBJS_DIR)template-imports.h:
 	$(DIR_GUARD)
@@ -123,6 +125,10 @@ $(IOP_BIN): $(IOP_OBJS) $(IOP_LIB_ARCHIVES) $(IOP_ADDITIONAL_DEPS)
 	$(DIR_GUARD)
 	$(IOP_C_COMPILE) $(IOP_OPTFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIB_ARCHIVES) $(IOP_LIBS)
 
-$(IOP_LIB): $(IOP_OBJS)
+$(IOP_LIB)_tmp$(MAKE_CURPID): $(IOP_OBJS)
 	$(DIR_GUARD)
 	$(IOP_AR) cru $@ $(IOP_OBJS)
+
+$(IOP_LIB): $(IOP_LIB)_tmp$(MAKE_CURPID)
+	$(DIR_GUARD)
+	mv $< $@

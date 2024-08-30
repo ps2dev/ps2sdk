@@ -1,0 +1,24 @@
+
+DECLARE_EXPORT_TABLE(atad, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(sceAtaTerminate)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(sceAtaInit)
+DECLARE_EXPORT(sceAtaSoftReset)
+DECLARE_EXPORT(sceAtaExecCmd)
+DECLARE_EXPORT(sceAtaWaitResult)
+DECLARE_EXPORT(sceAtaGetError)
+DECLARE_EXPORT(sceAtaDmaTransfer)
+DECLARE_EXPORT(sceAtaSecuritySetPassword)
+DECLARE_EXPORT(sceAtaSecurityUnLock)
+DECLARE_EXPORT(sceAtaSecurityEraseUnit)
+DECLARE_EXPORT(sceAtaIdle)
+DECLARE_EXPORT(sceAtaGetSceId)
+DECLARE_EXPORT(sceAtaSmartReturnStatus)
+DECLARE_EXPORT(sceAtaSmartSaveAttr)
+DECLARE_EXPORT(sceAtaFlushCache)
+DECLARE_EXPORT(sceAtaIdleImmediate)
+END_EXPORT_TABLE
+
+void _retonly() {}

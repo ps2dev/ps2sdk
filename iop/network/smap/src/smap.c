@@ -1,6 +1,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <defs.h>
 #include <dmacman.h>
 #include <dev9.h>
 #include <intrman.h>
@@ -462,7 +463,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
 
         if (EFBits & SMAP_EVENT_STOP) {
             if (SmapDrivPrivData->SmapIsInitialized) {
-                dev9IntrDisable(DEV9_SMAP_INTR_MASK2);
+                SpdIntrDisable(DEV9_SMAP_INTR_MASK2);
                 SMAP_EMAC3_SET32(SMAP_R_EMAC3_MODE0, 0);
                 SmapDrivPrivData->NetDevStopFlag    = 0;
                 SmapDrivPrivData->LinkStatus        = 0;
@@ -474,7 +475,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
         if (EFBits & SMAP_EVENT_START) {
             if (!SmapDrivPrivData->SmapIsInitialized) {
                 SmapDrivPrivData->SmapDriverStarted = 1;
-                dev9IntrEnable(DEV9_SMAP_INTR_MASK2);
+                SpdIntrEnable(DEV9_SMAP_INTR_MASK2);
                 if ((result = InitPHY(SmapDrivPrivData)) != 0)
                     break;
                 if (SmapDrivPrivData->NetDevStopFlag) {
@@ -532,7 +533,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
 
             // TXDNV is not enabled here, but only when frames are transmitted.
 #ifdef SMAP_RX_PACKETS_POLLING_MODE
-            dev9IntrEnable(SMAP_INTR_EMAC3 | SMAP_INTR_RXDNV);
+            SpdIntrEnable(SMAP_INTR_EMAC3 | SMAP_INTR_RXDNV);
 
             if (PacketCount >= 1) {
                 // Receive packets in polling mode
@@ -545,16 +546,16 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
                 SetAlarm(&SmapDrivPrivData->RxIntrPollingTimer, (void *)&RxIntrPollingTimerCB, SmapDrivPrivData);
             } else {
                 // Receive packets in interrupt mode
-                dev9IntrEnable(SMAP_INTR_RXEND);
+                SpdIntrEnable(SMAP_INTR_RXEND);
             }
 #else
-            dev9IntrEnable(DEV9_SMAP_INTR_MASK2);
+            SpdIntrEnable(DEV9_SMAP_INTR_MASK2);
 #endif
 
             // If there are frames to send out, let Tx channel 0 know and enable TXDNV.
             if (SmapDrivPrivData->NumPacketsInTx > 0) {
                 SMAP_EMAC3_SET32(SMAP_R_EMAC3_TxMODE0, SMAP_E3_TX_GNP_0);
-                dev9IntrEnable(SMAP_INTR_TXDNV);
+                SpdIntrEnable(SMAP_INTR_TXDNV);
             }
 
             // Do the link check, only if there has not been any incoming traffic in a while.
@@ -581,7 +582,7 @@ static int Dev9IntrCb(int flag)
 
     (void)flag;
 
-    dev9IntrDisable(DEV9_SMAP_ALL_INTR_MASK);
+    SpdIntrDisable(DEV9_SMAP_ALL_INTR_MASK);
     iSetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_INTR);
 
 #if USE_GP_REGISTER
@@ -636,7 +637,7 @@ int SMAPInitStart(void)
     if (!SmapDriverData.SmapIsInitialized) {
         emac3_regbase = SmapDriverData.emac3_regbase;
 
-        dev9IntrEnable(DEV9_SMAP_INTR_MASK2);
+        SpdIntrEnable(DEV9_SMAP_INTR_MASK2);
         if (InitPHY(&SmapDriverData) == 0 && !SmapDriverData.NetDevStopFlag) {
             SMAP_EMAC3_SET32(SMAP_R_EMAC3_MODE0, SMAP_E3_TXMAC_ENABLE | SMAP_E3_RXMAC_ENABLE);
             DelayThread(10000);
@@ -1153,7 +1154,7 @@ int smap_init(int argc, char *argv[])
     if (SPD_REG16(SPD_R_REV_1) < 0x11)
         return -6; // Minimum: revision 17, ES2.
 
-    dev9IntrDisable(DEV9_SMAP_ALL_INTR_MASK);
+    SpdIntrDisable(DEV9_SMAP_ALL_INTR_MASK);
 
     /* Reset FIFOs. */
     SMAP_REG8(SMAP_R_TXFIFO_CTRL) = SMAP_TXFIFO_RESET;
@@ -1198,7 +1199,7 @@ int smap_init(int argc, char *argv[])
 
     /* Retrieve the MAC address and verify it's integrity. */
     bzero(eeprom_data, 8);
-    if ((result = dev9GetEEPROM(eeprom_data)) < 0) {
+    if ((result = SpdGetEthernetID(eeprom_data)) < 0) {
         return (result == -1 ? -7 : -4);
     }
 
@@ -1237,7 +1238,7 @@ int smap_init(int argc, char *argv[])
 
     // Register the interrupt handlers for all SMAP events.
     for (i = 2; i < 7; i++)
-        dev9RegisterIntrCb(i, &Dev9IntrCb);
+        SpdRegisterIntrHandler(i, &Dev9IntrCb);
 
     dev9RegisterPreDmaCb(1, &Dev9PreDmaCbHandler);
     dev9RegisterPostDmaCb(1, &Dev9PostDmaCbHandler);

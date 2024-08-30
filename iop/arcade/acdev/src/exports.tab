@@ -1,0 +1,13 @@
+
+DECLARE_EXPORT_TABLE(acdev, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(SetAcMemDelayReg)
+DECLARE_EXPORT(GetAcMemDelayReg)
+DECLARE_EXPORT(SetAcIoDelayReg)
+DECLARE_EXPORT(GetAcIoDelayReg)
+END_EXPORT_TABLE
+
+void _retonly() {}

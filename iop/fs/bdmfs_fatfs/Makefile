@@ -6,15 +6,39 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-# IOP_CFLAGS += -DDEBUG -DDEBUG_EXTREME
+FATFS := $(PS2SDKSRC)/common/external_deps/fatfs
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
-IOP_CFLAGS += -Wno-error -Wno-strict-aliasing
+DEBUG ?= 0
+DEBUG_EXTREME ?= 0
 
-IOP_OBJS = ff.o ffsystem.o ffunicode.o fs_driver.o diskio.o main.o imports.o
+ifeq ($(DEBUG),1)
+	IOP_CFLAGS += -DDEBUG
+endif
+
+ifeq ($(DEBUG_EXTREME),1)
+	IOP_CFLAGS += -DDEBUG_EXTREME
+endif
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include -I$(FATFS)/source/include
+
+FATFS_OBJS = diskio.o ff.o ffsystem.o ffunicode.o 
+
+IOP_OBJS = main.o imports.o fs_driver.o $(FATFS_OBJS)
 IOP_LIBS = -static-libgcc -lgcc
+
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release
+
+$(FATFS):
+	$(MAKEREC) $(PS2SDKSRC)/common/external_deps all
+
+vpath %.c $(FATFS)/source/
+
+$(IOP_OBJS_DIR)%.o: %.c
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
+
+.NOTPARALLEL:: \
+	$(FATFS)

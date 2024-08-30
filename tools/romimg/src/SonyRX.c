@@ -20,7 +20,7 @@ int IsSonyRXModule(const char *path)
 	result = 0;
 	if ((file = fopen(path, "rb")) != NULL) {
 		if (fread(&header, 1, sizeof(elf_header_t), file) != 0) {
-            if (*(u32 *)header.ident == ELF_MAGIC && (header.type == ELF_TYPE_ERX2 || header.type == ELF_TYPE_IRX)) {
+            if (*(uint32_t *)header.ident == ELF_MAGIC && (header.type == ELF_TYPE_ERX2 || header.type == ELF_TYPE_IRX)) {
                 unsigned int i;
                 for (i = 0; i < header.shnum; i++) {
                     fseek(file, header.shoff + i * header.shentsize, SEEK_SET);
@@ -50,7 +50,7 @@ int GetSonyRXModInfo(const char *path, char *description, unsigned int MaxLength
 	result = ENOENT;
 	if ((file = fopen(path, "rb")) != NULL) {
 		if (fread(&header, 1, sizeof(elf_header_t), file) != 0) {
-            if (*(u32 *)header.ident == ELF_MAGIC && (header.type == ELF_TYPE_ERX2 || header.type == ELF_TYPE_IRX)) {
+            if (*(uint32_t *)header.ident == ELF_MAGIC && (header.type == ELF_TYPE_ERX2 || header.type == ELF_TYPE_IRX)) {
                 unsigned int i;
                 for (i = 0; i < header.shnum; i++) {
                     fseek(file, header.shoff + i * header.shentsize, SEEK_SET);

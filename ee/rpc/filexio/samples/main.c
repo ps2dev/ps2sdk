@@ -1,9 +1,14 @@
+#include <iopcontrol.h>
 #include <stdint.h>
 #include <kernel.h>
 #include <loadfile.h>
+#include <sbv_patches.h>
 #include <stdio.h>
 #include <sifrpc.h>
 #include <string.h>
+
+#define NEWLIB_PORT_AWARE
+#include <fileXio_rpc.h>
 
 int __iomanX_id = -1;
 int __fileXio_id = -1;
@@ -69,4 +74,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-

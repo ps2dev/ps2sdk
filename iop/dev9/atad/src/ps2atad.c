@@ -27,14 +27,21 @@
 #include <thevent.h>
 #include <stdio.h>
 #include <sysclib.h>
+#ifdef ATA_USE_DEV9
 #include <dev9.h>
+#endif
+#ifdef ATA_USE_AIFDEV9
+#include <aifdev9.h>
+#endif
 #include <atad.h>
 #ifdef ATA_ENABLE_BDM
 #include <bdm.h>
 #include <errno.h>
 #endif
 
+#ifdef ATA_USE_DEV9
 #include <speedregs.h>
+#endif
 #include <atahw.h>
 
 #define MODNAME "atad"
@@ -45,8 +52,6 @@ IRX_ID(MODNAME, 2, 7);
 
 #define M_PRINTF(format, args...) \
     printf(MODNAME ": " format, ##args)
-
-#define U64_2XU32(val) ((u32 *)val)[1], ((u32 *)val)[0]
 
 #define BANNER  "ATA device driver %s - Copyright (c) 2003 Marcus R. Brown\n"
 #define VERSION "v1.2"
@@ -65,8 +70,10 @@ static int ata_evflg        = -1;
 
 // Workarounds
 static u8 ata_dvrp_workaround = 0; // Please read the comments in _start().
+#ifdef ATA_USE_DEV9
 #ifdef ATA_GAMESTAR_WORKAROUND
 static u8 ata_gamestar_workaround = 0;
+#endif
 #endif
 
 /* Local device info kept for drives 0 and 1.  */
@@ -165,7 +172,7 @@ static const ata_cmd_info_t smart_cmd_table[] = {
     {ATA_S_SMART_RETURN_STATUS, 1}};
 #define SMART_CMD_TABLE_SIZE (sizeof smart_cmd_table / sizeof(ata_cmd_info_t))
 
-/* This is the state info tracked between ata_io_start() and ata_io_finish().  */
+/* This is the state info tracked between sceAtaExecCmd() and sceAtaWaitResult().  */
 typedef struct _ata_cmd_state
 {
     s32 type; /* The ata_cmd_info_t type field. */
@@ -187,9 +194,19 @@ static ata_cmd_state_t atad_cmd_state;
 static struct block_device g_ata_bd[NUM_DEVICES];
 #endif
 
+#ifdef ATA_USE_DEV9
 static int ata_intr_cb(int flag);
+#endif
+#ifdef ATA_USE_AIFDEV9
+static int ata_intr_cb(void);
+#endif
 static unsigned int ata_alarm_cb(void *unused);
 
+#ifdef ATA_USE_AIFDEV9
+static void aif_tune_drive(int unit, int mode);
+#endif
+
+#ifdef ATA_USE_DEV9
 static void ata_set_dir(int dir);
 
 static void ata_pio_mode(int mode);
@@ -197,6 +214,7 @@ static void ata_pio_mode(int mode);
 static void ata_multiword_dma_mode(int mode);
 #endif
 static void ata_ultra_dma_mode(int mode);
+#endif
 static void ata_shutdown_cb(void);
 
 int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir);
@@ -210,6 +228,7 @@ static int ata_bd_stop(struct block_device *bd);
 
 extern struct irx_export_table _exp_atad;
 
+#ifdef ATA_USE_DEV9
 // In v1.04, DMA was enabled in ata_set_dir() instead.
 static void ata_pre_dma_cb(int bcr, int dir)
 {
@@ -230,6 +249,7 @@ static void ata_post_dma_cb(int bcr, int dir)
 
     SPD_REG16(SPD_R_XFR_CTRL) &= ~0x80;
 }
+#endif
 
 static int ata_create_event_flag(void)
 {
@@ -242,7 +262,12 @@ static int ata_create_event_flag(void)
 
 int _start(int argc, char *argv[])
 {
+#ifdef ATA_USE_DEV9
     USE_SPD_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_REGS;
+#endif
     int res;
 
     (void)argc;
@@ -252,6 +277,7 @@ int _start(int argc, char *argv[])
 
     res = MODULE_NO_RESIDENT_END;
 
+#ifdef ATA_USE_DEV9
     if (!(SPD_REG16(SPD_R_REV_3) & SPD_CAPS_ATA) || !(SPD_REG16(SPD_R_REV_8) & 0x02)) {
         M_PRINTF("HDD is not connected, exiting.\n");
         goto out;
@@ -269,7 +295,17 @@ int _start(int argc, char *argv[])
 
         The workaround here is to return the 28-bit LBA as the total size and only use 48-bit LBA commands when required. */
     ata_dvrp_workaround = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR) ? 1 : 0;
+#endif
 
+#ifdef ATA_USE_AIFDEV9
+    if (!aifIsDetected()) {
+        M_PRINTF("AIF HDD: controller not found.\n");
+        goto out;
+    }
+    aif_regs[AIF_ATA_TCFG] = 0; // Clear ATA timing configuration.
+#endif
+
+#ifdef ATA_USE_DEV9
 #ifdef ATA_GAMESTAR_WORKAROUND
     /*  Some compatible adaptors may malfunction if transfers are not done according to the old ps2atad design.
         Official adaptors appear to have a 0x0001 set for this register, but not compatibles.
@@ -282,15 +318,17 @@ int _start(int argc, char *argv[])
         ata_gamestar_workaround = 0;
     }
 #endif
+#endif
 
     if ((ata_evflg = ata_create_event_flag()) < 0) {
         M_PRINTF("Couldn't create event flag, exiting.\n");
         goto out;
     }
 
+#ifdef ATA_USE_DEV9
     /* In v1.04, PIO mode 0 was set here. In late versions, it is set in ata_init_devices(). */
-    dev9RegisterIntrCb(1, &ata_intr_cb);
-    dev9RegisterIntrCb(0, &ata_intr_cb);
+    SpdRegisterIntrHandler(1, &ata_intr_cb);
+    SpdRegisterIntrHandler(0, &ata_intr_cb);
 #ifdef ATA_GAMESTAR_WORKAROUND
     if (!ata_gamestar_workaround) {
 #endif
@@ -300,7 +338,15 @@ int _start(int argc, char *argv[])
     }
 #endif
     /* Register this at the last position, as it should be the last thing done before shutdown. */
-    dev9RegisterShutdownCb(15, &ata_shutdown_cb);
+    Dev9RegisterPowerOffHandler(15, &ata_shutdown_cb);
+#endif
+
+#ifdef ATA_USE_AIFDEV9
+    aifRegisterIntrCb(AIF_INUM_ATA0, &ata_intr_cb);
+    aifRegisterShutdownCb(AIF_INUM_ATA0, &ata_shutdown_cb);
+
+    M_PRINTF("AIF HDD initialized.\n");
+#endif
 
 #ifdef ATA_ENABLE_BDM
     {
@@ -340,17 +386,29 @@ out:
 
 int _exit(void) { return MODULE_RESIDENT_END; }
 
+#ifdef ATA_USE_DEV9
 static int ata_intr_cb(int flag)
 {
     if (flag == 1) { /* New card, invalidate device info.  */
         memset(atad_devinfo, 0, sizeof atad_devinfo);
     } else {
-        dev9IntrDisable(SPD_INTR_ATA);
+        SpdIntrDisable(SPD_INTR_ATA);
         iSetEventFlag(ata_evflg, ATA_EV_COMPLETE);
     }
 
     return 1;
 }
+#endif
+
+#ifdef ATA_USE_AIFDEV9
+static int ata_intr_cb(void)
+{
+    aifIntrDisable(AIF_INTR_ATA0);
+    iSetEventFlag(ata_evflg, ATA_EV_COMPLETE);
+
+    return 1;
+}
+#endif
 
 static unsigned int ata_alarm_cb(void *unused)
 {
@@ -361,9 +419,14 @@ static unsigned int ata_alarm_cb(void *unused)
 }
 
 /* Export 8 */
-int ata_get_error(void)
+int sceAtaGetError(void)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     return ata_hwport->r_error & 0xff;
 }
 
@@ -377,7 +440,12 @@ int ata_get_error(void)
    In the original ATAD, the busy and bus-busy functions were separate, but similar.  */
 static int gen_ata_wait_busy(int bits)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     int i, delay;
 
     for (i = 0; i < 80; i++) {
@@ -415,7 +483,12 @@ static int gen_ata_wait_busy(int bits)
 
 static int ata_device_select(int device)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     int res;
 
     if ((res = ata_wait_bus_busy()) < 0)
@@ -443,9 +516,14 @@ static int ata_device_select(int device)
 
     48-bit LBA just involves writing the upper 24 bits in the format above into each respective register on the first write pass, before writing the lower 24 bits in the 2nd write pass. The LBA bits within the device field are not used in either write pass.
 */
-int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, u16 lcyl, u16 hcyl, u16 select, u16 command)
+int sceAtaExecCmd(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, u16 lcyl, u16 hcyl, u16 select, u16 command)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     iop_sys_clock_t cmd_timeout;
     const ata_cmd_info_t *cmd_table;
     int i, res, type, cmd_table_size;
@@ -531,8 +609,14 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
     }
 
     /* Enable the command completion interrupt.  */
-    if ((type & 0x7F) == 1)
-        dev9IntrEnable(SPD_INTR_ATA0);
+    if ((type & 0x7F) == 1) {
+#ifdef ATA_USE_DEV9
+        SpdIntrEnable(SPD_INTR_ATA0);
+#endif
+#ifdef ATA_USE_AIFDEV9
+        aifIntrEnable(AIF_INTR_ATA0);
+#endif
+    }
 
     /* Finally!  We send off the ATA command with arguments.  */
     ata_hwport->r_control = (using_timeout == 0) << 1;
@@ -557,8 +641,10 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
     ata_hwport->r_select  = (select | ATA_SEL_LBA) & 0xff; // In v1.04, LBA was enabled in the sceAtaDmaTransfer function.
     ata_hwport->r_command = command & 0xff;
 
+#ifdef ATA_USE_DEV9
     /* Turn on the LED.  */
-    dev9LEDCtl(1);
+    SpdSetLED(1);
+#endif
 
     return 0;
 }
@@ -566,13 +652,18 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 /* Do a PIO transfer, to or from the device.  */
 static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     u16 *buf16;
     int i, type;
     u16 status = ata_hwport->r_status & 0xff;
 
     if (status & ATA_STAT_ERR) {
-        M_PRINTF("Error: PIO cmd error: status 0x%02x, error 0x%02x.\n", status, ata_get_error());
+        M_PRINTF("Error: PIO cmd error: status 0x%02x, error 0x%02x.\n", status, sceAtaGetError());
         return ATA_RES_ERR_IO;
     }
 
@@ -610,6 +701,7 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
     return 0;
 }
 
+#ifdef ATA_USE_DEV9
 /* Complete a DMA transfer, to or from the device.  */
 static int ata_dma_complete(void *buf, u32 blkcount, int dir)
 {
@@ -627,7 +719,7 @@ static int ata_dma_complete(void *buf, u32 blkcount, int dir)
         if (dma_stat)
             goto next_transfer;
 
-        dev9IntrEnable(SPD_INTR_ATA);
+        SpdIntrEnable(SPD_INTR_ATA);
         /* Wait for the previous transfer to complete or a timeout.  */
         WaitEventFlag(ata_evflg, ATA_EV_TIMEOUT | ATA_EV_COMPLETE, WEF_CLEAR | WEF_OR, &bits);
 
@@ -639,9 +731,9 @@ static int ata_dma_complete(void *buf, u32 blkcount, int dir)
         if (!(SPD_REG16(SPD_R_INTR_STAT) & 0x02)) {
             if (ata_hwport->r_control & 0x01) {
                 M_PRINTF("Error: Command error while doing DMA.\n");
-                M_PRINTF("Error: Command error status 0x%02x, error 0x%02x.\n", ata_hwport->r_status, ata_get_error());
+                M_PRINTF("Error: Command error status 0x%02x, error 0x%02x.\n", ata_hwport->r_status, sceAtaGetError());
                 /* In v1.04, there was no check for ICRC. */
-                return ((ata_get_error() & ATA_ERR_ICRC) ? ATA_RES_ERR_ICRC : ATA_RES_ERR_IO);
+                return ((sceAtaGetError() & ATA_ERR_ICRC) ? ATA_RES_ERR_ICRC : ATA_RES_ERR_IO);
             } else {
                 M_PRINTF("Warning: Got command interrupt, but not an error.\n");
                 continue;
@@ -653,7 +745,7 @@ static int ata_dma_complete(void *buf, u32 blkcount, int dir)
     next_transfer:
         count  = (blkcount < dma_stat) ? blkcount : dma_stat;
         nbytes = count * 512;
-        if ((res = dev9DmaTransfer(0, buf, (nbytes << 9) | 32, dir)) < 0)
+        if ((res = SpdDmaTransfer(0, buf, (nbytes << 9) | 32, dir)) < 0)
             return res;
 
         buf = (void *)((u8 *)buf + nbytes);
@@ -662,15 +754,21 @@ static int ata_dma_complete(void *buf, u32 blkcount, int dir)
 
     return 0;
 }
+#endif
 
 /* Export 7 */
-int ata_io_finish(void)
+int sceAtaWaitResult(void)
 {
+#ifdef ATA_USE_DEV9
     USE_SPD_REGS;
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     ata_cmd_state_t *cmd_state = &atad_cmd_state;
     u32 bits;
-    int i, res = 0, type = cmd_state->type;
+    int res = 0, type = cmd_state->type;
     u16 stat;
 
     if (type == 1 || type == 6) { /* Non-data commands.  */
@@ -680,6 +778,9 @@ int ata_io_finish(void)
             return ATA_RES_ERR_TIMEOUT;
         }
     } else if (type == 4) { /* DMA.  */
+#ifdef ATA_USE_DEV9
+        int i;
+
         if ((res = ata_dma_complete(cmd_state->buf, cmd_state->blkcount,
                                     cmd_state->dir)) < 0)
             goto finish;
@@ -688,7 +789,7 @@ int ata_io_finish(void)
             if ((stat = SPD_REG16(SPD_R_INTR_STAT) & 0x01))
                 break;
         if (!stat) {
-            dev9IntrEnable(SPD_INTR_ATA0);
+            SpdIntrEnable(SPD_INTR_ATA0);
             WaitEventFlag(ata_evflg, ATA_EV_TIMEOUT | ATA_EV_COMPLETE, WEF_CLEAR | WEF_OR, &bits);
             if (bits & ATA_EV_TIMEOUT) {
                 M_PRINTF("Error: ATA timeout on DMA completion, buffer stat %04x\n", SPD_REG16(0x38));
@@ -696,6 +797,10 @@ int ata_io_finish(void)
                 res = ATA_RES_ERR_TIMEOUT;
             }
         }
+#endif
+#ifdef ATA_USE_AIFDEV9
+        res = -1;
+#endif
     } else { /* PIO transfers.  */
         stat = ata_hwport->r_control;
         if ((res = ata_wait_busy()) < 0)
@@ -717,16 +822,18 @@ int ata_io_finish(void)
     if (ata_hwport->r_status & ATA_STAT_BUSY)
         res = ata_wait_busy();
     if ((stat = ata_hwport->r_status) & ATA_STAT_ERR) {
-        M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", stat, ata_get_error());
+        M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", stat, sceAtaGetError());
         /* In v1.04, there was no check for ICRC. */
-        res = (ata_get_error() & ATA_ERR_ICRC) ? ATA_RES_ERR_ICRC : ATA_RES_ERR_IO;
+        res = (sceAtaGetError() & ATA_ERR_ICRC) ? ATA_RES_ERR_ICRC : ATA_RES_ERR_IO;
     }
 
 finish:
     /* The command has completed (with an error or not), so clean things up.  */
     CancelAlarm(&ata_alarm_cb, NULL);
+#ifdef ATA_USE_DEV9
     /* Turn off the LED.  */
-    dev9LEDCtl(0);
+    SpdSetLED(0);
+#endif
 
     if (res)
         M_PRINTF("error: ATA failed, %d\n", res);
@@ -737,19 +844,26 @@ finish:
 /* Reset the ATA controller/bus.  */
 static int ata_bus_reset(void)
 {
+#ifdef ATA_USE_DEV9
     USE_SPD_REGS;
     SPD_REG16(SPD_R_IF_CTRL) = SPD_IF_ATA_RESET;
     DelayThread(100);
     SPD_REG16(SPD_R_IF_CTRL) = 0; // Not present in v1.04.
     SPD_REG16(SPD_R_IF_CTRL) = 0x48;
     DelayThread(3000);
+#endif
     return ata_wait_busy();
 }
 
 /* Export 5 */
-int ata_reset_devices(void)
+int sceAtaSoftReset(void)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
 
     if (ata_hwport->r_control & 0x80)
         return ATA_RES_ERR_NOTREADY;
@@ -770,8 +884,8 @@ int sceAtaFlushCache(int device)
 {
     int res;
 
-    if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, (atad_devinfo[device].lba48 && !ata_dvrp_workaround) ? ATA_C_FLUSH_CACHE_EXT : ATA_C_FLUSH_CACHE)))
-        res = ata_io_finish();
+    if (!(res = sceAtaExecCmd(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, (atad_devinfo[device].lba48 && !ata_dvrp_workaround) ? ATA_C_FLUSH_CACHE_EXT : ATA_C_FLUSH_CACHE)))
+        res = sceAtaWaitResult();
 
     return res;
 }
@@ -781,8 +895,8 @@ int sceAtaIdle(int device, int period)
 {
     int res;
 
-    if (!(res = ata_io_start(NULL, 1, 0, period & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDLE)))
-        res = ata_io_finish();
+    if (!(res = sceAtaExecCmd(NULL, 1, 0, period & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDLE)))
+        res = sceAtaWaitResult();
 
     return res;
 }
@@ -791,8 +905,8 @@ static int ata_device_identify(int device, void *info)
 {
     int res;
 
-    if (!(res = ata_io_start(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_DEVICE)))
-        res = ata_io_finish();
+    if (!(res = sceAtaExecCmd(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_DEVICE)))
+        res = sceAtaWaitResult();
 
     return res;
 }
@@ -801,9 +915,9 @@ static int ata_device_pkt_identify(int device, void *info)
 {
     int res;
 
-    res = ata_io_start(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_PACKET_DEVICE);
+    res = sceAtaExecCmd(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_PACKET_DEVICE);
     if (!res)
-        return ata_io_finish();
+        return sceAtaWaitResult();
     return res;
 }
 
@@ -812,8 +926,8 @@ int sceAtaGetSceId(int device, void *data)
 {
     int res;
 
-    if (!(res = ata_io_start(data, 1, ATA_SCE_IDENTIFY_DRIVE, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL)))
-        res = ata_io_finish();
+    if (!(res = sceAtaExecCmd(data, 1, ATA_SCE_IDENTIFY_DRIVE, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL)))
+        res = sceAtaWaitResult();
 
     return res;
 }
@@ -822,8 +936,8 @@ static int ata_device_smart_enable(int device)
 {
     int res;
 
-    if (!(res = ata_io_start(NULL, 1, ATA_S_SMART_ENABLE_OPERATIONS, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART)))
-        res = ata_io_finish();
+    if (!(res = sceAtaExecCmd(NULL, 1, ATA_S_SMART_ENABLE_OPERATIONS, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART)))
+        res = sceAtaWaitResult();
 
     return res;
 }
@@ -833,8 +947,8 @@ int sceAtaSmartSaveAttr(int device)
 {
     int res;
 
-    if (!(res = ata_io_start(NULL, 1, ATA_S_SMART_SAVE_ATTRIBUTE_VALUES, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART)))
-        res = ata_io_finish();
+    if (!(res = sceAtaExecCmd(NULL, 1, ATA_S_SMART_SAVE_ATTRIBUTE_VALUES, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART)))
+        res = sceAtaWaitResult();
 
     return res;
 }
@@ -845,11 +959,11 @@ int sceAtaSmartReturnStatus(int device)
     USE_ATA_REGS;
     int res;
 
-    res = ata_io_start(NULL, 1, ATA_S_SMART_RETURN_STATUS, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART);
+    res = sceAtaExecCmd(NULL, 1, ATA_S_SMART_RETURN_STATUS, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART);
     if (res)
         return res;
 
-    res = ata_io_finish();
+    res = sceAtaWaitResult();
     if (res)
         return res;
 
@@ -867,15 +981,16 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 {
     int res;
 
-    res = ata_io_start(NULL, 1, 3, (type | mode) & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SET_FEATURES);
+    res = sceAtaExecCmd(NULL, 1, 3, (type | mode) & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SET_FEATURES);
     if (res)
         return res;
 
-    res = ata_io_finish();
+    res = sceAtaWaitResult();
     if (res)
         return res;
 
     switch (type) {
+#ifdef ATA_USE_DEV9
 #ifdef ATA_MWDMA_MODES
         case ATA_XFER_MODE_MDMA:
             ata_multiword_dma_mode(mode);
@@ -887,6 +1002,12 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
         case ATA_XFER_MODE_PIO:
             ata_pio_mode(mode);
             break;
+#endif
+#ifdef ATA_USE_AIFDEV9
+        case ATA_XFER_MODE_PIO:
+            aif_tune_drive(0, mode);
+            break;
+#endif
     }
 
     return 0;
@@ -932,15 +1053,18 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
         }
 
         for (retries = 3; retries > 0; retries--) {
+#ifdef ATA_USE_DEV9
 #ifdef ATA_GAMESTAR_WORKAROUND
             /* Due to the retry loop, put this call (for the GameStar workaround) here instead of the old location. */
             if (ata_gamestar_workaround)
                 ata_set_dir(dir);
 #endif
+#endif
 
-            if ((res = ata_io_start(buf, len, 0, len, sector, lcyl, hcyl, select, command)) != 0)
+            if ((res = sceAtaExecCmd(buf, len, 0, len, sector, lcyl, hcyl, select, command)) != 0)
                 break;
 
+#ifdef ATA_USE_DEV9
 #ifdef ATA_GAMESTAR_WORKAROUND
             if (!ata_gamestar_workaround)
                 ata_set_dir(dir);
@@ -948,8 +1072,9 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
             /* Set up (part of) the transfer here. In v1.04, this was called at the top of the outer loop. */
             ata_set_dir(dir);
 #endif
+#endif
 
-            res = ata_io_finish();
+            res = sceAtaWaitResult();
 
             /* In v1.04, this was not done. Neither was there a mechanism to retry if a non-permanent error occurs. */
             SPD_REG16(SPD_R_IF_CTRL) &= ~SPD_IF_DMA_ENABLE;
@@ -973,7 +1098,7 @@ static void ata_get_security_status(int device, ata_devinfo_t *devinfo, u16 *par
 }
 
 /* Export 10 */
-int ata_device_sce_sec_set_password(int device, void *password)
+int sceAtaSecuritySetPassword(int device, void *password)
 {
     ata_devinfo_t *devinfo = atad_devinfo;
     u16 *param             = ata_param;
@@ -985,9 +1110,9 @@ int ata_device_sce_sec_set_password(int device, void *password)
     memset(param, 0, 512);
     memcpy(param + 1, password, 32);
 
-    res = ata_io_start(param, 1, ATA_SCE_SECURITY_SET_PASSWORD, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL);
+    res = sceAtaExecCmd(param, 1, ATA_SCE_SECURITY_SET_PASSWORD, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL);
     if (res == 0)
-        res = ata_io_finish();
+        res = sceAtaWaitResult();
 
     ata_get_security_status(device, devinfo, param);
     return res;
@@ -1006,9 +1131,9 @@ int sceAtaSecurityUnLock(int device, void *password)
     memset(param, 0, 512);
     memcpy(param + 1, password, 32);
 
-    if ((res = ata_io_start(param, 1, ATA_SCE_SECURITY_UNLOCK, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL)) != 0)
+    if ((res = sceAtaExecCmd(param, 1, ATA_SCE_SECURITY_UNLOCK, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL)) != 0)
         return res;
-    if ((res = ata_io_finish()) != 0)
+    if ((res = sceAtaWaitResult()) != 0)
         return res;
 
     /* Check to see if the drive was actually unlocked.  */
@@ -1020,7 +1145,7 @@ int sceAtaSecurityUnLock(int device, void *password)
 }
 
 /* Export 12 */
-int ata_device_sce_sec_erase(int device)
+int sceAtaSecurityEraseUnit(int device)
 {
     ata_devinfo_t *devinfo = atad_devinfo;
     int res;
@@ -1029,13 +1154,13 @@ int ata_device_sce_sec_erase(int device)
         return 0;
 
     /* First send the mandatory ERASE PREPARE command.  */
-    if ((res = ata_io_start(NULL, 1, ATA_SCE_SECURITY_ERASE_PREPARE, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL)) != 0)
+    if ((res = sceAtaExecCmd(NULL, 1, ATA_SCE_SECURITY_ERASE_PREPARE, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL)) != 0)
         goto finish;
-    if ((res = ata_io_finish()) != 0)
+    if ((res = sceAtaWaitResult()) != 0)
         goto finish;
 
-    if ((res = ata_io_start(NULL, 1, ATA_SCE_SECURITY_ERASE_UNIT, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL)) == 0)
-        res = ata_io_finish();
+    if ((res = sceAtaExecCmd(NULL, 1, ATA_SCE_SECURITY_ERASE_UNIT, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL)) == 0)
+        res = sceAtaWaitResult();
 
 finish:
     ata_get_security_status(device, devinfo, NULL);
@@ -1044,7 +1169,12 @@ finish:
 
 static void ata_device_probe(ata_devinfo_t *devinfo)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     u16 nsector, sector, lcyl, hcyl;
 
     devinfo->exists     = 0;
@@ -1081,11 +1211,16 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 
 static int ata_init_devices(ata_devinfo_t *devinfo)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     int i, res;
     u32 total_sectors_nonlba48, total_sectors_lba48;
 
-    if ((res = ata_reset_devices()) != 0)
+    if ((res = sceAtaSoftReset()) != 0)
         return res;
 
     ata_device_probe(&devinfo[0]);
@@ -1103,7 +1238,9 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
     else
         devinfo[1].exists = 0;
 
+#ifdef ATA_USE_DEV9
     ata_pio_mode(0); // PIO mode is set here, in late ATAD versions.
+#endif
 
     for (i = 0; i < 2; i++) {
         if (!devinfo[i].exists)
@@ -1142,6 +1279,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 
         devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
+#ifdef ATA_USE_DEV9
         u8 maxUDMA = 4;
 #ifdef ATA_ENABLE_MAXUDMA
         maxUDMA = 6;
@@ -1158,6 +1296,11 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
             }
         }
         ata_device_set_transfer_mode(i, ATA_XFER_MODE_UDMA, udmaMode);
+#endif
+#ifdef ATA_USE_AIFDEV9
+        /* PIO mode 4.  */
+        ata_device_set_transfer_mode(i, ATA_XFER_MODE_PIO, 4);
+#endif
         ata_device_smart_enable(i);
         /* Set standby timer to 21min 15s.  */
         sceAtaIdle(i, 0xff);
@@ -1203,6 +1346,7 @@ ata_devinfo_t *sceAtaInit(int device)
     return &atad_devinfo[device];
 }
 
+#ifdef ATA_USE_DEV9
 static void ata_set_dir(int dir)
 {
     USE_SPD_REGS;
@@ -1297,14 +1441,36 @@ static void ata_ultra_dma_mode(int mode)
     SPD_REG16(SPD_R_UDMA_MODE) = val;
     SPD_REG16(SPD_R_IF_CTRL) |= 0x49;
 }
+#endif
+
+#ifdef ATA_USE_AIFDEV9
+static void aif_tune_drive(int unit, int mode)
+{
+    USE_AIF_REGS;
+    unsigned int use_iordy, value;
+
+    use_iordy = 1;
+    value     = (use_iordy << 3) | mode;
+    M_PRINTF("AIF HDD: tune unit%d, mode=%u\n", unit, value);
+
+    switch (unit) {
+        case 0:
+            aif_regs[AIF_ATA_TCFG] = (aif_regs[AIF_ATA_TCFG] & 0xf0) + value;
+            break;
+        case 1:
+            aif_regs[AIF_ATA_TCFG] = (aif_regs[AIF_ATA_TCFG] & 0x0f) + (value << 4);
+            break;
+    }
+}
+#endif
 
 /* Export 18 */
 int sceAtaIdleImmediate(int device)
 {
     int res;
 
-    if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xFFFF, ATA_C_IDLE_IMMEDIATE)))
-        res = ata_io_finish();
+    if (!(res = sceAtaExecCmd(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xFFFF, ATA_C_IDLE_IMMEDIATE)))
+        res = sceAtaWaitResult();
 
     return res;
 }
@@ -1313,8 +1479,8 @@ static int ata_device_standby_immediate(int device)
 {
     int res;
 
-    if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xFFFF, ATA_C_STANDBY_IMMEDIATE)))
-        res = ata_io_finish();
+    if (!(res = sceAtaExecCmd(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xFFFF, ATA_C_STANDBY_IMMEDIATE)))
+        res = sceAtaWaitResult();
 
     return res;
 }

@@ -149,9 +149,9 @@ void send_td(sio2_transfer_data_t *td)
 	}
 
 	if (td->in_dma.addr) {
-		dmac_request(IOP_DMAC_SIO2in, td->in_dma.addr, td->in_dma.size,
+		sceSetSliceDMA(IOP_DMAC_SIO2in, td->in_dma.addr, td->in_dma.size,
 				td->in_dma.count, DMAC_FROM_MEM);
-		dmac_transfer(IOP_DMAC_SIO2in);
+		sceStartDMA(IOP_DMAC_SIO2in);
 
 #ifdef SIO2LOG
 		log_dma(LOG_TRS_DMA_IN, &td->in_dma);
@@ -159,9 +159,9 @@ void send_td(sio2_transfer_data_t *td)
 	}
 
 	if (td->out_dma.addr) {
-		dmac_request(IOP_DMAC_SIO2out, td->out_dma.addr, td->out_dma.size,
+		sceSetSliceDMA(IOP_DMAC_SIO2out, td->out_dma.addr, td->out_dma.size,
 				td->out_dma.count, DMAC_TO_MEM);
-		dmac_transfer(IOP_DMAC_SIO2out);
+		sceStartDMA(IOP_DMAC_SIO2out);
 
 #ifdef SIO2LOG
 		log_dma(LOG_TRS_DMA_OUT, &td->out_dma);
@@ -338,8 +338,8 @@ void shutdown(void)
 	ReleaseIntrHandler(IOP_IRQ_SIO2);
 	CpuResumeIntr(state);
 
-	dmac_disable(IOP_DMAC_SIO2in);
-	dmac_disable(IOP_DMAC_SIO2out);
+	sceDisableDMAChannel(IOP_DMAC_SIO2in);
+	sceDisableDMAChannel(IOP_DMAC_SIO2out);
 }
 
 int _start(int argc, char *argv[])
@@ -370,10 +370,10 @@ int _start(int argc, char *argv[])
 	EnableIntr(IOP_IRQ_SIO2);
 	CpuResumeIntr(state);
 
-	dmac_ch_set_dpcr(IOP_DMAC_SIO2in, 3);
-	dmac_ch_set_dpcr(IOP_DMAC_SIO2out, 3);
-	dmac_enable(IOP_DMAC_SIO2in);
-	dmac_enable(IOP_DMAC_SIO2out);
+	sceSetDMAPriority(IOP_DMAC_SIO2in, 3);
+	sceSetDMAPriority(IOP_DMAC_SIO2out, 3);
+	sceEnableDMAChannel(IOP_DMAC_SIO2in);
+	sceEnableDMAChannel(IOP_DMAC_SIO2out);
 
 	StartThread(thid, NULL);
 #ifdef SIO2LOG

@@ -44,6 +44,7 @@ SUBDIRS = \
 	sysclib \
 	sysclib-full \
 	sysclib-nano \
+	sysmem \
 	threadman \
 	timrman \
 	timrmanp \

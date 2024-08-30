@@ -11,8 +11,6 @@
 IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
 
-IOP_CFLAGS += -Wno-strict-aliasing
-
 IOP_LDFLAGS = -lgcc
 
 IOP_OBJS = main.o usb_mass.o scsi.o imports.o

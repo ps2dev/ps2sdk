@@ -10,6 +10,7 @@
 
 // Based on pad sample by pukko, check the pad samples for more advanced features.
 
+#include <malloc.h>
 #include <tamtypes.h>
 #include <kernel.h>
 #include <sifrpc.h>

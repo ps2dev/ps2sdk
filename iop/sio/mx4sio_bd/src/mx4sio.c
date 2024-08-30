@@ -569,8 +569,8 @@ void mx_sio2_start_rx_dma(uint8_t *buffer)
     inl_sio2_regN_set(3, 0);
 
     /* enable dmac transfer */
-    dmac_request(IOP_DMAC_SIO2out, buffer, 0x100 >> 2, 2, DMAC_TO_MEM);
-    dmac_transfer(IOP_DMAC_SIO2out);
+    sceSetSliceDMA(IOP_DMAC_SIO2out, buffer, 0x100 >> 2, 2, DMAC_TO_MEM);
+    sceStartDMA(IOP_DMAC_SIO2out);
 
     /* start queue exec */
     inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
@@ -600,8 +600,8 @@ void mx_sio2_start_tx_dma(uint8_t *buffer)
     inl_sio2_regN_set(3, 0);
 
     /* enable dmac transfer */
-    dmac_request(IOP_DMAC_SIO2in, buffer, 0x100 >> 2, 2, DMAC_FROM_MEM);
-    dmac_transfer(IOP_DMAC_SIO2in);
+    sceSetSliceDMA(IOP_DMAC_SIO2in, buffer, 0x100 >> 2, 2, DMAC_FROM_MEM);
+    sceStartDMA(IOP_DMAC_SIO2in);
 
     /* start queue exec */
     inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
@@ -761,10 +761,10 @@ int module_start(int argc, char *argv[])
     }
 
     /* Just in case sio2man was not loaded, we initialize the dmac channels too */
-    dmac_ch_set_dpcr(IOP_DMAC_SIO2in, 3);
-    dmac_ch_set_dpcr(IOP_DMAC_SIO2out, 3);
-    dmac_enable(IOP_DMAC_SIO2in);
-    dmac_enable(IOP_DMAC_SIO2out);
+    sceSetDMAPriority(IOP_DMAC_SIO2in, 3);
+    sceSetDMAPriority(IOP_DMAC_SIO2out, 3);
+    sceEnableDMAChannel(IOP_DMAC_SIO2in);
+    sceEnableDMAChannel(IOP_DMAC_SIO2out);
 
     /* After a reboot the SD will always respond with:
      * - 0xff 0xff 0xc1 0x3f

@@ -10,7 +10,7 @@
 
 IOP_OBJS = main.o bdm.o part_driver.o part_driver_mbr.o part_driver_gpt.o imports.o exports.o
 IOP_LIB_ARCHIVES = $(PS2SDKSRC)/iop/fs/libbdm/lib/libbdm.a
-IOP_CFLAGS += -I$(PS2SDKSRC)/iop/fs/libbdm/include/ -Wno-strict-aliasing
+IOP_CFLAGS += -I$(PS2SDKSRC)/iop/fs/libbdm/include/
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
@@ -19,3 +19,6 @@ include $(PS2SDKSRC)/iop/Rules.release
 
 $(PS2SDKSRC)/iop/fs/libbdm/lib/libbdm.a:
 	$(MAKEREC) $(PS2SDKSRC)/iop/fs/libbdm
+
+.NOTPARALLEL:: \
+	$(PS2SDKSRC)/iop/fs/libbdm/lib/libbdm.a

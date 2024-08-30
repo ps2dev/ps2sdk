@@ -131,6 +131,22 @@ int __fdman_get_dup_descriptor(int fd)
 }
 #endif
 
+#ifdef F___fdman_get_dup_descriptor
+int __fdman_get_dup2_descriptor(int fd, int newfd)
+{	
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	WaitSema(__fdman_sema); /* lock here to make thread safe */
+	__descriptormap[newfd] = &__descriptor_data_pool[fd];
+	__descriptormap[newfd]->ref_count++;
+	SignalSema(__fdman_sema); /* release lock */
+	
+	return newfd;
+}
+#endif
 
 #ifdef F___fdman_release_descriptor
 void __fdman_release_descriptor(int fd)

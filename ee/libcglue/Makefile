@@ -12,10 +12,25 @@ CORE_OBJS = rtc.o
 
 TIMEZONE_OBJS = _libcglue_timezone_update.o ps2sdk_setTimezone.o ps2sdk_setDaylightSaving.o
 
-FDMAN_OBJS = __fdman_sema.o __descriptor_data_pool.o __descriptormap.o __fdman_init.o __fdman_deinit.o __fdman_get_new_descriptor.o \
-	__fdman_get_dup_descriptor.o __fdman_release_descriptor.o
+FDMAN_OBJS = \
+	__fdman_sema.o \
+	__descriptor_data_pool.o \
+	__descriptormap.o \
+	__fdman_init.o \
+	__fdman_deinit.o \
+	__fdman_get_new_descriptor.o \
+	__fdman_get_dup_descriptor.o \
+	__fdman_get_dup2_descriptor.o \
+	__fdman_release_descriptor.o
 
-INIT_OBJS = __libpthreadglue_init.o __libpthreadglue_deinit.o _libcglue_init.o _libcglue_deinit.o _libcglue_args_parse.o
+INIT_OBJS = \
+	__gprof_init.o \
+	__gprof_cleanup.o \
+	__libpthreadglue_init.o \
+	__libpthreadglue_deinit.o \
+	_libcglue_init.o \
+	_libcglue_deinit.o \
+	_libcglue_args_parse.o
 
 SLEEP_OBJS = nanosleep.o
 
@@ -117,12 +132,34 @@ GLUE_OBJS = \
 	fchownat.o \
 	linkat.o \
 	readlinkat.o \
-	unlinkat.o
+	unlinkat.o \
+	dup.o \
+	dup2.o \
 
-LOCK_OBJS = __retarget_lock_init.o __retarget_lock_acquire.o __retarget_lock_release.o __retarget_lock_try_acquire.o __retarget_lock_close.o \
-	__retarget_lock_init_recursive.o __retarget_lock_acquire_recursive.o __retarget_lock_release_recursive.o __retarget_lock_try_acquire_recursive.o __retarget_lock_close_recursive.o
+LOCK_OBJS = \
+	__lock___sfp_recursive_mutex.o \
+	__lock___atexit_recursive_mutex.o \
+	__lock___at_quick_exit_mutex.o \
+	__lock___malloc_recursive_mutex.o \
+	__lock___env_recursive_mutex.o \
+	__lock___tz_mutex.o \
+	__lock___dd_hash_mutex.o \
+	__lock___arc4random_mutex.o \
+	__retarget_lock_init.o \
+	__retarget_lock_init_recursive.o \
+	__retarget_lock_close.o \
+	__retarget_lock_close_recursive.o \
+	__retarget_lock_acquire.o \
+	__retarget_lock_acquire_recursive.o \
+	__retarget_lock_try_acquire.o \
+	__retarget_lock_try_acquire_recursive.o \
+	__retarget_lock_release.o \
+	__retarget_lock_release_recursive.o \
+	__locks_init.o \
+	__locks_deinit.o
 
 NETDB_OBJS = \
+	gethostbyaddr.o \
 	gethostbyname.o \
 	gethostbyname_r.o \
 	freeaddrinfo.o \
@@ -139,8 +176,10 @@ SOCKET_OBJS = \
 	listen.o \
 	recv.o \
 	recvfrom.o \
+	recvmsg.o \
 	send.o \
 	sendto.o \
+	sendmsg.o \
 	getsockopt.o \
 	setsockopt.o \
 	shutdown.o \

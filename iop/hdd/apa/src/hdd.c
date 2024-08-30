@@ -229,7 +229,7 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 			}
 		}
 #ifdef APA_USE_DEV9
-		dev9RegisterShutdownCb(0, NULL);
+		Dev9RegisterPowerOffHandler(0, NULL);
 #endif
 		iomanX_DelDrv(hddFioDev.name);
 #ifdef APA_SUPPORT_BHDD
@@ -280,7 +280,7 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 
 	APA_PRINTF(APA_DRV_NAME": max open = %d, %d buffers\n", apaMaxOpen, cacheSize);
 #ifdef APA_USE_DEV9
-	if(dev9RegisterShutdownCb(0, &hddShutdownCb) != 0)
+	if(Dev9RegisterPowerOffHandler(0, &hddShutdownCb) != 0)
 	{
 		APA_PRINTF(APA_DRV_NAME": error: dev9 may not be resident.\n");
 		return hddInitError();
@@ -395,7 +395,7 @@ static void hddShutdownCb(void)
 static int hddInitError(void)
 {
 #ifdef APA_USE_DEV9
-	dev9RegisterShutdownCb(0, NULL);
+	Dev9RegisterPowerOffHandler(0, NULL);
 #endif
 	return MODULE_NO_RESIDENT_END;
 }

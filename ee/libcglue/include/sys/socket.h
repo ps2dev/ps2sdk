@@ -82,6 +82,30 @@
 #include <tcpip.h>
 #endif
 
+/*
+ * Maximum queue length specifiable by listen(2).
+ */
+#ifndef SOMAXCONN
+#define	SOMAXCONN	128
+#endif
+
+/*
+ * Message header for recvmsg and sendmsg calls.
+ * Used value-result for recvmsg, value only for sendmsg.
+ */
+struct msghdr {
+	void		*msg_name;	/* optional address */
+	socklen_t	msg_namelen;	/* size of address */
+	struct iovec	*msg_iov;	/* scatter/gather array */
+	int		msg_iovlen;	/* # elements in msg_iov */
+	void		*msg_control;	/* ancillary data, see below */
+	socklen_t	msg_controllen;	/* ancillary data buffer len */
+	int		msg_flags;	/* flags on received message */
+};
+
+// TODO: Not available in LWIP
+#define	MSG_TRUNC	0x0000		/* data discarded before delivery */
+
 #if 0
 #include <sys/featuretest.h>
 
@@ -659,15 +683,11 @@ int	paccept(int, struct sockaddr * __restrict, socklen_t * __restrict,
 ssize_t	recv(int, void *, size_t, int);
 ssize_t	recvfrom(int, void *__restrict, size_t, int,
 	    struct sockaddr * __restrict, socklen_t * __restrict);
-#if 0
 ssize_t	recvmsg(int, struct msghdr *, int);
-#endif
 ssize_t	send(int, const void *, size_t, int);
 ssize_t	sendto(int, const void *,
 	    size_t, int, const struct sockaddr *, socklen_t);
-#if 0
 ssize_t	sendmsg(int, const struct msghdr *, int);
-#endif
 int	setsockopt(int, int, int, const void *, socklen_t);
 int	shutdown(int, int);
 #if 0

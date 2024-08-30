@@ -16,6 +16,10 @@
 
     All sections and files are (must be?) aligned to 16-byte boundaries, and all records within each section must be aligned to 4-byte boundaries.
 */
+
+#ifndef __ROMING_H__
+#define __ROMING_H__
+
 #include "dprintf.h"
 #if defined(_WIN32) || defined(WIN32)
 #define RMIMG_PTRCAST unsigned int
@@ -68,3 +72,5 @@ int AddFile(ROMIMG *ROMImg, const char *path);
 int DeleteFile(ROMIMG *ROMImg, const char *filename);
 int ExtractFile(const ROMIMG *ROMImg, const char *filename, const char *FileToExtract);
 int IsFileExists(const ROMIMG *ROMImg, const char *filename);
+
+#endif /* __ROMING_H__ */
