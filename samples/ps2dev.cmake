@@ -7,6 +7,7 @@
 # Copyright (C) 2024-Present PS2DEV Team
 #
 
+cmake_minimum_required(VERSION 3.0)
 
 INCLUDE(CMakeForceCompiler)
 if(DEFINED ENV{PS2SDK})
