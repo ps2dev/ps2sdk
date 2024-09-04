@@ -123,6 +123,23 @@ typedef struct
     u16 wData[1];
 } UsbStringDescriptor;
 
+typedef struct _usbHidDescriptorItem
+{
+    u8 bDescriptorType;
+    u8 wDescriptorLengthLb;
+    u8 wDescriptorLengthHb;
+} UsbHidDescriptorItem;
+
+typedef struct _usbHidDescriptor
+{
+    u8 bLength;
+    u8 bDescriptorType;
+    u16 bcdHID;
+    u8 bCountryCode;
+    u8 bNumDescriptors;
+    UsbHidDescriptorItem items[];
+} UsbHidDescriptor;
+
 typedef struct
 {
     u16 bLength  : 11;
