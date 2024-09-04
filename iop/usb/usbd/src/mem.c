@@ -3,257 +3,300 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Copyright ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-/**
- * @file
- * USB Driver function prototypes and constants.
- */
-
 #include "usbdpriv.h"
-#include "mem.h"
 
-#include "stdio.h"
-
-MemoryPool memPool;
-
-HcIsoTD *allocIsoTd(void)
+UsbdDevice_t *fetchDeviceById(int devId)
 {
-    HcIsoTD *newTd = memPool.freeHcIsoTdList;
-    if (newTd) {
-        memPool.freeHcIsoTdList = newTd->next;
-        newTd->next             = NULL;
-    }
-    return newTd;
+	UsbdDevice_t *dev;
+
+	if ( devId <= 0 )
+	{
+		return NULL;
+	}
+	if ( devId >= usbConfig.m_maxDevices )
+	{
+		return NULL;
+	}
+	dev = &memPool->m_deviceTreeBuf[devId];
+	if ( !dev->m_parent )
+		return NULL;
+	return dev;
 }
 
-void freeIsoTd(HcIsoTD *argTd)
+UsbdEndpoint_t *fetchEndpointById(int id)
 {
-    HcIsoTD *pos;
-    if (argTd) {
-        for (pos = memPool.freeHcIsoTdList; pos != NULL; pos = pos->next)
-            if (pos == argTd) {
-                printf("freeIsoTd %p: already free\n", argTd);
-                return;
-            }
-        argTd->next             = memPool.freeHcIsoTdList;
-        memPool.freeHcIsoTdList = argTd;
-    }
+	UsbdEndpoint_t *ep;
+
+	if ( id < 0 )
+	{
+		return NULL;
+	}
+	if ( id >= usbConfig.m_maxEndpoints )
+	{
+		return NULL;
+	}
+	ep = &memPool->m_endpointBuf[id];
+	if ( !ep->m_correspDevice )
+		return NULL;
+	return ep;
 }
 
-HcTD *allocTd(void)
+UsbdDevice_t *getDeviceTreeRoot(void)
 {
-    HcTD *res = memPool.freeHcTdList;
-    if (res) {
-        memPool.freeHcTdList = res->next;
-        res->next            = NULL;
-    }
-    return res;
+	return memPool->m_deviceTreeRoot;
 }
 
-void freeTd(HcTD *argTd)
+UsbdDevice_t *attachChildDevice(UsbdDevice_t *parent, u32 portNum)
 {
-    HcTD *pos;
-    if (argTd) {
-        for (pos = memPool.freeHcTdList; pos != NULL; pos = pos->next)
-            if (pos == argTd) {
-                printf("FreeTD %p: already free\n", argTd);
-                return;
-            }
-        argTd->next          = memPool.freeHcTdList;
-        memPool.freeHcTdList = argTd;
-    }
+	UsbdDevice_t *newDev;
+
+	newDev = memPool->m_freeDeviceListStart;
+	if ( !newDev )
+	{
+		dbg_printf("Ran out of device handles\n");
+		return NULL;
+	}
+	if ( newDev->m_next )
+		newDev->m_next->m_prev = newDev->m_prev;
+	else
+		memPool->m_freeDeviceListEnd = newDev->m_prev;
+	if ( newDev->m_prev )
+		newDev->m_prev->m_next = newDev->m_next;
+	else
+		memPool->m_freeDeviceListStart = newDev->m_next;
+	newDev->m_endpointListEnd = NULL;
+	newDev->m_endpointListStart = NULL;
+	newDev->m_devDriver = NULL;
+	newDev->m_deviceStatus = DEVICE_NOTCONNECTED;
+	newDev->m_resetFlag = 0;
+	newDev->m_magicPowerValue = 0;
+	newDev->m_childListEnd = NULL;
+	newDev->m_childListStart = NULL;
+	newDev->m_parent = parent;
+	newDev->m_attachedToPortNo = portNum;
+	newDev->m_privDataField = NULL;
+	if ( parent )
+	{
+		newDev->m_prev = parent->m_childListEnd;
+		if ( parent->m_childListEnd )
+			parent->m_childListEnd->m_next = newDev;
+		else
+			parent->m_childListStart = newDev;
+		newDev->m_next = NULL;
+		parent->m_childListEnd = newDev;
+	}
+	return newDev;
 }
 
-Device *attachChildDevice(Device *parent, u32 portNum)
+void freeDevice(UsbdDevice_t *dev)
 {
-    Device *newDev = memPool.freeDeviceListStart;
-    if (!newDev) {
-        dbg_printf("Ran out of device handles\n");
-        return NULL;
-    }
-
-    if (newDev->next)
-        newDev->next->prev = newDev->prev;
-    else
-        memPool.freeDeviceListEnd = newDev->prev;
-
-    if (newDev->prev)
-        newDev->prev->next = newDev->next;
-    else
-        memPool.freeDeviceListStart = newDev->next;
-
-    newDev->endpointListEnd = newDev->endpointListStart = NULL;
-    newDev->devDriver                                   = NULL;
-    newDev->deviceStatus                                = DEVICE_NOTCONNECTED;
-    newDev->resetFlag                                   = 0;
-    newDev->childListEnd = newDev->childListStart = NULL;
-    newDev->parent                                = parent;
-    newDev->attachedToPortNo                      = portNum;
-    newDev->privDataField                         = NULL;
-    if (parent) {
-        newDev->prev = parent->childListEnd;
-        if (parent->childListEnd)
-            parent->childListEnd->next = newDev;
-        else
-            parent->childListStart = newDev;
-        newDev->next         = NULL;
-        parent->childListEnd = newDev;
-    } else
-        newDev->next = newDev->prev = NULL;
-    return newDev;
+	if ( !dev || dev < memPool->m_deviceTreeBuf || dev >= memPool->m_deviceTreeBuf + usbConfig.m_maxDevices )
+	{
+		dbg_printf("freeDevice %p: Arg is not part of dev buffer\n", dev);
+		return;
+	}
+	dev->m_prev = memPool->m_freeDeviceListEnd;
+	if ( memPool->m_freeDeviceListEnd )
+		memPool->m_freeDeviceListEnd->m_next = dev;
+	else
+		memPool->m_freeDeviceListStart = dev;
+	dev->m_next = NULL;
+	memPool->m_freeDeviceListEnd = dev;
+	dev->m_parent = NULL;
 }
 
-void freeDevice(Device *dev)
+UsbdIoRequest_t *allocIoRequest(void)
 {
-    if (!dev)
-        return;
+	UsbdIoRequest_t *res;
 
-    if ((dev < memPool.deviceTreeBuf) || (dev >= memPool.deviceTreeBuf + usbConfig.maxDevices)) {
-        printf("freeDevice %p: Arg is not part of dev buffer\n", dev);
-        return;
-    }
-
-    dev->prev = memPool.freeDeviceListEnd;
-    if (memPool.freeDeviceListEnd)
-        memPool.freeDeviceListEnd->next = dev;
-    else
-        memPool.freeDeviceListStart = dev;
-
-    dev->next                 = NULL;
-    dev->parent               = NULL;
-    memPool.freeDeviceListEnd = dev;
+	res = memPool->m_freeIoReqList;
+	if ( !res )
+	{
+		dbg_printf("ran out of IoReqs\n");
+		return NULL;
+	}
+	if ( res->m_next )
+		res->m_next->m_prev = res->m_prev;
+	else
+		memPool->m_freeIoReqListEnd = res->m_prev;
+	if ( res->m_prev )
+		res->m_prev->m_next = res->m_next;
+	else
+		memPool->m_freeIoReqList = res->m_next;
+	return res;
 }
 
-Device *fetchPortElemByNumber(Device *hub, int port)
+void freeIoRequest(UsbdIoRequest_t *req)
 {
-    Device *res = hub->childListStart;
-    while (--port > 0) {
-        if (!res)
-            return NULL;
-        res = res->next;
-    }
-    return res;
+	UsbdIoRequest_t *pos;
+
+	if ( !req )
+	{
+		return;
+	}
+	if ( req < memPool->m_ioReqBufPtr || req >= memPool->m_ioReqBufPtr + usbConfig.m_maxIoReqs )
+	{
+		req->m_busyFlag = 0;
+		return;
+	}
+	for ( pos = memPool->m_freeIoReqList; pos && pos != req; pos = pos->m_next )
+	{
+	}
+	if ( pos )
+	{
+		dbg_printf("freeIoRequest %p: already free.\n", req);
+		return;
+	}
+	req->m_busyFlag = 0;
+	req->m_prev = memPool->m_freeIoReqListEnd;
+	if ( memPool->m_freeIoReqListEnd )
+		memPool->m_freeIoReqListEnd->m_next = req;
+	else
+		memPool->m_freeIoReqList = req;
+	req->m_next = NULL;
+	memPool->m_freeIoReqListEnd = req;
 }
 
-void addToHcEndpointList(u8 type, HcED *ed)
+UsbdEndpoint_t *allocEndpointForDevice(UsbdDevice_t *dev, u32 align)
 {
-    ed->next                   = memPool.hcEdBuf[type].next;
-    memPool.hcEdBuf[type].next = ed;
+	UsbdEndpoint_t *newEp;
+
+	newEp = memPool->m_freeEpListStart;
+	if ( !newEp )
+	{
+		return NULL;
+	}
+	if ( newEp->m_next )
+		newEp->m_next->m_prev = newEp->m_prev;
+	else
+		memPool->m_freeEpListEnd = newEp->m_prev;
+	if ( newEp->m_prev )
+		newEp->m_prev->m_next = newEp->m_next;
+	else
+		memPool->m_freeEpListStart = newEp->m_next;
+	newEp->m_correspDevice = dev;
+	newEp->m_ioReqListEnd = NULL;
+	newEp->m_ioReqListStart = NULL;
+	newEp->m_busyPrev = NULL;
+	newEp->m_busyNext = NULL;
+	newEp->m_inTdQueue = 0;
+	newEp->m_alignFlag = align;
+	newEp->m_prev = dev->m_endpointListEnd;
+	if ( dev->m_endpointListEnd )
+		dev->m_endpointListEnd->m_next = newEp;
+	else
+		dev->m_endpointListStart = newEp;
+	newEp->m_next = NULL;
+	dev->m_endpointListEnd = newEp;
+	return newEp;
 }
 
-void removeHcEdFromList(int type, const HcED *hcEd)
+int cleanUpFunc(UsbdDevice_t *dev, UsbdEndpoint_t *ep)
 {
-    HcED *prev = memPool.hcEdBuf + type;
-    HcED *pos  = prev->next;
-    while (pos) {
-        if (pos == hcEd) {
-            prev->next = pos->next;
-            return;
-        }
-        prev = pos;
-        pos  = pos->next;
-    }
+	if ( !ep || ep < memPool->m_endpointBuf || ep >= memPool->m_endpointBuf + usbConfig.m_maxEndpoints )
+	{
+		return 0;
+	}
+	if ( ep->m_inTdQueue != NOTIN_QUEUE )
+	{
+		if ( ep->m_busyNext )
+			ep->m_busyNext->m_busyPrev = ep->m_busyPrev;
+		else
+			memPool->m_tdQueueEnd = ep->m_busyPrev;
+		if ( ep->m_busyPrev )
+			ep->m_busyPrev->m_busyNext = ep->m_busyNext;
+		else
+			memPool->m_tdQueueStart = ep->m_busyNext;
+		ep->m_inTdQueue = NOTIN_QUEUE;
+	}
+	if ( ep->m_next )
+		ep->m_next->m_prev = ep->m_prev;
+	else
+		dev->m_endpointListEnd = ep->m_prev;
+	if ( ep->m_prev )
+		ep->m_prev->m_next = ep->m_next;
+	else
+		dev->m_endpointListStart = ep->m_next;
+	ep->m_prev = memPool->m_freeEpListEnd;
+	if ( memPool->m_freeEpListEnd )
+		memPool->m_freeEpListEnd->m_next = ep;
+	else
+		memPool->m_freeEpListStart = ep;
+	ep->m_next = NULL;
+	memPool->m_freeEpListEnd = ep;
+	ep->m_correspDevice = NULL;
+	return 0;
 }
 
-Endpoint *allocEndpointForDevice(Device *dev, u32 align)
+UsbdHcTD_t *allocTd(void)
 {
-    Endpoint *newEp = memPool.freeEpListStart;
-    if (!newEp)
-        return NULL;
+	UsbdHcTD_t *res;
 
-    if (newEp->next)
-        newEp->next->prev = newEp->prev;
-    else
-        memPool.freeEpListEnd = newEp->prev;
-
-    if (newEp->prev)
-        newEp->prev->next = newEp->next;
-    else
-        memPool.freeEpListStart = newEp->next;
-
-    newEp->correspDevice  = dev;
-    newEp->ioReqListStart = newEp->ioReqListEnd = NULL;
-    newEp->busyNext = newEp->busyPrev = NULL;
-    newEp->inTdQueue                  = 0;
-    newEp->alignFlag                  = align;
-
-    newEp->next = NULL;
-    newEp->prev = dev->endpointListEnd;
-    if (dev->endpointListEnd)
-        dev->endpointListEnd->next = newEp;
-    else
-        dev->endpointListStart = newEp;
-
-    dev->endpointListEnd = newEp;
-    return newEp;
+	res = memPool->m_freeHcTdList;
+	if ( !res )
+	{
+		return NULL;
+	}
+	memPool->m_freeHcTdList = res->m_next;
+	res->m_next = NULL;
+	return res;
 }
 
-Device *fetchDeviceById(int devId)
+void freeTd(UsbdHcTD_t *argTd)
 {
-    if ((devId > 0) && (devId < usbConfig.maxDevices)) {
-        Device *dev;
+	UsbdHcTD_t *pos;
 
-        dev = memPool.deviceTreeBuf + devId;
-        if (dev->parent)
-            return dev;
-    }
-    return NULL;
+	if ( !argTd )
+	{
+		return;
+	}
+	for ( pos = memPool->m_freeHcTdList; pos && argTd != pos; pos = pos->m_next )
+	{
+	}
+	if ( pos )
+	{
+		dbg_printf("FreeTD %p: already free\n", argTd);
+		return;
+	}
+	argTd->m_next = memPool->m_freeHcTdList;
+	memPool->m_freeHcTdList = argTd;
 }
 
-Endpoint *fetchEndpointById(int id)
+UsbdHcIsoTD_t *allocIsoTd(void)
 {
-    if ((id >= 0) && (id < usbConfig.maxEndpoints)) {
-        Endpoint *res;
+	UsbdHcIsoTD_t *newTd;
 
-        res = memPool.endpointBuf + id;
-        if (res->correspDevice)
-            return res;
-    }
-    return NULL;
+	newTd = memPool->m_freeHcIsoTdList;
+	if ( !newTd )
+	{
+		return NULL;
+	}
+	memPool->m_freeHcIsoTdList = newTd->m_next;
+	newTd->m_next = NULL;
+	return newTd;
 }
 
-IoRequest *allocIoRequest(void)
+void freeIsoTd(UsbdHcIsoTD_t *argTd)
 {
-    IoRequest *res = memPool.freeIoReqList;
-    if (res) {
-        if (res->next)
-            res->next->prev = res->prev;
-        else
-            memPool.freeIoReqListEnd = res->prev;
+	UsbdHcIsoTD_t *pos;
 
-        if (res->prev)
-            res->prev->next = res->next;
-        else
-            memPool.freeIoReqList = res->next;
-        res->prev = res->next = NULL;
-    } else
-        dbg_printf("ran out of IoReqs\n");
-    return res;
-}
-
-void freeIoRequest(IoRequest *req)
-{
-    int num = req - memPool.ioReqBufPtr;
-    IoRequest *pos;
-    if (req) {
-        if ((num >= 0) && (num < usbConfig.maxIoReqs)) {
-            for (pos = memPool.freeIoReqList; pos != NULL; pos = pos->next)
-                if (pos == req) {
-                    printf("freeIoRequest %p: already free.\n", req);
-                    return;
-                }
-            req->prev = memPool.freeIoReqListEnd;
-            if (memPool.freeIoReqListEnd)
-                memPool.freeIoReqListEnd->next = req;
-            else
-                memPool.freeIoReqList = req;
-            req->next                = NULL;
-            memPool.freeIoReqListEnd = req;
-        }
-        req->busyFlag = 0;
-    }
+	if ( !argTd )
+	{
+		return;
+	}
+	for ( pos = memPool->m_freeHcIsoTdList; pos && argTd != pos; pos = pos->m_next )
+	{
+	}
+	if ( pos )
+	{
+		dbg_printf("freeIsoTd %p: already free\n", argTd);
+		return;
+	}
+	argTd->m_next = memPool->m_freeHcIsoTdList;
+	memPool->m_freeHcIsoTdList = argTd;
 }
