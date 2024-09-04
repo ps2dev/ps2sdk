@@ -38,5 +38,10 @@ int acUartEntry(int argc, char **argv)
 	}
 	if ( RegisterLibraryEntries(&_exp_acuart) != 0 )
 		return -16;
-	return 0;
+
+#ifdef TTY_DEVICE
+	return CreateTTY();
+#else
+	return MODULE_RESIDENT_END;
+#endif
 }

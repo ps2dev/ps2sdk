@@ -45,3 +45,12 @@ I_iSetEventFlag
 I_WaitEventFlag
 I_PollEventFlag
 thevent_IMPORTS_end
+
+#ifdef TTY_DEVICE
+ioman_IMPORTS_start
+I_AddDrv
+I_DelDrv
+I_close
+I_open
+ioman_IMPORTS_end
+#endif
