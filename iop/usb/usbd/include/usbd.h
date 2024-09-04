@@ -308,7 +308,7 @@ int sceUsbdRegisterAutoloader(sceUsbdLddOps *drv); // Arbitrarily named
 int sceUsbdUnregisterAutoloader(void);             // Arbitrarily named
 int sceUsbdChangeThreadPriority(int prio1, int prio2);
 
-// these aren't implemented:
+// These have been added in 1.2 export version
 int sceUsbdGetReportDescriptor(int devId, int cfgNum, int ifNum, void **desc, u32 *len);
 int sceUsbdMultiIsochronousTransfer(int pipeId, sceUsbdMultiIsochronousRequest *request, sceUsbdMultiIsochronousDoneCallback callback, void *cbArg);
 
@@ -334,7 +334,7 @@ int sceUsbdMultiIsochronousTransfer(int pipeId, sceUsbdMultiIsochronousRequest *
 #define UsbGetReportDescriptor          sceUsbdGetReportDescriptor
 #define UsbMultiIsochronousTransfer     sceUsbdMultiIsochronousTransfer
 
-#define usbd_IMPORTS_start DECLARE_IMPORT_TABLE(usbd, 1, 1)
+#define usbd_IMPORTS_start DECLARE_IMPORT_TABLE(usbd, 1, 2)
 #define usbd_IMPORTS_end   END_IMPORT_TABLE
 
 #define I_sceUsbdRegisterLdd              DECLARE_IMPORT(4, sceUsbdRegisterLdd)
