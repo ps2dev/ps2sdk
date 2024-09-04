@@ -39,7 +39,7 @@ typedef struct
     u8 wHubCharacteristicsHb;
     u8 bPwrOn2PwrGood;
     u8 bHubContrCurrent;
-    u8 deviceRemovable[8]; // arbitrary number, depends on number of ports
+    u8 deviceRemovable[32]; // arbitrary number, depends on number of ports
 } UsbHubDescriptor;
 
 
