@@ -34,4 +34,8 @@ struct uart_softc
 	struct uart_buf recv;
 };
 
+#ifdef TTY_DEVICE
+int CreateTTY();
+#endif
+
 #endif
