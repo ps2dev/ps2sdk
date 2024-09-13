@@ -678,12 +678,12 @@ int sceCdAutoAdjustCtrl(int mode, u32 *result);
 /** Controls on-the-fly (hardware) data decryption. Setting all options to 0 will disable decryption.
  * This is used for decrypting encrypted sectors like the PlayStation 2 logo.
  *
- * @param arg1 Unknown
- * @param arg2 Unknown
- * @param shift Shift amount
+ * @param enable_xor Set to a non-zero value to enable xor by index 4 of the key argument in sceCdReadKey
+ * @param enable_shift Set to a non-zero value to enable rotate shift right by the amount specified by the "shiftval" argument
+ * @param shiftval Shift amount enable_shift is enabled
  * @return 1 on success, 0 on failure.
  */
-int sceCdDecSet(unsigned char arg1, unsigned char arg2, unsigned char shift);
+int sceCdDecSet(unsigned char enable_xor, unsigned char enable_shift, unsigned char shiftval);
 
 /** Reads the requested key from the CD/DVD.
  *
@@ -695,9 +695,9 @@ int sceCdDecSet(unsigned char arg1, unsigned char arg2, unsigned char shift);
  */
 int sceCdReadKey(unsigned char arg1, unsigned char arg2, unsigned int command, unsigned char *key);
 
-/** Sets the "HD mode", whatever that means.
+/** Blocks disc tray eject functionality and turns off the blue eject LED when enabled.
  *
- * @param mode mode
+ * @param mode Set to a non-zero value to enable the tray eject functionality
  * @return 1 on success, 0 on failure.
  */
 int sceCdSetHDMode(u32 mode);
@@ -712,7 +712,7 @@ int sceCdSetHDMode(u32 mode);
  */
 int sceCdOpenConfig(int block, int mode, int NumBlocks, u32 *status);
 
-/** Closes the configuration block.
+/** Closes the configuration block that is currently opened.
  *
  * @param result Result code.
  * @return 1 on success, 0 on failure.
@@ -745,8 +745,7 @@ int sceCdWriteConfig(const void *buffer, u32 *result);
 int sceCdReadNVM(u32 address, u16 *data, u8 *result);
 
 /** Writes a single word to the NVRAM storage.
- * Does not fully work on consoles starting from the SCPH-50000 ("Dragon" MECHACON):
- * Some parts, like those containing the console IDs, cannot be overwritten.
+ * Starting from Mechacon firmware version 50000, attempting to write to address values over 150 will error.
  *
  * @param address Address in 2-byte words, of the word that will be written to.
  * @param data Pointer to the buffer that contains the new data.
@@ -765,7 +764,7 @@ int sceCdWriteNVM(u32 address, u16 data, u8 *result);
 int sceCdRI(u8 *buffer, u32 *result);
 
 /** Writes a new i.Link ID for the console.
- * Does not work on consoles starting from the SCPH-50000 ("Dragon" MECHACON):
+ * Starting from Mechacon firmware version 50000, a unlock combination (0x03 0x46 and 0x03 0x47) needs to be executed first.
  *
  * @param buffer Pointer to the buffer that contains the new i.Link ID.
  * @param result Result code.
@@ -782,7 +781,7 @@ int sceCdWI(const u8 *buffer, u32 *result);
 int sceCdReadConsoleID(u8 *buffer, u32 *result);
 
 /** Writes a new ID for the console. This is not the same as the i.Link ID.
- * Does not work on consoles starting from the SCPH-50000 ("Dragon" MECHACON):
+ * Starting from Mechacon firmware version 50000, a unlock combination (0x03 0x46 and 0x03 0x47) needs to be executed first.
  *
  * @param buffer Pointer to the buffer that contains the new i.Link ID.
  * @param status Result code.
@@ -792,11 +791,11 @@ int sceCdWriteConsoleID(const u8 *buffer, u32 *status);
 
 /** Controls Audio Digital output.
  *
- * @param arg1 Unknown
+ * @param mode Set to a non-zero value to enable digital output.
  * @param status Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdCtrlADout(int arg1, u32 *status);
+int sceCdCtrlADout(int mode, u32 *status);
 
 /** Reads MECHACON version data (RR MM mm TT): RR = Magicgate region, MM = major, mm = minor, TT = system type (00 = PS2, 01 = PSX)
  * Magicgate region codes are: 00 = Japan, 01 = USA, 02 = Europe, 03 = Oceania, 04 = Asia, 05 = Russia, 06 = China, and 07 = Mexico.
@@ -831,7 +830,7 @@ int sceCdBootCertify(const u8 *romname);
 int sceCdRM(char *buffer, u32 *status);
 
 /** Sets the console's model name.
- * Does not work on consoles starting from the SCPH-50000 ("Dragon" MECHACON).
+ * Starting from Mechacon firmware version 50000, a unlock combination (0x03 0x46 and 0x03 0x47) needs to be executed first.
  * SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
  *
  * @param buffer Pointer to a buffer containing the new model name.
@@ -956,17 +955,26 @@ int sceCdRcBypassCtl(int mode, u32 *status);
  * Minimum Mechacon firmware version: 50000
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
+ * @param clock The time to wake up the system.
+ * @param userdata Any arbitrary value (not used in timer processing)
+ * @param wakeupreason The reason why the system woke up.
+ * @param flags bit 0 -> disable timer after expiration, bit 1 -> disable timer
  * @return 1 on success, 0 on failure
  */
-int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *arg2, u32 *arg3, int *arg4);
+int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *userdata, u32 *wakeupreason, int *flags);
 
 /** Writes wake up time.
  * Minimum Mechacon firmware version: 50000
+ * Note: in newer Mechacon firmware versions (TODO: determine the range), the wake up timer function is removed. However, the storage for the parameters remain.
+ * Note: if there was a non-zero value in sceCdCLOCK.stat the last time sceCdReadClock was called, no data will be written/enabled.
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
+ * @param clock The time to wake up the system.
+ * @param userdata Any arbitrary value (not used in timer processing)
+ * @param flags When 1, disables the timer after it has expired. When 255, disables the timer and sets the seconds value to 0xFF.
  * @return 1 on success, 0 on failure
  */
-int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 arg2, int arg3);
+int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 userdata, int flags);
 
 /** Disables Mechacon actions performed using the remote control.
  * The actions that can be specified are poweron, poweroff, reset and eject.
