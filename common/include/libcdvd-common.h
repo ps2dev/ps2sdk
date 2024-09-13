@@ -325,6 +325,40 @@ enum SCECdvdFanSpeed {
 /** Disable the power on functionality. (RM_PS2_POWERON) */
 #define CdlRCDisablePowerOn 0x10
 
+// Flag definitions for sceCdCLOCK.stat
+/** The RTC clock is stopped */
+#define CdlRTCStatClockStopDetected 1
+/** There was an issue checking the RTC battery voltage */
+#define CdlRTCStatClockBatteryMonitoringVoltageProblem 2
+/** The Rohm RTC hardware returned an error */
+#define CdlRTCStatCTLRegProblem 4
+/** There was an error while preparing to send the command from Mechacon to RTC */
+#define CdlRTCStatCommandError 128
+
+// Value definitions for the wakeupreason argument of sceCdReadWakeUpTime
+/** The system was powered on using the front panel buttons or the remote */
+#define CdlWakeUpReasonMainPowerOn 0
+/** The system was reset using the front panel button, the remote, or the SCMD */
+#define CdlWakeUpReasonMainReset 1
+/** The system was powered on because the timer set by sceCdWriteWakeUpTime expired */
+#define CdlWakeUpReasonMainTimer 2
+/** The system was powered on using the PON_REQ signal connected to the expansion bay port */
+#define CdlWakeUpReasonMainDevice 3
+
+// Value definitions for the return value of sceCdGetWakeUpReason
+#define CdlWakeUpReasonExtraSupportHard 0
+/** The system was reset using the front panel button, the remote, or the SCMD */
+#define CdlWakeUpReasonExtraReset 1
+/** The system was reset using the "Quit Game" button */
+#define CdlWakeUpReasonExtraGameReset 2
+/** The system was powered on because the timer set by sceCdWriteWakeUpTime expired */
+#define CdlWakeUpReasonExtraTimer 3
+/** The system was powered on using the front panel buttons or the remote */
+#define CdlWakeUpReasonExtraPowerOn 4
+/** The system was powered on when an object was inserted into the disc slot */
+#define CdlWakeUpReasonExtraSlotIn 7
+#define CdlWakeUpReasonExtraBackGround 8
+
 // For streaming operations (Use with sceCdStRead())
 enum SCECdvdStreamMode {
     /** Stream without blocking. */
