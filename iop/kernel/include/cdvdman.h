@@ -55,6 +55,18 @@ int sceCdRV(u32 lsn, u32 sectors, void *buf, sceCdRMode *mode, int arg5, void *c
  */
 int sceCdApplySCmd2(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize, void *outBuff);
 
+/** send an s-command by function number
+ * Unofficial name.
+ * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+ *
+ * @param cmdNum command number
+ * @param inBuff input buffer  (can be null)
+ * @param inBuffSize size of input buffer  (>= 16 bytes)
+ * @param outBuff output buffer (can be null)
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdApplySCmd3(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize, void *outBuff);
+
 /** Controls spindle speed? Not sure what it really does.
  * SUPPORTED IN XCDVDMAN ONLY
  *
@@ -62,6 +74,16 @@ int sceCdApplySCmd2(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize,
  * @return 1 on success, 0 on failure.
  */
 int sceCdSpinCtrlIOP(u32 speed);
+
+/** Set the eject callback when in ATAPI mode.
+ * Unofficial name.
+ * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
+ *
+ * @param cb The pointer to the callback
+ * @param userdata The pointer to the userdata that will be passed to the callback
+ * @return The old callback value
+ */
+void *sceCdSetAtapiEjectCallback(int (*cb)(int reason, void *userdata), void *userdata);
 
 //DNAS functions
 
@@ -72,6 +94,18 @@ int sceCdSpinCtrlIOP(u32 speed);
  * @return 1 on success, 0 on failure.
  */
 int sceCdReadDiskID(unsigned int *id);
+
+/** Deobfuscate using unique key.
+ * Unofficial name.
+ * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
+ *
+ * @param buffer Output buffer
+ * @param shiftval The amount to rotate left shift
+ * @param xorval The value to XOR the buffer against
+ * @param status Command status
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdDeobfuscateUsingUniqueKey(u8 *buffer, unsigned int shiftval, int xorval, u32 *status);
 
 #define cdvdman_IMPORTS_start DECLARE_IMPORT_TABLE(cdvdman, 1, 1)
 #define cdvdman_IMPORTS_end END_IMPORT_TABLE
@@ -163,17 +197,23 @@ int sceCdReadDiskID(unsigned int *id);
 #define I_sceCdApplySCmd2 DECLARE_IMPORT(112, sceCdApplySCmd2)
 #define I_sceCdRE DECLARE_IMPORT(114, sceCdRE)
 #define I_sceCdRcBypassCtl DECLARE_IMPORT(115, sceCdRcBypassCtl)
+#define I_sceCdSendSCmd1D DECLARE_IMPORT(116, sceCdSendSCmd1D)
 #define I_sceRemote2_7 DECLARE_IMPORT(117, sceRemote2_7)
 #define I_sceCdSetLEDsMode DECLARE_IMPORT(120, sceCdSetLEDsMode)
+#define I_sceCdApplySCmd3 DECLARE_IMPORT(125, sceCdApplySCmd3)
+#define I_sceRemote2_7Get DECLARE_IMPORT(128, sceRemote2_7Get)
 #define I_sceCdReadPS1BootParam DECLARE_IMPORT(148, sceCdReadPS1BootParam)
 #define I_sceCdSetFanProfile DECLARE_IMPORT(150, sceCdSetFanProfile)
 #define I_sceCdChgSys DECLARE_IMPORT(154, sceCdChgSys)
 #define I_sceCdNoticeGameStart DECLARE_IMPORT(156, sceCdNoticeGameStart)
+#define I_sceCdDeobfuscateUsingUniqueKey DECLARE_IMPORT(161, sceCdDeobfuscateUsingUniqueKey)
 #define I_sceCdXLEDCtl DECLARE_IMPORT(163, sceCdXLEDCtl)
 #define I_sceCdBuzzerCtl DECLARE_IMPORT(165, sceCdBuzzerCtl)
 #define I_sceCdXBSPowerCtl DECLARE_IMPORT(171, sceCdXBSPowerCtl)
+#define I_sceCdSetAtapiEjectCallback DECLARE_IMPORT(173, sceCdSetAtapiEjectCallback)
 #define I_sceCdSetMediumRemoval DECLARE_IMPORT(175, sceCdSetMediumRemoval)
 #define I_sceCdGetMediumRemoval DECLARE_IMPORT(177, sceCdGetMediumRemoval)
+#define I_sceCdDoesUniqueKeyExist DECLARE_IMPORT(179, sceCdDoesUniqueKeyExist)
 #define I_sceCdXDVRPReset DECLARE_IMPORT(181, sceCdXDVRPReset)
 #define I_sceCdGetWakeUpReason DECLARE_IMPORT(183, sceCdGetWakeUpReason)
 #define I_sceCdReadRegionParams DECLARE_IMPORT(189, sceCdReadRegionParams)

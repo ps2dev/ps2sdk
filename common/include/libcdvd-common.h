@@ -729,6 +729,15 @@ int sceCdDecSet(unsigned char enable_xor, unsigned char enable_shift, unsigned c
  */
 int sceCdReadKey(unsigned char arg1, unsigned char arg2, unsigned int command, unsigned char *key);
 
+/** Determines if unique disc key exists
+ * Unofficial name.
+ * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
+ *
+ * @param status Command status
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdDoesUniqueKeyExist(u32 *status);
+
 /** Blocks disc tray eject functionality and turns off the blue eject LED when enabled.
  *
  * @param mode Set to a non-zero value to enable the tray eject functionality
@@ -1020,6 +1029,17 @@ int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 userdata, int flags);
  */
 int sceRemote2_7(u16 param, u32 *status);
 
+/** Retrieves the value set by sceRemote2_7.
+ * Minimum Mechacon firmware version: 50000
+ * Unofficial name.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @param param The value set by sceRemote2_7
+ * @param status Command status
+ * @return 1 on success, 0 on failure.
+ */
+int sceRemote2_7Get(u32 *param, u32 *status);
+
 /** Set the LED state of the face buttons of the console.
  * The state of the buttons will be reset when the power or eject button is pressed.
  * Minimum Mechacon firmware version: 50000
@@ -1046,6 +1066,19 @@ int sceCdReadPS1BootParam(u8 *out, u32 *result);
  * @return 1 on success, 0 on failure
  */
 int sceCdSetFanProfile(u8 param, u32 *result);
+
+/** Sends SCMD 0x1D. Appears to be stubbed in Mechacon firmware 50000.
+ * Minimum Mechacon firmware version: 50000
+ * Unofficial name.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @param arg1 Unknown
+ * @param arg2 Unknown
+ * @param arg3 Unknown
+ * @param status Command status
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdSendSCmd1D(int *arg1, unsigned int *arg2, unsigned int *arg3, u32 *status);
 
 /** Change sys.
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
