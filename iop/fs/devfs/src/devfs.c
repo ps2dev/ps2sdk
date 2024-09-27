@@ -324,16 +324,6 @@ devfs_device_t *devfs_find_deviceid(HDEV hDev)
    return NULL;
 }
 
-/** Dummy ioman handler
- * @returns Always returns -1
- */
-int devfs_dummy(void)
-
-{
-   printf("devfs_dummy\n");
-   return -1;
-}
-
 /** ioman init handler
  * @returns Always returns 0
  */
@@ -1007,34 +997,34 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 
    return 0;
 }
- 
+
 static iop_device_ops_t devfs_ops = {
   &devfs_init,
   &devfs_deinit,
-  (void *)&devfs_dummy,
+  NOT_SUPPORTED,
   &devfs_open,
   &devfs_close,
   &devfs_read,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
   &devfs_ioctl,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
   &devfs_dopen,
   &devfs_dclose,
   &devfs_dread,
   &devfs_getstat,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
   &devfs_ioctl2,
 };
 

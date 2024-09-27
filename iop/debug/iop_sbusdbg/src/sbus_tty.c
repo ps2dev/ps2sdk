@@ -26,8 +26,6 @@ Of course this requires that the EE-side code accept this command and output the
 
 extern void sbus_tty_puts(const char *str);
 
-static int ttyfs_error() { return -1; }
-
 static int ttyfs_init()
 {
     //DBG_puts("SIOTTY: FS Init()\n");
@@ -97,21 +95,21 @@ static iop_device_ops_t fsd_ops =
 {
     &ttyfs_init,
     &ttyfs_deinit,
-    (void *)&ttyfs_error,
+    NOT_SUPPORTED,
     &ttyfs_open,
     &ttyfs_close,
-	(void *)&ttyfs_error,
+	NOT_SUPPORTED,
     &ttyfs_write,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
 	&ttyfs_dopen,
     &ttyfs_close,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
 };
 
 static iop_device_t tty_fsd =
