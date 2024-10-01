@@ -1,7 +1,6 @@
 function(compile_multiple target objects srcfile)
     foreach(obj ${objects})
         add_library(${obj} OBJECT ${srcfile})
-        set_target_properties(${obj} PROPERTIES LINKER_LANGUAGE C)
         get_filename_component(def ${obj} NAME_WLE)
         target_compile_definitions(${obj} PUBLIC "F_${def}")
         target_include_directories(${obj} PRIVATE include)
