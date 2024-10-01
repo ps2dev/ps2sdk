@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
+include(${PS2SDKSRC_ROOT}/cmake/utils.cmake)
 
 set(EXEC_SYSCALLS KExit.o _LoadExecPS2.o _ExecPS2.o)
 set(EXECOSD_SYSCALL _ExecOSD.o)
@@ -191,19 +192,8 @@ set(KERNEL_OBJ ResetEE.o SetGsCrt.o ${EXEC_SYSCALLS}
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o _print.o
 )
 
-function(compile_multiple target objects srcfile)
-    foreach(obj ${objects})
-        add_library(${obj} OBJECT ${srcfile})
-        set_target_properties(${obj} PROPERTIES LINKER_LANGUAGE C)
-        get_filename_component(def ${obj} NAME_WLE)
-        target_compile_definitions(${obj} PUBLIC "F_${def}")
-        target_include_directories(${obj} PRIVATE include)
-        target_link_libraries(${target} private ${obj})
-    endforeach()
-endfunction()
-
 add_library(kernel)
-target_include_directories(kernel PRIVATE include)
+target_include_directories(kernel PUBLIC include)
 compile_multiple(kernel "${SIFCMD_OBJ}" src/sifcmd.c)
 compile_multiple(kernel "${SIFRPC_OBJ}" src/sifrpc.c)
 compile_multiple(kernel "${FILEIO_OBJ}" src/fileio.c)
@@ -228,5 +218,8 @@ compile_multiple(kernel "${INITSYS_OBJ}" src/initsys.c)
 compile_multiple(kernel "${KERNEL_UTIL_OBJ}" src/kernel_util.c)
 compile_multiple(kernel "${KERNEL_OBJ}" src/kernel.S)
 target_sources(kernel PRIVATE src/setup_syscalls.S src/debug.c)
+
+file(GLOB KERNEL_INCLUDE_FILES "include/*.h*")
+set_target_properties(kernel PROPERTIES PUBLIC_HEADER "${KERNEL_INCLUDE_FILES}")
 
 install(TARGETS kernel)
