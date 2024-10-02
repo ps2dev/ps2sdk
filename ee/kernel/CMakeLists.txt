@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 
 include(${PS2SDKSRC_ROOT}/cmake/utils.cmake)
 
+add_subdirectory(src/eenull)
+#add_subdirectory(src/osdsrc)
+
 add_library(kernel)
+target_include_directories(kernel PUBLIC include)
 
 compile_multiple(kernel src/sifcmd.c OBJECTS 
     sif_cmd_send.o _sif_cmd_int_handler.o sif_cmd_main.o
@@ -15,7 +19,6 @@ compile_multiple(kernel src/sifrpc.c OBJECTS
 	SifExecRequest.o SifRpcLoop.o SifRpcMain.o _rpc_get_packet.o
 	_rpc_get_fpacket.o SifCheckStatRpc.o
 )
-
 
 compile_multiple(kernel src/fileio.c OBJECTS
     __fio_internals.o fio_init.o _fio_intr.o fio_sync.o fio_setblockmode.o 
@@ -34,7 +37,6 @@ compile_multiple(kernel src/loadfile.c OBJECTS
 	SifExecModuleBuffer.o SifExecModuleFile.o
 )
 
-
 compile_multiple(kernel src/iopheap.c OBJECTS
     SifInitIopHeap.o SifExitIopHeap.o SifAllocIopHeap.o 
 	SifFreeIopHeap.o SifLoadIopHeap.o
@@ -44,19 +46,16 @@ compile_multiple(kernel src/iopcontrol.c OBJECTS
     SifIopReboot.o SifIopReset.o SifIopIsAlive.o SifIopSync.o __iop_control_internals.o
 )
 
-
 compile_multiple(kernel src/glue.c OBJECTS
     DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o
     iEnableIntc.o iDisableIntc.o iEnableDmac.o iDisableDmac.o
     SyncDCache.o iSyncDCache.o InvalidDCache.o iInvalidDCache.o
 )
 
-
 compile_multiple(kernel src/sio.c OBJECTS
     sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o
 	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o
 )
-
 
 compile_multiple(kernel src/rom0_info.c OBJECTS
     _info_internals.o GetRomNameWithIODriver.o GetRomName.o IsDESRMachineWithIODriver.o IsDESRMachine.o IsT10KWithIODriver.o IsT10K.0
@@ -81,28 +80,33 @@ compile_multiple(kernel src/osd_config.c OBJECTS
 	configConvertToGmtTime.o configConvertToLocalTimeWithIODriver.o configConvertToLocalTime.o
 )
 
-# bin2c osdsrc_bin.o
-
-compile_multiple(kernel src/libosd.c OBJECTS
-	libosd.o libosd_full.o libosd_common.o
+macro(bin_include from_target output_name)
+add_custom_command(OUTPUT "${output_name}.c"
+  COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${from_target}> "${output_name}.bin"
+  COMMAND bin2c "${output_name}.bin" "${output_name}.c" eenull
+  BYPRODUCTS "${output_name}.bin"
+  DEPENDS ${from_target}
 )
+endmacro()
 
+# bin2c osdsrc_bin.o
+#bin_include(osdsrc osdsrc_bin)
+target_sources(kernel PRIVATE src/libosd.c src/libosd_full.c src/libosd_common.c)
 
 # bin2c tlbsrc_bin.o
-compile_multiple(kernel src/tlbfunc.c OBJECTS tlbfunc.o)
+target_sources(kernel PRIVATE src/tlbfunc.c)
 
 # bin2c srcfile_bin.o, eenull_bin.o
-compile_multiple(kernel src/alarm.c OBJECTS alarm.o)
+bin_include(eenull eenull_bin)
+target_sources(kernel PRIVATE src/alarm.c eenull_bin.c)
 
 compile_multiple(kernel src/thread.c OBJECTS
 	_thread_internals.o iWakeupThread.o iRotateThreadReadyQueue.o iSuspendThread.o)
-
 
 compile_multiple(kernel src/setup.c OBJECTS kCopy.o kCopyBytes.o)
 
 compile_multiple(kernel src/exit.c OBJECTS
 	_exit_internals.o SetArg.o Exit.o ExecPS2.o LoadExecPS2.o ExecOSD.o)
-
 
 compile_multiple(kernel src/timer.c OBJECTS
 	timer_data.o
@@ -164,6 +168,7 @@ compile_multiple(kernel src/initsys.c OBJECTS _InitSys.o TerminateLibrary.o)
 
 compile_multiple(kernel src/kernel_util.c OBJECTS WaitSemaEx.o)
 
+# IDK why these were on their own in the makefile, keep it for now
 set(EXEC_SYSCALLS KExit.o _LoadExecPS2.o _ExecPS2.o)
 set(EXECOSD_SYSCALL _ExecOSD.o)
 set(ALARM_SYSCALLS _SetAlarm.o SetAlarm.o _ReleaseAlarm.o ReleaseAlarm.o)
@@ -208,6 +213,7 @@ compile_multiple(kernel src/kernel.S OBJECTS
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o _print.o
 )
 
+target_include_directories(kernel PRIVATE ${EE_INC})
 target_sources(kernel PRIVATE src/setup_syscalls.S src/debug.c)
 
 file(GLOB KERNEL_INCLUDE_FILES "include/*.h*")
