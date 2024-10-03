@@ -32,8 +32,8 @@ SET(CMAKE_CXX_COMPILER mips64r5900el-ps2-elf-g++)
 
 find_program(CMAKE_OBJCOPY mips64r5900el-ps2-elf-objcopy)
 
-SET(EE_CFLAGS "-D_EE -DPS2 -D__PS2__ -O2 -G0" CACHE STRING "EE C compiler flags" FORCE)
-SET(EE_LDFLAGS "-Wl,-zmax-page-size=128 -T$ENV{PS2SDK}/ee/startup/linkfile" CACHE STRING "EE linker flags" FORCE)
+SET(EE_CFLAGS "-D_EE -G0 -O2 -Wall -Werror -gdwarf-2 -gz" CACHE STRING "EE C compiler flags" FORCE)
+SET(EE_LDFLAGS "-Wl,-zmax-page-size=128" CACHE STRING "EE linker flags" FORCE)
 
 SET(CMAKE_TARGET_INSTALL_PREFIX $ENV{PS2DEV}/ports)
 

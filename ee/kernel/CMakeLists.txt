@@ -3,10 +3,13 @@ cmake_minimum_required(VERSION 3.10)
 include(${PS2SDKSRC_ROOT}/cmake/utils.cmake)
 
 add_subdirectory(src/eenull)
-#add_subdirectory(src/osdsrc)
+add_subdirectory(src/osdsrc)
+add_subdirectory(src/srcfile)
+add_subdirectory(src/tlbsrc)
 
 add_library(kernel)
 target_include_directories(kernel PUBLIC include)
+target_include_directories(kernel PRIVATE ${EE_INC})
 
 compile_multiple(kernel src/sifcmd.c OBJECTS 
     sif_cmd_send.o _sif_cmd_int_handler.o sif_cmd_main.o
@@ -80,25 +83,26 @@ compile_multiple(kernel src/osd_config.c OBJECTS
 	configConvertToGmtTime.o configConvertToLocalTimeWithIODriver.o configConvertToLocalTime.o
 )
 
+# Generates a C array of the binary output of a target
+# objcopy -Obinary <elf> <bin> && bin2c <bin> <output_name.c> <target_name>
 macro(bin_include from_target output_name)
 add_custom_command(OUTPUT "${output_name}.c"
   COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${from_target}> "${output_name}.bin"
-  COMMAND bin2c "${output_name}.bin" "${output_name}.c" eenull
+  COMMAND bin2c "${output_name}.bin" "${output_name}.c" "${from_target}"
   BYPRODUCTS "${output_name}.bin"
   DEPENDS ${from_target}
 )
 endmacro()
 
-# bin2c osdsrc_bin.o
-#bin_include(osdsrc osdsrc_bin)
-target_sources(kernel PRIVATE src/libosd.c src/libosd_full.c src/libosd_common.c)
+bin_include(osdsrc osdsrc_bin)
+target_sources(kernel PRIVATE src/libosd.c src/libosd_full.c src/libosd_common.c osdsrc_bin.c)
 
-# bin2c tlbsrc_bin.o
-target_sources(kernel PRIVATE src/tlbfunc.c)
+bin_include(tlbsrc tlbsrc_bin)
+target_sources(kernel PRIVATE src/tlbfunc.c tlbsrc_bin.c)
 
-# bin2c srcfile_bin.o, eenull_bin.o
 bin_include(eenull eenull_bin)
-target_sources(kernel PRIVATE src/alarm.c eenull_bin.c)
+bin_include(srcfile srcfile_bin)
+target_sources(kernel PRIVATE src/alarm.c srcfile_bin.c)
 
 compile_multiple(kernel src/thread.c OBJECTS
 	_thread_internals.o iWakeupThread.o iRotateThreadReadyQueue.o iSuspendThread.o)
@@ -213,7 +217,6 @@ compile_multiple(kernel src/kernel.S OBJECTS
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o _print.o
 )
 
-target_include_directories(kernel PRIVATE ${EE_INC})
 target_sources(kernel PRIVATE src/setup_syscalls.S src/debug.c)
 
 file(GLOB KERNEL_INCLUDE_FILES "include/*.h*")
