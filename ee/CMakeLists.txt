@@ -7,3 +7,4 @@ set(EE_INC ${PS2SDKSRC_ROOT}/common/include ${PROJECT_SOURCE_DIR}/kernel/include
 add_subdirectory(kernel)
 add_subdirectory(libcglue)
 add_subdirectory(debug)
+add_subdirectory(sbv)
