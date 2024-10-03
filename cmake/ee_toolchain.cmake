@@ -10,17 +10,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 INCLUDE(CMakeForceCompiler)
-if(DEFINED ENV{PS2SDK})
-    SET(PS2SDK $ENV{PS2SDK})
-else()
-    message(FATAL_ERROR "The environment variable PS2SDK needs to be defined.")
-endif()
 
-if(DEFINED ENV{PS2DEV})
-    SET(PS2DEV $ENV{PS2DEV})
-else()
-    message(FATAL_ERROR "The environment variable PS2DEV needs to be defined.")
-endif()
 
 SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
