@@ -12,6 +12,7 @@
 #define _ACCDVD_INTERNAL_H
 
 #include <accdvd.h>
+#include <errno.h>
 #include <irx_imports.h>
 
 typedef acUint32 acd_lsn_t;
