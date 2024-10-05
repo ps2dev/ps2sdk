@@ -217,7 +217,7 @@ compile_multiple(kernel src/kernel.S OBJECTS
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o _print.o
 )
 
-target_sources(kernel PRIVATE src/setup_syscalls.S src/debug.c)
+target_sources(kernel PRIVATE src/setup_syscalls.S src/debug.c src/erl-support.c)
 
 file(GLOB KERNEL_INCLUDE_FILES "include/*.h*")
 set_target_properties(kernel PROPERTIES PUBLIC_HEADER "${KERNEL_INCLUDE_FILES}")
