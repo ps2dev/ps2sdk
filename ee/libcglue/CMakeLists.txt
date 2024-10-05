@@ -1,5 +1,3 @@
-include(${PS2SDKSRC_ROOT}/cmake/utils.cmake)
-
 add_library(cglue)
 target_include_directories(cglue PUBLIC ${EE_INC} include)
 target_sources(cglue PRIVATE src/rtc.c)

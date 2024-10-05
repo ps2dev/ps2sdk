@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-include(${PS2SDKSRC_ROOT}/cmake/utils.cmake)
-
 add_subdirectory(src/eenull)
 add_subdirectory(src/osdsrc)
 add_subdirectory(src/srcfile)
@@ -9,7 +7,10 @@ add_subdirectory(src/tlbsrc)
 
 add_library(kernel)
 target_include_directories(kernel PUBLIC include)
-target_include_directories(kernel PRIVATE ${EE_INC})
+target_include_directories(kernel PRIVATE 
+	${EE_INC}
+	${PROJECT_SOURCE_DIR}/rpc/cdvd/include
+)
 
 compile_multiple(kernel src/sifcmd.c OBJECTS 
     sif_cmd_send.o _sif_cmd_int_handler.o sif_cmd_main.o
