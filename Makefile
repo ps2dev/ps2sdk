@@ -43,7 +43,7 @@ $(subdir_release): dummy
 # Directory-level parallelism has been disabled due to issues with
 # multiple Make instances running inside a directory at once
 # and causing output file corruption
-.NOTPARALLEL: $(subdir_list) $(subdir_clean) $(subdir_release)
+.NOTPARALLEL: build $(subdir_list) $(subdir_clean) $(subdir_release)
 
 build: $(subdir_list) | env_build_check download_dependencies
 
