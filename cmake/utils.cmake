@@ -30,3 +30,13 @@ function(target_add_erl target)
     )
 endfunction()
 
+# Generates a C array of the binary output of a target
+# objcopy -Obinary <elf> <bin> && bin2c <bin> <output_name.c> <target_name>
+macro(bin_include from_target output_name)
+add_custom_command(OUTPUT "${output_name}.c"
+  COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${from_target}> "${output_name}.bin"
+  COMMAND bin2c "${output_name}.bin" "${output_name}.c" "${from_target}"
+  BYPRODUCTS "${output_name}.bin"
+  DEPENDS ${from_target}
+)
+endmacro()

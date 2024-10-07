@@ -1,0 +1,5 @@
+add_executable(loader)
+target_sources(loader PRIVATE src/loader.c)
+target_include_directories(loader PRIVATE ${EE_INC})
+target_link_libraries(loader PRIVATE kernel cglue)
+target_link_options(loader PRIVATE -T${CMAKE_CURRENT_SOURCE_DIR}/linkfile)

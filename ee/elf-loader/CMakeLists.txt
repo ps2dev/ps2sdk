@@ -1,12 +1,15 @@
-# TODO subfolder binary include
+add_subdirectory(src/loader)
+
 add_library(elf-loader)
 target_include_directories(elf-loader PUBLIC include)
 target_include_directories(elf-loader PRIVATE 
     ${EE_INC} 
 )
 
+bin_include(loader loader_bin)
 target_sources(elf-loader PRIVATE 
     src/elf.c
+    loader_bin.c
 )
 
 file(GLOB elf-loader_INCLUDE_FILES "include/*.h*")
