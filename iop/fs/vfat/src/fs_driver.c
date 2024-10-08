@@ -232,7 +232,7 @@ static int fs_dummy(void)
 {
     M_DEBUG("%s\n", __func__);
 
-    return -5;
+    return -EIO;
 }
 
 //---------------------------------------------------------------------------
@@ -441,7 +441,7 @@ static int fs_lseek(iop_file_t *fd, int offset, int whence)
             break;
         default:
             _fs_unlock();
-            return -1;
+            return -EPERM;
     }
     if ((int)(rec->filePos) < 0) {
         rec->filePos = 0;

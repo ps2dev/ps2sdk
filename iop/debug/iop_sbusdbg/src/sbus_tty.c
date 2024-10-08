@@ -14,6 +14,7 @@ Of course this requires that the EE-side code accept this command and output the
 #include <tamtypes.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <errno.h>
 #include <sysclib.h>
 #include <sysmem.h>
 #include <excepman.h>
@@ -26,7 +27,7 @@ Of course this requires that the EE-side code accept this command and output the
 
 extern void sbus_tty_puts(const char *str);
 
-static int ttyfs_error() { return -1; }
+static int ttyfs_error() { return -EPERM; }
 
 static int ttyfs_init()
 {

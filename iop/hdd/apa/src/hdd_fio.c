@@ -1177,5 +1177,5 @@ int hddUnsupported(iomanX_iop_file_t *f)
 {
 	(void)f;
 
-	return -1;
+	return -EPERM;
 }

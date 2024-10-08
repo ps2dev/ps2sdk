@@ -595,7 +595,7 @@ static int HdskInit(iomanX_iop_device_t *device)
 
 static int HdskUnsupported(void)
 {
-    return -1;
+    return -EPERM;
 }
 
 int BitmapUsed;
