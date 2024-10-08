@@ -323,6 +323,22 @@ void scsi_disconnect(struct scsi_interface *scsi)
     }
 }
 
+void scsi_set_ready(struct scsi_interface *scsi)
+{
+    int i;
+    M_DEBUG("%s\n", __func__);
+    for (i = 0; i < NUM_DEVICES; ++i) {
+        if (g_scsi_bd[i].priv == scsi) {
+            M_DEBUG("Device %s%d is now READY\n", g_scsi_bd[i].name, g_scsi_bd[i].devNr);
+            if (g_scsi_bd[i].device_ready_callback) {
+                g_scsi_bd[i].device_ready_callback(BDM_EVENT_DEVICE_READY);
+                M_DEBUG("Device is ready, invoking device ready callback\n");
+            }
+            break;
+        }
+    }
+}
+
 int scsi_init(void)
 {
     int i;
@@ -339,6 +355,8 @@ int scsi_init(void)
         g_scsi_bd[i].write = scsi_write;
         g_scsi_bd[i].flush = scsi_flush;
         g_scsi_bd[i].stop  = scsi_stop;
+
+        g_scsi_bd[i].device_ready_callback = NULL;
     }
 
     return 0;

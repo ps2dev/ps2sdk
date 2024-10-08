@@ -14,5 +14,6 @@ struct scsi_interface
 int scsi_init(void);
 void scsi_connect(struct scsi_interface *scsi);
 void scsi_disconnect(struct scsi_interface *scsi);
+void scsi_set_ready(struct scsi_interface *scsi);
 
 #endif
