@@ -1,0 +1,11 @@
+<map id="iop/dev9/poweroff/include/poweroff.h" name="iop/dev9/poweroff/include/poweroff.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,174,46"/>
+<area shape="rect" id="Node000002" href="$irx_8h.html" title=" " alt="" coords="67,94,112,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,46,92,78,87,78,87,46"/>
+<area shape="rect" id="Node000003" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="58,168,121,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,120,92,152,87,152,87,120"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="7,241,74,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="84,195,59,230,55,227,79,192"/>
+<area shape="rect" id="Node000005" href="$tamtypes_8h.html" title=" " alt="" coords="98,241,182,267"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="100,192,125,227,121,230,96,195"/>
+</map>

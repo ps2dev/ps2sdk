@@ -1,0 +1,42 @@
+<map id="ee/rpc/remote/src/librm.c" name="ee/rpc/remote/src/librm.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="169,5,335,31"/>
+<area shape="rect" id="Node000002" href="$stdio_8h.html" title=" " alt="" coords="109,153,168,178"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="226,34,194,53,166,81,152,109,144,138,139,136,147,107,162,77,191,49,223,29"/>
+<area shape="rect" id="Node000007" href="$tamtypes_8h.html" title=" " alt="" coords="231,374,315,399"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="320,29,375,46,428,73,452,90,470,111,482,136,486,164,486,241,484,288,476,307,460,328,432,350,398,366,364,377,331,383,330,378,363,372,396,361,429,346,457,324,472,305,479,287,481,240,481,164,477,137,465,114,448,94,426,77,373,51,318,34"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="176,79,240,105"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="247,33,226,67,221,64,242,30"/>
+<area shape="rect" id="Node000009" href="$kernel_8h.html" title=" " alt="" coords="5,153,72,178"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="229,34,147,81,64,145,61,141,144,77,226,29"/>
+<area shape="rect" id="Node000011" href="$string_8h_source.html" title=" " alt="" coords="264,79,328,105"/>
+<area shape="poly" id="edge14_Node000001_Node000011" title=" " alt="" coords="261,30,283,64,278,67,257,33"/>
+<area shape="rect" id="Node000015" href="$librm_8h.html" title="RPC Interface for PS2 Remote Control Driver (RMMAN)" alt="" coords="360,79,419,105"/>
+<area shape="poly" id="edge22_Node000001_Node000015" title=" " alt="" coords="276,29,353,69,351,74,274,34"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="69,226,136,252"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="135,180,118,214,113,211,130,177"/>
+<area shape="rect" id="Node000004" href="$irx_8h.html" title=" " alt="" coords="160,226,205,252"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="148,177,169,211,165,214,143,180"/>
+<area shape="rect" id="Node000005" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="151,300,214,326"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="185,252,185,284,180,284,180,252"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="44,374,111,399"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="166,328,109,367,106,362,163,324"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="200,324,248,362,245,366,196,328"/>
+<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="51,177,84,213,80,217,47,180"/>
+<area shape="poly" id="edge10_Node000009_Node000006" title=" " alt="" coords="37,180,29,207,23,243,21,284,29,325,39,344,53,361,49,364,35,347,24,327,16,285,17,243,24,205,32,178"/>
+<area shape="rect" id="Node000010" href="$sifdma_8h.html" title=" " alt="" coords="38,300,108,326"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="43,178,60,251,68,285,63,286,55,253,38,179"/>
+<area shape="poly" id="edge13_Node000010_Node000007" title=" " alt="" coords="108,324,226,365,224,371,106,329"/>
+<area shape="rect" id="Node000012" href="$sysclib_8h.html" title=" " alt="" coords="232,153,304,178"/>
+<area shape="poly" id="edge15_Node000011_Node000012" title=" " alt="" coords="294,106,281,139,276,137,289,104"/>
+<area shape="poly" id="edge18_Node000012_Node000003" title=" " alt="" coords="241,181,146,222,143,217,239,176"/>
+<area shape="poly" id="edge17_Node000012_Node000004" title=" " alt="" coords="255,181,210,218,207,214,252,177"/>
+<area shape="poly" id="edge16_Node000012_Node000005" title=" " alt="" coords="263,180,200,288,195,285,259,177"/>
+<area shape="rect" id="Node000013" href="$setjmp_8h.html" title=" " alt="" coords="238,300,308,326"/>
+<area shape="poly" id="edge19_Node000012_Node000013" title=" " alt="" coords="271,179,275,284,270,285,266,179"/>
+<area shape="rect" id="Node000014" href="$ctype_8h.html" title=" " alt="" coords="330,226,392,252"/>
+<area shape="poly" id="edge21_Node000012_Node000014" title=" " alt="" coords="285,177,335,215,332,219,282,181"/>
+<area shape="poly" id="edge20_Node000013_Node000007" title=" " alt="" coords="276,326,276,358,271,358,271,326"/>
+<area shape="rect" id="Node000016" href="$librm-common_8h.html" title=" " alt="" coords="333,300,446,326"/>
+<area shape="poly" id="edge23_Node000015_Node000016" title=" " alt="" coords="395,105,405,168,408,210,406,252,400,285,395,284,401,252,403,210,400,168,389,106"/>
+<area shape="poly" id="edge24_Node000016_Node000007" title=" " alt="" coords="371,328,307,368,304,363,368,324"/>
+</map>

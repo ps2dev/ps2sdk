@@ -1,0 +1,27 @@
+<map id="iop/system/iopmgr/include/iopmgr.h" name="iop/system/iopmgr/include/iopmgr.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="85,5,257,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,94,68,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,49,72,88,69,83,136,44"/>
+<area shape="rect" id="Node000003" href="$irx_8h.html" title=" " alt="" coords="182,168,227,193"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="178,46,201,152,196,153,173,47"/>
+<area shape="rect" id="Node000007" href="$ioman_8h.html" title=" " alt="" coords="247,94,314,120"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="200,44,253,82,250,87,197,49"/>
+<area shape="rect" id="Node000011" href="$loadcore_8h.html" title=" " alt="" coords="92,94,173,120"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="164,48,147,81,143,79,159,45"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="173,241,236,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="207,194,207,226,202,226,202,194"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="122,315,189,341"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="199,269,174,304,170,301,194,266"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="213,315,297,341"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="215,266,240,301,236,304,211,269"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="269,122,230,159,226,155,266,118"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="278,121,242,195,222,229,217,226,237,192,273,119"/>
+<area shape="rect" id="Node000008" href="$io__common_8h.html" title=" " alt="" coords="302,168,400,193"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="294,118,330,155,327,158,290,122"/>
+<area shape="rect" id="Node000009" href="$fcntl_8h_source.html" title=" " alt="" coords="396,241,477,267"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="367,192,412,229,409,233,364,196"/>
+<area shape="rect" id="Node000010" href="$unistd_8h_source.html" title=" " alt="" coords="282,241,372,267"/>
+<area shape="poly" id="edge11_Node000008_Node000010" title=" " alt="" coords="350,194,339,228,333,226,345,193"/>
+<area shape="poly" id="edge14_Node000011_Node000003" title=" " alt="" coords="146,118,183,155,180,158,143,122"/>
+<area shape="poly" id="edge13_Node000011_Node000004" title=" " alt="" coords="140,119,172,192,191,227,187,229,167,195,135,121"/>
+</map>

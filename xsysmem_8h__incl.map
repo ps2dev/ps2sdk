@@ -1,0 +1,16 @@
+<map id="iop/kernel/include/xsysmem.h" name="iop/kernel/include/xsysmem.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="58,5,180,46"/>
+<area shape="rect" id="Node000002" href="$sysmem_8h.html" title=" " alt="" coords="79,94,159,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="122,46,122,78,116,78,116,46"/>
+<area shape="rect" id="Node000003" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="57,241,120,267"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="112,122,98,143,87,168,83,198,86,226,80,226,78,198,82,167,93,140,107,119"/>
+<area shape="rect" id="Node000006" href="$irx_8h.html" title=" " alt="" coords="97,168,141,193"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="122,120,122,152,116,152,116,120"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="165,168,233,193"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="134,118,176,155,173,159,131,122"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,315,73,341"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="82,269,58,304,54,301,78,266"/>
+<area shape="rect" id="Node000005" href="$tamtypes_8h.html" title=" " alt="" coords="97,315,181,341"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="99,266,124,301,120,304,95,269"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="116,195,102,228,97,226,111,193"/>
+</map>

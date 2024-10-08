@@ -1,0 +1,24 @@
+<map id="iop/sound/libsd/src/batch.c" name="iop/sound/libsd/src/batch.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="158,5,288,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,94,68,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,49,80,90,78,85,176,44"/>
+<area shape="rect" id="Node000003" href="$sifman_8h.html" title=" " alt="" coords="92,94,162,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="201,48,155,86,152,82,198,44"/>
+<area shape="rect" id="Node000008" href="$intrman_8h.html" title=" " alt="" coords="186,94,260,120"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="226,46,226,78,221,78,221,46"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="285,94,343,120"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="247,44,290,82,287,86,244,48"/>
+<area shape="rect" id="Node000010" href="$spu2regs_8h.html" title=" " alt="" coords="368,94,452,120"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="271,44,368,85,366,90,269,49"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="144,241,206,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="130,120,134,153,143,192,160,227,156,229,138,194,128,154,125,120"/>
+<area shape="rect" id="Node000007" href="$irx_8h.html" title=" " alt="" coords="153,168,197,193"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="137,118,161,153,156,156,133,121"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="92,315,160,341"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="169,269,145,304,140,301,165,266"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="184,315,268,341"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="186,266,211,301,206,304,181,269"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="178,194,178,226,173,226,173,194"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="225,120,222,154,212,194,195,229,190,227,207,192,217,153,220,120"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="217,121,194,156,190,153,213,118"/>
+</map>

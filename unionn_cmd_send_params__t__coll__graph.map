@@ -1,0 +1,7 @@
+<map id="nCmdSendParams_t" name="nCmdSendParams_t">
+<area shape="rect" id="Node000001" title=" " alt="" coords="73,94,215,120"/>
+<area shape="rect" id="Node000002" href="$libcdvd-rpc_8h.html#structcdvd_ncmd_param" title=" " alt="" coords="5,5,128,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,41,135,92,131,95,86,45"/>
+<area shape="rect" id="Node000003" href="$libcdvd-rpc_8h.html#structcdvd_read_key_param" title=" " alt="" coords="152,5,291,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="202,45,156,95,153,92,198,41"/>
+</map>

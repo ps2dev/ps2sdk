@@ -1,0 +1,20 @@
+<map id="ee/kernel/src/timer_alarm.c" name="ee/kernel/src/timer_alarm.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="196,5,325,46"/>
+<area shape="rect" id="Node000002" href="$kernel_8h.html" title=" " alt="" coords="145,94,211,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="242,48,203,85,200,81,238,44"/>
+<area shape="rect" id="Node000007" href="$timer_8h.html" title=" " alt="" coords="284,168,344,193"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="267,46,288,119,303,152,298,155,283,121,262,47"/>
+<area shape="rect" id="Node000008" href="$timer__alarm_8h_source.html" title=" " alt="" coords="297,94,397,120"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="284,44,324,81,321,85,280,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,168,73,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="155,123,77,162,75,158,153,118"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="97,168,165,193"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="172,121,149,156,145,153,168,118"/>
+<area shape="rect" id="Node000005" href="$sifdma_8h.html" title=" " alt="" coords="189,168,260,193"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="188,118,210,153,206,156,183,121"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="272,241,356,267"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="241,192,288,229,285,234,238,196"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="316,194,316,226,311,226,311,194"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="354,119,362,153,362,174,359,194,350,214,338,231,333,228,345,211,354,193,357,173,356,154,349,121"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="344,121,328,155,323,152,339,119"/>
+</map>

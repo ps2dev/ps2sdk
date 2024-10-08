@@ -1,0 +1,7 @@
+<map id="devfs_node_t" name="devfs_node_t">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,213,105,238"/>
+<area shape="rect" id="Node000002" href="$group__devfs.html#structdevfs__info__t" title=" " alt="" coords="9,94,101,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="58,135,58,212,52,212,52,135"/>
+<area shape="rect" id="Node000003" href="$group__devfs.html#uniondevfs__loc__t" title=" " alt="" coords="11,5,99,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="58,47,58,94,52,94,52,47"/>
+</map>

@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['cd_5fpaused_0',['cd_paused',['../cdrom_8c.html#a23610831c073ed9c34b3c4dfa0c69b04',1,'cdrom.c']]],
+  ['cd_5fplaying_1',['cd_playing',['../cdrom_8c.html#a8656219f5c1d48b8c42b9e6a4be33100',1,'cdrom.c']]],
+  ['cd_5ftransfer_5fsema_2',['cd_transfer_sema',['../cdrom_8c.html#a641c7e932fb13ff4f3cc0b9ac3bea9b1',1,'cdrom.c']]],
+  ['cdda_5finitialized_3',['cdda_initialized',['../cdrom_8c.html#aa4d9009e025a768845a5b2075d855eea',1,'cdrom.c']]],
+  ['cdda_5fplay_5fend_4',['cdda_play_end',['../cdrom_8c.html#a79ddb4fade248699b17c05dc35bb228f',1,'cdrom.c']]],
+  ['cdda_5fplay_5fstart_5',['cdda_play_start',['../cdrom_8c.html#a63afbf27c0f3419997ad81fa20cb2e4c',1,'cdrom.c']]],
+  ['cdda_5fplay_5ftid_6',['cdda_play_tid',['../cdrom_8c.html#a685c81769a3727d32c9ea19da94f3ac4',1,'cdrom.c']]],
+  ['cdda_5fpos_7',['cdda_pos',['../cdrom_8c.html#a212caa83ebcce8ee4e045cdd9642a2a9',1,'cdrom.c']]],
+  ['channels_8',['channels',['../upsamplers_8c.html#a93631ca8efa63cb3798589792fd798ec',1,'entry_t::channels'],['../ee_2rpc_2audsrv_2include_2audsrv_8h.html#afdff79bc5765611d5b103c4a7fcbd549',1,'audsrv_fmt_t::channels']]],
+  ['charsize_9',['charsize',['../font_8h.html#a152b7de803067df536591bdcba35f20f',1,'fontx_t']]],
+  ['cid_10',['cid',['../iop_2kernel_2include_2sifcmd_8h.html#ad9ee187c2059621af6441c6a66b4bf92',1,'t_SifCmdHeader::cid'],['../ps2__sbus_8h.html#a1afc89a322a4f112f70691415beeecc4',1,'st_SIF2_CmdPkt::cid']]],
+  ['cmd_11',['cmd',['../group__packet2__types.html#a2e5cc7e42aa607f3e97973f7ecabab21',1,'vif_code_t']]],
+  ['controll_12',['controll',['../ps2cam_8h.html#a598c60b343fc0494c8a5a1a30f6a28db',1,'CAMERA_DEVICE']]],
+  ['copy_13',['copy',['../libmc_8h.html#a8b7a847113bb6549b882090bc60737ab',1,'mcIcon']]],
+  ['core1_5fbits_14',['core1_bits',['../audsrv_8c.html#acfe400051687fd6e8c158ac22d509ae6',1,'audsrv.c']]],
+  ['core1_5fchannels_15',['core1_channels',['../audsrv_8c.html#a3168c7f7f22624aa7906c9b47bacbd30',1,'audsrv.c']]],
+  ['core1_5ffreq_16',['core1_freq',['../audsrv_8c.html#ac273d1740f99ea0b6a7a4b3735ecdfa0',1,'audsrv.c']]],
+  ['core1_5fsample_5fshift_17',['core1_sample_shift',['../audsrv_8c.html#a78383d9f30a7cb3d6f4fe07973c7d69a',1,'audsrv.c']]],
+  ['core1_5fvolume_18',['core1_volume',['../audsrv_8c.html#a69da40149fa83da89f0af9681a6eeeac',1,'audsrv.c']]],
+  ['correction_19',['correction',['../freepad_8h.html#aa00ded1972035d8afb4a22af67da3579',1,'ee_old_paddata_t::correction'],['../libpad_8c.html#a2d046476c9651f9b9bd14b16844cd6f4',1,'pad_data::correction']]],
+  ['count_20',['count',['../usbhdfsd-common_8h.html#a2420db3642b59da2c5994511b8ac6398',1,'count:&#160;usbhdfsd-common.h'],['../usbhdfsd-common_8h.html#a29010965eda4ba4c8ccd17c70b414681',1,'bd_fragment::count']]],
+  ['crt_5fout_21',['crt_out',['../libgs_8h.html#acab0d9bb4353260931fa36a4625af737',1,'GS_PMODE']]],
+  ['ctp_22',['ctp',['../freepad_8h.html#aad954b721ee6742a083d8eba28c84dbf',1,'ee_old_paddata_t::CTP'],['../libpad_8c.html#a603dbe8d9c256718f222268580eb4b67',1,'pad_data::CTP']]],
+  ['currbits_23',['currBits',['../thevent_8h.html#adca5545675de93b708dd3032228056da',1,'iop_event_info_t']]],
+  ['current_5ffield_24',['current_field',['../libgs_8h.html#a0826cbf336f70b448e188762bf468a84',1,'GS_CSR']]]
+];

@@ -1,0 +1,17 @@
+<map id="_devfs_device" name="_devfs_device">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,304,111,329"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="127,308,137,316,129,325,111,328,111,322,127,320,132,316,124,312"/>
+<area shape="rect" id="Node000006" href="$devfs_8c.html#struct__ioman__data" title=" " alt="" coords="130,394,226,420"/>
+<area shape="poly" id="edge8_Node000006_Node000001" title=" " alt="" coords="88,336,163,392,160,396,85,340"/>
+<area shape="rect" id="Node000002" href="$group__devfs.html#structdevfs__node__t" title=" " alt="" coords="44,213,144,238"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="86,254,65,304,60,302,81,252"/>
+<area shape="rect" id="Node000003" href="$group__devfs.html#structdevfs__info__t" title=" " alt="" coords="71,94,163,120"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="114,135,99,213,94,212,109,134"/>
+<area shape="rect" id="Node000004" href="$group__devfs.html#uniondevfs__loc__t" title=" " alt="" coords="159,5,248,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="181,44,167,57,129,95,126,92,163,53,177,40"/>
+<area shape="rect" id="Node000005" href="$devfs_8c.html#structsubdev__t" title=" " alt="" coords="141,483,215,509"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="232,40,255,69,263,87,266,105,266,409,262,437,247,461,231,475,213,485,210,480,228,470,243,457,257,435,261,408,261,106,258,88,250,72,228,44"/>
+<area shape="poly" id="edge9_Node000006_Node000004" title=" " alt="" coords="206,46,206,106,206,318,199,361,186,395,181,393,194,360,201,317,201,106,201,46"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="131,478,94,455,77,440,64,421,54,397,51,371,53,329,58,330,56,371,59,396,68,419,81,436,97,451,134,474"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="181,436,181,483,175,483,175,436"/>
+</map>
