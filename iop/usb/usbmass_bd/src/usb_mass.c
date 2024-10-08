@@ -15,7 +15,7 @@
 #include <usbhdfsd-common.h>
 
 // #define ASYNC
-// #define DEBUG  //comment out this line when not debugging
+#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
 #define USB_SUBCLASS_MASS_RBC       0x01
@@ -613,6 +613,8 @@ static int usb_mass_probe(int devId)
     return 1;
 }
 
+static int devices_initialising = 0;
+
 static int usb_mass_connect(int devId)
 {
     int i;
@@ -637,6 +639,8 @@ static int usb_mass_connect(int devId)
         M_PRINTF("ERROR: Only one mass storage device allowed!\n");
         return 1;
     }
+
+    devices_initialising++;
 
     dev->status  = 0;
     dev->bulkEpI = -1;
@@ -676,6 +680,7 @@ static int usb_mass_connect(int devId)
     SemaData.option  = 0;
     SemaData.attr    = 0;
     if ((dev->ioSema = CreateSema(&SemaData)) < 0) {
+        usb_mass_release(dev);
         M_PRINTF("ERROR: Failed to allocate I/O semaphore\n");
         return -1;
     }
@@ -705,6 +710,9 @@ static void usb_mass_release(mass_dev *dev)
     dev->bulkEpO   = -1;
     dev->controlEp = -1;
     dev->status    = 0;
+
+    if (devices_initialising > 0) // should handle all errors?
+        devices_initialising--;
 }
 
 static int usb_mass_disconnect(int devId)
@@ -790,6 +798,43 @@ static void usb_mass_update(void *arg)
                 // This is the same wait amount as done in fat_getData in usbhdfsd.
                 // This is a workaround to avoid incorrect initialization when attaching multiple drives at the same time.
                 DelayThread(5000);
+                devices_initialising--;
+            }
+        }
+
+        // Determine how many devices are connected
+        int total_devs = 0;
+        for (i = 0; i < NUM_DEVICES; i++) {
+            mass_dev *dev = &g_mass_device[i];
+            if (dev->devId != -1 && (dev->status & USBMASS_DEV_STAT_CONN) && (dev->status & USBMASS_DEV_STAT_CONF))
+                total_devs++;
+        }
+
+        // Allow time for more devices to start initialising if there is a possibility of more devices
+        if (total_devs != NUM_DEVICES) {
+            int wait_cycles = 0;
+            while (wait_cycles < 5) {
+                // If another device is initialising.. break and wait for it
+                if (devices_initialising > 0) {
+                    M_DEBUG("Detected another device initialising. Breaking wait.\n");
+                    break;
+                }
+
+                wait_cycles++;
+                DelayThread(1000 * 1000);
+                M_DEBUG("Waiting... devices_initialising: %d\n", devices_initialising);
+            }
+        }
+
+        // Now devices are ready.. mark them as ready and perform the final actions
+        if (devices_initialising == 0) {
+            for (i = 0; i < NUM_DEVICES; i++) {
+                mass_dev *dev = &g_mass_device[i];
+                if (dev->devId != -1 && (dev->status & USBMASS_DEV_STAT_CONF) && !(dev->status & USBMASS_DEV_STAT_READY)) {
+                    dev->status |= USBMASS_DEV_STAT_READY;
+                    scsi_set_ready(&dev->scsi);
+                    M_PRINTF("Device %d is now ready\n", dev->devId);
+                }
             }
         }
     }
