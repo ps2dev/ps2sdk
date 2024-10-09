@@ -1,3 +1,4 @@
+# TODO investigate using interface libraries, will help with erl generation
 # Compiles the same source file multiple times with different defines
 function(compile_multiple target srcfile)
     cmake_parse_arguments(PARSE_ARGV 2 "arg" "" "" "OBJECTS")
