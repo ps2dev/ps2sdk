@@ -23,6 +23,12 @@
 #include <stdio.h>
 #include <string.h>
 
+// mingw-w64-x86_64 works fine without the binary flag
+// mingw-w64-i686 needs the binary flag
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 const char *const hex_lut[256] =
     {
         "0x00, ", "0x01, ", "0x02, ", "0x03, ", "0x04, ", "0x05, ", "0x06, ", "0x07, ", "0x08, ", "0x09, ", "0x0a, ", "0x0b, ", "0x0c, ", "0x0d, ", "0x0e, ", "0x0f, ",
@@ -55,7 +61,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if ((src_fd = open(argv[1], O_RDONLY, (mode_t)0600)) == -1)
+    if ((src_fd = open(argv[1], O_RDONLY | O_BINARY, (mode_t)0600)) == -1)
     {
         printf("Error opening %s for reading.\n", argv[1]);
         return 1;
