@@ -1,0 +1,17 @@
+<map id="t_SifRpcBindPkt" name="t_SifRpcBindPkt">
+<area shape="rect" id="Node000001" title=" " alt="" coords="32,185,149,211"/>
+<area shape="rect" id="Node000002" href="$iop_2kernel_2include_2sifcmd_8h.html#structt___sif_cmd_header" title=" " alt="" coords="5,94,123,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,135,73,158,85,183,80,185,67,160,63,136"/>
+<area shape="rect" id="Node000003" href="$iop_2kernel_2include_2sifcmd_8h.html#structt___sif_rpc_client_data" title=" " alt="" coords="146,94,278,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,131,109,187,106,182,182,127"/>
+<area shape="rect" id="Node000005" href="$iop_2kernel_2include_2sifcmd_8h.html#structt___sif_rpc_server_data" title=" " alt="" coords="189,185,326,211"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="206,135,205,147,208,157,219,171,234,182,231,187,216,175,204,160,200,147,201,134"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2sifcmd_8h.html#structt___sif_rpc_header" title=" " alt="" coords="155,5,269,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="215,47,215,94,209,94,209,47"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="252,170,243,145,224,122,229,119,248,142,257,169"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="342,189,352,198,344,206,327,209,326,203,342,201,347,198,339,194"/>
+<area shape="rect" id="Node000006" href="$iop_2kernel_2include_2sifcmd_8h.html#structt___sif_rpc_data_queue" title=" " alt="" coords="189,306,326,331"/>
+<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="236,223,228,238,223,259,228,281,245,304,241,307,224,283,218,259,224,236,232,221"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="255,290,255,211,260,211,260,290"/>
+<area shape="poly" id="edge9_Node000006_Node000006" title=" " alt="" coords="343,309,352,318,344,328,327,332,326,327,342,323,347,319,339,313"/>
+</map>

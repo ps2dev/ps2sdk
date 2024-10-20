@@ -1,0 +1,13 @@
+<map id="iop/fs/devfs/include/devfs.h" name="iop/fs/devfs/include/devfs.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="8,5,142,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,94,68,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,48,51,81,47,79,63,45"/>
+<area shape="rect" id="Node000003" href="$irx_8h.html" title=" " alt="" coords="92,94,136,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="87,45,104,79,99,81,82,48"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="83,168,145,193"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="117,120,117,152,111,152,111,120"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="31,241,98,267"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="108,195,84,230,79,227,103,192"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="122,241,207,267"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="124,192,149,227,145,230,120,195"/>
+</map>

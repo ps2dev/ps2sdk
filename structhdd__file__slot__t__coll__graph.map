@@ -1,0 +1,11 @@
+<map id="hdd_file_slot_t" name="hdd_file_slot_t">
+<area shape="rect" id="Node000001" title=" " alt="" coords="130,271,234,297"/>
+<area shape="rect" id="Node000002" href="$ioman_x_8h.html#struct__ioman_x__iop__file" title=" " alt="" coords="30,183,150,208"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,217,171,269,167,273,112,221"/>
+<area shape="rect" id="Node000003" href="$ioman_x_8h.html#struct__ioman_x__iop__device" title=" " alt="" coords="19,94,161,120"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="93,135,93,182,87,182,87,135"/>
+<area shape="rect" id="Node000004" href="$struct__ioman_x__iop__device__ops.html" title=" " alt="" coords="5,5,175,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="93,47,93,94,87,94,87,47"/>
+<area shape="rect" id="Node000005" href="$structapa__sub__t.html" title=" " alt="" coords="173,183,255,208"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="207,224,189,272,184,270,202,222"/>
+</map>
