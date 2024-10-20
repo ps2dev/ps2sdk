@@ -100,7 +100,7 @@ static struct HdckPrivateData PrivateData = {
 
 static int HdckUnsupported(void)
 {
-    return -1;
+    return -EPERM;
 }
 
 static int HdckInit(iomanX_iop_device_t *device)

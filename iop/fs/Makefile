@@ -13,6 +13,7 @@ SUBDIRS = \
 	bdmfs_fatfs \
 	bdmfs_vfat \
 	devfs \
+	eromdrv \
 	fakehost \
 	fileio \
 	filexio \
@@ -20,7 +21,8 @@ SUBDIRS = \
 	http \
 	libbdm \
 	netfs \
-	romdrv
+	romdrv \
+	subfile
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

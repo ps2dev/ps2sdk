@@ -3,542 +3,333 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Copyright ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-/**
- * @file
- * USB Driver function prototypes and constants.
- */
-
 #include "usbdpriv.h"
-#include "mem.h"
-#include "usbio.h"
-#include "hub.h"
-#include "driver.h"
 
-#include "stdio.h"
-#include "sysclib.h"
-#include "sysmem.h"
-#include "thbase.h"
-#include "thevent.h"
-#include "thsemap.h"
-#include "intrman.h"
+#if 0
+static UsbdMemoryPool_t *memPool_unused = NULL;
+#endif
 
-int hcdIrqEvent;
-int hcdTid;
-
-int cleanUpFunc(Device *dev, Endpoint *ep)
-{
-    if (!ep)
-        return 0;
-
-    if ((ep < memPool.endpointBuf) || (ep >= memPool.endpointBuf + usbConfig.maxEndpoints))
-        return 0;
-
-    if (ep->inTdQueue)
-        removeEndpointFromQueue(ep);
-
-    if (ep->next)
-        ep->next->prev = ep->prev;
-    else
-        dev->endpointListEnd = ep->prev;
-
-    if (ep->prev)
-        ep->prev->next = ep->next;
-    else
-        dev->endpointListStart = ep->next;
-
-    ep->correspDevice = NULL;
-    ep->next          = NULL;
-    ep->prev          = memPool.freeEpListEnd;
-    if (memPool.freeEpListEnd)
-        memPool.freeEpListEnd->next = ep;
-    else
-        memPool.freeEpListStart = ep;
-    memPool.freeEpListEnd = ep;
-    return 0;
-}
-
-Endpoint *openDeviceEndpoint(Device *dev, UsbEndpointDescriptor *endpDesc, u32 alignFlag)
-{
-
-    u16 flags = 0;
-    u16 hcMaxPktSize;
-    u8 endpType = 0;
-    u8 type;
-    HcTD *td = NULL;
-
-    Endpoint *newEp = allocEndpointForDevice(dev, alignFlag);
-
-    if (!newEp) {
-        dbg_printf("ran out of endpoints\n");
-        return NULL;
-    }
-
-    if (endpDesc) {
-        type         = endpDesc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK;
-        hcMaxPktSize = (endpDesc->wMaxPacketSizeHB << 8) | endpDesc->wMaxPacketSizeLB;
-
-        if (type == USB_ENDPOINT_XFER_ISOC) {
-            endpType = TYPE_ISOCHRON;
-            td       = (HcTD *)allocIsoTd();
-            if (!td) {
-                cleanUpFunc(dev, newEp);
-                dbg_printf("Open ISOC EP: no TDs left\n");
-                return NULL;
-            }
-        } else if (type == USB_ENDPOINT_XFER_CONTROL) {
-            endpType = TYPE_CONTROL;
-            if (!alignFlag)
-                if (hcMaxPktSize >= 0x3F)
-                    hcMaxPktSize = 0x3E;
-        } else { // BULK or INT
-            if (type == USB_ENDPOINT_XFER_INT) {
-                if (endpDesc->bInterval >= 0x20)
-                    endpType = 0x1F;
-                else if (endpDesc->bInterval >= 0x10)
-                    endpType = 0xF;
-                else if (endpDesc->bInterval >= 8)
-                    endpType = 7;
-                else if (endpDesc->bInterval >= 4)
-                    endpType = 3;
-                else if (endpDesc->bInterval >= 2)
-                    endpType = 1;
-                else
-                    endpType = 0;
-
-                // todo: add bandwidth scheduling
-
-                dbg_printf("opening INT endpoint (%d - %p), interval %d, list %d\n", newEp->id, newEp, endpDesc->bInterval, endpType);
-            } else
-                endpType = TYPE_BULK;
-
-            if (((endpDesc->bEndpointAddress & USB_DIR_IN) == 0) && !alignFlag)
-                if (hcMaxPktSize >= 0x3F)
-                    hcMaxPktSize = 0x3E;
-        }
-
-        hcMaxPktSize &= 0x7FF;
-        if (type == USB_ENDPOINT_XFER_ISOC)
-            flags |= HCED_ISOC;
-        if (dev->isLowSpeedDevice)
-            flags |= HCED_SPEED;
-
-        flags |= (endpDesc->bEndpointAddress & 0xF) << 7;
-
-        if (endpDesc->bEndpointAddress & USB_DIR_IN)
-            flags |= HCED_DIR_IN;
-        else
-            flags |= HCED_DIR_OUT;
-
-        flags |= dev->functionAddress & 0x7F;
-
-        newEp->hcEd.hcArea        = flags;
-        newEp->hcEd.maxPacketSize = hcMaxPktSize;
-    } else {
-        newEp->hcEd.maxPacketSize = 8;
-        if (dev->isLowSpeedDevice)
-            newEp->hcEd.hcArea = HCED_SPEED;
-        else
-            newEp->hcEd.hcArea = 0;
-        endpType = TYPE_CONTROL;
-    }
-
-    newEp->endpointType = endpType;
-    if (!td) {
-        td = allocTd();
-        if (!td) {
-            dbg_printf("Ran out of TDs\n");
-            cleanUpFunc(dev, newEp);
-            return NULL;
-        }
-    }
-    newEp->hcEd.tdHead = newEp->hcEd.tdTail = td;
-    addToHcEndpointList(newEp->endpointType, &newEp->hcEd);
-    return newEp;
-}
-
-Endpoint *doOpenEndpoint(Device *dev, UsbEndpointDescriptor *endpDesc, u32 alignFlag)
-{
-    if (!dev->parent)
-        return NULL;
-
-    if (endpDesc == NULL)
-        return dev->endpointListStart; // default control EP was already opened
-    else
-        return openDeviceEndpoint(dev, endpDesc, alignFlag);
-}
-
-int doCloseEndpoint(Endpoint *ep)
-{
-    Device *dev = ep->correspDevice;
-
-    if (dev->endpointListStart != ep)
-        return removeEndpointFromDevice(dev, ep);
-    else
-        return 0;
-}
-
-void *doGetDeviceStaticDescriptor(int devId, void *data, u8 type)
-{
-    UsbDeviceDescriptor *descBuf;
-    Device *dev = fetchDeviceById(devId);
-    if (!dev)
-        return NULL;
-
-    if (data)
-        descBuf = (UsbDeviceDescriptor *)((u8 *)data + ((UsbDeviceDescriptor *)data)->bLength);
-    else
-        descBuf = (UsbDeviceDescriptor *)dev->staticDeviceDescPtr;
-
-    if (type == 0)
-        return descBuf;
-
-    while (((u8 *)descBuf < (u8 *)dev->staticDeviceDescEndPtr) && (descBuf->bLength >= 2)) {
-        if (descBuf->bDescriptorType == type)
-            return descBuf;
-        descBuf = (UsbDeviceDescriptor *)((u8 *)descBuf + descBuf->bLength);
-    }
-    return NULL;
-}
-
-void handleRhsc(void)
-{
-    u32 portNum  = 0;
-    Device *port = memPool.deviceTreeRoot->childListStart;
-
-    while (port) {
-        u32 status                                = memPool.ohciRegs->HcRhPortStatus[portNum];
-        memPool.ohciRegs->HcRhPortStatus[portNum] = C_PORT_FLAGS; // reset all flags
-        if (status & BIT(PORT_CONNECTION)) {
-            if ((port->deviceStatus != DEVICE_NOTCONNECTED) && (status & BIT(C_PORT_CONNECTION)))
-                flushPort(port);
-
-            if (port->deviceStatus == DEVICE_NOTCONNECTED) {
-                port->deviceStatus = DEVICE_CONNECTED;
-                addTimerCallback(&port->timer, (TimerCallback)hubResetDevice, port, 500);
-            } else if (port->deviceStatus == DEVICE_RESETPENDING) {
-                if (!(status & BIT(PORT_RESET))) {
-                    port->deviceStatus     = DEVICE_RESETCOMPLETE;
-                    port->isLowSpeedDevice = (status >> PORT_LOW_SPEED) & 1;
-                    Endpoint *ep           = openDeviceEndpoint(port, NULL, 0);
-                    if (ep)
-                        hubTimedSetFuncAddress(port);
-                }
-            }
-        } else
-            flushPort(port);
-        port = port->next;
-        portNum++;
-    }
-}
+static void *hcdMemoryBuffer;
 
 void hcdProcessIntr(void)
 {
-    u32 intrFlags;
+	volatile OhciRegs *ohciRegs;
+	volatile HcCA *hcHCCA;
+	int intrFlags;
+	UsbdHcTD_t *doneQueue;
+	UsbdHcTD_t *prev;
+	UsbdHcTD_t *next_tmp1;
+	UsbdHcTD_t *next_tmp2;
 
-    intrFlags = memPool.ohciRegs->HcInterruptStatus & memPool.ohciRegs->HcInterruptEnable;
+	ohciRegs = memPool->m_ohciRegs;
+	memPool->m_interruptCounters[0] += 1;
+	hcHCCA = memPool->m_hcHCCA;
+	intrFlags = ohciRegs->HcInterruptStatus & ohciRegs->HcInterruptEnable;
+	if ( (intrFlags & OHCI_INT_SO) != 0 )
+	{
+		dbg_printf("HC: Scheduling overrun\n");
+		ohciRegs->HcInterruptStatus = OHCI_INT_SO;
+		intrFlags &= ~OHCI_INT_SO;
+		memPool->m_interruptCounters[1] += 1;
+	}
+	doneQueue = (UsbdHcTD_t *)((uiptr)hcHCCA->DoneHead & ~0xF);
+	prev = NULL;
+	if ( doneQueue )
+	{
+		hcHCCA->DoneHead = NULL;
+		ohciRegs->HcInterruptStatus = OHCI_INT_WDH;
 
-    if (intrFlags & OHCI_INT_SO) {
-        dbg_printf("HC: Scheduling overrun\n");
-        memPool.ohciRegs->HcInterruptStatus = OHCI_INT_SO;
-        intrFlags &= ~OHCI_INT_SO;
-    }
-
-    HcTD *doneQueue = (HcTD *)((u32)memPool.hcHCCA->DoneHead & ~0xF);
-    if (doneQueue) {
-        memPool.hcHCCA->DoneHead            = NULL;
-        memPool.ohciRegs->HcInterruptStatus = OHCI_INT_WDH;
-
-        // reverse queue
-        HcTD *prev = NULL;
-        do {
-            HcTD *tmp = doneQueue;
-            doneQueue = tmp->next;
-            tmp->next = prev;
-            prev      = tmp;
-        } while (doneQueue);
-
-        do {
-            HcTD *tmp = prev->next;
-            if ((prev >= memPool.hcTdBuf) && (prev < memPool.hcTdBufEnd))
-                processDoneQueue_GenTd(prev);
-            else if ((prev >= (HcTD *)memPool.hcIsoTdBuf) && (prev < (HcTD *)memPool.hcIsoTdBufEnd))
-                processDoneQueue_IsoTd((HcIsoTD *)prev);
-            prev = tmp;
-        } while (prev);
-
-        intrFlags &= ~OHCI_INT_WDH;
-    }
-
-    if (intrFlags & OHCI_INT_SF) {
-        memPool.ohciRegs->HcInterruptStatus = OHCI_INT_SF;
-        handleTimerList();
-        intrFlags &= ~OHCI_INT_SF;
-    }
-
-    if (intrFlags & OHCI_INT_UE) {
-        printf("HC: Unrecoverable error\n");
-        memPool.ohciRegs->HcInterruptStatus = OHCI_INT_UE;
-        intrFlags &= ~OHCI_INT_UE;
-    }
-
-    if (intrFlags & OHCI_INT_RHSC) {
-        dbg_printf("RHSC\n");
-        memPool.ohciRegs->HcInterruptStatus = OHCI_INT_RHSC;
-        handleRhsc();
-        intrFlags &= ~OHCI_INT_RHSC;
-    }
-
-    intrFlags &= ~OHCI_INT_MIE;
-    if (intrFlags) {
-        dbg_printf("Disable intr: %d\n", intrFlags);
-        memPool.ohciRegs->HcInterruptDisable = intrFlags;
-    }
+		// reverse queue
+		while ( doneQueue )
+		{
+			next_tmp1 = doneQueue;
+			doneQueue = doneQueue->m_next;
+			next_tmp1->m_next = prev;
+			prev = next_tmp1;
+		}
+		for ( ; prev; prev = next_tmp2 )
+		{
+			next_tmp2 = prev->m_next;
+			if ( prev < memPool->m_hcTdBuf || prev >= memPool->m_hcTdBufEnd )
+			{
+				if ( (UsbdHcIsoTD_t *)prev >= memPool->m_hcIsoTdBuf && (UsbdHcIsoTD_t *)prev < memPool->m_hcIsoTdBufEnd )
+					processDoneQueue_IsoTd((UsbdHcIsoTD_t *)prev);
+			}
+			else
+			{
+				processDoneQueue_GenTd(prev);
+			}
+		}
+		intrFlags &= ~OHCI_INT_WDH;
+		memPool->m_interruptCounters[2] += 1;
+	}
+	if ( (intrFlags & OHCI_INT_SF) != 0 )
+	{
+		ohciRegs->HcInterruptStatus = OHCI_INT_SF;
+		handleTimerList();
+		intrFlags &= ~OHCI_INT_SF;
+		memPool->m_interruptCounters[3] += 1;
+	}
+	if ( (intrFlags & OHCI_INT_RD) != 0 )
+	{
+		ohciRegs->HcInterruptStatus = OHCI_INT_RD;
+		intrFlags &= ~OHCI_INT_RD;
+		memPool->m_interruptCounters[4] += 1;
+	}
+	if ( (intrFlags & OHCI_INT_UE) != 0 )
+	{
+		dbg_printf("HC: Unrecoverable error\n");
+		ohciRegs->HcInterruptStatus = OHCI_INT_UE;
+		intrFlags &= ~OHCI_INT_UE;
+		memPool->m_interruptCounters[5] += 1;
+	}
+	if ( (intrFlags & OHCI_INT_FNO) != 0 )
+	{
+		ohciRegs->HcInterruptStatus = OHCI_INT_FNO;
+		intrFlags &= ~OHCI_INT_FNO;
+		memPool->m_interruptCounters[6] += 1;
+	}
+	if ( (intrFlags & OHCI_INT_RHSC) != 0 )
+	{
+		dbg_printf("RHSC\n");
+		ohciRegs->HcInterruptStatus = OHCI_INT_RHSC;
+		handleRhsc();
+		intrFlags &= ~OHCI_INT_RHSC;
+		memPool->m_interruptCounters[7] += 1;
+	}
+	if ( (intrFlags & OHCI_INT_OC) != 0 )
+	{
+		ohciRegs->HcInterruptStatus = OHCI_INT_OC;
+		intrFlags &= ~OHCI_INT_OC;
+		memPool->m_interruptCounters[8] += 1;
+	}
+	intrFlags &= ~OHCI_INT_MIE;
+	if ( intrFlags )
+	{
+		dbg_printf("Disable intr: %d\n", intrFlags);
+		ohciRegs->HcInterruptDisable = intrFlags;
+	}
 }
 
-static void PostIntrEnableFunction(void)
+void PostIntrEnableFunction(void)
 {
-    memPool.ohciRegs->HcInterruptDisable = OHCI_INT_MIE;
-    asm volatile("lw $zero, 0xffffffffbfc00000\n");
-    memPool.ohciRegs->HcInterruptEnable = OHCI_INT_MIE;
+	volatile int lw_busy;
+
+	lw_busy = 0;
+	memPool->m_ohciRegs->HcInterruptDisable = OHCI_INT_MIE;
+	do
+	{
+		u32 val;
+		val = *((volatile u32 *)0xBFC00000);
+		__asm__ __volatile__(" " : "=r"(val));
+		lw_busy -= 1;
+	} while ( lw_busy > 0 );
+	memPool->m_ohciRegs->HcInterruptEnable = OHCI_INT_MIE;
 }
 
-void hcdIrqThread(void *arg)
+static int initHardware(volatile OhciRegs *ohciRegs)
 {
-    u32 eventRes;
+	int i;
 
-    (void)arg;
+	dbg_printf("Host Controller...\n");
+	ohciRegs->HcInterruptDisable = ~0;
+	ohciRegs->HcControl &= ~0x3Cu;
+	DelayThread(2000);
+	ohciRegs->HcCommandStatus = OHCI_COM_HCR;
+	ohciRegs->HcControl = 0;
+	for ( i = 1; i < 1000; i += 1 )
+	{
+		volatile int lw_busy;
 
-    while (1) {
-        WaitEventFlag(hcdIrqEvent, 1, WEF_CLEAR | WEF_OR, &eventRes);
+		if ( (ohciRegs->HcCommandStatus & OHCI_COM_HCR) == 0 )
+		{
+			dbg_printf("HC reset done\n");
+			return 0;
+		}
 
-        usbdLock();
-        hcdProcessIntr();
-        EnableIntr(IOP_IRQ_USB);
-        PostIntrEnableFunction();
-        usbdUnlock();
-    }
-}
-
-int usbdIntrHandler(void *arg)
-{
-    iSetEventFlag((int)arg, 1);
-    return 0;
-}
-
-int initHardware(void)
-{
-    unsigned int i;
-
-    dbg_printf("Host Controller...\n");
-    memPool.ohciRegs->HcInterruptDisable = ~0;
-    memPool.ohciRegs->HcCommandStatus    = OHCI_COM_HCR;
-    memPool.ohciRegs->HcControl          = 0;
-
-    for (i = 0; memPool.ohciRegs->HcCommandStatus & OHCI_COM_HCR; i++) {
-        if (i == 1000)
-            return -1;
-
-        asm volatile("lw $zero, 0xffffffffbfc00000\n");
-    }
-    dbg_printf("HC reset done\n");
-    *(volatile u32 *)0xBF801570 |= 0x800 << 16;
-    *(volatile u32 *)0xBF801680 = 1;
-
-    return 0;
+		lw_busy = 0;
+		do
+		{
+			u32 val;
+			val = *((volatile u32 *)0xBFC00000);
+			__asm__ __volatile__(" " : "=r"(val));
+			lw_busy -= 1;
+		} while ( lw_busy > 0 );
+	}
+	return -1;
 }
 
 int initHcdStructs(void)
 {
-    int i;
-    HcCA *hcCommArea;
-    memPool.ohciRegs = (volatile OhciRegs *)OHCI_REG_BASE;
+	int memSize;
+	void *memBuf_1;
+	HcCA *hcCommArea;
+	UsbdHcIsoTD_t *hcIsoTdBuf;
+	UsbdHcTD_t *hcTdBuf;
+	int i;
+	UsbdHcED_t *hcEdBufForEndpoint;
+	UsbdHcED_t *hcEdBuf;
+	UsbdEndpoint_t *endpointBuf;
+	UsbdDevice_t *deviceTreeBuf;
+	UsbdIoRequest_t *ioReqBuf;
+	UsbdIoRequest_t **hcIsoTdToIoReqLUT;
+	UsbdIoRequest_t **hcTdToIoReqLUT;
+	UsbdIoRequest_t **devDescBuf;
+	volatile OhciRegs *ohciRegs;
 
-    initHardware();
-
-    dbg_printf("Structs...\n");
-
-    memPool.hcHCCA            = NULL;
-    memPool.hcIsoTdBuf        = (HcIsoTD *)(sizeof(HcCA));
-    memPool.hcIsoTdBufEnd     = memPool.hcIsoTdBuf + usbConfig.maxIsoTransfDesc;
-    memPool.hcTdBuf           = (HcTD *)memPool.hcIsoTdBufEnd;
-    memPool.hcTdBufEnd        = memPool.hcTdBuf + usbConfig.maxTransfDesc;
-    memPool.hcEdBuf           = (HcED *)memPool.hcTdBufEnd;
-    memPool.endpointBuf       = (Endpoint *)(memPool.hcEdBuf + 0x42);
-    memPool.deviceTreeBuf     = (Device *)(memPool.endpointBuf + usbConfig.maxEndpoints);
-    memPool.ioReqBufPtr       = (IoRequest *)(memPool.deviceTreeBuf + usbConfig.maxDevices);
-    memPool.hcIsoTdToIoReqLUT = (IoRequest **)(memPool.ioReqBufPtr + usbConfig.maxIoReqs);
-    memPool.hcTdToIoReqLUT    = (IoRequest **)(memPool.hcIsoTdToIoReqLUT + usbConfig.maxIsoTransfDesc);
-
-    u8 *devDescBuf = (u8 *)(memPool.hcTdToIoReqLUT + usbConfig.maxTransfDesc);
-    u32 memSize    = ((u32)devDescBuf) + usbConfig.maxDevices * usbConfig.maxStaticDescSize;
-
-    u8 *memBuf = AllocSysMemory(ALLOC_FIRST, memSize, 0);
-    memset(memBuf, 0, memSize);
-
-    hcCommArea                = (HcCA *)memBuf;
-    memPool.hcHCCA            = (HcCA *)((((u32)memBuf + (u32)memPool.hcHCCA) & 0x1FFFFFFF) | 0xA0000000);
-    memPool.hcIsoTdBuf        = (HcIsoTD *)((u32)memBuf + (u32)memPool.hcIsoTdBuf);
-    memPool.hcIsoTdBufEnd     = (HcIsoTD *)((u32)memBuf + (u32)memPool.hcIsoTdBufEnd);
-    memPool.hcTdBuf           = (HcTD *)((u32)memBuf + (u32)memPool.hcTdBuf);
-    memPool.hcTdBufEnd        = (HcTD *)((u32)memBuf + (u32)memPool.hcTdBufEnd);
-    memPool.hcEdBuf           = (HcED *)((u32)memBuf + (u32)memPool.hcEdBuf);
-    memPool.endpointBuf       = (Endpoint *)((u32)memBuf + (u32)memPool.endpointBuf);
-    memPool.deviceTreeBuf     = (Device *)((u32)memBuf + (u32)memPool.deviceTreeBuf);
-    memPool.ioReqBufPtr       = (IoRequest *)((u32)memBuf + (u32)memPool.ioReqBufPtr);
-    memPool.hcIsoTdToIoReqLUT = (IoRequest **)((u32)memBuf + (u32)memPool.hcIsoTdToIoReqLUT);
-    memPool.hcTdToIoReqLUT    = (IoRequest **)((u32)memBuf + (u32)memPool.hcTdToIoReqLUT);
-
-    devDescBuf = (u8 *)((u32)memBuf + (u32)devDescBuf);
-
-    Endpoint *ep = memPool.endpointBuf;
-
-    for (i = 0; i < usbConfig.maxEndpoints; i++) {
-        ep->id = i;
-
-        ep->next = NULL;
-        ep->prev = memPool.freeEpListEnd;
-        if (memPool.freeEpListEnd)
-            memPool.freeEpListEnd->next = ep;
-        else
-            memPool.freeEpListStart = ep;
-        memPool.freeEpListEnd = ep;
-        ep++;
-    }
-
-    memPool.tdQueueStart[0] = memPool.tdQueueStart[1] = NULL;
-    memPool.tdQueueEnd[0] = memPool.tdQueueEnd[1] = NULL;
-
-    Device *dev = memPool.deviceTreeBuf;
-    for (i = 0; i < usbConfig.maxDevices; i++) {
-        dev->functionAddress = i;
-        dev->id              = i & 0xFF;
-
-        dev->next = NULL;
-        dev->prev = memPool.freeDeviceListEnd;
-        if (memPool.freeDeviceListEnd)
-            memPool.freeDeviceListEnd->next = dev;
-        else
-            memPool.freeDeviceListStart = dev;
-        memPool.freeDeviceListEnd = dev;
-
-        dev->staticDeviceDescPtr = devDescBuf;
-        dev++;
-        devDescBuf += usbConfig.maxStaticDescSize;
-    }
-
-    memPool.deviceTreeRoot = attachChildDevice(NULL, 0); // virtual root
-    attachChildDevice(memPool.deviceTreeRoot, 1);        // root hub port 0
-    attachChildDevice(memPool.deviceTreeRoot, 2);        // root hub port 1
-
-    IoRequest *req = memPool.ioReqBufPtr;
-    for (i = 0; i < usbConfig.maxIoReqs; i++) {
-        req->next = NULL;
-        req->prev = memPool.freeIoReqListEnd;
-        if (memPool.freeIoReqListEnd)
-            memPool.freeIoReqListEnd->next = req;
-        else
-            memPool.freeIoReqList = req;
-        memPool.freeIoReqListEnd = req;
-        req++;
-    }
-
-    HcTD *hcTd = memPool.freeHcTdList = memPool.hcTdBuf;
-    for (i = 0; i < usbConfig.maxTransfDesc - 1; i++) {
-        hcTd->next = hcTd + 1;
-        hcTd++;
-    }
-    hcTd->next = NULL;
-
-    HcIsoTD *isoTd = memPool.freeHcIsoTdList = memPool.hcIsoTdBuf;
-    for (i = 0; i < usbConfig.maxIsoTransfDesc - 1; i++) {
-        isoTd->next = isoTd + 1;
-        isoTd++;
-    }
-    isoTd->next = NULL;
-
-    // build tree for interrupt table
-    HcED *ed = memPool.hcEdBuf;
-    for (i = 0; i < 0x3F; i++) {
-        ed->hcArea = HCED_SKIP;
-        if (i == 0)
-            ed->next = NULL;
-        else
-            ed->next = memPool.hcEdBuf + ((i - 1) >> 1);
-
-        int intrId = i - 31;
-        if (intrId >= 0) {
-            intrId                             = ((intrId & 1) << 4) | ((intrId & 2) << 2) | (intrId & 4) | ((intrId & 8) >> 2) | ((intrId & 0x10) >> 4);
-            hcCommArea->InterruptTable[intrId] = ed;
-        }
-        ed++;
-    }
-
-    ed->hcArea                        = HCED_SKIP;
-    memPool.ohciRegs->HcControlHeadEd = ed;
-    ed++;
-
-    ed->hcArea                     = HCED_SKIP;
-    memPool.ohciRegs->HcBulkHeadEd = ed;
-    ed++;
-
-    ed->hcArea            = HCED_SKIP;
-    memPool.hcEdBuf->next = ed; // the isochronous endpoint
-
-    memPool.ohciRegs->HcHCCA            = hcCommArea;
-    memPool.ohciRegs->HcFmInterval      = 0x27782EDF;
-    memPool.ohciRegs->HcPeriodicStart   = 0x2A2F;
-    memPool.ohciRegs->HcInterruptEnable = OHCI_INT_MIE | OHCI_INT_RHSC | OHCI_INT_UE | OHCI_INT_WDH | OHCI_INT_SO;
-    memPool.ohciRegs->HcControl         = OHCI_CTR_USB_OPERATIONAL | OHCI_CTR_PLE | OHCI_CTR_IE | OHCI_CTR_CLE | OHCI_CTR_BLE | 3;
-    return 0;
+	ohciRegs = (volatile OhciRegs *)OHCI_REG_BASE;
+	if ( initHardware(ohciRegs) < 0 )
+		return -1;
+	*(vu32 *)0xBF801570 |= 0x8000000u;
+	*(vu32 *)0xBF801680 = 1;
+	dbg_printf("Structs...\n");
+	memSize = 0 + 28 + sizeof(HcCA) + sizeof(UsbdHcIsoTD_t) * usbConfig.m_maxIsoTransfDesc
+					+ sizeof(UsbdHcTD_t) * usbConfig.m_maxTransfDesc + sizeof(UsbdHcED_t) * usbConfig.m_maxEndpoints
+					+ sizeof(UsbdHcED_t) * 66 + sizeof(UsbdEndpoint_t) * usbConfig.m_maxEndpoints
+					+ sizeof(UsbdDevice_t) * usbConfig.m_maxDevices + sizeof(UsbdIoRequest_t) * usbConfig.m_maxIoReqs
+					+ sizeof(UsbdIoRequest_t *) * usbConfig.m_maxIsoTransfDesc
+					+ sizeof(UsbdIoRequest_t *) * usbConfig.m_maxTransfDesc
+					+ usbConfig.m_maxStaticDescSize * usbConfig.m_maxDevices;
+	memBuf_1 = AllocSysMemoryWrap(memSize);
+	if ( !memBuf_1 )
+		return -1;
+	if ( ((uiptr)memBuf_1) & 0xFF )
+	{
+		FreeSysMemoryWrap(memBuf_1);
+		return -1;
+	}
+	hcdMemoryBuffer = memBuf_1;
+	hcCommArea = (HcCA *)memBuf_1;
+	bzero(memBuf_1, memSize);
+	hcIsoTdBuf = (UsbdHcIsoTD_t *)(((uiptr)memBuf_1 + (28 + sizeof(HcCA) - 1)) & 0xFFFFFFE0);
+#if 0
+	*(UsbdConfig_t **)((u8 *)hcIsoTdBuf - 28) = &usbConfig;
+#endif
+	hcTdBuf = (UsbdHcTD_t *)&hcIsoTdBuf[usbConfig.m_maxIsoTransfDesc];
+	hcEdBufForEndpoint = (UsbdHcED_t *)&hcTdBuf[usbConfig.m_maxTransfDesc];
+	hcEdBuf = (UsbdHcED_t *)&hcEdBufForEndpoint[usbConfig.m_maxEndpoints];
+	memPool = (UsbdMemoryPool_t *)&hcEdBuf[66];
+#if 0
+	memPool_unused = memPool;
+#endif
+	endpointBuf = (UsbdEndpoint_t *)&memPool[1];
+	deviceTreeBuf = (UsbdDevice_t *)&endpointBuf[usbConfig.m_maxEndpoints];
+	ioReqBuf = (UsbdIoRequest_t *)&deviceTreeBuf[usbConfig.m_maxDevices];
+	hcIsoTdToIoReqLUT = (UsbdIoRequest_t **)&ioReqBuf[usbConfig.m_maxIoReqs];
+	hcTdToIoReqLUT = &hcIsoTdToIoReqLUT[usbConfig.m_maxIsoTransfDesc];
+	devDescBuf = &hcTdToIoReqLUT[usbConfig.m_maxTransfDesc];
+	usbConfig.m_allocatedSize_unused += memSize;
+	memPool->m_ohciRegs = ohciRegs;
+	memPool->m_hcEdBuf = hcEdBuf;
+	memPool->m_hcIsoTdToIoReqLUT = hcIsoTdToIoReqLUT;
+	memPool->m_hcTdToIoReqLUT = hcTdToIoReqLUT;
+	memPool->m_endpointBuf = endpointBuf;
+	memPool->m_hcHCCA = (volatile HcCA *)(((uiptr)memBuf_1 & 0x1FFFFFFF) | 0xA0000000);
+	for ( i = 0; i < usbConfig.m_maxEndpoints; i += 1 )
+	{
+		endpointBuf[i].m_id = i;
+		endpointBuf[i].m_hcEd = &hcEdBufForEndpoint[i];
+		endpointBuf[i].m_prev = memPool->m_freeEpListEnd;
+		if ( memPool->m_freeEpListEnd )
+			memPool->m_freeEpListEnd->m_next = &endpointBuf[i];
+		else
+			memPool->m_freeEpListStart = &endpointBuf[i];
+		endpointBuf[i].m_next = NULL;
+		memPool->m_freeEpListEnd = &endpointBuf[i];
+	}
+	memPool->m_tdQueueEnd = NULL;
+	memPool->m_tdQueueStart = NULL;
+	memPool->m_deviceTreeBuf = deviceTreeBuf;
+	for ( i = 0; i < usbConfig.m_maxDevices; i += 1 )
+	{
+		deviceTreeBuf[i].m_functionAddress = i;
+		deviceTreeBuf[i].m_id = (u8)i;
+		deviceTreeBuf[i].m_staticDeviceDescPtr = (u8 *)devDescBuf + (usbConfig.m_maxStaticDescSize * i);
+		deviceTreeBuf[i].m_prev = memPool->m_freeDeviceListEnd;
+		if ( memPool->m_freeDeviceListEnd )
+			memPool->m_freeDeviceListEnd->m_next = &deviceTreeBuf[i];
+		else
+			memPool->m_freeDeviceListStart = &deviceTreeBuf[i];
+		deviceTreeBuf[i].m_next = NULL;
+		memPool->m_freeDeviceListEnd = &deviceTreeBuf[i];
+	}
+	memPool->m_deviceTreeRoot = attachChildDevice(NULL, 0);  // virtual root
+	memPool->m_deviceTreeRoot->m_magicPowerValue = 2;
+	attachChildDevice(memPool->m_deviceTreeRoot, 1u);  // root hub port 0
+	attachChildDevice(memPool->m_deviceTreeRoot, 2u);  // root hub port 1
+	memPool->m_ioReqBufPtr = ioReqBuf;
+	for ( i = 0; i < usbConfig.m_maxIoReqs; i += 1 )
+	{
+		ioReqBuf[i].m_id = i;
+		ioReqBuf[i].m_prev = memPool->m_freeIoReqListEnd;
+		if ( memPool->m_freeIoReqListEnd )
+			memPool->m_freeIoReqListEnd->m_next = &ioReqBuf[i];
+		else
+			memPool->m_freeIoReqList = &ioReqBuf[i];
+		ioReqBuf[i].m_next = NULL;
+		memPool->m_freeIoReqListEnd = &ioReqBuf[i];
+	}
+	memPool->m_freeHcTdList = hcTdBuf;
+	memPool->m_hcTdBuf = hcTdBuf;
+	memPool->m_hcTdBufEnd = &hcTdBuf[usbConfig.m_maxTransfDesc];
+	for ( i = 0; i < usbConfig.m_maxTransfDesc - 1; i += 1 )
+	{
+		hcTdBuf[i].m_next = &hcTdBuf[i + 1];
+	}
+	memPool->m_freeHcIsoTdList = hcIsoTdBuf;
+	memPool->m_hcIsoTdBuf = hcIsoTdBuf;
+	memPool->m_hcIsoTdBufEnd = &hcIsoTdBuf[usbConfig.m_maxIsoTransfDesc];
+	for ( i = 0; i < usbConfig.m_maxIsoTransfDesc - 1; i += 1 )
+	{
+		hcIsoTdBuf[i].m_next = &hcIsoTdBuf[i + 1];
+	}
+	// build tree for interrupt table
+	for ( i = 0; i < 63; i += 1 )
+	{
+		int intrId;
+		hcEdBuf[i].m_hcArea.asu32 = HCED_SKIP;
+		hcEdBuf[i].m_next = (i > 0) ? &hcEdBuf[(i - 1) >> 1] : NULL;
+		intrId = i - 31;
+		if ( intrId >= 0 )
+		{
+			intrId = ((intrId & 1) << 4) + ((intrId & 2) << 2) + (intrId & 4) + ((intrId & 8) >> 2) + ((intrId & 0x10) >> 4);
+			hcCommArea->InterruptTable[intrId] = &hcEdBuf[i];
+		}
+	}
+	hcEdBuf[TYPE_CONTROL].m_hcArea.asu32 = HCED_SKIP;
+	ohciRegs->HcControlHeadEd = &hcEdBuf[TYPE_CONTROL];
+	hcEdBuf[TYPE_BULK].m_hcArea.asu32 = HCED_SKIP;
+	ohciRegs->HcBulkHeadEd = &hcEdBuf[TYPE_BULK];
+	hcEdBuf[TYPE_ISOCHRON].m_hcArea.asu32 = HCED_SKIP;
+	hcEdBuf[0].m_next = &hcEdBuf[TYPE_ISOCHRON];  // the isochronous endpoint
+	ohciRegs->HcHCCA = hcCommArea;
+	ohciRegs->HcFmInterval = 0x27782EDF;
+	ohciRegs->HcPeriodicStart = 0x2A2F;
+	ohciRegs->HcInterruptEnable = OHCI_INT_SO | OHCI_INT_WDH | OHCI_INT_UE | OHCI_INT_FNO | OHCI_INT_RHSC | OHCI_INT_MIE;
+	ohciRegs->HcControl |=
+		OHCI_CTR_CBSR | OHCI_CTR_PLE | OHCI_CTR_IE | OHCI_CTR_CLE | OHCI_CTR_BLE | OHCI_CTR_USB_OPERATIONAL;
+	return 0;
 }
 
-int hcdInit(void)
+void deinitHcd(void)
 {
-    int irqRes;
-    iop_event_t event;
-    iop_thread_t thread;
+	UsbdDevice_t *i;
+	UsbdReportDescriptor_t *hidDescriptorStart;
+	UsbdReportDescriptor_t *next;
 
-    dbg_printf("Threads and events...\n");
-    event.attr = event.option = event.bits = 0;
-    hcdIrqEvent                            = CreateEventFlag(&event);
-
-    dbg_printf("Intr handler...\n");
-    DisableIntr(IOP_IRQ_USB, &irqRes);
-    if (RegisterIntrHandler(IOP_IRQ_USB, 1, usbdIntrHandler, (void *)hcdIrqEvent) != 0) {
-        if (irqRes == IOP_IRQ_USB)
-            EnableIntr(IOP_IRQ_USB);
-        return 1;
-    }
-
-    dbg_printf("HCD thread...\n");
-    thread.attr      = TH_C;
-    thread.option    = 0;
-    thread.thread    = hcdIrqThread;
-#ifndef MINI_DRIVER
-    thread.stacksize = 0x4000; // 16KiB
-#else
-    thread.stacksize = 0x0800; //  2KiB
-#endif
-    thread.priority  = usbConfig.hcdThreadPrio;
-    hcdTid           = CreateThread(&thread);
-    StartThread(hcdTid, (void *)hcdIrqEvent);
-
-    dbg_printf("Callback thread...\n");
-    initCallbackThread();
-
-    dbg_printf("HCD init...\n");
-    initHcdStructs();
-
-    dbg_printf("Hub driver...\n");
-    initHubDriver();
-
-    dbg_printf("Enabling interrupts...\n");
-    EnableIntr(IOP_IRQ_USB);
-
-    return 0;
+	initHardware((OhciRegs *)OHCI_REG_BASE);
+	for ( i = memPool->m_freeDeviceListStart; i; i = i->m_next )
+	{
+		for ( hidDescriptorStart = i->m_reportDescriptorStart, next = hidDescriptorStart; next; hidDescriptorStart = next )
+		{
+			next = hidDescriptorStart->m_next;
+			FreeSysMemoryWrap(hidDescriptorStart);
+		}
+	}
+	FreeSysMemoryWrap(hcdMemoryBuffer);
 }

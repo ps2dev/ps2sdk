@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <thbase.h>
 #include <sysclib.h>
+#include <errno.h>
 #include <ioman_mod.h>
 #include <sysmem.h>
 
@@ -352,7 +353,7 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
 int httpDummy()
 {
 	M_PRINTF("dummy function called\n");
-	return -5;
+	return -EIO;
 }
 
 int httpInitialize(iop_io_device_t *driver)
@@ -386,7 +387,7 @@ int httpOpen(iop_io_file_t *f, const char *name, int mode)
 	M_DEBUG("httpOpen(-, %s, %d)\n", name, mode);
 
 	if((privData = AllocSysMemory(ALLOC_FIRST, sizeof(t_fioPrivData), NULL)) == NULL)
-		return -1;
+		return -EPERM;
 
 	f->privdata = privData;
 
@@ -398,7 +399,7 @@ int httpOpen(iop_io_file_t *f, const char *name, int mode)
 	if((getName = resolveAddress( &server, name, hostAddr )) == NULL)
 	{
 		FreeSysMemory(privData);
-		return -2;
+		return -ENOENT;
 	}
 
 	// Now we connect and initiate the transfer by sending a
@@ -491,7 +492,7 @@ int httpLseek(iop_io_file_t *f, int offset, int mode)
 			break;
 
 		default:
-			return -1;
+			return -EPERM;
 	}
 
 	return privData->filePos;

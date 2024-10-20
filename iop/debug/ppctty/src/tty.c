@@ -7,6 +7,7 @@ IOP->PPC TTY
 #include <tamtypes.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <errno.h>
 #include <sysclib.h>
 #include <sysmem.h>
 #include <excepman.h>
@@ -25,7 +26,7 @@ static int tty_sema = -1;
 
 extern void tty_puts(const char *str);
 
-static int ttyfs_error() { return -1; }
+static int ttyfs_error() { return -EPERM; }
 
 static int ttyfs_init()
 {
