@@ -22,11 +22,6 @@ static bdm_cb g_cb       = NULL;
 static int bdm_event     = -1;
 static int bdm_thread_id = -1;
 
-/* Event flag bits */
-#define BDM_EVENT_CB_MOUNT  0x01
-#define BDM_EVENT_CB_UMOUNT 0x02
-#define BDM_EVENT_MOUNT     0x04
-
 void bdm_RegisterCallback(bdm_cb cb)
 {
     int i;
@@ -45,6 +40,11 @@ void bdm_RegisterCallback(bdm_cb cb)
             break;
         }
     }
+}
+
+void bdm_on_device_ready(int event)
+{
+    // do something with your device.. unlock io etc
 }
 
 void bdm_connect_bd(struct block_device *bd)
