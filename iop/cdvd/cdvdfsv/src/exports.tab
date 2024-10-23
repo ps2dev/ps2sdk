@@ -1,0 +1,11 @@
+
+DECLARE_EXPORT_TABLE(cdvdfsv, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(cdvdfsv_dummyentry)
+DECLARE_EXPORT(sceCdChangeThreadPriority)
+END_EXPORT_TABLE
+
+void _retonly() {}
