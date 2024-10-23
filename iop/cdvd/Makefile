@@ -8,6 +8,9 @@
 
 SUBDIRS = \
 	cdfs \
+	cdvdfsv \
+	cdvdman \
+	cdvdstm \
 	xesdrv
 
 include $(PS2SDKSRC)/Defs.make
