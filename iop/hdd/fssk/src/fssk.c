@@ -563,11 +563,6 @@ end2:
     SetEventFlag(fsskEventFlagID, 1);
 }
 
-static int FsskUnsupported(void)
-{
-    return 0;
-}
-
 static int FsskOpen(iomanX_iop_file_t *fd, const char *name, int flags, int mode)
 {
     int blockfd, result;
@@ -721,32 +716,32 @@ static int FsskIoctl2(iomanX_iop_file_t *fd, int cmd, void *arg, unsigned int ar
 }
 
 static iomanX_iop_device_ops_t FsskDeviceOps = {
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
     NULL,
     &FsskOpen,
     &FsskClose,
     NULL,
     NULL,
     NULL,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
-    (void *)&FsskUnsupported,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
     &FsskIoctl2};
 
 static iomanX_iop_device_t FsskDevice = {

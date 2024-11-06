@@ -418,29 +418,24 @@ static int fio_getstat(iop_file_t *fd, const char *name, io_stat_t *stat)
     return ret;
 }
 
-static int cdfs_dummy() {
-    DPRINTF("CDFS: dummy function called\n\n");
-    return -EIO;
-}
-
 static iop_device_ops_t fio_ops = {
     &fio_init,
     &fio_deinit,
-    (void *)&cdfs_dummy,
+    NOT_SUPPORTED,
     &fio_open,
     &fio_close,
     &fio_read,
     &fio_write,
     &fio_lseek,
-    (void *)&cdfs_dummy,
-    (void *)&cdfs_dummy,
-    (void *)&cdfs_dummy,
-    (void *)&cdfs_dummy,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
     &fio_openDir,
     &fio_closeDir,
     &fio_dread,
     &fio_getstat,
-    (void *)&cdfs_dummy,
+    NOT_SUPPORTED,
 };
 
 static iop_device_t fio_driver = {

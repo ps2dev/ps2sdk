@@ -28,7 +28,6 @@ IRX_ID("hdck", APA_MODVER_MAJOR, APA_MODVER_MINOR);
 
 // Function prototypes
 static int HdckInit(iomanX_iop_device_t *device);
-static int HdckUnsupported(void);
 static int HdckDevctl(iomanX_iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 
 static u8 IOBuffer[128 * 512];
@@ -36,28 +35,28 @@ static u8 IOBuffer2[128 * 512];
 
 static iomanX_iop_device_ops_t HdckDeviceOps = {
     &HdckInit,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
-    (void *)&HdckUnsupported,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
     &HdckDevctl,
     NULL,
     NULL,
@@ -97,11 +96,6 @@ static struct HdckPrivateData PrivateData = {
     0,
     0,
     0};
-
-static int HdckUnsupported(void)
-{
-    return -EPERM;
-}
 
 static int HdckInit(iomanX_iop_device_t *device)
 {

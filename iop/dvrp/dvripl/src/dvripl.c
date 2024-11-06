@@ -34,7 +34,6 @@ extern int dvripl_df_exit(iomanX_iop_device_t *dev);
 extern int dvripl_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
 extern int dvripl_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvripl_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvripl_df_null();
 extern s64 dvripl_df_null_long();
 extern int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg);
 extern void dvr_ready(int a1, void *a2);
@@ -43,30 +42,30 @@ static iomanX_iop_device_ops_t DvrFuncTbl =
     {
         &dvripl_df_init,
         &dvripl_df_exit,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
         &dvripl_df_ioctl,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
-        &dvripl_df_null,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
         &dvripl_df_null_long,
         &dvripl_df_devctl,
-        &dvripl_df_null,
-        &dvripl_df_null,
+        NOT_SUPPORTED,
+        NOT_SUPPORTED,
         &dvripl_df_ioctl2,
     };
 s32 dvr_ready_flag;
@@ -200,14 +199,9 @@ int dvripl_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int argl
     return -EINVAL;
 }
 
-int dvripl_df_null()
-{
-    return -EUNSUP;
-}
-
 s64 dvripl_df_null_long()
 {
-    return -EUNSUP;
+    return -134LL;
 }
 
 int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
