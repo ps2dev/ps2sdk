@@ -4,6 +4,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "dprintf.h"
 #if defined(_WIN32) || defined(WIN32)
 #include <windows.h>
@@ -113,4 +114,13 @@ int GetCurrentWorkingDirectory(char *buffer, unsigned int BufferSize)
 	else
 		return EIO;
 #endif
+}
+
+void upperbuff(char *temp)
+{
+    char *s = temp;
+    while (*s) {
+        *s = toupper((unsigned char) *s);
+        s++;
+    }
 }

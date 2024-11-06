@@ -98,6 +98,6 @@ ifeq (_$(IOPRP_CONTENTS)_,__)
 	$(error Cannot generate IOPRP if 'IOPRP_CONTENTS' variable is empty)
 else
 	$(DIR_GUARD)
-	romimg -c $@ $<
+	romimg -C $@ $<
 endif
 

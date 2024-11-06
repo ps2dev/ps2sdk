@@ -13,7 +13,6 @@
 #include "romimg.h"
 #include "SonyRX.h"
 
-#define BUFCHK(X) (X[0] == '\0') ? "" : X
 #define IMAGE_COMMENT_BASESIZE 31
 
 struct ROMImgStat
@@ -160,7 +159,7 @@ int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 	GetCurrentWorkingDirectory(cwd, sizeof(cwd));
 	/* Comment format: YYYYMMDD-XXXYYY,conffile,<filename>,<user>@<localhost>/<image path> */
 	CommentLength = IMAGE_COMMENT_BASESIZE + strlen(filename) + sizeof(LocalhostName) + sizeof(UserName) + MAX_PATH;
-	ROMImg->comment = (char *)calloc(0, CommentLength+1);
+	ROMImg->comment = (char *)malloc( CommentLength+1);
     if (!ROMImg->comment) return ENOMEM;
 	snprintf(ROMImg->comment, CommentLength, "%08x,conffile,%s,%s@%s/%s", ROMImg->date, filename, BUFCHK(UserName), BUFCHK(LocalhostName), cwd);
 
@@ -453,8 +452,9 @@ static int AddExtInfoStat(struct FileEntry *file, unsigned char type, void *data
 	return result;
 }
 
-int AddFile(ROMIMG *ROMImg, const char *path)
+int AddFile(ROMIMG *ROMImg, const char *path, int upperconv)
 {
+    char tbuf[10] = "\0"; // we dont need a large buf, this is for filling in the filename on ROMFS
 	FILE *InputFile;
 	int result;
 	unsigned int FileDateStamp;
@@ -462,6 +462,16 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 	if ((InputFile = fopen(path, "rb")) != NULL) {
 		const char* fname = strrchr(path, PATHSEP);
 		if (fname == NULL) fname = path; else fname++;
+        if (upperconv) {
+            strncpy(tbuf, fname, sizeof(tbuf));
+            tbuf[sizeof(tbuf) - 1] = '\0';
+            if (tbuf[0] != '\0') {
+                upperbuff(tbuf);
+                fname = tbuf;
+                char* T = strrchr(fname, '.');
+                if (T != NULL) *T = '\0'; //null terminate extension
+            }
+        }
 		int size;
 		fseek(InputFile, 0, SEEK_END);
 		size = ftell(InputFile);
@@ -477,7 +487,7 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 					file = &ROMImg->files[ROMImg->NumFiles - 1];
 					memset(&ROMImg->files[ROMImg->NumFiles - 1], 0, sizeof(struct FileEntry));
 
-					strncpy(file->RomDir.name, fname, sizeof(file->RomDir.name) - 1);
+					strncpy(file->RomDir.name, fname, sizeof(file->RomDir.name));
                     file->RomDir.name[sizeof(file->RomDir.name) - 1] = '\0';
 					file->RomDir.ExtInfoEntrySize = 0;
 

@@ -68,7 +68,7 @@ int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg);
 int WriteROMImg(const char *file, const ROMIMG *ROMImg);
 int LoadROMImg(ROMIMG *ROMImg, const char *path);
 void UnloadROMImg(ROMIMG *ROMImg);
-int AddFile(ROMIMG *ROMImg, const char *path);
+int AddFile(ROMIMG *ROMImg, const char *path, int upperconv);
 int DeleteFile(ROMIMG *ROMImg, const char *filename);
 int ExtractFile(const ROMIMG *ROMImg, const char *filename, const char *FileToExtract);
 int IsFileExists(const ROMIMG *ROMImg, const char *filename);
