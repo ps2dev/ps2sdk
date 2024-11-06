@@ -1,6 +1,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <defs.h>
 #include <dmacman.h>
 #include <dev9.h>
 #include <intrman.h>

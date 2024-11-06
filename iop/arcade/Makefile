@@ -24,7 +24,8 @@ SUBDIRS = \
 	acrtc \
 	acsram \
 	actimer \
-	acuart
+	acuart \
+	acuart_tty
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

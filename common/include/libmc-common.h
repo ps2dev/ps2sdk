@@ -17,6 +17,7 @@
 #define __LIBMC_COMMON_H__
 
 #include <tamtypes.h>
+#include <errno.h>
 
 typedef struct _sceMcStDateTime
 {
@@ -148,7 +149,9 @@ typedef struct
 } mcRpcStat_t;
 
 // in addition to errno
-#define EFORMAT 140
+#ifndef EFORMAT
+#define EFORMAT 47
+#endif
 
 // MCMAN basic error codes
 #define sceMcResSucceed         0

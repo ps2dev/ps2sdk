@@ -23,6 +23,7 @@
 #include "loadcore.h"
 #include "stdio.h"
 #include "sysclib.h"
+#include <errno.h>
 #include "thbase.h"
 #include "intrman.h"
 #include "sysmem.h"
@@ -109,7 +110,7 @@ int realfd( iop_io_file_t *f )
 int dummy()
 {
 	M_DEBUG("dummy function called\n");
-	return -5;
+	return -EIO;
 }
 
 /** Initialise fs driver.

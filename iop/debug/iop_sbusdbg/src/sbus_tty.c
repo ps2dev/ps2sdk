@@ -14,6 +14,7 @@ Of course this requires that the EE-side code accept this command and output the
 #include <tamtypes.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <errno.h>
 #include <sysclib.h>
 #include <sysmem.h>
 #include <excepman.h>

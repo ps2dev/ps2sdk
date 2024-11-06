@@ -23,6 +23,7 @@
 #include "intrman.h"
 #include "stdio.h"
 #include "sysclib.h"
+#include <errno.h>
 #include "devfs.h"
 #include "sysmem.h"
 #include "stdio.h"
@@ -365,7 +366,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
    if(name == NULL)
    {
       M_PRINTF("open: Name is NULL\n");
-      return -1;
+      return -EPERM;
    }
 
    if((name[0] == '\\') || (name[0] == '/'))
@@ -387,7 +388,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
       if((unsigned int)name_len == strlen(name)) /* If this is has not got a subnumber */
       {
         M_PRINTF("open: No subdevice number in filename %s\n", name);
-        return -1;
+        return -EPERM;
       }
 
       subdev = strtoul(&name[name_len + fn_offset], &endp, 10);
@@ -396,21 +397,21 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
          /* Invalid number */
       {
          M_PRINTF("open: Invalid subdev number %d\n", subdev);
-         return -1;
+         return -EPERM;
       }
 
       if(*endp)
       /* Extra charactes after filename */
       {
          M_PRINTF("open: Invalid filename\n");
-         return -1;
+         return -EPERM;
       }
 
       if(!dev->subdevs[subdev].valid)
       /* No subdev */
       {
         M_PRINTF("open: No subdev registered\n");
-        return -1;
+        return -EPERM;
       }
 
       if((dev->subdevs[subdev].mode & DEVFS_MODE_EX)
@@ -418,7 +419,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
       /* Already opened in exclusive mode */
       {
          M_PRINTF("open: Exclusive subdevice already opened\n");
-         return -1;
+         return -EPERM;
       }
 
       if(dev->subdevs[subdev].open_refcount == MAX_OPENFILES)
@@ -431,21 +432,21 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
         && !(dev->subdevs[subdev].mode & DEVFS_MODE_R))
       {
          M_PRINTF("open: Read mode requested but not permitted\n");
-         return -1;
+         return -EPERM;
       }
 
       if(((mode & O_WRONLY) || ((mode & O_RDWR) == O_RDWR))
         && !(dev->subdevs[subdev].mode & DEVFS_MODE_W))
       {
          M_PRINTF("open: Write mode requested but not permitted\n");
-         return -1;
+         return -EPERM;
       }
 
       file->privdata = AllocSysMemory(ALLOC_FIRST, sizeof(ioman_data_t), NULL);
       if(file->privdata == NULL)
       {
          M_PRINTF("open: Allocation failure\n");
-         return -1;
+         return -EPERM;
       }
 
       ((ioman_data_t *) file->privdata)->hDev = dev->hDev;
@@ -464,7 +465,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
       {
          FreeSysMemory(file->privdata);
          M_PRINTF("open: Inconsistency between number of open files and available slot\n");
-         return -1;
+         return -EPERM;
       }
 
       dev->subdevs[subdev].open_files[loop] = file->privdata;
@@ -474,7 +475,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
    else
    {
       M_PRINTF("open: Couldn't find the device\n");
-      return -1;
+      return -EPERM;
    }
 
    return 0;
@@ -531,12 +532,12 @@ int devfs_close(iop_file_t *file)
       {
          FreeSysMemory(data);
          file->privdata = NULL;
-         return -1;
+         return -EPERM;
       }
    }
    else
    {
-      return -1;
+      return -EPERM;
    }
 
    return 0;
@@ -556,7 +557,7 @@ int devfs_ioctl(iop_file_t *file, int cmd, void *args)
 
    if(cmd == DEVFS_IOCTL_GETDESC)
    {
-      return -1; /* ioctl cannot support this call */
+      return -EPERM; /* ioctl cannot support this call */
    }
 
    data = file->privdata;
@@ -568,7 +569,7 @@ int devfs_ioctl(iop_file_t *file, int cmd, void *args)
          /* Delete data to try and prevent a memory leak */
          FreeSysMemory(data);
          file->privdata = NULL;
-         return -1;
+         return -EPERM;
       }
 
       if(dev->node.ioctl != NULL)
@@ -584,7 +585,7 @@ int devfs_ioctl(iop_file_t *file, int cmd, void *args)
 
    }
 
-   return -1;
+   return -EPERM;
 }
 
 /** ioman ioctl2 handler
@@ -611,7 +612,7 @@ int devfs_ioctl2(iop_file_t *file, int cmd, void *args, unsigned int arglen, voi
          /* Delete data to try and prevent a memory leak */
          FreeSysMemory(data);
          file->privdata = NULL;
-         return -1;
+         return -EPERM;
       }
 
       if((cmd == DEVFS_IOCTL_GETDESC) && (buf) && (buflen >= DEVFS_MAX_DESC_LENGTH))
@@ -639,7 +640,7 @@ int devfs_ioctl2(iop_file_t *file, int cmd, void *args, unsigned int arglen, voi
 
    }
 
-   return -1;
+   return -EPERM;
 }
 
 /** ioman read handler
@@ -665,7 +666,7 @@ int devfs_read(iop_file_t *file, void *buf, int len)
          /* Delete data to try and prevent a memory leak */
          FreeSysMemory(data);
          file->privdata = NULL;
-         return -1;
+         return -EPERM;
       }
 
       if((dev->node.read != NULL)
@@ -687,7 +688,7 @@ int devfs_read(iop_file_t *file, void *buf, int len)
       }
    }
 
-   return -1;
+   return -EPERM;
 }
 
 /** ioman write handler
@@ -712,7 +713,7 @@ int devfs_write(iop_file_t *file, void *buf, int len)
          /* Delete data to try and prevent a memory leak */
          FreeSysMemory(data);
          file->privdata = NULL;
-         return -1;
+         return -EPERM;
       }
 
       if((dev->node.write != NULL)
@@ -734,7 +735,7 @@ int devfs_write(iop_file_t *file, void *buf, int len)
       }
    }
 
-   return -1;
+   return -EPERM;
 }
 
 /** ioman lseek handler
@@ -758,7 +759,7 @@ int devfs_lseek(iop_file_t *file, long loc, int whence)
          /* Delete data to try and prevent a memory leak */
          FreeSysMemory(data);
          file->privdata = NULL;
-         return -1;
+         return -EPERM;
       }
 
       switch(whence)
@@ -775,12 +776,12 @@ int devfs_lseek(iop_file_t *file, long loc, int whence)
                        && (dev->subdevs[data->subdev].extent.loc64 >= (u64) loc))
                          data->loc.loc64 = dev->subdevs[data->subdev].extent.loc64 - (u64) loc;
                        break;
-        default:       return -1;
+        default:       return -EPERM;
       }
    }
    else
    {
-      return -1;
+      return -EPERM;
    }
 
    return data->loc.loc32[0];
@@ -806,7 +807,7 @@ int devfs_lseek64(iop_file_t *file, long long loc, int whence)
          /* Delete data to try and prevent a memory leak */
          FreeSysMemory(data);
          file->privdata = NULL;
-         return -1;
+         return -EPERM;
       }
 
       switch(whence)
@@ -822,13 +823,13 @@ int devfs_lseek64(iop_file_t *file, long long loc, int whence)
         case SEEK_END: if((loc > 0)                                                                                  && (dev->subdevs[data->subdev].extent.loc64 >= (u64) loc))
                          data->loc.loc64 = dev->subdevs[data->subdev].extent.loc64 - (u64) loc;
                        break;
-        default:       return -1;
+        default:       return -EPERM;
       }
 
    }
    else
    {
-      return -1;
+      return -EPERM;
    }
 
    return data->loc.loc32[0];
@@ -846,7 +847,7 @@ int devfs_dopen(iop_file_t *file, const char *name)
    if((name == NULL) || ((name[0] != '\\') && (name[0] != '/')))
    {
       M_PRINTF("dopen: Not a valid directory name\n");
-      return -1;
+      return -EPERM;
    }
 
    //M_PRINTF("dopen: file=%p name=%s\n", file, name);
@@ -861,7 +862,7 @@ int devfs_dopen(iop_file_t *file, const char *name)
       }
    }
 
-   return -1;
+   return -EPERM;
 }
 
 /** ioman dclose handler
@@ -926,7 +927,7 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 
    if(name == NULL)
    {
-      return -1;
+      return -EPERM;
    }
 
    if((name[0] == '\\') || (name[0] == '/'))
@@ -936,7 +937,7 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 
    if(stat == NULL)
    {
-      return -1;
+      return -EPERM;
    }
 
    dev = devfs_find_devicename(name + fn_offset);
@@ -952,7 +953,7 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
       if((unsigned int)name_len == strlen(name)) /* If this is has not got a subnumber */
       {
         M_PRINTF("getstat: No subdevice number in filename %s\n", name);
-        return -1;
+        return -EPERM;
       }
 
       subdev = strtoul(&name[name_len + fn_offset], &endp, 10);
@@ -961,20 +962,20 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
          /* Invalid number */
       {
          M_PRINTF("getstat: Invalid subdev number %d\n", subdev);
-         return -1;
+         return -EPERM;
       }
 
       if(*endp)
       /* Extra charactes after filename */
       {
          M_PRINTF("getstat: Invalid filename\n");
-         return -1;
+         return -EPERM;
       }
 
       if(!dev->subdevs[subdev].valid)
       {
         M_PRINTF("getstat: No subdev registered\n");
-        return -1;
+        return -EPERM;
       }
 
 #ifdef USE_IOMAN

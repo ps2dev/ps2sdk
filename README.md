@@ -2,12 +2,15 @@
 
 [![CI](https://github.com/ps2dev/ps2sdk/workflows/CI/badge.svg)](https://github.com/ps2dev/ps2sdk/actions?query=workflow%3ACI)
 [![CI-Docker](https://github.com/ps2dev/ps2sdk/workflows/CI-Docker/badge.svg)](https://github.com/ps2dev/ps2sdk/actions?query=workflow%3ACI-Docker)
-[![Discord](https://img.shields.io/discord/652861436992946216?style=flat&logo=Discord)](https://discord.gg/CVFUa9xh6B)
 
 [PS2SDK Documentation](https://ps2dev.github.io/ps2sdk/)
 
 Copyright 2001-2004, ps2dev - <http://www.ps2dev.org>
 All rights reserved.
+
+## **ATTENTION**
+
+If you are confused on how to start developing for PS2, see the [getting started](https://ps2dev.github.io/#getting-started) section on the ps2dev main page.  
 
 ## Introduction
 
@@ -98,3 +101,7 @@ libhdd was started by Nick Van Veen (Sjeep) in 2003 to provide a Hard Disk Drive
 ps2hid was started by [Tyranid](https://github.com/tyranid) in October 2003 to provide USB mouse and keyboard drivers compatible with the Sony USB Driver.
 
 [AUTHORS](AUTHORS2004.md)
+
+## Community
+
+Links for discussion and chat are available [here](https://ps2dev.github.io/#community).  

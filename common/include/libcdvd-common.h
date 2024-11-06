@@ -129,6 +129,8 @@ enum SCECdvdMediaType {
     /** PS2 DVD */
     SCECdPS2DVD,
 
+    /** DVD-VR (Minimum mechacon firmware version: 50000) */
+    SCECdDVDVR = 0xFC,
     /** CDDA */
     SCECdCDDA = 0xFD,
     /** DVD Video */
@@ -310,6 +312,52 @@ enum SCECdvdFanSpeed {
 #define CdlLEDPowerYellow 4
 /** Light up the blue LED on the eject button. */
 #define CdlLEDEjectBlue 8
+
+// Remote control disable definitions for sceRemote2_7()
+/** Disable the power/reset functionalty. (RM_PS2_POWER) */
+#define CdlRCDisablePowerReset 1
+/** Disable the power off functionality. (RM_PS2_POWEROFF) */
+#define CdlRCDisablePowerOff 2
+/** Disable the reset functionalty. (RM_PS2_RESET) */
+#define CdlRCDisableReset 4
+/** Disable the eject functionalty. (RM_PS2_EJECT) */
+#define CdlRCDisableEject 8
+/** Disable the power on functionality. (RM_PS2_POWERON) */
+#define CdlRCDisablePowerOn 0x10
+
+// Flag definitions for sceCdCLOCK.stat
+/** The RTC clock is stopped */
+#define CdlRTCStatClockStopDetected 1
+/** There was an issue checking the RTC battery voltage */
+#define CdlRTCStatClockBatteryMonitoringVoltageProblem 2
+/** The Rohm RTC hardware returned an error */
+#define CdlRTCStatCTLRegProblem 4
+/** There was an error while preparing to send the command from Mechacon to RTC */
+#define CdlRTCStatCommandError 128
+
+// Value definitions for the wakeupreason argument of sceCdReadWakeUpTime
+/** The system was powered on using the front panel buttons or the remote */
+#define CdlWakeUpReasonMainPowerOn 0
+/** The system was reset using the front panel button, the remote, or the SCMD */
+#define CdlWakeUpReasonMainReset 1
+/** The system was powered on because the timer set by sceCdWriteWakeUpTime expired */
+#define CdlWakeUpReasonMainTimer 2
+/** The system was powered on using the PON_REQ signal connected to the expansion bay port */
+#define CdlWakeUpReasonMainDevice 3
+
+// Value definitions for the return value of sceCdGetWakeUpReason
+#define CdlWakeUpReasonExtraSupportHard 0
+/** The system was reset using the front panel button, the remote, or the SCMD */
+#define CdlWakeUpReasonExtraReset 1
+/** The system was reset using the "Quit Game" button */
+#define CdlWakeUpReasonExtraGameReset 2
+/** The system was powered on because the timer set by sceCdWriteWakeUpTime expired */
+#define CdlWakeUpReasonExtraTimer 3
+/** The system was powered on using the front panel buttons or the remote */
+#define CdlWakeUpReasonExtraPowerOn 4
+/** The system was powered on when an object was inserted into the disc slot */
+#define CdlWakeUpReasonExtraSlotIn 7
+#define CdlWakeUpReasonExtraBackGround 8
 
 // For streaming operations (Use with sceCdStRead())
 enum SCECdvdStreamMode {
@@ -664,12 +712,12 @@ int sceCdAutoAdjustCtrl(int mode, u32 *result);
 /** Controls on-the-fly (hardware) data decryption. Setting all options to 0 will disable decryption.
  * This is used for decrypting encrypted sectors like the PlayStation 2 logo.
  *
- * @param arg1 Unknown
- * @param arg2 Unknown
- * @param shift Shift amount
+ * @param enable_xor Set to a non-zero value to enable xor by index 4 of the key argument in sceCdReadKey
+ * @param enable_shift Set to a non-zero value to enable rotate shift right by the amount specified by the "shiftval" argument
+ * @param shiftval Shift amount enable_shift is enabled
  * @return 1 on success, 0 on failure.
  */
-int sceCdDecSet(unsigned char arg1, unsigned char arg2, unsigned char shift);
+int sceCdDecSet(unsigned char enable_xor, unsigned char enable_shift, unsigned char shiftval);
 
 /** Reads the requested key from the CD/DVD.
  *
@@ -681,9 +729,18 @@ int sceCdDecSet(unsigned char arg1, unsigned char arg2, unsigned char shift);
  */
 int sceCdReadKey(unsigned char arg1, unsigned char arg2, unsigned int command, unsigned char *key);
 
-/** Sets the "HD mode", whatever that means.
+/** Determines if unique disc key exists
+ * Unofficial name.
+ * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
  *
- * @param mode mode
+ * @param status Command status
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdDoesUniqueKeyExist(u32 *status);
+
+/** Blocks disc tray eject functionality and turns off the blue eject LED when enabled.
+ *
+ * @param mode Set to a non-zero value to enable the tray eject functionality
  * @return 1 on success, 0 on failure.
  */
 int sceCdSetHDMode(u32 mode);
@@ -698,7 +755,7 @@ int sceCdSetHDMode(u32 mode);
  */
 int sceCdOpenConfig(int block, int mode, int NumBlocks, u32 *status);
 
-/** Closes the configuration block.
+/** Closes the configuration block that is currently opened.
  *
  * @param result Result code.
  * @return 1 on success, 0 on failure.
@@ -731,8 +788,7 @@ int sceCdWriteConfig(const void *buffer, u32 *result);
 int sceCdReadNVM(u32 address, u16 *data, u8 *result);
 
 /** Writes a single word to the NVRAM storage.
- * Does not fully work on consoles starting from the SCPH-50000 ("Dragon" MECHACON):
- * Some parts, like those containing the console IDs, cannot be overwritten.
+ * Starting from Mechacon firmware version 50000, attempting to write to address values over 150 will error.
  *
  * @param address Address in 2-byte words, of the word that will be written to.
  * @param data Pointer to the buffer that contains the new data.
@@ -751,7 +807,7 @@ int sceCdWriteNVM(u32 address, u16 data, u8 *result);
 int sceCdRI(u8 *buffer, u32 *result);
 
 /** Writes a new i.Link ID for the console.
- * Does not work on consoles starting from the SCPH-50000 ("Dragon" MECHACON):
+ * Starting from Mechacon firmware version 50000, a unlock combination (0x03 0x46 and 0x03 0x47) needs to be executed first.
  *
  * @param buffer Pointer to the buffer that contains the new i.Link ID.
  * @param result Result code.
@@ -768,7 +824,7 @@ int sceCdWI(const u8 *buffer, u32 *result);
 int sceCdReadConsoleID(u8 *buffer, u32 *result);
 
 /** Writes a new ID for the console. This is not the same as the i.Link ID.
- * Does not work on consoles starting from the SCPH-50000 ("Dragon" MECHACON):
+ * Starting from Mechacon firmware version 50000, a unlock combination (0x03 0x46 and 0x03 0x47) needs to be executed first.
  *
  * @param buffer Pointer to the buffer that contains the new i.Link ID.
  * @param status Result code.
@@ -778,11 +834,11 @@ int sceCdWriteConsoleID(const u8 *buffer, u32 *status);
 
 /** Controls Audio Digital output.
  *
- * @param arg1 Unknown
+ * @param mode Set to a non-zero value to enable digital output.
  * @param status Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdCtrlADout(int arg1, u32 *status);
+int sceCdCtrlADout(int mode, u32 *status);
 
 /** Reads MECHACON version data (RR MM mm TT): RR = Magicgate region, MM = major, mm = minor, TT = system type (00 = PS2, 01 = PSX)
  * Magicgate region codes are: 00 = Japan, 01 = USA, 02 = Europe, 03 = Oceania, 04 = Asia, 05 = Russia, 06 = China, and 07 = Mexico.
@@ -817,7 +873,7 @@ int sceCdBootCertify(const u8 *romname);
 int sceCdRM(char *buffer, u32 *status);
 
 /** Sets the console's model name.
- * Does not work on consoles starting from the SCPH-50000 ("Dragon" MECHACON).
+ * Starting from Mechacon firmware version 50000, a unlock combination (0x03 0x46 and 0x03 0x47) needs to be executed first.
  * SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
  *
  * @param buffer Pointer to a buffer containing the new model name.
@@ -942,25 +998,47 @@ int sceCdRcBypassCtl(int mode, u32 *status);
  * Minimum Mechacon firmware version: 50000
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
+ * @param clock The time to wake up the system.
+ * @param userdata Any arbitrary value (not used in timer processing)
+ * @param wakeupreason The reason why the system woke up.
+ * @param flags bit 0 -> disable timer after expiration, bit 1 -> disable timer
  * @return 1 on success, 0 on failure
  */
-int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *arg2, u32 *arg3, int *arg4);
+int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *userdata, u32 *wakeupreason, int *flags);
 
 /** Writes wake up time.
  * Minimum Mechacon firmware version: 50000
+ * Note: in newer Mechacon firmware versions (TODO: determine the range), the wake up timer function is removed. However, the storage for the parameters remain.
+ * Note: if there was a non-zero value in sceCdCLOCK.stat the last time sceCdReadClock was called, no data will be written/enabled.
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
+ * @param clock The time to wake up the system.
+ * @param userdata Any arbitrary value (not used in timer processing)
+ * @param flags When 1, disables the timer after it has expired. When 255, disables the timer and sets the seconds value to 0xFF.
  * @return 1 on success, 0 on failure
  */
-int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 arg2, int arg3);
+int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 userdata, int flags);
 
-/** Remote control 2_7.
+/** Disables Mechacon actions performed using the remote control.
+ * The actions that can be specified are poweron, poweroff, reset and eject.
+ * The action performed by RM_PS2_NOLIGHT cannot be disabled.
  * Minimum Mechacon firmware version: 50000
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
  * @return 1 on success, 0 on failure
  */
-int sceRemote2_7(u16 a1, u32 *a2);
+int sceRemote2_7(u16 param, u32 *status);
+
+/** Retrieves the value set by sceRemote2_7.
+ * Minimum Mechacon firmware version: 50000
+ * Unofficial name.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @param param The value set by sceRemote2_7
+ * @param status Command status
+ * @return 1 on success, 0 on failure.
+ */
+int sceRemote2_7Get(u32 *param, u32 *status);
 
 /** Set the LED state of the face buttons of the console.
  * The state of the buttons will be reset when the power or eject button is pressed.
@@ -988,6 +1066,19 @@ int sceCdReadPS1BootParam(u8 *out, u32 *result);
  * @return 1 on success, 0 on failure
  */
 int sceCdSetFanProfile(u8 param, u32 *result);
+
+/** Sends SCMD 0x1D. Appears to be stubbed in Mechacon firmware 50000.
+ * Minimum Mechacon firmware version: 50000
+ * Unofficial name.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @param arg1 Unknown
+ * @param arg2 Unknown
+ * @param arg3 Unknown
+ * @param status Command status
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdSendSCmd1D(int *arg1, unsigned int *arg2, unsigned int *arg3, u32 *status);
 
 /** Change sys.
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES

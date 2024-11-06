@@ -201,6 +201,12 @@ int __ps2ipcRecvfromHelper(void *userdata, void *mem, size_t len, int flags, str
     return res;
 }
 
+int __ps2ipcRecvmsgHelper(void *userdata, struct msghdr *msg, int flags)
+{
+    // TODO
+    return -1;
+}
+
 int __ps2ipcSendHelper(void *userdata, const void *dataptr, size_t len, int flags)
 {
     int fd, res;
@@ -238,6 +244,12 @@ int __ps2ipcSendtoHelper(void *userdata, const void *dataptr, size_t len, int fl
     }
     return res;
 }
+
+int __ps2ipcSendmsgHelper(void *userdata, const struct msghdr *msg, int flags) {
+    // TODO
+    return -1;
+}
+
 
 int __ps2ipcIoctlHelper(void *userdata, int cmd, void *argp)
 {
@@ -334,6 +346,11 @@ int __ps2ipcSetsockoptHelper(void *userdata, int level, int optname, const void 
     return res;
 }
 
+struct hostent *ps2ipc_gethostbyaddr(const void *addr, int len, int type) {
+    // TODO
+    return NULL;
+}
+
 void __ps2ipcOpsInitializeImpl(void)
 {
     memset(&__ps2ipc_fdman_socket_ops, 0, sizeof(__ps2ipc_fdman_socket_ops));
@@ -343,6 +360,7 @@ void __ps2ipcOpsInitializeImpl(void)
     __ps2ipc_fdman_socket_ops.dns_getserver = ps2ipc_dns_getserver;
     __ps2ipc_fdman_socket_ops.socket = __ps2ipcSocketHelper;
     __ps2ipc_fdman_socket_ops.select = ps2ipc_select;
+    __ps2ipc_fdman_socket_ops.gethostbyaddr = ps2ipc_gethostbyaddr;
     __ps2ipc_fdman_socket_ops.gethostbyname = ps2ipc_gethostbyname;
 
     memset(&__ps2ipc_fdman_ops_socket, 0, sizeof(__ps2ipc_fdman_ops_socket));
@@ -355,8 +373,10 @@ void __ps2ipcOpsInitializeImpl(void)
     __ps2ipc_fdman_ops_socket.listen = __ps2ipcListenHelper;
     __ps2ipc_fdman_ops_socket.recv = __ps2ipcRecvHelper;
     __ps2ipc_fdman_ops_socket.recvfrom = __ps2ipcRecvfromHelper;
+    __ps2ipc_fdman_ops_socket.recvmsg = __ps2ipcRecvmsgHelper;
     __ps2ipc_fdman_ops_socket.send = __ps2ipcSendHelper;
     __ps2ipc_fdman_ops_socket.sendto = __ps2ipcSendtoHelper;
+    __ps2ipc_fdman_ops_socket.sendmsg = __ps2ipcSendmsgHelper;
     __ps2ipc_fdman_ops_socket.ioctl = __ps2ipcIoctlHelper;
     __ps2ipc_fdman_ops_socket.getsockname = __ps2ipcGetsocknameHelper;
     __ps2ipc_fdman_ops_socket.getpeername = __ps2ipcGetpeernameHelper;

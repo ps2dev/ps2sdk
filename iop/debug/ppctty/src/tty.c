@@ -7,6 +7,7 @@ IOP->PPC TTY
 #include <tamtypes.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <errno.h>
 #include <sysclib.h>
 #include <sysmem.h>
 #include <excepman.h>
@@ -122,7 +123,7 @@ static iop_device_ops_t fsd_ops =
 static iop_device_t tty_fsd =
 {
 	"tty",
-	IOP_DT_FS,
+	IOP_DT_CHAR | IOP_DT_CONS,
 	1,
 	"TTY via PPC SIO",
 	&fsd_ops,

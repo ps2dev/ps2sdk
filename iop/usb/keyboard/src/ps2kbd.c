@@ -20,6 +20,7 @@
 #include "sifcmd.h"
 #include "sifrpc.h"
 #include "sysclib.h"
+#include <errno.h>
 #include "sysmem.h"
 #include "usbd.h"
 #include "usbd_macro.h"
@@ -1002,7 +1003,7 @@ int fio_open(iop_file_t *f, const char *name, int mode)
   //printf("fio_open() %s %d\n", name, mode);
   if(strcmp(name, PS2KBD_KBDFILE)) /* If not the keyboard file */
     {
-      return -1;
+      return -EPERM;
     }
 
   return 0;
@@ -1094,7 +1095,7 @@ int fio_ioctl(iop_file_t *f, int cmd, void *param)
       break;
     case PS2KBD_IOCTL_SETREPEATRATE: ps2kbd_ioctl_setrepeatrate(*(u32 *) param);
       break;
-    default : return -1;
+    default : return -EPERM;
     }
 
   return 0;

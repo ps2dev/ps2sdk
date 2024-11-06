@@ -2,13 +2,27 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Copyright ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-# IOP_CFLAGS += -DDEBUG
-
-IOP_OBJS = hcd.o hub.o interface.o mem.o usbd.o usbio.o driver.o imports.o exports.o
+IOP_OBJS = \
+	hub.o \
+	mem.o \
+	timer.o \
+	endpoint.o \
+	io_request.o \
+	hub_resets.o \
+	td_queue.o \
+	hcd.o \
+	usbd_sys.o \
+	usbd_api.o \
+	usbd_main.o \
+	report_descriptor_init.o \
+	device_driver.o \
+	device.o \
+	imports.o \
+	exports.o
 IOP_PREFER_GPOPT = 16384
 
 include $(PS2SDKSRC)/Defs.make

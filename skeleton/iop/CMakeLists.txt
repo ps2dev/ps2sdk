@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(hello LANGUAGES C)
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+SET(IOP_BIN hello.irx)
+SET(IOP_SRCS hello_exports.c hello_main.c exports.c imports.c)
+SET(IOP_LIBS)
+
+BUILD_IOP_EXPORTS(exports.c ${CMAKE_CURRENT_SOURCE_DIR}/exports.tab)
+BUILD_IOP_IMPORTS(imports.c ${CMAKE_CURRENT_SOURCE_DIR}/imports.lst)
+
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fno-builtin")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
+
+ADD_EXECUTABLE(${IOP_BIN} ${IOP_SRCS})
+
+ADD_CUSTOM_COMMAND(TARGET ${IOP_BIN} POST_BUILD COMMAND md5sum ARGS ${IOP_BIN})

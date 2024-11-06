@@ -373,7 +373,7 @@ esdrv_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, v
 
 static s64 esdrv_df_null_long()
 {
-	return -48;
+	return -EUNSUP;
 }
 
 static void EsAcsSetAaryptorIoMode(void)

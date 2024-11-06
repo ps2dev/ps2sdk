@@ -228,6 +228,7 @@ static void fs_reset(void)
 static int fs_inited = 0;
 
 //---------------------------------------------------------------------------
+
 static int fs_init(iop_device_t *driver)
 {
     (void)driver;
@@ -433,7 +434,7 @@ static int fs_lseek(iop_file_t *fd, int offset, int whence)
             break;
         default:
             _fs_unlock();
-            return -1;
+            return -EPERM;
     }
     if ((int)(rec->filePos) < 0) {
         rec->filePos = 0;

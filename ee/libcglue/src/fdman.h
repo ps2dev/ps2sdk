@@ -32,6 +32,7 @@ void __fdman_init();
 void __fdman_deinit();
 int  __fdman_get_new_descriptor();
 int  __fdman_get_dup_descriptor(int fd);
+int __fdman_get_dup2_descriptor(int fd, int newfd);
 void __fdman_release_descriptor(int fd);
 
 #endif
