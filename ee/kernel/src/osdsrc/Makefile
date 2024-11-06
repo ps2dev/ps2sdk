@@ -27,6 +27,12 @@ clean:
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
 
-$(EE_OSDSRC_ELF): $(EE_OBJS)
+.INTERMEDIATE:: $(EE_OSDSRC_ELF)_tmp$(MAKE_CURPID)
+
+$(EE_OSDSRC_ELF)_tmp$(MAKE_CURPID): $(EE_OBJS)
 	$(DIR_GUARD)
 	$(EE_CC) $(EE_CFLAGS) -o $@ $^ -nostdlib -nostartfiles -Tlinkfile -s $(EE_LIBS)
+
+$(EE_OSDSRC_ELF): $(EE_OSDSRC_ELF)_tmp$(MAKE_CURPID)
+	$(DIR_GUARD)
+	mv $< $@
