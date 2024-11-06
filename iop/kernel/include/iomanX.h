@@ -20,6 +20,7 @@
 #ifdef _IOP
 #include <irx.h>
 #endif
+#include <errno.h>
 #include <stdarg.h>
 #include <io_common.h>
 #include <iox_stat.h>
@@ -86,6 +87,9 @@ typedef struct _iomanX_iop_device {
 	const char *desc;
 	struct _iomanX_iop_device_ops *ops;
 } iomanX_iop_device_t;
+
+static inline int not_supported_op (void) {return -ENOTSUP;}
+#define NOT_SUPPORTED (void*)&not_supported_op
 
 typedef struct _iomanX_iop_device_ops {
 	int	(*init)(iomanX_iop_device_t *);

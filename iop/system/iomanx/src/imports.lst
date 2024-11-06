@@ -1,3 +1,8 @@
+
+sysmem_IMPORTS_start
+I_Kprintf
+sysmem_IMPORTS_end
+
 stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end

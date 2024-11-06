@@ -26,8 +26,6 @@ static int tty_sema = -1;
 
 extern void tty_puts(const char *str);
 
-static int ttyfs_error() { return -EPERM; }
-
 static int ttyfs_init()
 {
     DPRINTF("FS Init()\n");
@@ -105,21 +103,21 @@ static iop_device_ops_t fsd_ops =
 {
     &ttyfs_init,
     &ttyfs_deinit,
-    (void *)&ttyfs_error,
+    NOT_SUPPORTED,
     &ttyfs_open,
     &ttyfs_close,
-	(void *)&ttyfs_error,
+	NOT_SUPPORTED,
     &ttyfs_write,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
 	&ttyfs_dopen,
     &ttyfs_close,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
 };
 
 static iop_device_t tty_fsd =

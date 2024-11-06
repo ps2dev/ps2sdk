@@ -42,7 +42,6 @@ static struct RomFileSlot fileSlots[ROMDRV_MAX_FILES];
 
 /* Function prototypes */
 static int init(void);
-static int romUnsupported(void);
 static int romInit(iop_device_t *device);
 static int romOpen(iop_file_t *fd, const char *path, int mode);
 static int romClose(iop_file_t *);
@@ -54,22 +53,23 @@ static struct RomdirFileStat *GetFileStatFromImage(const struct RomImg *ImageSta
 
 static iop_device_ops_t ops = {
     &romInit,
-    (void *)&romUnsupported,
-    (void *)&romUnsupported,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
     &romOpen,
     &romClose,
     &romRead,
     &romWrite,
     &romLseek,
-    (void *)&romUnsupported,
-    (void *)&romUnsupported,
-    (void *)&romUnsupported,
-    (void *)&romUnsupported,
-    (void *)&romUnsupported,
-    (void *)&romUnsupported,
-    (void *)&romUnsupported,
-    (void *)&romUnsupported,
-    (void *)&romUnsupported};
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED,
+    NOT_SUPPORTED
+};
 
 static iop_device_t DeviceOps = {
     "rom",
@@ -107,11 +107,6 @@ static int init(void)
     memset(fileSlots, 0, sizeof(fileSlots));
     // Add DEV2 (Boot ROM) as rom0. Unlike ROMDRV v1.1, the code for DEV1 is in the ADDDRV module.
     romGetImageStat((const void *)0xbfc00000, (const void *)0xbfc40000, &images[0]);
-    return 0;
-}
-
-static int romUnsupported(void)
-{
     return 0;
 }
 

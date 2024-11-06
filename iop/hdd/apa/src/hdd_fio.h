@@ -31,10 +31,8 @@ int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg, uns
 int hddMount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
 int hddUmount(iomanX_iop_file_t *f, const char *fsname);
 #else
-#define hddMount ((void*)&hddUnsupported)
-#define hddUmount ((void*)&hddUnsupported)
+#define hddMount (NOT_SUPPORTED)
+#define hddUmount (NOT_SUPPORTED)
 #endif
-
-int hddUnsupported(iomanX_iop_file_t *f);
 
 #endif /* _HDD_FIO_H */

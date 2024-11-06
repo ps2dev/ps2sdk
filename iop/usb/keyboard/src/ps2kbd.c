@@ -974,16 +974,10 @@ void ps2kbd_ioctl_setblockmode(u32 blockmode)
 }
 
 void ps2kbd_ioctl_setrepeatrate(u32 rate)
-
 {
   kbd_repeatrate = rate;
 }
 
-int fio_dummy()
-{
-  //printf("fio_dummy()\n");
-  return -EIO;
-}
 
 int fio_init(iop_device_t *driver)
 {
@@ -1117,26 +1111,25 @@ int fio_close(iop_file_t *f)
 }
 
 static iop_device_ops_t fio_ops =
-
-  {
-    &fio_init,
-    (void *)&fio_dummy,
-    &fio_format,
-    &fio_open,
-    &fio_close,
-    &fio_read,
-    (void *)&fio_dummy,
-    (void *)&fio_dummy,
-    &fio_ioctl,
-    (void *)&fio_dummy,
-    (void *)&fio_dummy,
-    (void *)&fio_dummy,
-    (void *)&fio_dummy,
-    (void *)&fio_dummy,
-    (void *)&fio_dummy,
-    (void *)&fio_dummy,
-    (void *)&fio_dummy,
-  };
+{
+  &fio_init,
+  NOT_SUPPORTED,
+  &fio_format,
+  &fio_open,
+  &fio_close,
+  &fio_read,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  &fio_ioctl,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+  NOT_SUPPORTED,
+};
 
 static iop_device_t kbd_filedrv = {
   PS2KBD_FSNAME,
