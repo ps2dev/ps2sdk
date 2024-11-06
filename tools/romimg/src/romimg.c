@@ -6,10 +6,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <limits.h>
 
 #include "platform.h"
 #include "romimg.h"
 #include "SonyRX.h"
+
+#define BUFCHK(X) (X[0] == '\0') ? "" : X
+#define IMAGE_COMMENT_BASESIZE 31
 
 struct ROMImgStat
 {
@@ -139,12 +144,7 @@ static int GetExtInfoStat(const struct ROMImgStat *ImageStat, struct RomDirFileF
 int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 {
 	unsigned int CommentLength;
-	char LocalhostName[32], cwd[128];
-#if defined(_WIN32) || defined(WIN32)
-	char UserName[32] = "";
-#else
-	char* UserName;
-#endif
+	char LocalhostName[32] = "\0", cwd[MAX_PATH] = "\0", UserName[32] = "\0";
 	struct FileEntry *ResetFile;
 	struct ExtInfoFieldEntry *ExtInfoEntry;
 
@@ -154,14 +154,15 @@ int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 #if defined(_WIN32) || defined(WIN32)
 	GetUsername(UserName, sizeof(UserName));
 #else
-	UserName = getenv("USER");
+    getlogin_r(UserName, sizeof(UserName));
 #endif
 	GetLocalhostName(LocalhostName, sizeof(LocalhostName));
 	GetCurrentWorkingDirectory(cwd, sizeof(cwd));
 	/* Comment format: YYYYMMDD-XXXYYY,conffile,<filename>,<user>@<localhost>/<image path> */
-	CommentLength = 31 + strlen(filename) + strlen(UserName) + strlen(LocalhostName) + strlen(cwd);
-	ROMImg->comment = (char *)malloc(CommentLength);
-	sprintf(ROMImg->comment, "%08x,conffile,%s,%s@%s/%s", ROMImg->date, filename, (UserName[0] =='\0')?"":UserName, LocalhostName, cwd);
+	CommentLength = IMAGE_COMMENT_BASESIZE + strlen(filename) + sizeof(LocalhostName) + sizeof(UserName) + MAX_PATH;
+	ROMImg->comment = (char *)calloc(0, CommentLength+1);
+    if (!ROMImg->comment) return ENOMEM;
+	snprintf(ROMImg->comment, CommentLength, "%08x,conffile,%s,%s@%s/%s", ROMImg->date, filename, BUFCHK(UserName), BUFCHK(LocalhostName), cwd);
 
 	// Create a blank RESET file.
 	ROMImg->NumFiles = 1;

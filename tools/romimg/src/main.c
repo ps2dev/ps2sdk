@@ -99,7 +99,7 @@ int main(int argc, char **argv)
             }
             UnloadROMImg(&ROMImg);
         } else
-            ERROR("(Internal fault) Can't create blank image file: %d. Please report.\n", result);
+            ERROR("(Internal fault) Can't create blank image file: %d (%s). Please report.\n", result, strerror(result));
     } else if (argc >= 4 && strcmp(argv[1], "-a") == 0) {
         if ((result = LoadROMImg(&ROMImg, argv[2])) == 0) {
             for (i = 0, FilesAffected = 0; i < argc - 3; i++) {

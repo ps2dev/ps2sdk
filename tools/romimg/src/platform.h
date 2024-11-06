@@ -12,5 +12,8 @@ int GetCurrentWorkingDirectory(char *buffer, unsigned int BufferSize);
 #else
 #define PATHSEP '/'
 #endif
+#ifndef MAX_PATH
+#define MAX_PATH 4096
+#endif
 
 #endif /* __PLATFORM_H__ */
