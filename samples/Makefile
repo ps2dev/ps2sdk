@@ -23,6 +23,7 @@ release-samples:
 	$(MKDIR) -p $(SHARE_TARGET)
 	cp -f Makefile_sample $(SAMPLES_TARGET)/Makefile
 	cp -f Makefile.pref_sample $(SAMPLES_TARGET)/Makefile.pref
+	cp -f Makefile.ioprp_sample $(SAMPLES_TARGET)/Makefile.ioprp
 	cp -f Makefile.eeglobal_sample $(SAMPLES_TARGET)/Makefile.eeglobal
 	cp -f Makefile.eeglobal_cpp_sample $(SAMPLES_TARGET)/Makefile.eeglobal_cpp
 	cp -f Makefile.iopglobal_sample $(SAMPLES_TARGET)/Makefile.iopglobal
