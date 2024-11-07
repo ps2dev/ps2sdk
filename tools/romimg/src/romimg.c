@@ -143,7 +143,7 @@ static int GetExtInfoStat(const struct ROMImgStat *ImageStat, struct RomDirFileF
 int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 {
 	unsigned int CommentLength;
-	char LocalhostName[32] = "\0", cwd[MAX_PATH] = "\0", UserName[32] = "\0";
+	char LocalhostName[32] = {0}, cwd[PATH_MAX] = {0}, UserName[32] = {0};
 	struct FileEntry *ResetFile;
 	struct ExtInfoFieldEntry *ExtInfoEntry;
 
@@ -158,10 +158,10 @@ int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 	GetLocalhostName(LocalhostName, sizeof(LocalhostName));
 	GetCurrentWorkingDirectory(cwd, sizeof(cwd));
 	/* Comment format: YYYYMMDD-XXXYYY,conffile,<filename>,<user>@<localhost>/<image path> */
-	CommentLength = IMAGE_COMMENT_BASESIZE + strlen(filename) + sizeof(LocalhostName) + sizeof(UserName) + MAX_PATH;
+	CommentLength = IMAGE_COMMENT_BASESIZE + strlen(filename) + sizeof(LocalhostName) + sizeof(UserName) + sizeof(cwd);
 	ROMImg->comment = (char *)malloc( CommentLength+1);
     if (!ROMImg->comment) return ENOMEM;
-	snprintf(ROMImg->comment, CommentLength, "%08x,conffile,%s,%s@%s/%s", ROMImg->date, filename, BUFCHK(UserName), BUFCHK(LocalhostName), cwd);
+	snprintf(ROMImg->comment, CommentLength, "%08x,conffile,%s,%s@%s/%s", ROMImg->date, filename, UserName, LocalhostName, cwd);
 
 	// Create a blank RESET file.
 	ROMImg->NumFiles = 1;
@@ -454,7 +454,7 @@ static int AddExtInfoStat(struct FileEntry *file, unsigned char type, void *data
 
 int AddFile(ROMIMG *ROMImg, const char *path, int upperconv)
 {
-    char tbuf[10] = "\0"; // we dont need a large buf, this is for filling in the filename on ROMFS
+    char tbuf[9] = "\0"; // we dont need a large buf, this is for filling in the filename on ROMFS
 	FILE *InputFile;
 	int result;
 	unsigned int FileDateStamp;

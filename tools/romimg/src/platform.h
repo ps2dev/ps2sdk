@@ -13,8 +13,5 @@ void upperbuff(char *temp);
 #else
 #define PATHSEP '/'
 #endif
-#ifndef MAX_PATH
-#define MAX_PATH 4096
-#endif
 
 #endif /* __PLATFORM_H__ */
