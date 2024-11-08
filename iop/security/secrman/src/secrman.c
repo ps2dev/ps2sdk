@@ -66,8 +66,12 @@ static int secr_set_header(int mode, int cnum, int arg2, void *buffer);
 static int Read_BIT(SecrBitTable_t *BitTable);
 static unsigned int get_BitTableOffset(const void *buffer);
 static int func_00000b5c(const void *block, unsigned int size);
-static int func_00000c94(void *kbit);
-static int func_00000cd4(void *kc);
+
+/// @brief obtain decrypted kbit from mechacon, already encrypted with the session key, ready to be sent to the memory card for final encryption
+static int scePreEncryptKbit(void *kbit);
+
+/// @brief obtain decrypted kc   from mechacon, already encrypted with the session key, ready to be sent to the memory card for final encryption
+static int scePreEncryptKc(void *kc);
 static int func_00000d14(void *icvps2);
 static int Uses_ICVPS2(const void *buffer);
 
@@ -955,13 +959,13 @@ int SecrDownloadBlock(void *block, unsigned int size)
 }
 
 // 0x00000c94
-static int func_00000c94(void *kbit)
+static int scePreEncryptKbit(void *kbit)
 {
-    if (func_00001ce8(kbit) == 0) {
+    if (_PreEncryptKbit1(kbit) == 0) {
         return 0;
     }
 
-    if (func_00001d64((void *)((u8 *)kbit + 8)) != 1) {
+    if (_PreEncryptKbit2((void *)((u8 *)kbit + 8)) != 1) {
         return 0;
     }
 
@@ -970,13 +974,13 @@ static int func_00000c94(void *kbit)
 
 
 // 0x00000cd4
-static int func_00000cd4(void *kc)
+static int scePreEncryptKc(void *kc)
 {
-    if (func_00001de0(kc) == 0) {
+    if (_PreEncryptKc1(kc) == 0) {
         return 0;
     }
 
-    if (func_00001e5c((void *)((u8 *)kc + 8)) != 1) {
+    if (_PreEncryptKc2((void *)((u8 *)kc + 8)) != 1) {
         return 0;
     }
 
@@ -1022,7 +1026,7 @@ static int card_encrypt(int port, int slot, void *buffer)
 // 0x00000fd4 - export #17
 int SecrDownloadGetKbit(int port, int slot, void *kbit)
 {
-    if (func_00000c94(kbit) == 0) {
+    if (scePreEncryptKbit(kbit) == 0) {
         return 0;
     }
 
@@ -1040,7 +1044,7 @@ int SecrDownloadGetKbit(int port, int slot, void *kbit)
 // 0x00001048 - export #18
 int SecrDownloadGetKc(int port, int slot, void *kc)
 {
-    if (func_00000cd4(kc) == 0) {
+    if (scePreEncryptKc(kc) == 0) {
         return 0;
     }
 
@@ -1305,7 +1309,7 @@ int SecrAuthDongle(int port, int slot, int cnum)
     _printf("dongle auth 0x0e\n");
     //sp193 comment on SecrAuthCard for the following function call: Originally, it used the same region as CardNonce. But that might have just been a result of compiler code optimization.
     //El_isra: contrary to what sp193 comments about this, ghidra shows this as a separate buffer than CardNonce. on both SecrAuthCard and SecrAuthDongle. maybe error, or an actual diff on the SECRMAN version sp193 reversed? who knows...
-    if (card_auth_read(port, slot, CardResponse1, 0xF0, 0x0F) == 0) { 
+    if (card_auth_read(port, slot, CardResponse1, 0xF0, 0x0F) == 0) {
         goto Error2_end;
     }
 

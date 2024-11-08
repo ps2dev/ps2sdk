@@ -17,8 +17,8 @@ int func_00001c98(unsigned short int size);
 int get_BIT_length(unsigned short int *BitLength);
 int func_00001b00(void *data, unsigned short int length);
 int mechacon_set_block_size(unsigned short int size);
-int func_00001ce8(void *kbit1);
-int func_00001d64(void *kbit2);
-int func_00001de0(void *kc1);
-int func_00001e5c(void *kc2);
+int _PreEncryptKbit1(void *kbit1); // request first  half of pre-encrypted kbit
+int _PreEncryptKbit2(void *kbit2); // request second half of pre-encrypted kbit
+int _PreEncryptKc1(void *kc1); // request first  half of pre-encrypted kc
+int _PreEncryptKc2(void *kc2); // request second half of pre-encrypted kc
 int func_00001ed8(void *icvps2);
