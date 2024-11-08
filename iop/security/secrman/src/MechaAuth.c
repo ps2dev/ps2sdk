@@ -341,7 +341,7 @@ int mechacon_set_block_size(unsigned short int size)
 }
 
 // 0x00001ce8
-int func_00001ce8(void *kbit1)
+int _PreEncryptKbit1(void *kbit1)
 {
     unsigned char ret[16];
 
@@ -359,7 +359,7 @@ int func_00001ce8(void *kbit1)
 }
 
 // 0x00001d64
-int func_00001d64(void *kbit2)
+int _PreEncryptKbit2(void *kbit2)
 {
     unsigned char ret[16];
 
@@ -377,7 +377,7 @@ int func_00001d64(void *kbit2)
 }
 
 // 0x00001de0
-int func_00001de0(void *kc1)
+int _PreEncryptKc1(void *kc1)
 {
     unsigned char ret[16];
 
@@ -395,7 +395,7 @@ int func_00001de0(void *kc1)
 }
 
 // 0x00001e5c
-int func_00001e5c(void *kc2)
+int _PreEncryptKc2(void *kc2)
 {
     unsigned char ret[16];
 
