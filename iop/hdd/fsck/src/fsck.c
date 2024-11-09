@@ -896,10 +896,10 @@ fsck_thread_end:
 }
 
 // 0x0000264c
-//static int FsckUnsupported(void)
-//{
-//    return 0;
-//}
+static int FsckUnsupported(void)
+{
+    return 0;
+}
 
 // 0x00000340
 static int fsckCheckBitmap(pfs_mount_t *mount, void *buffer)
@@ -1218,32 +1218,32 @@ static int FsckIoctl2(iomanX_iop_file_t *fd, int cmd, void *arg, unsigned int ar
 }
 
 static iomanX_iop_device_ops_t FsckDeviceOps = {
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
     NULL,
     &FsckOpen,
     &FsckClose,
     NULL,
     NULL,
     NULL,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
+    (void *)&FsckUnsupported,
     &FsckIoctl2};
 
 static iomanX_iop_device_t FsckDevice = {
