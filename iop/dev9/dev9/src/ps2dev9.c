@@ -122,6 +122,11 @@ static int expbay_init(int sema_attr);
 
 extern struct irx_export_table _exp_dev9;
 
+static int dev9x_dummy(void)
+{
+    return 0;
+}
+
 static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, unsigned int arglen, void *buf, unsigned int buflen)
 {
     (void)f;
@@ -148,33 +153,33 @@ static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, un
 
 static iop_device_ops_t dev9x_ops =
     {
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
         &dev9x_devctl,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
 };
 
 static iop_device_t dev9x_device =
