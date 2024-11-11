@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include "romimg.h"
 
@@ -34,13 +35,15 @@ static void DisplayROMImgDetails(const ROMIMG *ROMImg)
 
 static void DisplaySyntaxHelp(void)
 {
-    printf(REDBOLD"Syntax error"DEFCOL". Syntax:\n"
-           "ROMIMG -c <ROM image> <files>\n\tCreate ROM image\n"
+    printf("Syntax:\n"
+           "ROMIMG -c <ROM image> <files>\n\tCreate ROM image *\n"
            "ROMIMG -l <ROM image>\n\tList files in ROM image\n"
-           "ROMIMG -a <ROM image> <file(s)>\n\tAdd file(s) to ROM image\n"
+           "ROMIMG -a <ROM image> <file(s)>\n\tAdd file(s) to ROM image *\n"
            "ROMIMG -d <ROM image> <file(s)>\n\tDelete file(s) from ROM image\n"
            "ROMIMG -x <ROM image>\n\tExtract all files from ROM image\n"
-           "ROMIMG -x <ROM image> <file>\n\tExtract file from ROM image\n");
+           "ROMIMG -x <ROM image> <file>\n\tExtract file from ROM image\n"
+           "\n note*: write the switch in uppercase to perform filename transformation (eg: 'ioman.irx' > 'IOMAN')\n"
+           );
 }
 
 static void DisplayAddDeleteOperationResult(int result, const char *InvolvedFile)
@@ -80,31 +83,30 @@ int main(int argc, char **argv)
 
     if (argc < 2) {
         DisplaySyntaxHelp();
-        DPRINTF("ERROR: LESS THAN TWO ARGS PROVIDED\n");
         return EINVAL;
     }
 
-    if (argc >= 4 && strcmp(argv[1], "-c") == 0) {
+    if (argc >= 4 && strcasecmp(argv[1], "-c") == 0) {
         if ((result = CreateBlankROMImg(argv[2], &ROMImg)) == 0) {
             for (FilesAffected = 0, i = 0; i < argc - 3; i++) {
                 printf("Adding file '%s'", argv[3 + i]);
-                if ((result = AddFile(&ROMImg, argv[3 + i])) == 0)
+                if ((result = AddFile(&ROMImg, argv[3 + i], isupper(argv[1][1]))) == 0)
                     FilesAffected++;
                 printf(result == 0 ? GRNBOLD" done!"DEFCOL"\n" : REDBOLD" failed!"DEFCOL"\n");
             }
 
             if (FilesAffected > 0) {
-                printf("Writing image...");
+                printf("Writing image... ");
                 printf("%s", (result = WriteROMImg(argv[2], &ROMImg)) == 0 ? GRNBOLD"done!"DEFCOL"\n" : REDBOLD"failed!"DEFCOL"\n");
             }
             UnloadROMImg(&ROMImg);
         } else
-            ERROR("(Internal fault) Can't create blank image file: %d. Please report.\n", result);
-    } else if (argc >= 4 && strcmp(argv[1], "-a") == 0) {
+            ERROR("(Internal fault) Can't create blank image file: %d (%s). Please report.\n", result, strerror(result));
+    } else if (argc >= 4 && strcasecmp(argv[1], "-a") == 0) {
         if ((result = LoadROMImg(&ROMImg, argv[2])) == 0) {
             for (i = 0, FilesAffected = 0; i < argc - 3; i++) {
                 printf("Adding file '%s'", argv[3 + i]);
-                if ((result = AddFile(&ROMImg, argv[3 + i])) == 0)
+                if ((result = AddFile(&ROMImg, argv[3 + i], isupper(argv[1][1]))) == 0)
                     FilesAffected++;
                 DisplayAddDeleteOperationResult(result, argv[3 + i]);
             }

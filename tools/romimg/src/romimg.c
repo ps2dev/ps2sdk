@@ -6,10 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <limits.h>
 
 #include "platform.h"
 #include "romimg.h"
 #include "SonyRX.h"
+
+#define IMAGE_COMMENT_BASESIZE 31
 
 struct ROMImgStat
 {
@@ -139,12 +143,7 @@ static int GetExtInfoStat(const struct ROMImgStat *ImageStat, struct RomDirFileF
 int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 {
 	unsigned int CommentLength;
-	char LocalhostName[32], cwd[128];
-#if defined(_WIN32) || defined(WIN32)
-	char UserName[32] = "";
-#else
-	char* UserName;
-#endif
+	char LocalhostName[32] = {0}, cwd[PATH_MAX] = {0}, UserName[32] = {0};
 	struct FileEntry *ResetFile;
 	struct ExtInfoFieldEntry *ExtInfoEntry;
 
@@ -154,14 +153,15 @@ int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 #if defined(_WIN32) || defined(WIN32)
 	GetUsername(UserName, sizeof(UserName));
 #else
-	UserName = getenv("USER");
+    getlogin_r(UserName, sizeof(UserName));
 #endif
 	GetLocalhostName(LocalhostName, sizeof(LocalhostName));
 	GetCurrentWorkingDirectory(cwd, sizeof(cwd));
 	/* Comment format: YYYYMMDD-XXXYYY,conffile,<filename>,<user>@<localhost>/<image path> */
-	CommentLength = 31 + strlen(filename) + strlen(UserName) + strlen(LocalhostName) + strlen(cwd);
-	ROMImg->comment = (char *)malloc(CommentLength);
-	sprintf(ROMImg->comment, "%08x,conffile,%s,%s@%s/%s", ROMImg->date, filename, (UserName[0] =='\0')?"":UserName, LocalhostName, cwd);
+	CommentLength = IMAGE_COMMENT_BASESIZE + strlen(filename) + sizeof(LocalhostName) + sizeof(UserName) + sizeof(cwd);
+	ROMImg->comment = (char *)malloc( CommentLength+1);
+    if (!ROMImg->comment) return ENOMEM;
+	snprintf(ROMImg->comment, CommentLength, "%08x,conffile,%s,%s@%s/%s", ROMImg->date, filename, UserName, LocalhostName, cwd);
 
 	// Create a blank RESET file.
 	ROMImg->NumFiles = 1;
@@ -452,8 +452,9 @@ static int AddExtInfoStat(struct FileEntry *file, unsigned char type, void *data
 	return result;
 }
 
-int AddFile(ROMIMG *ROMImg, const char *path)
+int AddFile(ROMIMG *ROMImg, const char *path, int upperconv)
 {
+    char tbuf[9] = "\0"; // we dont need a large buf, this is for filling in the filename on ROMFS
 	FILE *InputFile;
 	int result;
 	unsigned int FileDateStamp;
@@ -461,6 +462,16 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 	if ((InputFile = fopen(path, "rb")) != NULL) {
 		const char* fname = strrchr(path, PATHSEP);
 		if (fname == NULL) fname = path; else fname++;
+        if (upperconv) {
+            strncpy(tbuf, fname, sizeof(tbuf));
+            tbuf[sizeof(tbuf) - 1] = '\0';
+            if (tbuf[0] != '\0') {
+                upperbuff(tbuf);
+                fname = tbuf;
+                char* T = strrchr(fname, '.');
+                if (T != NULL) *T = '\0'; //null terminate extension
+            }
+        }
 		int size;
 		fseek(InputFile, 0, SEEK_END);
 		size = ftell(InputFile);
@@ -476,7 +487,7 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 					file = &ROMImg->files[ROMImg->NumFiles - 1];
 					memset(&ROMImg->files[ROMImg->NumFiles - 1], 0, sizeof(struct FileEntry));
 
-					strncpy(file->RomDir.name, fname, sizeof(file->RomDir.name) - 1);
+					strncpy(file->RomDir.name, fname, sizeof(file->RomDir.name));
                     file->RomDir.name[sizeof(file->RomDir.name) - 1] = '\0';
 					file->RomDir.ExtInfoEntrySize = 0;
 
