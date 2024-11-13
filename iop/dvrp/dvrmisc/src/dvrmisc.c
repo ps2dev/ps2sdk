@@ -33,8 +33,6 @@ extern int dvrmisc_df_exit(iomanX_iop_device_t *dev);
 extern int dvrmisc_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
 extern int dvrmisc_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrmisc_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrmisc_df_null();
-extern s64 dvrmisc_df_null_long();
 extern int dvrioctl2_nop(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrioctl2_version(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrioctl2_led_hdd_rec(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
@@ -95,33 +93,33 @@ struct DevctlCmdTbl_t
 };
 static iomanX_iop_device_ops_t DvrFuncTbl =
     {
-        &dvrmisc_df_init,
-        &dvrmisc_df_exit,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_ioctl,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null_long,
-        &dvrmisc_df_devctl,
-        &dvrmisc_df_null,
-        &dvrmisc_df_null,
-        &dvrmisc_df_ioctl2,
+        &dvrmisc_df_init, // init
+        &dvrmisc_df_exit, // deinit
+        NOT_SUPPORTED, // format
+        NOT_SUPPORTED, // open
+        NOT_SUPPORTED, // close
+        NOT_SUPPORTED, // read
+        NOT_SUPPORTED, // write
+        NOT_SUPPORTED, // lseek
+        &dvrmisc_df_ioctl, // ioctl
+        NOT_SUPPORTED, // remove
+        NOT_SUPPORTED, // mkdir
+        NOT_SUPPORTED, // rmdir
+        NOT_SUPPORTED, // dopen
+        NOT_SUPPORTED, // dclose
+        NOT_SUPPORTED, // dread
+        NOT_SUPPORTED, // getstat
+        NOT_SUPPORTED, // chstat
+        NOT_SUPPORTED, // rename
+        NOT_SUPPORTED, // chdir
+        NOT_SUPPORTED, // sync
+        NOT_SUPPORTED, // mount
+        NOT_SUPPORTED, // umount
+        NOT_SUPPORTED_S64, // lseek64
+        &dvrmisc_df_devctl, // devctl
+        NOT_SUPPORTED, // symlink
+        NOT_SUPPORTED, // readlink
+        &dvrmisc_df_ioctl2, // ioctl2
     };
 static iomanX_iop_device_t DVRMISC = {
     .name = "dvr_misc",
@@ -274,16 +272,6 @@ int dvrmisc_df_ioctl2(
     WaitSema(sema_id);
     SignalSema(sema_id);
     return -EINVAL;
-}
-
-int dvrmisc_df_null()
-{
-    return -EUNSUP;
-}
-
-s64 dvrmisc_df_null_long()
-{
-    return -EUNSUP;
 }
 
 int dvrioctl2_nop(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)

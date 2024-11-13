@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <ioman_mod.h>
 #include <sysmem.h>
+#include <ioman.h>
 
 #include "ps2ip.h"
 
@@ -348,24 +349,6 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
 }
 
 /**
- * Any calls we don't implement calls dummy.
- */
-int httpDummy()
-{
-	M_PRINTF("dummy function called\n");
-	return -EIO;
-}
-
-int httpInitialize(iop_io_device_t *driver)
-{
-	(void)driver;
-
-	M_PRINTF("filesystem driver initialized\n");
-
-	return 0;
-}
-
-/**
  * Open has the most work to do in the file driver.  It must:
  *
  *  1. Find a free file Handle.
@@ -500,23 +483,23 @@ int httpLseek(iop_io_file_t *f, int offset, int mode)
 
 
 static iop_io_device_ops_t ps2httpOps = {
-	&httpInitialize,
-	(void *)&httpDummy,
-	(void *)&httpDummy,
-	&httpOpen,
-	&httpClose,
-	&httpRead,
-	(void *)&httpDummy,
-	&httpLseek,
-	(void *)&httpDummy,
-	(void *)&httpDummy,
-	(void *)&httpDummy,
-	(void *)&httpDummy,
-	(void *)&httpDummy,
-	(void *)&httpDummy,
-	(void *)&httpDummy,
-	(void *)&httpDummy,
-	(void *)&httpDummy,
+	DUMMY_IMPLEMENTATION, // init
+	DUMMY_IMPLEMENTATION, // deinit
+	NOT_SUPPORTED, // format
+	&httpOpen, // open
+	&httpClose, // close
+	&httpRead, // read
+	NOT_SUPPORTED, // write
+	&httpLseek, // lseek
+	NOT_SUPPORTED, // ioctl
+	NOT_SUPPORTED, // remove
+	NOT_SUPPORTED, // mkdir
+	NOT_SUPPORTED, // rmdir
+	NOT_SUPPORTED, // dopen
+	NOT_SUPPORTED, // dclose
+	NOT_SUPPORTED, // dread
+	NOT_SUPPORTED, // getstat
+	NOT_SUPPORTED, // chstat
 };
 
 static iop_io_device_t ps2httpDev = {

@@ -261,24 +261,6 @@ static DIR *fs_find_free_dir_structure(void)
 }
 
 //---------------------------------------------------------------------------
-static int fs_dummy(void)
-{
-    M_DEBUG("%s\n", __func__);
-
-    return -EIO;
-}
-
-//---------------------------------------------------------------------------
-static int fs_init(iop_device_t *driver)
-{
-    M_DEBUG("%s\n", __func__);
-
-    (void)driver;
-
-    return 1;
-}
-
-//---------------------------------------------------------------------------
 static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
 {
     M_DEBUG("%s: %s flags=%X mode=%X\n", __func__, name, flags, mode);
@@ -800,33 +782,33 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
 }
 
 static iop_device_ops_t fs_functarray = {
-    &fs_init,
-    (void *)&fs_dummy,
-    (void *)&fs_dummy,
-    &fs_open,
-    &fs_close,
-    &fs_read,
-    &fs_write,
-    &fs_lseek,
-    &fs_ioctl,
-    &fs_remove,
-    &fs_mkdir,
-    &fs_remove,
-    &fs_dopen,
-    &fs_dclose,
-    &fs_dread,
-    &fs_getstat,
-    (void *)&fs_dummy,
-    &fs_rename,
-    (void *)&fs_dummy,
-    (void *)&fs_dummy,
-    (void *)&fs_dummy,
-    (void *)&fs_dummy,
-    &fs_lseek64,
-    &fs_devctl,
-    (void *)&fs_dummy,
-    (void *)&fs_dummy,
-    &fs_ioctl2,
+    DUMMY_IMPLEMENTATION, // init
+    DUMMY_IMPLEMENTATION, // deinit
+    NOT_SUPPORTED, // format
+    &fs_open, // open
+    &fs_close, // close
+    &fs_read, // read
+    &fs_write, // write
+    &fs_lseek, // lseek
+    &fs_ioctl, // ioctl
+    &fs_remove, // remove
+    &fs_mkdir, // mkdir
+    &fs_remove, // rmdir
+    &fs_dopen, // dopen
+    &fs_dclose, // dclose
+    &fs_dread, // dread
+    &fs_getstat, // getstat
+    NOT_SUPPORTED, // chstat
+    &fs_rename, // rename
+    NOT_SUPPORTED, // chdir
+    NOT_SUPPORTED, // sync
+    NOT_SUPPORTED, // mount
+    NOT_SUPPORTED, // umount
+    &fs_lseek64, // lseek64
+    &fs_devctl, // devctl
+    NOT_SUPPORTED, // symlink
+    NOT_SUPPORTED, // readlink
+    &fs_ioctl2, // ioctl2
 };
 static iop_device_t fs_driver = {
     "mass",

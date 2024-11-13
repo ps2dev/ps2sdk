@@ -5,8 +5,6 @@
 int acUartWrite(void *buf, int count);
 int acUartRead(void *buf, int count);
 
-int dummy() {return -ENOTSUP;}
-
 static int acuart_read(iop_file_t *f, void *buffer, int size) {
     (void)f;
     return acUartRead(buffer, size);
@@ -17,23 +15,23 @@ static int acuart_write(iop_file_t *f, void *buffer, int size) {
 }
 
 static iop_device_ops_t uart_ops = {
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
-    &acuart_read,
-    &acuart_write,
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
-    (void *)&dummy,
+    DUMMY_IMPLEMENTATION, // init
+    DUMMY_IMPLEMENTATION, // deinit
+    NOT_SUPPORTED, // format
+    NOT_SUPPORTED, // open
+    NOT_SUPPORTED, // close
+    &acuart_read, // read
+    &acuart_write, // write
+    NOT_SUPPORTED, // lseek
+    NOT_SUPPORTED, // ioctl
+    NOT_SUPPORTED, // remove
+    NOT_SUPPORTED, // mkdir
+    NOT_SUPPORTED, // rmdir
+    NOT_SUPPORTED, // dopen
+    NOT_SUPPORTED, // dclose
+    NOT_SUPPORTED, // dread
+    NOT_SUPPORTED, // getstat
+    NOT_SUPPORTED, // chstat
 };
 
 #define DEVNAME "tty"

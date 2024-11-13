@@ -122,11 +122,6 @@ static int expbay_init(int sema_attr);
 
 extern struct irx_export_table _exp_dev9;
 
-static int dev9x_dummy(void)
-{
-    return 0;
-}
-
 static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, unsigned int arglen, void *buf, unsigned int buflen)
 {
     (void)f;
@@ -153,33 +148,33 @@ static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, un
 
 static iop_device_ops_t dev9x_ops =
     {
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        &dev9x_devctl,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
-        (void *)&dev9x_dummy,
+        DUMMY_IMPLEMENTATION, // init
+        DUMMY_IMPLEMENTATION, // deinit
+        NOT_SUPPORTED, // format
+        NOT_SUPPORTED, // open
+        NOT_SUPPORTED, // close
+        NOT_SUPPORTED, // read
+        NOT_SUPPORTED, // write
+        NOT_SUPPORTED, // lseek
+        NOT_SUPPORTED, // ioctl
+        NOT_SUPPORTED, // remove
+        NOT_SUPPORTED, // mkdir
+        NOT_SUPPORTED, // rmdir
+        NOT_SUPPORTED, // dopen
+        NOT_SUPPORTED, // dclose
+        NOT_SUPPORTED, // dread
+        NOT_SUPPORTED, // getstat
+        NOT_SUPPORTED, // chstat
+        NOT_SUPPORTED, // rename
+        NOT_SUPPORTED, // chdir
+        NOT_SUPPORTED, // sync
+        NOT_SUPPORTED, // mount
+        NOT_SUPPORTED, // umount
+        NOT_SUPPORTED_S64, // lseek64
+        &dev9x_devctl, // devctl
+        NOT_SUPPORTED, // symlink
+        NOT_SUPPORTED, // readlink
+        NOT_SUPPORTED, // ioctl2
 };
 
 static iop_device_t dev9x_device =

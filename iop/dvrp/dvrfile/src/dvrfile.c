@@ -203,33 +203,33 @@ static int dvrf_translator_df_umount(iomanX_iop_file_t *f, const char *fsname)
 }
 
 static iomanX_iop_device_ops_t dvrf_translator_functbl = {
-    dvrf_df_init,
-    dvrf_df_exit,
-    dvrf_translator_df_format,
-    dvrf_translator_df_open,
-    dvrf_df_close,
-    dvrf_df_read,
-    dvrf_df_write,
-    dvrf_df_lseek,
-    dvrf_df_ioctl,
-    dvrf_translator_df_remove,
-    dvrf_translator_df_mkdir,
-    dvrf_translator_df_rmdir,
-    dvrf_translator_df_dopen,
-    dvrf_df_dclose,
-    dvrf_df_dread,
-    dvrf_translator_df_getstat,
-    dvrf_translator_df_chstat,
-    dvrf_translator_df_rename,
-    dvrf_translator_df_chdir,
-    dvrf_translator_df_sync,
-    dvrf_translator_df_mount,
-    dvrf_translator_df_umount,
-    dvrf_df_lseek64,
-    dvrf_translator_df_devctl,
-    dvrf_translator_df_symlink,
-    dvrf_translator_df_readlink,
-    dvrf_df_ioctl2,
+    dvrf_df_init, // init
+    dvrf_df_exit, // deinit
+    dvrf_translator_df_format, // format
+    dvrf_translator_df_open, // open
+    dvrf_df_close, // close
+    dvrf_df_read, // read
+    dvrf_df_write, // write
+    dvrf_df_lseek, // lseek
+    dvrf_df_ioctl, // ioctl
+    dvrf_translator_df_remove, // remove
+    dvrf_translator_df_mkdir, // mkdir
+    dvrf_translator_df_rmdir, // rmdir
+    dvrf_translator_df_dopen, // dopen
+    dvrf_df_dclose, // dclose
+    dvrf_df_dread, // dread
+    dvrf_translator_df_getstat, // getstat
+    dvrf_translator_df_chstat, // chstat
+    dvrf_translator_df_rename, // rename
+    dvrf_translator_df_chdir, // chdir
+    dvrf_translator_df_sync, // sync
+    dvrf_translator_df_mount, // mount
+    dvrf_translator_df_umount, // umount
+    dvrf_df_lseek64, // lseek64
+    dvrf_translator_df_devctl, // devctl
+    dvrf_translator_df_symlink, // symlink
+    dvrf_translator_df_readlink, // readlink
+    dvrf_df_ioctl2, // ioctl2
 };
 
 #define GEN_TRANSLATION_FUNCS(basefuncname, basedevname, shouldbswapformatarg, drvname) \

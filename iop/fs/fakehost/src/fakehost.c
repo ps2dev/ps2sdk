@@ -104,27 +104,6 @@ int realfd( iop_io_file_t *f )
 	return (int) f->privdata;
 }
 
-/** Dummy function, for where needed.
- * @ingroup fakehost
- */
-int dummy()
-{
-	M_DEBUG("dummy function called\n");
-	return -EIO;
-}
-
-/** Initialise fs driver.
- * @ingroup fakehost
- *
- * @param driver  io_device pointer to device
- * @return Status (0=successful).
- */
-int fd_initialize( iop_io_device_t *driver)
-{
-	M_PRINTF( "initializing '%s' file driver.\n", driver->name );
-	return 0;
-}
-
 /** Handle open request.
  * @ingroup fakehost
  *
@@ -197,23 +176,23 @@ int fd_lseek( iop_io_file_t *fd, int offset, int whence)
 
 // Function array for fileio structure.
 static iop_io_device_ops_t functions = {
-	&fd_initialize,
-	(void *)&dummy,
-	(void *)&dummy,
-	&fd_open,
-	&fd_close,
-	&fd_read,
-	(void *)&dummy,
-	&fd_lseek,
-	(void *)&dummy,
-	(void *)&dummy,
-	(void *)&dummy,
-	(void *)&dummy,
-	(void *)&dummy,
-	(void *)&dummy,
-	(void *)&dummy,
-	(void *)&dummy,
-	(void *)&dummy,
+	DUMMY_IMPLEMENTATION, // init
+	DUMMY_IMPLEMENTATION, // deinit
+	NOT_SUPPORTED, // format
+	&fd_open, // open
+	&fd_close, // close
+	&fd_read, // read
+	NOT_SUPPORTED, // write
+	&fd_lseek, // lseek
+	NOT_SUPPORTED, // ioctl
+	NOT_SUPPORTED, // remove
+	NOT_SUPPORTED, // mkdir
+	NOT_SUPPORTED, // rmdir
+	NOT_SUPPORTED, // dopen
+	NOT_SUPPORTED, // dclose
+	NOT_SUPPORTED, // dread
+	NOT_SUPPORTED, // getstat
+	NOT_SUPPORTED, // chstat
 };
 
 // FileIO structure.
