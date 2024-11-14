@@ -28,13 +28,13 @@ int smbman_io_sema;
 static iop_device_ops_t smbman_ops = {
     &smb_init,
     &smb_deinit,
-    NOT_SUPPORTED,
+    (void *)&smb_dummy,
     &smb_open,
     &smb_close,
     &smb_read,
     &smb_write,
     &smb_lseek,
-    NOT_SUPPORTED,
+    (void *)&smb_dummy,
     &smb_remove,
     &smb_mkdir,
     &smb_rmdir,
@@ -42,18 +42,17 @@ static iop_device_ops_t smbman_ops = {
     &smb_dclose,
     &smb_dread,
     &smb_getstat,
-    NOT_SUPPORTED,
+    (void *)&smb_dummy,
     &smb_rename,
     &smb_chdir,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
+    (void *)&smb_dummy,
+    (void *)&smb_dummy,
+    (void *)&smb_dummy,
     &smb_lseek64,
     &smb_devctl,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED
-};
+    (void *)&smb_dummy,
+    (void *)&smb_dummy,
+    (void *)&smb_dummy};
 
 // driver descriptor
 static iop_device_t smbdev = {
@@ -205,6 +204,12 @@ static void keepalive_thread(void *args)
 
         SignalSema(smbman_io_sema);
     }
+}
+
+//--------------------------------------------------------------
+int smb_dummy(void)
+{
+    return -EIO;
 }
 
 //--------------------------------------------------------------
