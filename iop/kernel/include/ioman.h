@@ -16,7 +16,6 @@
 #ifndef __IOMAN_H__
 #define __IOMAN_H__
 
-#include <errno.h>
 #include <types.h>
 #include <irx.h>
 #include <io_common.h>
@@ -70,9 +69,6 @@ typedef struct _iop_device {
 	const char *desc;
 	struct _iop_device_ops *ops;
 } iop_device_t;
-
-static inline int not_supported_op (void) {return -ENOTSUP;}
-#define NOT_SUPPORTED (void*)&not_supported_op
 
 typedef struct _iop_device_ops {
 	int	(*init)(iop_device_t *);

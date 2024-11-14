@@ -32,6 +32,7 @@ extern int dvrav_df_exit(iomanX_iop_device_t *dev);
 extern int dvrav_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
 extern int dvrav_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrav_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrav_df_null();
 extern s64 dvrav_df_null_long();
 extern int avioctl2_select_position(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int avioctl2_get_position(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
@@ -112,30 +113,30 @@ static iomanX_iop_device_ops_t DvrFuncTbl =
     {
         &dvrav_df_init,
         &dvrav_df_exit,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
         &dvrav_df_ioctl,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
         (void *)&dvrav_df_null_long,
         &dvrav_df_devctl,
-        NOT_SUPPORTED,
-        NOT_SUPPORTED,
+        (void *)&dvrav_df_null,
+        (void *)&dvrav_df_null,
         &dvrav_df_ioctl2,
     };
 static iomanX_iop_device_t DVRAV = {
@@ -283,9 +284,14 @@ int dvrav_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int argle
     return -EINVAL;
 }
 
+int dvrav_df_null()
+{
+    return -EUNSUP;
+}
+
 s64 dvrav_df_null_long()
 {
-    return -134LL;
+    return -EUNSUP;
 }
 
 int avioctl2_get_tun_offset(

@@ -228,7 +228,14 @@ static void fs_reset(void)
 static int fs_inited = 0;
 
 //---------------------------------------------------------------------------
+static int fs_dummy(void)
+{
+    M_DEBUG("%s\n", __func__);
 
+    return -EIO;
+}
+
+//---------------------------------------------------------------------------
 static int fs_init(iop_device_t *driver)
 {
     (void)driver;
@@ -832,7 +839,7 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
             break;
 #endif
         default:
-            ret = -5; //EIO
+            ret = fs_dummy();
     }
 
     _fs_unlock();
@@ -986,7 +993,7 @@ static int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, 
             break;
         }
         default:
-            ret = -5; // EIO
+            ret = fs_dummy();
     }
 
     _fs_unlock();
@@ -997,8 +1004,8 @@ static int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, 
 #ifndef WIN32
 static iop_device_ops_t fs_functarray = {
     &fs_init,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
+    (void *)&fs_dummy,
+    (void *)&fs_dummy,
     &fs_open,
     &fs_close,
     &fs_read,
@@ -1012,24 +1019,24 @@ static iop_device_ops_t fs_functarray = {
     &fs_dclose,
     &fs_dread,
     &fs_getstat,
-    NOT_SUPPORTED,
+    (void *)&fs_dummy,
     &fs_rename,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
+    (void *)&fs_dummy,
+    (void *)&fs_dummy,
+    (void *)&fs_dummy,
+    (void *)&fs_dummy,
+    (void *)&fs_dummy,
 #ifndef BUILDING_IEEE1394_DISK
     &fs_devctl,
 #else
-    NOT_SUPPORTED,
+    (void *)&fs_dummy,
 #endif /* BUILDING_IEEE1394_DISK */
-    NOT_SUPPORTED,
-    NOT_SUPPORTED,
+    (void *)&fs_dummy,
+    (void *)&fs_dummy,
 #if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
     &fs_ioctl2,
 #else
-    NOT_SUPPORTED,
+    (void *)&fs_dummy,
 #endif /* BUILDING_IEEE1394_DISK */
 };
 static iop_device_t fs_driver = {

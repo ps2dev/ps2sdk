@@ -18,27 +18,26 @@ static int cddrv_read(iop_file_t *io, void *buf, int cnt);
 static int cddrv_write(iop_file_t *io, void *buf, int cnt);
 static int cddrv_lseek(iop_file_t *io, int offset, int whence);
 static int cddrv_ioctl(iop_file_t *io, int cmd, void *arg);
+static int cddrv_dummy();
 
- 
 static iop_device_ops_t Cddrv_ops = {
 	&cddrv_adddrv,
 	&cddrv_deldrv,
-	NOT_SUPPORTED,
+	&cddrv_dummy,
 	&cddrv_open,
 	&cddrv_close,
 	&cddrv_read,
 	&cddrv_write,
 	&cddrv_lseek,
 	&cddrv_ioctl,
-	NOT_SUPPORTED,
-	NOT_SUPPORTED,
-	NOT_SUPPORTED,
-	NOT_SUPPORTED,
-	NOT_SUPPORTED,
-	NOT_SUPPORTED,
-	NOT_SUPPORTED,
-	NOT_SUPPORTED
-};
+	&cddrv_dummy,
+	&cddrv_dummy,
+	&cddrv_dummy,
+	&cddrv_dummy,
+	&cddrv_dummy,
+	&cddrv_dummy,
+	&cddrv_dummy,
+	&cddrv_dummy};
 
 static iop_device_t Cddrv = {"cdrom", 16u, 0u, "ATAPI_C/DVD-ROM", &Cddrv_ops};
 
@@ -156,6 +155,11 @@ static int cddrv_ioctl(iop_file_t *io, int cmd, void *arg)
 	(void)cmd;
 	(void)arg;
 
+	return -EINVAL;
+}
+
+static int cddrv_dummy()
+{
 	return -EINVAL;
 }
 
