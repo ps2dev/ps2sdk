@@ -1,3 +1,3 @@
-int NetManInitRPCServer(void);
-void NetManDeinitRPCServer(void);
-int NetManRPCAllocRxBuffers(void);
+int _NetManInitRPCServer(void);
+void _NetManDeinitRPCServer(void);
+int _NetManRPCAllocRxBuffers(void);
