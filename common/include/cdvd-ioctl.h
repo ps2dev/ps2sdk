@@ -16,6 +16,8 @@
 #ifndef __CDVD_IOCTL_H__
 #define __CDVD_IOCTL_H__
 
+#include <libcdvd-common.h>
+
 ///////////////////////////////////////////////////////////////////////////////
 // CDVDMAN.IRX
 
@@ -52,5 +54,19 @@
 #define CDIOC_INIT            0x438A
 #define CDIOC_FSCACHEINIT     0x4395
 #define CDIOC_FSCACHEDELETE   0x4397
+
+///////////////////////////////////////////////////////////////////////////////
+// CDVDSTM.IRX
+
+typedef struct cdrom_stm_devctl_
+{
+	u32 m_posszarg1;
+	u32 m_posszarg2;
+	void *m_buffer;
+	u32 m_cmdid;
+	sceCdRMode m_rmode;
+	u32 m_error;
+} cdrom_stm_devctl_t;
+
 
 #endif /* __CDVD_IOCTL_H__ */
