@@ -608,10 +608,17 @@ int iomanX_remove(const char *name)
 {
 	iomanX_iop_file_t *f;
 	const char *parsefile_res;
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	iomanX_iop_file_t f_stk;
+#endif
 
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	f = &f_stk;
+#else
 	f = new_iob();
 	if ( !f )
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
+#endif
 	parsefile_res = parsefile(name, &(f->device), &(f->unit));
 	if ( !parsefile_res )
 		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
@@ -633,10 +640,17 @@ static int xx_stat(int op, const char *name, iox_stat_t *stat, unsigned int stat
 {
 	iomanX_iop_file_t *f;
 	const char *parsefile_res;
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	iomanX_iop_file_t f_stk;
+#endif
 
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	f = &f_stk;
+#else
 	f = new_iob();
 	if ( !f )
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
+#endif
 	parsefile_res = parsefile(name, &(f->device), &(f->unit));
 	if ( !parsefile_res )
 		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
@@ -702,10 +716,17 @@ int iomanX_format(const char *dev, const char *blockdev, void *arg, int arglen)
 {
 	iomanX_iop_file_t *f;
 	const char *parsefile_res;
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	iomanX_iop_file_t f_stk;
+#endif
 
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	f = &f_stk;
+#else
 	f = new_iob();
 	if ( !f )
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
+#endif
 	parsefile_res = parsefile(dev, &(f->device), &(f->unit));
 	if ( !parsefile_res )
 		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
@@ -722,10 +743,17 @@ static int xx_rename(int op, const char *oldname, const char *newname)
 	const char *parsefile_res_new;
 	iomanX_iop_device_t *device_new;
 	int unit_new;
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	iomanX_iop_file_t f_stk;
+#endif
 
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	f = &f_stk;
+#else
 	f = new_iob();
 	if ( !f )
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
+#endif
 	parsefile_res = parsefile(oldname, &(f->device), &(f->unit));
 	if ( !parsefile_res )
 		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
@@ -783,10 +811,17 @@ static int xx_dir(int op, const char *name, int mode)
 {
 	iomanX_iop_file_t *f;
 	const char *parsefile_res;
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	iomanX_iop_file_t f_stk;
+#endif
 
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	f = &f_stk;
+#else
 	f = new_iob();
 	if ( !f )
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
+#endif
 	parsefile_res = parsefile(name, &(f->device), &(f->unit));
 	if ( !parsefile_res )
 		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
@@ -822,10 +857,17 @@ int iomanX_mount(const char *fsname, const char *devname, int flag, void *arg, i
 {
 	iomanX_iop_file_t *f;
 	const char *parsefile_res;
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	iomanX_iop_file_t f_stk;
+#endif
 
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	f = &f_stk;
+#else
 	f = new_iob();
 	if ( !f )
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
+#endif
 	parsefile_res = parsefile(fsname, &(f->device), &(f->unit));
 	if ( !parsefile_res )
 		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
@@ -842,10 +884,17 @@ int iomanX_umount(const char *fsname)
 {
 	iomanX_iop_file_t *f;
 	const char *parsefile_res;
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	iomanX_iop_file_t f_stk;
+#endif
 
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	f = &f_stk;
+#else
 	f = new_iob();
 	if ( !f )
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
+#endif
 	parsefile_res = parsefile(fsname, &(f->device), &(f->unit));
 	if ( !parsefile_res )
 		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
@@ -860,10 +909,17 @@ int iomanX_devctl(const char *name, int cmd, void *arg, unsigned int arglen, voi
 {
 	iomanX_iop_file_t *f;
 	const char *parsefile_res;
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	iomanX_iop_file_t f_stk;
+#endif
 
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	f = &f_stk;
+#else
 	f = new_iob();
 	if ( !f )
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
+#endif
 	parsefile_res = parsefile(name, &(f->device), &(f->unit));
 	if ( !parsefile_res )
 		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
@@ -878,10 +934,17 @@ int iomanX_readlink(const char *path, char *buf, unsigned int buflen)
 {
 	iomanX_iop_file_t *f;
 	const char *parsefile_res;
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	iomanX_iop_file_t f_stk;
+#endif
 
+#ifdef IOMAN_USE_FILE_STRUCT_TEMP_STACK
+	f = &f_stk;
+#else
 	f = new_iob();
 	if ( !f )
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
+#endif
 	parsefile_res = parsefile(path, &(f->device), &(f->unit));
 	if ( !parsefile_res )
 		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
