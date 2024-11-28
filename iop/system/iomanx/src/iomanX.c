@@ -182,7 +182,7 @@ static inline void handle_result_pre(int in_result, iomanX_iop_file_t *f, int op
 	{
 		if ( f )
 		{
-			// Unofficial: don't clear mode
+			f->mode = 0;
 			f->device = NULL;
 		}
 	}
@@ -190,6 +190,8 @@ static inline void handle_result_pre(int in_result, iomanX_iop_file_t *f, int op
 	{
 		if ( f && (in_result < 0) )
 		{
+			// Unofficial: also clear mode
+			f->mode = 0;
 			f->device = NULL;
 		}
 	}
@@ -964,13 +966,13 @@ static iomanX_iop_file_t *new_iob(void)
 
 	CpuSuspendIntr(&state);
 	file_table_entry = file_table;
-	while ( (file_table_entry < &file_table[sizeof(file_table) / sizeof(file_table[0])]) && file_table_entry->device )
+	while ( (file_table_entry < &file_table[sizeof(file_table) / sizeof(file_table[0])]) && file_table_entry->mode )
 		file_table_entry += 1;
 	if ( file_table_entry >= &file_table[sizeof(file_table) / sizeof(file_table[0])] )
 		file_table_entry = NULL;
-	// fill in "device" temporarily to mark the fd as allocated.
+	// fill in "mode" temporarily to mark the fd as allocated.
 	if ( file_table_entry )
-		file_table_entry->device = (iomanX_iop_device_t *)(uiptr)0xFFFFFFEC;
+		file_table_entry->mode = -20;
 	CpuResumeIntr(state);
 	if ( !file_table_entry )
 		_ioabort("out of file descriptors", "[too many open]");
