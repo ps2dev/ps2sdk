@@ -961,13 +961,20 @@ static iomanX_iop_file_t *new_iob(void)
 {
 	iomanX_iop_file_t *file_table_entry;
 	int state;
+	int fd;
 
+	fd = 0;
 	CpuSuspendIntr(&state);
-	file_table_entry = file_table;
-	while ( (file_table_entry < &file_table[sizeof(file_table) / sizeof(file_table[0])]) && file_table_entry->device )
-		file_table_entry += 1;
-	if ( file_table_entry >= &file_table[sizeof(file_table) / sizeof(file_table[0])] )
-		file_table_entry = NULL;
+	file_table_entry = NULL;
+	while ( fd < (int)(sizeof(file_table) / sizeof(file_table[0])) )
+	{
+		if ( !file_table[fd].device )
+		{
+			file_table_entry = &file_table[fd];
+			break;
+		}
+		fd += 1;
+	}
 	// fill in "device" temporarily to mark the fd as allocated.
 	if ( file_table_entry )
 		file_table_entry->device = (iomanX_iop_device_t *)(uiptr)0xFFFFFFEC;
@@ -979,7 +986,7 @@ static iomanX_iop_file_t *new_iob(void)
 
 static iomanX_iop_file_t *get_iob(int fd)
 {
-	if ( (fd < 0) || ((unsigned int)fd >= (sizeof(file_table) / sizeof(file_table[0]))) || (!file_table[fd].device) )
+	if ( (fd < 0) || (fd >= (int)(sizeof(file_table) / sizeof(file_table[0]))) || (!file_table[fd].device) )
 		return NULL;
 	return &file_table[fd];
 }
