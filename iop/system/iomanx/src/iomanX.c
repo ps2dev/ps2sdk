@@ -979,7 +979,7 @@ static iomanX_iop_file_t *new_iob(void)
 
 static iomanX_iop_file_t *get_iob(int fd)
 {
-	if ( ((unsigned int)fd >= (sizeof(file_table) / sizeof(file_table[0]))) || (!file_table[fd].device) )
+	if ( (fd < 0) || ((unsigned int)fd >= (sizeof(file_table) / sizeof(file_table[0]))) || (!file_table[fd].device) )
 		return NULL;
 	return &file_table[fd];
 }
