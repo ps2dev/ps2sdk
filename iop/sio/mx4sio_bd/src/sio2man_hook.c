@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <thsemap.h>
+#include <modhook.h>
 
-#include "ioplib.h"
 #include "sio2man.h"
 #include "sio2man_hook.h"
 
@@ -97,26 +97,26 @@ static void _sio2man_unhook(iop_library_t *lib)
         return;
     }
 
-    ioplib_hookExportEntry(lib, 23, _23_psio2_pad_transfer_init);
-    ioplib_hookExportEntry(lib, 24, _24_psio2_mc_transfer_init);
-    ioplib_hookExportEntry(lib, 25, _25_psio2_transfer);
-    ioplib_hookExportEntry(lib, 26, _26_psio2_transfer_reset);
-    ioplib_hookExportEntry(lib, 46, _46_psio2_pad_transfer_init);
-    ioplib_hookExportEntry(lib, 47, _47_psio2_mc_transfer_init);
-    ioplib_hookExportEntry(lib, 48, _48_psio2_mtap_transfer_init);
+    modhookk_hookExportEntry(lib, 23, _23_psio2_pad_transfer_init);
+    modhook_hookExportEntry(lib, 24, _24_psio2_mc_transfer_init);
+    modhook_hookExportEntry(lib, 25, _25_psio2_transfer);
+    modhookk_hookExportEntry(lib, 26, _26_psio2_transfer_reset);
+    modhook_hookExportEntry(lib, 46, _46_psio2_pad_transfer_init);
+    modhook_hookExportEntry(lib, 47, _47_psio2_mc_transfer_init);
+    modhook_hookExportEntry(lib, 48, _48_psio2_mtap_transfer_init);
 
     if ((hooked_version >= IRX_VER(1, 2)) && (hooked_version < IRX_VER(2, 0))) {
         // Only for the newer rom0:XSIO2MAN
         // Assume all v1.x libraries to use this interface (reset at 50)
-        ioplib_hookExportEntry(lib, 49, _51_psio2_transfer);
-        ioplib_hookExportEntry(lib, 50, _52_psio2_transfer_reset);
+        modhook_hookExportEntry(lib, 49, _51_psio2_transfer);
+        modhook_hookExportEntry(lib, 50, _52_psio2_transfer_reset);
     } else /*if (hooked_version >= IRX_VER(2, 3))*/ {
         // Only for the newer rom1:SIO2MAN
         // Assume all v2.x libraries to use this interface (reset at 52)
-        ioplib_hookExportEntry(lib, 49, _49_psio2_rm_transfer_init);
-        ioplib_hookExportEntry(lib, 50, _50_psio2_unk_transfer_init);
-        ioplib_hookExportEntry(lib, 51, _51_psio2_transfer);
-        ioplib_hookExportEntry(lib, 52, _52_psio2_transfer_reset);
+        modhook_hookExportEntry(lib, 49, _49_psio2_rm_transfer_init);
+        modhook_hookExportEntry(lib, 50, _50_psio2_unk_transfer_init);
+        modhook_hookExportEntry(lib, 51, _51_psio2_transfer);
+        modhook_hookExportEntry(lib, 52, _52_psio2_transfer_reset);
     }
 
     hooked_version = 0;
@@ -134,29 +134,29 @@ static void _sio2man_hook(iop_library_t *lib)
     if (lib->version > IRX_VER(1, 1)) {
         M_DEBUG("Installing sio2man hooks for version 0x%x\n", lib->version);
 
-        _23_psio2_pad_transfer_init  = ioplib_hookExportEntry(lib, 23, _23_sio2_pad_transfer_init);
+        _23_psio2_pad_transfer_init  = modhook_hookExportEntry(lib, 23, _23_sio2_pad_transfer_init);
         // Lock sio2 to prevent race conditions with MC/PAD libraries
         _23_psio2_pad_transfer_init();
 
-        _24_psio2_mc_transfer_init   = ioplib_hookExportEntry(lib, 24, _24_sio2_mc_transfer_init);
-        _25_psio2_transfer           = ioplib_hookExportEntry(lib, 25, _25_sio2_transfer);
-        _26_psio2_transfer_reset     = ioplib_hookExportEntry(lib, 26, _26_sio2_transfer_reset);
-        _46_psio2_pad_transfer_init  = ioplib_hookExportEntry(lib, 46, _46_sio2_pad_transfer_init);
-        _47_psio2_mc_transfer_init   = ioplib_hookExportEntry(lib, 47, _47_sio2_mc_transfer_init);
-        _48_psio2_mtap_transfer_init = ioplib_hookExportEntry(lib, 48, _48_sio2_mtap_transfer_init);
+        _24_psio2_mc_transfer_init   = modhook_hookExportEntry(lib, 24, _24_sio2_mc_transfer_init);
+        _25_psio2_transfer           = modhook_hookExportEntry(lib, 25, _25_sio2_transfer);
+        _26_psio2_transfer_reset     = modhook_hookExportEntry(lib, 26, _26_sio2_transfer_reset);
+        _46_psio2_pad_transfer_init  = modhook_hookExportEntry(lib, 46, _46_sio2_pad_transfer_init);
+        _47_psio2_mc_transfer_init   = modhook_hookExportEntry(lib, 47, _47_sio2_mc_transfer_init);
+        _48_psio2_mtap_transfer_init = modhook_hookExportEntry(lib, 48, _48_sio2_mtap_transfer_init);
 
         if ((lib->version >= IRX_VER(1, 2)) && (lib->version < IRX_VER(2, 0))) {
             // Only for the newer rom0:XSIO2MAN
             // Assume all v1.x libraries to use this interface (reset at 50)
-            _51_psio2_transfer       = ioplib_hookExportEntry(lib, 49, _51_sio2_transfer);
-            _52_psio2_transfer_reset = ioplib_hookExportEntry(lib, 50, _52_sio2_transfer_reset);
+            _51_psio2_transfer       = modhook_hookExportEntry(lib, 49, _51_sio2_transfer);
+            _52_psio2_transfer_reset = modhook_hookExportEntry(lib, 50, _52_sio2_transfer_reset);
         } else /*if (lib->version >= IRX_VER(2, 3))*/ {
             // Only for the newer rom1:SIO2MAN
             // Assume all v2.x libraries to use this interface (reset at 52)
-            _49_psio2_rm_transfer_init  = ioplib_hookExportEntry(lib, 49, _49_sio2_rm_transfer_init);
-            _50_psio2_unk_transfer_init = ioplib_hookExportEntry(lib, 50, _50_sio2_unk_transfer_init);
-            _51_psio2_transfer          = ioplib_hookExportEntry(lib, 51, _51_sio2_transfer);
-            _52_psio2_transfer_reset    = ioplib_hookExportEntry(lib, 52, _52_sio2_transfer_reset);
+            _49_psio2_rm_transfer_init  = modhook_hookExportEntry(lib, 49, _49_sio2_rm_transfer_init);
+            _50_psio2_unk_transfer_init = modhook_hookExportEntry(lib, 50, _50_sio2_unk_transfer_init);
+            _51_psio2_transfer          = modhook_hookExportEntry(lib, 51, _51_sio2_transfer);
+            _52_psio2_transfer_reset    = modhook_hookExportEntry(lib, 52, _52_sio2_transfer_reset);
         }
 
         // Unlock sio2
@@ -195,19 +195,19 @@ int sio2man_hook_init()
     lock_sema2   = CreateSema(&sema);
 
     // Hook into 'loadcore' so we know when sio2man is loaded in the future
-    lib = ioplib_getByName("loadcore");
+    lib = modhook_getModule("loadcore");
     if (lib == NULL) {
         DeleteSema(lock_sema);
         DeleteSema(lock_sema2);
         return -1;
     }
-    pRegisterLibraryEntries = ioplib_hookExportEntry(lib, 6, hookRegisterLibraryEntries);
+    pRegisterLibraryEntries = modhook_hookExportEntry(lib, 6, hookRegisterLibraryEntries);
 
     // Hook into 'sio2man' now if it's already loaded
-    lib = ioplib_getByName("sio2man");
+    lib = modhook_getModule("sio2man");
     if (lib != NULL) {
         _sio2man_hook(lib);
-        ioplib_relinkExports(lib);
+        modhook_relinkExports(lib);
     }
 
     return 0;
@@ -220,14 +220,14 @@ void sio2man_hook_deinit()
     M_DEBUG("%s\n", __FUNCTION__);
 
     // Unhook 'sio2man'
-    lib = ioplib_getByName("sio2man");
+    lib = modhook_getModule("sio2man");
     if (lib != NULL) {
         _sio2man_unhook(lib);
-        ioplib_relinkExports(lib);
+        modhook_relinkExports(lib);
     }
 
     // Unhook 'loadcore'
-    ioplib_hookExportEntry(lib, 6, pRegisterLibraryEntries);
+    modhook_hookExportEntry(lib, 6, pRegisterLibraryEntries);
 
     // Delete locking semaphore
     DeleteSema(lock_sema);

@@ -7,9 +7,10 @@
 #include <thsemap.h>
 #include <xsio2man.h>
 
+#include <modhook.h>
+
 #include "mx4sio.h"
 #include "crc16.h"
-#include "ioplib.h"
 #include "sio2man_hook.h"
 #include "sio2regs.h"
 #include "spi_sdcard_driver.h"
@@ -793,7 +794,7 @@ int module_start(int argc, char *argv[])
         goto error4;
     }
 
-    lib_modload = ioplib_getByName("modload");
+    lib_modload = modhook_getModule("modload");
     if (lib_modload != NULL) {
         M_DEBUG("modload 0x%x detected\n", lib_modload->version);
         // Newer modload versions allow modules to be unloaded
