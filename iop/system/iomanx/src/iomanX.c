@@ -1052,6 +1052,7 @@ static const char *parsefile(const char *path, iomanX_iop_device_t **p_device, i
 	if ( devname_len > (sizeof(canon) - 1) )
 		return NULL;
 	strncpy(canon, path_trimmed, devname_len);
+	canon[devname_len] = 0;
 	unit = 0;
 	// Search backward for the unit number.
 	while ( isnum(canon[devname_len - 1]) )
