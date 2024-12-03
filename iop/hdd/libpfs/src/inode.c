@@ -18,7 +18,6 @@
 #include <string.h>
 #endif
 
-#include "pfs-opt.h"
 #include "libpfs.h"
 
 extern u32 pfsMetaSize;

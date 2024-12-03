@@ -29,7 +29,6 @@
 #include <iomanX.h>
 #include <hdd-ioctl.h>
 
-#include "apa-opt.h"
 #include <libapa.h>
 #include "hdd.h"
 #include "hdd_fio.h"

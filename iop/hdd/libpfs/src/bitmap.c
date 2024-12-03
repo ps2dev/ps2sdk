@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <limits.h>
 
-#include "pfs-opt.h"
 #include "libpfs.h"
 
 extern u32 pfsMetaSize;

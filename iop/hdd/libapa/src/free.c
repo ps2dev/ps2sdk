@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <hdd-ioctl.h>
 
-#include "apa-opt.h"
 #include "libapa.h"
 
 static void apaCalculateFreeSpace(u32 *free, u32 sectors)

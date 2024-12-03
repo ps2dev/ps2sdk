@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <hdd-ioctl.h>
 
-#include "apa-opt.h"
 #include "libapa.h"
 
 void *apaAllocMem(int size)

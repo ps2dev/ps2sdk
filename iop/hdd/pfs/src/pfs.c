@@ -23,7 +23,6 @@
 #include <errno.h>
 #include <thsemap.h>
 
-#include "pfs-opt.h"
 #include "libpfs.h"
 #include "pfs.h"
 #include "pfs_fio.h"

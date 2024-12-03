@@ -17,7 +17,6 @@
 #include <irx.h>
 #include <hdd-ioctl.h>
 
-#include "apa-opt.h"
 #include "libapa.h"
 
 #include "misc_hdck.h"

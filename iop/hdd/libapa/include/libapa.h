@@ -14,6 +14,12 @@
 #include <types.h>
 #include <hdd-ioctl.h>
 
+#ifndef APA_OPT_H
+#define APA_OPT_H "apa-opt.h"
+#endif
+
+#include APA_OPT_H
+
 // Sectors for this and that ;)
 #define APA_SECTOR_MBR 0
 #ifdef APA_SUPPORT_GPT
