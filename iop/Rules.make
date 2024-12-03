@@ -40,7 +40,7 @@ ifeq ($(DEBUG),1)
 IOP_CFLAGS += -DDEBUG
 endif
 # Linker flags
-IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
+IOP_LDFLAGS := -nostdlib -dc -r $(IOP_LDFLAGS)
 
 # Additional C compiler flags for GCC >=v5.3.0
 # -msoft-float is to "remind" GCC/Binutils that the soft-float ABI is to be used. This is due to a bug, which
@@ -69,7 +69,16 @@ endif
 # Assembler flags
 IOP_ASFLAGS := $(ASFLAGS_TARGET) -EL -G0 $(IOP_ASFLAGS)
 
+# Default link file
+ifeq ($(IOP_LINKFILE),)
+IOP_LINKFILE := $(PS2SDKSRC)/iop/startup/src/linkfile
+endif
+
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+
+IOP_BIN_ELF := $(IOP_BIN:.irx=.notiopmod.elf)
+
+IOP_BIN_STRIPPED_ELF := $(IOP_BIN:.irx=.notiopmod.stripped.elf)
 
 # Externally defined variables: IOP_BIN, IOP_OBJS, IOP_LIB
 
@@ -94,6 +103,9 @@ $(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.s
 	$(IOP_AS) $(IOP_ASFLAGS) $< -o $@
 
 .INTERMEDIATE:: $(IOP_LIB)_tmp$(MAKE_CURPID) $(IOP_OBJS_DIR)build-imports.c $(IOP_OBJS_DIR)build-exports.c
+
+$(PS2SDKSRC)/tools/srxfixup/bin/srxfixup: $(PS2SDKSRC)/tools/srxfixup
+	$(MAKEREC) $<
 
 $(IOP_OBJS_DIR)template-imports.h:
 	$(DIR_GUARD)
@@ -121,9 +133,16 @@ $(IOP_OBJS_DIR)exports.o: $(IOP_OBJS_DIR)build-exports.c
 	$(DIR_GUARD)
 	$(IOP_C_COMPILE) $(IOP_IETABLE_CFLAGS) -c $< -o $@
 
-$(IOP_BIN): $(IOP_OBJS) $(IOP_LIB_ARCHIVES) $(IOP_ADDITIONAL_DEPS)
+$(IOP_BIN_ELF): $(IOP_OBJS) $(IOP_LIB_ARCHIVES) $(IOP_ADDITIONAL_DEPS)
 	$(DIR_GUARD)
-	$(IOP_C_COMPILE) $(IOP_OPTFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIB_ARCHIVES) $(IOP_LIBS)
+	$(IOP_C_COMPILE) -T$(IOP_LINKFILE) $(IOP_OPTFLAGS) -o $@ $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIB_ARCHIVES) $(IOP_LIBS)
+
+$(IOP_BIN_STRIPPED_ELF): $(IOP_BIN_ELF)
+	$(DIR_GUARD)
+	$(IOP_STRIP) --strip-unneeded --remove-section=.pdr --remove-section=.comment --remove-section=.mdebug.abi32 --remove-section=.gnu.attributes -o $@ $<
+
+$(IOP_BIN): $(IOP_BIN_STRIPPED_ELF) $(PS2SDKSRC)/tools/srxfixup/bin/srxfixup
+	$(PS2SDKSRC)/tools/srxfixup/bin/srxfixup --irx1 -o $@ $<
 
 $(IOP_LIB)_tmp$(MAKE_CURPID): $(IOP_OBJS)
 	$(DIR_GUARD)
