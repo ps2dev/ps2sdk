@@ -14,6 +14,12 @@
 
 #include <types.h>
 
+#ifndef PFS_OPT_H
+#define PFS_OPT_H "pfs-opt.h"
+#endif
+
+#include PFS_OPT_H
+
 // General constants
 #define PFS_BLOCKSIZE 		0x2000
 #define PFS_SUPER_MAGIC		0x50465300	// "PFS\0" aka Playstation Filesystem

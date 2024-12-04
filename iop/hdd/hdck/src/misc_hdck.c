@@ -10,7 +10,6 @@
 
 #include <atad.h>
 
-#include "apa-opt.h"
 #include "libapa.h"
 #include "misc_hdck.h"
 

@@ -12,7 +12,6 @@
 #include <thbase.h>
 #include <thevent.h>
 
-#include "apa-opt.h"
 #include "libapa.h"
 #include "misc_hdsk.h"
 

@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <sysclib.h>
 
-#include "pfs-opt.h"
 #include "libpfs.h"
 #include "bitmap_fsck.h"
 #include "misc_fsck.h"

@@ -19,7 +19,6 @@
 #endif
 #include <iomanX.h>
 
-#include "pfs-opt.h"
 #include "libpfs.h"
 
 extern u32 pfsMetaSize;

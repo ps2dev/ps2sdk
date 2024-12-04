@@ -19,7 +19,6 @@
 #endif
 #include <hdd-ioctl.h>
 
-#include "pfs-opt.h"
 #include "libpfs.h"
 
 u32 pfsBlockSize = 1;// block size scale in sectors (512). Note that 0 = 1x

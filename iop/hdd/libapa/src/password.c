@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <hdd-ioctl.h>
 
-#include "apa-opt.h"
 #include "libapa.h"
 
 int apaPassCmp(const char *pw1, const char *pw2)
