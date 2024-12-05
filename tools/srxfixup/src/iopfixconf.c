@@ -1,0 +1,82 @@
+/*
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+*/
+
+#include "srxfixup_internal.h"
+
+// clang-format off
+const char *iop_defaultconf = 
+	"  @IOP\n"
+	"  .reginfo { @remove }\n"
+	"\n"
+	"  # Elf-header\n"
+	"  # Program-header-table\n"
+	"  .iopmod\n"
+	"\n"
+	"  @Define {\n"
+	"    @Segments_name { TEXT DATA BSS GLOBALDATA AFTER_SHT }\n"
+	"    @Memory_segment { TEXT DATA BSS GLOBALDATA }\n"
+	"    @Program_header_order { .iopmod  { TEXT DATA BSS } }\n"
+	"    @CreateSymbols {\n"
+	"  ##   name      bind    type    segment     shindex    base\n"
+	"  ##                             .section\n"
+	"     { _ftext    GLOBAL  OBJECT  TEXT        0          start  }\n"
+	"     { etext     GLOBAL  OBJECT  TEXT        SHN_RADDR  end    }\n"
+	"     { _etext    GLOBAL  OBJECT  TEXT        SHN_RADDR  end    }\n"
+	"     { _fdata    GLOBAL  OBJECT  DATA        0          start  }\n"
+	"     { edata     GLOBAL  OBJECT  DATA        SHN_RADDR  end    }\n"
+	"     { _edata    GLOBAL  OBJECT  DATA        SHN_RADDR  end    }\n"
+	"     { _fbss     GLOBAL  OBJECT  BSS         SHN_RADDR  start  }\n"
+	"     { end       GLOBAL  OBJECT  BSS         SHN_RADDR  end    }\n"
+	"     { _end      GLOBAL  OBJECT  BSS         SHN_RADDR  end    }\n"
+	"     { _gp       GLOBAL  OBJECT  GLOBALDATA  SHN_RADDR  gpbase  }\n"
+	"    }\n"
+	"  }\n"
+	"\n"
+	"  # TEXT segment\n"
+	"  .init    { @segment {TEXT} }  .rel.init     { @segment {AFTER_SHT} }\n"
+	"  .text    { @segment {TEXT} @createinfo{PROGBITS ALLOC EXECINSTR}}\n"
+	"  .rel.text{ @segment {AFTER_SHT} }\n"
+	"  .fini    { @segment {TEXT} }  .rel.fini     { @segment {AFTER_SHT} }\n"
+	"# .irx.lib { @segment {DATA} }  .rel.irx.lib  { @segment {AFTER_SHT} }\n"
+	"# .irx.stub{ @segment {DATA} }  .rel.irx.stub { @segment {AFTER_SHT} }\n"
+	"\n"
+	"  # DATA segment\n"
+	"  .rodata  { @segment {DATA} }  .rel.rodata   { @segment {AFTER_SHT} }\n"
+	"  .rodata1 { @segment {DATA} }  .rel.rodata1  { @segment {AFTER_SHT} }\n"
+	"  .data    { @segment {DATA}    @createinfo {PROGBITS ALLOC WRITE} }\n"
+	"  .rel.data{ @segment {AFTER_SHT} }\n"
+	"  .data1   { @segment {DATA} }  .rel.data1    { @segment {AFTER_SHT} }\n"
+	"\n"
+	"  .ctors    { @segment {DATA} } .rel.ctors    { @segment {AFTER_SHT} }\n"
+	"  .dtors    { @segment {DATA} } .rel.dtors    { @segment {AFTER_SHT} }\n"
+	"  .eh_frame { @segment {DATA} } .rel.eh_frame { @segment {AFTER_SHT} }\n"
+	"\n"
+	"  .sdata   { @segment {DATA GLOBALDATA} } .rel.sdata {@segment{AFTER_SHT}}\n"
+	"  .lit8    { @segment {DATA GLOBALDATA} }\n"
+	"  .lit4    { @segment {DATA GLOBALDATA} }\n"
+	"\n"
+	"  # BSS segment\n"
+	"    .sbss    { @segment { BSS GLOBALDATA } }\n"
+	"    .bss     { @segment { BSS } }\n"
+	"\n"
+	"  @Program_header_data { 1 }\n"
+	"\n"
+	"  .mdebug\n"
+	"  .shstrtab\n"
+	"\n"
+	"  @Section_header_table\n"
+	"  @Segment_data { AFTER_SHT }\n"
+	"\n"
+	"  .symtab\n"
+	"  .strtab\n"
+	"  *    ##### other sections\n"
+	"\n"
+;
+// clang-format on
