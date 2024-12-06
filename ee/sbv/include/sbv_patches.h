@@ -28,7 +28,7 @@ extern "C" {
  * Newer LOADFILE modules do not have this limitation.
  * Unlike the official patch, this version is not dependent on 0x01e00000-0x01e80000.
  */
-int sbv_patch_enable_lmb(void);
+extern int sbv_patch_enable_lmb(void);
 /**
  * @return 0: success, none-zero: error
  *
@@ -37,7 +37,7 @@ int sbv_patch_enable_lmb(void);
  * can be loaded from user-writable media like the memory card or HDD unit.
  * This patch will disable the black/white list, allowing executables to be freely loaded from any device.
  */
-int sbv_patch_disable_prefix_check(void);
+extern int sbv_patch_disable_prefix_check(void);
 /**
  * @start address above which all user memory is cleared
  * @return 0: success, -1: error
@@ -47,7 +47,7 @@ int sbv_patch_disable_prefix_check(void);
  * overwritten.  In order to completely disable the memory clear, simply pass
  * 0x02000000 to it.
  */
-int sbv_patch_user_mem_clear(void *start);
+extern int sbv_patch_user_mem_clear(void *start);
 /**
  * @return 0: success, none-zero: error
  *
@@ -56,7 +56,7 @@ int sbv_patch_user_mem_clear(void *start);
  *      which could allow simultaneous access into sceSifSetDma (a critical region).
  *   2. The RPC dispatcher code for remove() has a missing break, resulting in mkdir() being called after remove() returns.
  */
-int sbv_patch_fileio(void);
+extern int sbv_patch_fileio(void);
 
 #ifdef __cplusplus
 }

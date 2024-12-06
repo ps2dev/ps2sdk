@@ -121,20 +121,20 @@ typedef void *(*SecrDiskBootFile_callback_t)(void *buffer);
 typedef void (*SetLoadfileCallbacks_callback_t)(SetLoadfileCallbacks_struct_t *callbackinfo);
 typedef int (*CheckKelfPath_callback_t)(const char *filename, int *port, int *slot);
 
-void GetModloadInternalData(void **pInternalData);
+extern void GetModloadInternalData(void **pInternalData);
 
-int ReBootStart(const char *command, unsigned int flags);
-int LoadModuleAddress(const char *name, void *addr, int offset);
-int LoadModule(const char *name);
-int LoadStartModule(const char *name, int arglen, const char *args, int *result);
-int StartModule(int modid, const char *name, int arglen, const char *args, int *result);
-int LoadModuleBufferAddress(void *buffer, void *addr, int offset);
-int LoadModuleBuffer(void *buffer);
-int LoadStartKelfModule(const char *name, int arglen, const char *args, int *result);
-void SetSecrmanCallbacks(SecrCardBootFile_callback_t SecrCardBootFile_fnc, SecrDiskBootFile_callback_t SecrDiskBootFile_fnc, SetLoadfileCallbacks_callback_t SetLoadfileCallbacks_fnc);
-void SetCheckKelfPathCallback(CheckKelfPath_callback_t CheckKelfPath_fnc);
-void GetLoadfileCallbacks(CheckKelfPath_callback_t *CheckKelfPath_fnc, SetLoadfileCallbacks_callback_t *SetLoadfileCallbacks_fnc);
-int IsIllegalBootDevice(const char *path);
+extern int ReBootStart(const char *command, unsigned int flags);
+extern int LoadModuleAddress(const char *name, void *addr, int offset);
+extern int LoadModule(const char *name);
+extern int LoadStartModule(const char *name, int arglen, const char *args, int *result);
+extern int StartModule(int modid, const char *name, int arglen, const char *args, int *result);
+extern int LoadModuleBufferAddress(void *buffer, void *addr, int offset);
+extern int LoadModuleBuffer(void *buffer);
+extern int LoadStartKelfModule(const char *name, int arglen, const char *args, int *result);
+extern void SetSecrmanCallbacks(SecrCardBootFile_callback_t SecrCardBootFile_fnc, SecrDiskBootFile_callback_t SecrDiskBootFile_fnc, SetLoadfileCallbacks_callback_t SetLoadfileCallbacks_fnc);
+extern void SetCheckKelfPathCallback(CheckKelfPath_callback_t CheckKelfPath_fnc);
+extern void GetLoadfileCallbacks(CheckKelfPath_callback_t *CheckKelfPath_fnc, SetLoadfileCallbacks_callback_t *SetLoadfileCallbacks_fnc);
+extern int IsIllegalBootDevice(const char *path);
 
 #define modload_IMPORTS_start DECLARE_IMPORT_TABLE(modload, 1, 1)
 #define modload_IMPORTS_end END_IMPORT_TABLE

@@ -26,8 +26,8 @@
 extern "C" {
 #endif
 
-int ps2ip_init(void);
-void ps2ip_deinit(void);
+extern int ps2ip_init(void);
+extern void ps2ip_deinit(void);
 
 #ifdef __cplusplus
 }

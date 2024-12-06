@@ -29,6 +29,6 @@ typedef int	sys_thread_t;
 #define mem_clib_malloc(size) memalign(64,size)
 #define mem_clib_calloc(count,size) ps2ip_calloc64(count,size)
 
-void *ps2ip_calloc64(size_t n, size_t size);
+extern void *ps2ip_calloc64(size_t n, size_t size);
 
 #endif /* __SYS_ARCH_H__ */

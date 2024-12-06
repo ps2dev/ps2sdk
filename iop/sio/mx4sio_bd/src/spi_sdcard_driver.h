@@ -160,18 +160,18 @@ typedef struct spisd_t
 extern spisd_t sdcard;
 extern struct block_device bd;
 
-uint16_t spisd_read_status_register();
+extern uint16_t spisd_read_status_register();
 
 /* init */
-int spisd_init_card();   /* bring card up from identification mode to data-transfer mode */
-int spisd_get_card_info(); /* get card info and reattach to bdm if card capacity changed */
-int spisd_recover();
+extern int spisd_init_card();   /* bring card up from identification mode to data-transfer mode */
+extern int spisd_get_card_info(); /* get card info and reattach to bdm if card capacity changed */
+extern int spisd_recover();
 
 /* BDM functions */
-int spisd_read(struct block_device *bd, uint64_t sector, void *buffer, uint16_t count);
-int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, uint16_t count);
-void spisd_flush(struct block_device *bd);
-int spisd_stop(struct block_device *bd);
+extern int spisd_read(struct block_device *bd, uint64_t sector, void *buffer, uint16_t count);
+extern int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, uint16_t count);
+extern void spisd_flush(struct block_device *bd);
+extern int spisd_stop(struct block_device *bd);
 
 
 #endif

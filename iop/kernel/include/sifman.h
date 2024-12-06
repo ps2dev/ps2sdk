@@ -74,13 +74,13 @@ enum _sif_regs {
  * don't really care.
  */
 
-void sceSifDma2Init();
-void sceSifInit();
+extern void sceSifDma2Init();
+extern void sceSifInit();
 
-void sceSifSetDChain();
+extern void sceSifSetDChain();
 
-int sceSifSetDma(SifDmaTransfer_t *dmat, int count);
-int sceSifDmaStat(int trid);
+extern int sceSifSetDma(SifDmaTransfer_t *dmat, int count);
+extern int sceSifDmaStat(int trid);
 
 /* Compatibility names for use with ps2lib.  */
 #define SifSetDChain sceSifSetDChain
@@ -91,57 +91,57 @@ int sceSifDmaStat(int trid);
  * All of these except sceSifCheckInit() & sceSifSetDmaIntr() have been
  * aribitrarily named.
  */
-void sceSifSetOneDma(SifDmaTransfer_t dmat);
+extern void sceSifSetOneDma(SifDmaTransfer_t dmat);
 
-void sceSifSendSync();
-int sceSifIsSending();
+extern void sceSifSendSync();
+extern int sceSifIsSending();
 
-void sceSifDma0Transfer(void *addr, int size, int mode);
-void sceSifDma0Sync();
-int sceSifDma0Sending();
+extern void sceSifDma0Transfer(void *addr, int size, int mode);
+extern void sceSifDma0Sync();
+extern int sceSifDma0Sending();
 
-void sceSifDma1Transfer(void *addr, int size, int mode);
-void sceSifDma1Sync();
-int sceSifDma1Sending();
+extern void sceSifDma1Transfer(void *addr, int size, int mode);
+extern void sceSifDma1Sync();
+extern int sceSifDma1Sending();
 
-void sceSifDma2Transfer(void *addr, int size, int mode);
-void sceSifDma2Sync();
-int sceSifDma2Sending();
+extern void sceSifDma2Transfer(void *addr, int size, int mode);
+extern void sceSifDma2Sync();
+extern int sceSifDma2Sending();
 
 /*
  * SBUS Main->Sub CPU status register
  */
-u32 sceSifGetMSFlag();
-u32 sceSifSetMSFlag(u32 val);
+extern u32 sceSifGetMSFlag();
+extern u32 sceSifSetMSFlag(u32 val);
 
 /*
  * SBUS Sub->Main CPU status register
  */
-u32 sceSifGetSMFlag();
-u32 sceSifSetSMFlag(u32 val);
+extern u32 sceSifGetSMFlag();
+extern u32 sceSifSetSMFlag(u32 val);
 
 /*
  * SBUS Main CPU DMA receive address
  */
-u32 sceSifGetMainAddr();
+extern u32 sceSifGetMainAddr();
 
 /*
  * SBUS Sub CPU DMA receive address
  */
-u32 sceSifGetSubAddr();
-u32 sceSifSetSubAddr(u32 addr);
+extern u32 sceSifGetSubAddr();
+extern u32 sceSifSetSubAddr(u32 addr);
 
 /*
  * Send a SBUS interrupt to the Main CPU
  */
-void sceSifIntrMain();
+extern void sceSifIntrMain();
 
-int sceSifCheckInit();
+extern int sceSifCheckInit();
 
-void sceSifSetDmaIntrHandler(void (*handler)(void *), void *arg);
-void sceSifResetDmaIntrHandler();
+extern void sceSifSetDmaIntrHandler(void (*handler)(void *), void *arg);
+extern void sceSifResetDmaIntrHandler();
 
-unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int count, void (*completioncb)(void *userdata), void *userdata);
+extern unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int count, void (*completioncb)(void *userdata), void *userdata);
 
 #define sifman_IMPORTS_start DECLARE_IMPORT_TABLE(sifman, 1, 1)
 #define sifman_IMPORTS_end END_IMPORT_TABLE

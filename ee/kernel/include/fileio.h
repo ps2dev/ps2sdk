@@ -36,28 +36,28 @@
 extern "C" {
 #endif
 
-int fioInit(void);
-void fioExit(void);
-int fioOpen(const char *fname, int mode);
-int fioClose(int fd);
-int fioRead(int fd, void *buff, int buff_size);
-int fioWrite(int fd, const void *buff, int buff_size);
-int fioLseek(int fd, int offset, int whence);
-int fioMkdir(const char *dirname);
-int fioPutc(int fd, int c);
-int fioGetc(int fd);
-int fioGets(int fd, char *buff, int n);
-void fioSetBlockMode(int blocking);
-int fioSync(int mode, int *retVal);
-int fioIoctl(int fd, int request, void *data);
-int fioDopen(const char *name);
-int fioDclose(int fd);
-int fioDread(int fd, io_dirent_t *buf);           // Warning! (*)
-int fioGetstat(const char *name, io_stat_t *buf); // Warning! (*)
-int fioChstat(const char *name, io_stat_t *buf, unsigned int cbit);
-int fioRemove(const char *name); // Warning! (**)
-int fioFormat(const char *name);
-int fioRmdir(const char *dirname);
+extern int fioInit(void);
+extern void fioExit(void);
+extern int fioOpen(const char *fname, int mode);
+extern int fioClose(int fd);
+extern int fioRead(int fd, void *buff, int buff_size);
+extern int fioWrite(int fd, const void *buff, int buff_size);
+extern int fioLseek(int fd, int offset, int whence);
+extern int fioMkdir(const char *dirname);
+extern int fioPutc(int fd, int c);
+extern int fioGetc(int fd);
+extern int fioGets(int fd, char *buff, int n);
+extern void fioSetBlockMode(int blocking);
+extern int fioSync(int mode, int *retVal);
+extern int fioIoctl(int fd, int request, void *data);
+extern int fioDopen(const char *name);
+extern int fioDclose(int fd);
+extern int fioDread(int fd, io_dirent_t *buf);           // Warning! (*)
+extern int fioGetstat(const char *name, io_stat_t *buf); // Warning! (*)
+extern int fioChstat(const char *name, io_stat_t *buf, unsigned int cbit);
+extern int fioRemove(const char *name); // Warning! (**)
+extern int fioFormat(const char *name);
+extern int fioRmdir(const char *dirname);
 
 /*	* Function is unstable; does not suspend interrupts prior to performing DMA transfers on the IOP side.
     ** Function is broken; falls through to the next case (mkdir) upon completion.

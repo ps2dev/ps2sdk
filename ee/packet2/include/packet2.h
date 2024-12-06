@@ -48,7 +48,7 @@ extern "C"
      * so remember to align memory!
      * @returns Pointer to packet2 on success or NULL if memory allocation fail.
      */
-    packet2_t *packet2_create(u16 qwords, enum Packet2Type type, enum Packet2Mode mode, u8 tte);
+    extern packet2_t *packet2_create(u16 qwords, enum Packet2Type type, enum Packet2Mode mode, u8 tte);
 
     /** 
      * Create new packet2 with given data pointer. 
@@ -64,13 +64,13 @@ extern "C"
      * so remember to align memory!
      * @returns Pointer to packet2 on success or NULL if memory allocation fail.
      */
-    packet2_t *packet2_create_from(qword_t *base, qword_t *next, u16 qwords, enum Packet2Type type, enum Packet2Mode mode, u8 tte);
+    extern packet2_t *packet2_create_from(qword_t *base, qword_t *next, u16 qwords, enum Packet2Type type, enum Packet2Mode mode, u8 tte);
 
     /** 
      * Free packet2 memory.
      * @param packet2 Pointer to packet2.
      */
-    void packet2_free(packet2_t *packet2);
+    extern void packet2_free(packet2_t *packet2);
 
     /** 
      * Reset packet. 
@@ -80,7 +80,7 @@ extern "C"
      * @param packet2 Pointer to packet.
      * @param clear_mem If >0, data is cleared via memset(). SLOW! 
      */
-    void packet2_reset(packet2_t *packet2, u8 clear_mem);
+    extern void packet2_reset(packet2_t *packet2, u8 clear_mem);
 
     /** 
      * Update current position of packet buffer.
@@ -185,16 +185,16 @@ extern "C"
      * @param packet2 Pointer to packet.
      * @param clear_mem Count of qwords, type 0 for all. 
      */
-    void packet2_print(packet2_t *packet2, u32 qw_count);
+    extern void packet2_print(packet2_t *packet2, u32 qw_count);
 
     /** 
      * Print amount of qwords of packet. 
      * @param packet2 Pointer to packet.
      */
-    void packet2_print_qw_count(packet2_t *packet2);
+    extern void packet2_print_qw_count(packet2_t *packet2);
 
     /** Copy data from b packet into a packet with memcpy() */
-    void packet2_add(packet2_t *a, packet2_t *b);
+    extern void packet2_add(packet2_t *a, packet2_t *b);
 
     /** Returns count of added qwords into packet. */
     static inline u32 packet2_get_qw_count(packet2_t *packet2) { return ((u32)packet2->next - (u32)packet2->base) >> 4; }

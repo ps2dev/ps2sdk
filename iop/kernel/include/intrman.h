@@ -91,7 +91,7 @@ typedef struct intrman_internals_
     int dmac2_interrupt_handler_mask;
 } intrman_internals_t;
 
-intrman_internals_t *GetIntrmanInternalData(void);
+extern intrman_internals_t *GetIntrmanInternalData(void);
 
 /**
  * Register an interrupt handler for the specified interrupt.
@@ -104,21 +104,21 @@ intrman_internals_t *GetIntrmanInternalData(void);
  * @param arg An optional pointer to data that will be passed to the interrupt handler, whenever it is to be invoked.
  * @return 0 on success, non-zero error code on failure.
  */
-int RegisterIntrHandler(int irq, int mode, int (*handler)(void *), void *arg);
+extern int RegisterIntrHandler(int irq, int mode, int (*handler)(void *), void *arg);
 
 /**
  * Releases (deregisters) the interrupt handler for the specified interrupt.
  * @param irq Interrupt cause to release the interrupt handler for.
  * @return 0 on success, non-zero error code on failure.
  */
-int ReleaseIntrHandler(int irq);
+extern int ReleaseIntrHandler(int irq);
 
 /**
  * Enables (unmasks) the specified hardware interrupt cause.
  * @param irq Interrupt cause to enable.
  * @return Returns 0 on success, non-zero error code on failure.
  */
-int EnableIntr(int irq);
+extern int EnableIntr(int irq);
 
 /**
  * Disables (masks) the specified hardware interrupt cause.
@@ -126,7 +126,7 @@ int EnableIntr(int irq);
  * @param res Pointer to a variable to receive the interrupt number of the interrupt that was disabled.
  * @return Returns 0 on success, non-zero error code on failure.
  */
-int DisableIntr(int irq, int *res);
+extern int DisableIntr(int irq, int *res);
 
 /**
  * Disables interrupts, regardless of the current statue. This is deprecated.
@@ -134,14 +134,14 @@ int DisableIntr(int irq, int *res);
  * May be called from an interrupt or thread context.
  * @return Returns 0 on success, non-zero error code on failure.
  */
-int CpuDisableIntr();
+extern int CpuDisableIntr();
 /**
  * Enables interrupts, regardless of the current state. This is deprecated.
  * The interrupt mask registers for each interrupt cause will not be changed.
  * May be called from an interrupt or thread context.
  * @return Returns 0 on success, non-zero error code on failure.
  */
-int CpuEnableIntr();
+extern int CpuEnableIntr();
 
 /**
  * Disables interrupts.
@@ -151,7 +151,7 @@ int CpuEnableIntr();
  * @return Returns 0 on success, non-zero error code on failure.
  * @see CpuResumeIntr()
  */
-int CpuSuspendIntr(int *state);
+extern int CpuSuspendIntr(int *state);
 
 /**
  * Enables interrupts.
@@ -161,51 +161,51 @@ int CpuSuspendIntr(int *state);
  * @return Returns 0 on success, non-zero error code on failure.
  * @see CpuSuspendIntr()
  */
-int CpuResumeIntr(int state);
+extern int CpuResumeIntr(int state);
 
 /**
  * Invokes a function in kernel mode via a syscall handler. This is usually used for synchronization between interrupt and DECI2 contexts.
  * @param function A pointer to the function to call. Specify other arguments for the function, after function.
  * @return The return value of the function.
  */
-int CpuInvokeInKmode(void *function, ...);
+extern int CpuInvokeInKmode(void *function, ...);
 
 /**
  * Disables dispatching of the interrupt handler, by INTRMAN. Used by DECI2, when DECI2RS is to manage the SIF2 and SBUS interrupts.
  * This does not change the interrupt mask status.
  * @param irq The interrupt to mask in software.
  */
-void DisableDispatchIntr(int irq);
+extern void DisableDispatchIntr(int irq);
 /**
  * Enables dispatching of the interrupt handler, by INTRMAN.
  * This does not change the interrupt mask status.
  * @param irq The interrupt to unmask in software.
  */
-void EnableDispatchIntr(int irq);
+extern void EnableDispatchIntr(int irq);
 
 /**
  * Indicates whether execution is currently within an interrupt or thread context.
  * @return 1 if within the interrupt context, 0 if not.
  */
-int QueryIntrContext(void);
+extern int QueryIntrContext(void);
 
 /**
  * Indicates whether the specified stack pointer is within the interrupt stack.
  * @param sp The stack pointer to check.
  * @return 1 if the specified stack pointer is within the interrupt stack, 0 if not.
  */
-int QueryIntrStack(void *sp);
+extern int QueryIntrStack(void *sp);
 
-int iCatchMultiIntr(void);
+extern int iCatchMultiIntr(void);
 
 /**
  * These set callback functions for thread support
  * Only the thread manager should set these
  */
-void SetNewCtxCb(void *cb);
-void ResetNewCtxCb(void);
-void SetShouldPreemptCb(void *cb);
-void ResetShouldPreemptCb(void);
+extern void SetNewCtxCb(void *cb);
+extern void ResetNewCtxCb(void);
+extern void SetShouldPreemptCb(void *cb);
+extern void ResetShouldPreemptCb(void);
 
 #define intrman_IMPORTS_start DECLARE_IMPORT_TABLE(intrman, 1, 2)
 #define intrman_IMPORTS_end   END_IMPORT_TABLE

@@ -44,16 +44,16 @@ struct reroot
 typedef  struct reroot  reroot;
 
 /* make a new recycling root */
-reroot  *remkroot(/*_ size_t mysize _*/);
+extern reroot  *remkroot(/*_ size_t mysize _*/);
 
 /* free a recycling root and all the items it has made */
-void     refree(/*_ struct reroot *r _*/);
+extern void     refree(/*_ struct reroot *r _*/);
 
 /* get a new (cleared) item from the root */
 #define renew(r) ((r)->numleft ? \
    (((char *)((r)->list+1))+((r)->numleft-=(r)->size)) : renewx(r))
 
-char    *renewx(/*_ struct reroot *r _*/);
+extern char    *renewx(/*_ struct reroot *r _*/);
 
 /* delete an item; let the root recycle it */
 /* void     redel(/o_ struct reroot *r, struct recycle *item _o/); */
@@ -64,7 +64,7 @@ char    *renewx(/*_ struct reroot *r _*/);
 
 /* malloc, but exit program if no joy */
 /* use plain free() to free memory allocated by remalloc() */
-char    *remalloc(/*_ size_t len _*/);
+extern char    *remalloc(/*_ size_t len _*/);
 
 #ifdef __cplusplus
 }

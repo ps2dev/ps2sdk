@@ -21,10 +21,10 @@
 
 
 /* Create a new cached block device */
-struct block_device *bd_cache_create(struct block_device *bd);
+extern struct block_device *bd_cache_create(struct block_device *bd);
 
 /* Destroy a cached block device */
-void bd_cache_destroy(struct block_device *cbd);
+extern void bd_cache_destroy(struct block_device *cbd);
 
 
 #endif

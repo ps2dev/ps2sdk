@@ -31,56 +31,56 @@ typedef void (*print_callback_t)(void *context, int c);
 /* setjmp/longjmp are already defined in setjmp.h */
 
 /* These functions are non-standardized (char instead of int) */
-char _toupper(char c);
-char _tolower(char c);
+extern char _toupper(char c);
+extern char _tolower(char c);
 
 /* These functions are non-standardized (IOP-only functions operating on 32-bit integers instead of wchar_t) */
-void *_wmemcopy(u32 *dest, const u32 *src, size_t size);
-void *_wmemset(u32 *dest, u32 c, size_t size);
+extern void *_wmemcopy(u32 *dest, const u32 *src, size_t size);
+extern void *_wmemset(u32 *dest, u32 c, size_t size);
 #ifdef SYSCLIB_ENABLE_NONSTD_WIDE_MEMCOPY
 #define wmemcopy _wmemcopy
 #define wmemset _wmemset
 #endif
 
 /* This function is non-standard. */
-int prnt(print_callback_t, void *context, const char * format, va_list ap);
+extern int prnt(print_callback_t, void *context, const char * format, va_list ap);
 
 /* These functions are used in the process of ctype.h and is non-standard. */
-unsigned char look_ctype_table(char character);
-void *get_ctype_table();
+extern unsigned char look_ctype_table(char character);
+extern void *get_ctype_table();
 
 /* This function is non-standard. */
-char *atob(char *s, int *i);
+extern char *atob(char *s, int *i);
 
-void *memchr(const void *s, int c, size_t n);
-int memcmp(const void *p, const void *q, size_t size);
-void * memcpy(void *dest, const void *src, size_t size);
-void *memmove(void *dest, const void *src, size_t size);
-void * memset(void *ptr, int c, size_t size);
-int bcmp(const void *, const void *, size_t);
-void bcopy(const void *, void *, size_t);
-void bzero(void *, size_t);
-int sprintf(char *str, const char *format, ...);
-char *strcat(char *dest, const char *src);
-char *strchr(const char *s, int c);
-int strcmp(const char *p, const char *q);
-char *strcpy(char *dest, const char *src);
-size_t strcspn(const char *s, const char *reject);
-char *index(const char *s, int c);
-char *rindex(const char *s, int c);
-size_t strlen(const char *s);
-char *strncat(char *dest, const char *src, size_t size);
-int strncmp(const char *p, const char *q, size_t size);
-char *strncpy(char *dest, const char *src, size_t size);
-char *strpbrk(const char *s, const char *accept);
-char *strrchr(const char *s, int c);
-size_t strspn(const char *s, const char *accept);
-char *strstr(const char *haystack, const char *needle);
-char *strtok(char *s, const char *delim);
-long strtol(const char *s, char **endptr, int base);
-unsigned long strtoul(const char *s, char **endptr, int base);
-int vsprintf(char *, const char *, va_list);
-char *strtok_r(char *s, const char *delim, char **lasts);
+extern void *memchr(const void *s, int c, size_t n);
+extern int memcmp(const void *p, const void *q, size_t size);
+extern void * memcpy(void *dest, const void *src, size_t size);
+extern void *memmove(void *dest, const void *src, size_t size);
+extern void * memset(void *ptr, int c, size_t size);
+extern int bcmp(const void *, const void *, size_t);
+extern void bcopy(const void *, void *, size_t);
+extern void bzero(void *, size_t);
+extern int sprintf(char *str, const char *format, ...);
+extern char *strcat(char *dest, const char *src);
+extern char *strchr(const char *s, int c);
+extern int strcmp(const char *p, const char *q);
+extern char *strcpy(char *dest, const char *src);
+extern size_t strcspn(const char *s, const char *reject);
+extern char *index(const char *s, int c);
+extern char *rindex(const char *s, int c);
+extern size_t strlen(const char *s);
+extern char *strncat(char *dest, const char *src, size_t size);
+extern int strncmp(const char *p, const char *q, size_t size);
+extern char *strncpy(char *dest, const char *src, size_t size);
+extern char *strpbrk(const char *s, const char *accept);
+extern char *strrchr(const char *s, int c);
+extern size_t strspn(const char *s, const char *accept);
+extern char *strstr(const char *haystack, const char *needle);
+extern char *strtok(char *s, const char *delim);
+extern long strtol(const char *s, char **endptr, int base);
+extern unsigned long strtoul(const char *s, char **endptr, int base);
+extern int vsprintf(char *, const char *, va_list);
+extern char *strtok_r(char *s, const char *delim, char **lasts);
 
 #ifndef SYSCLIB_DISABLE_BUILTINS
 #ifndef memchr

@@ -54,16 +54,16 @@ typedef struct
     int reserved[2];
 } iop_sema_info_t;
 
-int CreateSema(iop_sema_t *sema);
-int DeleteSema(int semid);
+extern int CreateSema(iop_sema_t *sema);
+extern int DeleteSema(int semid);
 
-int SignalSema(int semid);
-int iSignalSema(int semid);
-int WaitSema(int semid);
-int PollSema(int semid);
+extern int SignalSema(int semid);
+extern int iSignalSema(int semid);
+extern int WaitSema(int semid);
+extern int PollSema(int semid);
 
-int ReferSemaStatus(int semid, iop_sema_info_t *info);
-int iReferSemaStatus(int semid, iop_sema_info_t *info);
+extern int ReferSemaStatus(int semid, iop_sema_info_t *info);
+extern int iReferSemaStatus(int semid, iop_sema_info_t *info);
 
 #define IOP_MUTEX_LOCKED   0
 #define IOP_MUTEX_UNLOCKED 1

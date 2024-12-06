@@ -27,24 +27,24 @@
 typedef ModuleInfo_t smod_mod_info_t __attribute__ ((deprecated));	//For backward-compatibility with older projects.
 
 /* from smod.c */
-ModuleInfo_t *smod_get_next_mod(ModuleInfo_t *cur_mod);
-ModuleInfo_t *smod_get_mod_by_name(const char *name);
-int smod_get_modcount_by_name(const char *name);
-int smod_get_modversion_by_name(const char *name);
-int smod_unload_module(const char *name);
+extern ModuleInfo_t *smod_get_next_mod(ModuleInfo_t *cur_mod);
+extern ModuleInfo_t *smod_get_mod_by_name(const char *name);
+extern int smod_get_modcount_by_name(const char *name);
+extern int smod_get_modversion_by_name(const char *name);
+extern int smod_unload_module(const char *name);
 
 /* from slib.c */
-iop_library_t *slib_get_lib_by_name(const char *name);
-void *slib_get_exportlist_by_name(const char *name);
-int slib_get_version_by_name(const char *name);
-int slib_release_library(const char *name);
+extern iop_library_t *slib_get_lib_by_name(const char *name);
+extern void *slib_get_exportlist_by_name(const char *name);
+extern int slib_get_version_by_name(const char *name);
+extern int slib_release_library(const char *name);
 
 /* from devices.c */
-iop_device_t *iopmgr_get_iomandev(char *device);
-iop_device_t *iopmgr_get_iomanxdev(char *device);
-iop_device_t *iopmgr_get_device(char *device);
-int iopmgr_get_devicetype(char *device);
-int iopmgr_get_devicelist(int man,int devtype,char *buffer);
+extern iop_device_t *iopmgr_get_iomandev(char *device);
+extern iop_device_t *iopmgr_get_iomanxdev(char *device);
+extern iop_device_t *iopmgr_get_device(char *device);
+extern int iopmgr_get_devicetype(char *device);
+extern int iopmgr_get_devicelist(int man,int devtype,char *buffer);
 
 /* from modules.c */
 

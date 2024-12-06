@@ -14,39 +14,39 @@
 #define	PFS_FDIRO		(0x0008)  /* internal use for dopen */
 
 ///////////////////////////////////////////////////////////////////////////////
-//	Function declarations
+//  Function declarations
 
-int pfsFioCheckForLastError(pfs_mount_t *pfsMount, int rv);
-int pfsFioCheckFileSlot(pfs_file_slot_t *fileSlot);
-pfs_mount_t *pfsFioGetMountedUnit(int unit);
-void pfsFioCloseFileSlot(pfs_file_slot_t *fileSlot);
+extern int pfsFioCheckForLastError(pfs_mount_t *pfsMount, int rv);
+extern int pfsFioCheckFileSlot(pfs_file_slot_t *fileSlot);
+extern pfs_mount_t *pfsFioGetMountedUnit(int unit);
+extern void pfsFioCloseFileSlot(pfs_file_slot_t *fileSlot);
 
 ///////////////////////////////////////////////////////////////////////////////
-//	I/O functions
+//  I/O functions
 
-int	pfsFioInit(iomanX_iop_device_t *f);
-int	pfsFioDeinit(iomanX_iop_device_t *f);
-int	pfsFioFormat(iomanX_iop_file_t *, const char *dev, const char *blockdev, void *arg, int arglen);
-int	pfsFioOpen(iomanX_iop_file_t *f, const char *name, int flags, int mode);
-int	pfsFioClose(iomanX_iop_file_t *f);
-int	pfsFioRead(iomanX_iop_file_t *f, void *buf, int size);
-int	pfsFioWrite(iomanX_iop_file_t *f, void *buf, int size);
-int	pfsFioLseek(iomanX_iop_file_t *f, int pos, int whence);
-int	pfsFioRemove(iomanX_iop_file_t *f, const char *name);
-int	pfsFioMkdir(iomanX_iop_file_t *f, const char *path, int mode);
-int	pfsFioRmdir(iomanX_iop_file_t *f, const char *path);
-int	pfsFioDopen(iomanX_iop_file_t *f, const char *name);
-int	pfsFioDclose(iomanX_iop_file_t *f);
-int	pfsFioDread(iomanX_iop_file_t *f, iox_dirent_t *buf);
-int	pfsFioGetstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat);
-int	pfsFioChstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask);
-int pfsFioRename(iomanX_iop_file_t *f, const char *old, const char *new);
-int pfsFioChdir(iomanX_iop_file_t *f, const char *name);
-int pfsFioSync(iomanX_iop_file_t *f, const char *dev, int flag);
-int pfsFioMount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
-int pfsFioUmount(iomanX_iop_file_t *f, const char *fsname);
-s64 pfsFioLseek64(iomanX_iop_file_t *f, s64 offset, int whence);
-int pfsFioSymlink(iomanX_iop_file_t *f, const char *old, const char *new);
-int pfsFioReadlink(iomanX_iop_file_t *f, const char *path, char *buf, unsigned int buflen);
+extern int pfsFioInit(iomanX_iop_device_t *f);
+extern int pfsFioDeinit(iomanX_iop_device_t *f);
+extern int pfsFioFormat(iomanX_iop_file_t *, const char *dev, const char *blockdev, void *arg, int arglen);
+extern int pfsFioOpen(iomanX_iop_file_t *f, const char *name, int flags, int mode);
+extern int pfsFioClose(iomanX_iop_file_t *f);
+extern int pfsFioRead(iomanX_iop_file_t *f, void *buf, int size);
+extern int pfsFioWrite(iomanX_iop_file_t *f, void *buf, int size);
+extern int pfsFioLseek(iomanX_iop_file_t *f, int pos, int whence);
+extern int pfsFioRemove(iomanX_iop_file_t *f, const char *name);
+extern int pfsFioMkdir(iomanX_iop_file_t *f, const char *path, int mode);
+extern int pfsFioRmdir(iomanX_iop_file_t *f, const char *path);
+extern int pfsFioDopen(iomanX_iop_file_t *f, const char *name);
+extern int pfsFioDclose(iomanX_iop_file_t *f);
+extern int pfsFioDread(iomanX_iop_file_t *f, iox_dirent_t *buf);
+extern int pfsFioGetstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat);
+extern int pfsFioChstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask);
+extern int pfsFioRename(iomanX_iop_file_t *f, const char *old, const char *new);
+extern int pfsFioChdir(iomanX_iop_file_t *f, const char *name);
+extern int pfsFioSync(iomanX_iop_file_t *f, const char *dev, int flag);
+extern int pfsFioMount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
+extern int pfsFioUmount(iomanX_iop_file_t *f, const char *fsname);
+extern s64 pfsFioLseek64(iomanX_iop_file_t *f, s64 offset, int whence);
+extern int pfsFioSymlink(iomanX_iop_file_t *f, const char *old, const char *new);
+extern int pfsFioReadlink(iomanX_iop_file_t *f, const char *path, char *buf, unsigned int buflen);
 
 #endif /* _PFS_FIO_H */

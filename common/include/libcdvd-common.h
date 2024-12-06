@@ -386,16 +386,16 @@ extern "C" {
  * @param mode mode to read as
  * @return 1 on success, 0 on failure.
  */
-int sceCdRead(u32 lbn, u32 sectors, void *buffer, sceCdRMode *mode);
-int sceCdReadDVDV(u32 lbn, u32 sectors, void *buffer, sceCdRMode *mode);
-int sceCdReadCDDA(u32 lbn, u32 sectors, void *buffer, sceCdRMode *mode);
+extern int sceCdRead(u32 lbn, u32 sectors, void *buffer, sceCdRMode *mode);
+extern int sceCdReadDVDV(u32 lbn, u32 sectors, void *buffer, sceCdRMode *mode);
+extern int sceCdReadCDDA(u32 lbn, u32 sectors, void *buffer, sceCdRMode *mode);
 
 /** get toc from inserted disc
  *
  * @param toc buffer to hold toc (1024 bytes)
  * @return 1 on success, 0 on failure.
  */
-int sceCdGetToc(u8 *toc);
+extern int sceCdGetToc(u8 *toc);
 
 /** Alternate TOC retrieving function with parameter
  *
@@ -403,7 +403,7 @@ int sceCdGetToc(u8 *toc);
  * @param param Parameter
  * @return 1 on success, 0 on failure.
  */
-int sceCdGetToc2(u8 *toc, int param);
+extern int sceCdGetToc2(u8 *toc, int param);
 
 /** seek to given sector on disc
  * non-blocking, requires sceCdSync() call
@@ -411,28 +411,28 @@ int sceCdGetToc2(u8 *toc, int param);
  * @param lbn sector to seek to on disc
  * @return 1 on success, 0 on failure.
  */
-int sceCdSeek(u32 lbn);
+extern int sceCdSeek(u32 lbn);
 
 /** puts ps2 sceCd drive into standby mode
  * non-blocking, requires sceCdSync() call
  *
  * @return 1 on success, 0 on failure.
  */
-int sceCdStandby(void);
+extern int sceCdStandby(void);
 
 /** stops ps2 sceCd drive from spinning
  * non-blocking, requires sceCdSync() call
  *
  * @return 1 on success, 0 on failure.
  */
-int sceCdStop(void);
+extern int sceCdStop(void);
 
 /** pauses ps2 sceCd drive
  * non-blocking, requires sceCdSync() call
  *
  * @return 1 on success, 0 on failure.
  */
-int sceCdPause(void);
+extern int sceCdPause(void);
 
 /** do a 'chain' of reads with one command
  * last chain value must be all 0xFFFFFFFF
@@ -445,7 +445,7 @@ int sceCdPause(void);
  * @param mode read mode
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadChain(sceCdRChain *tag, sceCdRMode *mode);
+extern int sceCdReadChain(sceCdRChain *tag, sceCdRMode *mode);
 
 /** send an n-command by function number
  *
@@ -454,7 +454,7 @@ int sceCdReadChain(sceCdRChain *tag, sceCdRMode *mode);
  * @param inBuffSize size of input buffer  (0 - 16 bytes)
  * @return 1 on success, 0 on failure.
  */
-int sceCdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize);
+extern int sceCdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize);
 
 // **** S-Command functions ****
 
@@ -466,7 +466,7 @@ int sceCdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize);
  * @param clock time/date struct
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadClock(sceCdCLOCK *clock);
+extern int sceCdReadClock(sceCdCLOCK *clock);
 
 /** Sets the PlayStation 2 clock.
  * (time value is in BCD)
@@ -476,19 +476,19 @@ int sceCdReadClock(sceCdCLOCK *clock);
  * @param clock time/date struct to set clocks time with
  * @return 1 on success, 0 on failure.
  */
-int sceCdWriteClock(sceCdCLOCK *clock);
+extern int sceCdWriteClock(sceCdCLOCK *clock);
 
 /** gets the type of the currently inserted disc
  *
  * @return disk type (SCECdvdMediaTypes)
  */
-int sceCdGetDiskType(void);
+extern int sceCdGetDiskType(void);
 
 /** gets the last error that occurred
  *
  * @return error type (SCECdvdErrorCode)
  */
-int sceCdGetError(void);
+extern int sceCdGetError(void);
 
 /** open/close/check disk tray
  *
@@ -496,19 +496,19 @@ int sceCdGetError(void);
  * @param traychk address for returning tray state change
  * @return 1 on success, 0 on failure.
  */
-int sceCdTrayReq(int param, u32 *traychk);
+extern int sceCdTrayReq(int param, u32 *traychk);
 
 /** gets the state of the drive
  *
  * @return status (SCECdvdDriveStates)
  */
-int sceCdStatus(void);
+extern int sceCdStatus(void);
 
 /** 'breaks' the currently executing command
  *
  * @return 1 on success, 0 on failure.
  */
-int sceCdBreak(void);
+extern int sceCdBreak(void);
 
 /** cancel power off
  * Minimum Mechacon firmware version: 20400
@@ -517,7 +517,7 @@ int sceCdBreak(void);
  * @param result result
  * @return 1 on success, 0 on failure.
  */
-int sceCdCancelPOffRdy(u32 *result);
+extern int sceCdCancelPOffRdy(u32 *result);
 
 /** blue led control
  *
@@ -527,7 +527,7 @@ int sceCdCancelPOffRdy(u32 *result);
  * @param result result
  * @return 1 on success, 0 on failure.
  */
-int sceCdBlueLEDCtl(u8 control, u32 *result);
+extern int sceCdBlueLEDCtl(u8 control, u32 *result);
 
 /** power off
  *
@@ -536,7 +536,7 @@ int sceCdBlueLEDCtl(u8 control, u32 *result);
  * @param result result
  * @return 1 on success, 0 on failure.
  */
-int sceCdPowerOff(u32 *result);
+extern int sceCdPowerOff(u32 *result);
 
 /** set media mode
  *
@@ -545,7 +545,7 @@ int sceCdPowerOff(u32 *result);
  * @param media media mode (SCECdvdMModeMediaTypes)
  * @return 1 on success, 0 on failure.
  */
-int sceCdMmode(int media);
+extern int sceCdMmode(int media);
 
 /** change libcdvd thread priority
  *
@@ -554,7 +554,7 @@ int sceCdMmode(int media);
  * @param priority priority
  * @return 1 on success, 0 on failure.
  */
-int sceCdChangeThreadPriority(int priority);
+extern int sceCdChangeThreadPriority(int priority);
 
 /** send an s-command by function number
  *
@@ -564,7 +564,7 @@ int sceCdChangeThreadPriority(int priority);
  * @param output buffer (16 bytes, can be null)
  * @return 1 if successful, 0 if error
  */
-int sceCdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff);
+extern int sceCdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff);
 
 // **** Streaming Functions ****
 
@@ -574,7 +574,7 @@ int sceCdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff)
  * @param mode mode to read in
  * @return 1 on success, 0 on failure.
  */
-int sceCdStStart(u32 lbn, sceCdRMode *mode);
+extern int sceCdStStart(u32 lbn, sceCdRMode *mode);
 
 /** read stream data
  *
@@ -584,20 +584,20 @@ int sceCdStStart(u32 lbn, sceCdRMode *mode);
  * @param error error value holder
  * @return number of sectors read if successful, 0 otherwise
  */
-int sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *error);
+extern int sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *error);
 
 /** stop streaming
  *
  * @return 1 on success, 0 on failure.
  */
-int sceCdStStop(void);
+extern int sceCdStStop(void);
 
 /** seek to a new stream position
  *
  * @param lbn sector location to start streaming from
  * @return 1 on success, 0 on failure.
  */
-int sceCdStSeek(u32 lbn);
+extern int sceCdStSeek(u32 lbn);
 
 /** init streaming
  *
@@ -606,25 +606,25 @@ int sceCdStSeek(u32 lbn);
  * @param buffer buffer address on iop
  * @return 1 on success, 0 on failure.
  */
-int sceCdStInit(u32 bufmax, u32 bankmax, void *buffer);
+extern int sceCdStInit(u32 bufmax, u32 bankmax, void *buffer);
 
 /** get stream read status
  *
  * @return number of sectors read if successful, 0 otherwise
  */
-int sceCdStStat(void);
+extern int sceCdStStat(void);
 
 /** pause streaming
  *
  * @return 1 on success, 0 on failure.
  */
-int sceCdStPause(void);
+extern int sceCdStPause(void);
 
 /** continue streaming
  *
  * @return 1 on success, 0 on failure.
  */
-int sceCdStResume(void);
+extern int sceCdStResume(void);
 
 // **** Other Functions ****
 
@@ -633,14 +633,14 @@ int sceCdStResume(void);
  * @param mode mode (SCECdvdInitModes)
  * @return 1 on success, 0 on failure.
  */
-int sceCdInit(int mode);
+extern int sceCdInit(int mode);
 
 /** waits/checks for completion of n-commands
  *
  * @param mode 0 = wait for completion of command (blocking), 1 = check current status and return immediately
  * @return 0 = completed, 1 = not completed
  */
-int sceCdSync(int mode);
+extern int sceCdSync(int mode);
 
 /** search for a file on disc
  *
@@ -648,23 +648,23 @@ int sceCdSync(int mode);
  * @param name name of file to search for (no wildcard characters) (should be in the form '\\SYSTEM.CNF;1')
  * @return 1 on success, 0 on failure. (or no file found)
  */
-int sceCdSearchFile(sceCdlFILE *file, const char *name);
+extern int sceCdSearchFile(sceCdlFILE *file, const char *name);
 
 /** checks if drive is ready
  *
  * @param mode mode
  * @return SCECdComplete if ready, SCECdNotReady if busy
  */
-int sceCdDiskReady(int mode);
+extern int sceCdDiskReady(int mode);
 
 /** convert from sector number to minute:second:frame  */
-sceCdlLOCCD *sceCdIntToPos(u32 i, sceCdlLOCCD *p);
+extern sceCdlLOCCD *sceCdIntToPos(u32 i, sceCdlLOCCD *p);
 
 /** convert from minute:second:frame to sector number  */
-u32 sceCdPosToInt(sceCdlLOCCD *p);
+extern u32 sceCdPosToInt(sceCdlLOCCD *p);
 
 /** get the current read position (when reading using sceCdRead)  */
-u32 sceCdGetReadPos(void);
+extern u32 sceCdGetReadPos(void);
 
 /** initialise EE callback thread
  *
@@ -673,14 +673,14 @@ u32 sceCdGetReadPos(void);
  * @param stackSize callback thread stack size
  * @return 1 if initialised callback, 0 if only priority was changed
  */
-int sceCdInitEeCB(int priority, void *stackAddr, int stackSize);
+extern int sceCdInitEeCB(int priority, void *stackAddr, int stackSize);
 
 /** set sceCd callback function
  *
  * @param function pointer to new callback function
  * @return pointer to old function
  */
-sceCdCBFunc sceCdCallback(sceCdCBFunc function);
+extern sceCdCBFunc sceCdCallback(sceCdCBFunc function);
 
 /** Reads SUBQ data from the disc.
 //
@@ -688,7 +688,7 @@ sceCdCBFunc sceCdCallback(sceCdCBFunc function);
 // @param status Result code.
 // @return 1 on success, 0 on failure.
  */
-int sceCdReadSUBQ(void *buffer, u32 *status);
+extern int sceCdReadSUBQ(void *buffer, u32 *status);
 
 // **** System functions ****
 
@@ -698,7 +698,7 @@ int sceCdReadSUBQ(void *buffer, u32 *status);
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdForbidDVDP(u32 *result);
+extern int sceCdForbidDVDP(u32 *result);
 
 /** Controls automatic adjustment of the CD/DVD drive.
  * This also causes the auto-tilt motor (on units that have one) to be activated.
@@ -707,7 +707,7 @@ int sceCdForbidDVDP(u32 *result);
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdAutoAdjustCtrl(int mode, u32 *result);
+extern int sceCdAutoAdjustCtrl(int mode, u32 *result);
 
 /** Controls on-the-fly (hardware) data decryption. Setting all options to 0 will disable decryption.
  * This is used for decrypting encrypted sectors like the PlayStation 2 logo.
@@ -717,7 +717,7 @@ int sceCdAutoAdjustCtrl(int mode, u32 *result);
  * @param shiftval Shift amount enable_shift is enabled
  * @return 1 on success, 0 on failure.
  */
-int sceCdDecSet(unsigned char enable_xor, unsigned char enable_shift, unsigned char shiftval);
+extern int sceCdDecSet(unsigned char enable_xor, unsigned char enable_shift, unsigned char shiftval);
 
 /** Reads the requested key from the CD/DVD.
  *
@@ -727,7 +727,7 @@ int sceCdDecSet(unsigned char enable_xor, unsigned char enable_shift, unsigned c
  * @param key Buffer to store the key in.
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadKey(unsigned char arg1, unsigned char arg2, unsigned int command, unsigned char *key);
+extern int sceCdReadKey(unsigned char arg1, unsigned char arg2, unsigned int command, unsigned char *key);
 
 /** Determines if unique disc key exists
  * Unofficial name.
@@ -736,14 +736,14 @@ int sceCdReadKey(unsigned char arg1, unsigned char arg2, unsigned int command, u
  * @param status Command status
  * @return 1 on success, 0 on failure.
  */
-int sceCdDoesUniqueKeyExist(u32 *status);
+extern int sceCdDoesUniqueKeyExist(u32 *status);
 
 /** Blocks disc tray eject functionality and turns off the blue eject LED when enabled.
  *
  * @param mode Set to a non-zero value to enable the tray eject functionality
  * @return 1 on success, 0 on failure.
  */
-int sceCdSetHDMode(u32 mode);
+extern int sceCdSetHDMode(u32 mode);
 
 /** Opens a specified configuration block, within NVRAM. Each block is 15 bytes long.
  *
@@ -753,14 +753,14 @@ int sceCdSetHDMode(u32 mode);
  * @param status Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdOpenConfig(int block, int mode, int NumBlocks, u32 *status);
+extern int sceCdOpenConfig(int block, int mode, int NumBlocks, u32 *status);
 
 /** Closes the configuration block that is currently opened.
  *
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdCloseConfig(u32 *result);
+extern int sceCdCloseConfig(u32 *result);
 
 /** Reads the configuration block(s) that was/were previously opened. Each block is 15 bytes long.
  *
@@ -768,7 +768,7 @@ int sceCdCloseConfig(u32 *result);
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadConfig(void *buffer, u32 *result);
+extern int sceCdReadConfig(void *buffer, u32 *result);
 
 /** Writes to the configuration block(s) that was/were previously opened. Each block is 15 bytes long.
  *
@@ -776,7 +776,7 @@ int sceCdReadConfig(void *buffer, u32 *result);
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdWriteConfig(const void *buffer, u32 *result);
+extern int sceCdWriteConfig(const void *buffer, u32 *result);
 
 /** Reads a single word from the NVRAM storage.
  *
@@ -785,7 +785,7 @@ int sceCdWriteConfig(const void *buffer, u32 *result);
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadNVM(u32 address, u16 *data, u8 *result);
+extern int sceCdReadNVM(u32 address, u16 *data, u8 *result);
 
 /** Writes a single word to the NVRAM storage.
  * Starting from Mechacon firmware version 50000, attempting to write to address values over 150 will error.
@@ -795,7 +795,7 @@ int sceCdReadNVM(u32 address, u16 *data, u8 *result);
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdWriteNVM(u32 address, u16 data, u8 *result);
+extern int sceCdWriteNVM(u32 address, u16 data, u8 *result);
 
 /** Reads the i.Link ID of the console.
  * All consoles have an i.Link ID, including those that do not have a physical i.Link port.
@@ -804,7 +804,7 @@ int sceCdWriteNVM(u32 address, u16 data, u8 *result);
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdRI(u8 *buffer, u32 *result);
+extern int sceCdRI(u8 *buffer, u32 *result);
 
 /** Writes a new i.Link ID for the console.
  * Starting from Mechacon firmware version 50000, a unlock combination (0x03 0x46 and 0x03 0x47) needs to be executed first.
@@ -813,7 +813,7 @@ int sceCdRI(u8 *buffer, u32 *result);
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdWI(const u8 *buffer, u32 *result);
+extern int sceCdWI(const u8 *buffer, u32 *result);
 
 /** Reads the ID of the console. This is not the same as the i.Link ID.
  *
@@ -821,7 +821,7 @@ int sceCdWI(const u8 *buffer, u32 *result);
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadConsoleID(u8 *buffer, u32 *result);
+extern int sceCdReadConsoleID(u8 *buffer, u32 *result);
 
 /** Writes a new ID for the console. This is not the same as the i.Link ID.
  * Starting from Mechacon firmware version 50000, a unlock combination (0x03 0x46 and 0x03 0x47) needs to be executed first.
@@ -830,7 +830,7 @@ int sceCdReadConsoleID(u8 *buffer, u32 *result);
  * @param status Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdWriteConsoleID(const u8 *buffer, u32 *status);
+extern int sceCdWriteConsoleID(const u8 *buffer, u32 *status);
 
 /** Controls Audio Digital output.
  *
@@ -838,7 +838,7 @@ int sceCdWriteConsoleID(const u8 *buffer, u32 *status);
  * @param status Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdCtrlADout(int mode, u32 *status);
+extern int sceCdCtrlADout(int mode, u32 *status);
 
 /** Reads MECHACON version data (RR MM mm TT): RR = Magicgate region, MM = major, mm = minor, TT = system type (00 = PS2, 01 = PSX)
  * Magicgate region codes are: 00 = Japan, 01 = USA, 02 = Europe, 03 = Oceania, 04 = Asia, 05 = Russia, 06 = China, and 07 = Mexico.
@@ -849,7 +849,7 @@ int sceCdCtrlADout(int mode, u32 *status);
  * @param status Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdMV(u8 *buffer, u32 *status);
+extern int sceCdMV(u8 *buffer, u32 *status);
 
 /** Performs bootup certification.
  * SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
@@ -861,7 +861,7 @@ int sceCdMV(u8 *buffer, u32 *status);
  *                romname[3]    - Console type (E.g. C, D or T).
  * @return 1 on success, 0 on failure.
  */
-int sceCdBootCertify(const u8 *romname);
+extern int sceCdBootCertify(const u8 *romname);
 
 /** Reads the console's model "name": e.g. "SCPH-39000".
  * SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
@@ -870,7 +870,7 @@ int sceCdBootCertify(const u8 *romname);
  * @param status Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdRM(char *buffer, u32 *status);
+extern int sceCdRM(char *buffer, u32 *status);
 
 /** Sets the console's model name.
  * Starting from Mechacon firmware version 50000, a unlock combination (0x03 0x46 and 0x03 0x47) needs to be executed first.
@@ -880,7 +880,7 @@ int sceCdRM(char *buffer, u32 *status);
  * @param status Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdWM(const char *buffer, u32 *status);
+extern int sceCdWM(const char *buffer, u32 *status);
 
 /** Disables (Forbids) the READ N-command, so that disc sectors cannot be read.
  * Support for the READ N-command is re-enabled when the disc is replaced.
@@ -889,7 +889,7 @@ int sceCdWM(const char *buffer, u32 *status);
  * @param result Result code.
  * @return 1 on success, 0 on failure.
  */
-int sceCdForbidRead(u32 *result);
+extern int sceCdForbidRead(u32 *result);
 
 // **** Extra Functions ****
 
@@ -902,7 +902,7 @@ int sceCdForbidRead(u32 *result);
  * @param mode mode to read in
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadFull(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode *mode);
+extern int sceCdReadFull(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode *mode);
 
 /** Seeks to a given position
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
@@ -910,7 +910,7 @@ int sceCdReadFull(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode 
  * @param lsn sector location to seek to
  * @return 1 on success, 0 on failure.
  */
-int sceCdStSeekF(unsigned int lsn);
+extern int sceCdStSeekF(unsigned int lsn);
 
 /** Sets a handler for the power-off event which will be called before the console switches off.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
@@ -919,7 +919,7 @@ int sceCdStSeekF(unsigned int lsn);
  * @param addr an argument which will be passed to the callback function
  * returns: a pointer to the previous handler function, or a null pointer if nothing has been set eariler
  */
-void *sceCdPOffCallback(void (*func)(void *), void *addr);
+extern void *sceCdPOffCallback(void (*func)(void *), void *addr);
 
 /** Sets the timeout lengths for the certain CDVDMAN's operations.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
@@ -928,7 +928,7 @@ void *sceCdPOffCallback(void (*func)(void *), void *addr);
  * @param timeout a timeout value
  * @return 1 on success, 0 on failure.
  */
-int sceCdSetTimeout(int param, int timeout);
+extern int sceCdSetTimeout(int param, int timeout);
 
 /** Reads the Model ID.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
@@ -936,7 +936,7 @@ int sceCdSetTimeout(int param, int timeout);
  * @param id integer where the Model ID is stored.
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadModelID(unsigned int *id);
+extern int sceCdReadModelID(unsigned int *id);
 
 /** Reads the information about DVD disk.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
@@ -945,7 +945,7 @@ int sceCdReadModelID(unsigned int *id);
  * @param layer1_start pointer to variable where the address of the second layer of a dual-layer DVD disc is returned.
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadDvdDualInfo(int *on_dual, unsigned int *layer1_start);
+extern int sceCdReadDvdDualInfo(int *on_dual, unsigned int *layer1_start);
 
 /** Retrieves basic information about a file on CD or the specified layer of DVD media.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
@@ -955,14 +955,14 @@ int sceCdReadDvdDualInfo(int *on_dual, unsigned int *layer1_start);
  * @param layer layer to search (0 for the first layer, 1 for the second layer)
  * @return 1 on success, 0 on failure.
  */
-int sceCdLayerSearchFile(sceCdlFILE *fp, const char *path, int layer);
+extern int sceCdLayerSearchFile(sceCdlFILE *fp, const char *path, int layer);
 
 /** Returns the CD/DVD drive status.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
  *
  * @return status
  */
-int sceCdStatus2(void);
+extern int sceCdStatus2(void);
 
 /** Reads sectors from CD or DVD disc.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
@@ -973,7 +973,7 @@ int sceCdStatus2(void);
  * @param mode mode to read in
  * @return 1 on success, 0 on failure.
  */
-int sceCdRE(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode *mode);
+extern int sceCdRE(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode *mode);
 
 /** Reads a GUID.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
@@ -981,7 +981,7 @@ int sceCdRE(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode *mode)
  * @param guid u64 integer where the GUID is stored.
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadGUID(u64 *guid);
+extern int sceCdReadGUID(u64 *guid);
 
 /** Controls whether SIRCS remote control input should be translated to SIO2 pad input.
  * This corresponds to the "Remote Control" "Gameplay Function On/Off" option in OSDSYS.
@@ -992,7 +992,7 @@ int sceCdReadGUID(u64 *guid);
  * @param status Result code.
  * @return 1 on success, 0 on failure
  */
-int sceCdRcBypassCtl(int mode, u32 *status);
+extern int sceCdRcBypassCtl(int mode, u32 *status);
 
 /** Reads wake up time.
  * Minimum Mechacon firmware version: 50000
@@ -1004,7 +1004,7 @@ int sceCdRcBypassCtl(int mode, u32 *status);
  * @param flags bit 0 -> disable timer after expiration, bit 1 -> disable timer
  * @return 1 on success, 0 on failure
  */
-int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *userdata, u32 *wakeupreason, int *flags);
+extern int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *userdata, u32 *wakeupreason, int *flags);
 
 /** Writes wake up time.
  * Minimum Mechacon firmware version: 50000
@@ -1017,7 +1017,7 @@ int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *userdata, u32 *wakeupreason, int
  * @param flags When 1, disables the timer after it has expired. When 255, disables the timer and sets the seconds value to 0xFF.
  * @return 1 on success, 0 on failure
  */
-int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 userdata, int flags);
+extern int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 userdata, int flags);
 
 /** Disables Mechacon actions performed using the remote control.
  * The actions that can be specified are poweron, poweroff, reset and eject.
@@ -1027,7 +1027,7 @@ int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 userdata, int flags);
  *
  * @return 1 on success, 0 on failure
  */
-int sceRemote2_7(u16 param, u32 *status);
+extern int sceRemote2_7(u16 param, u32 *status);
 
 /** Retrieves the value set by sceRemote2_7.
  * Minimum Mechacon firmware version: 50000
@@ -1038,7 +1038,7 @@ int sceRemote2_7(u16 param, u32 *status);
  * @param status Command status
  * @return 1 on success, 0 on failure.
  */
-int sceRemote2_7Get(u32 *param, u32 *status);
+extern int sceRemote2_7Get(u32 *param, u32 *status);
 
 /** Set the LED state of the face buttons of the console.
  * The state of the buttons will be reset when the power or eject button is pressed.
@@ -1048,7 +1048,7 @@ int sceRemote2_7Get(u32 *param, u32 *status);
  * @param param The LED state to set.
  * @return 1 on success, 0 on failure
  */
-int sceCdSetLEDsMode(u32 param, u32 *result);
+extern int sceCdSetLEDsMode(u32 param, u32 *result);
 
 /** Reads PS1 boot parameter.
  * Minimum Mechacon firmware version: 50200
@@ -1056,7 +1056,7 @@ int sceCdSetLEDsMode(u32 param, u32 *result);
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdReadPS1BootParam(u8 *out, u32 *result);
+extern int sceCdReadPS1BootParam(u8 *out, u32 *result);
 
 /** Sets fan profile.
  * Minimum Mechacon firmware version: 50400
@@ -1065,7 +1065,7 @@ int sceCdReadPS1BootParam(u8 *out, u32 *result);
  * @param param param (SCECdvdFanSpeed)
  * @return 1 on success, 0 on failure
  */
-int sceCdSetFanProfile(u8 param, u32 *result);
+extern int sceCdSetFanProfile(u8 param, u32 *result);
 
 /** Sends SCMD 0x1D. Appears to be stubbed in Mechacon firmware 50000.
  * Minimum Mechacon firmware version: 50000
@@ -1078,14 +1078,14 @@ int sceCdSetFanProfile(u8 param, u32 *result);
  * @param status Command status
  * @return 1 on success, 0 on failure.
  */
-int sceCdSendSCmd1D(int *arg1, unsigned int *arg2, unsigned int *arg3, u32 *status);
+extern int sceCdSendSCmd1D(int *arg1, unsigned int *arg2, unsigned int *arg3, u32 *status);
 
 /** Change sys.
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdChgSys(u32 arg1);
+extern int sceCdChgSys(u32 arg1);
 
 /** Notice game start.
  * Minimum Mechacon firmware version: 50400
@@ -1093,7 +1093,7 @@ int sceCdChgSys(u32 arg1);
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdNoticeGameStart(u8 arg1, u32 *result);
+extern int sceCdNoticeGameStart(u8 arg1, u32 *result);
 
 /** Extended LED control.
  * Minimum Mechacon firmware version: 50600
@@ -1101,7 +1101,7 @@ int sceCdNoticeGameStart(u8 arg1, u32 *result);
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdXLEDCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
+extern int sceCdXLEDCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
 
 /** Buzzer control.
  * Minimum Mechacon firmware version: 50600
@@ -1109,7 +1109,7 @@ int sceCdXLEDCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdBuzzerCtl(u32 *result);
+extern int sceCdBuzzerCtl(u32 *result);
 
 /** XBS power control.
  * Minimum Mechacon firmware version: 50600
@@ -1117,7 +1117,7 @@ int sceCdBuzzerCtl(u32 *result);
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdXBSPowerCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
+extern int sceCdXBSPowerCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
 
 /** Set medium removal.
  * Minimum Mechacon firmware version: 50600
@@ -1125,7 +1125,7 @@ int sceCdXBSPowerCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdSetMediumRemoval(u8 arg1, u32 *result);
+extern int sceCdSetMediumRemoval(u8 arg1, u32 *result);
 
 /** Get medium removal.
  * Minimum Mechacon firmware version: 50600
@@ -1133,7 +1133,7 @@ int sceCdSetMediumRemoval(u8 arg1, u32 *result);
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdGetMediumRemoval(u32 *result1, u32 *result2);
+extern int sceCdGetMediumRemoval(u32 *result1, u32 *result2);
 
 /** XDVRP reset.
  * Minimum Mechacon firmware version: 50600
@@ -1141,14 +1141,14 @@ int sceCdGetMediumRemoval(u32 *result1, u32 *result2);
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdXDVRPReset(u8 arg1, u32 *result);
+extern int sceCdXDVRPReset(u8 arg1, u32 *result);
 
 /** Get wake up reason.
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdGetWakeUpReason(void);
+extern int sceCdGetWakeUpReason(void);
 
 /** Reads region parameters.
  * Minimum Mechacon firmware version: 60000
@@ -1156,7 +1156,7 @@ int sceCdGetWakeUpReason(void);
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdReadRegionParams(u32 *arg1, u32 *result);
+extern int sceCdReadRegionParams(u32 *arg1, u32 *result);
 
 /** Writes region parameters.
  * Minimum Mechacon firmware version: 60600
@@ -1164,7 +1164,7 @@ int sceCdReadRegionParams(u32 *arg1, u32 *result);
  *
  * @return 1 on success, 0 on failure
  */
-int sceCdWriteRegionParams(u8 arg1, u32 *arg2, u8 *arg3, u32 *result);
+extern int sceCdWriteRegionParams(u8 arg1, u32 *arg2, u8 *arg3, u32 *result);
 
 // Compatibility names for older ps2sdk versions.
 

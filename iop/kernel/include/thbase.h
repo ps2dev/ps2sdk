@@ -114,56 +114,56 @@ typedef struct _iop_sys_status
     unsigned int reserved[8];
 } iop_sys_status_t;
 
-int CreateThread(iop_thread_t *thread);
-int DeleteThread(int thid);
+extern int CreateThread(iop_thread_t *thread);
+extern int DeleteThread(int thid);
 
-int StartThread(int thid, void *arg);
-int StartThreadArgs(int thid, int args, void *argp);
+extern int StartThread(int thid, void *arg);
+extern int StartThreadArgs(int thid, int args, void *argp);
 
-int ExitThread();
-int ExitDeleteThread();
-int TerminateThread(int thid);
-int iTerminateThread(int thid);
+extern int ExitThread();
+extern int ExitDeleteThread();
+extern int TerminateThread(int thid);
+extern int iTerminateThread(int thid);
 
-int DisableDispatchThread(void);
-int EnableDispatchThread(void);
+extern int DisableDispatchThread(void);
+extern int EnableDispatchThread(void);
 
-int ChangeThreadPriority(int thid, int priority);
-int iChangeThreadPriority(int thid, int priority);
+extern int ChangeThreadPriority(int thid, int priority);
+extern int iChangeThreadPriority(int thid, int priority);
 
-int RotateThreadReadyQueue(int priority);
-int iRotateThreadReadyQueue(int priority);
+extern int RotateThreadReadyQueue(int priority);
+extern int iRotateThreadReadyQueue(int priority);
 
-int ReleaseWaitThread(int thid);
-int iReleaseWaitThread(int thid);
+extern int ReleaseWaitThread(int thid);
+extern int iReleaseWaitThread(int thid);
 
-int GetThreadId(void);
-int CheckThreadStack(void);
-int ReferThreadStatus(int thid, iop_thread_info_t *info);
-int iReferThreadStatus(int thid, iop_thread_info_t *info);
+extern int GetThreadId(void);
+extern int CheckThreadStack(void);
+extern int ReferThreadStatus(int thid, iop_thread_info_t *info);
+extern int iReferThreadStatus(int thid, iop_thread_info_t *info);
 
-int SleepThread(void);
-int WakeupThread(int thid);
-int iWakeupThread(int thid);
-int CancelWakeupThread(int thid);
-int iCancelWakeupThread(int thid);
+extern int SleepThread(void);
+extern int WakeupThread(int thid);
+extern int iWakeupThread(int thid);
+extern int CancelWakeupThread(int thid);
+extern int iCancelWakeupThread(int thid);
 
-int SuspendThread(int thid);
-int iSuspendThread(int thid);
-int ResumeThread(int thid);
-int iResumeThread(int thid);
+extern int SuspendThread(int thid);
+extern int iSuspendThread(int thid);
+extern int ResumeThread(int thid);
+extern int iResumeThread(int thid);
 
-int DelayThread(int usec);
+extern int DelayThread(int usec);
 
-int GetSystemTime(iop_sys_clock_t *sys_clock);
-int SetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void *arg);
-int iSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void *arg);
-int CancelAlarm(unsigned int (*alarm_cb)(void *), void *arg);
-int iCancelAlarm(unsigned int (*alarm_cb)(void *), void *arg);
-void USec2SysClock(u32 usec, iop_sys_clock_t *sys_clock);
-void SysClock2USec(iop_sys_clock_t *sys_clock, u32 *sec, u32 *usec);
+extern int GetSystemTime(iop_sys_clock_t *sys_clock);
+extern int SetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void *arg);
+extern int iSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void *arg);
+extern int CancelAlarm(unsigned int (*alarm_cb)(void *), void *arg);
+extern int iCancelAlarm(unsigned int (*alarm_cb)(void *), void *arg);
+extern void USec2SysClock(u32 usec, iop_sys_clock_t *sys_clock);
+extern void SysClock2USec(iop_sys_clock_t *sys_clock, u32 *sec, u32 *usec);
 
-int GetSystemStatusFlag();
+extern int GetSystemStatusFlag();
 
 // clang-format off
 #define thbase_IMPORTS \

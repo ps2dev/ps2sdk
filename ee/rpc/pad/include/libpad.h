@@ -126,7 +126,7 @@ extern "C" {
  * @param mode Must be set to 0.
  * @return == 1 => OK
  */
-int padInit(int mode);
+extern int padInit(int mode);
 
 /** Initialise pad ports. Automatically called by padInit(), there is no need to call this function directly.
  * @param mode Must be set to 0.
@@ -137,7 +137,7 @@ int padInit(int mode);
  *
  * @return == 1 => OK
  */
-int padPortInit(int mode);
+extern int padPortInit(int mode);
 
 /** Ends all pad communication
   * Note: PADMAN from release 1.3.4 does not have padPortInit implemented.
@@ -146,7 +146,7 @@ int padPortInit(int mode);
   *
   * @return == 1 => OK
   */
-int padEnd(void);
+extern int padEnd(void);
 
 /**
  * @param port Port to open
@@ -155,7 +155,7 @@ int padEnd(void);
  *                Must be a 64-byte aligned address. For the old libpad, at least 16-bytes alignment.
  * @return != 0 => OK
  */
-int padPortOpen(int port, int slot, void *padArea);
+extern int padPortOpen(int port, int slot, void *padArea);
 
 /**
  * Closes an opened port.
@@ -164,7 +164,7 @@ int padPortOpen(int port, int slot, void *padArea);
  * @param slot Slot to close
  * @return != 0 => OK
  */
-int padPortClose(int port, int slot);
+extern int padPortClose(int port, int slot);
 
 /** Read pad data
  * @param port Port number of the pad to get the status for.
@@ -172,88 +172,88 @@ int padPortClose(int port, int slot);
  * @param data A pointer to a 32 byte array where the result is stored
  * @return != 0 => OK
  */
-unsigned char padRead(int port, int slot, struct padButtonStatus *data);
+extern unsigned char padRead(int port, int slot, struct padButtonStatus *data);
 
 /** Get current pad state
  * Wait until state == 6 (Ready) before trying to access the pad
  */
-int padGetState(int port, int slot);
+extern int padGetState(int port, int slot);
 
 /** Get pad request state*/
-unsigned char padGetReqState(int port, int slot);
+extern unsigned char padGetReqState(int port, int slot);
 
 /** Set pad request state (after a param setting)
  * No need to export this one perhaps..
  */
-int padSetReqState(int port, int slot, int state);
+extern int padSetReqState(int port, int slot, int state);
 
 /*
  * Debug print functions
  */
-void padStateInt2String(int state, char buf[16]);
-void padReqStateInt2String(int state, char buf[16]);
+extern void padStateInt2String(int state, char buf[16]);
+extern void padReqStateInt2String(int state, char buf[16]);
 
 /** Returns # slots on the PS2 (usally 2)
  */
-int padGetPortMax(void);
+extern int padGetPortMax(void);
 
 /** Returns # slots the port has (usually 1)
  * probably 4 if using a multi tap (not tested)
  */
-int padGetSlotMax(int port);
+extern int padGetSlotMax(int port);
 
 /** Returns the padman.irx version
  * NOT SUPPORTED on module rom0:padman
  */
-int padGetModVersion();
+extern int padGetModVersion();
 
 /** Get pad info (digital (4), dualshock (7), etc..)
  *
  * @return 3 - KONAMI GUN; 4 - DIGITAL PAD; 5 - JOYSTICK; 6 - NAMCO GUN; 7 - DUAL SHOCK
  */
-int padInfoMode(int port, int slot, int infoMode, int index);
+extern int padInfoMode(int port, int slot, int infoMode, int index);
 
 /**
  * mode = 1, -> Analog/dual shock enabled; mode = 0 -> Digital
  * lock = 3 -> Mode not changeable by user
  */
-int padSetMainMode(int port, int slot, int mode, int lock);
+extern int padSetMainMode(int port, int slot, int mode, int lock);
 
 /** Check if the pad has pressure sensitive buttons */
-int padInfoPressMode(int port, int slot);
+extern int padInfoPressMode(int port, int slot);
 
 /** Pressure sensitive mode ON */
-int padEnterPressMode(int port, int slot);
+extern int padEnterPressMode(int port, int slot);
 
 /** Check for newer version
  * Pressure sensitive mode OFF
  */
-int padExitPressMode(int port, int slot);
+extern int padExitPressMode(int port, int slot);
 
 /*
  * Dunno if these need to be exported
  */
-int padGetButtonMask(int port, int slot);
-int padSetButtonInfo(int port, int slot, int buttonInfo);
+extern int padGetButtonMask(int port, int slot);
+extern int padSetButtonInfo(int port, int slot, int buttonInfo);
 
 /** Get actuator status for this controller
  * If padInfoAct(port, slot, -1, 0) != 0, the controller has actuators
  * (i think ;) )
  */
-unsigned char padInfoAct(int port, int slot, int word, int byte);
+extern unsigned char padInfoAct(int port, int slot, int word, int byte);
 
 /** Initalise actuators. On dual shock controller:
  * act_align[0] = 0 enables 'small' engine
  * act_align[1] = 1 enables 'big' engine
  * set act_align[2-5] to 0xff (disable)
  */
-int padSetActAlign(int port, int slot, const char act_align[6]);
+extern int padSetActAlign(int port, int slot, const char act_align[6]);
 
 /** Set actuator status on dual shock controller,
  * act_align[0] = 0/1 turns off/on 'small' engine
  * act_align[1] = 0-255 sets 'big' engine speed
  */
-int padSetActDirect(int port, int slot, char act_align[6]);
+extern int padSetActDirect(int port, int slot, char act_align[6]);
 
 /** Returns whether the device at port,slot is connected (1 = connected)
  * Appears to have been removed very early during the PS2's lifetime.
@@ -261,7 +261,7 @@ int padSetActDirect(int port, int slot, char act_align[6]);
  *
  * NOT SUPPORTED with module rom0:padman
  */
-int padGetConnection(int port, int slot);
+extern int padGetConnection(int port, int slot);
 
 #ifdef __cplusplus
 }

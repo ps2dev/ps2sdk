@@ -47,51 +47,51 @@ extern "C" {
 #endif
 
 /** Enables alpha blending */
-void draw_enable_blending();
+extern void draw_enable_blending();
 
 /** Disables alpha blending */
-void draw_disable_blending();
+extern void draw_disable_blending();
 
 /** Draws a single point */
-qword_t *draw_point(qword_t *q, int context, point_t *point);
+extern qword_t *draw_point(qword_t *q, int context, point_t *point);
 
 /** Draws a single line */
-qword_t *draw_line(qword_t *q, int context, line_t *line);
+extern qword_t *draw_line(qword_t *q, int context, line_t *line);
 
 /** Draws a triangle using a line strip */
-qword_t *draw_triangle_outline(qword_t *q, int context, triangle_t *triangle);
+extern qword_t *draw_triangle_outline(qword_t *q, int context, triangle_t *triangle);
 
 /** Draws a single triangle */
-qword_t *draw_triangle_filled(qword_t *q, int context,triangle_t *triangle);
+extern qword_t *draw_triangle_filled(qword_t *q, int context,triangle_t *triangle);
 
 /** Draws a rectangle using line primitives */
-qword_t *draw_rect_outline(qword_t *q, int context, rect_t *rect);
+extern qword_t *draw_rect_outline(qword_t *q, int context, rect_t *rect);
 
 /** Draws a single sprite */
-qword_t *draw_rect_filled(qword_t *q, int context, rect_t *rect);
+extern qword_t *draw_rect_filled(qword_t *q, int context, rect_t *rect);
 
 /** Draws a single texture mapped sprite */
-qword_t *draw_rect_textured(qword_t *q, int context, texrect_t *rect);
+extern qword_t *draw_rect_textured(qword_t *q, int context, texrect_t *rect);
 
 /** Draws multiple sprite primitives */
-qword_t *draw_rect_filled_strips(qword_t *q, int context, rect_t *rect);
+extern qword_t *draw_rect_filled_strips(qword_t *q, int context, rect_t *rect);
 
 /** Draws multiple strips to render a large texture
  * width must be multiple of 32 - 0.9375
  */
-qword_t *draw_rect_textured_strips(qword_t *q, int context, texrect_t *rect);
+extern qword_t *draw_rect_textured_strips(qword_t *q, int context, texrect_t *rect);
 
 /** Draws filled round rectangle, buggy with partial coordinates */
-qword_t *draw_round_rect_filled(qword_t *q, int context, rect_t *rect);
+extern qword_t *draw_round_rect_filled(qword_t *q, int context, rect_t *rect);
 
 /** Draws a hollow round rectangle, buggy with partial coordinates */
-qword_t *draw_round_rect_outline(qword_t *q, int context, rect_t *rect);
+extern qword_t *draw_round_rect_outline(qword_t *q, int context, rect_t *rect);
 
 /** Draws an arc using line primitives */
-qword_t *draw_arc_outline(qword_t *q, int context, point_t *center, float radius, float angle_start, float angle_end);
+extern qword_t *draw_arc_outline(qword_t *q, int context, point_t *center, float radius, float angle_start, float angle_end);
 
 /** Draws multiple triangle fans */
-qword_t *draw_arc_filled(qword_t *q, int context, point_t *center, float radius, float angle_start, float angle_end);
+extern qword_t *draw_arc_filled(qword_t *q, int context, point_t *center, float radius, float angle_start, float angle_end);
 
 #ifdef __cplusplus
 }

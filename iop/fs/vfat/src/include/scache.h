@@ -43,25 +43,25 @@ typedef struct _cache_set
 } cache_set;
 #endif /* BUILDING_USBHDFSD */
 #if defined(BUILDING_USBHDFSD)
-cache_set *scache_init(mass_dev *dev, int sectorSize);
+extern cache_set *scache_init(mass_dev *dev, int sectorSize);
 #elif defined(BUILDING_IEEE1394_DISK)
-cache_set *scache_init(struct SBP2Device *dev, int sectorSize);
+extern cache_set *scache_init(struct SBP2Device *dev, int sectorSize);
 #else
-cache_set *scache_init(struct block_device *bd);
+extern cache_set *scache_init(struct block_device *bd);
 #endif
 
-void scache_close(cache_set *cache);
-void scache_kill(cache_set *cache); // dlanor: added for disconnection events (flush impossible)
+extern void scache_close(cache_set *cache);
+extern void scache_kill(cache_set *cache); // dlanor: added for disconnection events (flush impossible)
 #if 0
-int scache_allocSector(cache_set *cache, unsigned int sector, void **buf);
+extern int scache_allocSector(cache_set *cache, unsigned int sector, void **buf);
 #endif
-int scache_readSector(cache_set *cache, unsigned int sector, void **buf);
-int scache_writeSector(cache_set *cache, unsigned int sector);
-int scache_flushSectors(cache_set *cache);
+extern int scache_readSector(cache_set *cache, unsigned int sector, void **buf);
+extern int scache_writeSector(cache_set *cache, unsigned int sector);
+extern int scache_flushSectors(cache_set *cache);
 #ifdef BUILDING_USBHDFSD
-void scache_invalidate(cache_set *cache, unsigned int sector, int count);
+extern void scache_invalidate(cache_set *cache, unsigned int sector, int count);
 #endif /* BUILDING_USBHDFSD */
 
-void scache_getStat(cache_set *cache, unsigned int *access, unsigned int *hits);
+extern void scache_getStat(cache_set *cache, unsigned int *access, unsigned int *hits);
 
 #endif

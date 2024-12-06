@@ -390,7 +390,7 @@ extern "C"
      * @param start Start address. 
      * @param end End address. 
      */
-    void packet2_vif_add_micro_program(packet2_t *packet2, u32 dest, u32 *start, u32 *end);
+    extern void packet2_vif_add_micro_program(packet2_t *packet2, u32 dest, u32 *start, u32 *end);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
-int NetManInitRPCClient(void);
-void NetManDeinitRPCClient(void);
-void NetManRpcToggleGlobalNetIFLinkState(int state);
-void *NetManRpcNetProtStackAllocRxPacket(unsigned int length, void **payload);
-void NetManRpcNetProtStackFreeRxPacket(void *packet);
-void NetManRpcProtStackEnQRxPacket(void *packet);
+extern int NetManInitRPCClient(void);
+extern void NetManDeinitRPCClient(void);
+extern void NetManRpcToggleGlobalNetIFLinkState(int state);
+extern void *NetManRpcNetProtStackAllocRxPacket(unsigned int length, void **payload);
+extern void NetManRpcNetProtStackFreeRxPacket(void *packet);
+extern void NetManRpcProtStackEnQRxPacket(void *packet);

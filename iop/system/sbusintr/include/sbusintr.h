@@ -33,13 +33,13 @@ enum sbus_errors {
 
 typedef int (*sbus_intr_handler_t)(u32, void *);
 
-int sbus_intr_init();
-void sbus_intr_exit();
+extern int sbus_intr_init();
+extern void sbus_intr_exit();
 
-int sbus_intr_handler_add(u32 irq, sbus_intr_handler_t handler, void *arg);
-int sbus_intr_handler_del(u32 irq);
+extern int sbus_intr_handler_add(u32 irq, sbus_intr_handler_t handler, void *arg);
+extern int sbus_intr_handler_del(u32 irq);
 
-void sbus_intr_main_interrupt(u32 irq);
+extern void sbus_intr_main_interrupt(u32 irq);
 
 #define sbusintr_IMPORTS_start DECLARE_IMPORT_TABLE(sbusintr, 1, 1)
 #define sbusintr_IMPORTS_end END_IMPORT_TABLE

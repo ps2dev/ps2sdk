@@ -25,22 +25,22 @@
 extern "C" {
 #endif
 
-void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode);
-int sio_putc(int c);
-int sio_getc(void);
-int sio_getc_block(void);
+extern void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode);
+extern int sio_putc(int c);
+extern int sio_getc(void);
+extern int sio_getc_block(void);
 
-size_t sio_write(const char *buf, size_t size);
-size_t sio_read(char *buf, size_t size);
+extern size_t sio_write(const char *buf, size_t size);
+extern size_t sio_read(char *buf, size_t size);
 
-int sio_puts(const char *str);
-int sio_putsn(const char *str); // no newline for this one
-char *sio_gets(char *str);
+extern int sio_puts(const char *str);
+extern int sio_putsn(const char *str); // no newline for this one
+extern char *sio_gets(char *str);
 
-void sio_flush(void);
+extern void sio_flush(void);
 
-int sio_printf(const char *format, ...);
-int sio_vprintf(const char *format, va_list);
+extern int sio_printf(const char *format, ...);
+extern int sio_vprintf(const char *format, va_list);
 
 #define sior_IMPORTS_start DECLARE_IMPORT_TABLE(sior, 1, 1)
 #define sior_IMPORTS_end END_IMPORT_TABLE

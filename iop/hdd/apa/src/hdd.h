@@ -25,7 +25,7 @@ typedef struct
 
 ///////////////////////////////////////////////////////////////////////////////
 //	Function declarations
-int hddCheckPartitionMax(s32 device, u32 size);
-apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *EmptyBlocks, u32 sector, int *err);
+extern int hddCheckPartitionMax(s32 device, u32 size);
+extern apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *EmptyBlocks, u32 sector, int *err);
 
 #endif

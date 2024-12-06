@@ -6,8 +6,8 @@
 typedef unsigned char u8;
 #else
 #define USBHD_INLINE inline
-void *malloc(int size);
-void free(void *ptr);
+extern void *malloc(int size);
+extern void free(void *ptr);
 #endif
 
 #ifdef BUILDING_IEEE1394_DISK

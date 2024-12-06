@@ -24,6 +24,6 @@ typedef struct upsample_t
 
 typedef int (*upsampler_t)(struct upsample_t *);
 
-upsampler_t find_upsampler(int freq, int bits, int channels);
+extern upsampler_t find_upsampler(int freq, int bits, int channels);
 
 #endif

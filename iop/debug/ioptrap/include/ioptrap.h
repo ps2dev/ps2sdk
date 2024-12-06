@@ -59,25 +59,25 @@ typedef void (*trap_exception_handler_t)(exception_type_t, exception_frame_t *);
 #define DCIC_DA (1 << 25)
 #define DCIC_PC (1 << 24)
 
-const char *get_exception_name(exception_type_t type);
+extern const char *get_exception_name(exception_type_t type);
 
 /* Will act as a setjmp. Returns 0 to say it was the first call,
    otherwise, returns the exception number. (note that you'll never
    get any interrupt...) Note that using this will completely disable
    user defined exception handlers. */
-exception_type_t dbg_setjmp();
+extern exception_type_t dbg_setjmp();
 
 /* Will return the old handler. */
-trap_exception_handler_t set_exception_handler(exception_type_t type, trap_exception_handler_t handler);
-trap_exception_handler_t get_exception_handler(exception_type_t type);
+extern trap_exception_handler_t set_exception_handler(exception_type_t type, trap_exception_handler_t handler);
+extern trap_exception_handler_t get_exception_handler(exception_type_t type);
 
 /* Breakpoint stuff. */
-void set_dba(u32 v);
-void set_dbam(u32 v);
-void set_dcic(u32 v);
-u32 get_dba();
-u32 get_dbam();
-u32 get_dcic();
+extern void set_dba(u32 v);
+extern void set_dbam(u32 v);
+extern void set_dcic(u32 v);
+extern u32 get_dba();
+extern u32 get_dbam();
+extern u32 get_dcic();
 
 #define ioptrap_IMPORTS_start DECLARE_IMPORT_TABLE(ioptrap, 1, 1)
 #define ioptrap_IMPORTS_end   END_IMPORT_TABLE

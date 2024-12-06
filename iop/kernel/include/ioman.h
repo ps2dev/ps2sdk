@@ -25,21 +25,21 @@
 extern "C" {
 #endif
 
-int open(const char *name, int mode);
-int close(int fd);
-int read(int fd, void *ptr, size_t size);
-int write(int fd, void *ptr, size_t size);
-int lseek(int fd, int pos, int mode);
-int ioctl(int fd, int command, void *arg);
-int remove(const char *name);
-int mkdir(const char *path);
-int rmdir(const char *path);
-int dopen(const char *path, int mode);
-int dclose(int fd);
-int dread(int fd, io_dirent_t *buf);
-int getstat(const char *name, io_stat_t *stat);
-int chstat(const char *name, io_stat_t *stat, unsigned int statmask);
-int format(const char *dev);
+extern int open(const char *name, int mode);
+extern int close(int fd);
+extern int read(int fd, void *ptr, size_t size);
+extern int write(int fd, void *ptr, size_t size);
+extern int lseek(int fd, int pos, int mode);
+extern int ioctl(int fd, int command, void *arg);
+extern int remove(const char *name);
+extern int mkdir(const char *path);
+extern int rmdir(const char *path);
+extern int dopen(const char *path, int mode);
+extern int dclose(int fd);
+extern int dread(int fd, io_dirent_t *buf);
+extern int getstat(const char *name, io_stat_t *stat);
+extern int chstat(const char *name, io_stat_t *stat, unsigned int statmask);
+extern int format(const char *dev);
 
 /* Device drivers.  */
 
@@ -100,8 +100,8 @@ typedef struct _iop_device_ops {
 	int	(*chstat)(iop_file_t *, const char *, io_stat_t *, unsigned int);
 } iop_device_ops_t;
 
-int AddDrv(iop_device_t *device);
-int DelDrv(const char *name);
+extern int AddDrv(iop_device_t *device);
+extern int DelDrv(const char *name);
 
 #define ioman_IMPORTS_start DECLARE_IMPORT_TABLE(ioman, 1, 1)
 #define ioman_IMPORTS_end END_IMPORT_TABLE

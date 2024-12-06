@@ -123,14 +123,14 @@ typedef struct
  * @returns A device handle is returned if the device was added.
  * On error INVALID_HDEV is returned
  */
-HDEV DevFSAddDevice(const devfs_node_t *node);
+extern HDEV DevFSAddDevice(const devfs_node_t *node);
 /** Define to add DevFSAddDevice to the imports list */
 
 /** Deletes an previously opened device.
  * @param hDev: Handle to the device to delete
  * @returns 0 if device deleted, -1 on error
  */
-int DevFSDelDevice(HDEV hDev);
+extern int DevFSDelDevice(HDEV hDev);
 
 /** Adds a sub device to a previously opened device
  * @param hDev: Handle to an opened device
@@ -139,14 +139,14 @@ int DevFSDelDevice(HDEV hDev);
  * @param data: Pointer to some private data to associate with this sub device
  * @returns 0 if sub device added, else -1
  */
-int DevFSAddSubDevice(HDEV hDev, u32 subdev_no, s32 mode, devfs_loc_t extent, void *data);
+extern int DevFSAddSubDevice(HDEV hDev, u32 subdev_no, s32 mode, devfs_loc_t extent, void *data);
 
 /** Deletes a sub device.
  * @param hDev: Handle to an opened device.
  * @param subdev_no: The number of the subdevice to delete.
  * @returns 0 if device deleted. -1 on error.
  */
-int DevFSDelSubDevice(HDEV hDev, u32 subdev_no);
+extern int DevFSDelSubDevice(HDEV hDev, u32 subdev_no);
 
 /** Defines an invalid HDEV value */
 #define INVALID_HDEV -1

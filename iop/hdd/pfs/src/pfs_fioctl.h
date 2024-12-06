@@ -14,10 +14,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 //	Function declarations
 
-int pfsFioIoctl(iomanX_iop_file_t *f, int cmd, void *param);
-int pfsFioIoctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-int pfsFioDevctl(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int pfsFioIoctl(iomanX_iop_file_t *f, int cmd, void *param);
+extern int pfsFioIoctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int pfsFioDevctl(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 
-void pfsFioDevctlCloseAll(void);
+extern void pfsFioDevctlCloseAll(void);
 
 #endif /* _PFS_FIOCTL_H */

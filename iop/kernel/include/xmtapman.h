@@ -13,10 +13,10 @@
 extern "C" {
 #endif
 
-s32 mtapPortOpen(u32 port);
-s32 mtapPortClose(u32 port);
-s32 mtapGetSlotNumber(u32 port);
-s32 mtapChangeSlot(u32 port, u32 slot);
+extern s32 mtapPortOpen(u32 port);
+extern s32 mtapPortClose(u32 port);
+extern s32 mtapGetSlotNumber(u32 port);
+extern s32 mtapChangeSlot(u32 port, u32 slot);
 
 #define xmtapman_IMPORTS_start DECLARE_IMPORT_TABLE(mtapman, 1, 2)
 #define xmtapman_IMPORTS_end END_IMPORT_TABLE

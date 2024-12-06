@@ -45,26 +45,26 @@ typedef struct st_SIF2_CmdHandler
 } SIF2_CmdHandler;
 
 // SBUS
-int SBUS_init(void);
-int SBUS_deinit(void);
-void *SBUS_set_irq_handler(int irq, SBUS_IrqHandlerFunc func, void *param);
-int SBUS_rem_irq_handler(int irq);
-u32 SBUS_get_reg(int reg_no);
-void SBUS_set_reg(int reg_no, u32 val);
-int SBUS_interrupt_remote(int irq);
+extern int SBUS_init(void);
+extern int SBUS_deinit(void);
+extern void *SBUS_set_irq_handler(int irq, SBUS_IrqHandlerFunc func, void *param);
+extern int SBUS_rem_irq_handler(int irq);
+extern u32 SBUS_get_reg(int reg_no);
+extern void SBUS_set_reg(int reg_no, u32 val);
+extern int SBUS_interrupt_remote(int irq);
 
 // SIF2
-int SIF2_init(void);
-int SIF2_deinit(void);
-int SIF2_set_dma(u32 addr, u32 size, u32 attr);
-void SIF2_sync_dma(void);
+extern int SIF2_init(void);
+extern int SIF2_deinit(void);
+extern int SIF2_set_dma(u32 addr, u32 size, u32 attr);
+extern void SIF2_sync_dma(void);
 
 // SIF2 Command
-int SIF2_init_cmd(void);
-int SIF2_set_cmd_handler(int cid, SIF2_CmdHandlerFunc func, void *param);
-int SIF2_rem_cmd_handler(int cid);
-void SIF2_send_cmd(u32 cid, void *extra, int extra_size);
-void SBUS_check_intr(void);
+extern int SIF2_init_cmd(void);
+extern int SIF2_set_cmd_handler(int cid, SIF2_CmdHandlerFunc func, void *param);
+extern int SIF2_rem_cmd_handler(int cid);
+extern void SIF2_send_cmd(u32 cid, void *extra, int extra_size);
+extern void SBUS_check_intr(void);
 
 // SBUS
 #define I_SBUS_init             DECLARE_IMPORT(4, SBUS_init)

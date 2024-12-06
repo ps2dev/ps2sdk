@@ -12,6 +12,6 @@
 #ifndef __FREEPAD_RPC_SERVER_H__
 #define __FREEPAD_RPC_SERVER_H__
 
-int InitRpcServers(int prio);
+extern int InitRpcServers(int prio);
 
 #endif

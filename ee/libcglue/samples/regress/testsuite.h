@@ -20,8 +20,8 @@ typedef struct test_suite
     test_t *tests;
 } test_suite;
 
-void init_testsuite(test_suite *p);
-int add_test(test_suite *p, const char *name, testfunc_t func, void *arg);
-int run_testsuite(test_suite *p);
+extern void init_testsuite(test_suite *p);
+extern int add_test(test_suite *p, const char *name, testfunc_t func, void *arg);
+extern int run_testsuite(test_suite *p);
 
 #endif

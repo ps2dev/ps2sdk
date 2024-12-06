@@ -128,13 +128,13 @@ typedef struct _fat_driver
 } fat_driver;
 
 // Exported functions
-int UsbMassGetDeviceInfo(int device, UsbMassDeviceInfo_t *info);
-int UsbMassRegisterCallback(int device, usbmass_cb_t callback);
-fat_driver *UsbMassFatGetData(int device);
-int UsbMassReadSector(fat_driver *fatd, void **buffer, u32 sector);
-int UsbMassWriteSector(fat_driver *fatd, u32 sector);
-void UsbMassFlushCache(fat_driver *fatd);
-int UsbMassFatGetClusterChain(fat_driver *fatd, unsigned int cluster, unsigned int *buf, unsigned int bufSize, int startFlag);
+extern int UsbMassGetDeviceInfo(int device, UsbMassDeviceInfo_t *info);
+extern int UsbMassRegisterCallback(int device, usbmass_cb_t callback);
+extern fat_driver *UsbMassFatGetData(int device);
+extern int UsbMassReadSector(fat_driver *fatd, void **buffer, u32 sector);
+extern int UsbMassWriteSector(fat_driver *fatd, u32 sector);
+extern void UsbMassFlushCache(fat_driver *fatd);
+extern int UsbMassFatGetClusterChain(fat_driver *fatd, unsigned int cluster, unsigned int *buf, unsigned int bufSize, int startFlag);
 
 #define usbmass_IMPORTS_start DECLARE_IMPORT_TABLE(usbmass, 1, 2)
 #define usbmass_IMPORTS_end   END_IMPORT_TABLE

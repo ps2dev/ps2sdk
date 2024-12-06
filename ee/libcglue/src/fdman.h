@@ -28,11 +28,11 @@ typedef struct {
 	
 extern __descriptormap_type *__descriptormap[__FILENO_MAX];
 
-void __fdman_init();
-void __fdman_deinit();
-int  __fdman_get_new_descriptor();
-int  __fdman_get_dup_descriptor(int fd);
-int __fdman_get_dup2_descriptor(int fd, int newfd);
-void __fdman_release_descriptor(int fd);
+extern void __fdman_init();
+extern void __fdman_deinit();
+extern int  __fdman_get_new_descriptor();
+extern int  __fdman_get_dup_descriptor(int fd);
+extern int __fdman_get_dup2_descriptor(int fd, int newfd);
+extern void __fdman_release_descriptor(int fd);
 
 #endif

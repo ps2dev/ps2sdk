@@ -39,13 +39,13 @@ extern "C" {
  *
  * Initializes the LOADFILE API and binds to the remote LOADFILE RPC server.
  */
-int SifLoadFileInit(void);
+extern int SifLoadFileInit(void);
 /** Reset the LOADFILE library.
  * @ingroup loadfile
  *
  * Deinitializes the LOADFILE library in preparation of an IOP reset.
  */
-void SifLoadFileExit(void);
+extern void SifLoadFileExit(void);
 
 /** Load and execute an IRX module.
  * @ingroup loadfile
@@ -69,7 +69,7 @@ void SifLoadFileExit(void);
  *
  * @see SifExecModuleFile
  */
-int SifLoadModule(const char *path, int arg_len, const char *args);
+extern int SifLoadModule(const char *path, int arg_len, const char *args);
 /** Load and execute and IRX module, and retrieve the module's load status.
  * @ingroup loadfile
  *
@@ -87,7 +87,7 @@ int SifLoadModule(const char *path, int arg_len, const char *args);
  *
  * @see SifLoadModule
  */
-int SifLoadStartModule(const char *path, int arg_len, const char *args, int *mod_res);
+extern int SifLoadStartModule(const char *path, int arg_len, const char *args, int *mod_res);
 
 /** Load and execute an IRX module encrypted with MagicGate.
  * @ingroup loadfile
@@ -103,7 +103,7 @@ int SifLoadStartModule(const char *path, int arg_len, const char *args, int *mod
  *
  * @see SifLoadModule
  */
-int SifLoadModuleEncrypted(const char *path, int arg_len, const char *args);
+extern int SifLoadModuleEncrypted(const char *path, int arg_len, const char *args);
 
 /** Load and execute an IRX module from a buffer in IOP RAM.
  * @ingroup loadfile
@@ -123,7 +123,7 @@ int SifLoadModuleEncrypted(const char *path, int arg_len, const char *args);
  *
  * @see SifLoadModule, SifExecModuleBuffer
  */
-int SifLoadModuleBuffer(void *ptr, int arg_len, const char *args);
+extern int SifLoadModuleBuffer(void *ptr, int arg_len, const char *args);
 /** Load and execute an IRX module from a buffer in IOP RAM, and retrieve the module's load status.
  * @ingroup loadfile
  *
@@ -144,12 +144,12 @@ int SifLoadModuleBuffer(void *ptr, int arg_len, const char *args);
  *
  * @see SifLoadModule, SifExecModuleBuffer
  */
-int SifLoadStartModuleBuffer(void *ptr, int arg_len, const char *args, int *mod_res);
+extern int SifLoadStartModuleBuffer(void *ptr, int arg_len, const char *args, int *mod_res);
 
-int SifStopModule(int id, int arg_len, const char *args, int *mod_res);
-int SifUnloadModule(int id);
-int SifSearchModuleByName(const char *name);
-int SifSearchModuleByAddress(const void *ptr);
+extern int SifStopModule(int id, int arg_len, const char *args, int *mod_res);
+extern int SifUnloadModule(int id);
+extern int SifSearchModuleByName(const char *name);
+extern int SifSearchModuleByAddress(const void *ptr);
 
 /** Load the specified section of an ELF executable into EE RAM.
  * @ingroup loadfile
@@ -167,7 +167,7 @@ int SifSearchModuleByAddress(const void *ptr);
  *
  * @warning Don't ever use this function, it does not work as intended.
  */
-int SifLoadElfPart(const char *path, const char *secname, t_ExecData *data);
+extern int SifLoadElfPart(const char *path, const char *secname, t_ExecData *data);
 /** Load an ELF executable into EE RAM.
  * @ingroup loadfile
  *
@@ -196,7 +196,7 @@ int SifLoadElf(const char *path, t_ExecData *data);
  *
  * @see SifLoadElf
  */
-int SifLoadElfEncrypted(const char *path, t_ExecData *data);
+extern int SifLoadElfEncrypted(const char *path, t_ExecData *data);
 
 /** Write a value to an address within the IOP's memory space.
  * @ingroup loadfile
@@ -220,7 +220,7 @@ int SifLoadElfEncrypted(const char *path, t_ExecData *data);
  *
  * @see SifIopGetVal
  */
-int SifIopSetVal(u32 iop_addr, int val, int type);
+extern int SifIopSetVal(u32 iop_addr, int val, int type);
 /** Read a value from an address within the IOP's memory space.
  * @ingroup loadfile
  *
@@ -241,7 +241,7 @@ int SifIopSetVal(u32 iop_addr, int val, int type);
  * read the IOP's hardware registers directly so there is little use for this function.
  * @see SifIopSetVal
  */
-int SifIopGetVal(u32 iop_addr, void *val, int type);
+extern int SifIopGetVal(u32 iop_addr, void *val, int type);
 
 /** Transfer an IRX module from EE RAM to IOP RAM and execute it.
  * @ingroup loadfile
@@ -261,7 +261,7 @@ int SifIopGetVal(u32 iop_addr, void *val, int type);
  *
  * @see SifLoadModule, SifLoadModuleBuffer
  */
-int SifExecModuleBuffer(void *ptr, u32 size, u32 arg_len, const char *args, int *mod_res);
+extern int SifExecModuleBuffer(void *ptr, u32 size, u32 arg_len, const char *args, int *mod_res);
 /** Read an IRX module from a file into IOP RAM and execute it.
  * @ingroup loadfile
  *
@@ -279,7 +279,7 @@ int SifExecModuleBuffer(void *ptr, u32 size, u32 arg_len, const char *args, int 
  *
  * @see SifLoadModule, SifLoadModuleBuffer
  */
-int SifExecModuleFile(const char *path, u32 arg_len, const char *args, int *mod_res);
+extern int SifExecModuleFile(const char *path, u32 arg_len, const char *args, int *mod_res);
 
 
 /** Low-level function for loading and executing an IRX module.
@@ -299,7 +299,7 @@ int SifExecModuleFile(const char *path, u32 arg_len, const char *args, int *mod_
  *
  * @see SifLoadModule, SifLoadModuleBuffer, SifLoadModuleEncrypted
  */
-int _SifLoadModule(const char *path, int arg_len, const char *args,
+extern int _SifLoadModule(const char *path, int arg_len, const char *args,
                    int *modres, int fno, int dontwait);
 
 #ifdef __cplusplus

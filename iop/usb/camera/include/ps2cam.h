@@ -233,56 +233,56 @@ typedef struct
 															((unsigned char)(vdiv)		<<4)|\
 															((unsigned char)(en_sa)		<<7));
 
-void rpcMainThread(void* param);
-void *rpcCommandHandler(u32 command, void *buffer, int size);
+extern void rpcMainThread(void* param);
+extern void *rpcCommandHandler(u32 command, void *buffer, int size);
 
 // usbd.irx calls
-int  PS2CamInitDriver();
-int  PS2CamProbe(int devId);
-int  PS2CamConnect(int devId);
-int  PS2CamDisconnect(int devId);
-void PS2CamGetDeviceSring(CAMERA_DEVICE* dev, int index, char *str, int strmax);
+extern int  PS2CamInitDriver();
+extern int  PS2CamProbe(int devId);
+extern int  PS2CamConnect(int devId);
+extern int  PS2CamDisconnect(int devId);
+extern void PS2CamGetDeviceSring(CAMERA_DEVICE* dev, int index, char *str, int strmax);
 
 //private funtions
-void PS2CamCallback(int resultCode, int bytes, void *arg);
-void PS2CamSetDeviceConfiguration(CAMERA_DEVICE *dev,int id);
-void PS2CamInitializeNewDevice(CAMERA_DEVICE *argv);
-void PS2CamSetDeviceDefaults(CAMERA_DEVICE *dev);
-int PS2CamGetIRXVersion(void);
-int PS2CamInit(int mode);
-int PS2CamGetDeviceCount(void);
-int PS2CamOpenDevice(int device_index);
-int PS2CamCloseDevice(int handle);
-int PS2CamGetDeviceInfo(int handle,int *info);
+extern void PS2CamCallback(int resultCode, int bytes, void *arg);
+extern void PS2CamSetDeviceConfiguration(CAMERA_DEVICE *dev,int id);
+extern void PS2CamInitializeNewDevice(CAMERA_DEVICE *argv);
+extern void PS2CamSetDeviceDefaults(CAMERA_DEVICE *dev);
+extern int PS2CamGetIRXVersion(void);
+extern int PS2CamInit(int mode);
+extern int PS2CamGetDeviceCount(void);
+extern int PS2CamOpenDevice(int device_index);
+extern int PS2CamCloseDevice(int handle);
+extern int PS2CamGetDeviceInfo(int handle,int *info);
 
 // low level camera funtions
-int  setReg8(CAMERA_DEVICE		*dev, unsigned char reg_id, unsigned char  value);
-int  getReg8(CAMERA_DEVICE		*dev, unsigned char reg_id, unsigned char *value);
-int  setReg8Mask(CAMERA_DEVICE	*dev, unsigned char reg_id, unsigned char  value,unsigned char mask);
-int  setReg16(CAMERA_DEVICE		*dev, unsigned char reg_id, unsigned short value);
-int  PS2CamSelectInterface(CAMERA_DEVICE* dev, int interface, int altSetting);
+extern int  setReg8(CAMERA_DEVICE    *dev, unsigned char reg_id, unsigned char  value);
+extern int  getReg8(CAMERA_DEVICE    *dev, unsigned char reg_id, unsigned char *value);
+extern int  setReg8Mask(CAMERA_DEVICE  *dev, unsigned char reg_id, unsigned char  value,unsigned char mask);
+extern int  setReg16(CAMERA_DEVICE   *dev, unsigned char reg_id, unsigned short value);
+extern int  PS2CamSelectInterface(CAMERA_DEVICE* dev, int interface, int altSetting);
 
-void camResetDevice(CAMERA_DEVICE *dev);
-void camEnableAutoLaunch(CAMERA_DEVICE *dev);
-void camDisableAutoLaunch(CAMERA_DEVICE *dev);
-void camClearSnapButton(CAMERA_DEVICE *dev);
-int  camCheckAutoLaunch(CAMERA_DEVICE *dev);
-void camEnableSystem(CAMERA_DEVICE *dev);
-void camDisableSystem(CAMERA_DEVICE *dev);
-void camResetUsb(CAMERA_DEVICE *dev);
-void camSetUsbInit(CAMERA_DEVICE *dev);
-void camSetUsbWork(CAMERA_DEVICE *dev);
-void camTurnOnRedLed(CAMERA_DEVICE *dev);
-void camTurnOffRedLed(CAMERA_DEVICE *dev);
-void camBlockStream(CAMERA_DEVICE *dev);
-void camStartStream(CAMERA_DEVICE *dev);
-void camStopStream(CAMERA_DEVICE *dev);
+extern void camResetDevice(CAMERA_DEVICE *dev);
+extern void camEnableAutoLaunch(CAMERA_DEVICE *dev);
+extern void camDisableAutoLaunch(CAMERA_DEVICE *dev);
+extern void camClearSnapButton(CAMERA_DEVICE *dev);
+extern int  camCheckAutoLaunch(CAMERA_DEVICE *dev);
+extern void camEnableSystem(CAMERA_DEVICE *dev);
+extern void camDisableSystem(CAMERA_DEVICE *dev);
+extern void camResetUsb(CAMERA_DEVICE *dev);
+extern void camSetUsbInit(CAMERA_DEVICE *dev);
+extern void camSetUsbWork(CAMERA_DEVICE *dev);
+extern void camTurnOnRedLed(CAMERA_DEVICE *dev);
+extern void camTurnOffRedLed(CAMERA_DEVICE *dev);
+extern void camBlockStream(CAMERA_DEVICE *dev);
+extern void camStartStream(CAMERA_DEVICE *dev);
+extern void camStopStream(CAMERA_DEVICE *dev);
 
 // PS2Cam rpc/export funtions
-int PS2CamReadPacket(int device_id);
-int PS2CamGetDeviceStatus(int device_id);
-int PS2CamSetDeviceBandwidth(int device_id, char bandwidth);
-int PS2CamSetLEDMode(int device_id, int mode);
-int PS2CamSetDeviceConfig(int handle, void *config);
+extern int PS2CamReadPacket(int device_id);
+extern int PS2CamGetDeviceStatus(int device_id);
+extern int PS2CamSetDeviceBandwidth(int device_id, char bandwidth);
+extern int PS2CamSetLEDMode(int device_id, int mode);
+extern int PS2CamSetDeviceConfig(int handle, void *config);
 
 #endif /* __PS2CAM_H__ */

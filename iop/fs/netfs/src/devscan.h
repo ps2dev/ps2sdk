@@ -34,7 +34,7 @@ typedef struct {
   int  len;
 } dev_table_t;
 
-int devscan_gettype(char *name);
-int devscan_setup(int devtype);
-int devscan_getdevlist(char *buffer);
-ModuleInfo_t *devscan_getmodule(const char *name);
+extern int devscan_gettype(char *name);
+extern int devscan_setup(int devtype);
+extern int devscan_getdevlist(char *buffer);
+extern ModuleInfo_t *devscan_getmodule(const char *name);

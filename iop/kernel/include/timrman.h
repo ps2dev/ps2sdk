@@ -65,32 +65,32 @@ extern "C" {
         RTC4	SYSCLOCK		None		32	256
         RTC5	SYSCLOCK		None		32	256	*/
 
-void *GetTimersTable();
+extern void *GetTimersTable();
 
-int AllocHardTimer(int source, int size, int prescale);
-int ReferHardTimer(int source, int size, int mode, int modemask);
-int FreeHardTimer(int timid);
+extern int AllocHardTimer(int source, int size, int prescale);
+extern int ReferHardTimer(int source, int size, int mode, int modemask);
+extern int FreeHardTimer(int timid);
 
-void SetTimerMode(int timid, int mode);
+extern void SetTimerMode(int timid, int mode);
 
-u32 GetTimerStatus(int timid);
+extern u32 GetTimerStatus(int timid);
 
-void SetTimerCounter(int timid, u32 count);
-u32 GetTimerCounter(int timid);
+extern void SetTimerCounter(int timid, u32 count);
+extern u32 GetTimerCounter(int timid);
 
-void SetTimerCompare(int timid, u32 compare);
-u32 GetTimerCompare(int timid);
+extern void SetTimerCompare(int timid, u32 compare);
+extern u32 GetTimerCompare(int timid);
 
-void SetHoldMode(int holdnum, int mode);
-u32 GetHoldMode(int holdnum);
+extern void SetHoldMode(int holdnum, int mode);
+extern u32 GetHoldMode(int holdnum);
 
-u32 GetHoldReg(int holdnum);
+extern u32 GetHoldReg(int holdnum);
 
-int GetHardTimerIntrCode(int timid);
+extern int GetHardTimerIntrCode(int timid);
 
 // guessed name
-u32 GetTimerMode(int timid);
-u32 (*GetTimerReadFunc(int timid))();
+extern u32 GetTimerMode(int timid);
+extern u32 (*GetTimerReadFunc(int timid))();
 
 // clang-format off
 #define timrman_IMPORTS \

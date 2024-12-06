@@ -32,16 +32,16 @@ extern "C" {
 #endif
 
 /** Allocate a new packet for use, size in quadwords. */
-packet_t *packet_init(int qwords, int type);
+extern packet_t *packet_init(int qwords, int type);
 
 /** Reset the packet quadword counter and zero out data. */
-void packet_reset(packet_t *packet);
+extern void packet_reset(packet_t *packet);
 
 /** Free the space allocated by packet. */
-void packet_free(packet_t *packet);
+extern void packet_free(packet_t *packet);
 
 /** Advances the qwc and returns the current qword count. */
-qword_t *packet_increment_qwc(packet_t *packet, int num);
+extern qword_t *packet_increment_qwc(packet_t *packet, int num);
 
 /** For those that like getters and setters */
 static inline qword_t *packet_get_qword(packet_t *packet)

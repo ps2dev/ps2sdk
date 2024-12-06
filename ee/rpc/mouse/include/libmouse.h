@@ -25,26 +25,26 @@ extern "C" {
 #endif
 
 /** Initialise the RPC library */
-int PS2MouseInit(void);
+extern int PS2MouseInit(void);
 /** Reads the current mouse data (depending on read mode) */
-int PS2MouseRead(PS2MouseData *);
+extern int PS2MouseRead(PS2MouseData *);
 /** Sets the read mode */
-int PS2MouseSetReadMode(u32 readMode);
+extern int PS2MouseSetReadMode(u32 readMode);
 /** Gets the current read mode */
-u32 PS2MouseGetReadMode();
+extern u32 PS2MouseGetReadMode();
 
-int PS2MouseSetThres(u32 thres);
-u32 PS2MouseGetThres();
-int PS2MouseSetAccel(float accel);
-float PS2MouseGetAccel();
-int PS2MouseSetBoundary(int minx, int maxx, int miny, int maxy);
-int PS2MouseGetBoundary(int *minx, int *maxx, int *miny, int *maxy);
-int PS2MouseSetPosition(int x, int y);
-int PS2MouseReset();
-u32 PS2MouseEnum();
-int PS2MouseSetDblClickTime(u32 msec);
-u32 PS2MouseGetDblClickTIme();
-u32 PS2MouseGetVersion();
+extern int PS2MouseSetThres(u32 thres);
+extern u32 PS2MouseGetThres();
+extern int PS2MouseSetAccel(float accel);
+extern float PS2MouseGetAccel();
+extern int PS2MouseSetBoundary(int minx, int maxx, int miny, int maxy);
+extern int PS2MouseGetBoundary(int *minx, int *maxx, int *miny, int *maxy);
+extern int PS2MouseSetPosition(int x, int y);
+extern int PS2MouseReset();
+extern u32 PS2MouseEnum();
+extern int PS2MouseSetDblClickTime(u32 msec);
+extern u32 PS2MouseGetDblClickTIme();
+extern u32 PS2MouseGetVersion();
 
 #ifdef __cplusplus
 }

@@ -21,8 +21,8 @@
 #include <xsio2man.h>
 #undef NO_XSIO2MAN_IMPORTS
 
-void sio2_rm_transfer_init(void);
-void sio2_unk_transfer_init(void);
+extern void sio2_rm_transfer_init(void);
+extern void sio2_unk_transfer_init(void);
 
 #define rsio2man_IMPORTS_start DECLARE_IMPORT_TABLE(sio2man, 2, 3)
 #define rsio2man_IMPORTS_end END_IMPORT_TABLE

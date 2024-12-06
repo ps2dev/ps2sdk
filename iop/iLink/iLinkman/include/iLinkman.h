@@ -30,34 +30,34 @@
 #define iLink_CB_LOCK_REQUEST  0x04
 #define iLink_CB_BUS_RESET     0x08
 
-void iLinkEnableSBus(void);
-void iLinkDisableSBus(void);
-void iLinkResetSBus(void);
-unsigned int iLinkSetNodeCapabilities(unsigned int capabilities);
-void *iLinkSetTrCallbackHandler(void *function);
-int iLinkGetGenerationNumber(void);
+extern void iLinkEnableSBus(void);
+extern void iLinkDisableSBus(void);
+extern void iLinkResetSBus(void);
+extern unsigned int iLinkSetNodeCapabilities(unsigned int capabilities);
+extern void *iLinkSetTrCallbackHandler(void *function);
+extern int iLinkGetGenerationNumber(void);
 
-int iLinkGetLocalNodeID(void);
-int iLinkGetNodeCount(void);
+extern int iLinkGetLocalNodeID(void);
+extern int iLinkGetNodeCount(void);
 
-int iLinkTrAlloc(unsigned short int NodeID, unsigned char speed);
-void iLinkTrFree(int trContext);
-int iLinkTrWrite(int trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
-int iLinkTrRead(int trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
+extern int iLinkTrAlloc(unsigned short int NodeID, unsigned char speed);
+extern void iLinkTrFree(int trContext);
+extern int iLinkTrWrite(int trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
+extern int iLinkTrRead(int trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
 
-unsigned short int iLinkCalculateCRC16(void *data, unsigned int nQuads);
-int iLinkAddCROMUnit(unsigned int *data, unsigned int nQuads);
-void iLinkDeleteCROMUnit(unsigned int id);
-int iLinkGetNodeCapabilities(unsigned short NodeID);
-int iLinkGetNodeMaxSpeed(unsigned short int NodeID);
+extern unsigned short int iLinkCalculateCRC16(void *data, unsigned int nQuads);
+extern int iLinkAddCROMUnit(unsigned int *data, unsigned int nQuads);
+extern void iLinkDeleteCROMUnit(unsigned int id);
+extern int iLinkGetNodeCapabilities(unsigned short NodeID);
+extern int iLinkGetNodeMaxSpeed(unsigned short int NodeID);
 
-int iLinkGetNodeTrSpeed(int trContext);
-int iLinkSetNodeTrSpeed(int trContext, unsigned char speed);
+extern int iLinkGetNodeTrSpeed(int trContext);
+extern int iLinkSetNodeTrSpeed(int trContext, unsigned char speed);
 
-int iLinkFindUnit(int UnitInList, unsigned int UnitSpec, unsigned int UnitSW_Version);
-int iLinkReadCROM(unsigned short int NodeID, unsigned int Offset, unsigned int nQuads, unsigned int *buffer);
+extern int iLinkFindUnit(int UnitInList, unsigned int UnitSpec, unsigned int UnitSW_Version);
+extern int iLinkReadCROM(unsigned short int NodeID, unsigned int Offset, unsigned int nQuads, unsigned int *buffer);
 
-u64 iLinkGetLocalNodeEUI64(void);
+extern u64 iLinkGetLocalNodeEUI64(void);
 
 #define iLinkman_IMPORTS_start DECLARE_IMPORT_TABLE(iLinkman, 1, 1)
 #define iLinkman_IMPORTS_end   END_IMPORT_TABLE

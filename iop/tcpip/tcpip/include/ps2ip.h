@@ -25,43 +25,43 @@
 
 /* From include/lwip/sockets.h:  */
 
-int       lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen);
-int       lwip_bind(int s, struct sockaddr *name, socklen_t namelen);
-int       lwip_close(int s);
-int       lwip_connect(int s, struct sockaddr *name, socklen_t namelen);
-int       lwip_listen(int s, int backlog);
-int       lwip_recv(int s, void *mem, int len, unsigned int flags);
-int       lwip_recvfrom(int s, void *mem, int len, unsigned int flags,
+extern int       lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen);
+extern int       lwip_bind(int s, struct sockaddr *name, socklen_t namelen);
+extern int       lwip_close(int s);
+extern int       lwip_connect(int s, struct sockaddr *name, socklen_t namelen);
+extern int       lwip_listen(int s, int backlog);
+extern int       lwip_recv(int s, void *mem, int len, unsigned int flags);
+extern int       lwip_recvfrom(int s, void *mem, int len, unsigned int flags,
                         struct sockaddr *from, socklen_t *fromlen);
-int       lwip_send(int s, void *dataptr, int size, unsigned int flags);
-int       lwip_sendto(int s, void *dataptr, int size, unsigned int flags,
+extern int       lwip_send(int s, void *dataptr, int size, unsigned int flags);
+extern int       lwip_sendto(int s, void *dataptr, int size, unsigned int flags,
                       struct sockaddr *to, socklen_t tolen);
-int       lwip_socket(int domain, int type, int protocol);
-int       lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
+extern int       lwip_socket(int domain, int type, int protocol);
+extern int       lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
                       struct timeval *timeout);
-int       lwip_ioctl(int s, long cmd, void *argp);
-int       lwip_getpeername (int s, struct sockaddr *name, socklen_t *namelen);
-int       lwip_getsockname (int s, struct sockaddr *name, socklen_t *namelen);
-int       lwip_getsockopt (int s, int level, int optname, void *optval, socklen_t *optlen);
-int       lwip_setsockopt (int s, int level, int optname, const void *optval, socklen_t optlen);
+extern int       lwip_ioctl(int s, long cmd, void *argp);
+extern int       lwip_getpeername (int s, struct sockaddr *name, socklen_t *namelen);
+extern int       lwip_getsockname (int s, struct sockaddr *name, socklen_t *namelen);
+extern int       lwip_getsockopt (int s, int level, int optname, void *optval, socklen_t *optlen);
+extern int       lwip_setsockopt (int s, int level, int optname, const void *optval, socklen_t optlen);
 
-int       ps2ip_setconfig(const t_ip_info* ip_info);
-int       ps2ip_getconfig(char* netif_name,t_ip_info* ip_info);
-void	ps2ip_input(struct pbuf *p, struct netif *inp);
+extern int       ps2ip_setconfig(const t_ip_info* ip_info);
+extern int       ps2ip_getconfig(char* netif_name,t_ip_info* ip_info);
+extern void    ps2ip_input(struct pbuf *p, struct netif *inp);
 
-int lwip_shutdown(int s, int how);
-int lwip_fcntl(int s, int cmd, int val);
+extern int lwip_shutdown(int s, int how);
+extern int lwip_fcntl(int s, int cmd, int val);
 
 /* From include/netif/etharp.h:  */
-err_t	etharp_output(struct netif *netif, struct pbuf *q, const ip_addr_t *ipaddr);
+extern err_t   etharp_output(struct netif *netif, struct pbuf *q, const ip_addr_t *ipaddr);
 
 /* From include/lwip/tcpip.h:  */
-err_t     tcpip_input(struct pbuf *p, struct netif *inp);
+extern err_t     tcpip_input(struct pbuf *p, struct netif *inp);
 
 /** Function prototype for functions passed to tcpip_callback() */
 typedef void (*tcpip_callback_fn)(void *ctx);
 
-err_t  tcpip_callback_with_block(tcpip_callback_fn function, void *ctx, u8 block);
+extern err_t  tcpip_callback_with_block(tcpip_callback_fn function, void *ctx, u8 block);
 
 /**
  * @ingroup lwip_os
@@ -70,7 +70,7 @@ err_t  tcpip_callback_with_block(tcpip_callback_fn function, void *ctx, u8 block
 #define tcpip_callback(f, ctx)  tcpip_callback_with_block(f, ctx, 1)
 
 /* From include/lwip/netif.h:  */
-struct netif *netif_add(struct netif *netif,
+extern struct netif *netif_add(struct netif *netif,
 #if LWIP_IPV4
                         const ip4_addr_t *ipaddr, const ip4_addr_t *netmask, const ip4_addr_t *gw,
 #endif /* LWIP_IPV4 */
@@ -80,28 +80,28 @@ struct netif *netif_add(struct netif *netif,
    "et0", where the first two letters are the "name" field in the
    netif structure, and the digit is in the num field in the same
    structure. */
-struct netif*    netif_find(const char *name);
-void             netif_set_default(struct netif *netif);
-void             netif_set_ipaddr(struct netif *netif, const ip4_addr_t *ipaddr);
-void             netif_set_netmask(struct netif *netif, const ip4_addr_t *netmask);
-void             netif_set_gw(struct netif *netif, const ip4_addr_t *gw);
-void		netif_set_up(struct netif *netif);
-void		netif_set_down(struct netif *netif);
+extern struct netif*    netif_find(const char *name);
+extern void             netif_set_default(struct netif *netif);
+extern void             netif_set_ipaddr(struct netif *netif, const ip4_addr_t *ipaddr);
+extern void             netif_set_netmask(struct netif *netif, const ip4_addr_t *netmask);
+extern void             netif_set_gw(struct netif *netif, const ip4_addr_t *gw);
+extern void        netif_set_up(struct netif *netif);
+extern void        netif_set_down(struct netif *netif);
 
-void netif_set_link_up(struct netif *netif);
-void netif_set_link_down(struct netif *netif);
+extern void netif_set_link_up(struct netif *netif);
+extern void netif_set_link_down(struct netif *netif);
 
 /* From include/lwip/pbuf.h:  */
-struct pbuf*     pbuf_alloc(pbuf_layer l, u16 size, pbuf_type type);
-void             pbuf_realloc(struct pbuf *p, u16 size);
-u8               pbuf_header(struct pbuf *p, s16 header_size);
-void             pbuf_ref(struct pbuf *p);
-u8               pbuf_free(struct pbuf *p);
-u8               pbuf_clen(struct pbuf *p);
-void             pbuf_chain(struct pbuf *h, struct pbuf *t);
-struct pbuf*     pbuf_dechain(struct pbuf *p);
-struct pbuf*     pbuf_take(struct pbuf *f);
-struct pbuf*     pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
+extern struct pbuf*     pbuf_alloc(pbuf_layer l, u16 size, pbuf_type type);
+extern void             pbuf_realloc(struct pbuf *p, u16 size);
+extern u8               pbuf_header(struct pbuf *p, s16 header_size);
+extern void             pbuf_ref(struct pbuf *p);
+extern u8               pbuf_free(struct pbuf *p);
+extern u8               pbuf_clen(struct pbuf *p);
+extern void             pbuf_chain(struct pbuf *h, struct pbuf *t);
+extern struct pbuf*     pbuf_dechain(struct pbuf *p);
+extern struct pbuf*     pbuf_take(struct pbuf *f);
+extern struct pbuf*     pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
 
 /* From include/lwip/inet.h:  */
 /* directly map this to the lwip internal functions */
@@ -110,26 +110,26 @@ struct pbuf*     pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
 #define inet_ntoa(addr)                 ip4addr_ntoa((const ip4_addr_t*)&(addr))
 #define inet_ntoa_r(addr, buf, buflen)  ip4addr_ntoa_r((const ip4_addr_t*)&(addr), buf, buflen)
 
-u32        ipaddr_addr(const char *cp);
-int        ip4addr_aton(const char *cp, ip4_addr_t *addr);
+extern u32        ipaddr_addr(const char *cp);
+extern int        ip4addr_aton(const char *cp, ip4_addr_t *addr);
 /** returns ptr to static buffer; not reentrant! */
-char       *ip4addr_ntoa(const ip4_addr_t *addr);
-char       *ip4addr_ntoa_r(const ip4_addr_t *addr, char *buf, int buflen);
+extern char       *ip4addr_ntoa(const ip4_addr_t *addr);
+extern char       *ip4addr_ntoa_r(const ip4_addr_t *addr, char *buf, int buflen);
 
 #ifdef PS2IP_DNS
 /* From include/lwip/netdb.h:  */
-struct hostent *lwip_gethostbyname(const char *name);
-int lwip_gethostbyname_r(const char *name, struct hostent *ret, char *buf,
+extern struct hostent *lwip_gethostbyname(const char *name);
+extern int lwip_gethostbyname_r(const char *name, struct hostent *ret, char *buf,
                 size_t buflen, struct hostent **result, int *h_errnop);
-void lwip_freeaddrinfo(struct addrinfo *ai);
-int lwip_getaddrinfo(const char *nodename,
+extern void lwip_freeaddrinfo(struct addrinfo *ai);
+extern int lwip_getaddrinfo(const char *nodename,
        const char *servname,
        const struct addrinfo *hints,
        struct addrinfo **res);
 
 /* From include/lwip/dns.h:  */
-void           dns_setserver(u8 numdns, const ip_addr_t *dnsserver);
-const ip_addr_t* dns_getserver(u8 numdns);
+extern void           dns_setserver(u8 numdns, const ip_addr_t *dnsserver);
+extern const ip_addr_t* dns_getserver(u8 numdns);
 #endif
 
 /* Compatibility macros.  */

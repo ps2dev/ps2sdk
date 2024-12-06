@@ -46,7 +46,7 @@ typedef struct _read_capacity_data
 } read_capacity_data;
 
 /* Function prototypes. */
-int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, int sectorCount);
-int scsiWriteSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, int sectorCount);
-void releaseSBP2Device(struct SBP2Device *dev);
-int ConfigureSBP2Device(struct SBP2Device *dev);
+extern int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, int sectorCount);
+extern int scsiWriteSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, int sectorCount);
+extern void releaseSBP2Device(struct SBP2Device *dev);
+extern int ConfigureSBP2Device(struct SBP2Device *dev);

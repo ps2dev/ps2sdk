@@ -51,14 +51,14 @@ typedef struct _iop_fpl_info
     int reserved[4];
 } iop_fpl_info_t;
 
-int CreateFpl(iop_fpl_param *param);
-int DeleteFpl(int fplId);
-void *AllocateFpl(int fplId);
-void *pAllocateFpl(int fplId);
-void *ipAllocateFpl(int fplId);
-int FreeFpl(int fplId, void *memory);
-int ReferFplStatus(int fplId, iop_fpl_info_t *info);
-int iReferFplStatus(int fplId, iop_fpl_info_t *info);
+extern int CreateFpl(iop_fpl_param *param);
+extern int DeleteFpl(int fplId);
+extern void *AllocateFpl(int fplId);
+extern void *pAllocateFpl(int fplId);
+extern void *ipAllocateFpl(int fplId);
+extern int FreeFpl(int fplId, void *memory);
+extern int ReferFplStatus(int fplId, iop_fpl_info_t *info);
+extern int iReferFplStatus(int fplId, iop_fpl_info_t *info);
 
 #define thfpool_IMPORTS_start DECLARE_IMPORT_TABLE(thfpool, 1, 1)
 #define thfpool_IMPORTS_end   END_IMPORT_TABLE
@@ -98,14 +98,14 @@ typedef struct _iop_vpl_info
     int reserved[3];
 } iop_vpl_info_t;
 
-int CreateVpl(iop_vpl_param *param);
-int DeleteVpl(int vplId);
-void *AllocateVpl(int vplId, int size);
-void *pAllocateVpl(int vplId, int size);
-void *ipAllocateVpl(int vplId, int size);
-int FreeVpl(int vplId, void *memory);
-int ReferVplStatus(int vplId, iop_vpl_info_t *info);
-int iReferVplStatus(int vplId, iop_vpl_info_t *info);
+extern int CreateVpl(iop_vpl_param *param);
+extern int DeleteVpl(int vplId);
+extern void *AllocateVpl(int vplId, int size);
+extern void *pAllocateVpl(int vplId, int size);
+extern void *ipAllocateVpl(int vplId, int size);
+extern int FreeVpl(int vplId, void *memory);
+extern int ReferVplStatus(int vplId, iop_vpl_info_t *info);
+extern int iReferVplStatus(int vplId, iop_vpl_info_t *info);
 
 #define thvpool_IMPORTS_start DECLARE_IMPORT_TABLE(thvpool, 1, 1)
 #define thvpool_IMPORTS_end   END_IMPORT_TABLE

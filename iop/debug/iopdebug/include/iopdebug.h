@@ -24,32 +24,32 @@
 
 typedef void (IOP_ExceptionHandler)(IOP_RegFrame *);
 
-int iop_dbg_install(void);
-int iop_dbg_remove(void);
-IOP_ExceptionHandler *iop_dbg_get_handler(int cause);
-IOP_ExceptionHandler *iop_dbg_set_handler(int cause, IOP_ExceptionHandler *handler);
-void iop_dbg_get_reg_frames(IOP_RegFrame **def_frame_ptr, IOP_RegFrame **dbg_frame_ptr);
-u32 iop_dbg_get_dcic(void);
-void iop_dbg_set_dcic(u32 v);
+extern int iop_dbg_install(void);
+extern int iop_dbg_remove(void);
+extern IOP_ExceptionHandler *iop_dbg_get_handler(int cause);
+extern IOP_ExceptionHandler *iop_dbg_set_handler(int cause, IOP_ExceptionHandler *handler);
+extern void iop_dbg_get_reg_frames(IOP_RegFrame **def_frame_ptr, IOP_RegFrame **dbg_frame_ptr);
+extern u32 iop_dbg_get_dcic(void);
+extern void iop_dbg_set_dcic(u32 v);
 
-u32 iop_dbg_get_bpc(void);
-void iop_dbg_set_bpc(u32 v);
+extern u32 iop_dbg_get_bpc(void);
+extern void iop_dbg_set_bpc(u32 v);
 
-u32 iop_dbg_get_bpcm(void);
-void iop_dbg_set_bpcm(u32 v);
+extern u32 iop_dbg_get_bpcm(void);
+extern void iop_dbg_set_bpcm(u32 v);
 
-u32 iop_dbg_get_bda(void);
-void iop_dbg_set_bda(u32 v);
-u32 iop_dbg_get_bdam(void);
-void iop_dbg_set_bdam(u32 v);
+extern u32 iop_dbg_get_bda(void);
+extern void iop_dbg_set_bda(u32 v);
+extern u32 iop_dbg_get_bdam(void);
+extern void iop_dbg_set_bdam(u32 v);
 
-void iop_dbg_set_bpr(u32 addr, u32 mask, u32 user_mask);
-void iop_dbg_set_bpw(u32 addr, u32 mask, u32 user_mask);
-void iop_dbg_set_bpx(u32 addr, u32 mask, u32 user_mask);
+extern void iop_dbg_set_bpr(u32 addr, u32 mask, u32 user_mask);
+extern void iop_dbg_set_bpw(u32 addr, u32 mask, u32 user_mask);
+extern void iop_dbg_set_bpx(u32 addr, u32 mask, u32 user_mask);
 
-void iop_dbg_clr_bps(void);
-void iop_dbg_clr_bpda(void);
-void iop_dbg_clr_bpx(void);
+extern void iop_dbg_clr_bps(void);
+extern void iop_dbg_clr_bpda(void);
+extern void iop_dbg_clr_bpx(void);
 
 #define iopdebug_IMPORTS_start DECLARE_IMPORT_TABLE(iopdebug, 1, 1)
 #define iopdebug_IMPORTS_end END_IMPORT_TABLE

@@ -55,24 +55,24 @@ extern int sio2_event_flag;
 extern const uint8_t reverse_byte_LUT8[256];
 
 /* MX SIO2 functions */
-void mx_sio2_lock(uint8_t intr_type);
-void mx_sio2_unlock(uint8_t intr_type);
-void mx_sio2_set_baud(uint8_t baud);
+extern void mx_sio2_lock(uint8_t intr_type);
+extern void mx_sio2_unlock(uint8_t intr_type);
+extern void mx_sio2_set_baud(uint8_t baud);
 
-uint8_t mx_sio2_write_byte(uint8_t byte);
-uint8_t mx_sio2_write_dummy(void);
+extern uint8_t mx_sio2_write_byte(uint8_t byte);
+extern uint8_t mx_sio2_write_dummy(void);
 
-void mx_sio2_rx_pio(uint8_t *buffer, uint32_t size); /* PIO only used for sending commands */
-void mx_sio2_tx_pio(uint8_t *buffer, uint32_t size);
+extern void mx_sio2_rx_pio(uint8_t *buffer, uint32_t size); /* PIO only used for sending commands */
+extern void mx_sio2_tx_pio(uint8_t *buffer, uint32_t size);
 
-void mx_sio2_start_rx_dma(uint8_t *buffer); /* DMA used for all other transfers */
-void mx_sio2_start_tx_dma(uint8_t *buffer);
+extern void mx_sio2_start_rx_dma(uint8_t *buffer); /* DMA used for all other transfers */
+extern void mx_sio2_start_tx_dma(uint8_t *buffer);
 
-uint8_t mx_sio2_wait_equal(uint8_t value, uint32_t count);
-uint8_t mx_sio2_wait_not_equal(uint8_t value, uint32_t count);
-uint8_t mx_sio2_wait_equal_masked(uint8_t value, uint8_t mask, uint32_t count);
+extern uint8_t mx_sio2_wait_equal(uint8_t value, uint32_t count);
+extern uint8_t mx_sio2_wait_not_equal(uint8_t value, uint32_t count);
+extern uint8_t mx_sio2_wait_equal_masked(uint8_t value, uint8_t mask, uint32_t count);
 
 /* misc */
-void reverse_buffer(uint32_t *buffer, uint32_t count);
+extern void reverse_buffer(uint32_t *buffer, uint32_t count);
 
 #endif

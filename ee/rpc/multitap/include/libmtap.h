@@ -23,25 +23,25 @@ extern "C" {
 /** Initialise the multitap library. 
  * @return 1 on success; 1 on failure 
  */
-int mtapInit(void);
+extern int mtapInit(void);
 
 /** Open a port for the multitap. 
  * @param port specifies the port that is to be monitored as a multitap connection destination. 
  * @return 1 on success; !1 on failure. 
  */
-int mtapPortOpen(int port);
+extern int mtapPortOpen(int port);
 
 /** Closes a port for the multitap. 
  * @param port is a port that is to be closed (must have been previously opened by mtapPortOpen). 
  * @return 1 on success; !1 on failure. 
  */
-int mtapPortClose(int port);
+extern int mtapPortClose(int port);
 
 /** Checks if a multitap is connected to an opened port. 
  * @param port is the port to be checked. 
  * @return 1 if a multitap exists on the specified port; !1 if there isno multitap on the specified port. 
  */
-int mtapGetConnection(int port);
+extern int mtapGetConnection(int port);
 
 #ifdef __cplusplus
 }

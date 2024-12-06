@@ -49,30 +49,30 @@ typedef struct _ata_devinfo
 #define ATA_RES_ERR_LOCKED   -509
 #define ATA_RES_ERR_ICRC     -510
 
-ata_devinfo_t *sceAtaInit(int device);
+extern ata_devinfo_t *sceAtaInit(int device);
 
-int sceAtaSoftReset(void);
+extern int sceAtaSoftReset(void);
 
-int sceAtaExecCmd(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, u16 lcyl, u16 hcyl, u16 select, u16 command);
-int sceAtaWaitResult(void);
+extern int sceAtaExecCmd(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, u16 lcyl, u16 hcyl, u16 select, u16 command);
+extern int sceAtaWaitResult(void);
 
-int sceAtaGetError(void);
+extern int sceAtaGetError(void);
 
-int sceAtaDmaTransfer(int device, void *buf, u32 lba, u32 nsectors, int dir);
+extern int sceAtaDmaTransfer(int device, void *buf, u32 lba, u32 nsectors, int dir);
 
 // DRM functions that were meant to keep users from sharing disks (and hence the contained content). Supported by only Sony-modified HDDs (e.g. the SCPH-20400).
-int sceAtaSecuritySetPassword(int device, void *password);
-int sceAtaSecurityUnLock(int device, void *password);
-int sceAtaSecurityEraseUnit(int device);
+extern int sceAtaSecuritySetPassword(int device, void *password);
+extern int sceAtaSecurityUnLock(int device, void *password);
+extern int sceAtaSecurityEraseUnit(int device);
 
-int sceAtaIdle(int device, int period);
-int sceAtaGetSceId(int device, void *data);
-int sceAtaSmartReturnStatus(int device);
-int sceAtaSmartSaveAttr(int device);
-int sceAtaFlushCache(int device);
-int sceAtaIdleImmediate(int device);
+extern int sceAtaIdle(int device, int period);
+extern int sceAtaGetSceId(int device, void *data);
+extern int sceAtaSmartReturnStatus(int device);
+extern int sceAtaSmartSaveAttr(int device);
+extern int sceAtaFlushCache(int device);
+extern int sceAtaIdleImmediate(int device);
 
-int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir);
+extern int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir);
 
 #define atad_IMPORTS_start DECLARE_IMPORT_TABLE(atad, 1, 3)
 #define atad_IMPORTS_end   END_IMPORT_TABLE

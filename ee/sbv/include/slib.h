@@ -57,10 +57,10 @@ extern "C" {
  *
  * This routine will need to be called everytime the IOP is reset.
  */
-slib_exp_lib_list_t *slib_exp_lib_list();
+extern slib_exp_lib_list_t *slib_exp_lib_list();
 
 /** Retrieve an export library by name.  */
-int slib_get_exp_lib(const char *name, slib_exp_lib_t *library);
+extern int slib_get_exp_lib(const char *name, slib_exp_lib_t *library);
 
 #ifdef __cplusplus
 }

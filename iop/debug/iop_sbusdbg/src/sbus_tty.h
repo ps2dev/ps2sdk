@@ -4,6 +4,6 @@
 #include "tamtypes.h"
 
 // Prototypes
-int sbus_tty_init(void);
+extern int sbus_tty_init(void);
 
 #endif

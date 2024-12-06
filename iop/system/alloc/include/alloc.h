@@ -19,15 +19,15 @@
 #include <types.h>
 #include <irx.h>
 
-void * malloc(size_t size);
-void * realloc(void * ptr, size_t size);
-void free(void * ptr);
-void * calloc(size_t n, size_t size);
-void * memalign(size_t align, size_t size);
-void * __mem_walk_begin();
-void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid);
-void * __mem_walk_inc(void * token);
-int __mem_walk_end(void * token);
+extern void * malloc(size_t size);
+extern void * realloc(void * ptr, size_t size);
+extern void free(void * ptr);
+extern void * calloc(size_t n, size_t size);
+extern void * memalign(size_t align, size_t size);
+extern void * __mem_walk_begin();
+extern void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid);
+extern void * __mem_walk_inc(void * token);
+extern int __mem_walk_end(void * token);
 
 #define alloc_IMPORTS_start DECLARE_IMPORT_TABLE(alloc, 1, 1)
 #define alloc_IMPORTS_end END_IMPORT_TABLE

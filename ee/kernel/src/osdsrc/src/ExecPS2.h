@@ -7,4 +7,4 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-void *ExecPS2Patch(void *EntryPoint, void *gp, int argc, char *argv[]);
+extern void *ExecPS2Patch(void *EntryPoint, void *gp, int argc, char *argv[]);

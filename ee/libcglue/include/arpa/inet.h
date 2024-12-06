@@ -22,10 +22,10 @@
 #endif
 
 __BEGIN_DECLS
-u32 libcglue_inet_addr(const char *cp);
-char *libcglue_inet_ntoa(const ip4_addr_t *addr);
-char *libcglue_inet_ntoa_r(const ip4_addr_t *addr, char *buf, int buflen);
-int libcglue_inet_aton(const char *cp, ip4_addr_t *addr);
+extern u32 libcglue_inet_addr(const char *cp);
+extern char *libcglue_inet_ntoa(const ip4_addr_t *addr);
+extern char *libcglue_inet_ntoa_r(const ip4_addr_t *addr, char *buf, int buflen);
+extern int libcglue_inet_aton(const char *cp, ip4_addr_t *addr);
 __END_DECLS
 
 #endif

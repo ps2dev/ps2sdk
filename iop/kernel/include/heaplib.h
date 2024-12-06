@@ -23,14 +23,14 @@
 extern "C" {
 #endif
 
-void *CreateHeap(int heapblocksize, int flag);
-void DeleteHeap(void *heap);
-void *AllocHeapMemory(void *heap, size_t nbytes);
-int FreeHeapMemory(void *heap, void *ptr);
-int HeapTotalFreeSize(void *heap);
+extern void *CreateHeap(int heapblocksize, int flag);
+extern void DeleteHeap(void *heap);
+extern void *AllocHeapMemory(void *heap, size_t nbytes);
+extern int FreeHeapMemory(void *heap, void *ptr);
+extern int HeapTotalFreeSize(void *heap);
 
-void HeapPrepare(void* mem, int size);
-int HeapChunkSize(void* chunk);
+extern void HeapPrepare(void* mem, int size);
+extern int HeapChunkSize(void* chunk);
 
 #define heaplib_IMPORTS_start DECLARE_IMPORT_TABLE(heaplib, 1, 1)
 #define heaplib_IMPORTS_end END_IMPORT_TABLE

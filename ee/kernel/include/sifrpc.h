@@ -165,37 +165,37 @@ typedef struct t_SifRpcDataQueue
 extern "C" {
 #endif
 
-void SifInitRpc(int mode);
-void SifExitRpc(void);
+extern void SifInitRpc(int mode);
+extern void SifExitRpc(void);
 
 /* SIF RPC client API */
-int SifBindRpc(SifRpcClientData_t *client, int rpc_number, int mode);
-int SifCallRpc(SifRpcClientData_t *client, int rpc_number, int mode,
+extern int SifBindRpc(SifRpcClientData_t *client, int rpc_number, int mode);
+extern int SifCallRpc(SifRpcClientData_t *client, int rpc_number, int mode,
                void *send, int ssize, void *receive, int rsize,
                SifRpcEndFunc_t end_function, void *end_param);
-int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
+extern int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
                        int size, int mode);
 
-int SifCheckStatRpc(SifRpcClientData_t *cd);
+extern int SifCheckStatRpc(SifRpcClientData_t *cd);
 
 /* SIF RPC server API */
-SifRpcDataQueue_t *
+extern SifRpcDataQueue_t *
 SifSetRpcQueue(SifRpcDataQueue_t *q, int thread_id);
-SifRpcDataQueue_t *
+extern SifRpcDataQueue_t *
 SifRemoveRpcQueue(SifRpcDataQueue_t *qd);
 
-SifRpcServerData_t *
+extern SifRpcServerData_t *
 SifRegisterRpc(SifRpcServerData_t *srv,
                int sid, SifRpcFunc_t func, void *buff, SifRpcFunc_t cfunc,
                void *cbuff, SifRpcDataQueue_t *qd);
-SifRpcServerData_t *
+extern SifRpcServerData_t *
 SifRemoveRpc(SifRpcServerData_t *sd, SifRpcDataQueue_t *queue);
 
-SifRpcServerData_t *
+extern SifRpcServerData_t *
 SifGetNextRequest(SifRpcDataQueue_t *qd);
 
-void SifExecRequest(SifRpcServerData_t *srv);
-void SifRpcLoop(SifRpcDataQueue_t *q);
+extern void SifExecRequest(SifRpcServerData_t *srv);
+extern void SifRpcLoop(SifRpcDataQueue_t *q);
 
 #ifdef __cplusplus
 }

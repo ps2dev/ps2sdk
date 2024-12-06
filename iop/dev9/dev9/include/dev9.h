@@ -25,25 +25,25 @@ typedef int (*dev9_intr_cb_t)(int flag);
 typedef void (*dev9_shutdown_cb_t)(void);
 typedef void (*dev9_dma_cb_t)(int bcr, int dir);
 
-void SpdRegisterIntrHandler(int intr, dev9_intr_cb_t cb);
+extern void SpdRegisterIntrHandler(int intr, dev9_intr_cb_t cb);
 
-int SpdDmaTransfer(int ctrl, void *buf, int bcr, int dir);
+extern int SpdDmaTransfer(int ctrl, void *buf, int bcr, int dir);
 
-void Dev9CardStop(void);
-void SpdIntrEnable(int mask);
-void SpdIntrDisable(int mask);
+extern void Dev9CardStop(void);
+extern void SpdIntrEnable(int mask);
+extern void SpdIntrDisable(int mask);
 
-int SpdGetEthernetID(u16 *buf);
+extern int SpdGetEthernetID(u16 *buf);
 
-void SpdSetLED(int ctl);
-void dev9LED2Ctl(int ctl);
-void dev9ControlPIO3(int ctl);
+extern void SpdSetLED(int ctl);
+extern void dev9LED2Ctl(int ctl);
+extern void dev9ControlPIO3(int ctl);
 
-int Dev9RegisterPowerOffHandler(int idx, dev9_shutdown_cb_t cb);
+extern int Dev9RegisterPowerOffHandler(int idx, dev9_shutdown_cb_t cb);
 
-void dev9RegisterPreDmaCb(int ctrl, dev9_dma_cb_t cb);
+extern void dev9RegisterPreDmaCb(int ctrl, dev9_dma_cb_t cb);
 
-void dev9RegisterPostDmaCb(int ctrl, dev9_dma_cb_t cb);
+extern void dev9RegisterPostDmaCb(int ctrl, dev9_dma_cb_t cb);
 
 #define dev9_IMPORTS_start DECLARE_IMPORT_TABLE(dev9, 1, 9)
 #define dev9_IMPORTS_end   END_IMPORT_TABLE

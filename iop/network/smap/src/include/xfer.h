@@ -4,7 +4,7 @@
 
 #include "main.h"
 
-int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData);
-int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData);
+extern int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData);
+extern int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData);
 
 #endif

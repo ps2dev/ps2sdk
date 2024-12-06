@@ -46,16 +46,16 @@ typedef struct vblank_internals_
 	vblank_item_t list_items[16];
 } vblank_internals_t;
 
-vblank_internals_t *GetVblankInternalData(void);
+extern vblank_internals_t *GetVblankInternalData(void);
 
-void WaitVblankStart();
-void WaitVblankEnd();
-void WaitVblank();
-void WaitNonVblank();
+extern void WaitVblankStart();
+extern void WaitVblankEnd();
+extern void WaitVblank();
+extern void WaitNonVblank();
 
-int RegisterVblankHandler(int startend, int priority, int (*handler)(void *),
-		void *arg);
-int ReleaseVblankHandler(int startend, int (*handler)(void *));
+extern int RegisterVblankHandler(int startend, int priority, int (*handler)(void *),
+        void *arg);
+extern int ReleaseVblankHandler(int startend, int (*handler)(void *));
 
 #define vblank_IMPORTS_start DECLARE_IMPORT_TABLE(vblank, 1, 1)
 #define vblank_IMPORTS_end END_IMPORT_TABLE

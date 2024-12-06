@@ -205,13 +205,13 @@ extern "C" {
  * @param type MC_TYPE_MC = use MCSERV/MCMAN; MC_TYPE_XMC = use XMCSERV/XMCMAN
  * @return 0 = successful; < 0 = error
  */
-int mcInit(int type);
+extern int mcInit(int type);
 
 /** get memcard state
- * mcSync result:	 0 = same card as last getInfo call
- *					-1 = formatted card inserted since last getInfo call
- *					-2 = unformatted card inserted since last getInfo call
- *					< -2 = memcard access error (could be due to accessing psx memcard)
+ * mcSync result:    0 = same card as last getInfo call
+ *                  -1 = formatted card inserted since last getInfo call
+ *                  -2 = unformatted card inserted since last getInfo call
+ *                  < -2 = memcard access error (could be due to accessing psx memcard)
  *
  * @param port port number
  * @param slot slot number
@@ -220,11 +220,11 @@ int mcInit(int type);
  * @param format pointer to get whether or not the card is formatted (Note: Originally, sceMcGetInfo didn't have a 5th argument for returning the format status. As this is emulated based on the return value of sceMcSync() when rom0:MCSERV is used, please keep track of the return value from sceMcSync instead!)
  * @return 0 = successful; < 0 = error
  */
-int mcGetInfo(int port, int slot, int* type, int* free, int* format);
+extern int mcGetInfo(int port, int slot, int* type, int* free, int* format);
 
 /** open a file on memcard
- * mcSync returns:	0 or more = file descriptor (success)
- *					< 0 = error
+ * mcSync returns:  0 or more = file descriptor (success)
+ *                  < 0 = error
  *
  * @param port port number
  * @param slot slot number
@@ -232,75 +232,75 @@ int mcGetInfo(int port, int slot, int* type, int* free, int* format);
  * @param mode open file mode (O_RDWR, O_CREAT, etc)
  * @return 0 = successful; < 0 = error
  */
-int mcOpen(int port, int slot, const char *name, int mode);
+extern int mcOpen(int port, int slot, const char *name, int mode);
 
 /** close an open file on memcard
- * mcSync returns:	0 if closed successfully
- *					< 0 = error
+ * mcSync returns:  0 if closed successfully
+ *                  < 0 = error
  *
  * @param fd file descriptor of open file
  * @return 0 successful; < 0 = error
  */
-int mcClose(int fd);
+extern int mcClose(int fd);
 
 /** move memcard file pointer
- * mcSync returns:	0 or more = offset of file pointer from start of file
- *					< 0 = error
+ * mcSync returns:  0 or more = offset of file pointer from start of file
+ *                  < 0 = error
  *
  * @param fd file descriptor
  * @param offset number of bytes from origin
  * @param origin initial position for offset
  * @return 0 = successful; < 0 = error
  */
-int mcSeek(int fd, int offset, int origin);
+extern int mcSeek(int fd, int offset, int origin);
 
 
 /** read from file on memcard
- * mcSync returns:	0 or more = number of bytes read from memcard
- *					< 0 = error
+ * mcSync returns:  0 or more = number of bytes read from memcard
+ *                  < 0 = error
  *
  * @param fd file descriptor
  * @param buffer buffer to read to
  * @param size number of bytes to read
  * @return 0 = successful; < 0 = error
  */
-int mcRead(int fd, void *buffer, int size);
+extern int mcRead(int fd, void *buffer, int size);
 
 /** write to file on memcard
- * mcSync returns:	0 or more = number of bytes written to memcard
- *					< 0 = error
+ * mcSync returns:  0 or more = number of bytes written to memcard
+ *                  < 0 = error
  *
  * @param fd file descriptor
  * @param buffer to write from write
  * @param size number of bytes to read
  * @return 0 = successful; < 0 = error
  */
-int mcWrite(int fd, const void *buffer, int size);
+extern int mcWrite(int fd, const void *buffer, int size);
 
 /** flush file cache to memcard
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param fd file descriptor
  * @return 0 = successful; < 0 = error
  */
-int mcFlush(int fd);
+extern int mcFlush(int fd);
 
 /** create a dir
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param port port number
  * @param slot slot number
  * @param name directory name
  * @return 0 = successful; < 0 = error
  */
-int mcMkDir(int port, int slot, const char* name);
+extern int mcMkDir(int port, int slot, const char* name);
 
 /** change current dir
  * (can also get current dir)
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param port port number
  * @param slot slot number
@@ -308,12 +308,12 @@ int mcMkDir(int port, int slot, const char* name);
  * @param currentDir buffer to get current dir (use 0 if not needed)
  * @return 0 = successful; < 0 = error
  */
-int mcChdir(int port, int slot, const char* newDir, char* currentDir);
+extern int mcChdir(int port, int slot, const char* newDir, char* currentDir);
 
 /** get memcard filelist
- * mcSync result:	 0 or more = number of file entries obtained (success)
- *					-2 = unformatted card
- *					-4 = dirname error
+ * mcSync result:    0 or more = number of file entries obtained (success)
+ *                  -2 = unformatted card
+ *                  -4 = dirname error
  *
  * @param port port number of memcard
  * @param slot slot number of memcard
@@ -323,11 +323,11 @@ int mcChdir(int port, int slot, const char* newDir, char* currentDir);
  * @param table mc table array
  * @return 0 = successful; < 0 = error
  */
-int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sceMcTblGetDir* table);
+extern int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sceMcTblGetDir* table);
 
 /** change file information
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param port port number
  * @param slot slot number
@@ -336,54 +336,54 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sc
  * @param flags flags to show which data is valid
  * @return 0 = successful; < 0 = error
  */
-int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* info, unsigned flags);
+extern int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* info, unsigned flags);
 
 /** delete file
- * mcSync returns:	0 if deleted successfully
- *					< 0 if error
+ * mcSync returns:  0 if deleted successfully
+ *                  < 0 if error
  *
  * @param port port number to delete from
  * @param slot slot number to delete from
  * @param name filename to delete
  * @return 0 = successful; < 0 = error
  */
-int mcDelete(int port, int slot, const char *name);
+extern int mcDelete(int port, int slot, const char *name);
 
 /** format memory card
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param port port number
  * @param slot slot number
  * @return 0 = success; -1 = error
  */
-int mcFormat(int port, int slot);
+extern int mcFormat(int port, int slot);
 
 /** unformat memory card
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param port port number
  * @param slot slot number
  * @return 0 = success; -1 = error
  */
-int mcUnformat(int port, int slot);
+extern int mcUnformat(int port, int slot);
 
 /** get free space info
- * mcSync returns:	0 or more = number of free entries (success)
- *					< 0 if error
+ * mcSync returns:  0 or more = number of free entries (success)
+ *                  < 0 if error
  *
  * @param port port number
  * @param slot slot number
  * @param path path to be checked
  * @return 0 or more = number of empty entries; -1 = error
  */
-int mcGetEntSpace(int port, int slot, const char* path);
+extern int mcGetEntSpace(int port, int slot, const char* path);
 
 /** rename file or dir on memcard
  * Note: rom0:MCSERV does not support this.
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param port port number
  * @param slot slot number
@@ -391,12 +391,12 @@ int mcGetEntSpace(int port, int slot, const char* path);
  * @param newName new name to give to file/dir
  * @return 1 = success; < 0 = error
  */
-int mcRename(int port, int slot, const char* oldName, const char* newName);
+extern int mcRename(int port, int slot, const char* oldName, const char* newName);
 
 /** Erases a block on the memory card.
  * Note: rom0:XMCSERV does not support this.
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param port port number
  * @param slot slot number
@@ -404,12 +404,12 @@ int mcRename(int port, int slot, const char* oldName, const char* newName);
  * @param mode Mode: -1 to inhibit ECC recalculation of the erased block's pages (useful if sceMcWritePage is used to fill in its contents later on), 0 for normal operation.
  * @return 0 = success; -1 = error
  */
-int mcEraseBlock(int port, int slot, int block, int mode);
+extern int mcEraseBlock(int port, int slot, int block, int mode);
 
 /** Reads a page from the memory card.
  * Note: rom0:XMCSERV does not support this.
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param port port number
  * @param slot slot number
@@ -417,12 +417,12 @@ int mcEraseBlock(int port, int slot, int block, int mode);
  * @param buffer Pointer to buffer that will contain the read data.
  * @return 0 = success; -1 = error
  */
-int mcReadPage(int port, int slot, unsigned int page, void *buffer);
+extern int mcReadPage(int port, int slot, unsigned int page, void *buffer);
 
 /** Writes a page to the memory card. (The block which the page resides on must be erased first!)
  * Note: rom0:XMCSERV does not support this.
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param port port number
  * @param slot slot number
@@ -430,18 +430,18 @@ int mcReadPage(int port, int slot, unsigned int page, void *buffer);
  * @param buffer Pointer to buffer containing data to be written.
  * @return 0 = success; -1 = error
  */
-int mcWritePage(int port, int slot, int page, const void *buffer);
+extern int mcWritePage(int port, int slot, int page, const void *buffer);
 
 /** change mcserv thread priority
  * (I don't think this is implemented properly)
  * Note: rom0:MCSERV does not support this.
- * mcSync returns:	0 if ok
- *					< 0 if error
+ * mcSync returns:  0 if ok
+ *                  < 0 if error
  *
  * @param level thread priority
  * @return 0 = success; -1 = error
  */
-int mcChangeThreadPriority(int level);
+extern int mcChangeThreadPriority(int level);
 
 /** wait for mc functions to finish or check if they have finished yet
  *
@@ -450,13 +450,13 @@ int mcChangeThreadPriority(int level);
  * @param result pointer for storing result of function if it finishes
  * @return 0 = function is still executing (mode=1); 1 = function has finished executing; -1 = no function registered
  */
-int mcSync(int mode, int *cmd, int *result);
+extern int mcSync(int mode, int *cmd, int *result);
 
 /** Reset (force deinit) of library
  *
  * @return 0 = success
  */
-int mcReset(void);
+extern int mcReset(void);
 
 #ifdef __cplusplus
 }

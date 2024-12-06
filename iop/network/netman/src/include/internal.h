@@ -1,4 +1,4 @@
-void NetManUpdateStackNIFLinkState(void);
-void NetManToggleGlobalNetIFLinkState(unsigned char state);
-void *malloc(int size);
-void free(void *buffer);
+extern void NetManUpdateStackNIFLinkState(void);
+extern void NetManToggleGlobalNetIFLinkState(unsigned char state);
+extern void *malloc(int size);
+extern void free(void *buffer);

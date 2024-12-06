@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int SIOR_Init(int priority);
+extern int SIOR_Init(int priority);
 
 #ifdef __cplusplus
 }

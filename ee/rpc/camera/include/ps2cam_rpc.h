@@ -146,19 +146,19 @@ typedef struct
 extern "C" {
 #endif
 
-int PS2CamInit(int mode);
-int PS2CamGetIRXVersion(void);
-int PS2CamGetDeviceCount(void);
-int PS2CamOpenDevice(int device_index);
-int PS2CamCloseDevice(int handle);
-int PS2CamGetDeviceStatus(int handle);
-int PS2CamGetDeviceInfo(int handle, PS2CAM_DEVICE_INFO *info);
-int PS2CamSetDeviceBandwidth(int handle, char bandwidth);
-int PS2CamReadPacket(int handle);
-int PS2CamSetLEDMode(int handle, int mode);
-int PS2CamSetDeviceConfig(int handle, PS2CAM_DEVICE_CONFIG *cfg);
+extern int PS2CamInit(int mode);
+extern int PS2CamGetIRXVersion(void);
+extern int PS2CamGetDeviceCount(void);
+extern int PS2CamOpenDevice(int device_index);
+extern int PS2CamCloseDevice(int handle);
+extern int PS2CamGetDeviceStatus(int handle);
+extern int PS2CamGetDeviceInfo(int handle, PS2CAM_DEVICE_INFO *info);
+extern int PS2CamSetDeviceBandwidth(int handle, char bandwidth);
+extern int PS2CamReadPacket(int handle);
+extern int PS2CamSetLEDMode(int handle, int mode);
+extern int PS2CamSetDeviceConfig(int handle, PS2CAM_DEVICE_CONFIG *cfg);
 
-int PS2CamExtractFrame(int handle, char *buffer, int bufsize);
+extern int PS2CamExtractFrame(int handle, char *buffer, int bufsize);
 
 #ifdef __cplusplus
 }

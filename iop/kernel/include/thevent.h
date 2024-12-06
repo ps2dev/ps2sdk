@@ -57,21 +57,21 @@ typedef struct
     int reserved2;
 } iop_event_info_t;
 
-int CreateEventFlag(iop_event_t *event);
-int DeleteEventFlag(int ef);
+extern int CreateEventFlag(iop_event_t *event);
+extern int DeleteEventFlag(int ef);
 
-int SetEventFlag(int ef, u32 bits);
-int iSetEventFlag(int ef, u32 bits);
+extern int SetEventFlag(int ef, u32 bits);
+extern int iSetEventFlag(int ef, u32 bits);
 
-int ClearEventFlag(int ef, u32 bits);
-int iClearEventFlag(int ef, u32 bits);
+extern int ClearEventFlag(int ef, u32 bits);
+extern int iClearEventFlag(int ef, u32 bits);
 
-int WaitEventFlag(int ef, u32 bits, int mode, u32 *resbits);
+extern int WaitEventFlag(int ef, u32 bits, int mode, u32 *resbits);
 
-int PollEventFlag(int ef, u32 bits, int mode, u32 *resbits);
+extern int PollEventFlag(int ef, u32 bits, int mode, u32 *resbits);
 
-int ReferEventFlagStatus(int ef, iop_event_info_t *info);
-int iReferEventFlagStatus(int ef, iop_event_info_t *info);
+extern int ReferEventFlagStatus(int ef, iop_event_info_t *info);
+extern int iReferEventFlagStatus(int ef, iop_event_info_t *info);
 
 // clang-format off
 #define thevent_IMPORTS \

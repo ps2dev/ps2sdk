@@ -9,5 +9,5 @@ struct smem_buf {
 	};
 };
 
-int smem_write_word(void *address, u32 value);
-int __memcmp(const void *s1, const void *s2, unsigned int length);
+extern int smem_write_word(void *address, u32 value);
+extern int __memcmp(const void *s1, const void *s2, unsigned int length);

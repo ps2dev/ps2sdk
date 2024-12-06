@@ -61,8 +61,8 @@ typedef struct t_SifDmaTransfer
 extern "C" {
 #endif
 
-u32 SifSetDma(SifDmaTransfer_t *sdd, s32 len);
-s32 SifDmaStat(u32 id);
+extern u32 SifSetDma(SifDmaTransfer_t *sdd, s32 len);
+extern s32 SifDmaStat(u32 id);
 
 #ifdef __cplusplus
 }

@@ -66,18 +66,18 @@ extern "C" {
 #endif
 
 #ifdef _EE
-int sndLoadSample(void *buf, u32 spuaddr, int size);
-u32 sndQueryMaxFreeMemSize(void);
+extern int sndLoadSample(void *buf, u32 spuaddr, int size);
+extern u32 sndQueryMaxFreeMemSize(void);
 #endif
 
-int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize);
-int sndStreamClose(void);
-int sndStreamPlay(void);
-int sndStreamPause(void);
-int sndStreamSetPosition(int block);
-int sndStreamGetPosition(void);
-int sndStreamSetVolume(int left, int right);
-u32 sndQueryMaxFreeMemSize();
+extern int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize);
+extern int sndStreamClose(void);
+extern int sndStreamPlay(void);
+extern int sndStreamPause(void);
+extern int sndStreamSetPosition(int block);
+extern int sndStreamGetPosition(void);
+extern int sndStreamSetVolume(int left, int right);
+extern u32 sndQueryMaxFreeMemSize();
 
 #ifdef __cplusplus
 }

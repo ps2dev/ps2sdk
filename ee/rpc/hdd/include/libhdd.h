@@ -68,14 +68,14 @@ typedef struct
 extern "C" {
 #endif
 
-int hddCheckPresent();
-int hddCheckFormatted();
-int hddFormat();
-int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries);
-void hddGetInfo(t_hddInfo *info);
-int hddMakeFilesystem(int fsSizeMB, char *name, int type);
-int hddRemoveFilesystem(t_hddFilesystem *fs);
-int hddExpandFilesystem(t_hddFilesystem *fs, int extraMB);
+extern int hddCheckPresent();
+extern int hddCheckFormatted();
+extern int hddFormat();
+extern int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries);
+extern void hddGetInfo(t_hddInfo *info);
+extern int hddMakeFilesystem(int fsSizeMB, char *name, int type);
+extern int hddRemoveFilesystem(t_hddFilesystem *fs);
+extern int hddExpandFilesystem(t_hddFilesystem *fs, int extraMB);
 
 #ifdef __cplusplus
 }

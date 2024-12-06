@@ -26,9 +26,9 @@ struct partition
 extern struct partition g_part[MAX_PARTITIONS];
 extern struct block_device g_part_bd[MAX_PARTITIONS];
 
-int GetNextFreePartitionIndex();
+extern int GetNextFreePartitionIndex();
 
-int part_connect_mbr(struct block_device *bd);
-int part_connect_gpt(struct block_device *bd);
+extern int part_connect_mbr(struct block_device *bd);
+extern int part_connect_gpt(struct block_device *bd);
 
 #endif
