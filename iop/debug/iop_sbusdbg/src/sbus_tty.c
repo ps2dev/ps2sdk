@@ -27,8 +27,6 @@ Of course this requires that the EE-side code accept this command and output the
 
 extern void sbus_tty_puts(const char *str);
 
-static int ttyfs_error() { return -EPERM; }
-
 static int ttyfs_init()
 {
     //DBG_puts("SIOTTY: FS Init()\n");
@@ -96,23 +94,23 @@ static int ttyfs_write(iop_file_t *file, void *ptr, int size) {
 
 static iop_device_ops_t fsd_ops =
 {
-    &ttyfs_init,
-    &ttyfs_deinit,
-    (void *)&ttyfs_error,
-    &ttyfs_open,
-    &ttyfs_close,
-	(void *)&ttyfs_error,
-    &ttyfs_write,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-	&ttyfs_dopen,
-    &ttyfs_close,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
+    &ttyfs_init, // init
+    &ttyfs_deinit, // deinit
+    NOT_SUPPORTED, // format
+    &ttyfs_open, // open
+    &ttyfs_close, // close
+    NOT_SUPPORTED, // read
+    &ttyfs_write, // write
+    NOT_SUPPORTED, // lseek
+    NOT_SUPPORTED, // ioctl
+    NOT_SUPPORTED, // remove
+    NOT_SUPPORTED, // mkdir
+    NOT_SUPPORTED, // rmdir
+    &ttyfs_dopen, // dopen
+    &ttyfs_close, // dclose
+    NOT_SUPPORTED, // dread
+    NOT_SUPPORTED, // getstat
+    NOT_SUPPORTED, // chstat
 };
 
 static iop_device_t tty_fsd =

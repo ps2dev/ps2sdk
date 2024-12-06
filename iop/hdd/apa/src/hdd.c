@@ -39,33 +39,33 @@ IRX_ID("hdd_driver", APA_MODVER_MAJOR, APA_MODVER_MINOR);
 #endif
 
 static iomanX_iop_device_ops_t hddOps={
-	&hddInit,
-	&hddDeinit,
-	&hddFormat,
-	&hddOpen,
-	&hddClose,
-	&hddRead,
-	&hddWrite,
-	&hddLseek,
-	(void*)&hddUnsupported,
-	&hddRemove,
-	(void*)&hddUnsupported,
-	(void*)&hddUnsupported,
-	&hddDopen,
-	&hddClose,
-	&hddDread,
-	&hddGetStat,
-	(void*)&hddUnsupported,
-	&hddReName,
-	(void*)&hddUnsupported,
-	(void*)&hddUnsupported,
-	hddMount,
-	hddUmount,
-	(void*)&hddUnsupported,
-	&hddDevctl,
-	(void*)&hddUnsupported,
-	(void*)&hddUnsupported,
-	&hddIoctl2,
+	&hddInit, // init
+	&hddDeinit, // deinit
+	&hddFormat, // format
+	&hddOpen, // open
+	&hddClose, // close
+	&hddRead, // read
+	&hddWrite, // write
+	&hddLseek, // lseek
+	NOT_SUPPORTED, // ioctl
+	&hddRemove, // remove
+	NOT_SUPPORTED, // mkdir
+	NOT_SUPPORTED, // rmdir
+	&hddDopen, // dopen
+	&hddClose, // dclose
+	&hddDread, // dread
+	&hddGetStat, // getstat
+	NOT_SUPPORTED, // chstat
+	&hddReName, // rename
+	NOT_SUPPORTED, // chdir
+	NOT_SUPPORTED, // sync
+	hddMount, // mount
+	hddUmount, // umount
+	NOT_SUPPORTED_S64, // lseek64
+	&hddDevctl, // devctl
+	NOT_SUPPORTED, // symlink
+	NOT_SUPPORTED, // readlink
+	&hddIoctl2, // ioctl2
 };
 static iomanX_iop_device_t hddFioDev={
 	"hdd",

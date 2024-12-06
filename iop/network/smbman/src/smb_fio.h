@@ -8,7 +8,6 @@
 
 // smb driver ops functions prototypes
 int smb_initdev(void);
-int smb_dummy(void);
 int smb_init(iop_device_t *iop_dev);
 int smb_deinit(iop_device_t *dev);
 int smb_open(iop_file_t *f, const char *filename, int flags, int mode);

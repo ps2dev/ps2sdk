@@ -36,6 +36,8 @@ IRX_ID("IO/File_Manager", 1, 1);
 
 #include "errno.h"
 
+#include <ioman.h>
+
 #define MAX_DEVICES 16
 #define MAX_FILES   16
 
@@ -50,29 +52,24 @@ static int should_print_known_devices = 1;
 extern struct irx_export_table _exp_ioman;
 #endif
 
-static int tty_noop()
-{
-	return 0;
-}
-
 iop_io_device_ops_t tty_dev_operations = {
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
-	&tty_noop,
+	DUMMY_IMPLEMENTATION, // init
+	DUMMY_IMPLEMENTATION, // deinit
+	NOT_SUPPORTED, // format
+	NOT_SUPPORTED, // open
+	NOT_SUPPORTED, // close
+	NOT_SUPPORTED, // read
+	NOT_SUPPORTED, // write
+	NOT_SUPPORTED, // lseek
+	NOT_SUPPORTED, // ioctl
+	NOT_SUPPORTED, // remove
+	NOT_SUPPORTED, // mkdir
+	NOT_SUPPORTED, // rmdir
+	NOT_SUPPORTED, // dopen
+	NOT_SUPPORTED, // dclose
+	NOT_SUPPORTED, // dread
+	NOT_SUPPORTED, // getstat
+	NOT_SUPPORTED, // chstat
 };
 
 iop_io_device_t tty_device = {

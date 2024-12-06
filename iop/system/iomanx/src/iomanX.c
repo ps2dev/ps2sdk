@@ -85,33 +85,33 @@ struct ioman_dev_listentry
 static int showdrvflag = 1;
 #ifndef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 static iomanX_iop_device_ops_t dev_tty_dev_operations = {
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	(void *)&tty_noop,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	DUMMY_IMPLEMENTATION, // init
+	DUMMY_IMPLEMENTATION, // deinit
+	NOT_SUPPORTED, // format
+	NOT_SUPPORTED, // open
+	NOT_SUPPORTED, // close
+	NOT_SUPPORTED, // read
+	NOT_SUPPORTED, // write
+	NOT_SUPPORTED, // lseek
+	NOT_SUPPORTED, // ioctl
+	NOT_SUPPORTED, // remove
+	NOT_SUPPORTED, // mkdir
+	NOT_SUPPORTED, // rmdir
+	NOT_SUPPORTED, // dopen
+	NOT_SUPPORTED, // dclose
+	NOT_SUPPORTED, // dread
+	NOT_SUPPORTED, // getstat
+	NOT_SUPPORTED, // chstat
+	NOT_SUPPORTED, // rename
+	NOT_SUPPORTED, // chdir
+	NOT_SUPPORTED, // sync
+	NOT_SUPPORTED, // mount
+	NOT_SUPPORTED, // umount
+	NOT_SUPPORTED_S64, // lseek64
+	NOT_SUPPORTED, // devctl
+	NOT_SUPPORTED, // symlink
+	NOT_SUPPORTED, // readlink
+	NOT_SUPPORTED, // ioctl2
 };
 static iomanX_iop_device_t dev_tty = {
 	"tty",
@@ -1080,13 +1080,6 @@ static const char *parsefile(const char *path, iomanX_iop_device_t **p_device, i
 }
 
 // Unofficial: unused "io request for unsupported operation" func removed
-
-#ifndef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
-static int tty_noop(void)
-{
-	return 0;
-}
-#endif
 
 int iomanX_AddDrv(iomanX_iop_device_t *device)
 {

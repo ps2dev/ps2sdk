@@ -26,8 +26,6 @@ static int tty_sema = -1;
 
 extern void tty_puts(const char *str);
 
-static int ttyfs_error() { return -EPERM; }
-
 static int ttyfs_init()
 {
     DPRINTF("FS Init()\n");
@@ -44,33 +42,6 @@ static int ttyfs_deinit()
     DPRINTF("FS Deinit()\n");
     DeleteSema(tty_sema);
 	return 0;
-}
-
-static int ttyfs_open(iop_file_t *file, const char *name, int flags)
-{
-    (void)file;
-    (void)name;
-    (void)flags;
-
-    DPRINTF("FS Open()\n");
-	return 0;
-}
-
-static int ttyfs_dopen(iop_file_t *file, const char *name)
-{
-    (void)file;
-    (void)name;
-
-    DPRINTF("FS Dopen()\n");
-    return 0;
-}
-
-static int ttyfs_close(iop_file_t *file)
-{
-    (void)file;
-
-    DPRINTF("FS Close()\n");
-    return(0);
 }
 
 static int ttyfs_write(iop_file_t *file, void *ptr, int size) {
@@ -103,23 +74,23 @@ static int ttyfs_write(iop_file_t *file, void *ptr, int size) {
 
 static iop_device_ops_t fsd_ops =
 {
-    &ttyfs_init,
-    &ttyfs_deinit,
-    (void *)&ttyfs_error,
-    &ttyfs_open,
-    &ttyfs_close,
-	(void *)&ttyfs_error,
-    &ttyfs_write,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-	&ttyfs_dopen,
-    &ttyfs_close,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
-    (void *)&ttyfs_error,
+    &ttyfs_init, // init
+    &ttyfs_deinit, // deinit
+    NOT_SUPPORTED, // format
+    NOT_SUPPORTED, // open
+    NOT_SUPPORTED, // close
+    NOT_SUPPORTED, // read
+    &ttyfs_write, // write
+    NOT_SUPPORTED, // lseek
+    NOT_SUPPORTED, // ioctl
+    NOT_SUPPORTED, // remove
+    NOT_SUPPORTED, // mkdir
+    NOT_SUPPORTED, // rmdir
+    NOT_SUPPORTED, // dopen
+    NOT_SUPPORTED, // dclose
+    NOT_SUPPORTED, // dread
+    NOT_SUPPORTED, // getstat
+    NOT_SUPPORTED, // chstat
 };
 
 static iop_device_t tty_fsd =

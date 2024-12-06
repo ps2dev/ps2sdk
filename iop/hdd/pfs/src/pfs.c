@@ -36,33 +36,33 @@ IRX_ID("pfs_driver", PFS_MAJOR, PFS_MINOR);
 //	Globals
 
 static iomanX_iop_device_ops_t pfsOps = {
-	&pfsFioInit,
-	&pfsFioDeinit,
-	&pfsFioFormat,
-	&pfsFioOpen,
-	&pfsFioClose,
-	&pfsFioRead,
-	&pfsFioWrite,
-	&pfsFioLseek,
-	&pfsFioIoctl,
-	&pfsFioRemove,
-	&pfsFioMkdir,
-	&pfsFioRmdir,
-	&pfsFioDopen,
-	&pfsFioClose,
-	&pfsFioDread,
-	&pfsFioGetstat,
-	&pfsFioChstat,
-	&pfsFioRename,
-	&pfsFioChdir,
-	&pfsFioSync,
-	&pfsFioMount,
-	&pfsFioUmount,
-	&pfsFioLseek64,
-	&pfsFioDevctl,
-	&pfsFioSymlink,
-	&pfsFioReadlink,
-	&pfsFioIoctl2,
+	&pfsFioInit, // init
+	&pfsFioDeinit, // deinit
+	&pfsFioFormat, // format
+	&pfsFioOpen, // open
+	&pfsFioClose, // close
+	&pfsFioRead, // read
+	&pfsFioWrite, // write
+	&pfsFioLseek, // lseek
+	&pfsFioIoctl, // ioctl
+	&pfsFioRemove, // remove
+	&pfsFioMkdir, // mkdir
+	&pfsFioRmdir, // rmdir
+	&pfsFioDopen, // dopen
+	&pfsFioClose, // dclose
+	&pfsFioDread, // dread
+	&pfsFioGetstat, // getstat
+	&pfsFioChstat, // chstat
+	&pfsFioRename, // rename
+	&pfsFioChdir, // chdir
+	&pfsFioSync, // sync
+	&pfsFioMount, // mount
+	&pfsFioUmount, // umount
+	&pfsFioLseek64, // lseek64
+	&pfsFioDevctl, // devctl
+	&pfsFioSymlink, // symlink
+	&pfsFioReadlink, // readlink
+	&pfsFioIoctl2, // ioctl2
 };
 
 static iomanX_iop_device_t pfsFioDev = {

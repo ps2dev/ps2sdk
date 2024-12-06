@@ -894,12 +894,6 @@ fsck_thread_end:
     SetEventFlag(fsckEventFlagID, 1);
 }
 
-// 0x0000264c
-static int FsckUnsupported(void)
-{
-    return 0;
-}
-
 // 0x00000340
 static int fsckCheckBitmap(pfs_mount_t *mount, void *buffer)
 {
@@ -1217,33 +1211,34 @@ static int FsckIoctl2(iomanX_iop_file_t *fd, int cmd, void *arg, unsigned int ar
 }
 
 static iomanX_iop_device_ops_t FsckDeviceOps = {
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    NULL,
-    &FsckOpen,
-    &FsckClose,
-    NULL,
-    NULL,
-    NULL,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    (void *)&FsckUnsupported,
-    &FsckIoctl2};
+    DUMMY_IMPLEMENTATION, // init
+    DUMMY_IMPLEMENTATION, // deinit
+    NOT_SUPPORTED, // format
+    &FsckOpen, // open
+    &FsckClose, // close
+    NOT_SUPPORTED, // read
+    NOT_SUPPORTED, // write
+    NOT_SUPPORTED, // lseek
+    NOT_SUPPORTED, // ioctl
+    NOT_SUPPORTED, // remove
+    NOT_SUPPORTED, // mkdir
+    NOT_SUPPORTED, // rmdir
+    NOT_SUPPORTED, // dopen
+    NOT_SUPPORTED, // dclose
+    NOT_SUPPORTED, // dread
+    NOT_SUPPORTED, // getstat
+    NOT_SUPPORTED, // chstat
+    NOT_SUPPORTED, // rename
+    NOT_SUPPORTED, // chdir
+    NOT_SUPPORTED, // sync
+    NOT_SUPPORTED, // mount
+    NOT_SUPPORTED, // umount
+    NOT_SUPPORTED_S64, // lseek64
+    NOT_SUPPORTED, // devctl
+    NOT_SUPPORTED, // symlink
+    NOT_SUPPORTED, // readlink
+    &FsckIoctl2, // ioctl2
+};
 
 static iomanX_iop_device_t FsckDevice = {
     "fsck",

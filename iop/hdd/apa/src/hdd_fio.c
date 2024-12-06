@@ -1171,10 +1171,3 @@ int hddUmount(iomanX_iop_file_t *f, const char *fsname)
     return rv;
 }
 #endif
-
-int hddUnsupported(iomanX_iop_file_t *f)
-{
-	(void)f;
-
-	return -EPERM;
-}

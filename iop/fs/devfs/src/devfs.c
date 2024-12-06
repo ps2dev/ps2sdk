@@ -325,36 +325,6 @@ devfs_device_t *devfs_find_deviceid(HDEV hDev)
    return NULL;
 }
 
-/** Dummy ioman handler
- * @returns Always returns -1
- */
-int devfs_dummy(void)
-
-{
-   printf("devfs_dummy\n");
-   return -EPERM;
-}
-
-/** ioman init handler
- * @returns Always returns 0
- */
-int devfs_init(iop_device_t *dev)
-
-{
-   printf("devfs_init dev=%p\n", dev);
-   return 0;
-}
-
-/** ioman deinit handler
- * @returns Always returns 0
- */
-int devfs_deinit(iop_device_t *dev)
-
-{
-   printf("devfs_deinit dev=%p\n", dev);
-   return 0;
-}
-
 /** ioman open handler
  * @oaram file: Pointer to the ioman file structure
  * @param name: Name of file to open
@@ -1010,33 +980,33 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 }
  
 static iop_device_ops_t devfs_ops = {
-  &devfs_init,
-  &devfs_deinit,
-  (void *)&devfs_dummy,
-  &devfs_open,
-  &devfs_close,
-  &devfs_read,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  &devfs_ioctl,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  &devfs_dopen,
-  &devfs_dclose,
-  &devfs_dread,
-  &devfs_getstat,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  (void *)&devfs_dummy,
-  &devfs_ioctl2,
+  DUMMY_IMPLEMENTATION, // init
+  DUMMY_IMPLEMENTATION, // deinit
+  NOT_SUPPORTED, // format
+  &devfs_open, // open
+  &devfs_close, // close
+  &devfs_read, // read
+  NOT_SUPPORTED, // write
+  NOT_SUPPORTED, // lseek
+  &devfs_ioctl, // ioctl
+  NOT_SUPPORTED, // remove
+  NOT_SUPPORTED, // mkdir
+  NOT_SUPPORTED, // rmdir
+  &devfs_dopen, // dopen
+  &devfs_dclose, // dclose
+  &devfs_dread, // dread
+  &devfs_getstat, // getstat
+  NOT_SUPPORTED, // chstat
+  NOT_SUPPORTED, // rename
+  NOT_SUPPORTED, // chdir
+  NOT_SUPPORTED, // sync
+  NOT_SUPPORTED, // mount
+  NOT_SUPPORTED, // umount
+  NOT_SUPPORTED_S64, // lseek64
+  NOT_SUPPORTED, // devctl
+  NOT_SUPPORTED, // symlink
+  NOT_SUPPORTED, // readlink
+  &devfs_ioctl2, // ioctl2
 };
 
 static iop_device_t devfs_device = {
