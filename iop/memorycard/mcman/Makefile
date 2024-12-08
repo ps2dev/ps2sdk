@@ -29,8 +29,19 @@ MCMAN_BUILDING_XFROMMAN ?= 0
 # Read from a file on the filesystem insead of the memory card?
 MCMAN_BUILDING_VMCMAN ?= 0
 
+# support for COH-H10020
+MCMAN_BUILDING_DONGLEMAN ?= 0
+
 ifneq (x$(MCMAN_BUILDING_XMCMAN),x0)
 IOP_CFLAGS += -DBUILDING_XMCMAN
+
+ifneq (x$(MCMAN_BUILDING_DONGLEMAN),x0)#because DONGLEMAN is based on XMCMAN
+IOP_CFLAGS += -DBUILDING_DONGLEMAN
+
+ifneq (x$(DONGLEMAN_USE_SEMAPHORE),x0)#use semaphores to avoid issues with rom0:DAEMON
+IOP_CFLAGS += -DDONGLEMAN_USE_SEMAPHORE
+endif
+endif
 endif
 
 ifneq (x$(MCMAN_BUILDING_XFROMMAN),x0)
