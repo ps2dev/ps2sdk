@@ -67,41 +67,41 @@
 #define AUDSRV_ERR_NO_DISC                 0x0006
 #define AUDSRV_ERR_NO_MORE_CHANNELS        0x0007
 
-int audsrv_init();
-int audsrv_quit();
+extern int audsrv_init();
+extern int audsrv_quit();
 
 /* audio streaming functions */
-int audsrv_format_ok(int freq, int bits, int channels);
-int audsrv_set_format(int freq, int bits, int channels);
-int audsrv_wait_audio(int buflen);
-int audsrv_play_audio(const char *buf, int buflen);
-int audsrv_stop_audio();
-int audsrv_set_volume(int vol);
-int audsrv_available();
-int audsrv_queued();
+extern int audsrv_format_ok(int freq, int bits, int channels);
+extern int audsrv_set_format(int freq, int bits, int channels);
+extern int audsrv_wait_audio(int buflen);
+extern int audsrv_play_audio(const char *buf, int buflen);
+extern int audsrv_stop_audio();
+extern int audsrv_set_volume(int vol);
+extern int audsrv_available();
+extern int audsrv_queued();
 
 /* cdda playing functions */
-int audsrv_play_cd(int track);
-int audsrv_stop_cd();
-int audsrv_set_threshold(int amount);
-int audsrv_get_cdpos();
-int audsrv_get_trackpos();
-int audsrv_get_numtracks();
-int audsrv_get_track_offset(int track);
-int audsrv_cd_pause();
-int audsrv_cd_resume();
-int audsrv_cd_play_sectors(int start, int end);
-int audsrv_get_cd_status();
-int audsrv_get_cd_type();
+extern int audsrv_play_cd(int track);
+extern int audsrv_stop_cd();
+extern int audsrv_set_threshold(int amount);
+extern int audsrv_get_cdpos();
+extern int audsrv_get_trackpos();
+extern int audsrv_get_numtracks();
+extern int audsrv_get_track_offset(int track);
+extern int audsrv_cd_pause();
+extern int audsrv_cd_resume();
+extern int audsrv_cd_play_sectors(int start, int end);
+extern int audsrv_get_cd_status();
+extern int audsrv_get_cd_type();
 
 /* adpcm functions */
-int audsrv_adpcm_init();
-int audsrv_adpcm_set_volume(int ch, int voll, int volr);
-void *audsrv_load_adpcm(u32 *buffer, int size, int id);
+extern int audsrv_adpcm_init();
+extern int audsrv_adpcm_set_volume(int ch, int voll, int volr);
+extern void *audsrv_load_adpcm(u32 *buffer, int size, int id);
 #define audsrv_play_adpcm(id)      audsrv_ch_play_adpcm(-1, id) //For backward-compatibility
-int audsrv_ch_play_adpcm(int ch, u32 id);
-int audsrv_is_adpcm_playing(int ch, u32 id);
-int free_sample(u32 id);
+extern int audsrv_ch_play_adpcm(int ch, u32 id);
+extern int audsrv_is_adpcm_playing(int ch, u32 id);
+extern int free_sample(u32 id);
 
 #define audsrv_IMPORTS_start DECLARE_IMPORT_TABLE(audsrv, 1, 4)
 #define audsrv_IMPORTS_end END_IMPORT_TABLE

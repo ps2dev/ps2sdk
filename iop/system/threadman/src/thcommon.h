@@ -272,27 +272,27 @@ static inline void readyq_remove(struct thread *thread, u32 prio)
     list_remove(&thread->queue);
 }
 
-u32 readyq_highest();
+extern u32 readyq_highest();
 
-struct alarm *alarm_alloc();
-void alarm_free(struct alarm *alarm);
-void alarm_insert(struct list_head *list, struct alarm *alarm);
+extern struct alarm *alarm_alloc();
+extern void alarm_free(struct alarm *alarm);
+extern void alarm_insert(struct list_head *list, struct alarm *alarm);
 
-void update_timer_compare(int timid, u64 time, struct list_head *alarm_list);
+extern void update_timer_compare(int timid, u64 time, struct list_head *alarm_list);
 
-void *heap_alloc(u16 tag, u32 bytes);
-int heap_free(struct heaptag *tag);
+extern void *heap_alloc(u16 tag, u32 bytes);
+extern int heap_free(struct heaptag *tag);
 
-int thread_start(struct thread *thread, int intr_state);
-int thread_init_and_start(struct thread *thread, int intr_state);
-int thread_leave(int unk, int unk2, int intr_state, int release);
+extern int thread_start(struct thread *thread, int intr_state);
+extern int thread_init_and_start(struct thread *thread, int intr_state);
+extern int thread_leave(int unk, int unk2, int intr_state, int release);
 
-unsigned int thread_delay_cb(void *user);
+extern unsigned int thread_delay_cb(void *user);
 
-int read_sys_time(iop_sys_clock_t *clock);
+extern int read_sys_time(iop_sys_clock_t *clock);
 
-void waitlist_insert(struct thread *thread, struct event *event, s32 priority);
+extern void waitlist_insert(struct thread *thread, struct event *event, s32 priority);
 
-int check_thread_stack();
+extern int check_thread_stack();
 
 #endif // THCOMMON_H_

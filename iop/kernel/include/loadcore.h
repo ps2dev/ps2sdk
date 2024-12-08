@@ -114,40 +114,40 @@ typedef struct {
 /**
  * Retained for backward-compatibility with older projects. This function actually returns a pointer to LOADCORE's internal data structure.
  */
-iop_library_table_t *GetLibraryEntryTable(void) __attribute__ ((deprecated));
-lc_internals_t *GetLoadcoreInternalData(void);
+extern iop_library_table_t *GetLibraryEntryTable(void) __attribute__ ((deprecated));
+extern lc_internals_t *GetLoadcoreInternalData(void);
 
-void FlushIcache(void);
-void FlushDcache(void);
+extern void FlushIcache(void);
+extern void FlushDcache(void);
 
-int RegisterLibraryEntries(struct irx_export_table *exports);
-int ReleaseLibraryEntries(struct irx_export_table *exports);
+extern int RegisterLibraryEntries(struct irx_export_table *exports);
+extern int ReleaseLibraryEntries(struct irx_export_table *exports);
 
 // In liberx, the following is LinkLibraryClients
-int LinkLibraryEntries(void* addr, int size);
+extern int LinkLibraryEntries(void* addr, int size);
 // In liberx, the following is UnLinkLibraryClients
-int UnLinkLibraryEntries(void* addr, int size);
+extern int UnLinkLibraryEntries(void* addr, int size);
 
-int RegisterNonAutoLinkEntries(struct irx_export_table *exports);
+extern int RegisterNonAutoLinkEntries(struct irx_export_table *exports);
 
 // In liberx, the following is SearchLibraryEntries
-void *QueryLibraryEntryTable(iop_library_t *library);
-int * QueryBootMode(int mode);
-void RegisterBootMode(iop_bootmode_t *b);
+extern void *QueryLibraryEntryTable(iop_library_t *library);
+extern int * QueryBootMode(int mode);
+extern void RegisterBootMode(iop_bootmode_t *b);
 
-void LockLibraryClient(struct irx_export_table *export);
-void UnLockLibraryClient(struct irx_export_table *export);
+extern void LockLibraryClient(struct irx_export_table *export);
+extern void UnLockLibraryClient(struct irx_export_table *export);
 
-void RegisterModule(ModuleInfo_t *mi);
-void ReleaseModule(ModuleInfo_t *mi);
+extern void RegisterModule(ModuleInfo_t *mi);
+extern void ReleaseModule(ModuleInfo_t *mi);
 
-int AddRebootNotifyHandler(BootupCallback_t func, int priority, int *stat);
+extern int AddRebootNotifyHandler(BootupCallback_t func, int priority, int *stat);
 
-void SetCacheCtrl(u32 val);
+extern void SetCacheCtrl(u32 val);
 
-int ProbeExecutableObject(void* image, FileInfo_t *result);
-int LoadExecutableObject(void* image, FileInfo_t *fi);
-ModuleInfo_t *SearchModuleCBByAddr(void* addr);
+extern int ProbeExecutableObject(void* image, FileInfo_t *result);
+extern int LoadExecutableObject(void* image, FileInfo_t *fi);
+extern ModuleInfo_t *SearchModuleCBByAddr(void* addr);
 
 #define loadcore_IMPORTS \
 	loadcore_IMPORTS_start \

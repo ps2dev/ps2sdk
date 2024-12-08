@@ -15,11 +15,11 @@
 #include <tcpip.h>
 
 __BEGIN_DECLS
-struct hostent *gethostbyaddr(const void *addr, int len, int type);
-struct hostent *gethostbyname(const char *name);
-int gethostbyname_r(const char *name, struct hostent *ret, char *buf, size_t buflen, struct hostent **result, int *h_errnop);
-void freeaddrinfo(struct addrinfo *ai);
-int getaddrinfo(const char *nodename, const char *servname, const struct addrinfo *hints, struct addrinfo **res);
+extern struct hostent *gethostbyaddr(const void *addr, int len, int type);
+extern struct hostent *gethostbyname(const char *name);
+extern int gethostbyname_r(const char *name, struct hostent *ret, char *buf, size_t buflen, struct hostent **result, int *h_errnop);
+extern void freeaddrinfo(struct addrinfo *ai);
+extern int getaddrinfo(const char *nodename, const char *servname, const struct addrinfo *hints, struct addrinfo **res);
 __END_DECLS
 
 #endif

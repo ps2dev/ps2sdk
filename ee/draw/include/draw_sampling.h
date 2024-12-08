@@ -67,19 +67,19 @@ extern "C" {
 #endif
 
 /** Texture Sampling, Level-of-Detail, and Filtering */
-qword_t *draw_texture_sampling(qword_t *q, int context, lod_t *lod);
+extern qword_t *draw_texture_sampling(qword_t *q, int context, lod_t *lod);
 
 /** Mipmap levels 1-3 */
-qword_t *draw_mipmap1(qword_t *q, int context, mipmap_t *mipmap);
+extern qword_t *draw_mipmap1(qword_t *q, int context, mipmap_t *mipmap);
 
 /** Mipmap levels 4-6 */
-qword_t *draw_mipmap2(qword_t *q, int context, mipmap_t *mipmap);
+extern qword_t *draw_mipmap2(qword_t *q, int context, mipmap_t *mipmap);
 
 /** Texture Clamping */
-qword_t *draw_texture_wrapping(qword_t *q, int context, texwrap_t *wrap);
+extern qword_t *draw_texture_wrapping(qword_t *q, int context, texwrap_t *wrap);
 
 /** Alpha Expansion Values */
-qword_t *draw_texture_expand_alpha(qword_t *q, unsigned char zero_value, int expand, unsigned char one_value);
+extern qword_t *draw_texture_expand_alpha(qword_t *q, unsigned char zero_value, int expand, unsigned char one_value);
 
 #ifdef __cplusplus
 }

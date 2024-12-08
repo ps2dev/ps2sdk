@@ -26,33 +26,33 @@ extern "C" {
 #endif
 
 /** Initialise the keyboard library */
-int PS2KbdInit(void);
+extern int PS2KbdInit(void);
 /** Reads 1 character from the keyboard */
-int PS2KbdRead(char *key);
+extern int PS2KbdRead(char *key);
 /** Reads 1 raw character from the keyboard */
-int PS2KbdReadRaw(PS2KbdRawKey *key);
+extern int PS2KbdReadRaw(PS2KbdRawKey *key);
 /** Sets the read mode to normal or raw */
-int PS2KbdSetReadmode(u32 readMode);
+extern int PS2KbdSetReadmode(u32 readMode);
 /** Sets the blocking mode on or off */
-int PS2KbdSetBlockingMode(u32 readMode);
+extern int PS2KbdSetBlockingMode(u32 readMode);
 /** Sets the repeat rate in millseconds */
-int PS2KbdSetRepeatRate(u32 repeat);
+extern int PS2KbdSetRepeatRate(u32 repeat);
 /** Sets all connected keyboards leds */
-int PS2KbdSetLeds(u8 leds);
+extern int PS2KbdSetLeds(u8 leds);
 /** Sets the current keymap */
-int PS2KbdSetKeymap(PS2KbdKeyMap *keymaps);
+extern int PS2KbdSetKeymap(PS2KbdKeyMap *keymaps);
 /** Sets the control key mappings */
-int PS2KbdSetCtrlmap(u8 *ctrlmap);
+extern int PS2KbdSetCtrlmap(u8 *ctrlmap);
 /** Sets the alt key mappings */
-int PS2KbdSetAltmap(u8 *altmap);
+extern int PS2KbdSetAltmap(u8 *altmap);
 /** Sets the special key mappings */
-int PS2KbdSetSpecialmap(u8 *special);
+extern int PS2KbdSetSpecialmap(u8 *special);
 /** Flushes the keyboard buffer */
-int PS2KbdFlushBuffer(void);
+extern int PS2KbdFlushBuffer(void);
 /** Resets the keymap to the default US mapping */
-int PS2KbdResetKeymap(void);
+extern int PS2KbdResetKeymap(void);
 /** Close down the keyboard library */
-int PS2KbdClose(void);
+extern int PS2KbdClose(void);
 
 #ifdef __cplusplus
 }

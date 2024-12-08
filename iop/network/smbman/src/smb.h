@@ -861,31 +861,31 @@ typedef struct
 } __attribute__((packed)) RenameResponse_t;
 
 // function prototypes
-server_specs_t *getServerSpecs(void);
+extern server_specs_t *getServerSpecs(void);
 
-int smb_Connect(char *SMBServerIP, int SMBServerPort);
-int smb_Disconnect(void);
+extern int smb_Connect(char *SMBServerIP, int SMBServerPort);
+extern int smb_Disconnect(void);
 
-int smb_NegotiateProtocol(u32 *capabilities);
-int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capabilities);
-int smb_TreeConnectAndX(int UID, char *ShareName, char *Password, int PasswordType);
-int smb_TreeDisconnect(int UID, int TID);
-int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, int maxEntries);
-int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInformationDisk);
-int smb_QueryPathInformation(int UID, int TID, PathInformation_t *Info, char *Path);
-int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info);
-int smb_LogOffAndX(int UID);
-int smb_Echo(void *echo, int len);
+extern int smb_NegotiateProtocol(u32 *capabilities);
+extern int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capabilities);
+extern int smb_TreeConnectAndX(int UID, char *ShareName, char *Password, int PasswordType);
+extern int smb_TreeDisconnect(int UID, int TID);
+extern int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, int maxEntries);
+extern int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInformationDisk);
+extern int smb_QueryPathInformation(int UID, int TID, PathInformation_t *Info, char *Path);
+extern int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info);
+extern int smb_LogOffAndX(int UID);
+extern int smb_Echo(void *echo, int len);
 
-int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode);
-int smb_ReadAndX(int UID, int TID, int FID, s64 offset, void *readbuf, int nbytes);
-int smb_WriteAndX(int UID, int TID, int FID, s64 offset, void *writebuf, int nbytes);
-int smb_ReadFile(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int nbytes);
-int smb_WriteFile(int UID, int TID, int FID, s64 fileoffset, void *writebuf, int nbytes);
-int smb_Close(int UID, int TID, int FID);
-int smb_Delete(int UID, int TID, char *Path);
-int smb_ManageDirectory(int UID, int TID, char *Path, int cmd);
-int smb_Rename(int UID, int TID, char *oldPath, char *newPath);
+extern int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode);
+extern int smb_ReadAndX(int UID, int TID, int FID, s64 offset, void *readbuf, int nbytes);
+extern int smb_WriteAndX(int UID, int TID, int FID, s64 offset, void *writebuf, int nbytes);
+extern int smb_ReadFile(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int nbytes);
+extern int smb_WriteFile(int UID, int TID, int FID, s64 fileoffset, void *writebuf, int nbytes);
+extern int smb_Close(int UID, int TID, int FID);
+extern int smb_Delete(int UID, int TID, char *Path);
+extern int smb_ManageDirectory(int UID, int TID, char *Path, int cmd);
+extern int smb_Rename(int UID, int TID, char *oldPath, char *newPath);
 
 #define MAX_SMB_BUF     4096 // must fit on u16 !!!
 #define MAX_SMB_BUF_HDR 128  // Must be at least as large as the largest header structure.

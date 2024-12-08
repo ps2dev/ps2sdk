@@ -22,8 +22,8 @@ extern "C" {
 #define hashsize(n) ((ub4)1<<(n))
 #define hashmask(n) (hashsize(n)-1)
 
-ub4  lookup(/*_ ub1 *k, ub4 length, ub4 level _*/);
-void checksum(/*_ ub1 *k, ub4 length, ub4 *state _*/);
+extern ub4  lookup(/*_ ub1 *k, ub4 length, ub4 level _*/);
+extern void checksum(/*_ ub1 *k, ub4 length, ub4 *state _*/);
 
 #ifdef __cplusplus
 }

@@ -23,17 +23,17 @@
 extern "C" {
 #endif
 
-int printf(const char *format, ...);
-int getchar(void);
-int putchar(int c);
-int puts(const char *s);
-char *gets(char *s);
-int fdprintf(int fd, const char *format, ...);
-int fdgetc(int fd);
-int fdputc(int c, int fd);
-int fdputs(const char *s, int fd);
-char *fdgets(char *buf, int fd);
-int vfdprintf(int fd, const char *format, va_list ap);
+extern int printf(const char *format, ...);
+extern int getchar(void);
+extern int putchar(int c);
+extern int puts(const char *s);
+extern char *gets(char *s);
+extern int fdprintf(int fd, const char *format, ...);
+extern int fdgetc(int fd);
+extern int fdputc(int c, int fd);
+extern int fdputs(const char *s, int fd);
+extern char *fdgets(char *buf, int fd);
+extern int vfdprintf(int fd, const char *format, va_list ap);
 
 #define stdio_IMPORTS_start DECLARE_IMPORT_TABLE(stdio, 1, 2)
 #define stdio_IMPORTS_end END_IMPORT_TABLE

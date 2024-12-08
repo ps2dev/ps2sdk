@@ -84,18 +84,18 @@ typedef struct _iop_reset_pkt
 extern "C" {
 #endif
 
-unsigned int SifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
+extern unsigned int SifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
                         void *dest_extra, int size_extra);
-unsigned int iSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
+extern unsigned int iSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
                          void *dest_extra, int size_extra);
-void SifAddCmdHandler(int pos, SifCmdHandler_t handler, void *harg);
-void SifRemoveCmdHandler(int pos);
-void SifInitCmd(void);
-void SifExitCmd(void);
-SifCmdHandlerData_t *SifSetCmdBuffer(SifCmdHandlerData_t *db, int size);
-int SifGetSreg(int index);
+extern void SifAddCmdHandler(int pos, SifCmdHandler_t handler, void *harg);
+extern void SifRemoveCmdHandler(int pos);
+extern void SifInitCmd(void);
+extern void SifExitCmd(void);
+extern SifCmdHandlerData_t *SifSetCmdBuffer(SifCmdHandlerData_t *db, int size);
+extern int SifGetSreg(int index);
 
-void SifWriteBackDCache(void *ptr, int size); // EE only
+extern void SifWriteBackDCache(void *ptr, int size); // EE only
 
 // Send mode bits
 /** Called within an interrupt context */

@@ -46,10 +46,10 @@ extern "C" {
 #endif
 
 /** Return the next module referenced in the global module list.  */
-int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod);
+extern int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod);
 
 /** Find and retreive a module by it's module name.  */
-int smod_get_mod_by_name(const char *name, smod_mod_info_t *info);
+extern int smod_get_mod_by_name(const char *name, smod_mod_info_t *info);
 
 #ifdef __cplusplus
 }

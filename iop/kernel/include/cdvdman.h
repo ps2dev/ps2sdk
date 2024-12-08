@@ -121,24 +121,24 @@ typedef struct cdvdman_internal_struct_
 } cdvdman_internal_struct_t;
 
 //IOP-only libcdvd function prototypes.
-int sceCdCheckCmd(void);
-int sceCdNop(void);
-void *sceGetFsvRbuf(void);
-int sceCdstm0Cb(void (*p)(int));
-int sceCdstm1Cb(void (*p)(int));
-int sceCdSC(int code, int *param);
+extern int sceCdCheckCmd(void);
+extern int sceCdNop(void);
+extern void *sceGetFsvRbuf(void);
+extern int sceCdstm0Cb(void (*p)(int));
+extern int sceCdstm1Cb(void (*p)(int));
+extern int sceCdSC(int code, int *param);
 /*	Within all CDVDMAN modules, sceCdReadClock and sceCdRC both exist. In the old one, both have exactly the same code.
 	In the newer ones, sceCdReadClock would automatically file off the most significant bit within the month field,
 	while sceCdRC continued having its original behaviour of not changing the data.	*/
-int sceCdRC(sceCdCLOCK *clock);
-int sceCdRead0(u32 lsn, u32 sectors, void *buffer, sceCdRMode *mode, int csec, void *callback);
+extern int sceCdRC(sceCdCLOCK *clock);
+extern int sceCdRead0(u32 lsn, u32 sectors, void *buffer, sceCdRMode *mode, int csec, void *callback);
 
 /** Reads DVD video.
  * SUPPORTED IN NEWER CDVDMAN MODULES WITHIN DVD PLAYER IOPRP ONLY
  *
  * @return 1 on success, 0 on failure.
  */
-int sceCdRV(u32 lsn, u32 sectors, void *buf, sceCdRMode *mode, int arg5, void *cb);
+extern int sceCdRV(u32 lsn, u32 sectors, void *buf, sceCdRMode *mode, int arg5, void *cb);
 
 /** send an s-command by function number
  * 
@@ -148,7 +148,7 @@ int sceCdRV(u32 lsn, u32 sectors, void *buf, sceCdRMode *mode, int arg5, void *c
  * @param outBuff output buffer (can be null)
  * @return 1 on success, 0 on failure.
  */
-int sceCdApplySCmd2(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize, void *outBuff);
+extern int sceCdApplySCmd2(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize, void *outBuff);
 
 /** send an s-command by function number
  * Unofficial name.
@@ -160,7 +160,7 @@ int sceCdApplySCmd2(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize,
  * @param outBuff output buffer (can be null)
  * @return 1 on success, 0 on failure.
  */
-int sceCdApplySCmd3(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize, void *outBuff);
+extern int sceCdApplySCmd3(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize, void *outBuff);
 
 /** Controls spindle speed? Not sure what it really does.
  * SUPPORTED IN XCDVDMAN ONLY
@@ -168,7 +168,7 @@ int sceCdApplySCmd3(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize,
  * @param speed Speed mode.
  * @return 1 on success, 0 on failure.
  */
-int sceCdSpinCtrlIOP(u32 speed);
+extern int sceCdSpinCtrlIOP(u32 speed);
 
 /** Set the eject callback when in ATAPI mode.
  * Unofficial name.
@@ -178,7 +178,7 @@ int sceCdSpinCtrlIOP(u32 speed);
  * @param userdata The pointer to the userdata that will be passed to the callback
  * @return The old callback value
  */
-void *sceCdSetAtapiEjectCallback(int (*cb)(int reason, void *userdata), void *userdata);
+extern void *sceCdSetAtapiEjectCallback(int (*cb)(int reason, void *userdata), void *userdata);
 
 //DNAS functions
 
@@ -188,7 +188,7 @@ void *sceCdSetAtapiEjectCallback(int (*cb)(int reason, void *userdata), void *us
  * @param id integer where the Disk ID is stored.
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadDiskID(unsigned int *id);
+extern int sceCdReadDiskID(unsigned int *id);
 
 /** Deobfuscate using unique key.
  * Unofficial name.
@@ -200,7 +200,7 @@ int sceCdReadDiskID(unsigned int *id);
  * @param status Command status
  * @return 1 on success, 0 on failure.
  */
-int sceCdDeobfuscateUsingUniqueKey(u8 *buffer, unsigned int shiftval, int xorval, u32 *status);
+extern int sceCdDeobfuscateUsingUniqueKey(u8 *buffer, unsigned int shiftval, int xorval, u32 *status);
 
 #define cdvdman_IMPORTS_start DECLARE_IMPORT_TABLE(cdvdman, 1, 1)
 #define cdvdman_IMPORTS_end END_IMPORT_TABLE

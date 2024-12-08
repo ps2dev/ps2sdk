@@ -20,10 +20,10 @@
 #include <irx.h>
 #include <librm-common.h>
 
-int rmmanInit(void);
-int rmmanOpen(int port, int slot, void *buffer);
-int rmmanClose(int port, int slot);
-int rmmanEnd(void);
+extern int rmmanInit(void);
+extern int rmmanOpen(int port, int slot, void *buffer);
+extern int rmmanClose(int port, int slot);
+extern int rmmanEnd(void);
 
 #define rmman_IMPORTS_start DECLARE_IMPORT_TABLE(rmman, 1, 1)
 #define rmman_IMPORTS_end END_IMPORT_TABLE

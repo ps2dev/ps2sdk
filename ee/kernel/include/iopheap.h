@@ -20,13 +20,13 @@
 extern "C" {
 #endif
 
-int SifInitIopHeap(void);
-void SifExitIopHeap(void);
+extern int SifInitIopHeap(void);
+extern void SifExitIopHeap(void);
 
-void *SifAllocIopHeap(int size);
-int SifFreeIopHeap(void *addr);
+extern void *SifAllocIopHeap(int size);
+extern int SifFreeIopHeap(void *addr);
 
-int SifLoadIopHeap(const char *path, void *addr);
+extern int SifLoadIopHeap(const char *path, void *addr);
 
 #ifdef __cplusplus
 }

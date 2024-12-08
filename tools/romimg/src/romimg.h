@@ -64,13 +64,13 @@ typedef struct ImageStructure
 } ROMIMG;
 
 /* Function prototypes */
-int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg);
-int WriteROMImg(const char *file, const ROMIMG *ROMImg);
-int LoadROMImg(ROMIMG *ROMImg, const char *path);
-void UnloadROMImg(ROMIMG *ROMImg);
-int AddFile(ROMIMG *ROMImg, const char *path, int upperconv);
-int DeleteFile(ROMIMG *ROMImg, const char *filename);
-int ExtractFile(const ROMIMG *ROMImg, const char *filename, const char *FileToExtract);
-int IsFileExists(const ROMIMG *ROMImg, const char *filename);
+extern int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg);
+extern int WriteROMImg(const char *file, const ROMIMG *ROMImg);
+extern int LoadROMImg(ROMIMG *ROMImg, const char *path);
+extern void UnloadROMImg(ROMIMG *ROMImg);
+extern int AddFile(ROMIMG *ROMImg, const char *path, int upperconv);
+extern int DeleteFile(ROMIMG *ROMImg, const char *filename);
+extern int ExtractFile(const ROMIMG *ROMImg, const char *filename, const char *FileToExtract);
+extern int IsFileExists(const ROMIMG *ROMImg, const char *filename);
 
 #endif /* __ROMING_H__ */

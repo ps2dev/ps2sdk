@@ -39,8 +39,8 @@
 extern "C" {
 #endif
 
-u32 smem_read(void *addr, void *buf, u32 size);
-u32 smem_write(void *addr, void *buf, u32 size);
+extern u32 smem_read(void *addr, void *buf, u32 size);
+extern u32 smem_write(void *addr, void *buf, u32 size);
 
 #ifdef __cplusplus
 }

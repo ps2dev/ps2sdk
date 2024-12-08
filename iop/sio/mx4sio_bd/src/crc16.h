@@ -3,6 +3,6 @@
 
 #include "stdint.h"
 
-uint16_t crc16(void *buf, int len);
+extern uint16_t crc16(void *buf, int len);
 
 #endif

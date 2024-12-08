@@ -22,6 +22,7 @@ extern "C" {
  * and ignore the result.
  * Finally, it initializes a new profiler session.
  */
+extern
 __attribute__((__no_instrument_function__, __no_profile_instrument_function__))
 void gprof_start(void);
 /**
@@ -31,6 +32,7 @@ void gprof_start(void);
  * @param should_dump If 1, the profiling data will be written to the file.
  * If 0, the profiling data will be discarded.
  */
+extern
 __attribute__((__no_instrument_function__, __no_profile_instrument_function__))
 void gprof_stop(const char* filename, int should_dump);
 

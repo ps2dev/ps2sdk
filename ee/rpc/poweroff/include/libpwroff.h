@@ -53,7 +53,7 @@ typedef void (*poweroff_callback)(void *arg);
  *  @details A service thread with a default priority of <b>POWEROFF_THREAD_PRIORITY</b>
  *  will be created.
  */
-int poweroffInit(void);
+extern int poweroffInit(void);
 
 /**
  *  @brief Set callback function
@@ -65,14 +65,14 @@ int poweroffInit(void);
  *  standart specifications.
  *
  */
-void poweroffSetCallback(poweroff_callback cb, void *arg);
+extern void poweroffSetCallback(poweroff_callback cb, void *arg);
 
 /**
  *  @brief Immidiate console shutdown.
  *  Do not call it without closing all stuff.
  *
  */
-void poweroffShutdown(void);
+extern void poweroffShutdown(void);
 
 /**
  *  @brief Change thread priority
@@ -84,7 +84,7 @@ void poweroffShutdown(void);
  *  poweroffInit() ). In that case poweroffSetCallback() will be registered with
  *  the provided priority.
  */
-void poweroffChangeThreadPriority(int priority);
+extern void poweroffChangeThreadPriority(int priority);
 
 #ifdef __cplusplus
 }

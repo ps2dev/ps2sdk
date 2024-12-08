@@ -30,6 +30,6 @@ typedef struct
 #define	dbgprintf(args...)
 #endif
 
-err_t ps2ip_input(struct pbuf *p, struct netif *inp);
+extern err_t ps2ip_input(struct pbuf *p, struct netif *inp);
 
 #endif	// !defined(IOP_PS2IP_INTERNAL_H)

@@ -26,11 +26,11 @@ extern "C" {
 #define TSS_DISABLEINTR 3
 #define TSS_NOTHREAD    4
 
-int GetThreadCurrentPriority(void);
-unsigned int GetSystemTimeLow(void);
-int ReferSystemStatus(iop_sys_status_t *info, size_t size);
-int ReferThreadRunStatus(int thid, iop_thread_run_status_t *stat, size_t size);
-int GetThreadStackFreeSize(int thid);
+extern int GetThreadCurrentPriority(void);
+extern unsigned int GetSystemTimeLow(void);
+extern int ReferSystemStatus(iop_sys_status_t *info, size_t size);
+extern int ReferThreadRunStatus(int thid, iop_thread_run_status_t *stat, size_t size);
+extern int GetThreadStackFreeSize(int thid);
 
 // Type argument for GetThreadmanIdList
 #define TMID_Thread        1
@@ -43,7 +43,7 @@ int GetThreadStackFreeSize(int thid);
 #define TMID_DelayThread   8
 #define TMID_DormantThread 9
 
-int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount);
+extern int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount);
 
 #define xthbase_IMPORTS_start DECLARE_IMPORT_TABLE(thbase, 1, 1)
 #define xthbase_IMPORTS_end   END_IMPORT_TABLE

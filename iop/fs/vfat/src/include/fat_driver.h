@@ -105,38 +105,38 @@ typedef struct _fat_dir
 } fat_dir;
 
 #ifdef BUILDING_IEEE1394_DISK
-int InitFAT(void);
+extern int InitFAT(void);
 #endif /* BUILDING_IEEE1394_DISK */
-int strEqual(const char *s1, const char *s2);
+extern int strEqual(const char *s1, const char *s2);
 
 #ifdef BUILDING_USBHDFSD
-int fat_mount(mass_dev *dev, unsigned int start, unsigned int count);
-void fat_forceUnmount(mass_dev *dev);
+extern int fat_mount(mass_dev *dev, unsigned int start, unsigned int count);
+extern void fat_forceUnmount(mass_dev *dev);
 #endif /* BUILDING_USBHDFSD */
 #ifdef BUILDING_IEEE1394_DISK
-int fat_mount(struct SBP2Device *dev, unsigned int start, unsigned int count);
-void fat_forceUnmount(struct SBP2Device *dev);
+extern int fat_mount(struct SBP2Device *dev, unsigned int start, unsigned int count);
+extern void fat_forceUnmount(struct SBP2Device *dev);
 #endif /* BUILDING_IEEE1394_DISK */
 #if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
-int fat_mount(struct block_device *bd);
-void fat_forceUnmount(struct block_device *bd);
+extern int fat_mount(struct block_device *bd);
+extern void fat_forceUnmount(struct block_device *bd);
 #endif
 
-void fat_setFatDirChain(fat_driver *fatd, fat_dir *fatDir);
-int fat_readFile(fat_driver *fatd, fat_dir *fatDir, unsigned int filePos, unsigned char *buffer, unsigned int size);
-int fat_getFirstDirentry(fat_driver *fatd, const char *dirName, fat_dir_list *fatdlist, fat_dir *fatDir_host, fat_dir *fatDir);
-int fat_getNextDirentry(fat_driver *fatd, fat_dir_list *fatdlist, fat_dir *fatDir);
+extern void fat_setFatDirChain(fat_driver *fatd, fat_dir *fatDir);
+extern int fat_readFile(fat_driver *fatd, fat_dir *fatDir, unsigned int filePos, unsigned char *buffer, unsigned int size);
+extern int fat_getFirstDirentry(fat_driver *fatd, const char *dirName, fat_dir_list *fatdlist, fat_dir *fatDir_host, fat_dir *fatDir);
+extern int fat_getNextDirentry(fat_driver *fatd, fat_dir_list *fatdlist, fat_dir *fatDir);
 
-fat_driver *fat_getData(int device);
-int fat_getFileStartCluster(fat_driver *fatd, const char *fname, unsigned int *startCluster, fat_dir *fatDir);
-int fat_getClusterChain(fat_driver *fatd, unsigned int cluster, unsigned int *buf, unsigned int bufSize, int startFlag);
+extern fat_driver *fat_getData(int device);
+extern int fat_getFileStartCluster(fat_driver *fatd, const char *fname, unsigned int *startCluster, fat_dir *fatDir);
+extern int fat_getClusterChain(fat_driver *fatd, unsigned int cluster, unsigned int *buf, unsigned int bufSize, int startFlag);
 #ifndef BUILDING_IEEE1394_DISK
-int fat_CheckChain(fat_driver *fatd, unsigned int cluster);
+extern int fat_CheckChain(fat_driver *fatd, unsigned int cluster);
 #endif /* BUILDING_USBHDFSD */
 
 #if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
-int fat_stopUnit(int device);
-void fat_stopAll(void);
+extern int fat_stopUnit(int device);
+extern void fat_stopAll(void);
 #endif
 
 #endif

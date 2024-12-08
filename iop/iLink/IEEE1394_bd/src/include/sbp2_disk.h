@@ -153,10 +153,10 @@ struct SBP2Device
 };
 
 /* Function prototypes. */
-void init_ieee1394DiskDriver(void);
-int ieee1394_SendCommandBlockORB(struct SBP2Device *dev, struct CommandDescriptorBlock *firstCDB);
-int ieee1394_Sync(void);
-void DeinitIEEE1394(void);
+extern void init_ieee1394DiskDriver(void);
+extern int ieee1394_SendCommandBlockORB(struct SBP2Device *dev, struct CommandDescriptorBlock *firstCDB);
+extern int ieee1394_Sync(void);
+extern void DeinitIEEE1394(void);
 
 
 #endif

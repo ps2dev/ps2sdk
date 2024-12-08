@@ -67,12 +67,12 @@ typedef int (*audsrv_callback_t)(void *arg);
 /** Initializes audsrv library
  * @returns error code
  */
-int audsrv_init();
+extern int audsrv_init();
 
 /** Shutdowns audsrv
  * @returns AUDSRV_ERR_NOERROR
  */
-int audsrv_quit();
+extern int audsrv_quit();
 
 /** Configures audio stream
  * @param fmt output specification structure
@@ -83,7 +83,7 @@ int audsrv_quit();
  * change the format at any point. You might want to stop audio prior
  * to that, to prevent mismatched audio output.
  */
-int audsrv_set_format(struct audsrv_fmt_t *fmt);
+extern int audsrv_set_format(struct audsrv_fmt_t *fmt);
 
 /** Blocks until there is enough space to enqueue chunk
  * @param bytes size of chunk requested to be enqueued (in bytes)
@@ -92,13 +92,13 @@ int audsrv_set_format(struct audsrv_fmt_t *fmt);
  * Blocks until there are enough space to store the upcoming chunk
  * in audsrv's internal ring buffer.
  */
-int audsrv_wait_audio(int bytes);
+extern int audsrv_wait_audio(int bytes);
 
 /** Sets output volume
  * @param vol volume in percentage
  * @returns error code
  */
-int audsrv_set_volume(int volume);
+extern int audsrv_set_volume(int volume);
 
 /** Uploads audio buffer to SPU
  * @param chunk   audio buffer
@@ -110,33 +110,33 @@ int audsrv_set_volume(int volume);
  * interfering with fluent streaming. The buffer and buflen are given
  * in host format (i.e, 11025hz 8bit stereo.)
  */
-int audsrv_play_audio(const char *chunk, int bytes);
+extern int audsrv_play_audio(const char *chunk, int bytes);
 
 /** Stops audio from playing.
  * @returns status code
  */
-int audsrv_stop_audio();
+extern int audsrv_stop_audio();
 
 /** Returns the last error audsrv raised
  * @returns error code
  */
-int audsrv_get_error();
+extern int audsrv_get_error();
 
 /** Translates audsrv_get_error() response to readable string
  * @returns string representation of error code
  */
-const char *audsrv_get_error_string();
+extern const char *audsrv_get_error_string();
 
 /** Starts playing the request track
  * @param track segment to play
  * @returns status code
  */
-int audsrv_play_cd(int track);
+extern int audsrv_play_cd(int track);
 
 /** Stops CD from playing.
  * @returns status code
  */
-int audsrv_stop_cd();
+extern int audsrv_stop_cd();
 
 /** Returns the current playing sector
  * @returns sector number
@@ -144,7 +144,7 @@ int audsrv_stop_cd();
  * CDDA type discs have sector size of 2352 bytes. There are 75
  * such sectors per second.
  */
-int audsrv_get_cdpos();
+extern int audsrv_get_cdpos();
 
 /** Returns the current playing sector, relative to track
  * @returns sector number
@@ -157,49 +157,49 @@ int audsrv_get_cdpos();
  *
  * where ff is the frame number, 1/75th of a second.
  */
-int audsrv_get_trackpos();
+extern int audsrv_get_trackpos();
 
 /** Returns the number of tracks available on the CD in tray
  * @returns positive track count, or negative error status code
  */
-int audsrv_get_numtracks();
+extern int audsrv_get_numtracks();
 
 /** Returns the first sector for the given track
  * @param track   track index, must be between 1 and the trackcount
  * @returns sector number, or negative status code
  */
-int audsrv_get_track_offset(int track);
+extern int audsrv_get_track_offset(int track);
 
 /** Pauses CDDA playing
  * @returns error status code
  *
  * If CDDA is paused, no operation is taken
  */
-int audsrv_pause_cd();
+extern int audsrv_pause_cd();
 
 /** Resumes CDDA playing
  * @returns error status code
  *
  * If CDDA was not paused, no operation is taken
  */
-int audsrv_resume_cd();
+extern int audsrv_resume_cd();
 
 /** Starts playing at a specific sector
  * @param start first sector to play
  * @param end   last sector to play
  * @returns status code
  */
-int audsrv_play_sectors(int start, int end);
+extern int audsrv_play_sectors(int start, int end);
 
 /** Returns the status of the CD tray (open, closed, seeking etc.)
  * @returns value as defined in libcdvd, negative on error
  */
-int audsrv_get_cd_status();
+extern int audsrv_get_cd_status();
 
 /** Returns the type of disc currently in tray
  * @returns value as defined in libcdvd, negative on error
  */
-int audsrv_get_cd_type();
+extern int audsrv_get_cd_type();
 
 /** Installs a callback function to be called when ringbuffer has enough
  * space to transmit the request number of bytes.
@@ -208,7 +208,7 @@ int audsrv_get_cd_type();
  * @param arg extra parameter to pass to callback function later
  * @returns AUDSRV_ERR_NOERROR, AUDSRV_ERR_ARGS if amount is greater than sizeof(ringbuf)
  */
-int audsrv_on_fillbuf(int amount, audsrv_callback_t cb, void *arg);
+extern int audsrv_on_fillbuf(int amount, audsrv_callback_t cb, void *arg);
 
 /** Initializes adpcm unit of audsrv
  * @returns zero on success, negative value on error
@@ -216,7 +216,7 @@ int audsrv_on_fillbuf(int amount, audsrv_callback_t cb, void *arg);
  * Frees up all memory taken by samples, and stops all voices from
  * being played. This can be called multiple times
  */
-int audsrv_adpcm_init();
+extern int audsrv_adpcm_init();
 
 /** Sets output volume for the specified voice channel.
  * @param ch       Voice channel ID
@@ -224,7 +224,7 @@ int audsrv_adpcm_init();
  * @param pan      left/right offset [-100 .. 0 .. 100]
  * @returns 0 on success, negative otherwise
  */
-int audsrv_adpcm_set_volume_and_pan(int ch, int vol, int pan);
+extern int audsrv_adpcm_set_volume_and_pan(int ch, int vol, int pan);
 #define audsrv_adpcm_set_volume(ch, vol) audsrv_adpcm_set_volume_and_pan(ch, vol, 0) //For backward-compatibility
 
 /** Uploads a sample to SPU2 memory
@@ -233,7 +233,7 @@ int audsrv_adpcm_set_volume_and_pan(int ch, int vol, int pan);
  * @param size     size of sample (including the header)
  * @returns zero on success, negative error code otherwise
  */
-int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size);
+extern int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size);
 
 /** Plays an adpcm sample already uploaded with audsrv_load_adpcm()
  * @param ch    channel identifier. Specifies one of the 24 voice channel to play the ADPCM channel on.
@@ -245,27 +245,27 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size);
  * When ch is set to a valid channel ID, -AUDSRV_ERR_NO_MORE_CHANNELS is returned if the channel is currently in use.
  * Trying to play a sample which is unavailable will result in -AUDSRV_ERR_ARGS
  */
-int audsrv_ch_play_adpcm(int ch, audsrv_adpcm_t *adpcm);
+extern int audsrv_ch_play_adpcm(int ch, audsrv_adpcm_t *adpcm);
 #define audsrv_play_adpcm(adpcm) audsrv_ch_play_adpcm(-1, adpcm) //For backward-compatibility
 
 /** Check if a sample is currently playing on the given channel
  * @returns 1 if playing, 0 if not
  */
-int audsrv_is_adpcm_playing(int ch, audsrv_adpcm_t *adpcm);
+extern int audsrv_is_adpcm_playing(int ch, audsrv_adpcm_t *adpcm);
 
 /** Remove an adpcm sample uploaded with audsrv_load_adpcm() from the list of loaded sounds
  * @param id    sample identifier, as specified in load()
  *
  * SPU memory is freed only when there are no sounds in the list that where loaded after the ones that have been freed
  */
-int audsrv_free_adpcm(audsrv_adpcm_t *adpcm);
+extern int audsrv_free_adpcm(audsrv_adpcm_t *adpcm);
 
 /** Installs a callback function upon completion of a cdda track
  * @param cb your callback
  * @param arg extra parameter to pass to callback function later
  * @returns status code
  */
-int audsrv_on_cdda_stop(audsrv_callback_t cb, void *arg);
+extern int audsrv_on_cdda_stop(audsrv_callback_t cb, void *arg);
 
 /** Returns the number of bytes that can be queued
  * @returns number of bytes left in the ring buffer
@@ -274,14 +274,14 @@ int audsrv_on_cdda_stop(audsrv_callback_t cb, void *arg);
  * is the total bytes that can be queued, without collision of the reading
  * head with the writing head.
  */
-int audsrv_available();
+extern int audsrv_available();
 
 /** Returns the number of bytes already in queue
  * @returns byte count
 
  * Returns the number of bytes that are already in the ring buffer.
  */
-int audsrv_queued();
+extern int audsrv_queued();
 
 #ifdef __cplusplus
 }

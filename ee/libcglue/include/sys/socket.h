@@ -663,37 +663,37 @@ __END_DECLS
 #ifndef	_KERNEL
 
 __BEGIN_DECLS
-int	accept(int, struct sockaddr * __restrict, socklen_t * __restrict);
+extern int	accept(int, struct sockaddr * __restrict, socklen_t * __restrict);
 #if 0
-int	accept4(int, struct sockaddr * __restrict, socklen_t * __restrict, int);
+extern int	accept4(int, struct sockaddr * __restrict, socklen_t * __restrict, int);
 #endif
-int	bind(int, const struct sockaddr *, socklen_t);
-int	connect(int, const struct sockaddr *, socklen_t);
-int	getpeername(int, struct sockaddr * __restrict, socklen_t * __restrict);
-int	getsockname(int, struct sockaddr * __restrict, socklen_t * __restrict);
-int	getsockopt(int, int, int, void *__restrict, socklen_t * __restrict);
+extern int bind(int, const struct sockaddr *, socklen_t);
+extern int connect(int, const struct sockaddr *, socklen_t);
+extern int getpeername(int, struct sockaddr * __restrict, socklen_t * __restrict);
+extern int getsockname(int, struct sockaddr * __restrict, socklen_t * __restrict);
+extern int getsockopt(int, int, int, void *__restrict, socklen_t * __restrict);
 #if 0
-int	getsockopt2(int, int, int, void *__restrict, socklen_t * __restrict);
+extern int	getsockopt2(int, int, int, void *__restrict, socklen_t * __restrict);
 #endif
-int	listen(int, int);
+extern int	listen(int, int);
 #if 0
-int	paccept(int, struct sockaddr * __restrict, socklen_t * __restrict,
+extern int	paccept(int, struct sockaddr * __restrict, socklen_t * __restrict,
 	const sigset_t * __restrict, int);
 #endif
-ssize_t	recv(int, void *, size_t, int);
-ssize_t	recvfrom(int, void *__restrict, size_t, int,
-	    struct sockaddr * __restrict, socklen_t * __restrict);
-ssize_t	recvmsg(int, struct msghdr *, int);
-ssize_t	send(int, const void *, size_t, int);
-ssize_t	sendto(int, const void *,
-	    size_t, int, const struct sockaddr *, socklen_t);
-ssize_t	sendmsg(int, const struct msghdr *, int);
-int	setsockopt(int, int, int, const void *, socklen_t);
-int	shutdown(int, int);
+extern ssize_t recv(int, void *, size_t, int);
+extern ssize_t recvfrom(int, void *__restrict, size_t, int,
+      struct sockaddr * __restrict, socklen_t * __restrict);
+extern ssize_t recvmsg(int, struct msghdr *, int);
+extern ssize_t send(int, const void *, size_t, int);
+extern ssize_t sendto(int, const void *,
+      size_t, int, const struct sockaddr *, socklen_t);
+extern ssize_t sendmsg(int, const struct msghdr *, int);
+extern int setsockopt(int, int, int, const void *, socklen_t);
+extern int shutdown(int, int);
 #if 0
-int	sockatmark(int);
+extern int	sockatmark(int);
 #endif
-int	socket(int, int, int)
+extern int	socket(int, int, int)
 #if 0
 #if !defined(__LIBC12_SOURCE__) && !defined(_STANDALONE)
 __RENAME(__socket30)
@@ -701,22 +701,22 @@ __RENAME(__socket30)
 #endif
 			     ;
 #if 0
-int	socketpair(int, int, int, int *);
+extern int	socketpair(int, int, int, int *);
 #endif
 
 #if 0
 #if defined(_NETBSD_SOURCE)
-int	sendmmsg(int, struct mmsghdr *, unsigned int, unsigned int);
+extern int	sendmmsg(int, struct mmsghdr *, unsigned int, unsigned int);
 struct timespec;
-int	recvmmsg(int, struct mmsghdr *, unsigned int, unsigned int,
+extern int	recvmmsg(int, struct mmsghdr *, unsigned int, unsigned int,
     struct timespec *);
 #endif
 #endif
 #if 1
-int libcglue_ps2ip_setconfig(t_ip_info *ip_info);
-int libcglue_ps2ip_getconfig(char *netif_name, t_ip_info *ip_info);
-void libcglue_dns_setserver(u8 numdns, ip_addr_t *dnsserver);
-const ip_addr_t *libcglue_dns_getserver(u8 numdns);
+extern int libcglue_ps2ip_setconfig(t_ip_info *ip_info);
+extern int libcglue_ps2ip_getconfig(char *netif_name, t_ip_info *ip_info);
+extern void libcglue_dns_setserver(u8 numdns, ip_addr_t *dnsserver);
+extern const ip_addr_t *libcglue_dns_getserver(u8 numdns);
 #endif
 __END_DECLS
 

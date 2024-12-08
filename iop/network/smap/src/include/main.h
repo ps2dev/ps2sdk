@@ -74,22 +74,22 @@ struct SmapDriverData
 #define SMAP_EVENT_LINK_CHECK 0x10
 
 /* Function prototypes */
-int DisplayBanner(void);
-int smap_init(int argc, char *argv[]);
+extern int DisplayBanner(void);
+extern int smap_init(int argc, char *argv[]);
 #ifdef BUILDING_SMAP_PS2IP
-int SMAPInitStart(void);
+extern int SMAPInitStart(void);
 #endif
-int SMAPStart(void);
-void SMAPStop(void);
-void SMAPXmit(void);
-int SMAPGetMACAddress(u8 *buffer);
+extern int SMAPStart(void);
+extern void SMAPStop(void);
+extern void SMAPXmit(void);
+extern int SMAPGetMACAddress(u8 *buffer);
 #ifdef BUILDING_SMAP_PS2IP
-void PS2IPLinkStateUp(void);
-void PS2IPLinkStateDown(void);
+extern void PS2IPLinkStateUp(void);
+extern void PS2IPLinkStateDown(void);
 
-void SMapLowLevelInput(struct pbuf *pBuf);
-int SMapTxPacketNext(void **payload);
-void SMapTxPacketDeQ(void);
+extern void SMapLowLevelInput(struct pbuf *pBuf);
+extern int SMapTxPacketNext(void **payload);
+extern void SMapTxPacketDeQ(void);
 #endif
 
 /* Data prototypes */

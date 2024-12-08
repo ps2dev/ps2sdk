@@ -57,24 +57,24 @@ typedef struct sysmem_internals_
 	sysmem_alloc_table_t *smemupdate_cur;
 } sysmem_internals_t;
 
-sysmem_internals_t *GetSysmemInternalData(void);
+extern sysmem_internals_t *GetSysmemInternalData(void);
 
-void * AllocSysMemory(int mode, int size, void *ptr);
+extern void * AllocSysMemory(int mode, int size, void *ptr);
 
-int FreeSysMemory(void *ptr);
+extern int FreeSysMemory(void *ptr);
 
-u32 QueryMemSize();
+extern u32 QueryMemSize();
 // In liberx, the following is QueryFreeMemSize
-u32 QueryMaxFreeMemSize();
-u32 QueryTotalFreeMemSize();
+extern u32 QueryMaxFreeMemSize();
+extern u32 QueryTotalFreeMemSize();
 // In liberx, the following is QueryBlockInfo
-void * QueryBlockTopAddress(void *address);
-int QueryBlockSize(void *address);
+extern void * QueryBlockTopAddress(void *address);
+extern int QueryBlockSize(void *address);
 
 typedef int (KprintfHandler_t)(void *context, const char *format, va_list ap);
 
-int Kprintf(const char *format,...);
-void KprintfSet(KprintfHandler_t *, void *context);
+extern int Kprintf(const char *format,...);
+extern void KprintfSet(KprintfHandler_t *, void *context);
 
 #define sysmem_IMPORTS_start DECLARE_IMPORT_TABLE(sysmem, 1, 1)
 #define sysmem_IMPORTS_end END_IMPORT_TABLE

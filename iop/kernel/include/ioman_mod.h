@@ -26,21 +26,21 @@
 extern "C" {
 #endif
 
-int io_open(const char *name, int mode);
-int io_close(int fd);
-int io_read(int fd, void *ptr, size_t size);
-int io_write(int fd, void *ptr, size_t size);
-int io_lseek(int fd, int pos, int mode);
-int io_ioctl(int fd, unsigned long arg, void *param);
-int io_remove(const char *name);
-int io_mkdir(const char *path);
-int io_rmdir(const char *path);
-int io_dopen(const char *path, int mode);
-int io_dclose(int fd);
-int io_dread(int fd, io_dirent_t *buf);
-int io_getstat(const char *name, io_stat_t *stat);
-int io_chstat(const char *name, io_stat_t *stat, unsigned int statmask);
-int io_format(const char *dev);
+extern int io_open(const char *name, int mode);
+extern int io_close(int fd);
+extern int io_read(int fd, void *ptr, size_t size);
+extern int io_write(int fd, void *ptr, size_t size);
+extern int io_lseek(int fd, int pos, int mode);
+extern int io_ioctl(int fd, unsigned long arg, void *param);
+extern int io_remove(const char *name);
+extern int io_mkdir(const char *path);
+extern int io_rmdir(const char *path);
+extern int io_dopen(const char *path, int mode);
+extern int io_dclose(int fd);
+extern int io_dread(int fd, io_dirent_t *buf);
+extern int io_getstat(const char *name, io_stat_t *stat);
+extern int io_chstat(const char *name, io_stat_t *stat, unsigned int statmask);
+extern int io_format(const char *dev);
 
 /* Device drivers.  */
 
@@ -92,8 +92,8 @@ typedef struct _iop_io_device_ops {
 	int	(*io_chstat)(iop_io_file_t *, const char *, io_stat_t *, unsigned int);
 } iop_io_device_ops_t;
 
-int io_AddDrv(iop_io_device_t *device);
-int io_DelDrv(const char *name);
+extern int io_AddDrv(iop_io_device_t *device);
+extern int io_DelDrv(const char *name);
 
 #define ioman_mod_IMPORTS_start DECLARE_IMPORT_TABLE(ioman, 1, 1)
 #define ioman_mod_IMPORTS_end END_IMPORT_TABLE

@@ -25,21 +25,21 @@ extern "C" {
  * @param arg a const character pointer for path to module that will be loaded afterwards or an empty string. NULL must not be specified.
  * @return 1 for success or 0 for failure.
  */
-int SifIopReboot(const char *arg);
+extern int SifIopReboot(const char *arg);
 /** Resets IOP
  * @param arg a const character pointer for path to module that will be loaded afterwards or a blank. NULL is not officially supported, but is supported for backward-compatibility with old homebrew projects.
  * @param mode Bitmask for optional settings. 0x80000000 for verbose messages and 0x100 for magicgate.
  * @return 1 for success or 0 for failure.
  */
-int SifIopReset(const char *arg, int mode);
+extern int SifIopReset(const char *arg, int mode);
 /**
  * @return 1 for SIF initialized or 0 for not initialized.
  */
-int SifIopIsAlive(void);
+extern int SifIopIsAlive(void);
 /**
  * @return 1 for bootup complete or 0 for incomplete.
  */
-int SifIopSync(void);
+extern int SifIopSync(void);
 
 #ifdef __cplusplus
 }

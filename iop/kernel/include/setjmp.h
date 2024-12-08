@@ -30,8 +30,8 @@ typedef _JBTYPE jmp_buf[_JBLEN];
 extern "C" {
 #endif
 
-int setjmp(jmp_buf env);
-void longjmp(jmp_buf env, int val) __attribute__ ((noreturn));
+extern int setjmp(jmp_buf env);
+extern void longjmp(jmp_buf env, int val) __attribute__ ((noreturn));
 
 #ifdef __cplusplus
 }

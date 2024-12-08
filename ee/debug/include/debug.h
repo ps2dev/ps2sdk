@@ -25,22 +25,22 @@
 extern "C" {
 #endif
 
-void init_scr(void);
-void scr_printf(const char *, ...) __attribute__((format(printf,1,2)));
-void scr_vprintf(const char *format, va_list opt);
-void scr_putchar(int x, int y, u32 color, int ch);
-void ps2GetStackTrace(unsigned int* results,int max);
-void scr_setXY(int x, int y);
-int scr_getX(void);
-int scr_getY(void);
-void scr_clear(void);
-void scr_clearline(int Y);
-void scr_clearchar(int X, int Y);
-void scr_setbgcolor(u32 color);
-void scr_setfontcolor(u32 color);
-void scr_setcursorcolor(u32 color);
-void scr_setCursor(int enable);
-int scr_getCursor(void);
+extern void init_scr(void);
+extern void scr_printf(const char *, ...) __attribute__((format(printf,1,2)));
+extern void scr_vprintf(const char *format, va_list opt);
+extern void scr_putchar(int x, int y, u32 color, int ch);
+extern void ps2GetStackTrace(unsigned int* results,int max);
+extern void scr_setXY(int x, int y);
+extern int scr_getX(void);
+extern int scr_getY(void);
+extern void scr_clear(void);
+extern void scr_clearline(int Y);
+extern void scr_clearchar(int X, int Y);
+extern void scr_setbgcolor(u32 color);
+extern void scr_setfontcolor(u32 color);
+extern void scr_setcursorcolor(u32 color);
+extern void scr_setCursor(int enable);
+extern int scr_getCursor(void);
 #ifdef __cplusplus
 }
 #endif

@@ -32,50 +32,50 @@ typedef struct _sceMcTblGetDir {	// size = 64
 	char EntryName[32];	// 32
 } sceMcTblGetDir;
 
-int  McDetectCard(int port, int slot);
-int  McOpen(int port, int slot, const char *filename, int flags);
-int  McClose(int fd);
-int  McRead(int fd, void *buf, int length);
-int  McWrite(int fd, void *buf, int length);
-int  McSeek(int fd, int offset, int origin);
-int  McFormat(int port, int slot);
-int  McGetDir(int port, int slot, const char *dirname, int flags, int maxent, sceMcTblGetDir *info);
-int  McDelete(int port, int slot, const char *filename, int flags);
-int  McFlush(int fd);
-int  McChDir(int port, int slot, const char *newdir, char *currentdir);
-int  McSetFileInfo(int port, int slot, const char *filename, sceMcTblGetDir *info, int flags);
-int  McEraseBlock(int port, int block, void **pagebuf, void *eccbuf);	//MCMAN v1.1 does not have a slot argument
-int  McReadPage(int port, int slot, int page, void *buf);
-int  McWritePage(int port, int slot, int page, void *pagebuf, void *eccbuf);
-void McDataChecksum(void *buf, void *ecc);
-int  McReadPS1PDACard(int port, int slot, int page, void *buf);
-int  McWritePS1PDACard(int port, int slot, int page, void *buf);
-int  McUnformat(int port, int slot);
-int  McRetOnly(int fd);
-int  McGetFreeClusters(int port, int slot);
-int  McGetMcType(int port, int slot);
-void McSetPS1CardFlag(int flag);
+extern int  McDetectCard(int port, int slot);
+extern int  McOpen(int port, int slot, const char *filename, int flags);
+extern int  McClose(int fd);
+extern int  McRead(int fd, void *buf, int length);
+extern int  McWrite(int fd, void *buf, int length);
+extern int  McSeek(int fd, int offset, int origin);
+extern int  McFormat(int port, int slot);
+extern int  McGetDir(int port, int slot, const char *dirname, int flags, int maxent, sceMcTblGetDir *info);
+extern int  McDelete(int port, int slot, const char *filename, int flags);
+extern int  McFlush(int fd);
+extern int  McChDir(int port, int slot, const char *newdir, char *currentdir);
+extern int  McSetFileInfo(int port, int slot, const char *filename, sceMcTblGetDir *info, int flags);
+extern int  McEraseBlock(int port, int block, void **pagebuf, void *eccbuf);   //MCMAN v1.1 does not have a slot argument
+extern int  McReadPage(int port, int slot, int page, void *buf);
+extern int  McWritePage(int port, int slot, int page, void *pagebuf, void *eccbuf);
+extern void McDataChecksum(void *buf, void *ecc);
+extern int  McReadPS1PDACard(int port, int slot, int page, void *buf);
+extern int  McWritePS1PDACard(int port, int slot, int page, void *buf);
+extern int  McUnformat(int port, int slot);
+extern int  McRetOnly(int fd);
+extern int  McGetFreeClusters(int port, int slot);
+extern int  McGetMcType(int port, int slot);
+extern void McSetPS1CardFlag(int flag);
 
 /* Available in XMCMAN only */
-int  McEraseBlock2(int port, int slot, int block, void **pagebuf, void *eccbuf);
-int  McDetectCard2(int port, int slot);
-int  McGetFormat(int port, int slot);
-int  McGetEntSpace(int port, int slot, const char *dirname);
-int  McReplaceBadBlock(void);
-int  McCloseAll(void);
+extern int  McEraseBlock2(int port, int slot, int block, void **pagebuf, void *eccbuf);
+extern int  McDetectCard2(int port, int slot);
+extern int  McGetFormat(int port, int slot);
+extern int  McGetEntSpace(int port, int slot, const char *dirname);
+extern int  McReplaceBadBlock(void);
+extern int  McCloseAll(void);
 #ifdef _IOP
-struct irx_id *McGetModuleInfo(void);
+extern struct irx_id *McGetModuleInfo(void);
 #endif
-int  McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsize, u8 *flags);
-int  McGetFATentry(int port, int slot, int fat_index, int *fat_entry);
-int  McCheckBlock(int port, int slot, int block);
-int  McSetFATentry(int port, int slot, int fat_index, int fat_entry);
-int  McReadDirEntry(int port, int slot, int cluster, int fsindex, McFsEntry **pfse);
-void Mc1stCacheEntSetWrFlagOff(void);
-int McCreateDirentry(int port, int slot, int parent_cluster, int num_entries, int cluster, const sceMcStDateTime *ctime);
-int McReadCluster(int port, int slot, int cluster, McCacheEntry **pmce);
-int McFlushCache(int port, int slot);
-int McSetDirEntryState(int port, int slot, int cluster, int fsindex, int flags);
+extern int  McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsize, u8 *flags);
+extern int  McGetFATentry(int port, int slot, int fat_index, int *fat_entry);
+extern int  McCheckBlock(int port, int slot, int block);
+extern int  McSetFATentry(int port, int slot, int fat_index, int fat_entry);
+extern int  McReadDirEntry(int port, int slot, int cluster, int fsindex, McFsEntry **pfse);
+extern void Mc1stCacheEntSetWrFlagOff(void);
+extern int McCreateDirentry(int port, int slot, int parent_cluster, int num_entries, int cluster, const sceMcStDateTime *ctime);
+extern int McReadCluster(int port, int slot, int cluster, McCacheEntry **pmce);
+extern int McFlushCache(int port, int slot);
+extern int McSetDirEntryState(int port, int slot, int cluster, int fsindex, int flags);
 
 #define xfromman_IMPORTS_start DECLARE_IMPORT_TABLE(xfromman, 2, 3)
 #define xfromman_IMPORTS_end END_IMPORT_TABLE

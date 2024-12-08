@@ -221,133 +221,133 @@ typedef struct
 ///////////////////////////////////////////////////////////////////////////////
 // Super Block functions
 
-#define PFS_SUPER_SECTOR			8192
-#define PFS_SUPER_BACKUP_SECTOR		8193
+#define PFS_SUPER_SECTOR            8192
+#define PFS_SUPER_BACKUP_SECTOR     8193
 
-int pfsCheckZoneSize(u32 zone_size);
+extern int pfsCheckZoneSize(u32 zone_size);
 #ifdef PFS_SUPPORT_BHDD
-int pfsCheckExtendedZoneSize(u32 zone_size);
+extern int pfsCheckExtendedZoneSize(u32 zone_size);
 #endif
-u32 pfsGetBitmapSizeSectors(int zoneScale, u32 partSize);
-u32 pfsGetBitmapSizeBlocks(int scale, u32 mainsize);
-int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u32 scale, u32 fragment);
-int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment);
-int pfsUpdateSuperBlock(pfs_mount_t *pfsMount, pfs_super_block_t *superblock, u32 sub);
-int pfsMountSuperBlock(pfs_mount_t *pfsMount);
+extern u32 pfsGetBitmapSizeSectors(int zoneScale, u32 partSize);
+extern u32 pfsGetBitmapSizeBlocks(int scale, u32 mainsize);
+extern int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u32 scale, u32 fragment);
+extern int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment);
+extern int pfsUpdateSuperBlock(pfs_mount_t *pfsMount, pfs_super_block_t *superblock, u32 sub);
+extern int pfsMountSuperBlock(pfs_mount_t *pfsMount);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Cache functions
 
-void pfsCacheFree(pfs_cache_t *clink);
-void pfsCacheLink(pfs_cache_t *clink, pfs_cache_t *cnew);
-pfs_cache_t *pfsCacheUnLink(pfs_cache_t *clink);
-pfs_cache_t *pfsCacheUsedAdd(pfs_cache_t *clink);
-int pfsCacheTransfer(pfs_cache_t* clink, int mode);
-void pfsCacheFlushAllDirty(pfs_mount_t *pfsMount);
-pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 block, int flags, int *result);
-pfs_cache_t *pfsCacheGetData(pfs_mount_t *pfsMount, u16 sub, u32 block, int flags, int *result);
-pfs_cache_t *pfsCacheAllocClean(int *result);
-int pfsCacheIsFull(void);
-int pfsCacheInit(u32 numBuf, u32 bufSize);
-int pfsCacheDeinit(void);
-void pfsCacheClose(pfs_mount_t *pfsMount);
-void pfsCacheMarkClean(const pfs_mount_t *pfsMount, u32 subpart, u32 blockStart, u32 blockEnd);
+extern void pfsCacheFree(pfs_cache_t *clink);
+extern void pfsCacheLink(pfs_cache_t *clink, pfs_cache_t *cnew);
+extern pfs_cache_t *pfsCacheUnLink(pfs_cache_t *clink);
+extern pfs_cache_t *pfsCacheUsedAdd(pfs_cache_t *clink);
+extern int pfsCacheTransfer(pfs_cache_t* clink, int mode);
+extern void pfsCacheFlushAllDirty(pfs_mount_t *pfsMount);
+extern pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 block, int flags, int *result);
+extern pfs_cache_t *pfsCacheGetData(pfs_mount_t *pfsMount, u16 sub, u32 block, int flags, int *result);
+extern pfs_cache_t *pfsCacheAllocClean(int *result);
+extern int pfsCacheIsFull(void);
+extern int pfsCacheInit(u32 numBuf, u32 bufSize);
+extern int pfsCacheDeinit(void);
+extern void pfsCacheClose(pfs_mount_t *pfsMount);
+extern void pfsCacheMarkClean(const pfs_mount_t *pfsMount, u32 subpart, u32 blockStart, u32 blockEnd);
 
 ///////////////////////////////////////////////////////////////////////////////
-//	Bitmap functions
+//  Bitmap functions
 
-#define PFS_BITMAP_ALLOC	0
-#define PFS_BITMAP_FREE		1
+#define PFS_BITMAP_ALLOC    0
+#define PFS_BITMAP_FREE     1
 
 typedef struct
 {
-	u32 chunk;
-	u32 index;
-	u32 bit;
-	u32 partitionChunks;
-	u32 partitionRemainder;
+    u32 chunk;
+    u32 index;
+    u32 bit;
+    u32 partitionChunks;
+    u32 partitionRemainder;
 } pfs_bitmapInfo_t;
 
-void pfsBitmapSetupInfo(pfs_mount_t *pfsMount, pfs_bitmapInfo_t *info, u32 subpart, u32 number);
-void pfsBitmapAllocFree(pfs_cache_t *clink, u32 operation, u32 subpart, u32 chunk, u32 index, u32 _bit, u32 count);
-int pfsBitmapAllocateAdditionalZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 count);
-int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 amount);
-int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 max_count);
-void pfsBitmapFreeBlockSegment(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi);
-int pfsBitmapCalcFreeZones(pfs_mount_t *pfsMount, int sub);
-void pfsBitmapShow(pfs_mount_t *pfsMount);
-void pfsBitmapFreeInodeBlocks(pfs_cache_t *clink);
+extern void pfsBitmapSetupInfo(pfs_mount_t *pfsMount, pfs_bitmapInfo_t *info, u32 subpart, u32 number);
+extern void pfsBitmapAllocFree(pfs_cache_t *clink, u32 operation, u32 subpart, u32 chunk, u32 index, u32 _bit, u32 count);
+extern int pfsBitmapAllocateAdditionalZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 count);
+extern int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 amount);
+extern int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 max_count);
+extern void pfsBitmapFreeBlockSegment(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi);
+extern int pfsBitmapCalcFreeZones(pfs_mount_t *pfsMount, int sub);
+extern void pfsBitmapShow(pfs_mount_t *pfsMount);
+extern void pfsBitmapFreeInodeBlocks(pfs_cache_t *clink);
 
 ///////////////////////////////////////////////////////////////////////////////
-//	Block functions
+//  Block functions
 
-int pfsBlockSeekNextSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos);
-u32 pfsBlockSyncPos(pfs_blockpos_t *blockpos, u64 size);
-int pfsBlockInitPos(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u64 position);
-int pfsBlockExpandSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 count);
-int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 blocks);
-pfs_blockinfo_t* pfsBlockGetCurrent(pfs_blockpos_t *blockpos);
-pfs_cache_t *pfsBlockGetNextSegment(pfs_cache_t *clink, int *result);
-pfs_cache_t *pfsBlockGetLastSegmentDescriptorInode(pfs_cache_t *clink, int *result);
-
-///////////////////////////////////////////////////////////////////////////////
-//	Directory-Entry (DEntry) inode functions
-
-pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry_t **dentry, u32 *size, int option);
-int pfsGetNextDentry(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 *position, char *name, pfs_blockinfo_t *bi);
-pfs_cache_t *pfsFillDentry(pfs_cache_t *clink, pfs_dentry_t *dentry, char *path1, pfs_blockinfo_t *bi, u32 len, u16 mode);
-pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo_t *bi, u16 mode, int *result);
-pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path);
-int pfsCheckDirForFiles(pfs_cache_t *clink);
-void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo_t *self, pfs_blockinfo_t *parent);
-pfs_cache_t* pfsSetDentryParent(pfs_cache_t *clink, pfs_blockinfo_t *bi, int *result);
-pfs_cache_t *pfsInodeGetFileInDir(pfs_cache_t *dirInode, char *path, int *result);
-pfs_cache_t *pfsInodeGetFile(pfs_mount_t *pfsMount, pfs_cache_t *clink, const char *name, int *result);
-void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo_t *bi, u16 mode, u16 uid, u16 gid);
-int pfsInodeRemove(pfs_cache_t *parent, pfs_cache_t *inode, char *path);
-pfs_cache_t *pfsInodeGetParent(pfs_mount_t *pfsMount, pfs_cache_t *clink, const char *filename, char *path, int *result);
-pfs_cache_t *pfsInodeCreate(pfs_cache_t *clink, u16 mode, u16 uid, u16 gid, int *result);
-int pfsCheckAccess(pfs_cache_t *clink, int flags);
-char* pfsSplitPath(char *filename, char *path, int *result);
-u16 pfsGetMaxIndex(pfs_mount_t *pfsMount);
-
-int pfsAllocZones(pfs_cache_t *clink, int msize, int mode);
-void pfsFreeZones(pfs_cache_t *pfree);
+extern int pfsBlockSeekNextSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos);
+extern u32 pfsBlockSyncPos(pfs_blockpos_t *blockpos, u64 size);
+extern int pfsBlockInitPos(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u64 position);
+extern int pfsBlockExpandSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 count);
+extern int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 blocks);
+extern pfs_blockinfo_t* pfsBlockGetCurrent(pfs_blockpos_t *blockpos);
+extern pfs_cache_t *pfsBlockGetNextSegment(pfs_cache_t *clink, int *result);
+extern pfs_cache_t *pfsBlockGetLastSegmentDescriptorInode(pfs_cache_t *clink, int *result);
 
 ///////////////////////////////////////////////////////////////////////////////
-//	Inode functions
+//  Directory-Entry (DEntry) inode functions
 
-void pfsInodePrint(pfs_inode_t *inode);
-int pfsInodeCheckSum(pfs_inode_t *inode);
-void pfsInodeSetTime(pfs_cache_t *clink);
-void pfsInodeSetTimeParent(pfs_cache_t *parent, pfs_cache_t *self);
-pfs_cache_t *pfsInodeGetData(pfs_mount_t *pfsMount, u16 sub, u32 inode, int *result);
-int pfsInodeSync(pfs_blockpos_t *blockpos, u64 size, u32 used_segments);
-pfs_cache_t *pfsGetDentriesChunk(pfs_blockpos_t *position, int *result);
-pfs_cache_t *pfsGetDentriesAtPos(pfs_cache_t *clink, u64 position, int *offset, int *result);
+extern pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry_t **dentry, u32 *size, int option);
+extern int pfsGetNextDentry(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 *position, char *name, pfs_blockinfo_t *bi);
+extern pfs_cache_t *pfsFillDentry(pfs_cache_t *clink, pfs_dentry_t *dentry, char *path1, pfs_blockinfo_t *bi, u32 len, u16 mode);
+extern pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo_t *bi, u16 mode, int *result);
+extern pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path);
+extern int pfsCheckDirForFiles(pfs_cache_t *clink);
+extern void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo_t *self, pfs_blockinfo_t *parent);
+extern pfs_cache_t* pfsSetDentryParent(pfs_cache_t *clink, pfs_blockinfo_t *bi, int *result);
+extern pfs_cache_t *pfsInodeGetFileInDir(pfs_cache_t *dirInode, char *path, int *result);
+extern pfs_cache_t *pfsInodeGetFile(pfs_mount_t *pfsMount, pfs_cache_t *clink, const char *name, int *result);
+extern void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo_t *bi, u16 mode, u16 uid, u16 gid);
+extern int pfsInodeRemove(pfs_cache_t *parent, pfs_cache_t *inode, char *path);
+extern pfs_cache_t *pfsInodeGetParent(pfs_mount_t *pfsMount, pfs_cache_t *clink, const char *filename, char *path, int *result);
+extern pfs_cache_t *pfsInodeCreate(pfs_cache_t *clink, u16 mode, u16 uid, u16 gid, int *result);
+extern int pfsCheckAccess(pfs_cache_t *clink, int flags);
+extern char* pfsSplitPath(char *filename, char *path, int *result);
+extern u16 pfsGetMaxIndex(pfs_mount_t *pfsMount);
+
+extern int pfsAllocZones(pfs_cache_t *clink, int msize, int mode);
+extern void pfsFreeZones(pfs_cache_t *pfree);
 
 ///////////////////////////////////////////////////////////////////////////////
-//	Journal functions
+//  Inode functions
 
-int pfsJournalChecksum(void *header);
-void pfsJournalWrite(pfs_mount_t *pfsMount, pfs_cache_t *clink, u32 pfsCacheNumBuffers);
-int pfsJournalReset(pfs_mount_t *pfsMount);
-int pfsJournalFlush(pfs_mount_t *pfsMount);
-int pfsJournalRestore(pfs_mount_t *pfsMount);
-int pfsJournalResetThis(pfs_block_device_t *blockDev, int fd, u32 sector);
+extern void pfsInodePrint(pfs_inode_t *inode);
+extern int pfsInodeCheckSum(pfs_inode_t *inode);
+extern void pfsInodeSetTime(pfs_cache_t *clink);
+extern void pfsInodeSetTimeParent(pfs_cache_t *parent, pfs_cache_t *self);
+extern pfs_cache_t *pfsInodeGetData(pfs_mount_t *pfsMount, u16 sub, u32 inode, int *result);
+extern int pfsInodeSync(pfs_blockpos_t *blockpos, u64 size, u32 used_segments);
+extern pfs_cache_t *pfsGetDentriesChunk(pfs_blockpos_t *position, int *result);
+extern pfs_cache_t *pfsGetDentriesAtPos(pfs_cache_t *clink, u64 position, int *offset, int *result);
 
 ///////////////////////////////////////////////////////////////////////////////
-//	Function declerations
+//  Journal functions
 
-int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block_t *superblock, u32 stat, int mode);
+extern int pfsJournalChecksum(void *header);
+extern void pfsJournalWrite(pfs_mount_t *pfsMount, pfs_cache_t *clink, u32 pfsCacheNumBuffers);
+extern int pfsJournalReset(pfs_mount_t *pfsMount);
+extern int pfsJournalFlush(pfs_mount_t *pfsMount);
+extern int pfsJournalRestore(pfs_mount_t *pfsMount);
+extern int pfsJournalResetThis(pfs_block_device_t *blockDev, int fd, u32 sector);
 
-void *pfsAllocMem(int size);
-void pfsFreeMem(void *buffer);
-int pfsGetTime(pfs_datetime_t *tm);
-void pfsPrintBitmap(const u32 *bitmap);
+///////////////////////////////////////////////////////////////////////////////
+//  Function declerations
 
-pfs_block_device_t *pfsGetBlockDeviceTable(const char *name);
-u32 pfsGetScale(u32 num, u32 size);
-u32 pfsFixIndex(u32 index);
+extern int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block_t *superblock, u32 stat, int mode);
+
+extern void *pfsAllocMem(int size);
+extern void pfsFreeMem(void *buffer);
+extern int pfsGetTime(pfs_datetime_t *tm);
+extern void pfsPrintBitmap(const u32 *bitmap);
+
+extern pfs_block_device_t *pfsGetBlockDeviceTable(const char *name);
+extern u32 pfsGetScale(u32 num, u32 size);
+extern u32 pfsFixIndex(u32 index);
 
 #endif /* _LIBPFS_H */

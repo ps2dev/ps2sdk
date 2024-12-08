@@ -57,12 +57,12 @@ struct file_system
 typedef void (*bdm_cb)(int event);
 
 // Exported functions
-void bdm_connect_bd(struct block_device *bd);
-void bdm_disconnect_bd(struct block_device *bd);
-void bdm_connect_fs(struct file_system *fs);
-void bdm_disconnect_fs(struct file_system *fs);
-void bdm_get_bd(struct block_device **pbd, unsigned int count);
-void bdm_RegisterCallback(bdm_cb cb);
+extern void bdm_connect_bd(struct block_device *bd);
+extern void bdm_disconnect_bd(struct block_device *bd);
+extern void bdm_connect_fs(struct file_system *fs);
+extern void bdm_disconnect_fs(struct file_system *fs);
+extern void bdm_get_bd(struct block_device **pbd, unsigned int count);
+extern void bdm_RegisterCallback(bdm_cb cb);
 
 #define bdm_IMPORTS_start DECLARE_IMPORT_TABLE(bdm, 1, 1)
 #define bdm_IMPORTS_end   END_IMPORT_TABLE

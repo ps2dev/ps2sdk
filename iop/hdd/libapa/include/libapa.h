@@ -144,39 +144,39 @@ typedef struct
     u32 number;
 } apa_params_t;
 
-void apaSaveError(s32 device, void *buffer, u32 lba, u32 err_lba);
-void apaSetPartErrorSector(s32 device, u32 lba);
-int apaGetPartErrorSector(s32 device, u32 lba, u32 *lba_out);
-int apaGetPartErrorName(s32 device, char *name);
+extern void apaSaveError(s32 device, void *buffer, u32 lba, u32 err_lba);
+extern void apaSetPartErrorSector(s32 device, u32 lba);
+extern int apaGetPartErrorSector(s32 device, u32 lba, u32 *lba_out);
+extern int apaGetPartErrorName(s32 device, char *name);
 
-apa_cache_t *apaFillHeader(s32 device, const apa_params_t *params, u32 start, u32 next, u32 prev, u32 length, int *err);
-apa_cache_t *apaInsertPartition(s32 device, const apa_params_t *params, u32 sector, int *err);
-apa_cache_t *apaFindPartition(s32 device, const char *id, int *err);
-void apaAddEmptyBlock(apa_header_t *header, u32 *emptyBlocks);
-apa_cache_t *apaRemovePartition(s32 device, u32 start, u32 next, u32 prev, u32 length);
-void apaMakeEmpty(apa_cache_t *clink);
-apa_cache_t *apaDeleteFixPrev(apa_cache_t *clink1, int *err);
-apa_cache_t *apaDeleteFixNext(apa_cache_t *clink, int *err);
-int apaDelete(apa_cache_t *clink);
-int apaCheckSum(apa_header_t *header, int fullcheck);
-int apaReadHeader(s32 device, apa_header_t *header, u32 lba);
-int apaWriteHeader(s32 device, apa_header_t *header, u32 lba);
-int apaGetFormat(s32 device, int *format);
-u32 apaGetPartitionMax(u32 totalLBA);
-apa_cache_t *apaGetNextHeader(apa_cache_t *clink, int *err);
+extern apa_cache_t *apaFillHeader(s32 device, const apa_params_t *params, u32 start, u32 next, u32 prev, u32 length, int *err);
+extern apa_cache_t *apaInsertPartition(s32 device, const apa_params_t *params, u32 sector, int *err);
+extern apa_cache_t *apaFindPartition(s32 device, const char *id, int *err);
+extern void apaAddEmptyBlock(apa_header_t *header, u32 *emptyBlocks);
+extern apa_cache_t *apaRemovePartition(s32 device, u32 start, u32 next, u32 prev, u32 length);
+extern void apaMakeEmpty(apa_cache_t *clink);
+extern apa_cache_t *apaDeleteFixPrev(apa_cache_t *clink1, int *err);
+extern apa_cache_t *apaDeleteFixNext(apa_cache_t *clink, int *err);
+extern int apaDelete(apa_cache_t *clink);
+extern int apaCheckSum(apa_header_t *header, int fullcheck);
+extern int apaReadHeader(s32 device, apa_header_t *header, u32 lba);
+extern int apaWriteHeader(s32 device, apa_header_t *header, u32 lba);
+extern int apaGetFormat(s32 device, int *format);
+extern u32 apaGetPartitionMax(u32 totalLBA);
+extern apa_cache_t *apaGetNextHeader(apa_cache_t *clink, int *err);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int apaCacheInit(u32 size);
-int apaCacheDeinit(void);
-void apaCacheLink(apa_cache_t *clink, apa_cache_t *cnew);
-apa_cache_t *apaCacheUnLink(apa_cache_t *clink);
-int apaCacheTransfer(apa_cache_t *clink, int type);
-void apaCacheFlushDirty(apa_cache_t *clink);
-int apaCacheFlushAllDirty(s32 device);
-apa_cache_t *apaCacheGetHeader(s32 device, u32 sector, u32 mode, int *err);
-void apaCacheFree(apa_cache_t *clink);
-apa_cache_t *apaCacheAlloc(void);
+extern int apaCacheInit(u32 size);
+extern int apaCacheDeinit(void);
+extern void apaCacheLink(apa_cache_t *clink, apa_cache_t *cnew);
+extern apa_cache_t *apaCacheUnLink(apa_cache_t *clink);
+extern int apaCacheTransfer(apa_cache_t *clink, int type);
+extern void apaCacheFlushDirty(apa_cache_t *clink);
+extern int apaCacheFlushAllDirty(s32 device);
+extern apa_cache_t *apaCacheGetHeader(s32 device, u32 sector, u32 mode, int *err);
+extern void apaCacheFree(apa_cache_t *clink);
+extern apa_cache_t *apaCacheAlloc(void);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -189,21 +189,21 @@ typedef struct
 } apa_journal_t;
 
 #define journalCheckSum(header) apaCheckSum((apa_header_t *)header, 1)
-int apaJournalReset(s32 device);
-int apaJournalFlush(s32 device);
-int apaJournalWrite(apa_cache_t *clink);
-int apaJournalRestore(s32 device);
+extern int apaJournalReset(s32 device);
+extern int apaJournalFlush(s32 device);
+extern int apaJournalWrite(apa_cache_t *clink);
+extern int apaJournalRestore(s32 device);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void *apaAllocMem(int size);
-void apaFreeMem(void *ptr);
-int apaGetTime(apa_ps2time_t *tm);
-int apaGetIlinkID(u8 *idbuf);
+extern void *apaAllocMem(int size);
+extern void apaFreeMem(void *ptr);
+extern int apaGetTime(apa_ps2time_t *tm);
+extern int apaGetIlinkID(u8 *idbuf);
 
 ///////////////////////////////////////////////////////////////////////////////
-int apaPassCmp(const char *password1, const char *password2);
-void apaEncryptPassword(const char *id, char *password_out, const char *password_in);
+extern int apaPassCmp(const char *password1, const char *password2);
+extern void apaEncryptPassword(const char *id, char *password_out, const char *password_in);
 
 ///////////////////////////////////////////////////////////////////////////////
 typedef struct
@@ -214,6 +214,6 @@ typedef struct
     int status;
 } apa_device_t;
 
-int apaGetFreeSectors(s32 device, u32 *free, apa_device_t *deviceinfo);
+extern int apaGetFreeSectors(s32 device, u32 *free, apa_device_t *deviceinfo);
 
 #endif /* __LIBAPA_H__ */

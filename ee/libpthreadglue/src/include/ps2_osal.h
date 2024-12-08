@@ -24,17 +24,17 @@ typedef int pte_osSemaphoreHandle;
 typedef int pte_osMutexHandle;
 #include <sys/pte_generic_osal.h>
 
-pte_osResult pteTlsGlobalInit(int maxEntries);
-void * pteTlsThreadInit(void);
+extern pte_osResult pteTlsGlobalInit(int maxEntries);
+extern void * pteTlsThreadInit(void);
 
-pte_osResult __pteTlsAlloc(unsigned int *pKey);
-void * pteTlsGetValue(void *pTlsThreadStruct, unsigned int index);
-pte_osResult __pteTlsSetValue(void *pTlsThreadStruct, unsigned int index, void * value);
-void *__getTlsStructFromThread(s32 thid);
-pte_osResult pteTlsFree(unsigned int index);
+extern pte_osResult __pteTlsAlloc(unsigned int *pKey);
+extern void * pteTlsGetValue(void *pTlsThreadStruct, unsigned int index);
+extern pte_osResult __pteTlsSetValue(void *pTlsThreadStruct, unsigned int index, void * value);
+extern void *__getTlsStructFromThread(s32 thid);
+extern pte_osResult pteTlsFree(unsigned int index);
 
-void pteTlsThreadDestroy(void * pTlsThreadStruct);
-void pteTlsGlobalDestroy(void);
+extern void pteTlsThreadDestroy(void * pTlsThreadStruct);
+extern void pteTlsGlobalDestroy(void);
 
 struct OsalThreadInfo {
   uint32_t threadNumber;

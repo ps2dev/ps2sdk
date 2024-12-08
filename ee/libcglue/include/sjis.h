@@ -25,7 +25,7 @@ extern "C" {
  * @param ascii_buff source ascii string buffer
  * @return length of ascii string copied
  */
-int strcpy_sjis(short* sjis_buff, const char* ascii_buff);
+extern int strcpy_sjis(short* sjis_buff, const char* ascii_buff);
 
 /** copies sjis string to ascii string
  *
@@ -33,7 +33,7 @@ int strcpy_sjis(short* sjis_buff, const char* ascii_buff);
  * @param sjis_buff source sjis string buffer
  * @return length of sjis string copied
  */
-int strcpy_ascii(char* ascii_buff, const short* sjis_buff);
+extern int strcpy_ascii(char* ascii_buff, const short* sjis_buff);
 
 #ifdef __cplusplus
 }

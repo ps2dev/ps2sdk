@@ -1,7 +1,7 @@
-int checkModelVersion(void);
+extern int checkModelVersion(void);
 
 //DMA management
-void GsDmaInit(void);
-void GsDmaSend(const void *addr, u32 qwords);
-void GsDmaSend_tag(const void *addr, u32 qwords, const GS_GIF_DMACHAIN_TAG *tag);
-void GsDmaWait(void);
+extern void GsDmaInit(void);
+extern void GsDmaSend(const void *addr, u32 qwords);
+extern void GsDmaSend_tag(const void *addr, u32 qwords, const GS_GIF_DMACHAIN_TAG *tag);
+extern void GsDmaWait(void);

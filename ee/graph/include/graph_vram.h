@@ -20,16 +20,16 @@ extern "C" {
 #endif
 
 /** Allocates vram and returns vram base pointer */
-int graph_vram_allocate(int width, int height, int psm, int alignment);
+extern int graph_vram_allocate(int width, int height, int psm, int alignment);
 
 /** Frees in FIFO order... */
-void graph_vram_free(int address);
+extern void graph_vram_free(int address);
 
 /** Clears the vram status */
-void graph_vram_clear(void);
+extern void graph_vram_clear(void);
 
 /** Calculate the size in vram of a texture or buffer */
-int graph_vram_size(int width, int height, int psm, int alignment);
+extern int graph_vram_size(int width, int height, int psm, int alignment);
 
 #ifdef __cplusplus
 }

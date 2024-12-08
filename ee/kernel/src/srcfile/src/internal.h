@@ -7,6 +7,6 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-void Intc12Handler(void);
-void InvokeUserModeCallback(void *dispatcher, void *callback, int id, u32 target, void *common);
-void ResumeIntrDispatch(void);
+extern void Intc12Handler(void);
+extern void InvokeUserModeCallback(void *dispatcher, void *callback, int id, u32 target, void *common);
+extern void ResumeIntrDispatch(void);

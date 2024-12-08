@@ -13,21 +13,21 @@
 extern "C" {
 #endif
 
-s32 padInit(void * ee_addr);
-s32 padEnd();
-s32 padPortClose(s32 port, s32 slot, s32 wait);
-s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf);
-u32 padGetInBuffer(u32 port, u32 slot, u8 *buf);
-u32 padSetupEEButtonData(u32 port, u32 slot, void *pstate);
-u32 padGetModeConfig(u32 port, u32 slot);
-u32 padSetMainMode(u32 port, u32 slot, u32 mode, u32 lock);
-u32 padSetActDirect(u32 port, u32 slot, u8 *actData);
-u32 padSetActAlign(u32 port, u32 slot, const u8 *actData);
-u32 padGetButtonMask(u32 port, u32 slot);
-u32 padSetButtonInfo(u32 port, u32 slot, u32 info);
-s32 padInfoAct(u32 port, u32 slot, s32 act, u32 val);
-s32 padInfoComb(u32 port, u32 slot, s32 val1, u32 val2);
-s32 padInfoMode(u32 port, u32 slot, s32 val1, u32 val2);
+extern s32 padInit(void * ee_addr);
+extern s32 padEnd();
+extern s32 padPortClose(s32 port, s32 slot, s32 wait);
+extern s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf);
+extern u32 padGetInBuffer(u32 port, u32 slot, u8 *buf);
+extern u32 padSetupEEButtonData(u32 port, u32 slot, void *pstate);
+extern u32 padGetModeConfig(u32 port, u32 slot);
+extern u32 padSetMainMode(u32 port, u32 slot, u32 mode, u32 lock);
+extern u32 padSetActDirect(u32 port, u32 slot, u8 *actData);
+extern u32 padSetActAlign(u32 port, u32 slot, const u8 *actData);
+extern u32 padGetButtonMask(u32 port, u32 slot);
+extern u32 padSetButtonInfo(u32 port, u32 slot, u32 info);
+extern s32 padInfoAct(u32 port, u32 slot, s32 act, u32 val);
+extern s32 padInfoComb(u32 port, u32 slot, s32 val1, u32 val2);
+extern s32 padInfoMode(u32 port, u32 slot, s32 val1, u32 val2);
 
 #define xpadman_IMPORTS_start DECLARE_IMPORT_TABLE(padman, 1, 2)
 #define xpadman_IMPORTS_end END_IMPORT_TABLE

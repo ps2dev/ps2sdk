@@ -2333,79 +2333,79 @@ extern "C" {
 /* COMMONLY UDED, LOW LEVEL FUNCTIONS */
 
 /* These Use Gif-Dma To Transfer*/
-int GsSetXYOffset1(u16 x, u16 y);
-int GsSetXYOffset2(u16 x, u16 y);
-int GsSetScissor1(u16 upper_x, u16 upper_y, u16 lower_x, u16 lower_y);
-int GsSetScissor2(u16 upper_x, u16 upper_y, u16 lower_x, u16 lower_y);
-int GsSetFrame1(u16 framebuffer_addr, u8 framebuffer_width, u8 psm, u32 draw_mask);
-int GsSetFrame2(u16 framebuffer_addr, u8 framebuffer_width, u8 psm, u32 draw_mask);
-int GsTextureFlush(void);
-int GsSetPixelTest1(u8 enable_alpha_test, u8 alpha_test_method, u8 alpha_reference, u8 alpha_fail_method, u8 enable_dest_alpha_test, u8 dest_alpha_test_mode, u8 enable_zbuff_test, u8 alpha_zbuff_method);
-int GsSetPixelTest2(u8 enable_alpha_test, u8 alpha_test_method, u8 alpha_reference, u8 alpha_fail_method, u8 enable_dest_alpha_test, u8 dest_alpha_test_mode, u8 enable_zbuff_test, u8 alpha_zbuff_method);
-int GsSelectTexure1(u16 tex_addr, u8 addr_width, u8 tex_pixmode, u16 tex_width, u16 tex_height, u16 clut_addr, u8 clut_pixmode, u8 clut_storagemode,u8 clut_offset);
-int GsSelectTexure2(u16 tex_addr, u8 addr_width, u8 tex_pixmode, u16 tex_width, u16 tex_height, u16 clut_addr, u8 clut_pixmode, u8 clut_storagemode,u8 clut_offset);
-void GsSetFogColor(u8 r, u8 g, u8 b);
-void GsEnableColorClamp(u16 enable);
+extern int GsSetXYOffset1(u16 x, u16 y);
+extern int GsSetXYOffset2(u16 x, u16 y);
+extern int GsSetScissor1(u16 upper_x, u16 upper_y, u16 lower_x, u16 lower_y);
+extern int GsSetScissor2(u16 upper_x, u16 upper_y, u16 lower_x, u16 lower_y);
+extern int GsSetFrame1(u16 framebuffer_addr, u8 framebuffer_width, u8 psm, u32 draw_mask);
+extern int GsSetFrame2(u16 framebuffer_addr, u8 framebuffer_width, u8 psm, u32 draw_mask);
+extern int GsTextureFlush(void);
+extern int GsSetPixelTest1(u8 enable_alpha_test, u8 alpha_test_method, u8 alpha_reference, u8 alpha_fail_method, u8 enable_dest_alpha_test, u8 dest_alpha_test_mode, u8 enable_zbuff_test, u8 alpha_zbuff_method);
+extern int GsSetPixelTest2(u8 enable_alpha_test, u8 alpha_test_method, u8 alpha_reference, u8 alpha_fail_method, u8 enable_dest_alpha_test, u8 dest_alpha_test_mode, u8 enable_zbuff_test, u8 alpha_zbuff_method);
+extern int GsSelectTexure1(u16 tex_addr, u8 addr_width, u8 tex_pixmode, u16 tex_width, u16 tex_height, u16 clut_addr, u8 clut_pixmode, u8 clut_storagemode,u8 clut_offset);
+extern int GsSelectTexure2(u16 tex_addr, u8 addr_width, u8 tex_pixmode, u16 tex_width, u16 tex_height, u16 clut_addr, u8 clut_pixmode, u8 clut_storagemode,u8 clut_offset);
+extern void GsSetFogColor(u8 r, u8 g, u8 b);
+extern void GsEnableColorClamp(u16 enable);
 
 /* NORMAL FUNCTIONS */
 
-GsGParam_t *GsGetGParam(void);
-void GsResetGraph(short int mode, short int interlace, short int omode, short int ffmode);
-void GsResetPath(void);
-void GsSetCRTCSettings(u64 settings, u8 alpha_value);
+extern GsGParam_t *GsGetGParam(void);
+extern void GsResetGraph(short int mode, short int interlace, short int omode, short int ffmode);
+extern void GsResetPath(void);
+extern void GsSetCRTCSettings(u64 settings, u8 alpha_value);
 
 /* Initialise structs with defaults Based On Input*/
-void GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, u16 psm, u16 w, u16 h);
-void GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, u16 vram_addr);
-void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, u16 psm, u16 w, u16 h, u16 dx, u16 dy);
-void GsSetDefaultDisplayEnvAddress(GS_DISPENV *dispenv, u16 vram_addr);
-void GsSetDefaultZBufferEnv(GS_ZENV *zenv, u8 update_mask);
-void GsSetDefaultZBufferEnvAddress(GS_ZENV *zenv, u16 vram_addr, u8 psm);
+extern void GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, u16 psm, u16 w, u16 h);
+extern void GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, u16 vram_addr);
+extern void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, u16 psm, u16 w, u16 h, u16 dx, u16 dy);
+extern void GsSetDefaultDisplayEnvAddress(GS_DISPENV *dispenv, u16 vram_addr);
+extern void GsSetDefaultZBufferEnv(GS_ZENV *zenv, u8 update_mask);
+extern void GsSetDefaultZBufferEnvAddress(GS_ZENV *zenv, u16 vram_addr, u8 psm);
 
 /* Execute struct's data (Environments)*/
-void GsPutDrawEnv1(GS_DRAWENV		*drawenv);
-void GsPutDrawEnv2(GS_DRAWENV		*drawenv);
-void GsPutDisplayEnv1(GS_DISPENV	*dispenv);
-void GsPutDisplayEnv2(GS_DISPENV	*dispenv);
-void GsPutZBufferEnv1(GS_ZENV *zenv);
-void GsPutZBufferEnv2(GS_ZENV *zenv);
+extern void GsPutDrawEnv1(GS_DRAWENV   *drawenv);
+extern void GsPutDrawEnv2(GS_DRAWENV   *drawenv);
+extern void GsPutDisplayEnv1(GS_DISPENV  *dispenv);
+extern void GsPutDisplayEnv2(GS_DISPENV  *dispenv);
+extern void GsPutZBufferEnv1(GS_ZENV *zenv);
+extern void GsPutZBufferEnv2(GS_ZENV *zenv);
 /** clear draw buffer with GS_DRAWENV->bg_color color (contex 1) */
-void GsClearDrawEnv1(GS_DRAWENV	*drawenv);
+extern void GsClearDrawEnv1(GS_DRAWENV *drawenv);
 /** clear draw buffer with GS_DRAWENV->bg_color color (contex 2) */
-void GsClearDrawEnv2(GS_DRAWENV	*drawenv);
+extern void GsClearDrawEnv2(GS_DRAWENV *drawenv);
 
 /* Gif packet execution*/
-QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, u32  num_qwords);
-void GsGifPacketsClear(GS_PACKET_TABLE *table);
-int GsGifPacketsExecute(GS_PACKET_TABLE	*table, u16 wait);
+extern QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, u32  num_qwords);
+extern void GsGifPacketsClear(GS_PACKET_TABLE *table);
+extern int GsGifPacketsExecute(GS_PACKET_TABLE *table, u16 wait);
 
 /* Texture/Image Funtions*/
-int GsLoadImage(const void *source_addr, GS_IMAGE *dest);
+extern int GsLoadImage(const void *source_addr, GS_IMAGE *dest);
 
-void GsOverridePrimAttributes(s8 override, s8 iip, s8 tme, s8 fge, s8 abe, s8 aa1, s8 fst, s8 ctxt, s8 fix);
-void GsEnableDithering(u8 enable, int mode);
-void GsEnableAlphaTransparency1(u16 enable,u16 method,u8 alpha_ref,u16 fail_method);
-void GsEnableAlphaTransparency2(u16 enable,u16 method,u8 alpha_ref,u16 fail_method);
-void GsEnableZbuffer1(u16 enable,u16 test_method);
-void GsEnableZbuffer2(u16 enable,u16 test_method);
-void GsEnableAlphaBlending1(u16 enable);
-void GsEnableAlphaBlending2(u16 enable);
+extern void GsOverridePrimAttributes(s8 override, s8 iip, s8 tme, s8 fge, s8 abe, s8 aa1, s8 fst, s8 ctxt, s8 fix);
+extern void GsEnableDithering(u8 enable, int mode);
+extern void GsEnableAlphaTransparency1(u16 enable,u16 method,u8 alpha_ref,u16 fail_method);
+extern void GsEnableAlphaTransparency2(u16 enable,u16 method,u8 alpha_ref,u16 fail_method);
+extern void GsEnableZbuffer1(u16 enable,u16 test_method);
+extern void GsEnableZbuffer2(u16 enable,u16 test_method);
+extern void GsEnableAlphaBlending1(u16 enable);
+extern void GsEnableAlphaBlending2(u16 enable);
 
-void GsDrawSync(int mode);
-void GsHSync(int mode);
-void GsVSync(int mode);
+extern void GsDrawSync(int mode);
+extern void GsHSync(int mode);
+extern void GsVSync(int mode);
 
 /* Vram Allocation */
-int    GsVramAllocFrameBuffer(s16 w, s16 h, s16 psm);
-int    GsVramAllocTextureBuffer(s16 w, s16 h, s16 psm);
+extern int    GsVramAllocFrameBuffer(s16 w, s16 h, s16 psm);
+extern int    GsVramAllocTextureBuffer(s16 w, s16 h, s16 psm);
 /** free texture buffer without freeing frame buffer */
-void GsVramFreeAllTextureBuffer(void);
-void GsVramFreeAll(void);
+extern void GsVramFreeAllTextureBuffer(void);
+extern void GsVramFreeAll(void);
 
 /* Just used for buffer swapping*/
-int    GsDbGetDrawBuffer(void);
-int    GsDbGetDisplayBuffer(void);
-void GsDbSwapBuffer(void);
+extern int    GsDbGetDrawBuffer(void);
+extern int    GsDbGetDisplayBuffer(void);
+extern void GsDbSwapBuffer(void);
 
 #ifdef __cplusplus
 }

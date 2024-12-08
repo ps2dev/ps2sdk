@@ -51,7 +51,7 @@ typedef union sysmem_info_
 	sysmem_meminfo_t meminfo; /* when flag of GetSysMemoryInfo is nonzero */
 } sysmem_info_t;
 
-void GetSysMemoryInfo(int flag, sysmem_info_t *info);
+extern void GetSysMemoryInfo(int flag, sysmem_info_t *info);
 
 #define I_GetSysMemoryInfo DECLARE_IMPORT(11, GetSysMemoryInfo)
 

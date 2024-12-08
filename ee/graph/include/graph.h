@@ -99,58 +99,58 @@ extern "C" {
 #endif
 
 /** Initializes a default NTSC/PAL mode with default settings. */
-int graph_initialize(int fbp, int width, int height, int psm, int x, int y);
+extern int graph_initialize(int fbp, int width, int height, int psm, int x, int y);
 
 /** Retrieves the PS2's region for automatic mode selection. */
-int graph_get_region(void);
+extern int graph_get_region(void);
 
 /** Returns an aspect ratio calculated from system setting, width, and height */
-float graph_aspect_ratio(void);
+extern float graph_aspect_ratio(void);
 
 /** Sets a default output method. */
-void graph_enable_output(void);
+extern void graph_enable_output(void);
 
 /** Turns off the read circuits. */
-void graph_disable_output(void);
+extern void graph_disable_output(void);
 
 /** Sets the graphics mode. */
-int graph_set_mode(int interlace, int mode, int ffmd, int flicker_filter);
+extern int graph_set_mode(int interlace, int mode, int ffmd, int flicker_filter);
 
 /** Sets the screen dimensions for the read circuits. */
-int graph_set_screen(int x, int y, int width, int height);
+extern int graph_set_screen(int x, int y, int width, int height);
 
 /** Sets the framebuffer attributes for the read circuits with filter. */
-void graph_set_framebuffer_filtered(int fbp, int width, int psm, int x, int y);
+extern void graph_set_framebuffer_filtered(int fbp, int width, int psm, int x, int y);
 
 /** Sets the framebuffer attributes for the read circuits. */
-void graph_set_framebuffer(int context, int fbp, int width, int psm, int x, int y);
+extern void graph_set_framebuffer(int context, int fbp, int width, int psm, int x, int y);
 
 /** Sets the background color for merge circuit. */
-void graph_set_bgcolor(unsigned char r, unsigned char g, unsigned char b);
+extern void graph_set_bgcolor(unsigned char r, unsigned char g, unsigned char b);
 
 /** Sets the read circuits and merge cicuit. */
-void graph_set_output(int rc1, int rc2, int alpha_select, int alpha_output, int blend_method, unsigned char alpha);
+extern void graph_set_output(int rc1, int rc2, int alpha_select, int alpha_output, int blend_method, unsigned char alpha);
 
 /** Add a vsync interrupt handler */
-int graph_add_vsync_handler(int (*vsync_callback)());
+extern int graph_add_vsync_handler(int (*vsync_callback)());
 
 /** Remove a vsync interrupt handler */
-void graph_remove_vsync_handler(int callback_id);
+extern void graph_remove_vsync_handler(int callback_id);
 
 /** Starts a horizontal sync event and waits */
-void graph_wait_hsync(void);
+extern void graph_wait_hsync(void);
 
 /** Starts a vertical sync event and waits. */
-void graph_wait_vsync(void);
+extern void graph_wait_vsync(void);
 
 /** Checks if a vertical sync event is currently generated. */
-int graph_check_vsync(void);
+extern int graph_check_vsync(void);
 
 /** Starts a vertical sync event and returns immediately. */
-void graph_start_vsync(void);
+extern void graph_start_vsync(void);
 
 /** Shut down the graphics library and hardware. */
-int graph_shutdown(void);
+extern int graph_shutdown(void);
 
 ///****************USE AT OWN RISK****************///
 /// Sets PLL sync generator control register.     ///

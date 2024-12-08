@@ -20,10 +20,10 @@
 
 typedef void (*pwoffcb)(void*);
 
-void SetPowerButtonHandler(pwoffcb func, void* param);
-void AddPowerOffHandler(pwoffcb func, void* param);
-void RemovePowerOffHandler(pwoffcb func);
-void PoweroffShutdown();
+extern void SetPowerButtonHandler(pwoffcb func, void* param);
+extern void AddPowerOffHandler(pwoffcb func, void* param);
+extern void RemovePowerOffHandler(pwoffcb func);
+extern void PoweroffShutdown();
 
 #define poweroff_IMPORTS_start DECLARE_IMPORT_TABLE(poweroff, 1, 1)
 #define poweroff_IMPORTS_end END_IMPORT_TABLE

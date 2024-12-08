@@ -222,26 +222,26 @@ typedef struct
 } padState_t;
 
 // Internal functions
-void WaitClearEvent(int eventflag, u32 bits, int mode, u32 *resbits_out);
-int VblankStart(void *arg);
-int VblankEnd(void *arg);
+extern void WaitClearEvent(int eventflag, u32 bits, int mode, u32 *resbits_out);
+extern int VblankStart(void *arg);
+extern int VblankEnd(void *arg);
 
 // Exported/RPC functions
-s32 padInit(void * ee_addr);
-s32 padEnd(void);
-s32 padPortClose(s32 port, s32 slot, s32 wait);
-s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf);
-u32 padSetMainMode(u32 port, u32 slot, u32 mode, u32 lock);
-u32 padSetActDirect(u32 port, u32 slot, u8 *actData);
-u32 padSetActAlign(u32 port, u32 slot, const u8 *actData);
-u32 padGetButtonMask(u32 port, u32 slot);
-u32 padSetButtonInfo(u32 port, u32 slot, u32 info);
-u32 padSetVrefParam(u32 port, u32 slot, const u8 *vparam);
-s32 padInfoAct(u32 port, u32 slot, s32 act, u32 val);
-s32 padInfoComb(u32 port, u32 slot, s32 listno, u32 offs);
-s32 padInfoMode(u32 port, u32 slot, s32 term, u32 offs);
-u32 padGetPortMax(void);
-u32 padGetSlotMax(u32 port);
-u32 padGetModVersion(void);
+extern s32 padInit(void * ee_addr);
+extern s32 padEnd(void);
+extern s32 padPortClose(s32 port, s32 slot, s32 wait);
+extern s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf);
+extern u32 padSetMainMode(u32 port, u32 slot, u32 mode, u32 lock);
+extern u32 padSetActDirect(u32 port, u32 slot, u8 *actData);
+extern u32 padSetActAlign(u32 port, u32 slot, const u8 *actData);
+extern u32 padGetButtonMask(u32 port, u32 slot);
+extern u32 padSetButtonInfo(u32 port, u32 slot, u32 info);
+extern u32 padSetVrefParam(u32 port, u32 slot, const u8 *vparam);
+extern s32 padInfoAct(u32 port, u32 slot, s32 act, u32 val);
+extern s32 padInfoComb(u32 port, u32 slot, s32 listno, u32 offs);
+extern s32 padInfoMode(u32 port, u32 slot, s32 term, u32 offs);
+extern u32 padGetPortMax(void);
+extern u32 padGetSlotMax(u32 port);
+extern u32 padGetModVersion(void);
 
 #endif

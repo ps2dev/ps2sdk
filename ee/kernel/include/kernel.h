@@ -52,9 +52,9 @@
 #define ALIGNED(x) __attribute__((aligned((x))))
 
 // GP functions
-void *ChangeGP(void *gp);
-void SetGP(void *gp);
-void *GetGP(void);
+extern void *ChangeGP(void *gp);
+extern void SetGP(void *gp);
+extern void *GetGP(void);
 
 extern void *_gp;
 #define SetModuleGP() ChangeGP(&_gp)
@@ -318,236 +318,236 @@ extern "C" {
 #endif
 
 /* Initialization/deinitialization routines.  */
-void _InitSys(void); // Run by crt0
+extern void _InitSys(void); // Run by crt0
 
-void TerminateLibrary(void); // Run by crt0
+extern void TerminateLibrary(void); // Run by crt0
 
 /* Thread update functions */
-int InitThread(void); // Run by _InitSys
+extern int InitThread(void); // Run by _InitSys
 
-s32 iWakeupThread(s32 thread_id);
-s32 iRotateThreadReadyQueue(s32 priority);
-s32 iSuspendThread(s32 thread_id);
+extern s32 iWakeupThread(s32 thread_id);
+extern s32 iRotateThreadReadyQueue(s32 priority);
+extern s32 iSuspendThread(s32 thread_id);
 
 /* TLB update functions */
-void InitTLBFunctions(void); // Run by _InitSys
+extern void InitTLBFunctions(void); // Run by _InitSys
 
-void InitTLB(void);
-void Exit(s32 exit_code) __attribute__((noreturn));
-s32 ExecPS2(void *entry, void *gp, int num_args, char *args[]);
-void LoadExecPS2(const char *filename, s32 num_args, char *args[]) __attribute__((noreturn));
-void ExecOSD(int num_args, char *args[]) __attribute__((noreturn));
+extern void InitTLB(void);
+extern void Exit(s32 exit_code) __attribute__((noreturn));
+extern s32 ExecPS2(void *entry, void *gp, int num_args, char *args[]);
+extern void LoadExecPS2(const char *filename, s32 num_args, char *args[]) __attribute__((noreturn));
+extern void ExecOSD(int num_args, char *args[]) __attribute__((noreturn));
 
 /* Alarm update functions */
-void InitAlarm(void); // Run by _InitSys
+extern void InitAlarm(void); // Run by _InitSys
 
 /* libosd update functions */
-void InitExecPS2(void); // ExecPS2 patch only. Run by _InitSys, Exit, LoadExecPS2, ExecPS2 and ExecOSD
-void InitOsd(void);     // ExecPS2 + System Configuration patches. Please refer to the comments within libosd_full.c
+extern void InitExecPS2(void); // ExecPS2 patch only. Run by _InitSys, Exit, LoadExecPS2, ExecPS2 and ExecOSD
+extern void InitOsd(void);     // ExecPS2 + System Configuration patches. Please refer to the comments within libosd_full.c
 
-int PatchIsNeeded(void); // Indicates whether the patch is required.
+extern int PatchIsNeeded(void); // Indicates whether the patch is required.
 
 // Debug (print) update functions:
-void InitDebug(void);
+extern void InitDebug(void);
 
 /* Glue routines.  */
-int DIntr(void);
-int EIntr(void);
+extern int DIntr(void);
+extern int EIntr(void);
 
-int EnableIntc(int intc);
-int DisableIntc(int intc);
-int EnableDmac(int dmac);
-int DisableDmac(int dmac);
+extern int EnableIntc(int intc);
+extern int DisableIntc(int intc);
+extern int EnableDmac(int dmac);
+extern int DisableDmac(int dmac);
 
-int iEnableIntc(int intc);
-int iDisableIntc(int intc);
-int iEnableDmac(int dmac);
-int iDisableDmac(int dmac);
+extern int iEnableIntc(int intc);
+extern int iDisableIntc(int intc);
+extern int iEnableDmac(int dmac);
+extern int iDisableDmac(int dmac);
 
-void SyncDCache(void *start, void *end);
-void iSyncDCache(void *start, void *end);
-void InvalidDCache(void *start, void *end);
-void iInvalidDCache(void *start, void *end);
+extern void SyncDCache(void *start, void *end);
+extern void iSyncDCache(void *start, void *end);
+extern void InvalidDCache(void *start, void *end);
+extern void iInvalidDCache(void *start, void *end);
 
 /* System call prototypes */
-void ResetEE(u32 init_bitfield);
-void SetGsCrt(s16 interlace, s16 pal_ntsc, s16 field);
-void KExit(s32 exit_code) __attribute__((noreturn));
-void _LoadExecPS2(const char *filename, s32 num_args, char *args[]) __attribute__((noreturn));
-s32 _ExecPS2(void *entry, void *gp, int num_args, char *args[]);
-void RFU009(u32 arg0, u32 arg1);
-s32 AddSbusIntcHandler(s32 cause, void (*handler)(int call));
-s32 RemoveSbusIntcHandler(s32 cause);
-s32 Interrupt2Iop(s32 cause);
-void SetVTLBRefillHandler(s32 handler_num, void *handler_func);
-void SetVCommonHandler(s32 handler_num, void *handler_func);
-void SetVInterruptHandler(s32 handler_num, void *handler_func);
-s32 AddIntcHandler(s32 cause, s32 (*handler_func)(s32 cause), s32 next);
-s32 AddIntcHandler2(s32 cause, s32 (*handler_func)(s32 cause, void *arg, void *addr), s32 next, void *arg);
-s32 RemoveIntcHandler(s32 cause, s32 handler_id);
-s32 AddDmacHandler(s32 channel, s32 (*handler)(s32 channel), s32 next);
-s32 AddDmacHandler2(s32 channel, s32 (*handler)(s32 channel, void *arg, void *addr), s32 next, void *arg);
-s32 RemoveDmacHandler(s32 channel, s32 handler_id);
-s32 _EnableIntc(s32 cause);
-s32 _DisableIntc(s32 cause);
-s32 _EnableDmac(s32 channel);
-s32 _DisableDmac(s32 channel);
+extern void ResetEE(u32 init_bitfield);
+extern void SetGsCrt(s16 interlace, s16 pal_ntsc, s16 field);
+extern void KExit(s32 exit_code) __attribute__((noreturn));
+extern void _LoadExecPS2(const char *filename, s32 num_args, char *args[]) __attribute__((noreturn));
+extern s32 _ExecPS2(void *entry, void *gp, int num_args, char *args[]);
+extern void RFU009(u32 arg0, u32 arg1);
+extern s32 AddSbusIntcHandler(s32 cause, void (*handler)(int call));
+extern s32 RemoveSbusIntcHandler(s32 cause);
+extern s32 Interrupt2Iop(s32 cause);
+extern void SetVTLBRefillHandler(s32 handler_num, void *handler_func);
+extern void SetVCommonHandler(s32 handler_num, void *handler_func);
+extern void SetVInterruptHandler(s32 handler_num, void *handler_func);
+extern s32 AddIntcHandler(s32 cause, s32 (*handler_func)(s32 cause), s32 next);
+extern s32 AddIntcHandler2(s32 cause, s32 (*handler_func)(s32 cause, void *arg, void *addr), s32 next, void *arg);
+extern s32 RemoveIntcHandler(s32 cause, s32 handler_id);
+extern s32 AddDmacHandler(s32 channel, s32 (*handler)(s32 channel), s32 next);
+extern s32 AddDmacHandler2(s32 channel, s32 (*handler)(s32 channel, void *arg, void *addr), s32 next, void *arg);
+extern s32 RemoveDmacHandler(s32 channel, s32 handler_id);
+extern s32 _EnableIntc(s32 cause);
+extern s32 _DisableIntc(s32 cause);
+extern s32 _EnableDmac(s32 channel);
+extern s32 _DisableDmac(s32 channel);
 
 // Alarm value is in H-SYNC ticks.
-s32 SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
-s32 _SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
-s32 ReleaseAlarm(s32 alarm_id);
-s32 _ReleaseAlarm(s32 alarm_id);
+extern s32 SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
+extern s32 _SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
+extern s32 ReleaseAlarm(s32 alarm_id);
+extern s32 _ReleaseAlarm(s32 alarm_id);
 
-s32 _iEnableIntc(s32 cause);
-s32 _iDisableIntc(s32 cause);
-s32 _iEnableDmac(s32 channel);
-s32 _iDisableDmac(s32 channel);
+extern s32 _iEnableIntc(s32 cause);
+extern s32 _iDisableIntc(s32 cause);
+extern s32 _iEnableDmac(s32 channel);
+extern s32 _iDisableDmac(s32 channel);
 
-s32 iSetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
-s32 _iSetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
-s32 iReleaseAlarm(s32 alarm_id);
-s32 _iReleaseAlarm(s32 alarm_id);
+extern s32 iSetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
+extern s32 _iSetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
+extern s32 iReleaseAlarm(s32 alarm_id);
+extern s32 _iReleaseAlarm(s32 alarm_id);
 
-s32 CreateThread(ee_thread_t *thread);
-s32 DeleteThread(s32 thread_id);
-s32 StartThread(s32 thread_id, void *args);
-void ExitThread(void);
-void ExitDeleteThread(void);
-s32 TerminateThread(s32 thread_id);
-s32 iTerminateThread(s32 thread_id);
-// void DisableDispatchThread(void);	// not supported
-// void EnableDispatchThread(void);		// not supported
-s32 ChangeThreadPriority(s32 thread_id, s32 priority);
-s32 iChangeThreadPriority(s32 thread_id, s32 priority);
-s32 RotateThreadReadyQueue(s32 priority);
-s32 _iRotateThreadReadyQueue(s32 priority);
-s32 ReleaseWaitThread(s32 thread_id);
-s32 iReleaseWaitThread(s32 thread_id);
-s32 GetThreadId(void);
-s32 _iGetThreadId(void); // This is actually GetThreadId(), used for a hack by SCE to work around the iWakeupThread design flaw.
-s32 ReferThreadStatus(s32 thread_id, ee_thread_status_t *info);
-s32 iReferThreadStatus(s32 thread_id, ee_thread_status_t *info);
-s32 SleepThread(void);
-s32 WakeupThread(s32 thread_id);
-s32 _iWakeupThread(s32 thread_id);
-s32 CancelWakeupThread(s32 thread_id);
-s32 iCancelWakeupThread(s32 thread_id);
-s32 SuspendThread(s32 thread_id);
-s32 _iSuspendThread(s32 thread_id);
-s32 ResumeThread(s32 thread_id);
-s32 iResumeThread(s32 thread_id);
+extern s32 CreateThread(ee_thread_t *thread);
+extern s32 DeleteThread(s32 thread_id);
+extern s32 StartThread(s32 thread_id, void *args);
+extern void ExitThread(void);
+extern void ExitDeleteThread(void);
+extern s32 TerminateThread(s32 thread_id);
+extern s32 iTerminateThread(s32 thread_id);
+// extern void DisableDispatchThread(void);  // not supported
+// extern void EnableDispatchThread(void);   // not supported
+extern s32 ChangeThreadPriority(s32 thread_id, s32 priority);
+extern s32 iChangeThreadPriority(s32 thread_id, s32 priority);
+extern s32 RotateThreadReadyQueue(s32 priority);
+extern s32 _iRotateThreadReadyQueue(s32 priority);
+extern s32 ReleaseWaitThread(s32 thread_id);
+extern s32 iReleaseWaitThread(s32 thread_id);
+extern s32 GetThreadId(void);
+extern s32 _iGetThreadId(void); // This is actually GetThreadId(), used for a hack by SCE to work around the iWakeupThread design flaw.
+extern s32 ReferThreadStatus(s32 thread_id, ee_thread_status_t *info);
+extern s32 iReferThreadStatus(s32 thread_id, ee_thread_status_t *info);
+extern s32 SleepThread(void);
+extern s32 WakeupThread(s32 thread_id);
+extern s32 _iWakeupThread(s32 thread_id);
+extern s32 CancelWakeupThread(s32 thread_id);
+extern s32 iCancelWakeupThread(s32 thread_id);
+extern s32 SuspendThread(s32 thread_id);
+extern s32 _iSuspendThread(s32 thread_id);
+extern s32 ResumeThread(s32 thread_id);
+extern s32 iResumeThread(s32 thread_id);
 
-u8 RFU059(void);
+extern u8 RFU059(void);
 
-void *SetupThread(void *gp, void *stack, s32 stack_size, void *args, void *root_func);
-void SetupHeap(void *heap_start, s32 heap_size);
-void *EndOfHeap(void);
+extern void *SetupThread(void *gp, void *stack, s32 stack_size, void *args, void *root_func);
+extern void SetupHeap(void *heap_start, s32 heap_size);
+extern void *EndOfHeap(void);
 
-s32 CreateSema(ee_sema_t *sema);
-s32 DeleteSema(s32 sema_id);
-s32 SignalSema(s32 sema_id);
-s32 iSignalSema(s32 sema_id);
-s32 WaitSema(s32 sema_id);
-s32 PollSema(s32 sema_id);
-s32 iPollSema(s32 sema_id);
-s32 ReferSemaStatus(s32 sema_id, ee_sema_t *sema);
-s32 iReferSemaStatus(s32 sema_id, ee_sema_t *sema);
-s32 iDeleteSema(s32 sema_id);
-void SetOsdConfigParam(void *addr);
-void GetOsdConfigParam(void *addr);
-void GetGsHParam(void *addr1, void *addr2, void *addr3);
-s32 GetGsVParam(void);
-void SetGsHParam(void *addr1, void *addr2, void *addr3, void *addr4);
-void SetGsVParam(s32 arg1);
+extern s32 CreateSema(ee_sema_t *sema);
+extern s32 DeleteSema(s32 sema_id);
+extern s32 SignalSema(s32 sema_id);
+extern s32 iSignalSema(s32 sema_id);
+extern s32 WaitSema(s32 sema_id);
+extern s32 PollSema(s32 sema_id);
+extern s32 iPollSema(s32 sema_id);
+extern s32 ReferSemaStatus(s32 sema_id, ee_sema_t *sema);
+extern s32 iReferSemaStatus(s32 sema_id, ee_sema_t *sema);
+extern s32 iDeleteSema(s32 sema_id);
+extern void SetOsdConfigParam(void *addr);
+extern void GetOsdConfigParam(void *addr);
+extern void GetGsHParam(void *addr1, void *addr2, void *addr3);
+extern s32 GetGsVParam(void);
+extern void SetGsHParam(void *addr1, void *addr2, void *addr3, void *addr4);
+extern void SetGsVParam(s32 arg1);
 
 // TLB functions are only available if InitTLBFunctions() is run (Normally run by crt0).
-int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
-int iPutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
-int _SetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
-int iSetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
-int GetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryHi, unsigned int *EntryLo0, unsigned int *EntryLo1);
-int iGetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryHi, unsigned int *EntryLo0, unsigned int *EntryLo1);
-int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
-int iProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
-int ExpandScratchPad(unsigned int page);
+extern int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
+extern int iPutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
+extern int _SetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
+extern int iSetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
+extern int GetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryHi, unsigned int *EntryLo0, unsigned int *EntryLo1);
+extern int iGetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryHi, unsigned int *EntryLo0, unsigned int *EntryLo1);
+extern int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
+extern int iProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
+extern int ExpandScratchPad(unsigned int page);
 
-void EnableIntcHandler(u32 cause);
-void iEnableIntcHandler(u32 cause);
-void DisableIntcHandler(u32 cause);
-void iDisableIntcHandler(u32 cause);
-void EnableDmacHandler(u32 channel);
-void iEnableDmacHandler(u32 channel);
-void DisableDmacHandler(u32 channel);
-void iDisableDmacHandler(u32 channel);
-void KSeg0(s32 arg1);
-s32 EnableCache(s32 cache);
-s32 DisableCache(s32 cache);
-u32 GetCop0(s32 reg_id);
-void FlushCache(s32 operation);
-u32 CpuConfig(u32 config);
-u32 iGetCop0(s32 reg_id);
-void iFlushCache(s32 operation);
-u32 iCpuConfig(u32 config);
-void SetCPUTimerHandler(void (*handler)(void));
-void SetCPUTimer(s32 compval);
+extern void EnableIntcHandler(u32 cause);
+extern void iEnableIntcHandler(u32 cause);
+extern void DisableIntcHandler(u32 cause);
+extern void iDisableIntcHandler(u32 cause);
+extern void EnableDmacHandler(u32 channel);
+extern void iEnableDmacHandler(u32 channel);
+extern void DisableDmacHandler(u32 channel);
+extern void iDisableDmacHandler(u32 channel);
+extern void KSeg0(s32 arg1);
+extern s32 EnableCache(s32 cache);
+extern s32 DisableCache(s32 cache);
+extern u32 GetCop0(s32 reg_id);
+extern void FlushCache(s32 operation);
+extern u32 CpuConfig(u32 config);
+extern u32 iGetCop0(s32 reg_id);
+extern void iFlushCache(s32 operation);
+extern u32 iCpuConfig(u32 config);
+extern void SetCPUTimerHandler(void (*handler)(void));
+extern void SetCPUTimer(s32 compval);
 
 // These two are not available in the unpatched Protokernel (Unpatched SCPH-10000 and SCPH-15000 kernels).
-void SetOsdConfigParam2(void *config, s32 size, s32 offset);
-void GetOsdConfigParam2(void *config, s32 size, s32 offset);
+extern void SetOsdConfigParam2(void *config, s32 size, s32 offset);
+extern void GetOsdConfigParam2(void *config, s32 size, s32 offset);
 
-u64 GsGetIMR(void);
-u64 iGsGetIMR(void);
-u64 GsPutIMR(u64 imr);
-u64 iGsPutIMR(u64 imr);
-void SetPgifHandler(void *handler);
-void SetVSyncFlag(u32 *, u64 *);
-void SetSyscall(s32 syscall_num, void *handler);
-void _print(const char *fmt, ...);		// Disabled by default, must call InitDebug() to enable
+extern u64 GsGetIMR(void);
+extern u64 iGsGetIMR(void);
+extern u64 GsPutIMR(u64 imr);
+extern u64 iGsPutIMR(u64 imr);
+extern void SetPgifHandler(void *handler);
+extern void SetVSyncFlag(u32 *, u64 *);
+extern void SetSyscall(s32 syscall_num, void *handler);
+extern void _print(const char *fmt, ...);    // Disabled by default, must call InitDebug() to enable
 
-void SifStopDma(void); // Disables SIF0 (IOP -> EE).
+extern void SifStopDma(void); // Disables SIF0 (IOP -> EE).
 
-s32 SifDmaStat(u32 id);
-s32 iSifDmaStat(u32 id);
-u32 SifSetDma(SifDmaTransfer_t *sdd, s32 len);
-u32 iSifSetDma(SifDmaTransfer_t *sdd, s32 len);
+extern s32 SifDmaStat(u32 id);
+extern s32 iSifDmaStat(u32 id);
+extern u32 SifSetDma(SifDmaTransfer_t *sdd, s32 len);
+extern u32 iSifSetDma(SifDmaTransfer_t *sdd, s32 len);
 
 // Enables SIF0 (IOP -> EE). Sets channel 5 CHCR to 0x184 (CHAIN, TIE and STR).
-void SifSetDChain(void);
-void iSifSetDChain(void);
+extern void SifSetDChain(void);
+extern void iSifSetDChain(void);
 
 // Sets/gets SIF register values (Refer to sifdma.h for a register list).
-int SifSetReg(u32 register_num, int register_value);
-int SifGetReg(u32 register_num);
+extern int SifSetReg(u32 register_num, int register_value);
+extern int SifGetReg(u32 register_num);
 
-void _ExecOSD(int num_args, char *args[]) __attribute__((noreturn));
-s32 Deci2Call(s32, u32 *);
-void PSMode(void);
-s32 MachineType(void);
-s32 GetMemorySize(void);
+extern void _ExecOSD(int num_args, char *args[]) __attribute__((noreturn));
+extern s32 Deci2Call(s32, u32 *);
+extern void PSMode(void);
+extern s32 MachineType(void);
+extern s32 GetMemorySize(void);
 
 // Internal function for getting board-specific offsets, only present in later kernels (ROMVER > 20010608).
-void _GetGsDxDyOffset(int mode, int *dx, int *dy, int *dw, int *dh);
+extern void _GetGsDxDyOffset(int mode, int *dx, int *dy, int *dw, int *dh);
 
 // Internal function for reinitializing the TLB, only present in later kernels. Please use InitTLB() instead to initialize the TLB with all kernels.
-int _InitTLB(void);
+extern int _InitTLB(void);
 /* (PSX only) Sets the memory size. 0 = 64MB mode, 1 = 32MB mode. The mode is only binding when either _InitTLB() or the PSX ExecPS2() syscall is called.
    The stack pointer must remain in range of usable memory, or a TLB exception will occur. */
-int SetMemoryMode(int mode); // Arbitrarily named.
+extern int SetMemoryMode(int mode); // Arbitrarily named.
 
-void _SyncDCache(void *start, void *end);
-void _InvalidDCache(void *start, void *end);
+extern void _SyncDCache(void *start, void *end);
+extern void _InvalidDCache(void *start, void *end);
 
-void *GetSyscallHandler(int syscall_no);
-void *GetExceptionHandler(int except_no);
-void *GetInterruptHandler(int intr_no);
+extern void *GetSyscallHandler(int syscall_no);
+extern void *GetExceptionHandler(int except_no);
+extern void *GetInterruptHandler(int intr_no);
 
 /* Helper functions for kernel patching */
-int kCopy(void *dest, const void *src, int size);
-int kCopyBytes(void *dest, const void *src, int size);
-int Copy(void *dest, const void *src, int size);
-void setup(int syscall_num, void *handler); // alias of "SetSyscall"
-void *GetEntryAddress(int syscall);
+extern int kCopy(void *dest, const void *src, int size);
+extern int kCopyBytes(void *dest, const void *src, int size);
+extern int Copy(void *dest, const void *src, int size);
+extern void setup(int syscall_num, void *handler); // alias of "SetSyscall"
+extern void *GetEntryAddress(int syscall);
 
 // Helpers marcos for no-patch versions 
 // Useful to build a special version of libkernel that does not contain any runtime patches (useful for loaders/resident programs).

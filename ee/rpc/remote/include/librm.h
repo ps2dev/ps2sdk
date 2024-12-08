@@ -258,13 +258,13 @@ extern "C" {
  *  @brief Initialise librm
  *  @return == 1 => OK
  */
-int RMMan_Init(void);
+extern int RMMan_Init(void);
 
 /**
  *  @brief Ends all remote communication
  *  @return == 1 => OK
  */
-int RMMan_End(void);
+extern int RMMan_End(void);
 
 /**
  *  @param [in] port Port number to open (0 or 1)
@@ -274,7 +274,7 @@ int RMMan_End(void);
  *               Must be a 64-byte aligned address.
  *  @return != 0 => OK
  */
-int RMMan_Open(int port, int slot, void *pData);
+extern int RMMan_Open(int port, int slot, void *pData);
 
 /**
  *  @brief Closes an opened port.
@@ -283,7 +283,7 @@ int RMMan_Open(int port, int slot, void *pData);
  *  @param slot Slot to close
  *  @return != 0 => OK
  */
-int RMMan_Close(int port, int slot);
+extern int RMMan_Close(int port, int slot);
 
 /**
  *  @brief Read remote data
@@ -292,12 +292,12 @@ int RMMan_Close(int port, int slot);
  *  @param [out] data A pointer to a 32 byte array where the result is stored
  *  @return != 0 => OK
  */
-void RMMan_Read(int port, int slot, struct remote_data *data);
+extern void RMMan_Read(int port, int slot, struct remote_data *data);
 
 /**
  *  @brief Returns the rmman.irx version
  */
-u32 RMMan_GetModuleVersion(void);
+extern u32 RMMan_GetModuleVersion(void);
 
 #ifdef _cplusplus
 }

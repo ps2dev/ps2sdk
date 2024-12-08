@@ -24,12 +24,12 @@
  * Creates a thread based on the given parameter. Upon completion,
  * thread is started.
 */
-int create_thread(void *func, int priority, void *param);
+extern int create_thread(void *func, int priority, void *param);
 
 /** Helper to print buffer in hex. Useful for debugging.
  * @param ptr   pointer to buffer
  * @param len   buffer length
  */
-void print_hex_buffer(unsigned char *ptr, int len);
+extern void print_hex_buffer(unsigned char *ptr, int len);
 
 #endif

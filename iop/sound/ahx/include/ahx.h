@@ -109,23 +109,23 @@ struct AHXWaves
     char HighPasses[0x31588];
 };
 
-void AHXPlayer_Init();
-int AHXPlayer_LoadSongBuffer(void *Buffer, int Len);
+extern void AHXPlayer_Init();
+extern int AHXPlayer_LoadSongBuffer(void *Buffer, int Len);
 #ifdef WIN32
-int AHXPlayer_LoadSong(char *Filename);
+extern int AHXPlayer_LoadSong(char *Filename);
 #endif
-int AHXPlayer_InitSubsong(int Nr);
-void AHXPlayer_NextPosition();
-void AHXPlayer_PrevPosition();
-void AHXPlayer_VoiceOnOff(int Voice, int OnOff);
-void AHXPlayer_SetAudio(int v);
-void AHXPlayer_PListCommandParse(int v, int FX, int FXParam);
-void AHXPlayer_PlayIRQ();
-void AHXPlayer_ProcessStep(int v);
-void AHXPlayer_ProcessFrame(int v);
-void AHXPlayer_SetBoost(int boostval);
-void AHXPlayer_SetOversampling(int enable);
+extern int AHXPlayer_InitSubsong(int Nr);
+extern void AHXPlayer_NextPosition();
+extern void AHXPlayer_PrevPosition();
+extern void AHXPlayer_VoiceOnOff(int Voice, int OnOff);
+extern void AHXPlayer_SetAudio(int v);
+extern void AHXPlayer_PListCommandParse(int v, int FX, int FXParam);
+extern void AHXPlayer_PlayIRQ();
+extern void AHXPlayer_ProcessStep(int v);
+extern void AHXPlayer_ProcessFrame(int v);
+extern void AHXPlayer_SetBoost(int boostval);
+extern void AHXPlayer_SetOversampling(int enable);
 
-void AHXOutput_MixBuffer(short *target);
+extern void AHXOutput_MixBuffer(short *target);
 
 #endif /* __AHX_H__ */

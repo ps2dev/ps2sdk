@@ -65,16 +65,16 @@ typedef struct _iop_mbx_status
     int reserved[2];
 } iop_mbx_status_t;
 
-int CreateMbx(iop_mbx_t *mbx);
-int DeleteMbx(int mbxid);
+extern int CreateMbx(iop_mbx_t *mbx);
+extern int DeleteMbx(int mbxid);
 
-int SendMbx(int mbxid, void *msg);
-int iSendMbx(int mbxid, void *msg);
-int ReceiveMbx(void **msgvar, int mbxid);
-int PollMbx(void **msgvar, int mbxid);
+extern int SendMbx(int mbxid, void *msg);
+extern int iSendMbx(int mbxid, void *msg);
+extern int ReceiveMbx(void **msgvar, int mbxid);
+extern int PollMbx(void **msgvar, int mbxid);
 
-int ReferMbxStatus(int mbxid, iop_mbx_status_t *info);
-int iReferMbxStatus(int mbxid, iop_mbx_status_t *info);
+extern int ReferMbxStatus(int mbxid, iop_mbx_status_t *info);
+extern int iReferMbxStatus(int mbxid, iop_mbx_status_t *info);
 
 #define thmsgbx_IMPORTS_start DECLARE_IMPORT_TABLE(thmsgbx, 1, 1)
 #define thmsgbx_IMPORTS_end   END_IMPORT_TABLE

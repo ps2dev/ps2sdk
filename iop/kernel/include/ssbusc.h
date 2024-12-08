@@ -185,24 +185,24 @@ ID  - PS2 Function - PS Function - Address     - Delay (Configuration)
 Common Delay register: 0xBF801020	*/
 
 //These functions control access configuration (i.e. window size and access cycles) and memory map of the devices.
-int SetDelay(int device, unsigned int value);
-int GetDelay(int device);
-int SetBaseAddress(int device, unsigned int value);
-int GetBaseAddress(int device);
+extern int SetDelay(int device, unsigned int value);
+extern int GetDelay(int device);
+extern int SetBaseAddress(int device, unsigned int value);
+extern int GetBaseAddress(int device);
 
 //Helper functions for getting/setting various fields within the common delay register.
-int SetRecoveryTime(unsigned int value);
-int GetRecoveryTime(void);
-int SetHoldTime(unsigned int value);
-int GetHoldTime(void);
-int SetFloatTime(unsigned int value);
-int GetFloatTime(void);
-int SetStrobeTime(unsigned int value);
-int GetStrobeTime(void);
+extern int SetRecoveryTime(unsigned int value);
+extern int GetRecoveryTime(void);
+extern int SetHoldTime(unsigned int value);
+extern int GetHoldTime(void);
+extern int SetFloatTime(unsigned int value);
+extern int GetFloatTime(void);
+extern int SetStrobeTime(unsigned int value);
+extern int GetStrobeTime(void);
 
 //Direct access to the common delay register.
-int SetCommonDelay(unsigned int value);
-int GetCommonDelay(void);
+extern int SetCommonDelay(unsigned int value);
+extern int GetCommonDelay(void);
 
 #define ssbusc_IMPORTS_start DECLARE_IMPORT_TABLE(ssbusc, 1, 1)
 #define ssbusc_IMPORTS_end END_IMPORT_TABLE

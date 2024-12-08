@@ -56,16 +56,16 @@ extern "C" {
 #endif
 
 /** Scissoring pixel test area */
-qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0, int y1);
+extern qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0, int y1);
 
 /** Pixel Testing */
-qword_t *draw_pixel_test(qword_t *q, int context, atest_t *atest, dtest_t *dtest, ztest_t *ztest);
+extern qword_t *draw_pixel_test(qword_t *q, int context, atest_t *atest, dtest_t *dtest, ztest_t *ztest);
 
 /** Disable pixel testing defaults */
-qword_t *draw_disable_tests(qword_t *q, int context, zbuffer_t *z);
+extern qword_t *draw_disable_tests(qword_t *q, int context, zbuffer_t *z);
 
 /** Enable pixel testing defaults */
-qword_t *draw_enable_tests(qword_t *q, int context, zbuffer_t *z);
+extern qword_t *draw_enable_tests(qword_t *q, int context, zbuffer_t *z);
 
 #ifdef __cplusplus
 }

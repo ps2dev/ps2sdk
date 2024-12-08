@@ -32,14 +32,14 @@ extern "C" {
  * @param mode read mode
  * @return 1 if successful, 0 if error
  */
-int sceCdReadIOPMem(u32 lbn, u32 sectors, void *buf, sceCdRMode *mode);
+extern int sceCdReadIOPMem(u32 lbn, u32 sectors, void *buf, sceCdRMode *mode);
 
 /** wait for disc to finish all n-commands
  * (shouldnt really need to call this yourself)
  *
  * @return SCECdNotReady (6) if busy; SCECdComplete (2) if ready; 0 if error
  */
-int sceCdNCmdDiskReady(void);
+extern int sceCdNCmdDiskReady(void);
 
 /** Controls spindle speed? Not sure what it really does.
  * SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
@@ -47,7 +47,7 @@ int sceCdNCmdDiskReady(void);
  * @param speed Speed mode.
  * @return 1 on success, 0 on failure.
  */
-int sceCdSpinCtrlEE(u32 speed);
+extern int sceCdSpinCtrlEE(u32 speed);
 
 #ifdef __cplusplus
 }

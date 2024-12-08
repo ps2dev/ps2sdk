@@ -79,60 +79,60 @@ enum _iop_dmac_ch {
 /* Note that these are far from official names.  */
 
 /* Memory ADdRess  */
-void dmac_ch_set_madr(u32 channel, u32 val);
-u32 dmac_ch_get_madr(u32 channel);
+extern void dmac_ch_set_madr(u32 channel, u32 val);
+extern u32 dmac_ch_get_madr(u32 channel);
 
 /* Block Control Register  */
-void dmac_ch_set_bcr(u32 channel, u32 val);
-u32 dmac_ch_get_bcr(u32 channel);
+extern void dmac_ch_set_bcr(u32 channel, u32 val);
+extern u32 dmac_ch_get_bcr(u32 channel);
 
 /* CHannel Control Register  */
-void dmac_ch_set_chcr(u32 channel, u32 val);
-u32 dmac_ch_get_chcr(u32 channel);
+extern void dmac_ch_set_chcr(u32 channel, u32 val);
+extern u32 dmac_ch_get_chcr(u32 channel);
 
 /* Tag ADdRess */
-void dmac_ch_set_tadr(u32 channel, u32 val);
-u32 dmac_ch_get_tadr(u32 channel);
+extern void dmac_ch_set_tadr(u32 channel, u32 val);
+extern u32 dmac_ch_get_tadr(u32 channel);
 
-void dmac_set_4_9_a(u32 channel, u32 val);
-u32 dmac_get_4_9_a(u32 channel);
+extern void dmac_set_4_9_a(u32 channel, u32 val);
+extern u32 dmac_get_4_9_a(u32 channel);
 
 /* Dmac P??? Control Registers  */
-void dmac_set_dpcr(u32 val);
-u32 dmac_get_dpcr(void);
-void dmac_set_dpcr2(u32 val);
-u32 dmac_get_dpcr2(void);
-void dmac_set_dpcr3(u32 val);
-u32 dmac_get_dpcr3(void);
+extern void dmac_set_dpcr(u32 val);
+extern u32 dmac_get_dpcr(void);
+extern void dmac_set_dpcr2(u32 val);
+extern u32 dmac_get_dpcr2(void);
+extern void dmac_set_dpcr3(u32 val);
+extern u32 dmac_get_dpcr3(void);
 
 /* Dmac Interrupt Control Registers  */
-void dmac_set_dicr(u32 val);
-u32 dmac_get_dicr(void);
-void dmac_set_dicr2(u32 val);
-u32 dmac_get_dicr2(void);
+extern void dmac_set_dicr(u32 val);
+extern u32 dmac_get_dicr(void);
+extern void dmac_set_dicr2(u32 val);
+extern u32 dmac_get_dicr2(void);
 
-void dmac_set_BF80157C(u32 val);
-u32 dmac_get_BF80157C(void);
+extern void dmac_set_BF80157C(u32 val);
+extern u32 dmac_get_BF80157C(void);
 
-void dmac_set_BF801578(u32 val);
-u32 dmac_get_BF801578(void);
+extern void dmac_set_BF801578(u32 val);
+extern u32 dmac_get_BF801578(void);
 
 /* Initialize the given channel and start the transfer.  Returns 1 if the
    transfer was started, and 0 on error.  */
-int sceSetSliceDMA(u32 channel, void * addr, u32 size, u32 count, int dir);
+extern int sceSetSliceDMA(u32 channel, void * addr, u32 size, u32 count, int dir);
 
-int dmac_set_dma_chained_spu_sif0(u32 channel, u32 size, u32 tadr);
-int dmac_set_dma_sif0(u32 channel, u32 size, u32 tadr);
-int dmac_set_dma_sif1(u32 ch, u32 size);
+extern int dmac_set_dma_chained_spu_sif0(u32 channel, u32 size, u32 tadr);
+extern int dmac_set_dma_sif0(u32 channel, u32 size, u32 tadr);
+extern int dmac_set_dma_sif1(u32 ch, u32 size);
 
 /* Start a transfer on the given channel.  */
-void sceStartDMA(u32 channel);
+extern void sceStartDMA(u32 channel);
 
 /* Set the DPCRn value for a specific channel.  */
-void sceSetDMAPriority(u32 channel, u32 val);
+extern void sceSetDMAPriority(u32 channel, u32 val);
 
-void sceEnableDMAChannel(u32 channel);
-void sceDisableDMAChannel(u32 channel);
+extern void sceEnableDMAChannel(u32 channel);
+extern void sceDisableDMAChannel(u32 channel);
 
 #define dmacman_IMPORTS_start DECLARE_IMPORT_TABLE(dmacman, 1, 1)
 #define dmacman_IMPORTS_end END_IMPORT_TABLE

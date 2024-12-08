@@ -5,6 +5,6 @@
 #include <stdint.h>
 #define MODNAME "ppctty"
 // Prototypes
-int tty_init(void);
+extern int tty_init(void);
 
 #endif

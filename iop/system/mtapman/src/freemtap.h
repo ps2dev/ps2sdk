@@ -16,14 +16,14 @@
 #define M_PRINTF(format, args...)	printf(MODNAME ": " format, ## args)
 
 // rpcservers.c
-s32 InitRpcServers();
+extern s32 InitRpcServers();
 
 // freemtap.c
-s32 mtapPortOpen(u32 port);
-s32 mtapPortClose(u32 port);
-s32 mtapGetConnection(u32 port);
-s32 mtapGetSlotNumber(u32 port);
-s32 mtapChangeSlot(u32 port, u32 slot);
+extern s32 mtapPortOpen(u32 port);
+extern s32 mtapPortClose(u32 port);
+extern s32 mtapGetConnection(u32 port);
+extern s32 mtapGetSlotNumber(u32 port);
+extern s32 mtapChangeSlot(u32 port, u32 slot);
 
 #endif
 

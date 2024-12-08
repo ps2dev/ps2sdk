@@ -154,7 +154,7 @@ extern _libcglue_fdman_inet_ops_t *_libcglue_fdman_inet_ops;
 
 /* Functions from cwd.c */
 extern char __cwd[MAXNAMLEN + 1];
-int __path_absolute(const char *in, char *out, int len);
+extern int __path_absolute(const char *in, char *out, int len);
 
 #define PS2_CLOCKS_PER_SEC kBUSCLKBY256 // 576.000
 #define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576
@@ -180,16 +180,16 @@ extern void _libcglue_rtc_update();
 // The newlib port does not support 64bit
 // this should have been defined in unistd.h
 typedef int64_t off64_t;
-off64_t lseek64(int fd, off64_t offset, int whence);
+extern off64_t lseek64(int fd, off64_t offset, int whence);
 
 // Functions to be used related to timezone
 extern void _libcglue_timezone_update();
 
-void ps2sdk_setTimezone(int timezone);
-void ps2sdk_setDaylightSaving(int daylightSaving);
+extern void ps2sdk_setTimezone(int timezone);
+extern void ps2sdk_setDaylightSaving(int daylightSaving);
 
-_libcglue_fdman_fd_info_t *libcglue_get_fd_info(int fd);
-int __libcglue_init_stdio(_libcglue_fdman_fd_info_t *info, int fd);
+extern _libcglue_fdman_fd_info_t *libcglue_get_fd_info(int fd);
+extern int __libcglue_init_stdio(_libcglue_fdman_fd_info_t *info, int fd);
 
 /* The fd we provide to final user aren't actually the same than IOP's fd
 * so this function allow you to get actual IOP's fd from public fd

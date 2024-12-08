@@ -290,34 +290,34 @@ struct TransactionContextData
 };
 
 /* Function prototypes. */
-void UBUFThread(void *arg);
-int GetConsoleIDs(u64 *guid, char *ModelName);
-void iLinkDisableIntr(void);
-int iLinkResetHW(void);
-void iLinkShutdownHW(void);
-void iLinkHWInitialize(void);
-void iLinkEnableCMaster(void);
-void iLinkBusEnable(void);
-void *malloc(unsigned int nBytes);
-void free(void *buffer);
+extern void UBUFThread(void *arg);
+extern int GetConsoleIDs(u64 *guid, char *ModelName);
+extern void iLinkDisableIntr(void);
+extern int iLinkResetHW(void);
+extern void iLinkShutdownHW(void);
+extern void iLinkHWInitialize(void);
+extern void iLinkEnableCMaster(void);
+extern void iLinkBusEnable(void);
+extern void *malloc(unsigned int nBytes);
+extern void free(void *buffer);
 
-void InitializeConfigurationROM(void);
+extern void InitializeConfigurationROM(void);
 
-unsigned char iLinkReadPhy(unsigned char address);
-void iLinkWritePhy(unsigned char address, unsigned char data);
-void iLinkPHY_SetRootBit(int isRoot);
-void iLinkPHY_SetGapCount(unsigned char GapCount);
-void iLinkPHY_SetLCTRL(int LCTRL_status);
-void iLinkPHYBusReset(void);
+extern unsigned char iLinkReadPhy(unsigned char address);
+extern void iLinkWritePhy(unsigned char address, unsigned char data);
+extern void iLinkPHY_SetRootBit(int isRoot);
+extern void iLinkPHY_SetGapCount(unsigned char GapCount);
+extern void iLinkPHY_SetLCTRL(int LCTRL_status);
+extern void iLinkPHYBusReset(void);
 
-int iLinkIntrHandler(void *arg);
-void iLinkIntrRegister0Handler(void *arg);
+extern int iLinkIntrHandler(void *arg);
+extern void iLinkIntrRegister0Handler(void *arg);
 
-void SendResponse(unsigned short int NodeID, unsigned short RcvdBusID, unsigned char rcode, unsigned char tLabel, unsigned char tCode, unsigned char speed, unsigned int *buffer, unsigned int nQuads);
-int iLinkReadReq(struct TransactionContextData *trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
-int iLinkWriteReq(struct TransactionContextData *trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
+extern void SendResponse(unsigned short int NodeID, unsigned short RcvdBusID, unsigned char rcode, unsigned char tLabel, unsigned char tCode, unsigned char speed, unsigned int *buffer, unsigned int nQuads);
+extern int iLinkReadReq(struct TransactionContextData *trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
+extern int iLinkWriteReq(struct TransactionContextData *trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
 
-void iLinkInitPHT(void);
-void PHTSendResponse(unsigned short int NodeID, unsigned short RcvdBusID, unsigned char rcode, unsigned char tLabel, unsigned char tCode, unsigned char speed, unsigned int *buffer, unsigned int nQuads);
-int iLinkReadPHTReq(struct TransactionContextData *trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
-int iLinkWritePHTReq(struct TransactionContextData *trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
+extern void iLinkInitPHT(void);
+extern void PHTSendResponse(unsigned short int NodeID, unsigned short RcvdBusID, unsigned char rcode, unsigned char tLabel, unsigned char tCode, unsigned char speed, unsigned int *buffer, unsigned int nQuads);
+extern int iLinkReadPHTReq(struct TransactionContextData *trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);
+extern int iLinkWritePHTReq(struct TransactionContextData *trContext, unsigned short int offset_high, unsigned int offset_low, void *buffer, unsigned int nBytes);

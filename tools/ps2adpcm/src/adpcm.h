@@ -27,9 +27,9 @@ typedef struct
 	int pad;
 } AdpcmSetup;
 
-AdpcmSetup *AdpcmCreate(AdpcmGetPCMfunc get, void *getpriv, AdpcmPutADPCMfunc put, void *putpriv, int loopstart);
-int AdpcmDestroy(AdpcmSetup *set);
-int AdpcmEncode(AdpcmSetup *set, int blocks);
+extern AdpcmSetup *AdpcmCreate(AdpcmGetPCMfunc get, void *getpriv, AdpcmPutADPCMfunc put, void *putpriv, int loopstart);
+extern int AdpcmDestroy(AdpcmSetup *set);
+extern int AdpcmEncode(AdpcmSetup *set, int blocks);
 
 
 #endif

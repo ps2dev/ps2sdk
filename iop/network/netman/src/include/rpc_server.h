@@ -1,2 +1,2 @@
-int NetmanInitRPCServer(void);
-void NetmanDeinitRPCClient(void);
+extern int NetmanInitRPCServer(void);
+extern void NetmanDeinitRPCClient(void);

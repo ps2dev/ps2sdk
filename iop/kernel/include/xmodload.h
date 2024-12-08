@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int GetModuleIdList(int *readbuf, int readbufsize, int *modulecount);
+extern int GetModuleIdList(int *readbuf, int readbufsize, int *modulecount);
 
 typedef struct {
 	char name[56];
@@ -38,8 +38,8 @@ typedef struct {
 	u32 lreserve[2];
 } ModuleStatus;
 
-int ReferModuleStatus(int modid, ModuleStatus *status);
-int GetModuleIdListByName(const char *name, int *readbuf, int readbufsize, int *modulecount);
+extern int ReferModuleStatus(int modid, ModuleStatus *status);
+extern int GetModuleIdListByName(const char *name, int *readbuf, int readbufsize, int *modulecount);
 
 typedef struct {
 	int (*beforeOpen)(void *opt, const char *filename, int flag);
@@ -63,16 +63,16 @@ typedef struct {
 	int ireserved[3];
 } LMWOoption;
 
-int LoadModuleWithOption(const char *filename, const LMWOoption *option);
-int StopModule(int modid, int arglen, const char *args, int *result);
-int UnloadModule(int modid);
-int SearchModuleByName(const char *name);
-int SearchModuleByAddress(const void *addr);
-int SelfStopModule(int arglen, const char *args, int *result);
-void SelfUnloadModule(void);
-void *AllocLoadMemory(int type, unsigned int size, void *addr);
-int FreeLoadMemory(void *area);
-int SetModuleFlags(int modid, int flag);
+extern int LoadModuleWithOption(const char *filename, const LMWOoption *option);
+extern int StopModule(int modid, int arglen, const char *args, int *result);
+extern int UnloadModule(int modid);
+extern int SearchModuleByName(const char *name);
+extern int SearchModuleByAddress(const void *addr);
+extern int SelfStopModule(int arglen, const char *args, int *result);
+extern void SelfUnloadModule(void);
+extern void *AllocLoadMemory(int type, unsigned int size, void *addr);
+extern int FreeLoadMemory(void *area);
+extern int SetModuleFlags(int modid, int flag);
 
 #define xmodload_IMPORTS_start DECLARE_IMPORT_TABLE(modload, 1, 7)
 #define xmodload_IMPORTS_end END_IMPORT_TABLE

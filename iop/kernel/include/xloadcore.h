@@ -25,9 +25,9 @@ extern "C" {
 #define xloadcore_IMPORTS_start DECLARE_IMPORT_TABLE(loadcore, 1, 3)
 #define xloadcore_IMPORTS_end END_IMPORT_TABLE
 
-void ApplyElfRelSection(void *buffer, const void *module, int element_count);
-void CopyModInfo(FileInfo_t *ModuleInfo, ModuleInfo_t *ModInfo);
-int SetRebootTimeLibraryHandlingMode(struct irx_export_table *exports, int mode);
+extern void ApplyElfRelSection(void *buffer, const void *module, int element_count);
+extern void CopyModInfo(FileInfo_t *ModuleInfo, ModuleInfo_t *ModInfo);
+extern int SetRebootTimeLibraryHandlingMode(struct irx_export_table *exports, int mode);
 
 #define I_ApplyElfRelSection DECLARE_IMPORT(25, ApplyElfRelSection)
 #define I_CopyModInfo DECLARE_IMPORT(26, CopyModInfo)

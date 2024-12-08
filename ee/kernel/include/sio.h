@@ -93,30 +93,30 @@ extern "C" {
  * You can pass 0 for all of the lcr_* params to get the standard 8N1 setting (8 data bits, no parity checking, 1 stop bit).
  * Note: Unlike the BIOS sio_init() routine, we always base the baud rate on the CPU clock.
  */
-void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode);
+extern void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode);
 
-int sio_putc(int c);
-int sio_getc(void);
+extern int sio_putc(int c);
+extern int sio_getc(void);
 /** Same as sio_getc, but blocking.
  * Note that getc should be blocking by default. Ho well.
  */
-int sio_getc_block(void);
+extern int sio_getc_block(void);
 
 /** Not really much to do in the way of error-handling.  sio_putc() already
  * checks to see if there's room in the TX FIFO, and my cable doesn't support
  * hardware flow control.
  */
-size_t sio_write(void *buf, size_t size);
+extern size_t sio_write(void *buf, size_t size);
 /** This will read from the serial port until size characters have been read or EOF (RX FIFO is empty).  */
-size_t sio_read(void *buf, size_t size);
+extern size_t sio_read(void *buf, size_t size);
 
-int sio_puts(const char *str);
-int sio_putsn(const char *str); // no newline for this one
+extern int sio_puts(const char *str);
+extern int sio_putsn(const char *str); // no newline for this one
 /** Will block until it recieves \n or \r. */
-char *sio_gets(char *str);
+extern char *sio_gets(char *str);
 
 /** Flushes the input buffer. */
-void sio_flush(void);
+extern void sio_flush(void);
 
 #ifdef __cplusplus
 }

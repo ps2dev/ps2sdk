@@ -44,9 +44,9 @@ extern u8 nCmdRecvBuff[];
 extern "C" {
 #endif
 
-void _CdSemaInit(void);
-void _CdGenericCallbackFunction(void *funcNum);
-int _CdSyncS(int mode);
+extern void _CdSemaInit(void);
+extern void _CdGenericCallbackFunction(void *funcNum);
+extern int _CdSyncS(int mode);
 
 #ifdef __cplusplus
 }

@@ -13,8 +13,8 @@ typedef union
     u8 data[40];
 } SystemConfiguration_t;
 
-void InitSystemConfig(SystemConfiguration_t *SysConf, int SysConfLen);
-void SetOsdConfigParam(ConfigParam *config);
-void GetOsdConfigParam(ConfigParam *config);
-void SetOsdConfigParam2(void *config, int size, int offset);
-int GetOsdConfigParam2(void *config, int size, int offset);
+extern void InitSystemConfig(SystemConfiguration_t *SysConf, int SysConfLen);
+extern void SetOsdConfigParam(ConfigParam *config);
+extern void GetOsdConfigParam(ConfigParam *config);
+extern void SetOsdConfigParam2(void *config, int size, int offset);
+extern int GetOsdConfigParam2(void *config, int size, int offset);

@@ -28,15 +28,15 @@ enum _log_types {
 	LOG_RESET
 };
 
-void log_write8(u8 val);
-void log_write32(u32 val);
-void log_flush(int now);
+extern void log_write8(u8 val);
+extern void log_write32(u32 val);
+extern void log_flush(int now);
 
-void log_default(int type);
-void log_portdata(u32 *pd1, u32 *pd2);
-void log_regdata(u32 *rd);
-void log_data(int type, u8 *data, u32 size);
-void log_dma(int type, struct _sio2_dma_arg *arg);
-void log_stat(u32 stat6c, u32 stat70, u32 stat74);
+extern void log_default(int type);
+extern void log_portdata(u32 *pd1, u32 *pd2);
+extern void log_regdata(u32 *rd);
+extern void log_data(int type, u8 *data, u32 size);
+extern void log_dma(int type, struct _sio2_dma_arg *arg);
+extern void log_stat(u32 stat6c, u32 stat70, u32 stat74);
 
 #endif /* SIO2LOG_LOG_H */

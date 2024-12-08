@@ -77,7 +77,7 @@ typedef  struct htab  htab;
    RETURNS:
      the new table
  */
-htab *hcreate(/*_ word logsize _*/);
+extern htab *hcreate(/*_ word logsize _*/);
 
 
 /* hdestroy - destroy a hash table
@@ -88,7 +88,7 @@ htab *hcreate(/*_ word logsize _*/);
    RETURNS:
      nothing
  */
-void  hdestroy(/*_ htab *t _*/);
+extern void  hdestroy(/*_ htab *t _*/);
 
 
 /* hcount, hkey, hkeyl, hstuff
@@ -121,7 +121,7 @@ void  hdestroy(/*_ htab *t _*/);
      TRUE if the item exists, FALSE if it does not.
      If the item exists, moves the current position to that item.
  */
-word  hfind(/*_ htab *t, ub1 *key, ub4 keyl _*/);
+extern word  hfind(/*_ htab *t, ub1 *key, ub4 keyl _*/);
 
 
 /* hadd - add a new item to the hash table
@@ -134,7 +134,7 @@ word  hfind(/*_ htab *t, ub1 *key, ub4 keyl _*/);
    RETURNS:
      FALSE if the operation fails (because that key is already there).
  */
-word  hadd(/*_ htab *t, ub1 *key, ub4 keyl, void *stuff _*/);
+extern word  hadd(/*_ htab *t, ub1 *key, ub4 keyl, void *stuff _*/);
 
 
 /* hdel - delete the item at the current position
@@ -153,7 +153,7 @@ word  hadd(/*_ htab *t, ub1 *key, ub4 keyl, void *stuff _*/);
         hdel(tab);
       }
  */
-word  hdel(/* htab *t */);
+extern word  hdel(/* htab *t */);
 
 
 /* hfirst - move position to the first item in the table
@@ -163,7 +163,7 @@ word  hdel(/* htab *t */);
     FALSE if there is no current item (meaning the table is empty)
   NOTE:
  */
-word hfirst(/*_ htab *t _*/);
+extern word hfirst(/*_ htab *t _*/);
 
 
 /* hnext - move position to the next item in the table
@@ -193,7 +193,7 @@ word hfirst(/*_ htab *t _*/);
   NOTE:
     This is private to hashtab; do not use it externally.
  */
-word hnbucket(/*_ htab *t _*/);
+extern word hnbucket(/*_ htab *t _*/);
 
 
 /* hstat - print statistics about the hash table
@@ -212,7 +212,7 @@ word hnbucket(/*_ htab *t _*/);
     have n items.  That is, .3678 0, .3678 1, .1839 2, ...
     Also expect "existing" to be about 2.
  */
-void hstat(/*_ htab *t _*/);
+extern void hstat(/*_ htab *t _*/);
 
 #ifdef __cplusplus
 }

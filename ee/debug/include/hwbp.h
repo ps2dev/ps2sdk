@@ -65,46 +65,46 @@ extern "C" {
 #endif
 
 /** Initialise the Breakpoint controller */
-void InitBPC(void);
+extern void InitBPC(void);
 /** Set an instruction BP */
-void SetInstructionBP(u32 addr, u32 mask, u32 options);
+extern void SetInstructionBP(u32 addr, u32 mask, u32 options);
 /** Set a data address BP *
  * Options is one or more of the BPC settings for data address
  * Note you must set BPC_DRE and/or BPC_DWE in the options
  */
-void SetDataAddrBP(u32 addr, u32 mask, u32 options);
+extern void SetDataAddrBP(u32 addr, u32 mask, u32 options);
 /** Set a data value BP */
-void SetDataValueBP(u32 addr, u32 mask, u32 value, u32 vmask, u32 options);
+extern void SetDataValueBP(u32 addr, u32 mask, u32 value, u32 vmask, u32 options);
 
 /** Get the BPC register */
-u32  GetBPC(void);
+extern u32  GetBPC(void);
 /** Set the BPC register */
-void SetBPC(u32 bpc);
+extern void SetBPC(u32 bpc);
 
 /** Get the instruction address register */
-u32  GetIAB(void);
+extern u32  GetIAB(void);
 /** Set the instruction address register */
-void SetIAB(u32 val);
+extern void SetIAB(u32 val);
 /** Get the instruction address mask register */
-u32  GetIABM(void);
+extern u32  GetIABM(void);
 /** Set the instruction address mask register */
-void SetIABM(u32 val);
+extern void SetIABM(u32 val);
 /** Get the data address register */
-u32  GetDAB(void);
+extern u32  GetDAB(void);
 /** Set the data address register */
-void SetDAB(u32 val);
+extern void SetDAB(u32 val);
 /** Get the data address register */
-u32  GetDABM(void);
+extern u32  GetDABM(void);
 /** Set the data address mask register */
-void SetDABM(u32 val);
+extern void SetDABM(u32 val);
 /** Get the data value mask register */
-u32  GetDVB(void);
+extern u32  GetDVB(void);
 /** Set the data value register */
-void SetDVB(u32 val);
+extern void SetDVB(u32 val);
 /** Get the data value mask register */
-u32  GetDVBM(void);
+extern u32  GetDVBM(void);
 /** Set the data value mask register */
-void SetDVBM(u32 val);
+extern void SetDVBM(u32 val);
 
 #ifdef __cplusplus
 }

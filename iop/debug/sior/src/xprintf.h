@@ -22,19 +22,19 @@
 #define F_vsnprintf
 
 #ifdef F_sprintf
-int sprintf(char *str, const char *format, ...);
+extern int sprintf(char *str, const char *format, ...);
 #endif
 
 #ifdef F_snprintf
-int snprintf(char *str, size_t sz, const char *format, ...);
+extern int snprintf(char *str, size_t sz, const char *format, ...);
 #endif
 
 #ifdef F_vsprintf
-int vsprintf(char *buf, const char *fmt, va_list ap);
+extern int vsprintf(char *buf, const char *fmt, va_list ap);
 #endif
 
 #ifdef F_vsnprintf
-int vsnprintf(char *buf, size_t n, const char *fmt, va_list ap);
+extern int vsnprintf(char *buf, size_t n, const char *fmt, va_list ap);
 #endif
 
 #endif /* _XPRINTF_H_ */

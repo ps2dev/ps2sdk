@@ -152,47 +152,47 @@ typedef int (*SdIntrCallback)(void *data);
 extern "C" {
 #endif
 
-int sceSdQuit();
-int sceSdInit(int flag);
-SdIntrCallback sceSdSetIRQCallback(SdIntrCallback cb);
-SdIntrCallback sceSdSetTransCallback(s32 core, SdIntrCallback cb);
+extern int sceSdQuit();
+extern int sceSdInit(int flag);
+extern SdIntrCallback sceSdSetIRQCallback(SdIntrCallback cb);
+extern SdIntrCallback sceSdSetTransCallback(s32 core, SdIntrCallback cb);
 
-void sceSdSetParam(u16 entry, u16 value);
-u16 sceSdGetParam(u16 entry);
+extern void sceSdSetParam(u16 entry, u16 value);
+extern u16 sceSdGetParam(u16 entry);
 
-void sceSdSetCoreAttr(u16 entry, u16 value);
-u16 sceSdGetCoreAttr(u16 entry);
-int sceSdClearEffectWorkArea(int core, int channel, int effect_mode);
+extern void sceSdSetCoreAttr(u16 entry, u16 value);
+extern u16 sceSdGetCoreAttr(u16 entry);
+extern int sceSdClearEffectWorkArea(int core, int channel, int effect_mode);
 
-void sceSdSetAddr(u16 entry, u32 value);
-u32 sceSdGetAddr(u16 entry);
+extern void sceSdSetAddr(u16 entry, u32 value);
+extern u32 sceSdGetAddr(u16 entry);
 
-void sceSdSetSwitch(u16 entry, u32 value);
-u32 sceSdGetSwitch(u16 entry);
+extern void sceSdSetSwitch(u16 entry, u32 value);
+extern u32 sceSdGetSwitch(u16 entry);
 
-u16 sceSdNote2Pitch(u16 center_note, u16 center_fine, u16 note, s16 fine);
-u16 sceSdPitch2Note(u16 center_note, u16 center_fine, u16 pitch);
+extern u16 sceSdNote2Pitch(u16 center_note, u16 center_fine, u16 note, s16 fine);
+extern u16 sceSdPitch2Note(u16 center_note, u16 center_fine, u16 pitch);
 
-int sceSdSetEffectAttr(int core, sceSdEffectAttr *attr);
-void sceSdGetEffectAttr(int core, sceSdEffectAttr *attr);
+extern int sceSdSetEffectAttr(int core, sceSdEffectAttr *attr);
+extern void sceSdGetEffectAttr(int core, sceSdEffectAttr *attr);
 
-int sceSdProcBatch(sceSdBatch *batch, u32 *rets, u32 num);
-int sceSdProcBatchEx(sceSdBatch *batch, u32 *rets, u32 num, u32 voice);
+extern int sceSdProcBatch(sceSdBatch *batch, u32 *rets, u32 num);
+extern int sceSdProcBatchEx(sceSdBatch *batch, u32 *rets, u32 num, u32 voice);
 
-int sceSdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size);
-int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...);
-u32 sceSdVoiceTransStatus(s16 channel, s16 flag);
-u32 sceSdBlockTransStatus(s16 channel, s16 flag);
+extern int sceSdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size);
+extern int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...);
+extern u32 sceSdVoiceTransStatus(s16 channel, s16 flag);
+extern u32 sceSdBlockTransStatus(s16 channel, s16 flag);
 
-sceSdTransIntrHandler sceSdSetTransIntrHandler(int channel, sceSdTransIntrHandler func, void *arg);
-sceSdSpu2IntrHandler sceSdSetSpu2IntrHandler(sceSdSpu2IntrHandler func, void *arg);
+extern sceSdTransIntrHandler sceSdSetTransIntrHandler(int channel, sceSdTransIntrHandler func, void *arg);
+extern sceSdSpu2IntrHandler sceSdSetSpu2IntrHandler(sceSdSpu2IntrHandler func, void *arg);
 
-void *sceSdGetTransIntrHandlerArgument(int arg);
-void *sceSdGetSpu2IntrHandlerArgument();
-int sceSdStopTrans(int channel);
-int sceSdCleanEffectWorkArea(int core, int channel, int effect_mode);
-int sceSdSetEffectMode(int core, sceSdEffectAttr *param);
-int sceSdSetEffectModeParams(int core, sceSdEffectAttr *attr);
+extern void *sceSdGetTransIntrHandlerArgument(int arg);
+extern void *sceSdGetSpu2IntrHandlerArgument();
+extern int sceSdStopTrans(int channel);
+extern int sceSdCleanEffectWorkArea(int core, int channel, int effect_mode);
+extern int sceSdSetEffectMode(int core, sceSdEffectAttr *param);
+extern int sceSdSetEffectModeParams(int core, sceSdEffectAttr *attr);
 
 #ifdef __cplusplus
 }

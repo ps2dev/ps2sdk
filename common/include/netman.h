@@ -105,37 +105,37 @@ enum NETMAN_NETIF_IOCTL_CODES {
 // Initialization and deinitialization functions, for the EE side.
 #ifdef _EE
 
-int NetManInit(void);
-void NetManDeinit(void);
+extern int NetManInit(void);
+extern void NetManDeinit(void);
 
 #endif
 
 // Network Interface (IF) control.
-int NetManGetGlobalNetIFLinkState(void);
-int NetManSetMainIF(const char *name);
-int NetManQueryMainIF(char *name);
+extern int NetManGetGlobalNetIFLinkState(void);
+extern int NetManSetMainIF(const char *name);
+extern int NetManQueryMainIF(char *name);
 
 //*** System functions for either the Network IF driver or the network protocol stack ***
 // For the network protocol stack to initialize/deinitialize NETMAN.
-int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack);
-void NetManUnregisterNetworkStack(void);
+extern int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack);
+extern void NetManUnregisterNetworkStack(void);
 
 /* Common network Interface (IF) management functions. Used by the user program and the protocol stack. */
-int NetManIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length);
-int NetManSetLinkMode(int mode);
+extern int NetManIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length);
+extern int NetManSetLinkMode(int mode);
 
 /* Network Interface (IF) management functions. Used by the protocol stack. */
-void NetManNetIFXmit(void); // Notify the interface of available packets. May be called from the interrupt context.
+extern void NetManNetIFXmit(void); // Notify the interface of available packets. May be called from the interrupt context.
 
 /* Network protocol stack management functions. Used by the Network InterFace (IF) driver. */
-void *NetManNetProtStackAllocRxPacket(unsigned int length, void **payload);
-void NetManNetProtStackFreeRxPacket(void *packet);
-void NetManNetProtStackEnQRxPacket(void *packet);
-int NetManTxPacketNext(void **payload);
-void NetManTxPacketDeQ(void);
+extern void *NetManNetProtStackAllocRxPacket(unsigned int length, void **payload);
+extern void NetManNetProtStackFreeRxPacket(void *packet);
+extern void NetManNetProtStackEnQRxPacket(void *packet);
+extern int NetManTxPacketNext(void **payload);
+extern void NetManTxPacketDeQ(void);
 
-int NetManTxPacketAfter(void **payload);                                   // For EE only, for NETMAN's internal use.
-void NetManNetProtStackReallocRxPacket(void *packet, unsigned int length); // For EE only, for NETMAN's internal use.
+extern int NetManTxPacketAfter(void **payload);                                   // For EE only, for NETMAN's internal use.
+extern void NetManNetProtStackReallocRxPacket(void *packet, unsigned int length); // For EE only, for NETMAN's internal use.
 
 /* NETIF flags. */
 /** Set internally by NETMAN. Do not set externally. */
@@ -167,9 +167,9 @@ struct NetManNetIF
 #define NETMAN_MAX_NETIF_COUNT 2
 
 /* Network InterFace (IF) management functions. Used by the network InterFace (IF). */
-int NetManRegisterNetIF(struct NetManNetIF *NetIF);
-void NetManUnregisterNetIF(const char *name);
-void NetManToggleNetIFLinkState(int NetIFID, unsigned char state); // Also toggles NETMAN_NETIF_EVF_UP and NETMAN_NETIF_EVF_DOWN
+extern int NetManRegisterNetIF(struct NetManNetIF *NetIF);
+extern void NetManUnregisterNetIF(const char *name);
+extern void NetManToggleNetIFLinkState(int NetIFID, unsigned char state); // Also toggles NETMAN_NETIF_EVF_UP and NETMAN_NETIF_EVF_DOWN
 
 #ifdef _IOP
 

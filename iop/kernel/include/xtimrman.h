@@ -26,11 +26,11 @@ extern "C" {
 #define TC_PIXEL    2
 #define TC_HLINE    4
 
-int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void *), void *common);
-int SetOverflowHandler(int timid, unsigned int (*handler)(void *), void *common);
-int SetupHardTimer(int timid, int source, int mode, int prescale);
-int StartHardTimer(int timid);
-int StopHardTimer(int timid);
+extern int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void *), void *common);
+extern int SetOverflowHandler(int timid, unsigned int (*handler)(void *), void *common);
+extern int SetupHardTimer(int timid, int source, int mode, int prescale);
+extern int StartHardTimer(int timid);
+extern int StopHardTimer(int timid);
 
 #define xtimrman_IMPORTS_start DECLARE_IMPORT_TABLE(timrman, 1, 1)
 #define xtimrman_IMPORTS_end   END_IMPORT_TABLE
