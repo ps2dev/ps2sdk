@@ -62,10 +62,12 @@ PS2SDKAPI_OBJS = \
 
 GLUE_OBJS = \
 	__dummy_passwd.o \
+	__dummy_group.o \
 	__transform_errno.o \
 	__transform64_errno.o \
 	compile_time_check.o \
 	_open.o \
+	pipe.o \
 	_close.o \
 	_read.o \
 	_write.o \
@@ -78,16 +80,28 @@ GLUE_OBJS = \
 	_lseek.o \
 	lseek64.o \
 	chdir.o \
+	fchdir.o \
+	_mkdir.o \
 	mkdir.o \
 	rmdir.o \
 	_link.o \
 	_unlink.o \
 	_rename.o \
+	pause.o \
+	getitimer.o \
+	setitimer.o \
+	sched_yield.o \
 	_getpid.o \
+	getppid.o \
 	_kill.o \
+	sigprocmask.o \
+	sigaction.o \
 	_fork.o \
+	vfork.o \
 	_wait.o \
+	waitpid.o \
 	_execve.o \
+	_system.o \
 	_sbrk.o \
 	_gettimeofday.o \
 	_times.o \
@@ -95,22 +109,40 @@ GLUE_OBJS = \
 	clock_getres.o \
 	clock_gettime.o \
 	clock_settime.o \
+	readv.o \
+	writev.o \
 	truncate.o \
+	ftruncate.o \
+	_symlink.o \
 	symlink.o \
+	_readlink.o \
 	readlink.o \
 	utime.o \
+	utimes.o \
 	fchown.o \
 	getrandom.o \
 	_getentropy.o \
-	_isatty.o \
+	umask.o \
 	chmod.o \
 	fchmod.o \
+	_chown.o \
+	chown.o \
 	pathconf.o \
+	fpathconf.o \
 	fsync.o \
+	sysconf.o \
+	tcgetattr.o \
+	tcsetattr.o \
+	getlogin.o \
 	getuid.o \
 	geteuid.o \
+	getgid.o \
+	getegid.o \
 	getpwuid.o \
 	getpwnam.o \
+	issetugid.o \
+	getgrgid.o \
+	getgrnam.o \
 	libcglue_get_fd_info.o \
 	ps2sdk_get_iop_fd.o \
 	ps2sdk_get_iop_filename.o \
