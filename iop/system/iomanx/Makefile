@@ -10,6 +10,13 @@ IOP_BIN ?= iomanX.irx
 
 IOP_CFLAGS += -DIOMANX_OLD_NAME_ADDDELDRV=0 -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_ENABLE_LEGACY_IOMAN_HOOK -DIOMAN_USE_FILE_STRUCT_TEMP_STACK
 
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include
+
 IOP_OBJS = iomanX.o ioman_sbv.o exports.o imports.o
 
 include $(PS2SDKSRC)/Defs.make

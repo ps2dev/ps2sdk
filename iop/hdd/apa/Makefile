@@ -6,19 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-LIBAPA_PATH = $(PS2SDKSRC)/iop/hdd/libapa/
-
-LIBAPA_SRC_DIR = $(LIBAPA_PATH)src/
-
-IOP_BIN ?= ps2hdd.irx
-
-IOP_INCS += -I$(LIBAPA_PATH)include
-
-IOP_CFLAGS += -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_OLD_NAME_ADDDELDRV=0
-
-APA_OBJS = password.o misc.o cache.o apa.o journal.o free.o
-IOP_OBJS = hdd_fio.o hdd_blkio.o hdd.o imports.o $(APA_OBJS)
-
 # Depend on dev9 module for poweroff callback?
 APA_USE_DEV9 ?= 1
 
@@ -30,6 +17,28 @@ APA_USE_BDM ?= 0
 
 # Depend on iomanX module for block device interface?
 APA_USE_IOMANX ?= 0
+
+LIBAPA_PATH = $(PS2SDKSRC)/iop/hdd/libapa/
+
+LIBAPA_SRC_DIR = $(LIBAPA_PATH)src/
+
+IOP_BIN ?= ps2hdd.irx
+
+IOP_CFLAGS += -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_OLD_NAME_ADDDELDRV=0
+
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/cdvd/cdvdman/include \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/iomanx/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include \
+	-I$(LIBAPA_PATH)include
+
+APA_OBJS = password.o misc.o cache.o apa.o journal.o free.o
+IOP_OBJS = hdd_fio.o hdd_blkio.o hdd.o imports.o $(APA_OBJS)
 
 ifneq (x$(APA_USE_DEV9),x0)
 IOP_CFLAGS += -DAPA_USE_DEV9

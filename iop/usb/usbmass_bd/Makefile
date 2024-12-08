@@ -8,10 +8,15 @@
 
 # IOP_CFLAGS += -DDEBUG
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
-IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/fs/bdm/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include \
+	-I$(PS2SDKSRC)/iop/usb/usbd/include
 
-IOP_LDFLAGS = -lgcc
+IOP_LIBS += -lgcc
 
 IOP_OBJS = main.o usb_mass.o scsi.o imports.o
 

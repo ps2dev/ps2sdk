@@ -7,7 +7,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/arcade/acdev/include
+	-I$(PS2SDKSRC)/iop/arcade/acdev/include \
+	-I$(PS2SDKSRC)/iop/system/dmacman/include \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include
 
 IOP_OBJS = \
 	accore-entry.o \

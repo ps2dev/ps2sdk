@@ -8,6 +8,15 @@
 
 IOP_CFLAGS += -DIOMANX_OLD_NAME_ADDDELDRV=0
 
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/iomanx/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include
+
 IOP_OBJS = devfs.o exports.o imports.o
 
 include $(PS2SDKSRC)/Defs.make

@@ -6,9 +6,31 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+# Build the newer version of the memory card module?
+MCMAN_BUILDING_XMCMAN ?= 1
+
+# Read from the dev9 external flash ROM instead of the memory card?
+MCMAN_BUILDING_XFROMMAN ?= 0
+
+# Read from a file on the filesystem insead of the memory card?
+MCMAN_BUILDING_VMCMAN ?= 0
+
 # IOP_CFLAGS += -DSIO_DEBUG -DDEBUG
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2man/include
+IOP_INCS += \
+    -I$(PS2SDKSRC)/iop/cdvd/cdvdman/include \
+    -I$(PS2SDKSRC)/iop/debug/sior/include \
+    -I$(PS2SDKSRC)/iop/security/secrman/include \
+    -I$(PS2SDKSRC)/iop/system/intrman/include \
+    -I$(PS2SDKSRC)/iop/system/ioman/include \
+    -I$(PS2SDKSRC)/iop/system/iomanx/include \
+    -I$(PS2SDKSRC)/iop/system/loadcore/include \
+    -I$(PS2SDKSRC)/iop/system/modload/include \
+    -I$(PS2SDKSRC)/iop/system/sio2man/include \
+    -I$(PS2SDKSRC)/iop/system/stdio/include \
+    -I$(PS2SDKSRC)/iop/system/sysclib/include \
+    -I$(PS2SDKSRC)/iop/system/threadman/include \
+    -I$(PS2SDKSRC)/iop/system/timrman/include
 
 IOP_OBJS = \
     main.o \
@@ -19,15 +41,6 @@ IOP_OBJS = \
     ps1mc_fio.o \
     imports.o \
     exports.o
-
-# Build the newer version of the memory card module?
-MCMAN_BUILDING_XMCMAN ?= 1
-
-# Read from the dev9 external flash ROM instead of the memory card?
-MCMAN_BUILDING_XFROMMAN ?= 0
-
-# Read from a file on the filesystem insead of the memory card?
-MCMAN_BUILDING_VMCMAN ?= 0
 
 ifneq (x$(MCMAN_BUILDING_XMCMAN),x0)
 IOP_CFLAGS += -DBUILDING_XMCMAN

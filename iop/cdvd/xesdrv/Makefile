@@ -7,6 +7,12 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 IOP_CFLAGS += -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_OLD_NAME_ADDDELDRV=0
+
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/iomanx/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include
+
 IOP_OBJS = xesdrv.o imports.o
 
 include $(PS2SDKSRC)/Defs.make

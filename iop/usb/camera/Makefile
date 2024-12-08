@@ -8,7 +8,19 @@
 
 IOP_BIN ?= ps2cam.irx
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/sound/libsd/include \
+	-I$(PS2SDKSRC)/iop/system/dmacman/include \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/ioman/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/sifcmd/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include \
+	-I$(PS2SDKSRC)/iop/system/vblank/include \
+	-I$(PS2SDKSRC)/iop/usb/usbd/include
 
 IOP_OBJS = ps2cam.o imports.o
 

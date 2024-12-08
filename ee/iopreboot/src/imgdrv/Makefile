@@ -7,6 +7,10 @@
 
 IOP_BIN ?= imgdrv.irx
 
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/ioman/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include
+
 IOP_OBJS = imgdrv.o imports.o
 
 include $(PS2SDKSRC)/Defs.make

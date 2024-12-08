@@ -7,7 +7,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/arcade/accore/include
+	-I$(PS2SDKSRC)/iop/arcade/accore/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include
 
 IOP_OBJS = \
 	acsram-entry.o \

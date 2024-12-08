@@ -6,10 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN_ALTNAMES ?= freesio2.irx
-
-IOP_OBJS = sio2man.o log.o imports.o exports.o
-
 # Build the newer version of the SIO2 module with support for multitap?
 SIO2MAN_BUILDING_XSIO2MAN ?= 1
 
@@ -18,6 +14,19 @@ SIO2MAN_BUILDING_XSIO2MAN_V2 ?= 0
 
 # Enable logging?
 SIO2MAN_ENABLE_LOGGING ?= 0
+
+IOP_BIN_ALTNAMES ?= freesio2.irx
+
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/dmacman/include \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/ioman/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/sio2man/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include
+
+IOP_OBJS = sio2man.o log.o imports.o exports.o
 
 ifneq (x$(SIO2MAN_BUILDING_XSIO2MAN),x0)
 IOP_CFLAGS += -DBUILDING_XSIO2MAN
