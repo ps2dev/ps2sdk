@@ -15,7 +15,19 @@ IOP_CFLAGS += -DBUILDING_IEEE1394_DISK
 
 IOP_CFLAGS += -mno-check-zero-division # -DSIF_CALLBACKS_12_13
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/iLink/iLinkman/include -I$(VFAT_SRC_DIR)/include
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/cdvd/cdvdman/include \
+	-I$(PS2SDKSRC)/iop/iLink/iLinkman/include \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/ioman/include \
+	-I$(PS2SDKSRC)/iop/system/iomanx/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/sifcmd/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include \
+	-I$(VFAT_SRC_DIR)/include
 
 IOP_OBJS = sbp2_driver.o imports.o main.o scsi.o fat_write.o fs_driver.o scache.o fat_driver.o part_driver.o
 

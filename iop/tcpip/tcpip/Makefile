@@ -32,7 +32,16 @@ ifdef PS2IP_DNS
 IOP_CFLAGS += -DPS2IP_DNS
 endif
 
-IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -I$(PS2IP_BASE)/include
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include \
+	-I$(LWIP)/src/include \
+	-I$(LWIP)/src/include/ipv4 \
+	-I$(PS2IP_BASE)/include
 
 ps2api_OBJECTS = api_lib.o api_msg.o api_netbuf.o err.o sockets.o tcpip.o
 ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o

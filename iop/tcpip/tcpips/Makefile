@@ -19,7 +19,15 @@ ifeq ($(PS2IP_DNS),1)
 IOP_CFLAGS += -DPS2IP_DNS
 endif
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/sifcmd/include \
+	-I$(PS2SDKSRC)/iop/system/sifman/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include \
+	-I$(PS2SDKSRC)/iop/tcpip/tcpip/include
 
 IOP_OBJS = ps2ips.o imports.o
 

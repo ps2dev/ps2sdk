@@ -12,6 +12,7 @@ IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/mtapman/src/
 
 IOP_CFLAGS += -DSIO2MAN_V2
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/system/rsio2man/include/
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/rsio2man/include/
 
 include $(PS2SDKSRC)/iop/system/mtapman/Makefile

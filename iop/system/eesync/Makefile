@@ -6,8 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_OBJS = eesync.o exports.o imports.o
-
 # Wipe EE kernel space?
 EESYNC_WIPE_EE_KERNEL_SPACE ?= 0
 
@@ -19,6 +17,16 @@ EESYNC_REGISTER_EXPORTS ?= 1
 
 # Check IOP boot parameter to see if initialization should be skipped?
 EESYNC_CHECK_ILOADP ?= 1
+
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/ioman/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/sifman/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include
+
+IOP_OBJS = eesync.o exports.o imports.o
 
 ifneq (x$(EESYNC_WIPE_EE_KERNEL_SPACE),x0)
 IOP_CFLAGS += -DEESYNC_WIPE_EE_KERNEL_SPACE

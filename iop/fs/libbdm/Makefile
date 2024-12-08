@@ -6,7 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/fs/bdm/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include
 
 IOP_OBJS = bd_defrag.o bd_cache.o
 IOP_LIB = libbdm.a

@@ -8,6 +8,19 @@
 
 # IOP_CFLAGS += -DSIO_DEBUG -DDEBUG
 
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/cdvd/cdvdman/include \
+	-I$(PS2SDKSRC)/iop/debug/sior/include \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/ioman/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/sifcmd/include \
+	-I$(PS2SDKSRC)/iop/system/sifman/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include
+
 IOP_OBJS = main.o cdfs_iop.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
