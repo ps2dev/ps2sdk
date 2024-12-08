@@ -1,0 +1,13 @@
+<map id="AHXVoice" name="AHXVoice">
+<area shape="rect" id="Node000001" title=" " alt="" coords="85,271,167,297"/>
+<area shape="rect" id="Node000002" href="$ahx_8h.html#struct_a_h_x_envelope" title=" " alt="" coords="5,94,108,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="38,134,20,170,17,189,21,207,36,227,55,244,96,269,93,273,51,249,32,231,16,209,11,189,15,168,34,131"/>
+<area shape="rect" id="Node000003" href="$ahx_8h.html#struct_a_h_x_instrument" title=" " alt="" coords="70,183,182,208"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="72,132,89,157,113,180,109,184,85,160,68,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="129,224,129,271,123,271,123,224"/>
+<area shape="rect" id="Node000004" href="$ahx_8h.html#struct_a_h_x_p_list" title=" " alt="" coords="139,94,219,120"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="194,133,203,159,209,188,209,220,199,249,185,263,169,273,166,269,182,259,194,246,204,219,204,189,198,160,189,135"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="166,134,135,184,131,181,162,132"/>
+<area shape="rect" id="Node000005" href="$ahx_8h.html#struct_a_h_x_p_list_entry" title=" " alt="" coords="125,5,234,31"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="182,47,182,94,177,94,177,47"/>
+</map>

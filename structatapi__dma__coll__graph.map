@@ -1,0 +1,20 @@
+<map id="atapi_dma" name="atapi_dma">
+<area shape="rect" id="Node000001" title=" " alt="" coords="67,276,148,301"/>
+<area shape="rect" id="Node000002" href="$structac__dma.html" title=" " alt="" coords="53,98,120,124"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,139,109,275,104,275,87,140"/>
+<area shape="rect" id="Node000003" href="$structac__queue.html" title=" " alt="" coords="125,8,202,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="145,47,99,100,95,96,141,43"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="220,11,229,20,221,29,203,32,202,26,218,24,224,20,216,15"/>
+<area shape="rect" id="Node000006" href="$structac__ata__h.html" title=" " alt="" coords="265,98,340,124"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="196,39,285,96,282,100,194,44"/>
+<area shape="rect" id="Node000004" href="$structac__dma__ops.html" title=" " alt="" coords="5,8,101,33"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="65,47,84,97,79,99,60,49"/>
+<area shape="rect" id="Node000005" href="$structac__atapi.html" title=" " alt="" coords="159,187,230,213"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="174,225,121,277,118,273,170,222"/>
+<area shape="poly" id="edge9_Node000005_Node000005" title=" " alt="" coords="247,191,256,200,248,209,230,211,230,205,246,204,251,200,244,195"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="288,139,264,165,225,189,222,184,261,161,284,135"/>
+<area shape="rect" id="Node000007" href="$structac__ata__ops.html" title=" " alt="" coords="292,8,380,33"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="328,49,309,99,304,97,323,47"/>
+<area shape="rect" id="Node000008" href="$unionac__atapi__pkt.html" title=" " alt="" coords="145,98,241,124"/>
+<area shape="poly" id="edge10_Node000005_Node000008" title=" " alt="" coords="196,140,197,187,191,187,191,140"/>
+</map>

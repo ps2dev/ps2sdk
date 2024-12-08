@@ -1,0 +1,14 @@
+<map id="iop/kernel/include/xthbase.h" name="iop/kernel/include/xthbase.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="27,5,150,46"/>
+<area shape="rect" id="Node000002" href="$thbase_8h.html" title=" " alt="" coords="53,94,124,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,46,91,78,86,78,86,46"/>
+<area shape="rect" id="Node000003" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="57,241,120,267"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="90,120,87,193,89,226,83,226,82,193,84,120"/>
+<area shape="rect" id="Node000006" href="$irx_8h.html" title=" " alt="" coords="97,168,141,193"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="96,119,110,152,105,154,91,121"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,315,73,341"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="82,269,58,304,54,301,78,266"/>
+<area shape="rect" id="Node000005" href="$tamtypes_8h.html" title=" " alt="" coords="97,315,181,341"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="99,266,124,301,120,304,95,269"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="116,195,102,228,97,226,111,193"/>
+</map>

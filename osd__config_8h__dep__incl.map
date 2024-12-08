@@ -1,0 +1,23 @@
+<map id="ee/kernel/include/osd_config.h" name="ee/kernel/include/osd_config.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="749,5,893,46"/>
+<area shape="rect" id="Node000002" href="$graph__mode_8c_source.html" title=" " alt="" coords="5,94,135,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="733,34,470,55,309,73,148,97,136,99,135,94,147,91,308,68,470,50,733,29"/>
+<area shape="rect" id="Node000003" href="$libosd_8c.html" title=" " alt="" coords="159,102,304,127"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="734,39,542,62,317,97,283,104,282,98,316,91,541,57,733,34"/>
+<area shape="rect" id="Node000004" href="$libosd__common_8c.html" title=" " alt="" coords="328,94,463,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="734,46,476,97,464,99,462,94,475,91,733,40"/>
+<area shape="rect" id="Node000005" href="$libosd__full_8c.html" title=" " alt="" coords="487,94,621,135"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="746,54,615,96,614,91,745,49"/>
+<area shape="rect" id="Node000006" href="$osd__config_8c.html" title=" " alt="" coords="645,102,818,127"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="791,59,745,103,742,99,788,55"/>
+<area shape="rect" id="Node000007" href="$osd_8c_source.html" title=" " alt="" coords="842,94,981,135"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="854,55,893,92,889,95,850,59"/>
+<area shape="rect" id="Node000008" href="$osdsrc_8c_source.html" title=" " alt="" coords="1006,94,1145,135"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="893,49,1018,91,1016,96,892,54"/>
+<area shape="rect" id="Node000009" href="$rtc_8c.html" title=" " alt="" coords="1170,102,1304,127"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="908,41,1157,91,1187,98,1186,103,1156,97,907,46"/>
+<area shape="rect" id="Node000010" href="$timezone_8c.html" title=" " alt="" coords="1328,102,1500,127"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="908,35,1096,59,1316,91,1355,98,1354,104,1315,97,1095,64,908,40"/>
+<area shape="rect" id="Node000011" href="$scmd_8c.html" title=" " alt="" coords="1523,102,1681,127"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="908,30,1178,51,1345,69,1512,91,1549,98,1548,103,1511,97,1344,74,1178,57,908,35"/>
+</map>

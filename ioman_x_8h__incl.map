@@ -1,0 +1,23 @@
+<map id="iop/kernel/include/iomanX.h" name="iop/kernel/include/iomanX.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="219,5,342,46"/>
+<area shape="rect" id="Node000002" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="76,94,138,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,49,149,90,146,85,236,44"/>
+<area shape="rect" id="Node000005" href="$errno_8h.html" title=" " alt="" coords="162,94,223,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="260,48,219,85,216,81,257,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="247,94,314,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="283,46,283,78,278,78,278,46"/>
+<area shape="rect" id="Node000007" href="$io__common_8h.html" title=" " alt="" coords="338,94,436,120"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="308,44,360,82,357,87,305,49"/>
+<area shape="rect" id="Node000010" href="$iox__stat_8h.html" title=" " alt="" coords="461,94,537,120"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="336,44,452,86,450,91,334,49"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,168,73,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,122,63,158,59,155,94,118"/>
+<area shape="rect" id="Node000004" href="$tamtypes_8h.html" title=" " alt="" coords="97,168,181,193"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="115,119,130,152,125,154,110,121"/>
+<area shape="rect" id="Node000008" href="$fcntl_8h_source.html" title=" " alt="" coords="239,168,319,193"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="370,122,312,161,309,156,367,118"/>
+<area shape="rect" id="Node000009" href="$unistd_8h_source.html" title=" " alt="" coords="343,168,434,193"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="390,120,390,152,385,152,385,120"/>
+<area shape="rect" id="Node000011" href="$time_8h.html" title=" " alt="" coords="459,168,539,193"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="502,120,502,152,496,152,496,120"/>
+</map>

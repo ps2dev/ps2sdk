@@ -1,0 +1,9 @@
+<map id="iop/sound/audsrv/src/upsamplers.h" name="iop/sound/audsrv/src/upsamplers.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="172,5,314,46"/>
+<area shape="rect" id="Node000002" href="$audsrv_8c.html" title=" " alt="" coords="5,94,148,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,56,115,96,113,91,191,51"/>
+<area shape="rect" id="Node000003" href="$cdrom_8c.html" title=" " alt="" coords="172,94,314,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="246,62,246,94,241,94,241,62"/>
+<area shape="rect" id="Node000004" href="$upsamplers_8c.html" title=" " alt="" coords="339,94,481,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="296,51,373,91,371,96,293,56"/>
+</map>
