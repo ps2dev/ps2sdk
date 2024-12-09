@@ -16,6 +16,7 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <sifrpc.h>
+#include <loadfile.h>
 #include <string.h>
 #include "libmc.h"
 
@@ -229,7 +230,7 @@ static void mcStoreDir(void* arg)
 
 int mcInit(int type)
 {
-	int ret=0;
+	int ret = 0, bind_retry = 100;
 	mcRpcStat_t *rpcStat = (mcRpcStat_t*)UNCACHED_SEG(&g_rdata.rpcStat);
 	static int _rb_count = 0;
 
@@ -260,6 +261,7 @@ int mcInit(int type)
 		}
 		if(g_cdata.server == NULL)
 			nopdelay();
+		if (--bind_retry < 1) return -SCE_EBINDMISS;
 	}
 	while (g_cdata.server == NULL);
 

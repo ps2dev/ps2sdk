@@ -11,6 +11,7 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
+#include <loadfile.h>
 #include <sifrpc.h>
 #include <stdio.h>
 #include <string.h>
@@ -36,8 +37,9 @@ int sem;
 
 int PS2CamInit(int mode)
 {
-	int				ret=0;
-	int				*buf;
+	int ret = 0;
+	int *buf;
+	int bind_retry = 100;
 	// unsigned int i;
 	// int timeout = 100000;
 
@@ -45,9 +47,10 @@ int PS2CamInit(int mode)
 
 	SifInitRpc(0);
 
-	while (((ret = SifBindRpc(&cdata, PS2_CAM_RPC_ID, 0)) >= 0) && (cdata.server == NULL))
+	while (((ret = SifBindRpc(&cdata, PS2_CAM_RPC_ID, 0)) >= 0) && (cdata.server == NULL)) {
+		if (--bind_retry < 1) return -SCE_EBINDMISS;
 		nopdelay();
-
+	}
 	nopdelay();
 
 
