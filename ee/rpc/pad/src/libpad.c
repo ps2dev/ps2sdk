@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sifrpc.h>
+#include <loadfile.h>
 #include <sifcmd.h>
 #include "libpad.h"
 
@@ -299,6 +300,7 @@ padInit(int mode)
     // Version check isn't used by default
     // int ver;
     static int _rb_count = 0;
+    int bind_retry = 100;
 
     if (_rb_count != _iop_reboot_count)
     {
@@ -319,13 +321,16 @@ padInit(int mode)
             return -1;
         }
         nopdelay();
+    if (--bind_retry < 1) return -SCE_EBINDMISS;
     } while(!padsif[0].server);
 
+    bind_retry = 100;
     do {
         if (SifBindRpc(&padsif[1], PAD_BIND_RPC_ID2, 0) < 0) {
             return -3;
         }
         nopdelay();
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
     } while(!padsif[1].server);
 
     // If you require a special version of the padman, check for that here (uncomment)

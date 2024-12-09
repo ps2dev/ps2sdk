@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <sys/fcntl.h>
+#include <loadfile.h>
 #include <sys/stat.h>
 #include <ps2sdkapi.h>
 
@@ -93,7 +94,7 @@ static inline int _unlock(void)
 #ifdef F_fileXioInit
 int fileXioInit(void)
 {
-	int res;
+	int res, bind_retry = 100;
 	ee_sema_t sp;
 	static int _rb_count = 0;
 
@@ -114,8 +115,10 @@ int fileXioInit(void)
 	sp.option = 0;
 	__lock_sema_id = CreateSema(&sp);
 
-	while(((res = SifBindRpc(&__cd0, FILEXIO_IRX, 0)) >= 0) && (__cd0.server == NULL))
+	while(((res = SifBindRpc(&__cd0, FILEXIO_IRX, 0)) >= 0) && (__cd0.server == NULL)) {
+		if (--bind_retry < 1) return -SCE_EBINDMISS;
 		nopdelay();
+	}
 
 	if(res < 0)
 		return res;

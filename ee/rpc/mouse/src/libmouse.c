@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <tamtypes.h>
 #include <sifrpc.h>
+#include <loadfile.h>
 #include <kernel.h>
 #include <string.h>
 #include "libmouse.h"
@@ -39,13 +40,13 @@ static union {
 static int mouse_init = 0;
 
 int PS2MouseInit(void)
-
 {
-  if(mouse_init)
-    {
+  int bind_retry = 100;
+  if (mouse_init)
+  {
       printf("PS2Mouse Library already initialised\n");
       return 0;
-    }
+  }
 
   mouseif.server = NULL;
 
@@ -54,6 +55,7 @@ int PS2MouseInit(void)
       return -1;
     }
     nopdelay();
+    if (--bind_retry < 1) return -SCE_EBINDMISS;
   } while(!mouseif.server);
 
   mouse_init = 1;

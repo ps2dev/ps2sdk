@@ -12,6 +12,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <iopheap.h>
+#include <loadfile.h>
 #include <stdio.h>
 #include <ps2snd.h>
 
@@ -20,6 +21,7 @@ static SifRpcClientData_t sd_client ALIGNED(64);
 int sceSdInit(int flag)
 {
 	s32 buf[1] ALIGNED(64);
+	int bind_retry = 100;
 
 	{
 
@@ -34,6 +36,7 @@ int sceSdInit(int flag)
  			if (sd_client.server != NULL)
 				break;
 
+			if (--bind_retry < 1) return -SCE_EBINDMISS;
 			nopdelay();
 		}
 
