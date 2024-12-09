@@ -18,6 +18,7 @@
 #include <sifrpc.h>
 #include <tamtypes.h>
 #include <string.h>
+#include <loadfile.h>
 #include <iopheap.h>
 
 #include <audsrv.h>
@@ -353,6 +354,11 @@ int audsrv_init()
 		}
 
 		nopdelay();
+		
+		if (--bind_retry < 1) {
+			set_error(AUDSRV_ERR_RPC_FAILED);
+			return -SCE_EBINDMISS;
+		}
 	}
 
 	compSema.init_count = 1;
