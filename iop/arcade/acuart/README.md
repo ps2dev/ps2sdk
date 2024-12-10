@@ -16,3 +16,9 @@ balancing between size, speed, and features.
 
 In order to use this module in your program, use `LoadModule` or \
 `LoadModuleBuffer` with no arguments.
+
+## Hardware Notes
+The UART is easily accesible through the white JST 3 pin connector located on the frontal panel of the arcade board, just between JVS USB and the dip switches.
+From left to right, the pins are: RX, TX, GND.
+
+An USB to RS232 (usually with DB9 connector) is recommended
