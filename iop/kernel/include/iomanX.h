@@ -20,7 +20,6 @@
 #ifdef _IOP
 #include <irx.h>
 #endif
-#include <errno.h>
 #include <stdarg.h>
 #include <io_common.h>
 #include <iox_stat.h>
@@ -87,14 +86,11 @@ typedef struct _iomanX_iop_device {
 	const char *desc;
 	struct _iomanX_iop_device_ops *ops;
 } iomanX_iop_device_t;
-static inline int not_supported_int(void) {return -ENOTSUP;}
-static inline signed long long not_supported_s64(void) {return -ENOTSUP;}
-static inline int dummy_implementation_int(void) { return 0; }
-static inline signed long long dummy_implementation_s64(void) { return 0; }
-#define NOT_SUPPORTED (void*)&not_supported_int
-#define NOT_SUPPORTED_S64 (void*)&not_supported_s64
-#define DUMMY_IMPLEMENTATION (void*)&dummy_implementation_int
-#define DUMMY_IMPLEMENTATION_S64 (void*)&dummy_implementation_s64
+#define IOMANX_RETURN_VALUE_IMPL(val) \
+	static inline int my_iomanx_retval_##val##_int(void) {return -val;} \
+	static inline signed long long my_iomanx_retval_##val##_s64(void) {return -val;}
+#define IOMANX_RETURN_VALUE(val) ((void*)&my_iomanx_retval_##val##_int)
+#define IOMANX_RETURN_VALUE_S64(val) ((void*)&my_iomanx_retval_##val##_s64)
 
 typedef struct _iomanX_iop_device_ops {
 	int	(*init)(iomanX_iop_device_t *);

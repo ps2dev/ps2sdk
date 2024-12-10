@@ -978,34 +978,37 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 
    return 0;
 }
+
+IOMANX_RETURN_VALUE_IMPL(0);
+IOMANX_RETURN_VALUE_IMPL(EPERM);
  
 static iop_device_ops_t devfs_ops = {
-  DUMMY_IMPLEMENTATION, // init
-  DUMMY_IMPLEMENTATION, // deinit
-  NOT_SUPPORTED, // format
+  IOMANX_RETURN_VALUE(0), // init
+  IOMANX_RETURN_VALUE(0), // deinit
+  IOMANX_RETURN_VALUE(EPERM), // format
   &devfs_open, // open
   &devfs_close, // close
   &devfs_read, // read
-  NOT_SUPPORTED, // write
-  NOT_SUPPORTED, // lseek
+  IOMANX_RETURN_VALUE(EPERM), // write
+  IOMANX_RETURN_VALUE(EPERM), // lseek
   &devfs_ioctl, // ioctl
-  NOT_SUPPORTED, // remove
-  NOT_SUPPORTED, // mkdir
-  NOT_SUPPORTED, // rmdir
+  IOMANX_RETURN_VALUE(EPERM), // remove
+  IOMANX_RETURN_VALUE(EPERM), // mkdir
+  IOMANX_RETURN_VALUE(EPERM), // rmdir
   &devfs_dopen, // dopen
   &devfs_dclose, // dclose
   &devfs_dread, // dread
   &devfs_getstat, // getstat
-  NOT_SUPPORTED, // chstat
-  NOT_SUPPORTED, // rename
-  NOT_SUPPORTED, // chdir
-  NOT_SUPPORTED, // sync
-  NOT_SUPPORTED, // mount
-  NOT_SUPPORTED, // umount
-  NOT_SUPPORTED_S64, // lseek64
-  NOT_SUPPORTED, // devctl
-  NOT_SUPPORTED, // symlink
-  NOT_SUPPORTED, // readlink
+  IOMANX_RETURN_VALUE(EPERM), // chstat
+  IOMANX_RETURN_VALUE(EPERM), // rename
+  IOMANX_RETURN_VALUE(EPERM), // chdir
+  IOMANX_RETURN_VALUE(EPERM), // sync
+  IOMANX_RETURN_VALUE(EPERM), // mount
+  IOMANX_RETURN_VALUE(EPERM), // umount
+  IOMANX_RETURN_VALUE_S64(EPERM), // lseek64
+  IOMANX_RETURN_VALUE(EPERM), // devctl
+  IOMANX_RETURN_VALUE(EPERM), // symlink
+  IOMANX_RETURN_VALUE(EPERM), // readlink
   &devfs_ioctl2, // ioctl2
 };
 

@@ -418,24 +418,26 @@ static int fio_getstat(iop_file_t *fd, const char *name, io_stat_t *stat)
     return ret;
 }
 
+IOMAN_RETURN_VALUE_IMPL(EIO);
+
 static iop_device_ops_t fio_ops = {
     &fio_init, // init
     &fio_deinit, // deinit
-    NOT_SUPPORTED, // format
+    IOMAN_RETURN_VALUE(EIO), // format
     &fio_open, // open
     &fio_close, // close
     &fio_read, // read
     &fio_write, // write
     &fio_lseek, // lseek
-    NOT_SUPPORTED, // ioctl
-    NOT_SUPPORTED, // remove
-    NOT_SUPPORTED, // mkdir
-    NOT_SUPPORTED, // rmdir
+    IOMAN_RETURN_VALUE(EIO), // ioctl
+    IOMAN_RETURN_VALUE(EIO), // remove
+    IOMAN_RETURN_VALUE(EIO), // mkdir
+    IOMAN_RETURN_VALUE(EIO), // rmdir
     &fio_openDir, // dopen
     &fio_closeDir, // dclose
     &fio_dread, // dread
     &fio_getstat, // getstat
-    NOT_SUPPORTED, // chstat
+    IOMAN_RETURN_VALUE(EIO), // chstat
 };
 
 static iop_device_t fio_driver = {
