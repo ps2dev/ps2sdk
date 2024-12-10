@@ -1,0 +1,13 @@
+<map id="iop/dev9/atad/include/atad.h" name="iop/dev9/atad/include/atad.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,150,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="8,94,70,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,48,54,81,49,79,66,45"/>
+<area shape="rect" id="Node000003" href="$irx_8h.html" title=" " alt="" coords="94,94,138,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="89,45,106,79,101,81,85,48"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="85,168,147,193"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="119,120,119,152,114,152,114,120"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="33,241,101,267"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="110,195,86,230,81,227,106,192"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="125,241,209,267"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="127,192,152,227,147,230,122,195"/>
+</map>

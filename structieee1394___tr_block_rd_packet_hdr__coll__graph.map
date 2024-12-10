@@ -1,0 +1,5 @@
+<map id="ieee1394_TrBlockRdPacketHdr" name="ieee1394_TrBlockRdPacketHdr">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,94,209,120"/>
+<area shape="rect" id="Node000002" href="$structieee1394___tr_common_rd_pkt_hdr.html" title=" " alt="" coords="6,5,208,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,47,110,94,104,94,104,47"/>
+</map>

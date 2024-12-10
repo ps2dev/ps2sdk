@@ -1,0 +1,15 @@
+<map id="GS_TRIANGLE_GT3ST" name="GS_TRIANGLE_GT3ST">
+<area shape="rect" id="Node000001" title=" " alt="" coords="99,213,262,238"/>
+<area shape="rect" id="Node000002" href="$libgs_8h.html#struct_g_s___r___r_g_b_a_q" title=" " alt="" coords="5,94,116,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,130,135,187,164,210,161,214,131,191,78,134"/>
+<area shape="rect" id="Node000003" href="$libgs_8h.html#struct_g_s___r_g_b_a_q" title=" " alt="" coords="13,5,108,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="63,47,63,94,58,94,58,47"/>
+<area shape="rect" id="Node000004" href="$libgs_8h.html#struct_g_s___r___s_t" title=" " alt="" coords="140,94,221,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="183,135,183,212,178,212,178,135"/>
+<area shape="rect" id="Node000005" href="$libgs_8h.html#struct_g_s___s_t" title=" " alt="" coords="148,5,213,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="183,47,183,94,178,94,178,47"/>
+<area shape="rect" id="Node000006" href="$libgs_8h.html#struct_g_s___r___x_y_z" title=" " alt="" coords="245,94,335,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="270,133,194,214,190,210,266,129"/>
+<area shape="rect" id="Node000007" href="$libgs_8h.html#struct_g_s___x_y_z" title=" " alt="" coords="253,5,327,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="293,47,293,94,287,94,287,47"/>
+</map>

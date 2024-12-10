@@ -1,0 +1,35 @@
+var ioctl_8h =
+[
+    [ "hdd_ioc_devio_t", "ioctl_8h.html#structhdd__ioc__devio__t", [
+      [ "sub", "ioctl_8h.html#a1d5aa63879e6a5c5778ec6b847f06ddb", null ],
+      [ "lba", "ioctl_8h.html#ae3568c406be9e4329ec8ccca0d0f6916", null ],
+      [ "nsectors", "ioctl_8h.html#a369dc510648802bcaa4622cc0383f98e", null ],
+      [ "dir", "ioctl_8h.html#a6cf616af78061dd73fb240a1ab99bca3", null ],
+      [ "buf", "ioctl_8h.html#ac9d641b1daaccc3aeac5b98a582fe8bb", null ]
+    ] ],
+    [ "hdd_ctl_driveio_t", "ioctl_8h.html#structhdd__ctl__driveio__t", null ],
+    [ "HDDIOCADDSUB", "ioctl_8h.html#ac4ae2f4426e2d20200af645891b8bced", null ],
+    [ "HDDIOCDELSUB", "ioctl_8h.html#a0ead2648eb110ece70a16a6558cd8f64", null ],
+    [ "HDDIOCGETSUBS", "ioctl_8h.html#ac52adb65a4d86a6f83c2cc5fe0dadc9e", null ],
+    [ "HDDIOCFLUSH", "ioctl_8h.html#a04e06250136e0dab7bf6979776a4415d", null ],
+    [ "HDDIOCDEVIO", "ioctl_8h.html#a967404f954872358dbdcd9628f99a958", null ],
+    [ "HDDIOCGETSIZE", "ioctl_8h.html#a795e23e86e0eea2585bd7bc8a3657908", null ],
+    [ "HDDIOCSETERROR", "ioctl_8h.html#a2c26c0cbf63195728f7b816c9de74666", null ],
+    [ "HDDIOCGETERROR", "ioctl_8h.html#a9f968be8c842ad8adbb777e94813f90e", null ],
+    [ "HDDCTLGETMAXSECT", "ioctl_8h.html#ab67fdcb40586bd0c73ec1b5646355019", null ],
+    [ "HDDCTLGETTOTALSECT", "ioctl_8h.html#a5860c507c381a4e510544b5220d45b1b", null ],
+    [ "HDDCTLSETIDLE", "ioctl_8h.html#ad2e997e391e17c5d2dded4bd19fd8cb3", null ],
+    [ "HDDCTLFLUSH", "ioctl_8h.html#ab448dd0163de31df5a981d9030419e57", null ],
+    [ "HDDCTLSWAPTMP", "ioctl_8h.html#a8e80af152d427b029a13aa21675fc817", null ],
+    [ "HDDCTLSHUTDOWN", "ioctl_8h.html#a9e9f36ed54a080e64a26c74e036425df", null ],
+    [ "HDDCTLGETSTATUS", "ioctl_8h.html#a1a7d606583553325473841d4b37ace9b", null ],
+    [ "HDDCTLGETFMTVER", "ioctl_8h.html#a894200252dfc7281bb7817ae90410f2d", null ],
+    [ "HDDCTLGETSMARTSTAT", "ioctl_8h.html#a020f26d59ec3baf533c3917da8c3bd1a", null ],
+    [ "HDDCTLGETDATE", "ioctl_8h.html#ab08fbde33f5a1435e0ad8144d0944d56", null ],
+    [ "HDDCTLINSTALLOSD", "ioctl_8h.html#a0242f71519318aa1250a1d79a8cccf7e", null ],
+    [ "HDDCTLGETERROR", "ioctl_8h.html#a6cf5f04955a8698b4addd4f4beb7bec3", null ],
+    [ "HDDCTLGETERRORID", "ioctl_8h.html#a685a0869bf94ed1db1264881bf1802da", null ],
+    [ "HDDCTLDRIVEREAD", "ioctl_8h.html#a6d87ac1eec04bf0fb5b51dac7d99597d", null ],
+    [ "HDDCTLDRIVEWRITE", "ioctl_8h.html#aacea40dc935880cb649f0fb50ece6d1f", null ],
+    [ "HDDCTLSCEIDENTIFY", "ioctl_8h.html#a81e7daae0821c4d1046b44da30a79d16", null ]
+];

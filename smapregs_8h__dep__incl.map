@@ -1,0 +1,9 @@
+<map id="common/include/smapregs.h" name="common/include/smapregs.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="196,5,383,31"/>
+<area shape="rect" id="Node000002" href="$ps2dev9_8c.html" title=" " alt="" coords="5,87,193,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="247,40,129,88,127,84,245,35"/>
+<area shape="rect" id="Node000003" href="$smap_8c_source.html" title=" " alt="" coords="217,79,363,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="292,46,292,79,287,79,287,46"/>
+<area shape="rect" id="Node000004" href="$xfer_8c_source.html" title=" " alt="" coords="387,79,534,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="331,35,419,76,417,81,329,40"/>
+</map>

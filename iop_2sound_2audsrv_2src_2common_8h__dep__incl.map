@@ -1,0 +1,13 @@
+<map id="iop/sound/audsrv/src/common.h" name="iop/sound/audsrv/src/common.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="339,5,481,46"/>
+<area shape="rect" id="Node000002" href="$iop_2sound_2audsrv_2src_2adpcm_8c.html" title=" " alt="" coords="5,94,148,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="324,52,149,97,147,92,323,47"/>
+<area shape="rect" id="Node000003" href="$audsrv_8c.html" title=" " alt="" coords="172,94,314,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="360,56,282,96,280,91,357,51"/>
+<area shape="rect" id="Node000004" href="$cdrom_8c.html" title=" " alt="" coords="339,94,481,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="413,62,413,94,407,94,407,62"/>
+<area shape="rect" id="Node000005" href="$iop_2sound_2audsrv_2src_2common_8c.html" title=" " alt="" coords="505,94,648,135"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="462,51,540,91,538,96,460,56"/>
+<area shape="rect" id="Node000006" href="$iop_2sound_2audsrv_2src_2rpc__server_8c.html" title=" " alt="" coords="672,94,814,135"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="497,47,672,92,671,97,495,52"/>
+</map>

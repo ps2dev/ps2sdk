@@ -1,0 +1,20 @@
+<map id="iop/kernel/include/ioman.h" name="iop/kernel/include/ioman.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="72,5,194,46"/>
+<area shape="rect" id="Node000002" href="$errno_8h.html" title=" " alt="" coords="5,94,66,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,48,64,86,61,82,107,44"/>
+<area shape="rect" id="Node000003" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="102,168,164,193"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="134,47,131,120,133,152,128,152,126,120,128,46"/>
+<area shape="rect" id="Node000006" href="$irx_8h.html" title=" " alt="" coords="141,94,186,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="143,45,156,78,151,80,138,47"/>
+<area shape="rect" id="Node000007" href="$io__common_8h.html" title=" " alt="" coords="210,94,309,120"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="166,44,228,83,226,88,163,49"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="50,241,117,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="127,195,103,230,98,227,122,192"/>
+<area shape="rect" id="Node000005" href="$tamtypes_8h.html" title=" " alt="" coords="141,241,226,267"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="143,192,168,227,164,230,139,195"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="161,121,146,154,142,152,156,119"/>
+<area shape="rect" id="Node000008" href="$fcntl_8h_source.html" title=" " alt="" coords="203,168,284,193"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="259,120,252,153,247,152,254,119"/>
+<area shape="rect" id="Node000009" href="$unistd_8h_source.html" title=" " alt="" coords="308,168,398,193"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="277,118,327,156,324,160,274,122"/>
+</map>

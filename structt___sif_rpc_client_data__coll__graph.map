@@ -1,0 +1,13 @@
+<map id="t_SifRpcClientData" name="t_SifRpcClientData">
+<area shape="rect" id="Node000001" title=" " alt="" coords="8,94,139,120"/>
+<area shape="rect" id="Node000003" href="$iop_2kernel_2include_2sifcmd_8h.html#structt___sif_rpc_server_data" title=" " alt="" coords="5,185,142,211"/>
+<area shape="poly" id="edge3_Node000003_Node000001" title=" " alt="" coords="48,132,40,145,41,158,49,171,59,182,56,186,44,174,36,159,35,143,44,129"/>
+<area shape="rect" id="Node000002" href="$iop_2kernel_2include_2sifcmd_8h.html#structt___sif_rpc_header" title=" " alt="" coords="17,5,130,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="76,47,76,94,71,94,71,47"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="74,169,75,144,73,120,78,120,80,144,80,169"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="159,189,168,198,160,206,143,209,142,203,158,201,163,198,155,194"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2sifcmd_8h.html#structt___sif_rpc_data_queue" title=" " alt="" coords="5,306,142,331"/>
+<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="53,223,45,238,40,259,45,281,61,304,57,307,40,283,34,259,40,236,48,221"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="71,290,71,211,76,211,76,290"/>
+<area shape="poly" id="edge7_Node000004_Node000004" title=" " alt="" coords="159,309,168,318,160,328,143,332,142,327,158,323,163,319,155,313"/>
+</map>
