@@ -31,8 +31,8 @@ extern int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *a
 extern int hddMount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
 extern int hddUmount(iomanX_iop_file_t *f, const char *fsname);
 #else
-#define hddMount NOT_SUPPORTED
-#define hddUmount NOT_SUPPORTED
+#define hddMount IOMANX_RETURN_VALUE(EPERM)
+#define hddUmount IOMANX_RETURN_VALUE(EPERM)
 #endif
 
 #endif /* _HDD_FIO_H */

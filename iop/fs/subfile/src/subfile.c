@@ -29,24 +29,26 @@ typedef struct subfile_priv_fd_
 	int m_curpos;
 } subfile_priv_fd_t;
 
+IOMAN_RETURN_VALUE_IMPL(0);
+
 static iop_device_ops_t subfile_devops = {
-	DUMMY_IMPLEMENTATION, // init
-	DUMMY_IMPLEMENTATION, // deinit
-	NOT_SUPPORTED, // format
-	subfile_op_open, // open
-	subfile_op_close, // close
-	subfile_op_read, // read
-	NOT_SUPPORTED, // write
-	subfile_op_lseek, // lseek
-	NOT_SUPPORTED, // ioctl
-	NOT_SUPPORTED, // remove
-	NOT_SUPPORTED, // mkdir
-	NOT_SUPPORTED, // rmdir
-	NOT_SUPPORTED, // dopen
-	NOT_SUPPORTED, // dclose
-	NOT_SUPPORTED, // dread
-	NOT_SUPPORTED, // getstat
-	NOT_SUPPORTED, // chstat
+	IOMAN_RETURN_VALUE(0), // init
+	IOMAN_RETURN_VALUE(0), // deinit
+	IOMAN_RETURN_VALUE(0), // format
+	&subfile_op_open, // open
+	&subfile_op_close, // close
+	&subfile_op_read, // read
+	IOMAN_RETURN_VALUE(0), // write
+	&subfile_op_lseek, // lseek
+	IOMAN_RETURN_VALUE(0), // ioctl
+	IOMAN_RETURN_VALUE(0), // remove
+	IOMAN_RETURN_VALUE(0), // mkdir
+	IOMAN_RETURN_VALUE(0), // rmdir
+	IOMAN_RETURN_VALUE(0), // dopen
+	IOMAN_RETURN_VALUE(0), // dclose
+	IOMAN_RETURN_VALUE(0), // dread
+	IOMAN_RETURN_VALUE(0), // getstat
+	IOMAN_RETURN_VALUE(0), // chstat
 };
 static iop_device_t subfile_dev = {
 	"subfile",

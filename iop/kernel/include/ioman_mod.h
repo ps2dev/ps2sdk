@@ -72,6 +72,10 @@ typedef struct _iop_io_device {
 	struct _iop_io_device_ops *ops;
 } iop_io_device_t;
 
+#define IOMAN_RETURN_VALUE_IMPL(val) \
+	static inline int my_ioman_retval_##val##_int(void) {return -val;}
+#define IOMAN_RETURN_VALUE(val) ((void*)&my_ioman_retval_##val##_int)
+
 typedef struct _iop_io_device_ops {
 	int	(*io_init)(iop_io_device_t *);
 	int	(*io_deinit)(iop_io_device_t *);

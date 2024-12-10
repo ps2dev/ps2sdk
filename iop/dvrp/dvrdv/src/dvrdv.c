@@ -52,34 +52,37 @@ struct DevctlCmdTbl_t
         {0x5607, &dvrioctl2_get_dvcam_info},
         {0x5608, &dvrioctl2_get_dvcam_name},
 };
+
+IOMANX_RETURN_VALUE_IMPL(EUNSUP);
+
 static iomanX_iop_device_ops_t DvrFuncTbl =
     {
         &dvrdv_df_init, // init
         &dvrdv_df_exit, // deinit
-        NOT_SUPPORTED, // format
-        NOT_SUPPORTED, // open
-        NOT_SUPPORTED, // close
-        NOT_SUPPORTED, // read
-        NOT_SUPPORTED, // write
-        NOT_SUPPORTED, // lseek
+        IOMANX_RETURN_VALUE(EUNSUP), // format
+        IOMANX_RETURN_VALUE(EUNSUP), // open
+        IOMANX_RETURN_VALUE(EUNSUP), // close
+        IOMANX_RETURN_VALUE(EUNSUP), // read
+        IOMANX_RETURN_VALUE(EUNSUP), // write
+        IOMANX_RETURN_VALUE(EUNSUP), // lseek
         &dvrdv_df_ioctl, // ioctl
-        NOT_SUPPORTED, // remove
-        NOT_SUPPORTED, // mkdir
-        NOT_SUPPORTED, // rmdir
-        NOT_SUPPORTED, // dopen
-        NOT_SUPPORTED, // dclose
-        NOT_SUPPORTED, // dread
-        NOT_SUPPORTED, // getstat
-        NOT_SUPPORTED, // chstat
-        NOT_SUPPORTED, // rename
-        NOT_SUPPORTED, // chdir
-        NOT_SUPPORTED, // sync
-        NOT_SUPPORTED, // mount
-        NOT_SUPPORTED, // umount
-        NOT_SUPPORTED_S64, // lseek64
+        IOMANX_RETURN_VALUE(EUNSUP), // remove
+        IOMANX_RETURN_VALUE(EUNSUP), // mkdir
+        IOMANX_RETURN_VALUE(EUNSUP), // rmdir
+        IOMANX_RETURN_VALUE(EUNSUP), // dopen
+        IOMANX_RETURN_VALUE(EUNSUP), // dclose
+        IOMANX_RETURN_VALUE(EUNSUP), // dread
+        IOMANX_RETURN_VALUE(EUNSUP), // getstat
+        IOMANX_RETURN_VALUE(EUNSUP), // chstat
+        IOMANX_RETURN_VALUE(EUNSUP), // rename
+        IOMANX_RETURN_VALUE(EUNSUP), // chdir
+        IOMANX_RETURN_VALUE(EUNSUP), // sync
+        IOMANX_RETURN_VALUE(EUNSUP), // mount
+        IOMANX_RETURN_VALUE(EUNSUP), // umount
+        IOMANX_RETURN_VALUE_S64(EUNSUP), // lseek64
         &dvrdv_df_devctl, // devctl
-        NOT_SUPPORTED, // symlink
-        NOT_SUPPORTED, // readlink
+        IOMANX_RETURN_VALUE(EUNSUP), // symlink
+        IOMANX_RETURN_VALUE(EUNSUP), // readlink
         &dvrdv_df_ioctl2, // ioctl2
     };
 static iomanX_iop_device_t DVR = {
