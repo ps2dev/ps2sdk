@@ -39,7 +39,7 @@ int _lf_init = 0;
 
 int SifLoadFileInit()
 {
-    int res;
+    int res, bind_retry = 100;;
     static int _rb_count = 0;
     if (_rb_count != _iop_reboot_count) {
         _rb_count = _iop_reboot_count;
@@ -52,9 +52,10 @@ int SifLoadFileInit()
 
     SifInitRpc(0);
 
-    while ((res = SifBindRpc(&_lf_cd, 0x80000006, 0)) >= 0 && !_lf_cd.server)
+    while ((res = SifBindRpc(&_lf_cd, 0x80000006, 0)) >= 0 && !_lf_cd.server) {
         nopdelay();
-
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
+    }
     if (res < 0)
         return -E_SIF_RPC_BIND;
 

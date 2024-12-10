@@ -5,6 +5,7 @@
 #include <malloc.h>
 #include <netman.h>
 #include <netman_rpc.h>
+#include <loadfile.h>
 
 #include "rpc_client.h"
 
@@ -56,7 +57,7 @@ static void NETMAN_TxThread(void *arg);
 
 int NetManInitRPCClient(void){
 	static const char NetManID[]="NetMan";
-	int result;
+	int result, bind_retry = 100;
 	ee_sema_t SemaData;
 	ee_thread_t thread;
 
@@ -88,8 +89,10 @@ int NetManInitRPCClient(void){
 			return NETMAN_Tx_threadID;
 		}
 
-		while((SifBindRpc(&NETMAN_rpc_cd, NETMAN_RPC_NUMBER, 0)<0)||(NETMAN_rpc_cd.server==NULL))
+		while((SifBindRpc(&NETMAN_rpc_cd, NETMAN_RPC_NUMBER, 0)<0)||(NETMAN_rpc_cd.server==NULL)) {
+			if (--bind_retry < 1) return -SCE_EBINDMISS;
 			nopdelay();
+		}
 
 		if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_INIT, 0, NULL, 0, &ReceiveBuffer, sizeof(s32), NULL, NULL))>=0)
 		{

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <kernel.h>
+#include <loadfile.h>
 #include <sifrpc.h>
 
 #include "libsecr.h"
@@ -20,41 +21,55 @@ static unsigned char RpcBuffer[0x1000] ALIGNED(64);
 
 int SecrInit(void)
 {
+    int bind_retry = 100;
     SifInitRpc(0);
 
     nopdelay();
     while (SifBindRpc(&SifRpcClient01, 0x80000A01, 0) < 0 || SifRpcClient01.server == NULL) {
         _printf("libsecr: bind failed\n");
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
     }
 
     nopdelay();
+    bind_retry = 100;
     while (SifBindRpc(&SifRpcClient02, 0x80000A02, 0) < 0 || SifRpcClient02.server == NULL) {
         _printf("libsecr: bind failed\n");
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
     }
 
     nopdelay();
+    bind_retry = 100;
     while (SifBindRpc(&SifRpcClient03, 0x80000A03, 0) < 0 || SifRpcClient03.server == NULL) {
         _printf("libsecr: bind failed\n");
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
     }
 
     nopdelay();
+    bind_retry = 100;
     while (SifBindRpc(&SifRpcClient04, 0x80000A04, 0) < 0 || SifRpcClient04.server == NULL) {
         _printf("libsecr: bind failed\n");
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
     }
 
     nopdelay();
+    bind_retry = 100;
     while (SifBindRpc(&SifRpcClient05, 0x80000A05, 0) < 0 || SifRpcClient05.server == NULL) {
         _printf("libsecr: bind failed\n");
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
     }
 
     nopdelay();
+    bind_retry = 100;
     while (SifBindRpc(&SifRpcClient06, 0x80000A06, 0) < 0 || SifRpcClient06.server == NULL) {
         _printf("libsecr: bind failed\n");
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
     }
 
     nopdelay();
+    bind_retry = 100;
     while (SifBindRpc(&SifRpcClient07, 0x80000A07, 0) < 0 || SifRpcClient07.server == NULL) {
         _printf("libsecr: bind failed\n");
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
     }
 
     return 1;

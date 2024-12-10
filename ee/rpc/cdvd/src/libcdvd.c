@@ -26,6 +26,7 @@
 #include <sifrpc.h>
 #include <string.h>
 #include <libcdvd.h>
+#include <loadfile.h>
 #include <stdarg.h>
 
 #include "internal.h"
@@ -121,6 +122,7 @@ extern u32 searchFileRecvBuff;
 #ifdef F_sceCdInit
 s32 sceCdInit(s32 mode)
 {
+    int bind_retry = 100;
     if (_CdSyncS(1))
         return 0;
     SifInitRpc(0);
@@ -139,6 +141,7 @@ s32 sceCdInit(s32 mode)
             break;
 
         nopdelay();
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
     }
 
     bindInit = 0;

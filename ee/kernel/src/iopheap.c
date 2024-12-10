@@ -9,6 +9,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+#include <loadfile.h>
 #include "tamtypes.h"
 #include "ps2lib_err.h"
 #include "kernel.h"
@@ -31,7 +32,7 @@ int _ih_caps = 0;
 
 int SifInitIopHeap()
 {
-    int res;
+    int res, bind_retry = 100;
 
     static int _rb_count = 0;
     if (_rb_count != _iop_reboot_count) {
@@ -46,9 +47,10 @@ int SifInitIopHeap()
 
     SifInitRpc(0);
 
-    while ((res = SifBindRpc(&_ih_cd, 0x80000003, 0)) >= 0 && !_ih_cd.server)
+    while ((res = SifBindRpc(&_ih_cd, 0x80000003, 0)) >= 0 && !_ih_cd.server) {
         nopdelay();
-
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
+    }
     if (res < 0)
         return -E_SIF_RPC_BIND;
 
