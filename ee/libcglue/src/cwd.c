@@ -71,19 +71,26 @@ int __get_drive(const char *dev, enum SeparatorType *usePOSIXSeparator)
 		devname_len -= 1;
 	}
 
-	/* We need to check if driver is cdrom because those one use \ as separator */
-	if (devname_len == 5 && (memcmp(d, "cdrom", 5) == 0))
+	*usePOSIXSeparator = SeparatorTypePOSIX;
+	switch (devname_len)
 	{
-		*usePOSIXSeparator = SeparatorTypeWindows;
-	}
-	/* We need to check if drive is rom or hdd because those one don't have separator */
-	else if (devname_len == 3 && ((memcmp(d, "rom", 3) == 0) || (memcmp(d, "hdd", 3) == 0)))
-	{
-		*usePOSIXSeparator = SeparatorTypeNone;
-	}
-	else
-	{
-		*usePOSIXSeparator = SeparatorTypePOSIX;
+	case 3:
+		/* These drivers don't have separator */
+		if ((memcmp(d, "rom", devname_len) == 0) || (memcmp(d, "hdd", devname_len) == 0))
+			*usePOSIXSeparator = SeparatorTypeNone;
+		break;
+	case 5:
+		/* These drivers use \ as separator */
+		if ((memcmp(d, "cdrom", devname_len) == 0))
+			*usePOSIXSeparator = SeparatorTypeWindows;
+		break;
+	case 6:
+		/* These drivers don't have separator */
+		if ((memcmp(d, "usbkbd", devname_len) == 0))
+			*usePOSIXSeparator = SeparatorTypeNone;
+		break;
+	default:
+		break;
 	}
 
 	/* Return the length of the whole device name portion, including:
