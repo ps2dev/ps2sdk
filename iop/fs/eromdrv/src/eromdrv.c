@@ -51,24 +51,27 @@ static int get_val_from_hash1(u32 obfval);
 static erom_info_t *get_erom_info(const u32 *erom_start, const u32 *erom_end, erom_info_t *info);
 static const erom_dentry_t *get_direntry_by_name(erom_info_t *info, const char *name);
 
+IOMAN_RETURN_VALUE_IMPL(0);
+IOMAN_RETURN_VALUE_IMPL(EIO);
+
 static iop_device_ops_t erom_devops = {
-	DUMMY_IMPLEMENTATION, // init
-	DUMMY_IMPLEMENTATION, // deinit
-	NOT_SUPPORTED, // format
-	erom_op_open, // open
-	erom_op_close, // close
-	erom_op_read, // read
-	NOT_SUPPORTED, // write
-	erom_op_lseek, // lseek
-	NOT_SUPPORTED, // ioctl
-	NOT_SUPPORTED, // remove
-	NOT_SUPPORTED, // mkdir
-	NOT_SUPPORTED, // rmdir
-	NOT_SUPPORTED, // dopen
-	NOT_SUPPORTED, // dclose
-	NOT_SUPPORTED, // dread
-	NOT_SUPPORTED, // getstat
-	NOT_SUPPORTED, // chstat
+	IOMAN_RETURN_VALUE(0), // init
+	IOMAN_RETURN_VALUE(0), // deinit
+	IOMAN_RETURN_VALUE(0), // format
+	&erom_op_open, // open
+	&erom_op_close, // close
+	&erom_op_read, // read
+	IOMAN_RETURN_VALUE(EIO), // write
+	&erom_op_lseek, // lseek
+	IOMAN_RETURN_VALUE(0), // ioctl
+	IOMAN_RETURN_VALUE(0), // remove
+	IOMAN_RETURN_VALUE(0), // mkdir
+	IOMAN_RETURN_VALUE(0), // rmdir
+	IOMAN_RETURN_VALUE(0), // dopen
+	IOMAN_RETURN_VALUE(0), // dclose
+	IOMAN_RETURN_VALUE(0), // dread
+	IOMAN_RETURN_VALUE(0), // getstat
+	IOMAN_RETURN_VALUE(0), // chstat
 };
 
 static iop_device_t erom_dev = {

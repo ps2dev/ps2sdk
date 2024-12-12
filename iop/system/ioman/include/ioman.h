@@ -16,7 +16,6 @@
 #ifndef __IOMAN_H__
 #define __IOMAN_H__
 
-#include <errno.h>
 #include <types.h>
 #include <irx.h>
 #include <io_common.h>
@@ -71,14 +70,9 @@ typedef struct _iop_device {
 	struct _iop_device_ops *ops;
 } iop_device_t;
 
-static inline int not_supported_int(void) {return -ENOTSUP;}
-static inline signed long long not_supported_s64(void) {return -ENOTSUP;}
-static inline int dummy_implementation_int(void) { return 0; }
-static inline signed long long dummy_implementation_s64(void) { return 0; }
-#define NOT_SUPPORTED (void*)&not_supported_int
-#define NOT_SUPPORTED_S64 (void*)&not_supported_s64
-#define DUMMY_IMPLEMENTATION (void*)&dummy_implementation_int
-#define DUMMY_IMPLEMENTATION_S64 (void*)&dummy_implementation_s64
+#define IOMAN_RETURN_VALUE_IMPL(val) \
+	static inline int my_ioman_retval_##val##_int(void) {return -val;}
+#define IOMAN_RETURN_VALUE(val) ((void*)&my_ioman_retval_##val##_int)
 
 typedef struct _iop_device_ops {
 	int	(*init)(iop_device_t *);

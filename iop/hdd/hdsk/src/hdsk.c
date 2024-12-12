@@ -723,34 +723,37 @@ static int HdskDevctl(iomanX_iop_file_t *fd, const char *name, int cmd, void *ar
     return result;
 }
 
+IOMANX_RETURN_VALUE_IMPL(0);
+IOMANX_RETURN_VALUE_IMPL(EPERM);
+
 static iomanX_iop_device_ops_t HdskDeviceOps = {
     &HdskInit, // init
-    DUMMY_IMPLEMENTATION, // deinit
-    NOT_SUPPORTED, // format
-    NOT_SUPPORTED, // open
-    NOT_SUPPORTED, // close
-    NOT_SUPPORTED, // read
-    NOT_SUPPORTED, // write
-    NOT_SUPPORTED, // lseek
-    NOT_SUPPORTED, // ioctl
-    NOT_SUPPORTED, // remove
-    NOT_SUPPORTED, // mkdir
-    NOT_SUPPORTED, // rmdir
-    NOT_SUPPORTED, // dopen
-    NOT_SUPPORTED, // dclose
-    NOT_SUPPORTED, // dread
-    NOT_SUPPORTED, // getstat
-    NOT_SUPPORTED, // chstat
-    NOT_SUPPORTED, // rename
-    NOT_SUPPORTED, // chdir
-    NOT_SUPPORTED, // sync
-    NOT_SUPPORTED, // mount
-    NOT_SUPPORTED, // umount
-    NOT_SUPPORTED_S64, // lseek64
+    IOMANX_RETURN_VALUE(0), // deinit
+    IOMANX_RETURN_VALUE(EPERM), // format
+    IOMANX_RETURN_VALUE(EPERM), // open
+    IOMANX_RETURN_VALUE(EPERM), // close
+    IOMANX_RETURN_VALUE(EPERM), // read
+    IOMANX_RETURN_VALUE(EPERM), // write
+    IOMANX_RETURN_VALUE(EPERM), // lseek
+    IOMANX_RETURN_VALUE(EPERM), // ioctl
+    IOMANX_RETURN_VALUE(EPERM), // remove
+    IOMANX_RETURN_VALUE(EPERM), // mkdir
+    IOMANX_RETURN_VALUE(EPERM), // rmdir
+    IOMANX_RETURN_VALUE(EPERM), // dopen
+    IOMANX_RETURN_VALUE(EPERM), // dclose
+    IOMANX_RETURN_VALUE(EPERM), // dread
+    IOMANX_RETURN_VALUE(EPERM), // getstat
+    IOMANX_RETURN_VALUE(EPERM), // chstat
+    IOMANX_RETURN_VALUE(EPERM), // rename
+    IOMANX_RETURN_VALUE(EPERM), // chdir
+    IOMANX_RETURN_VALUE(EPERM), // sync
+    IOMANX_RETURN_VALUE(EPERM), // mount
+    IOMANX_RETURN_VALUE(EPERM), // umount
+    IOMANX_RETURN_VALUE_S64(EPERM), // lseek64
     &HdskDevctl, // devctl
-    NOT_SUPPORTED, // symlink
-    NOT_SUPPORTED, // readlink
-    NOT_SUPPORTED, // ioctl2
+    IOMANX_RETURN_VALUE(EPERM), // symlink
+    IOMANX_RETURN_VALUE(EPERM), // readlink
+    IOMANX_RETURN_VALUE(EPERM), // ioctl2
 };
 
 static iomanX_iop_device_t HdskDevice = {

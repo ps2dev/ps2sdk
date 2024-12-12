@@ -14,24 +14,27 @@ static int acuart_write(iop_file_t *f, void *buffer, int size) {
     return acUartWrite(buffer, size);
 }
 
+IOMAN_RETURN_VALUE_IMPL(0);
+IOMAN_RETURN_VALUE_IMPL(ENOTSUP);
+
 static iop_device_ops_t uart_ops = {
-    DUMMY_IMPLEMENTATION, // init
-    DUMMY_IMPLEMENTATION, // deinit
-    NOT_SUPPORTED, // format
-    NOT_SUPPORTED, // open
-    NOT_SUPPORTED, // close
+    IOMAN_RETURN_VALUE(0), // init
+    IOMAN_RETURN_VALUE(0), // deinit
+    IOMAN_RETURN_VALUE(ENOTSUP), // format
+    IOMAN_RETURN_VALUE(ENOTSUP), // open
+    IOMAN_RETURN_VALUE(ENOTSUP), // close
     &acuart_read, // read
     &acuart_write, // write
-    NOT_SUPPORTED, // lseek
-    NOT_SUPPORTED, // ioctl
-    NOT_SUPPORTED, // remove
-    NOT_SUPPORTED, // mkdir
-    NOT_SUPPORTED, // rmdir
-    NOT_SUPPORTED, // dopen
-    NOT_SUPPORTED, // dclose
-    NOT_SUPPORTED, // dread
-    NOT_SUPPORTED, // getstat
-    NOT_SUPPORTED, // chstat
+    IOMAN_RETURN_VALUE(ENOTSUP), // lseek
+    IOMAN_RETURN_VALUE(ENOTSUP), // ioctl
+    IOMAN_RETURN_VALUE(ENOTSUP), // remove
+    IOMAN_RETURN_VALUE(ENOTSUP), // mkdir
+    IOMAN_RETURN_VALUE(ENOTSUP), // rmdir
+    IOMAN_RETURN_VALUE(ENOTSUP), // dopen
+    IOMAN_RETURN_VALUE(ENOTSUP), // dclose
+    IOMAN_RETURN_VALUE(ENOTSUP), // dread
+    IOMAN_RETURN_VALUE(ENOTSUP), // getstat
+    IOMAN_RETURN_VALUE(ENOTSUP), // chstat
 };
 
 #define DEVNAME "tty"

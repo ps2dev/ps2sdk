@@ -781,10 +781,13 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
     return ret;
 }
 
+IOMANX_RETURN_VALUE_IMPL(0);
+IOMANX_RETURN_VALUE_IMPL(EIO);
+
 static iop_device_ops_t fs_functarray = {
-    DUMMY_IMPLEMENTATION, // init
-    DUMMY_IMPLEMENTATION, // deinit
-    NOT_SUPPORTED, // format
+    IOMANX_RETURN_VALUE(0), // init
+    IOMANX_RETURN_VALUE(0), // deinit
+    IOMANX_RETURN_VALUE(EIO), // format
     &fs_open, // open
     &fs_close, // close
     &fs_read, // read
@@ -798,16 +801,16 @@ static iop_device_ops_t fs_functarray = {
     &fs_dclose, // dclose
     &fs_dread, // dread
     &fs_getstat, // getstat
-    NOT_SUPPORTED, // chstat
+    IOMANX_RETURN_VALUE(EIO), // chstat
     &fs_rename, // rename
-    NOT_SUPPORTED, // chdir
-    NOT_SUPPORTED, // sync
-    NOT_SUPPORTED, // mount
-    NOT_SUPPORTED, // umount
+    IOMANX_RETURN_VALUE(EIO), // chdir
+    IOMANX_RETURN_VALUE(EIO), // sync
+    IOMANX_RETURN_VALUE(EIO), // mount
+    IOMANX_RETURN_VALUE(EIO), // umount
     &fs_lseek64, // lseek64
     &fs_devctl, // devctl
-    NOT_SUPPORTED, // symlink
-    NOT_SUPPORTED, // readlink
+    IOMANX_RETURN_VALUE(EIO), // symlink
+    IOMANX_RETURN_VALUE(EIO), // readlink
     &fs_ioctl2, // ioctl2
 };
 static iop_device_t fs_driver = {
