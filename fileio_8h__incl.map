@@ -1,0 +1,9 @@
+<map id="ee/kernel/include/fileio.h" name="ee/kernel/include/fileio.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="21,5,180,31"/>
+<area shape="rect" id="Node000002" href="$io__common_8h.html" title=" " alt="" coords="51,79,149,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,31,103,63,98,63,98,31"/>
+<area shape="rect" id="Node000003" href="$fcntl_8h_source.html" title=" " alt="" coords="5,153,86,178"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="93,107,66,142,62,139,89,103"/>
+<area shape="rect" id="Node000004" href="$unistd_8h_source.html" title=" " alt="" coords="110,153,200,178"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="111,103,139,139,134,142,107,107"/>
+</map>

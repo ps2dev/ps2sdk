@@ -1,0 +1,11 @@
+<map id="ee/kernel/include/kernel.h" name="ee/kernel/include/kernel.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="47,5,215,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,73,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,34,68,72,65,67,114,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="97,79,165,105"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="134,31,134,63,128,63,128,31"/>
+<area shape="rect" id="Node000004" href="$sifdma_8h.html" title=" " alt="" coords="189,79,260,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="148,29,198,67,195,72,145,34"/>
+<area shape="rect" id="Node000005" href="$tamtypes_8h.html" title=" " alt="" coords="182,153,267,178"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="227,105,227,137,222,137,222,105"/>
+</map>

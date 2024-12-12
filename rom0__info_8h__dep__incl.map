@@ -1,0 +1,31 @@
+<map id="ee/kernel/include/rom0_info.h" name="ee/kernel/include/rom0_info.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="306,5,458,46"/>
+<area shape="rect" id="Node000002" href="$scr__printf_8c.html" title=" " alt="" coords="129,102,294,127"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="331,56,236,103,234,99,329,51"/>
+<area shape="rect" id="Node000003" href="$graph__mode_8c_source.html" title=" " alt="" coords="5,183,135,223"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="369,61,344,101,327,120,307,137,244,157,136,187,134,182,242,152,305,132,323,116,339,98,364,58"/>
+<area shape="rect" id="Node000004" href="$osd__config_8h.html" title=" " alt="" coords="643,94,788,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="473,48,644,92,642,97,472,53"/>
+<area shape="rect" id="Node000008" href="$osd__config_8c.html" title=" " alt="" coords="159,190,331,216"/>
+<area shape="poly" id="edge14_Node000001_Node000008" title=" " alt="" coords="381,62,371,100,352,136,335,154,316,170,276,192,273,187,313,165,332,151,348,133,366,98,376,61"/>
+<area shape="rect" id="Node000014" href="$rom0__info_8c.html" title=" " alt="" coords="812,94,941,135"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="474,37,627,60,800,91,812,94,811,99,799,97,626,65,473,42"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="628,125,408,147,277,164,146,185,135,187,134,182,146,180,276,159,408,142,627,120"/>
+<area shape="rect" id="Node000005" href="$libosd_8c.html" title=" " alt="" coords="731,190,876,216"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="748,144,793,188,789,192,744,148"/>
+<area shape="rect" id="Node000006" href="$libosd__common_8c.html" title=" " alt="" coords="900,183,1035,223"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="788,138,911,180,909,185,786,143"/>
+<area shape="rect" id="Node000007" href="$libosd__full_8c.html" title=" " alt="" coords="1059,183,1193,223"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="803,132,1047,180,1059,183,1058,188,1045,185,802,138"/>
+<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="628,134,344,185,307,192,306,187,343,180,627,129"/>
+<area shape="rect" id="Node000009" href="$osd_8c_source.html" title=" " alt="" coords="1218,183,1357,223"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="803,132,917,148,1006,156,1094,164,1205,180,1218,182,1217,188,1204,185,1094,169,1005,161,916,153,802,137"/>
+<area shape="rect" id="Node000010" href="$osdsrc_8c_source.html" title=" " alt="" coords="1382,183,1521,223"/>
+<area shape="poly" id="edge10_Node000004_Node000010" title=" " alt="" coords="803,132,963,150,1088,156,1212,162,1369,180,1382,182,1381,187,1368,185,1212,167,1088,161,962,155,802,137"/>
+<area shape="rect" id="Node000011" href="$rtc_8c.html" title=" " alt="" coords="1546,190,1680,216"/>
+<area shape="poly" id="edge11_Node000004_Node000011" title=" " alt="" coords="803,132,914,145,1009,152,1170,155,1330,159,1424,166,1533,180,1568,187,1567,192,1532,185,1423,171,1330,164,1170,160,1008,157,914,150,803,137"/>
+<area shape="rect" id="Node000012" href="$timezone_8c.html" title=" " alt="" coords="355,190,526,216"/>
+<area shape="poly" id="edge12_Node000004_Node000012" title=" " alt="" coords="639,142,480,192,479,187,638,137"/>
+<area shape="rect" id="Node000013" href="$scmd_8c.html" title=" " alt="" coords="550,190,707,216"/>
+<area shape="poly" id="edge13_Node000004_Node000013" title=" " alt="" coords="687,148,642,192,639,188,683,144"/>
+</map>

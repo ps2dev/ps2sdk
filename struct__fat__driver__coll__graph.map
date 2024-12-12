@@ -1,0 +1,18 @@
+<map id="_fat_driver" name="_fat_driver">
+<area shape="rect" id="Node000001" title=" " alt="" coords="112,271,194,297"/>
+<area shape="rect" id="Node000002" href="$structblock__device.html" title=" " alt="" coords="5,5,103,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="62,46,87,137,106,192,130,246,145,269,141,272,125,249,101,194,82,138,57,47"/>
+<area shape="rect" id="Node000003" href="$usbhdfsd_8h.html#struct__cache__set" title=" " alt="" coords="115,94,204,120"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="82,39,146,91,143,95,79,43"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="148,135,131,183,129,207,134,231,149,270,144,272,129,233,124,208,125,182,143,133"/>
+<area shape="rect" id="Node000005" href="$struct__mass__dev.html" title=" " alt="" coords="178,183,266,208"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="155,135,155,147,158,157,170,170,185,180,182,184,166,174,154,160,149,148,149,135"/>
+<area shape="rect" id="Node000004" href="$usbhdfsd_8h.html#struct__cache__record" title=" " alt="" coords="126,5,233,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="176,47,165,94,159,93,171,46"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="205,222,164,273,160,269,201,219"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="211,170,197,145,174,122,178,118,201,142,215,167"/>
+<area shape="rect" id="Node000006" href="$structscsi__interface.html" title=" " alt="" coords="232,94,335,120"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="272,135,256,160,236,184,232,180,252,157,268,132"/>
+<area shape="rect" id="Node000007" href="$usbhdfsd_8h.html#struct__fat__bpb" title=" " alt="" coords="290,183,362,208"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="289,218,178,273,176,268,287,213"/>
+</map>

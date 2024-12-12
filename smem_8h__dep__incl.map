@@ -1,0 +1,9 @@
+<map id="ee/sbv/include/smem.h" name="ee/sbv/include/smem.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="181,5,337,31"/>
+<area shape="rect" id="Node000002" href="$patch__enable__lmb_8c.html" title=" " alt="" coords="5,79,169,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="220,40,131,81,129,76,218,35"/>
+<area shape="rect" id="Node000003" href="$smem_8c.html" title=" " alt="" coords="193,87,325,112"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="262,47,262,86,256,86,256,47"/>
+<area shape="rect" id="Node000004" href="$ee_2sbv_2src_2smod_8c.html" title=" " alt="" coords="350,87,478,112"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="297,36,391,84,389,88,295,41"/>
+</map>

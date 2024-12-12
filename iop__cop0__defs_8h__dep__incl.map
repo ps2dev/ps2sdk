@@ -1,0 +1,19 @@
+<map id="common/include/iop_cop0_defs.h" name="common/include/iop_cop0_defs.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="461,5,598,46"/>
+<area shape="rect" id="Node000002" href="$iop_2debug_2iop__sbusdbg_2src_2main_8c_source.html" title=" " alt="" coords="5,183,160,223"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="466,54,133,185,131,180,465,49"/>
+<area shape="rect" id="Node000003" href="$iopdebug_8h.html" title=" " alt="" coords="463,94,596,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="532,62,532,94,527,94,527,62"/>
+<area shape="rect" id="Node000007" href="$iop__debug_8c.html" title=" " alt="" coords="877,183,1011,223"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="590,50,899,180,897,185,588,55"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="447,133,172,185,160,188,159,182,171,180,446,128"/>
+<area shape="rect" id="Node000004" href="$iop_2debug_2iop__sbusdbg_2src_2irx__imports_8h_source.html" title=" " alt="" coords="184,183,338,223"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="455,142,323,185,321,180,453,137"/>
+<area shape="rect" id="Node000005" href="$sbus__dbg_8c_source.html" title=" " alt="" coords="363,183,517,223"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="500,148,462,184,458,180,496,144"/>
+<area shape="rect" id="Node000006" href="$sbus__tty_8c_source.html" title=" " alt="" coords="541,183,696,223"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="562,144,600,180,596,184,559,148"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="612,128,866,180,877,183,876,188,865,185,611,134"/>
+<area shape="rect" id="Node000008" href="$iop_2debug_2iopdebug_2src_2main_8c.html" title=" " alt="" coords="720,183,853,223"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="603,137,729,180,727,185,601,142"/>
+</map>

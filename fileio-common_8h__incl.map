@@ -1,0 +1,11 @@
+<map id="common/include/fileio&#45;common.h" name="common/include/fileio&#45;common.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="32,5,178,46"/>
+<area shape="rect" id="Node000002" href="$tamtypes_8h.html" title=" " alt="" coords="5,94,90,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,48,68,83,63,79,89,45"/>
+<area shape="rect" id="Node000003" href="$io__common_8h.html" title=" " alt="" coords="114,94,213,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="121,45,148,80,143,83,117,48"/>
+<area shape="rect" id="Node000004" href="$fcntl_8h_source.html" title=" " alt="" coords="69,168,149,193"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="157,122,129,157,125,154,152,118"/>
+<area shape="rect" id="Node000005" href="$unistd_8h_source.html" title=" " alt="" coords="173,168,263,193"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="175,118,202,154,198,157,170,122"/>
+</map>
