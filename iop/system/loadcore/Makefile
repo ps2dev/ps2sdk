@@ -8,6 +8,9 @@
 
 IOP_BIN ?= loadcore.irx
 
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include
+
 IOP_OBJS = loadcore.o exports.o imports.o
 
 include $(PS2SDKSRC)/Defs.make

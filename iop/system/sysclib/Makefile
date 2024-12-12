@@ -6,8 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_OBJS = _start.o imports.o exports.o
-
 # Use MIPS or C version?
 USE_MIPS_ASM ?= 1
 
@@ -16,6 +14,13 @@ USE_SIZE_OPTIMIZED ?= 0
 
 # Use full version of printf? This will massively increase the file size
 USE_FULL_PRINTF ?= 0
+
+IOP_CFLAGS += -D_COMPILING_NEWLIB -DPRINTF_ALIAS_STANDARD_FUNCTION_NAMES=1
+
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include
+
+IOP_OBJS = _start.o imports.o exports.o
 
 IOP_OBJS += nonstd/atob.o
 IOP_OBJS += nonstd/ctype.o
@@ -100,8 +105,6 @@ IOP_LIBS += -lgcc
 else
 IOP_CFLAGS += -DPRINTF_SUPPORT_DECIMAL_SPECIFIERS=0 -DPRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS=0 -DPRINTF_SUPPORT_LONG_LONG=0
 endif
-
-IOP_CFLAGS += -D_COMPILING_NEWLIB -DPRINTF_ALIAS_STANDARD_FUNCTION_NAMES=1
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

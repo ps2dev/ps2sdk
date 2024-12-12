@@ -6,8 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-
 IOP_LIB = libdummy.a
+
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/system/stdio/include
+
 IOP_OBJS = crt0.o
 # disable array bounds warning for __do_global_ctors
 IOP_WARNFLAGS += -Wno-array-bounds

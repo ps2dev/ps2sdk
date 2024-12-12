@@ -12,14 +12,26 @@ LIBAPA_SRC_DIR = $(LIBAPA_PATH)src/
 
 IOP_BIN ?= hdck.irx
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/poweroff/include -I$(PS2SDKSRC)/iop/dev9/dev9/include -I$(PS2SDKSRC)/iop/dev9/atad/include -I$(LIBAPA_PATH)include
-
 IOP_CFLAGS += -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_OLD_NAME_ADDDELDRV=0
 
 IOP_CFLAGS += -DAPA_OSD_VER
 
 # If desired, uncomment to build a version of HDCK that checks for crosslinked partitions(unofficial).
 IOP_CFLAGS += -DHDCK_CHECK_CROSSLINK=1
+
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/cdvd/cdvdman/include \
+	-I$(PS2SDKSRC)/iop/dev9/atad/include \
+	-I$(PS2SDKSRC)/iop/dev9/dev9/include \
+	-I$(PS2SDKSRC)/iop/dev9/poweroff/include \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/iomanx/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/sysmem/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include \
+	-I$(LIBAPA_PATH)include
 
 APA_OBJS = misc.o cache.o apa.o journal.o
 IOP_OBJS = hdck.o misc_hdck.o imports.o $(APA_OBJS)

@@ -25,6 +25,18 @@ SMAP_RX_PACKETS_POLLING_MODE ?= 1
 IOP_PREFER_GPOPT = 16384
 IOP_CFLAGS += -mno-check-zero-division
 
+IOP_INCS += \
+	-I$(PS2SDKSRC)/iop/dev9/dev9/include \
+	-I$(PS2SDKSRC)/iop/system/dmacman/include \
+	-I$(PS2SDKSRC)/iop/system/intrman/include \
+	-I$(PS2SDKSRC)/iop/system/loadcore/include \
+	-I$(PS2SDKSRC)/iop/system/modload/include \
+	-I$(PS2SDKSRC)/iop/system/stdio/include \
+	-I$(PS2SDKSRC)/iop/system/sysclib/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include
+
+IOP_OBJS = ipstack.o main.o smap.o xfer.o imports.o exports.o
+
 ifneq (x$(LWIP_DHCP),x0)
 IOP_CFLAGS += -DLWIP_DHCP=1
 endif
@@ -45,10 +57,6 @@ endif
 ifneq (x$(SMAP_RX_PACKETS_POLLING_MODE),x0)
 IOP_CFLAGS += -DSMAP_RX_PACKETS_POLLING_MODE=1
 endif
-
-IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
-
-IOP_OBJS = ipstack.o main.o smap.o xfer.o imports.o exports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
