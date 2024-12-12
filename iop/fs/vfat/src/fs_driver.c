@@ -994,10 +994,14 @@ static int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, 
 #endif
 
 #ifndef WIN32
+
+IOMANX_RETURN_VALUE_IMPL(0);
+IOMANX_RETURN_VALUE_IMPL(EIO);
+
 static iop_device_ops_t fs_functarray = {
     &fs_init, // init
-    DUMMY_IMPLEMENTATION, // deinit
-    NOT_SUPPORTED, // format
+    IOMANX_RETURN_VALUE(0), // deinit
+    IOMANX_RETURN_VALUE(EIO), // format
     &fs_open, // open
     &fs_close, // close
     &fs_read, // read
@@ -1011,24 +1015,24 @@ static iop_device_ops_t fs_functarray = {
     &fs_dclose, // dclose
     &fs_dread, // dread
     &fs_getstat, // getstat
-    NOT_SUPPORTED, // chstat
+    IOMANX_RETURN_VALUE(EIO), // chstat
     &fs_rename, // rename
-    NOT_SUPPORTED, // chdir
-    NOT_SUPPORTED, // sync
-    NOT_SUPPORTED, // mount
-    NOT_SUPPORTED, // umount
-    NOT_SUPPORTED_S64, // lseek64
+    IOMANX_RETURN_VALUE(EIO), // chdir
+    IOMANX_RETURN_VALUE(EIO), // sync
+    IOMANX_RETURN_VALUE(EIO), // mount
+    IOMANX_RETURN_VALUE(EIO), // umount
+    IOMANX_RETURN_VALUE_S64(EIO), // lseek64
 #ifndef BUILDING_IEEE1394_DISK
     &fs_devctl, // devctl
 #else
-    NOT_SUPPORTED, // devctl
+    IOMANX_RETURN_VALUE(EIO), // devctl
 #endif /* BUILDING_IEEE1394_DISK */
-    NOT_SUPPORTED, // symlink
-    NOT_SUPPORTED, // readlink
+    IOMANX_RETURN_VALUE(EIO), // symlink
+    IOMANX_RETURN_VALUE(EIO), // readlink
 #if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
     &fs_ioctl2, // ioctl2
 #else
-    NOT_SUPPORTED, // ioctl2
+    IOMANX_RETURN_VALUE(EIO), // ioctl2
 #endif /* BUILDING_IEEE1394_DISK */
 };
 static iop_device_t fs_driver = {

@@ -218,33 +218,35 @@ struct DevctlCmdTbl_t
 	{0x5473, &esioctl2_func_10},
 };
 
+IOMANX_RETURN_VALUE_IMPL(ENOTSUP);
+
 static iomanX_iop_device_ops_t DvrFuncTbl = {
 	&esdrv_df_init, // init
 	&esdrv_df_exit, // deinit
-	NOT_SUPPORTED, // format
-	NOT_SUPPORTED, // open
-	NOT_SUPPORTED, // close
-	NOT_SUPPORTED, // read
-	NOT_SUPPORTED, // write
-	NOT_SUPPORTED, // lseek
+	IOMANX_RETURN_VALUE(ENOTSUP), // format
+	IOMANX_RETURN_VALUE(ENOTSUP), // open
+	IOMANX_RETURN_VALUE(ENOTSUP), // close
+	IOMANX_RETURN_VALUE(ENOTSUP), // read
+	IOMANX_RETURN_VALUE(ENOTSUP), // write
+	IOMANX_RETURN_VALUE(ENOTSUP), // lseek
 	&esdrv_df_ioctl, // ioctl
-	NOT_SUPPORTED, // remove
-	NOT_SUPPORTED, // mkdir
-	NOT_SUPPORTED, // rmdir
-	NOT_SUPPORTED, // dopen
-	NOT_SUPPORTED, // dclose
-	NOT_SUPPORTED, // dread
-	NOT_SUPPORTED, // getstat
-	NOT_SUPPORTED, // chstat
-	NOT_SUPPORTED, // rename
-	NOT_SUPPORTED, // chdir
-	NOT_SUPPORTED, // sync
-	NOT_SUPPORTED, // mount
-	NOT_SUPPORTED, // umount
-	NOT_SUPPORTED_S64, // lseek64
+	IOMANX_RETURN_VALUE(ENOTSUP), // remove
+	IOMANX_RETURN_VALUE(ENOTSUP), // mkdir
+	IOMANX_RETURN_VALUE(ENOTSUP), // rmdir
+	IOMANX_RETURN_VALUE(ENOTSUP), // dopen
+	IOMANX_RETURN_VALUE(ENOTSUP), // dclose
+	IOMANX_RETURN_VALUE(ENOTSUP), // dread
+	IOMANX_RETURN_VALUE(ENOTSUP), // getstat
+	IOMANX_RETURN_VALUE(ENOTSUP), // chstat
+	IOMANX_RETURN_VALUE(ENOTSUP), // rename
+	IOMANX_RETURN_VALUE(ENOTSUP), // chdir
+	IOMANX_RETURN_VALUE(ENOTSUP), // sync
+	IOMANX_RETURN_VALUE(ENOTSUP), // mount
+	IOMANX_RETURN_VALUE(ENOTSUP), // umount
+	IOMANX_RETURN_VALUE_S64(ENOTSUP), // lseek64
 	&esdrv_df_devctl, // devctl
-	NOT_SUPPORTED, // symlink
-	NOT_SUPPORTED, // readlink
+	IOMANX_RETURN_VALUE(ENOTSUP), // symlink
+	IOMANX_RETURN_VALUE(ENOTSUP), // readlink
 	&esdrv_df_ioctl2, // ioctl2
 };
 static iomanX_iop_device_t ESDRV = {

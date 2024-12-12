@@ -714,33 +714,35 @@ static int FsskIoctl2(iomanX_iop_file_t *fd, int cmd, void *arg, unsigned int ar
     return result;
 }
 
+IOMANX_RETURN_VALUE_IMPL(0);
+
 static iomanX_iop_device_ops_t FsskDeviceOps = {
-    DUMMY_IMPLEMENTATION, // init
-    DUMMY_IMPLEMENTATION, // deinit
-    NOT_SUPPORTED, // format
+    IOMANX_RETURN_VALUE(0), // init
+    IOMANX_RETURN_VALUE(0), // deinit
+    IOMANX_RETURN_VALUE(0), // format
     &FsskOpen, // open
     &FsskClose, // close
-    NOT_SUPPORTED, // read
-    NOT_SUPPORTED, // write
-    NOT_SUPPORTED, // lseek
-    NOT_SUPPORTED, // ioctl
-    NOT_SUPPORTED, // remove
-    NOT_SUPPORTED, // mkdir
-    NOT_SUPPORTED, // rmdir
-    NOT_SUPPORTED, // dopen
-    NOT_SUPPORTED, // dclose
-    NOT_SUPPORTED, // dread
-    NOT_SUPPORTED, // getstat
-    NOT_SUPPORTED, // chstat
-    NOT_SUPPORTED, // rename
-    NOT_SUPPORTED, // chdir
-    NOT_SUPPORTED, // sync
-    NOT_SUPPORTED, // mount
-    NOT_SUPPORTED, // umount
-    NOT_SUPPORTED_S64, // lseek64
-    NOT_SUPPORTED, // devctl
-    NOT_SUPPORTED, // symlink
-    NOT_SUPPORTED, // readlink
+    IOMANX_RETURN_VALUE(0), // read
+    IOMANX_RETURN_VALUE(0), // write
+    IOMANX_RETURN_VALUE(0), // lseek
+    IOMANX_RETURN_VALUE(0), // ioctl
+    IOMANX_RETURN_VALUE(0), // remove
+    IOMANX_RETURN_VALUE(0), // mkdir
+    IOMANX_RETURN_VALUE(0), // rmdir
+    IOMANX_RETURN_VALUE(0), // dopen
+    IOMANX_RETURN_VALUE(0), // dclose
+    IOMANX_RETURN_VALUE(0), // dread
+    IOMANX_RETURN_VALUE(0), // getstat
+    IOMANX_RETURN_VALUE(0), // chstat
+    IOMANX_RETURN_VALUE(0), // rename
+    IOMANX_RETURN_VALUE(0), // chdir
+    IOMANX_RETURN_VALUE(0), // sync
+    IOMANX_RETURN_VALUE(0), // mount
+    IOMANX_RETURN_VALUE(0), // umount
+    IOMANX_RETURN_VALUE_S64(0), // lseek64
+    IOMANX_RETURN_VALUE(0), // devctl
+    IOMANX_RETURN_VALUE(0), // symlink
+    IOMANX_RETURN_VALUE(0), // readlink
     &FsskIoctl2, // ioctl2
 };
 

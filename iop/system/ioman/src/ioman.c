@@ -52,24 +52,26 @@ static int should_print_known_devices = 1;
 extern struct irx_export_table _exp_ioman;
 #endif
 
+IOMAN_RETURN_VALUE_IMPL(0);
+
 iop_io_device_ops_t tty_dev_operations = {
-	DUMMY_IMPLEMENTATION, // init
-	DUMMY_IMPLEMENTATION, // deinit
-	NOT_SUPPORTED, // format
-	NOT_SUPPORTED, // open
-	NOT_SUPPORTED, // close
-	NOT_SUPPORTED, // read
-	NOT_SUPPORTED, // write
-	NOT_SUPPORTED, // lseek
-	NOT_SUPPORTED, // ioctl
-	NOT_SUPPORTED, // remove
-	NOT_SUPPORTED, // mkdir
-	NOT_SUPPORTED, // rmdir
-	NOT_SUPPORTED, // dopen
-	NOT_SUPPORTED, // dclose
-	NOT_SUPPORTED, // dread
-	NOT_SUPPORTED, // getstat
-	NOT_SUPPORTED, // chstat
+	IOMAN_RETURN_VALUE(0), // init
+	IOMAN_RETURN_VALUE(0), // deinit
+	IOMAN_RETURN_VALUE(0), // format
+	IOMAN_RETURN_VALUE(0), // open
+	IOMAN_RETURN_VALUE(0), // close
+	IOMAN_RETURN_VALUE(0), // read
+	IOMAN_RETURN_VALUE(0), // write
+	IOMAN_RETURN_VALUE(0), // lseek
+	IOMAN_RETURN_VALUE(0), // ioctl
+	IOMAN_RETURN_VALUE(0), // remove
+	IOMAN_RETURN_VALUE(0), // mkdir
+	IOMAN_RETURN_VALUE(0), // rmdir
+	IOMAN_RETURN_VALUE(0), // dopen
+	IOMAN_RETURN_VALUE(0), // dclose
+	IOMAN_RETURN_VALUE(0), // dread
+	IOMAN_RETURN_VALUE(0), // getstat
+	IOMAN_RETURN_VALUE(0), // chstat
 };
 
 iop_io_device_t tty_device = {
