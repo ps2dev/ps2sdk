@@ -21,11 +21,15 @@
 
 #include <pwd.h>
 #include <time.h>
+#include <grp.h>
+#include <sys/termios.h>
 #include <sys/time.h>
 #include <sys/timeb.h>
 #include <sys/times.h>
 #include <sys/utime.h>
+#include <sys/uio.h>
 #include <sys/stat.h>
+#include <sys/signal.h>
 #include <sys/types.h>
 #include <sys/random.h>
 
@@ -51,10 +55,19 @@ int __path_absolute(const char *in, char *out, int len);
 extern void * _end;
 
 #ifdef F___dummy_passwd
+char __dummy_passwd_loginbuf[16] = "ps2user";
 /* the present working directory variable. */
-struct passwd __dummy_passwd = { "ps2_user", "xxx", 1000, 1000, "", "", "/", "" };
+struct passwd __dummy_passwd = { &__dummy_passwd_loginbuf[0], "xxx", 1000, 1000, "", "", "/", "" };
 #else
+extern char __dummy_passwd_loginbuf[16];
 extern struct passwd __dummy_passwd;
+#endif
+
+#ifdef F___dummy_group
+static char *__dummy_group_members[2] = {&__dummy_passwd_loginbuf[0], NULL};
+struct group __dummy_group = { "ps2group", "xxx", 1000, &__dummy_group_members[0]};
+#else
+extern struct group __dummy_group;
 #endif
 
 #ifdef F___transform_errno
@@ -121,6 +134,7 @@ void compile_time_check() {
 #endif
 
 #ifdef F__open
+// Called from newlib openr.c
 int _open(const char *buf, int flags, ...) {
 	int iop_fd, fd;
 	int mode;
@@ -162,7 +176,17 @@ int _open(const char *buf, int flags, ...) {
 }
 #endif
 
+#ifdef F_pipe
+// Called from newlib wordexp.c, popen.c
+int pipe(int fildes[2])
+{
+	errno = ENOSYS;
+	return -1;
+}
+#endif
+
 #ifdef F__close
+// Called from newlib closer.c
 int _close(int fd) {
 	int ret = 0;
 
@@ -187,6 +211,7 @@ int _close(int fd) {
 #endif
 
 #ifdef F__read
+// Called from newlib readr.c
 int _read(int fd, void *buf, size_t nbytes) {
 	if (!__IS_FD_VALID(fd)) {
 		errno = EBADF;
@@ -206,6 +231,7 @@ int _read(int fd, void *buf, size_t nbytes) {
 #endif
 
 #ifdef F__write
+// Called from newlib writer.c
 int _write(int fd, const void *buf, size_t nbytes) {
 	if (!__IS_FD_VALID(fd)) {
 		errno = EBADF;
@@ -225,6 +251,7 @@ int _write(int fd, const void *buf, size_t nbytes) {
 #endif
 
 #ifdef F__stat
+// Called from newlib statr.c
 int _stat(const char *path, struct stat *buf) {
 	char dest[MAXNAMLEN + 1];
 
@@ -244,12 +271,14 @@ int _stat(const char *path, struct stat *buf) {
 #endif
 
 #ifdef F_lstat
+// Called from newlib glob.c, nftw.c
 int lstat(const char *path, struct stat *buf) {
 	return stat(path, buf);
 }
 #endif
 
 #ifdef F__fstat
+// Called from newlib fstatr.c
 int _fstat(int fd, struct stat *buf) {
 	if (!__IS_FD_VALID(fd)) {
 		errno = EBADF;
@@ -283,6 +312,7 @@ int _fstat(int fd, struct stat *buf) {
 #endif
 
 #ifdef F_access
+// Called from newlib nftw.c
 int access(const char *fn, int flags) {
 	struct stat s;
 	if (stat(fn, &s))
@@ -300,6 +330,7 @@ int access(const char *fn, int flags) {
 #endif
 
 #ifdef F__fcntl
+// Called from newlib fcntlr.c
 int _fcntl(int fd, int cmd, ...)
 {
 	if (!__IS_FD_VALID(fd)) {
@@ -365,6 +396,7 @@ int _fcntl(int fd, int cmd, ...)
 #endif /* F__fcntl */
 
 #ifdef F_getdents
+// Called from newlib readdir.c, readdir_r.c
 int getdents(int fd, void *dd_buf, int count)
 {
 	struct dirent *dirp;
@@ -396,9 +428,8 @@ int getdents(int fd, void *dd_buf, int count)
 }
 #endif
 
-
-
 #ifdef F__lseek
+// Called from newlib lseekr.c
 off_t _lseek(int fd, off_t offset, int whence)
 {
 	if (!__IS_FD_VALID(fd)) {
@@ -453,8 +484,18 @@ int chdir(const char *path) {
 }
 #endif
 
-#ifdef F_mkdir
-int mkdir(const char *path, mode_t mode) {
+#ifdef F_fchdir
+int fchdir(int fd)
+{
+	errno = ENOSYS;
+	return -1;
+}
+#endif
+
+#ifdef F__mkdir
+// Called from newlib mkdirr.c
+int _mkdir(const char *path, mode_t mode)
+{
 	char dest[MAXNAMLEN + 1];
 
 	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
@@ -470,6 +511,17 @@ int mkdir(const char *path, mode_t mode) {
 
 	return __transform_errno(_libcglue_fdman_path_ops->mkdir(dest, mode));
 }
+#else
+int _mkdir(const char *path, mode_t mode);
+#endif
+
+#ifdef F_mkdir
+int mkdir(const char *path, mode_t mode)
+{
+	return _mkdir(path, mode);
+}
+#else
+int mkdir(const char *path, mode_t mode);
 #endif
 
 #ifdef F_rmdir
@@ -492,6 +544,7 @@ int rmdir(const char *path) {
 #endif
 
 #ifdef F__link
+// Called from newlib linkr.c
 int _link(const char *old, const char *new) {
 	errno = ENOSYS;
 	return -1; /* not supported */
@@ -499,6 +552,7 @@ int _link(const char *old, const char *new) {
 #endif
 
 #ifdef F__unlink
+// Called from newlib unlinkr.c
 int _unlink(const char *path) {
 	char dest[MAXNAMLEN + 1];
 	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
@@ -517,6 +571,7 @@ int _unlink(const char *path) {
 #endif
 
 #ifdef F__rename
+// Called from newlib renamer.c
 int _rename(const char *old, const char *new) {
 	char oldname[MAXNAMLEN + 1];
 	char newname[MAXNAMLEN + 1];
@@ -541,13 +596,54 @@ int _rename(const char *old, const char *new) {
 }
 #endif
 
+#ifdef F_pause
+int pause(void)
+{
+	errno = ENOSYS;
+	return -1;
+}
+#endif
+
+#ifdef F_getitimer
+int getitimer(int which, struct itimerval *value)
+{
+	errno = ENOSYS;
+	return -1;
+}
+#endif
+
+#ifdef F_setitimer
+int setitimer(int which, const struct itimerval *value, struct itimerval *ovalue)
+{
+	errno = ENOSYS;
+	return -1;
+}
+#endif
+
+#ifdef F_sched_yield
+int sched_yield(void)
+{
+	return 0;
+}
+#endif
+
 #ifdef F__getpid
+// Called from newlib signalr.c
 int _getpid(void) {
 	return GetThreadId();
 }
 #endif
 
+#ifdef F_getppid
+pid_t getppid(void)
+{
+	errno = ENOSYS;
+	return (pid_t) -1;
+}
+#endif
+
 #ifdef F__kill
+// Called from newlib signalr.c
 int _kill(int pid, int sig) {
 #if 0 // needs to be tested first
 	// null signal: do error checking on pid only
@@ -563,32 +659,81 @@ int _kill(int pid, int sig) {
 	(void)pid;
 	(void)sig;
 	errno = ENOSYS;
-	return 1; /* not supported */
+	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_sigprocmask
+// Called from newlib hash_page.c
+int sigprocmask(int how, const sigset_t *set, sigset_t *oset)
+{
+	errno = ENOSYS;
+	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_sigaction
+int sigaction(int sig, const struct sigaction *act, struct sigaction *oact)
+{
+	errno = ENOSYS;
+	return -1; /* not supported */
 }
 #endif
 
 #ifdef F__fork
+// Called from newlib execr.c
 pid_t _fork(void) {
 	errno = ENOSYS;
 	return (pid_t) -1; /* not supported */
 }
 #endif
 
+#ifdef F_vfork
+// Called from newlib popen.c
+pid_t vfork(void)
+{
+	errno = ENOSYS;
+	return (pid_t) -1; /* not supported */
+}
+#endif
+
 #ifdef F__wait
+// Called from newlib execr.c
 pid_t _wait(int *unused) {
 	errno = ENOSYS;
 	return (pid_t) -1; /* not supported */
 }
 #endif
 
+#ifdef F_waitpid
+// Called from newlib wordexp.c, popen.c
+pid_t waitpid(pid_t pid, int *stat_loc, int options)
+{
+	errno = ENOSYS;
+	return (pid_t) -1; /* not supported */
+}
+#endif
+
 #ifdef F__execve
+// Called from newlib execr.c, execl.c, execle.c, execv.c, execve.c
 int _execve(const char *name, char *const argv[], char *const env[]) {
 	errno = ENOSYS;
 	return (pid_t) -1; /* not supported */
 }
 #endif
 
+#ifdef F__system
+int _system(const char *command)
+{
+	if (!command)
+		return 0;
+	errno = ENOSYS;
+	return -1;
+}
+#endif
+
 #ifdef F__sbrk
+// Called from newlib sbrkr.c
 void * _sbrk(size_t incr) {
 	static void * _heap_ptr = &_end;
 	void *mp, *ret = (void *)-1;
@@ -608,6 +753,7 @@ void * _sbrk(size_t incr) {
 #endif
 
 #ifdef F__gettimeofday
+// Called from newlib gettimeofdayr.c
 int _gettimeofday(struct timeval *tv, struct timezone *tz)
 {
 	if (tv == NULL)
@@ -636,6 +782,7 @@ int _gettimeofday(struct timeval *tv, struct timezone *tz)
 #endif
 
 #ifdef F__times
+// Called from newlib timesr.c
 clock_t _times(struct tms *buffer) {
 	clock_t clk = GetTimerSystemTime() / (kBUSCLK / (1000 * 1000));
 
@@ -704,6 +851,52 @@ int clock_settime(clockid_t clk_id, const struct timespec *tp) {
 }
 #endif
 
+#ifdef F_readv
+__attribute__((weak))
+ssize_t readv(int fd, const struct iovec *iov, int iovcnt)
+{
+	int i;
+	ssize_t size_sum;
+
+	size_sum = 0;
+	for (i = 0; i < iovcnt; i += 1)
+	{
+		ssize_t size_cur;
+
+		size_cur = read(fd, iov[i].iov_base, iov[i].iov_len);
+		if (size_cur < 0)
+			return size_cur;
+		size_sum += size_cur;
+		if (size_cur != iov[i].iov_len)
+			break;
+	}
+	return size_sum;
+}
+#endif
+
+#ifdef F_writev
+__attribute__((weak))
+ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
+{
+	int i;
+	ssize_t size_sum;
+
+	size_sum = 0;
+	for (i = 0; i < iovcnt; i += 1)
+	{
+		ssize_t size_cur;
+
+		size_cur = write(fd, iov[i].iov_base, iov[i].iov_len);
+		if (size_cur < 0)
+			return size_cur;
+		size_sum += size_cur;
+		if (size_cur != iov[i].iov_len)
+			break;
+	}
+	return size_sum;
+}
+#endif
+
 #ifdef F_truncate
 int truncate(const char *path, off_t length)
 {
@@ -736,8 +929,16 @@ int truncate(const char *path, off_t length)
 }
 #endif
 
-#ifdef F_symlink
-int symlink(const char *target, const char *linkpath)
+#ifdef F_ftruncate
+int ftruncate(int fd, off_t length)
+{
+	errno = ENOSYS;
+	return -1; /* not supported */
+}
+#endif
+
+#ifdef F__symlink
+int _symlink(const char *target, const char *linkpath)
 {
 	char dest_target[MAXNAMLEN + 1];
 	char dest_linkpath[MAXNAMLEN + 1];
@@ -760,10 +961,19 @@ int symlink(const char *target, const char *linkpath)
 
 	return __transform_errno(_libcglue_fdman_path_ops->symlink(dest_target, dest_linkpath));
 }
+#else
+int _symlink(const char *target, const char *linkpath);
 #endif
 
-#ifdef F_readlink
-ssize_t readlink(const char *path, char *buf, size_t bufsiz)
+#ifdef F_symlink
+int symlink(const char *target, const char *linkpath)
+{
+	return _symlink(target, linkpath);
+}
+#endif
+
+#ifdef F__readlink
+ssize_t _readlink(const char *path, char *buf, size_t bufsiz)
 {
 	char dest[MAXNAMLEN + 1];
 
@@ -780,10 +990,28 @@ ssize_t readlink(const char *path, char *buf, size_t bufsiz)
 
 	return __transform_errno(_libcglue_fdman_path_ops->readlink(dest, buf, bufsiz));
 }
+#else
+ssize_t _readlink(const char *path, char *buf, size_t bufsiz);
+#endif
+
+#ifdef F_readlink
+ssize_t readlink(const char *path, char *buf, size_t bufsiz)
+{
+	return _readlink(path, buf, bufsiz);
+}
 #endif
 
 #ifdef F_utime
 int utime(const char *pathname, const struct utimbuf *times)
+{
+	// TODO: implement in terms of chstat
+	errno = ENOSYS;
+	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_utimes
+int utimes(const char *filename, const struct timeval times[2])
 {
 	// TODO: implement in terms of chstat
 	errno = ENOSYS;
@@ -810,6 +1038,7 @@ ssize_t getrandom(void *buf, size_t buflen, unsigned int flags)
 #endif
 
 #ifdef F__getentropy
+// Called from newlib getentropyr.c
 int _getentropy(void *buf, size_t buflen)
 {
 	u8 *buf_cur = buf;
@@ -833,11 +1062,10 @@ int _getentropy(void *buf, size_t buflen)
 }
 #endif
 
-#ifdef F__isatty
-int _isatty(int fd)
+#ifdef F_umask
+mode_t umask(mode_t mask)
 {
-	errno = ENOSYS;
-	return -1; /* not supported */
+	return 0;
 }
 #endif
 
@@ -857,8 +1085,33 @@ int fchmod(int fd, mode_t mode)
 }
 #endif
 
+#ifdef F__chown
+int _chown(const char *path, uid_t owner, gid_t group)
+{
+	errno = ENOSYS;
+	return -1; /* not supported */
+}
+#else
+int _chown(const char *path, uid_t owner, gid_t group);
+#endif
+
+#ifdef F_chown
+int chown(const char *path, uid_t owner, gid_t group)
+{
+	return _chown(path, owner, group);
+}
+#endif
+
 #ifdef F_pathconf
-long int pathconf(const char *path, int name)
+long pathconf(const char *path, int name)
+{
+	errno = ENOSYS;
+	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_fpathconf
+long fpathconf(int fd, int name)
 {
 	errno = ENOSYS;
 	return -1; /* not supported */
@@ -872,19 +1125,69 @@ int fsync(int fd) {
 }
 #endif
 
+#ifdef F_sysconf
+long sysconf(int name)
+{
+	errno = EINVAL;
+	return -1;
+}
+#endif
+
+#ifdef F_tcgetattr
+int tcgetattr(int fd, struct termios *tp)
+{
+	errno = ENOSYS;
+	return -1;
+}
+#endif
+
+#ifdef F_tcsetattr
+int tcsetattr(int fd, int opts, const struct termios *tp)
+{
+	errno = ENOSYS;
+	return -1;
+}
+#endif
+
+#ifdef F_getlogin
+// Called from newlib glob.c
+char *getlogin(void)
+{
+	return __dummy_passwd.pw_name;
+}
+#endif
+
 #ifdef F_getuid
-uid_t getuid(void) {
+// Called from newlib glob.c
+uid_t getuid(void)
+{
 	return __dummy_passwd.pw_uid;
 }
 #endif
 
 #ifdef F_geteuid
-uid_t geteuid(void) {
+uid_t geteuid(void)
+{
 	return __dummy_passwd.pw_uid;
 }
 #endif
 
+#ifdef F_getgid
+gid_t getgid(void)
+{
+	return __dummy_passwd.pw_gid;
+}
+#endif
+
+#ifdef F_getegid
+gid_t getegid(void)
+{
+	return __dummy_passwd.pw_gid;
+}
+#endif
+
 #ifdef F_getpwuid
+// Called from newlib glob.c
 struct passwd *getpwuid(uid_t uid) {
 	/* There's no support for users */
 	return &__dummy_passwd;
@@ -892,9 +1195,32 @@ struct passwd *getpwuid(uid_t uid) {
 #endif
 
 #ifdef F_getpwnam
+// Called from newlib glob.c
 struct passwd *getpwnam(const char *name) {
 	/* There's no support for users */
 	return &__dummy_passwd;
+}
+#endif
+
+#ifdef F_issetugid
+// Called from newlib glob.c
+int issetugid(void)
+{
+	return 0;
+}
+#endif
+
+#ifdef F_getgrgid
+struct group *getgrgid(gid_t gid)
+{
+	return &__dummy_group;
+}
+#endif
+
+#ifdef F_getgrnam
+struct group *getgrnam(const char *nam)
+{
+	return &__dummy_group;
 }
 #endif
 
@@ -1205,6 +1531,7 @@ int dup(int oldfd)
 #endif /* F_dup  */
 
 #ifdef F_dup2
+// Called from wordexp.c, popen.c
 int dup2(int oldfd, int newfd)
 {
 	if (!__IS_FD_VALID(oldfd)) {
