@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+command -v pkg-config >/dev/null 2>&1 || { printf >&2 "pkg-config is not found\n"; exit 1; }
+
+# Ensure host libraries are not being used
+
+export PKG_CONFIG_DIR=
+export PKG_CONFIG_PATH=
+export PKG_CONFIG_SYSROOT_DIR=
+
+export PKG_CONFIG_LIBDIR=${PS2SDK}/ports/lib/pkgconfig:${PS2DEV}/gsKit/lib/pkgconfig:${PS2SDK}/ee/lib/pkgconfig
+
+test "$1" = '--version' && exec pkg-config "$@"
+exec pkg-config --static "$@"

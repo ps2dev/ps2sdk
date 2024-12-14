@@ -24,6 +24,7 @@ EE_OBJCOPY ?= $(EE_TOOL_PREFIX)objcopy
 EE_STRIP ?= $(EE_TOOL_PREFIX)strip
 EE_ADDR2LINE ?= $(EE_TOOL_PREFIX)addr2line
 EE_RANLIB ?= $(EE_TOOL_PREFIX)ranlib
+EE_PKG_CONFIG ?= $(EE_TOOL_PREFIX)pkg-config
 
 #
 # Defintions for the IOP toolchain.
