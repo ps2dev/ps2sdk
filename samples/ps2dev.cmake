@@ -48,6 +48,11 @@ SET(CMAKE_EXE_LINKER_FLAGS_INIT ${EE_LDFLAGS})
 
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-nostartfiles -Wl,-r -Wl,-d")
 
+find_program(PKG_CONFIG_EXECUTABLE NAMES mips64r5900el-ps2-elf-pkg-config HINTS "$ENV{PS2SDK}/bin")
+if (NOT PKG_CONFIG_EXECUTABLE)
+    message(FATAL_ERROR "Could not find mips64r5900el-ps2-elf-pkg-config")
+endif()
+
 SET(PS2 TRUE)
 SET(PLATFORM_PS2 TRUE)
 SET(EE TRUE)

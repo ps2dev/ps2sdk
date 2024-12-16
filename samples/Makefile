@@ -6,6 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+BIN_TARGET = $(PS2SDK)/bin
 SAMPLES_TARGET = $(PS2SDK)/samples
 SHARE_TARGET = $(PS2DEV)/share
 
@@ -28,7 +29,8 @@ release-samples:
 	cp -f Makefile.eeglobal_cpp_sample $(SAMPLES_TARGET)/Makefile.eeglobal_cpp
 	cp -f Makefile.iopglobal_sample $(SAMPLES_TARGET)/Makefile.iopglobal
 	cp -f ps2dev.cmake $(SHARE_TARGET)/ps2dev.cmake
-	cp -f ps2dev_iop.cmake $(SHARE_TARGET)/ps2dev_iop.cmake
+	cp -f pkg-config.in $(BIN_TARGET)/$(EE_TOOL_PREFIX)pkg-config
+	chmod 755 $(BIN_TARGET)/$(EE_TOOL_PREFIX)pkg-config
 
 release-clean:
 	rm -f -r $(SAMPLES_TARGET)
