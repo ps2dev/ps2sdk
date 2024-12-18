@@ -29,6 +29,7 @@ release-samples:
 	cp -f Makefile.eeglobal_cpp_sample $(SAMPLES_TARGET)/Makefile.eeglobal_cpp
 	cp -f Makefile.iopglobal_sample $(SAMPLES_TARGET)/Makefile.iopglobal
 	cp -f ps2dev.cmake $(SHARE_TARGET)/ps2dev.cmake
+	cp -f ps2dev_iop.cmake $(SHARE_TARGET)/ps2dev_iop.cmake
 	cp -f pkg-config.in $(BIN_TARGET)/$(EE_TOOL_PREFIX)pkg-config
 	chmod 755 $(BIN_TARGET)/$(EE_TOOL_PREFIX)pkg-config
 
