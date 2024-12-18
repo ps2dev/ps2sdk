@@ -1,0 +1,18 @@
+<map id="iop/usb/keyboard" name="iop/usb/keyboard">
+<area shape="rect" id="node1" href="dir_8f550b51c304fe10978bfd792866fae2.html" title="usbd" alt="" coords="33,137,82,162"/>
+<area shape="rect" id="node3" href="dir_e958439eae9e499529b4758660d27573.html" title="include" alt="" coords="101,63,163,89"/>
+<area shape="rect" id="node4" href="dir_649efdce889a9164ac5e894f2ff13a76.html" title="src" alt="" coords="38,63,77,89"/>
+<area shape="poly" id="edge2" href="dir_000491_000530.html" alt="" coords="60,89,60,121,55,121,55,89"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000491_000530.html" title="3" alt="" coords="62,111,69,126"/>
+<area shape="rect" id="node5" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="293,137,350,162"/>
+<area shape="poly" id="edge3" href="dir_000491_000239.html" alt="" coords="73,87,90,97,141,113,183,119,226,123,279,132,278,137,225,128,183,125,140,119,88,102,70,91"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000491_000239.html" title="1" alt="" coords="274,118,281,133"/>
+<area shape="rect" id="node6" href="dir_40ac35421bc63b72c26b6c69b1517fd6.html" title="system" alt="" coords="374,137,437,162"/>
+<area shape="poly" id="edge1" href="dir_000491_000515.html" alt="" coords="73,87,90,97,161,117,220,123,281,125,359,134,358,139,281,130,220,129,160,123,88,102,70,91"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000491_000515.html" title="18" alt="" coords="350,120,364,135"/>
+<area shape="rect" id="node7" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html" title="common" alt="" coords="462,137,533,162"/>
+<area shape="poly" id="edge4" href="dir_000491_000045.html" alt="" coords="73,87,90,97,141,113,185,122,263,126,344,125,392,128,447,134,446,139,391,133,344,131,263,132,184,127,140,118,88,102,70,92"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000491_000045.html" title="1" alt="" coords="441,120,448,135"/>
+<area shape="rect" id="clust2" href="dir_dfd34f7999bdb28cb70101636e016b16.html" alt="" coords="27,52,272,99"/>
+<area shape="rect" id="clust1" href="dir_b6c875632944d243a548db157cd77ec2.html" title="usb" alt="" coords="16,16,283,173"/>
+</map>

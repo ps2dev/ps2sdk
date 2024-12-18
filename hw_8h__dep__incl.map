@@ -1,0 +1,7 @@
+<map id="iop/sound/audsrv/src/hw.h" name="iop/sound/audsrv/src/hw.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="73,5,246,31"/>
+<area shape="rect" id="Node000002" href="$audsrv_8c.html" title=" " alt="" coords="5,79,148,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,44,99,81,95,77,134,40"/>
+<area shape="rect" id="Node000003" href="$cdrom_8c.html" title=" " alt="" coords="172,79,314,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,40,224,77,221,81,181,44"/>
+</map>
