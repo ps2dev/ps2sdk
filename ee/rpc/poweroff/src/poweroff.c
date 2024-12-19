@@ -16,6 +16,7 @@
 #include <kernel.h>
 #include <string.h>
 #include <sifrpc.h>
+#include <loadfile.h>
 #include <pwroff_rpc.h>
 
 extern void *_gp;
@@ -64,16 +65,17 @@ static void PowerOffThread(void *dat)
 int poweroffInit(void)
 {
     ee_thread_t thread;
-    int res;
+    int res, int bind_retry = 100;
     static int _init_count = -1;
 
     if (_init_count == _iop_reboot_count)
         return 0;
     _init_count = _iop_reboot_count;
 
-    while (((res = SifBindRpc(&cd0, PWROFF_IRX, 0)) < 0) || (cd0.server == NULL))
+    while (((res = SifBindRpc(&cd0, PWROFF_IRX, 0)) < 0) || (cd0.server == NULL)) {
         nopdelay();
-
+        if (--bind_retry < 1) return -SCE_EBINDMISS;
+     }
     // Terminate and delete any previously created threads
     if (powerOffThreadId >= 0)
     {

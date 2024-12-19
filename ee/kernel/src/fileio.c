@@ -22,6 +22,7 @@
 #include <fileio.h>
 #include <string.h>
 #include <fileio-common.h>
+#include <loadfile.h>
 
 #define D(fmt, args...) printf("(%s:%s:%i):" #fmt, __FILE__, __FUNCTION__, __LINE__, ##args)
 
@@ -50,6 +51,7 @@ int _fio_completion_sema = -1;
 #ifdef F_fio_init
 int fioInit(void)
 {
+    int bind_retry = 100;
     int res;
     ee_sema_t sema;
     static int _rb_count = 0;
@@ -66,8 +68,10 @@ int fioInit(void)
     SifInitRpc(0);
 
     while (((res = SifBindRpc(&_fio_cd, 0x80000001, 0)) >= 0) &&
-           (_fio_cd.server == NULL))
-        nopdelay();
+           (_fio_cd.server == NULL)) {
+            nopdelay();
+            if (--bind_retry < 1) return -SCE_EBINDMISS;
+           }
 
     if (res < 0)
         return res;

@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <loadfile.h>
 #include "ahx_rpc.h"
 
 static unsigned sbuff[64] __attribute__((aligned (64)));
@@ -51,7 +52,7 @@ int AHX_Init()
 
 	// if already init'd, exit
 	if (ahx_init_done) return 0;
-
+	int bind_retry = 100;
 	// bind rpc
 	while(1){
 		int i;
@@ -60,6 +61,7 @@ int AHX_Init()
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
+		if (--bind_retry < 1) return -SCE_EBINDMISS;
 	}
 
 	SifCallRpc(&cd0,AHX_INIT,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,NULL,NULL);
