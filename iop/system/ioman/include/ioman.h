@@ -71,8 +71,10 @@ typedef struct _iop_device {
 } iop_device_t;
 
 #define IOMAN_RETURN_VALUE_IMPL(val) \
-	static inline int my_ioman_retval_##val##_int(void) {return -val;}
+	static inline int my_ioman_retval_##val##_int(void) {return -val;} \
+	static inline signed long long my_ioman_retval_##val##_s64(void) {return -val;}	
 #define IOMAN_RETURN_VALUE(val) ((void*)&my_ioman_retval_##val##_int)
+#define IOMAN_RETURN_VALUE_S64(val) ((void*)&my_ioman_retval_##val##_s64)
 
 typedef struct _iop_device_ops {
 	int	(*init)(iop_device_t *);
