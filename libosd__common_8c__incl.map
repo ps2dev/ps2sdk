@@ -1,0 +1,25 @@
+<map id="ee/kernel/src/libosd_common.c" name="ee/kernel/src/libosd_common.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="167,5,301,46"/>
+<area shape="rect" id="Node000002" href="$kernel_8h.html" title=" " alt="" coords="101,94,167,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="211,49,162,86,159,82,207,44"/>
+<area shape="rect" id="Node000007" href="$syscallnr_8h.html" title=" " alt="" coords="193,94,275,120"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="236,46,236,78,231,78,231,46"/>
+<area shape="rect" id="Node000008" href="$osd__config_8h.html" title=" " alt="" coords="300,94,394,120"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="263,44,319,83,316,87,260,49"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,168,73,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="119,122,69,160,65,156,116,118"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="97,168,165,193"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="136,120,135,152,129,152,131,120"/>
+<area shape="rect" id="Node000005" href="$sifdma_8h.html" title=" " alt="" coords="160,241,230,267"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="147,118,163,140,179,167,189,196,195,225,189,226,184,198,174,169,159,143,142,122"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="225,315,309,341"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="209,265,246,302,242,306,205,269"/>
+<area shape="poly" id="edge8_Node000008_Node000006" title=" " alt="" coords="334,122,313,143,295,169,282,202,275,238,269,300,264,299,269,237,277,201,290,166,309,139,330,118"/>
+<area shape="rect" id="Node000009" href="$rom0__info_8h.html" title=" " alt="" coords="304,168,393,193"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="350,120,350,152,345,152,345,120"/>
+<area shape="rect" id="Node000010" href="$libcdvd_8h.html" title=" " alt="" coords="416,168,489,193"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="366,118,423,156,420,161,363,122"/>
+<area shape="rect" id="Node000011" href="$libcdvd-common_8h.html" title=" " alt="" coords="347,241,473,267"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="448,195,427,229,422,226,443,192"/>
+<area shape="poly" id="edge12_Node000011_Node000006" title=" " alt="" coords="387,270,306,310,304,305,384,265"/>
+</map>

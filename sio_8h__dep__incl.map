@@ -1,0 +1,9 @@
+<map id="ee/kernel/include/sio.h" name="ee/kernel/include/sio.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="154,5,304,31"/>
+<area shape="rect" id="Node000002" href="$sio_8c.html" title=" " alt="" coords="5,87,133,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,41,95,88,92,84,190,36"/>
+<area shape="rect" id="Node000003" href="$libcglue_2src_2glue_8c_source.html" title=" " alt="" coords="157,87,301,112"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="232,47,232,86,226,86,226,47"/>
+<area shape="rect" id="Node000004" href="$sior__rpc_8c.html" title=" " alt="" coords="324,79,454,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="268,36,350,76,348,81,266,41"/>
+</map>

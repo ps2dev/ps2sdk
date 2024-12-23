@@ -1,0 +1,16 @@
+<map id="iop/system/rmman/include/rmman.h" name="iop/system/rmman/include/rmman.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="27,5,201,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,94,68,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,48,61,84,57,81,93,45"/>
+<area shape="rect" id="Node000003" href="$irx_8h.html" title=" " alt="" coords="92,94,136,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="117,46,117,78,111,78,111,46"/>
+<area shape="rect" id="Node000007" href="$librm-common_8h.html" title=" " alt="" coords="156,168,269,193"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="129,45,199,153,194,156,124,48"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="69,168,132,193"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="114,120,108,153,103,152,109,119"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="67,241,134,267"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="103,194,103,226,98,226,98,194"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="164,241,248,267"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="120,192,177,230,174,235,117,196"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="214,194,211,226,206,226,209,193"/>
+</map>
