@@ -9,6 +9,7 @@
 SUBDIRS = \
 	alloc \
 	dmacman \
+	eeconf \
 	eesync \
 	eesync-nano \
 	excepman \
