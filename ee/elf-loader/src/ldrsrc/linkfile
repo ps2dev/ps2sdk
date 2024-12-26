@@ -1,0 +1,101 @@
+/*
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+*/
+
+ENTRY(ldr_getinternalinfo);
+
+MEMORY {
+	bram	: ORIGIN = 0x00084000, LENGTH = 0x7c000 /* 0x00084000 - 0x00100000: Low user region */
+}
+
+REGION_ALIAS("MAIN_REGION", bram);
+
+PHDRS {
+	text PT_LOAD;
+}
+
+SECTIONS {
+	.text : {
+		_ftext = . ;
+		*(.start)
+		*(.text)
+		*(.text.*)
+		*(.gnu.linkonce.t*)
+		QUAD(0)
+	} >MAIN_REGION :text
+
+	PROVIDE(_etext = .);
+	PROVIDE(etext = .);
+
+	.reginfo : { *(.reginfo) } >MAIN_REGION
+
+	/* Static data.  */
+	.rodata ALIGN(128): {
+		*(.rodata)
+		*(.rodata.*)
+		*(.gnu.linkonce.r*)
+	} >MAIN_REGION
+
+	.data ALIGN(128): {
+		_fdata = . ;
+		*(.data)
+		*(.data.*)
+		*(.gnu.linkonce.d*)
+		SORT(CONSTRUCTORS)
+	} >MAIN_REGION
+
+	_gp = ALIGN(128) + 0x7ff0;
+	.lit4 ALIGN(128): { *(.lit4) } >MAIN_REGION
+	.lit8 ALIGN(128): { *(.lit8) } >MAIN_REGION
+
+	.sdata ALIGN(128): {
+		*(.sdata)
+		*(.sdata.*)
+		*(.gnu.linkonce.s*)
+	} >MAIN_REGION
+
+	_edata = .;
+	PROVIDE(edata = .);
+
+	/* Uninitialized data.  */
+	.sbss ALIGN(128) : {
+		_fbss = . ;
+		*(.sbss)
+		*(.sbss.*)
+		*(.gnu.linkonce.sb*)
+		*(.scommon)
+	} >MAIN_REGION
+
+	.bss ALIGN(128) : {
+		*(.bss)
+		*(.bss.*)
+		*(.gnu.linkonce.b*)
+		*(COMMON)
+	} >MAIN_REGION
+	_end_bss = .;
+
+	/* Symbols needed by crt0.  */
+	PROVIDE(_heap_size = 0x2000);
+	PROVIDE(_stack_size = 0x2000);
+
+	_stack = ALIGN(128);
+	PROVIDE(_stack = .);
+	. = _stack + _stack_size;
+
+	/* Special region at the end of the image for storing additional arguments. */
+	.ldr_userarg ALIGN(16): { *(.ldr_userarg) }
+
+	_end = .;
+	PROVIDE(end = .);
+
+	/* Unwanted stuff */
+	/DISCARD/ : {
+		* ( .MIPS.abiflags )
+	}
+}
