@@ -3,120 +3,221 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
+# Copyright ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+#include "irx_imports.h"
+
 /**
  * @file
- * SIO2 logging utility.
+ * SIO2 interface manager and logging utility.
  */
 
-#include <irx.h>
-#include <defs.h>
-#include <types.h>
-
-#include <loadcore.h>
-#include <intrman.h>
-#include <dmacman.h>
-#include <stdio.h>
-#include <thbase.h>
-#include <thevent.h>
-#include <ioman.h>
-
-#include "xsio2man.h"
+#include <iop_mmio_hwport.h>
+#include <rsio2man.h>
 
 #ifdef SIO2LOG
-	#include "log.h"
+#include "log.h"
 #endif
 
-// TODO: last sdk 3.1.0 and sdk 3.0.3 has SIO2MAN module version 0x03,0x11
-// Check what was changed, and maybe port changes.
-// Note: currently is based on the last XPADMAN from BOOTROM:
-// 0x02,0x01 (where is 0x02,0x04?)
 #ifdef SIO2LOG
-	IRX_ID("sio2man_logger", 2, 1);
+IRX_ID("sio2man_logger", 3, 17);
 #else
-#ifdef BUILDING_XSIO2MAN
-#ifdef BUILDING_XSIO2MAN_V2
-	IRX_ID("sio2man", 2, 4);
-#else
-	IRX_ID("sio2man", 2, 1);
+IRX_ID("sio2man", 3, 17);
 #endif
-#else
-	IRX_ID("sio2man", 1, 1);
-#endif
-#endif
+// Based on the module from SDK 3.1.0.
 
 extern struct irx_export_table _exp_sio2man;
+extern struct irx_export_table _exp_sio2man1;
 
-#define SIO2_REG_BASE		0xbf808200
-#define SIO2_REG_PORT0_CTRL1	0xbf808240
-#define SIO2_REG_PORT0_CTRL2	0xbf808244
-#define SIO2_REG_DATA_OUT	0xbf808260
-#define SIO2_REG_DATA_IN	0xbf808264
-#define SIO2_REG_CTRL		0xbf808268
-#define SIO2_REG_STAT6C		0xbf80826c
-#define SIO2_REG_STAT70		0xbf808270
-#define SIO2_REG_STAT74		0xbf808274
-#define SIO2_REG_UNKN78		0xbf808278
-#define SIO2_REG_UNKN7C		0xbf80827c
-#define SIO2_REG_STAT		0xbf808280
-
-/* Event flags */
-#define EF_PAD_TRANSFER_INIT	0x00000001
-#define EF_PAD_TRANSFER_READY	0x00000002
-#define EF_MC_TRANSFER_INIT	0x00000004
-#define EF_MC_TRANSFER_READY	0x00000008
-#ifdef BUILDING_XSIO2MAN
-#define EF_MTAP_TRANSFER_INIT	0x00000010
-#define EF_MTAP_TRANSFER_READY	0x00000020
-#ifdef BUILDING_XSIO2MAN_V2
-	#define EF_RM_TRANSFER_INIT	0x00000040
-	#define EF_RM_TRANSFER_READY	0x00000080
-	#define EF_UNK_TRANSFER_INIT	0x00000100
-	#define EF_UNK_TRANSFER_READY	0x00000200
-	#define EF_TRANSFER_START	0x00000400
-	#define EF_TRANSFER_FINISH	0x00000800
-	#define EF_TRANSFER_RESET	0x00001000
-	#define EF_SIO2_INTR_COMPLETE	0x00002000
-#else
-	#define EF_TRANSFER_START	0x00000040
-	#define EF_TRANSFER_FINISH	0x00000080
-	#define EF_TRANSFER_RESET	0x00000100
-	#define EF_SIO2_INTR_COMPLETE	0x00000200
-#endif
-#else
-	#define EF_TRANSFER_START	0x00000010
-	#define EF_TRANSFER_FINISH	0x00000020
-	#define EF_TRANSFER_RESET	0x00000040
-	#define EF_SIO2_INTR_COMPLETE	0x00000080
-#endif
-
-#define EPRINTF(format, args...) printf("%s: " format, _irx_id.n , ## args)
-
-int init = 0;
-int event_flag = -1;
-int thid = -1;
-sio2_transfer_data_t *transfer_data = NULL;
-int (*mtap_change_slot_cb)(s32 *) = NULL;
-int (*mtap_get_slot_max_cb)(int) = NULL;
-int (*mtap_get_slot_max2_cb)(int) = NULL;
-void (*mtap_update_slots_cb)(void) = NULL;
-
-int sio2_intr_handler(void *arg)
+// Unofficial: remove unused structure members
+struct sio2man_internal_data
 {
-	int ef = *(int *)arg;
+	// Unofficial: move inited into bss section
+	int m_inited;
+	int m_intr_sema;
+	int m_transfer_semaphore;
+	// Unofficial: backwards compatibility for libraries using 1.3 SDK
+	int m_sdk13x_flag;
+	sio2_mtap_change_slot_cb_t m_mtap_change_slot_cb;
+	sio2_mtap_get_slot_max_cb_t m_mtap_get_slot_max_cb;
+	sio2_mtap_get_slot_max2_cb_t m_mtap_get_slot_max2_cb;
+	sio2_mtap_update_slots_t m_mtap_update_slots_cb;
+};
 
-	sio2_stat_set(sio2_stat_get());
+#define EPRINTF(format, args...) printf("%s: " format, _irx_id.n, ##args)
 
-	iSetEventFlag(ef, EF_SIO2_INTR_COMPLETE);
+static struct sio2man_internal_data g_sio2man_data;
 
-	return 1;
+#ifdef SIO2MAN_NANO
+#define sio2_ctrl_set inl_sio2_ctrl_set
+#define sio2_ctrl_get inl_sio2_ctrl_get
+#define sio2_stat6c_get inl_sio2_stat6c_get
+#define sio2_portN_ctrl1_set inl_sio2_portN_ctrl1_set
+#define sio2_portN_ctrl2_set inl_sio2_portN_ctrl2_set
+#define sio2_regN_set inl_sio2_regN_set
+#define sio2_stat74_get inl_sio2_stat74_get
+#define sio2_data_out inl_sio2_data_out
+#define sio2_data_in inl_sio2_data_in
+#define sio2_stat_set inl_sio2_stat_set
+#define sio2_stat_get inl_sio2_stat_get
+#define sio2_set_ctrl_c inl_sio2_set_ctrl_c
+#define sio2_set_ctrl_1 inl_sio2_set_ctrl_1
+#define NANO_STATIC static inline
+#else
+#define NANO_STATIC
+#endif
+
+NANO_STATIC void sio2_ctrl_set(u32 val)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	iop_mmio_hwport->sio2.ctrl = val;
 }
 
-void send_td(sio2_transfer_data_t *td)
+NANO_STATIC u32 sio2_ctrl_get(void)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.ctrl;
+}
+
+NANO_STATIC u32 sio2_stat6c_get(void)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.recv1;
+}
+
+NANO_STATIC void sio2_portN_ctrl1_set(int N, u32 val)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	iop_mmio_hwport->sio2.send1_2_buf[N * 2] = val;
+}
+
+#ifndef SIO2MAN_NANO
+u32 sio2_portN_ctrl1_get(int N)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.send1_2_buf[N * 2];
+}
+#endif
+
+NANO_STATIC void sio2_portN_ctrl2_set(int N, u32 val)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	iop_mmio_hwport->sio2.send1_2_buf[(N * 2) + 1] = val;
+}
+
+#ifndef SIO2MAN_NANO
+u32 sio2_portN_ctrl2_get(int N)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.send1_2_buf[(N * 2) + 1];
+}
+#endif
+
+u32 sio2_stat70_get(void)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.recv2;
+}
+
+NANO_STATIC void sio2_regN_set(int N, u32 val)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	iop_mmio_hwport->sio2.send3_buf[N] = val;
+}
+
+#ifndef SIO2MAN_NANO
+u32 sio2_regN_get(int N)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.send3_buf[N];
+}
+#endif
+
+NANO_STATIC u32 sio2_stat74_get(void)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.recv3;
+}
+
+#ifndef SIO2MAN_NANO
+void sio2_unkn78_set(u32 val)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	iop_mmio_hwport->sio2.unk_78 = val;
+}
+#endif
+
+#ifndef SIO2MAN_NANO
+u32 sio2_unkn78_get(void)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.unk_78;
+}
+#endif
+
+#ifndef SIO2MAN_NANO
+void sio2_unkn7c_set(u32 val)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	iop_mmio_hwport->sio2.unk_7c = val;
+}
+#endif
+
+#ifndef SIO2MAN_NANO
+u32 sio2_unkn7c_get(void)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.unk_7c;
+}
+#endif
+
+NANO_STATIC void sio2_data_out(u8 val)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	iop_mmio_hwport->sio2.out_fifo = val;
+}
+
+NANO_STATIC u8 sio2_data_in(void)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.in_fifo;
+}
+
+NANO_STATIC void sio2_stat_set(u32 val)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	iop_mmio_hwport->sio2.stat = val;
+}
+
+NANO_STATIC u32 sio2_stat_get(void)
+{
+	USE_IOP_MMIO_HWPORT();
+
+	return iop_mmio_hwport->sio2.stat;
+}
+
+static void send_td(sio2_transfer_data_t *td)
 {
 	int i;
 
@@ -124,7 +225,8 @@ void send_td(sio2_transfer_data_t *td)
 	log_default(LOG_TRS);
 #endif
 
-	for (i = 0; i < 4; i++) {
+	for ( i = 0; i < 4; i += 1 )
+	{
 		sio2_portN_ctrl1_set(i, td->port_ctrl1[i]);
 		sio2_portN_ctrl2_set(i, td->port_ctrl2[i]);
 	}
@@ -133,45 +235,41 @@ void send_td(sio2_transfer_data_t *td)
 	log_portdata(td->port_ctrl1, td->port_ctrl2);
 #endif
 
-	for (i = 0; i < 16; i++)
+	for ( i = 0; i < 16; i += 1 )
 		sio2_regN_set(i, td->regdata[i]);
 
 #ifdef SIO2LOG
 	log_regdata(td->regdata);
 #endif
 
-	if (td->in_size) {
-		for (i = 0; (u32)i < td->in_size; i++)
-			sio2_data_out(td->in[i]);
+	for ( i = 0; i < (int)td->in_size; i += 1 )
+		sio2_data_out(td->in[i]);
 #ifdef SIO2LOG
+	if ( td->in_size )
 		log_data(LOG_TRS_DATA, td->in, td->in_size);
 #endif
-	}
-
-	if (td->in_dma.addr) {
-		sceSetSliceDMA(IOP_DMAC_SIO2in, td->in_dma.addr, td->in_dma.size,
-				td->in_dma.count, DMAC_FROM_MEM);
+	if ( td->in_dma.addr )
+	{
+		sceSetSliceDMA(IOP_DMAC_SIO2in, td->in_dma.addr, td->in_dma.size, td->in_dma.count, DMAC_FROM_MEM);
 		sceStartDMA(IOP_DMAC_SIO2in);
-
 #ifdef SIO2LOG
 		log_dma(LOG_TRS_DMA_IN, &td->in_dma);
 #endif
 	}
-
-	if (td->out_dma.addr) {
-		sceSetSliceDMA(IOP_DMAC_SIO2out, td->out_dma.addr, td->out_dma.size,
-				td->out_dma.count, DMAC_TO_MEM);
+	if ( td->out_dma.addr )
+	{
+		sceSetSliceDMA(IOP_DMAC_SIO2out, td->out_dma.addr, td->out_dma.size, td->out_dma.count, DMAC_TO_MEM);
 		sceStartDMA(IOP_DMAC_SIO2out);
-
 #ifdef SIO2LOG
 		log_dma(LOG_TRS_DMA_OUT, &td->out_dma);
 #endif
 	}
 }
 
-void recv_td(sio2_transfer_data_t *td)
+static void recv_td(sio2_transfer_data_t *td)
 {
 	int i;
+
 #ifdef SIO2LOG
 	log_default(LOG_TRR);
 #endif
@@ -181,338 +279,219 @@ void recv_td(sio2_transfer_data_t *td)
 #ifdef SIO2LOG
 	log_stat(td->stat6c, td->stat70, td->stat74);
 #endif
-	if (td->out_size) {
-		for (i = 0; (u32)i < td->out_size; i++)
-			td->out[i] = sio2_data_in();
+	for ( i = 0; i < (int)td->out_size; i += 1 )
+		td->out[i] = sio2_data_in();
 #ifdef SIO2LOG
+	if ( td->out_size )
 		log_data(LOG_TRR_DATA, td->out, td->out_size);
 #endif
-	}
 }
 
-void main_thread(void *unused)
+static int sio2_intr_handler(const struct sio2man_internal_data *arg)
 {
-	u32 resbits[4];
-
-	(void)unused;
-
-	while (1) {
-	#ifdef SIO2LOG
-		log_flush(0);
-	#endif
-		WaitEventFlag(event_flag, EF_PAD_TRANSFER_INIT |
-				EF_MC_TRANSFER_INIT
-#ifdef BUILDING_XSIO2MAN
-				| EF_MTAP_TRANSFER_INIT
-#ifdef BUILDING_XSIO2MAN_V2
-				| EF_RM_TRANSFER_INIT | EF_UNK_TRANSFER_INIT
-#endif
-#endif
-				, 1, resbits);
-
-		if (resbits[0] & EF_PAD_TRANSFER_INIT) {
-			ClearEventFlag(event_flag, ~EF_PAD_TRANSFER_INIT);
-			SetEventFlag(event_flag, EF_PAD_TRANSFER_READY);
-#ifdef SIO2LOG
-			log_default(LOG_PAD_READY);
-#endif
-		} else if (resbits[0] & EF_MC_TRANSFER_INIT) {
-			ClearEventFlag(event_flag, ~EF_MC_TRANSFER_INIT);
-			SetEventFlag(event_flag, EF_MC_TRANSFER_READY);
-#ifdef SIO2LOG
-			log_default(LOG_MC_READY);
-#endif
-		}
-#ifdef BUILDING_XSIO2MAN
-		else if (resbits[0] & EF_MTAP_TRANSFER_INIT) {
-			ClearEventFlag(event_flag, ~EF_MTAP_TRANSFER_INIT);
-			SetEventFlag(event_flag, EF_MTAP_TRANSFER_READY);
-#ifdef SIO2LOG
-			log_default(LOG_MTAP_READY);
-#endif
-		}
-#ifdef BUILDING_XSIO2MAN_V2
-		else if (resbits[0] & EF_RM_TRANSFER_INIT) {
-			ClearEventFlag(event_flag, ~EF_RM_TRANSFER_INIT);
-			SetEventFlag(event_flag, EF_RM_TRANSFER_READY);
-#ifdef SIO2LOG
-			log_default(LOG_RM_READY);
-#endif
-		} else if (resbits[0] & EF_UNK_TRANSFER_INIT) {
-			ClearEventFlag(event_flag, ~EF_UNK_TRANSFER_INIT);
-			SetEventFlag(event_flag, EF_UNK_TRANSFER_READY);
-#ifdef SIO2LOG
-			log_default(LOG_UNK_READY);
-#endif
-		}
-#endif
-#endif
-		else {
-#ifdef BUILDING_XSIO2MAN
-			EPRINTF("Unknown event %08lx. Exiting.\n", resbits[0]);
-#else
-			EPRINTF("SIO2_BASIC_THREAD : why I wakeup ? %08lx\n", resbits[0]);
-#endif
-			return;
-		}
-
-#ifdef BUILDING_XSIO2MAN
-transfer_loop:
-#endif
-		WaitEventFlag(event_flag, EF_TRANSFER_START
-#ifdef BUILDING_XSIO2MAN
-				 | EF_TRANSFER_RESET
-#endif
-				 , 1, resbits);
-
-#ifdef BUILDING_XSIO2MAN
-		if (resbits[0] & EF_TRANSFER_RESET) {
-			ClearEventFlag(event_flag, ~EF_TRANSFER_RESET);
-#ifdef SIO2LOG
-			log_default(LOG_RESET);
-#endif
-			continue;
-		}
-#endif
-
-		ClearEventFlag(event_flag, ~EF_TRANSFER_START);
-
-		sio2_ctrl_set(sio2_ctrl_get() | 0xc);
-		send_td(transfer_data);
-		sio2_ctrl_set(sio2_ctrl_get() | 1);
-
-		WaitEventFlag(event_flag, EF_SIO2_INTR_COMPLETE, 0, NULL);
-		ClearEventFlag(event_flag, ~EF_SIO2_INTR_COMPLETE);
-
-		recv_td(transfer_data);
-		SetEventFlag(event_flag, EF_TRANSFER_FINISH);
-#ifndef BUILDING_XSIO2MAN
-		WaitEventFlag(event_flag, EF_TRANSFER_RESET, 0, NULL);
-		ClearEventFlag(event_flag, ~EF_TRANSFER_RESET);
-#endif
-
-		/* Bah... this is needed to get the initial dump from XMCMAN,
-		   but it will kill the IOP when XPADMAN is spamming...
-
-		   TODO
-		   I guess the correct solution is to do all logging in a
-		   dedicated thread.  */
-//		log_flush(1);
-
-#ifdef BUILDING_XSIO2MAN
-		goto transfer_loop;
-#endif
-	}
+	sio2_stat_set(sio2_stat_get());
+	iSignalSema(arg->m_intr_sema);
+	return 1;
 }
 
-int create_main_thread(void)
+int _start(int ac, char **av)
 {
-	iop_thread_t thread;
-
-	thread.attr = 0x2000000;
-	thread.option = 0;
-	thread.thread = main_thread;
-	thread.stacksize = 0x8000;
-	thread.priority = 0x18;
-	return CreateThread(&thread);
-}
-
-int create_event_flag(void)
-{
-	iop_event_t event;
-
-	event.attr = 2;
-	event.option = 0;
-	event.bits = 0;
-	return CreateEventFlag(&event);
-}
-
-void shutdown(void)
-{
-	int state;
-#ifdef SIO2LOG
-	log_flush(1);
-#endif
-	CpuSuspendIntr(&state);
-	DisableIntr(IOP_IRQ_SIO2, 0);
-	ReleaseIntrHandler(IOP_IRQ_SIO2);
-	CpuResumeIntr(state);
-
-	sceDisableDMAChannel(IOP_DMAC_SIO2in);
-	sceDisableDMAChannel(IOP_DMAC_SIO2out);
-}
-
-int _start(int argc, char *argv[])
-{
+	iop_sema_t semaparam;
 	int state;
 
-	(void)argc;
-	(void)argv;
+	(void)ac;
+	(void)av;
 
-	shutdown();
-
-	if (RegisterLibraryEntries(&_exp_sio2man) != 0)
-		return MODULE_NO_RESIDENT_END;
-
-	if (init)
-		return MODULE_NO_RESIDENT_END;
-
-	init = 1;
-
-	sio2_ctrl_set(0x3bc);
-
-	mtap_change_slot_cb = NULL;  mtap_get_slot_max_cb = NULL;  mtap_get_slot_max2_cb = NULL; mtap_update_slots_cb = NULL;
-	event_flag = create_event_flag();
-	thid = create_main_thread();
-
+	if ( RegisterLibraryEntries(&_exp_sio2man) != 0 )
+		return 1;
+	// Unofficial: register same name but older major version for backwards compatibility
+	_exp_sio2man1.name[7] = '\x00';
+	if ( RegisterLibraryEntries(&_exp_sio2man1) != 0 )
+		return 1;
+	if ( g_sio2man_data.m_inited )
+		return 1;
+	g_sio2man_data.m_inited = 1;
+	g_sio2man_data.m_sdk13x_flag = 0;
+	// Unofficial: remove unneeded thread priority argument handler
+	g_sio2man_data.m_mtap_change_slot_cb = 0;
+	g_sio2man_data.m_mtap_get_slot_max_cb = 0;
+	g_sio2man_data.m_mtap_get_slot_max2_cb = 0;
+	g_sio2man_data.m_mtap_update_slots_cb = 0;
+	// Unofficial: inlined
+	sio2_ctrl_set(0x3BC);
 	CpuSuspendIntr(&state);
-	RegisterIntrHandler(IOP_IRQ_SIO2, 1, sio2_intr_handler, &event_flag);
+	RegisterIntrHandler(IOP_IRQ_SIO2, 1, (int (*)(void *))sio2_intr_handler, &g_sio2man_data);
 	EnableIntr(IOP_IRQ_SIO2);
 	CpuResumeIntr(state);
-
 	sceSetDMAPriority(IOP_DMAC_SIO2in, 3);
 	sceSetDMAPriority(IOP_DMAC_SIO2out, 3);
 	sceEnableDMAChannel(IOP_DMAC_SIO2in);
 	sceEnableDMAChannel(IOP_DMAC_SIO2out);
-
-	StartThread(thid, NULL);
+	semaparam.attr = 0;
+	semaparam.option = 0;
+	semaparam.initial = 1;
+	semaparam.max = 64;
+	g_sio2man_data.m_transfer_semaphore = CreateSema(&semaparam);
+	semaparam.attr = 0;
+	semaparam.option = 0;
+	semaparam.initial = 0;
+	semaparam.max = 64;
+	g_sio2man_data.m_intr_sema = CreateSema(&semaparam);
 #ifdef SIO2LOG
 	EPRINTF("Logging started.\n");
 #endif
-	return MODULE_RESIDENT_END;
+	return 0;
+}
+
+void _deinit()
+{
+	int state;
+
+	// Unofficial: check inited
+	if ( !g_sio2man_data.m_inited )
+		return;
+#ifdef SIO2LOG
+	log_flush(1);
+#endif
+	// Unofficial: unset inited
+	g_sio2man_data.m_inited = 0;
+	// Unofficial: remove unused GetThreadId
+	CpuSuspendIntr(&state);
+	DisableIntr(IOP_IRQ_SIO2, 0);
+	ReleaseIntrHandler(IOP_IRQ_SIO2);
+	CpuResumeIntr(state);
+	sceDisableDMAChannel(IOP_DMAC_SIO2in);
+	sceDisableDMAChannel(IOP_DMAC_SIO2out);
+	DeleteSema(g_sio2man_data.m_intr_sema);
+	DeleteSema(g_sio2man_data.m_transfer_semaphore);
+}
+
+#ifndef SIO2MAN_NANO
+void sio2_set_intr_handler(int (*handler)(void *), void *userdata)
+{
+	int state;
+
+	CpuSuspendIntr(&state);
+	DisableIntr(IOP_IRQ_SIO2, 0);
+	ReleaseIntrHandler(IOP_IRQ_SIO2);
+	RegisterIntrHandler(
+		IOP_IRQ_SIO2, 1, handler ? handler : (int (*)(void *))sio2_intr_handler, handler ? userdata : &g_sio2man_data);
+	EnableIntr(IOP_IRQ_SIO2);
+	CpuResumeIntr(state);
+}
+#endif
+
+NANO_STATIC void sio2_set_ctrl_c()
+{
+	// Unofficial: inlined
+	sio2_ctrl_set(sio2_ctrl_get() | 0xC);
+}
+
+NANO_STATIC void sio2_set_ctrl_1()
+{
+	// Unofficial: inlined
+	sio2_ctrl_set(sio2_ctrl_get() | 1);
+}
+
+void sio2_wait_for_intr()
+{
+	WaitSema(g_sio2man_data.m_intr_sema);
+}
+
+int sio2_transfer(sio2_transfer_data_t *td)
+{
+	// Unofficial: remove unused transfer data global
+	// Unofficial: replace with inlined func
+	sio2_set_ctrl_c();
+	send_td(td);
+	// Unofficial: replace with inlined func
+	sio2_set_ctrl_1();
+	sio2_wait_for_intr();
+	recv_td(td);
+	if ( g_sio2man_data.m_sdk13x_flag )
+		sio2_transfer_reset();
+#ifdef SIO2LOG
+	log_flush(0);
+#endif
+	return 1;
 }
 
 void sio2_pad_transfer_init(void)
 {
-	SetEventFlag(event_flag, EF_PAD_TRANSFER_INIT);
-
-	WaitEventFlag(event_flag, EF_PAD_TRANSFER_READY, 0, NULL);
-	ClearEventFlag(event_flag, ~EF_PAD_TRANSFER_READY);
-}
-
-void sio2_mc_transfer_init(void)
-{
-	SetEventFlag(event_flag, EF_MC_TRANSFER_INIT);
-
-	WaitEventFlag(event_flag, EF_MC_TRANSFER_READY, 0, NULL);
-	ClearEventFlag(event_flag, ~EF_MC_TRANSFER_READY);
-}
-
-#ifdef BUILDING_XSIO2MAN
-void sio2_mtap_transfer_init(void)
-{
-	SetEventFlag(event_flag, EF_MTAP_TRANSFER_INIT);
-
-	WaitEventFlag(event_flag, EF_MTAP_TRANSFER_READY, 0, NULL);
-	ClearEventFlag(event_flag, ~EF_MTAP_TRANSFER_READY);
-}
+#ifdef SIO2LOG
+	log_flush(0);
 #endif
-
-int sio2_transfer(sio2_transfer_data_t *td)
-{
-	transfer_data = td;
-	SetEventFlag(event_flag, EF_TRANSFER_START);
-
-	WaitEventFlag(event_flag, EF_TRANSFER_FINISH, 0, NULL);
-	ClearEventFlag(event_flag, ~EF_TRANSFER_FINISH);
-
-#ifndef BUILDING_XSIO2MAN
-	SetEventFlag(event_flag, EF_TRANSFER_RESET);
+	WaitSema(g_sio2man_data.m_transfer_semaphore);
+#ifdef SIO2LOG
+	log_default(LOG_PAD_READY);
 #endif
-	return 1;
+	g_sio2man_data.m_sdk13x_flag = 0;
 }
 
-#ifdef BUILDING_XSIO2MAN
-#ifdef BUILDING_XSIO2MAN_V2
-void sio2_rm_transfer_init(void)
+void sio2_pad_transfer_init_possiblysdk13x(void)
 {
-	SetEventFlag(event_flag, EF_RM_TRANSFER_INIT);
-
-	WaitEventFlag(event_flag, EF_RM_TRANSFER_READY, 0, NULL);
-	ClearEventFlag(event_flag, ~EF_RM_TRANSFER_READY);
+	sio2_pad_transfer_init();
+	g_sio2man_data.m_sdk13x_flag = 1;
 }
 
-void sio2_unk_transfer_init(void)
-{
-	SetEventFlag(event_flag, EF_UNK_TRANSFER_INIT);
-
-	WaitEventFlag(event_flag, EF_UNK_TRANSFER_READY, 0, NULL);
-	ClearEventFlag(event_flag, ~EF_UNK_TRANSFER_READY);
-}
-#endif
-#endif
-
-#ifdef BUILDING_XSIO2MAN
 void sio2_transfer_reset(void)
 {
-	SetEventFlag(event_flag, EF_TRANSFER_RESET);
+	g_sio2man_data.m_sdk13x_flag = 0;
+	SignalSema(g_sio2man_data.m_transfer_semaphore);
+#ifdef SIO2LOG
+	log_default(LOG_RESET);
+#endif
 }
 
-int sio2_mtap_change_slot(s32 *status)
+void sio2_mtap_change_slot_set(sio2_mtap_change_slot_cb_t cb)
 {
-	int i, ret = 1;
+	g_sio2man_data.m_mtap_change_slot_cb = cb;
+}
 
-	if (mtap_change_slot_cb)
-		return mtap_change_slot_cb(status);
+void sio2_mtap_get_slot_max_set(sio2_mtap_get_slot_max_cb_t cb)
+{
+	g_sio2man_data.m_mtap_get_slot_max_cb = cb;
+}
 
-	for (i = 0; i < 4; i++, status++) {
-		if ((*status + 1) < 2)
-			status[4] = 1;
-		else {
-			status[4] = 0;
-			ret = 0;
-		}
+void sio2_mtap_get_slot_max2_set(sio2_mtap_get_slot_max2_cb_t cb)
+{
+	g_sio2man_data.m_mtap_get_slot_max2_cb = cb;
+}
+
+void sio2_mtap_update_slots_set(sio2_mtap_update_slots_t cb)
+{
+	g_sio2man_data.m_mtap_update_slots_cb = cb;
+}
+
+int sio2_mtap_change_slot(s32 *arg)
+{
+	int sum;
+	int i;
+
+	g_sio2man_data.m_sdk13x_flag = 0;
+	if ( g_sio2man_data.m_mtap_change_slot_cb )
+		return g_sio2man_data.m_mtap_change_slot_cb(arg);
+	sum = 0;
+	for ( i = 0; i < 4; i += 1 )
+	{
+		arg[i + 4] = ((arg[i] + 1) < 2);
+		sum += arg[i + 4];
 	}
-
-	return ret;
+	return sum == 4;
 }
 
 int sio2_mtap_get_slot_max(int port)
 {
-	if (mtap_get_slot_max_cb)
-		return mtap_get_slot_max_cb(port);
-
-	return 1;
+	return g_sio2man_data.m_mtap_get_slot_max_cb ? g_sio2man_data.m_mtap_get_slot_max_cb(port) : 1;
 }
 
 int sio2_mtap_get_slot_max2(int port)
 {
-	if (mtap_get_slot_max2_cb)
-		return mtap_get_slot_max2_cb(port);
-
-	return 1;
+	return g_sio2man_data.m_mtap_get_slot_max2_cb ? g_sio2man_data.m_mtap_get_slot_max2_cb(port) : 1;
 }
 
 void sio2_mtap_update_slots(void)
 {
-	if (mtap_update_slots_cb)
-		mtap_update_slots_cb();
+	if ( g_sio2man_data.m_mtap_update_slots_cb )
+		g_sio2man_data.m_mtap_update_slots_cb();
 }
-#endif
-
-#ifdef BUILDING_XSIO2MAN
-void sio2_mtap_change_slot_set(sio2_mtap_change_slot_cb_t cb) { mtap_change_slot_cb = cb; }
-void sio2_mtap_get_slot_max_set(sio2_mtap_get_slot_max_cb_t cb) { mtap_get_slot_max_cb = cb; }
-void sio2_mtap_get_slot_max2_set(sio2_mtap_get_slot_max2_cb_t cb) { mtap_get_slot_max2_cb = cb; }
-void sio2_mtap_update_slots_set(sio2_mtap_update_slots_t cb) { mtap_update_slots_cb = cb; }
-#endif
-
-void sio2_ctrl_set(u32 val) { _sw(val, SIO2_REG_CTRL); }
-u32  sio2_ctrl_get() { return _lw(SIO2_REG_CTRL); }
-u32  sio2_stat6c_get() { return _lw(SIO2_REG_STAT6C); }
-void sio2_portN_ctrl1_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL1 + (N * 8)); }
-u32  sio2_portN_ctrl1_get(int N) { return _lw(SIO2_REG_PORT0_CTRL1 + (N * 8)); }
-void sio2_portN_ctrl2_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL2 + (N * 8)); }
-u32  sio2_portN_ctrl2_get(int N) { return _lw(SIO2_REG_PORT0_CTRL2 + (N * 8)); }
-u32  sio2_stat70_get() { return _lw(SIO2_REG_STAT70); }
-void sio2_regN_set(int N, u32 val) { _sw(val, SIO2_REG_BASE + (N * 4)); }
-u32  sio2_regN_get(int N) { return _lw(SIO2_REG_BASE + (N * 4)); }
-u32  sio2_stat74_get() { return _lw(SIO2_REG_STAT74); }
-void sio2_unkn78_set(u32 val) { _sw(val, SIO2_REG_UNKN78); }
-u32  sio2_unkn78_get() { return _lw(SIO2_REG_UNKN78); }
-void sio2_unkn7c_set(u32 val) { _sw(val, SIO2_REG_UNKN7C); }
-u32  sio2_unkn7c_get() { return _lw(SIO2_REG_UNKN7C); }
-void sio2_data_out(u8 val) { _sb(val, SIO2_REG_DATA_OUT); }
-u8   sio2_data_in() { return _lb(SIO2_REG_DATA_IN); }
-void sio2_stat_set(u32 val) { _sw(val, SIO2_REG_STAT); }
-u32  sio2_stat_get() { return _lw(SIO2_REG_STAT); }
