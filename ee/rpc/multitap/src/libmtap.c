@@ -16,6 +16,7 @@
 #include <tamtypes.h>
 #include <string.h>
 #include <kernel.h>
+#include <loadfile.h>
 #include <sifrpc.h>
 #include <stdarg.h>
 
@@ -33,30 +34,36 @@ static int mtapInited = 0;
 
 int mtapInit(void)
 {
+	int bind_retry = 100;
 	if(mtapInited) return -1;
 
 	while(1)
 	{
 		if (SifBindRpc(&clientPortOpen, MTAPSERV_PORT_OPEN, 0) < 0) return -1;
  		if (clientPortOpen.server != 0) break;
+		if (--bind_retry < 1) return -SCE_EBINDMISS;
 
-	nopdelay();
+		nopdelay();
 	}
 
+	bind_retry = 100;
 	while(1)
 	{
 		if (SifBindRpc(&clientPortClose, MTAPSERV_PORT_CLOSE, 0) < 0) return -1;
  		if (clientPortClose.server != 0) break;
+		if (--bind_retry < 1) return -SCE_EBINDMISS;
 
-	nopdelay();
+		nopdelay();
 	}
 
+	bind_retry = 100;
 	while(1)
 	{
 		if (SifBindRpc(&clientGetConnection, MTAPSERV_GET_CONNECTION, 0) < 0) return -1;
  		if (clientGetConnection.server != 0) break;
+		if (--bind_retry < 1) return -SCE_EBINDMISS;
 
-	nopdelay();
+		nopdelay();
 	}
 
 	mtapInited = 1;

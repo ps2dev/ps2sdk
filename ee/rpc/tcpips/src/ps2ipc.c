@@ -16,6 +16,7 @@
 #include <tamtypes.h>
 #include <string.h>
 #include <kernel.h>
+#include <loadfile.h>
 #include <sifrpc.h>
 
 #include <ps2ips.h>
@@ -63,6 +64,7 @@ extern void _ps2sdk_ps2ipc_deinit(void);
 
 int ps2ip_init(void)
 {
+	int bind_retry = 100;
 	ee_sema_t sema;
 
 	while(1)
@@ -72,6 +74,7 @@ int ps2ip_init(void)
 
 		if(_ps2ip.server != NULL)
 			break;
+		if (--bind_retry < 1) return -SCE_EBINDMISS;
 
 		nopdelay();
 	}
