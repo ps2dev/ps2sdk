@@ -6,7 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = iopdebug iop_sbusdbg ioptrap sior ppctty
+SUBDIRS = \
+	iop_sbusdbg \
+	iopdebug \
+	ioptrap \
+	ppctty \
+	sior \
+	thmon
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
