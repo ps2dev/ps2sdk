@@ -467,6 +467,7 @@ off_t __attribute__((weak)) _lseek(int fd, off_t offset, int whence);
 off64_t __attribute__((weak)) lseek64(int fd, off64_t offset, int whence);
 int __attribute__((weak)) _write(int fd, const void *buf, size_t nbytes);
 int __attribute__((weak)) _ioctl(int fd, int request, void *data);
+int __attribute__((weak)) _ps2sdk_ioctl(int fd, int request, void *data);
 int __attribute__((weak)) getdents(int fd, void *dd_buf, int count);
 
 extern void __fileXioOpsInitializeImpl(void)
@@ -503,7 +504,7 @@ extern void __fileXioOpsInitializeImpl(void)
     // cppcheck-suppress knownConditionTrueFalse
     if (&_write) __fileXio_fdman_ops_file.write = __fileXioWriteHelper;
     // cppcheck-suppress knownConditionTrueFalse
-    if (&_ioctl) __fileXio_fdman_ops_file.ioctl = __fileXioIoctlHelper;
+    if ((&_ioctl) || (&_ps2sdk_ioctl)) __fileXio_fdman_ops_file.ioctl = __fileXioIoctlHelper;
     __fileXio_fdman_ops_file.ioctl2 = __fileXioIoctl2Helper;
 
     memset(&__fileXio_fdman_ops_dir, 0, sizeof(__fileXio_fdman_ops_dir));

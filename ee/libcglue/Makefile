@@ -75,6 +75,7 @@ GLUE_OBJS = \
 	lstat.o \
 	_fstat.o \
 	access.o \
+	_ioctl.o \
 	_fcntl.o \
 	getdents.o \
 	_lseek.o \

@@ -395,6 +395,27 @@ int _fcntl(int fd, int cmd, ...)
 }
 #endif /* F__fcntl */
 
+#ifdef F__ioctl
+// This is actually not called from newlib, but the _ioctl symbol is checked by
+// ps2sdkapi.c and fileXio_ps2sdkapi.c. Perhaps it was later renamed to _ps2sdk_ioctl?
+// For consistency, _ioctl is implemented as an errno alternative to _ps2sdk_ioctl.
+int _ioctl(int fd, int request, void *data) {
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		errno = EBADF;
+		return -1;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->ioctl == NULL)
+	{
+		errno = ENOSYS;
+		return -1;
+	}
+	return __transform_errno(fdinfo->ops->ioctl(fdinfo->userdata, request, data));
+}
+#endif /* F__ioctl */
+
 #ifdef F_getdents
 // Called from newlib readdir.c, readdir_r.c
 int getdents(int fd, void *dd_buf, int count)
