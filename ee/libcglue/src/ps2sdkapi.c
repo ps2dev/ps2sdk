@@ -458,6 +458,7 @@ int __attribute__((weak)) _read(int fd, void *buf, size_t nbytes);
 off_t __attribute__((weak)) _lseek(int fd, off_t offset, int whence);
 int __attribute__((weak)) _write(int fd, const void *buf, size_t nbytes);
 int __attribute__((weak)) _ioctl(int fd, int request, void *data);
+int __attribute__((weak)) _ps2sdk_ioctl(int fd, int request, void *data);
 int __attribute__((weak)) getdents(int fd, void *dd_buf, int count);
 
 void __fioOpsInitializeImpl(void)
@@ -486,7 +487,7 @@ void __fioOpsInitializeImpl(void)
     // cppcheck-suppress knownConditionTrueFalse
     if (&_write) __fio_fdman_ops_file.write = __fioWriteHelper;
     // cppcheck-suppress knownConditionTrueFalse
-    if (&_ioctl) __fio_fdman_ops_file.ioctl = __fioIoctlHelper;
+    if ((&_ioctl) || (&_ps2sdk_ioctl)) __fio_fdman_ops_file.ioctl = __fioIoctlHelper;
 
     memset(&__fio_fdman_ops_dir, 0, sizeof(__fio_fdman_ops_dir));
     __fio_fdman_ops_dir.getfd = __fioGetFdHelper;
