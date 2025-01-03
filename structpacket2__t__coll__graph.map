@@ -1,0 +1,7 @@
+<map id="packet2_t" name="packet2_t">
+<area shape="rect" id="Node000001" title=" " alt="" coords="66,94,144,120"/>
+<area shape="rect" id="Node000002" href="$group__packet2__types.html#structdma__tag__t" title=" " alt="" coords="5,5,88,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="45,46,50,69,61,82,76,91,73,96,58,86,45,71,40,47"/>
+<area shape="rect" id="Node000003" href="$group__packet2__types.html#structvif__code__t" title=" " alt="" coords="125,5,206,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,46,138,72,119,95,114,92,134,68,150,43"/>
+</map>

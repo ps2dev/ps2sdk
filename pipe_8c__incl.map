@@ -1,0 +1,23 @@
+<map id="iop/system/siftoo/src/pipe.c" name="iop/system/siftoo/src/pipe.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="30,5,173,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="96,168,158,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,47,92,81,95,119,111,154,106,156,90,120,87,81,93,46"/>
+<area shape="rect" id="Node000003" href="$defs_8h.html" title=" " alt="" coords="5,168,62,193"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="95,47,48,154,43,152,90,45"/>
+<area shape="rect" id="Node000007" href="$sbusintr_8h.html" title=" " alt="" coords="192,94,270,120"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="135,44,200,83,197,88,132,49"/>
+<area shape="rect" id="Node000009" href="$siftoo_8h.html" title=" " alt="" coords="105,94,168,120"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="113,45,127,78,122,81,108,47"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="82,241,145,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="49,192,91,229,87,233,45,196"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="31,315,98,341"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="108,269,83,304,79,301,103,266"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="122,315,206,341"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="124,266,149,301,145,304,120,269"/>
+<area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="215,122,158,161,155,156,212,118"/>
+<area shape="rect" id="Node000008" href="$irx_8h.html" title=" " alt="" coords="182,168,226,193"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="229,121,216,154,211,152,224,119"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="190,196,142,234,139,230,187,192"/>
+<area shape="poly" id="edge11_Node000009_Node000002" title=" " alt="" coords="137,120,133,153,128,152,132,120"/>
+<area shape="poly" id="edge12_Node000009_Node000008" title=" " alt="" coords="149,118,184,155,180,158,145,122"/>
+</map>

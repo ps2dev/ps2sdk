@@ -1,0 +1,13 @@
+<map id="ee/kernel/src/glue.c" name="ee/kernel/src/glue.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="64,5,198,31"/>
+<area shape="rect" id="Node000002" href="$kernel_8h.html" title=" " alt="" coords="98,79,164,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,31,134,63,128,63,128,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,153,73,178"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="117,107,68,145,65,141,114,103"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="97,153,165,178"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="134,105,134,137,128,137,128,105"/>
+<area shape="rect" id="Node000005" href="$sifdma_8h.html" title=" " alt="" coords="189,153,260,178"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="148,103,198,141,195,145,145,107"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="182,226,267,252"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="227,179,227,211,222,211,222,179"/>
+</map>

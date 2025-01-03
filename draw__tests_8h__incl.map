@@ -1,0 +1,8 @@
+<map id="ee/draw/include/draw_tests.h" name="ee/draw/include/draw_tests.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,150,46"/>
+<area shape="rect" id="Node000002" href="$tamtypes_8h.html" title=" " alt="" coords="35,168,120,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="72,47,62,81,60,119,69,152,64,154,55,120,56,80,66,46"/>
+<area shape="rect" id="Node000003" href="$draw__buffers_8h.html" title=" " alt="" coords="70,94,176,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="91,45,111,79,106,82,86,48"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="118,121,95,156,91,153,113,118"/>
+</map>

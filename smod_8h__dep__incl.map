@@ -1,0 +1,13 @@
+<map id="ee/sbv/include/smod.h" name="ee/sbv/include/smod.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="368,5,520,31"/>
+<area shape="rect" id="Node000002" href="$ee_2sbv_2src_2common_8c.html" title=" " alt="" coords="5,87,152,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="372,37,164,82,133,88,132,83,163,76,370,32"/>
+<area shape="rect" id="Node000003" href="$patch__enable__lmb_8c.html" title=" " alt="" coords="176,79,339,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="402,40,305,81,303,76,400,35"/>
+<area shape="rect" id="Node000004" href="$patch__fileio_8c_source.html" title=" " alt="" coords="363,87,525,112"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="447,47,447,86,441,86,441,47"/>
+<area shape="rect" id="Node000005" href="$ee_2sbv_2src_2slib_8c.html" title=" " alt="" coords="548,87,665,112"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="484,36,583,84,581,88,481,41"/>
+<area shape="rect" id="Node000006" href="$ee_2sbv_2src_2smod_8c.html" title=" " alt="" coords="689,87,817,112"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="507,33,706,83,705,88,506,38"/>
+</map>
