@@ -8,6 +8,7 @@
 
 SUBDIRS = \
 	alloc \
+	boardinf \
 	dmacman \
 	eeconf \
 	eesync \
