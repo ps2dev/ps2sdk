@@ -1,3 +1,4 @@
+
 loadcore_IMPORTS_start
 I_RegisterLibraryEntries
 loadcore_IMPORTS_end
@@ -19,24 +20,19 @@ I_sceEnableDMAChannel
 I_sceDisableDMAChannel
 dmacman_IMPORTS_end
 
+thsemap_IMPORTS_start
+I_CreateSema
+I_DeleteSema
+I_SignalSema
+I_iSignalSema
+I_WaitSema
+thsemap_IMPORTS_end
+
+#ifdef SIO2LOG
 stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
 
-thbase_IMPORTS_start
-I_CreateThread
-I_StartThread
-thbase_IMPORTS_end
-
-thevent_IMPORTS_start
-I_CreateEventFlag
-I_SetEventFlag
-I_iSetEventFlag
-I_ClearEventFlag
-I_WaitEventFlag
-thevent_IMPORTS_end
-
-#ifdef SIO2LOG
 ioman_IMPORTS_start
 I_open
 I_write

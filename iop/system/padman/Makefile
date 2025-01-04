@@ -36,7 +36,6 @@ endif
 
 ifneq (x$(PADMAN_BUILDING_XPADMAN_V2),x0)
 IOP_CFLAGS += -DBUILDING_XPADMAN_V2
-IOP_INCS += -I$(PS2SDKSRC)/iop/system/rsio2man/include
 endif
 
 include $(PS2SDKSRC)/Defs.make
