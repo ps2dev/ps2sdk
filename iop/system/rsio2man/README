@@ -1,6 +1,0 @@
-Based on the free XSIO2MAN replacement module, freesio2.
-Built from the sio2log source, without the logging feature.
-
-This module is meant to be a compatible version of rom1:SIO2MAN,
-	which is a newer version of SIO2MAN than rom0:SIO2MAN.
-rom1:SIO2MAN is used by the DVD player, which is required for the remote control manager (RMMAN).

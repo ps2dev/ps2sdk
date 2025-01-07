@@ -34,7 +34,6 @@ SUBDIRS = \
 	rmmanx \
 	rmtapman \
 	rpadman \
-	rsio2man \
 	sbusintr \
 	sifcmd \
 	sifinit \
@@ -42,7 +41,7 @@ SUBDIRS = \
 	siftoo \
 	sio2log \
 	sio2man \
-	sio2man-old \
+	sio2man-nano \
 	ssbusc \
 	stdio \
 	sysclib \

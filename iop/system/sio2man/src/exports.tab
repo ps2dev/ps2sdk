@@ -1,88 +1,193 @@
-#ifdef BUILDING_XSIO2MAN
-#ifdef BUILDING_XSIO2MAN_V2
-DECLARE_EXPORT_TABLE(sio2man, 2, 3)
-#else
-DECLARE_EXPORT_TABLE(sio2man, 1, 2)
-#endif
-#else
-DECLARE_EXPORT_TABLE(sio2man, 1, 1)
-#endif
-	DECLARE_EXPORT(_start)
-	DECLARE_EXPORT(_retonly)
-	DECLARE_EXPORT(shutdown)
-	DECLARE_EXPORT(_retonly)
 
-	/* Register manipulation 04 - 22 */
-	DECLARE_EXPORT(sio2_ctrl_set)
-	DECLARE_EXPORT(sio2_ctrl_get) // 5
-	DECLARE_EXPORT(sio2_stat6c_get)
-	DECLARE_EXPORT(sio2_portN_ctrl1_set)
-	DECLARE_EXPORT(sio2_portN_ctrl1_get)
-	DECLARE_EXPORT(sio2_portN_ctrl2_set)
-	DECLARE_EXPORT(sio2_portN_ctrl2_get) // 10
-	DECLARE_EXPORT(sio2_stat70_get)
-	DECLARE_EXPORT(sio2_regN_set)
-	DECLARE_EXPORT(sio2_regN_get)
-	DECLARE_EXPORT(sio2_stat74_get)
-	DECLARE_EXPORT(sio2_unkn78_set) // 15
-	DECLARE_EXPORT(sio2_unkn78_get)
-	DECLARE_EXPORT(sio2_unkn7c_set)
-	DECLARE_EXPORT(sio2_unkn7c_get)
-	DECLARE_EXPORT(sio2_data_out)
-	DECLARE_EXPORT(sio2_data_in) // 20
-	DECLARE_EXPORT(sio2_stat_set)
-	DECLARE_EXPORT(sio2_stat_get)
+#define sio2_mc_transfer_init sio2_pad_transfer_init
+#define sio2_mtap_transfer_init sio2_pad_transfer_init
+#define sio2_rm_transfer_init sio2_pad_transfer_init
+#define sio2_imode_transfer_init sio2_pad_transfer_init
+#define sio2_ctrl_set2 sio2_ctrl_set
+#define sio2_ctrl_get2 sio2_ctrl_get
+#define sio2_stat6c_get2 sio2_stat6c_get
+#define sio2_portN_ctrl1_set2 sio2_portN_ctrl1_set
+#define sio2_portN_ctrl1_get2 sio2_portN_ctrl1_get
+#define sio2_portN_ctrl2_set2 sio2_portN_ctrl2_set
+#define sio2_portN_ctrl2_get2 sio2_portN_ctrl2_get
+#define sio2_stat70_get2 sio2_stat70_get
+#define sio2_regN_set2 sio2_regN_set
+#define sio2_regN_get2 sio2_regN_get
+#define sio2_stat74_get2 sio2_stat74_get
+#define sio2_unkn78_set2 sio2_unkn78_set
+#define sio2_unkn78_get2 sio2_unkn78_get
+#define sio2_unkn7c_set2 sio2_unkn7c_set
+#define sio2_unkn7c_get2 sio2_unkn7c_get
+#define sio2_data_out2 sio2_data_out
+#define sio2_data_in2 sio2_data_in
+#define sio2_stat_set2 sio2_stat_set
+#define sio2_stat_get2 sio2_stat_get
+#define sio2_pad_transfer_init2 sio2_pad_transfer_init
+#define sio2_mc_transfer_init2 sio2_mc_transfer_init
+#define sio2_transfer2 sio2_transfer
+#define sio2_transfer_reset2 sio2_transfer_reset
+#define sio2_pad2_transfer_init sio2_pad_transfer_init
+#define sio2_transfer_reset3 sio2_transfer_reset
+#define sio2_mc2_transfer_init sio2_pad_transfer_init
 
-	/* Transfer events 23 - 26 */
-	DECLARE_EXPORT(sio2_pad_transfer_init)
-	DECLARE_EXPORT(sio2_mc_transfer_init)
-	DECLARE_EXPORT(sio2_transfer) // 25
-#ifdef BUILDING_XSIO2MAN
-	DECLARE_EXPORT(sio2_transfer_reset)
+#ifdef SIO2MAN_NANO
+#define sio2_portN_ctrl1_get _retonly
+#define sio2_portN_ctrl2_get _retonly
+#define sio2_regN_get _retonly
+#define sio2_unkn78_set _retonly
+#define sio2_unkn78_get _retonly
+#define sio2_unkn7c_set _retonly
+#define sio2_unkn7c_get _retonly
 
-	/* Repeat of register routines 27 - 45 */
-	DECLARE_EXPORT(sio2_ctrl_set)
-	DECLARE_EXPORT(sio2_ctrl_get)
-	DECLARE_EXPORT(sio2_stat6c_get)
-	DECLARE_EXPORT(sio2_portN_ctrl1_set)
-	DECLARE_EXPORT(sio2_portN_ctrl1_get)
-	DECLARE_EXPORT(sio2_portN_ctrl2_set)
-	DECLARE_EXPORT(sio2_portN_ctrl2_get)
-	DECLARE_EXPORT(sio2_stat70_get)
-	DECLARE_EXPORT(sio2_regN_set)
-	DECLARE_EXPORT(sio2_regN_get)
-	DECLARE_EXPORT(sio2_stat74_get)
-	DECLARE_EXPORT(sio2_unkn78_set)
-	DECLARE_EXPORT(sio2_unkn78_get)
-	DECLARE_EXPORT(sio2_unkn7c_set)
-	DECLARE_EXPORT(sio2_unkn7c_get)
-	DECLARE_EXPORT(sio2_data_out)
-	DECLARE_EXPORT(sio2_data_in)
-	DECLARE_EXPORT(sio2_stat_set)
-	DECLARE_EXPORT(sio2_stat_get)
+#define sio2_ctrl_set _retonly
+#define sio2_ctrl_get _retonly
+#define sio2_stat6c_get _retonly
+#define sio2_portN_ctrl1_set _retonly
+#define sio2_portN_ctrl2_set _retonly
+#define sio2_regN_set _retonly
+#define sio2_stat74_get _retonly
+#define sio2_data_out _retonly
+#define sio2_data_in _retonly
+#define sio2_stat_set _retonly
+#define sio2_stat_get _retonly
 
-	/* Repeat of transfers + mtap 46 - 50 */
-	DECLARE_EXPORT(sio2_pad_transfer_init)
-	DECLARE_EXPORT(sio2_mc_transfer_init)
-	DECLARE_EXPORT(sio2_mtap_transfer_init)
-#ifdef SIO2MAN_V2
-	DECLARE_EXPORT(sio2_rm_transfer_init)
-	DECLARE_EXPORT(sio2_unk_transfer_init)	//50
-#endif
-	DECLARE_EXPORT(sio2_transfer)
-	DECLARE_EXPORT(sio2_transfer_reset) // 50 / 52
-
-	/* Callbacks 51 - 58 / 53 - 60 */
-	DECLARE_EXPORT(sio2_mtap_change_slot_set)
-	DECLARE_EXPORT(sio2_mtap_get_slot_max_set)
-	DECLARE_EXPORT(sio2_mtap_get_slot_max2_set)
-	DECLARE_EXPORT(sio2_mtap_update_slots_set)
-	DECLARE_EXPORT(sio2_mtap_change_slot) // 55 / 57
-	DECLARE_EXPORT(sio2_mtap_get_slot_max)
-	DECLARE_EXPORT(sio2_mtap_get_slot_max2)
-	DECLARE_EXPORT(sio2_mtap_update_slots)
+#define sio2_set_intr_handler _retonly
+#define sio2_set_ctrl_c _retonly
+#define sio2_set_ctrl_1 _retonly
 #endif
 
+DECLARE_EXPORT_TABLE(sio2man, 2, 7)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_deinit)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(sio2_ctrl_set)
+DECLARE_EXPORT(sio2_ctrl_get)
+DECLARE_EXPORT(sio2_stat6c_get)
+DECLARE_EXPORT(sio2_portN_ctrl1_set)
+DECLARE_EXPORT(sio2_portN_ctrl1_get)
+DECLARE_EXPORT(sio2_portN_ctrl2_set)
+DECLARE_EXPORT(sio2_portN_ctrl2_get)
+DECLARE_EXPORT(sio2_stat70_get)
+DECLARE_EXPORT(sio2_regN_set)
+DECLARE_EXPORT(sio2_regN_get)
+DECLARE_EXPORT(sio2_stat74_get)
+DECLARE_EXPORT(sio2_unkn78_set)
+DECLARE_EXPORT(sio2_unkn78_get)
+DECLARE_EXPORT(sio2_unkn7c_set)
+DECLARE_EXPORT(sio2_unkn7c_get)
+DECLARE_EXPORT(sio2_data_out)
+DECLARE_EXPORT(sio2_data_in)
+DECLARE_EXPORT(sio2_stat_set)
+DECLARE_EXPORT(sio2_stat_get)
+DECLARE_EXPORT(sio2_pad_transfer_init)
+DECLARE_EXPORT(sio2_mc_transfer_init)
+DECLARE_EXPORT(sio2_transfer)
+DECLARE_EXPORT(sio2_transfer_reset)
+DECLARE_EXPORT(sio2_ctrl_set2)
+// The following is intentional
+DECLARE_EXPORT(sio2_ctrl_set2)
+DECLARE_EXPORT(sio2_stat6c_get2)
+DECLARE_EXPORT(sio2_portN_ctrl1_set2)
+DECLARE_EXPORT(sio2_portN_ctrl1_get2)
+DECLARE_EXPORT(sio2_portN_ctrl2_set2)
+DECLARE_EXPORT(sio2_portN_ctrl2_get2)
+DECLARE_EXPORT(sio2_stat70_get2)
+DECLARE_EXPORT(sio2_regN_set2)
+DECLARE_EXPORT(sio2_regN_get2)
+DECLARE_EXPORT(sio2_stat74_get2)
+DECLARE_EXPORT(sio2_unkn78_set2)
+DECLARE_EXPORT(sio2_unkn78_get2)
+DECLARE_EXPORT(sio2_unkn7c_set2)
+DECLARE_EXPORT(sio2_unkn7c_get2)
+DECLARE_EXPORT(sio2_data_out2)
+DECLARE_EXPORT(sio2_data_in2)
+DECLARE_EXPORT(sio2_stat_set2)
+DECLARE_EXPORT(sio2_stat_get2)
+DECLARE_EXPORT(sio2_pad_transfer_init2)
+DECLARE_EXPORT(sio2_mc_transfer_init2)
+DECLARE_EXPORT(sio2_mtap_transfer_init)
+DECLARE_EXPORT(sio2_rm_transfer_init)
+DECLARE_EXPORT(sio2_imode_transfer_init)
+DECLARE_EXPORT(sio2_transfer2)
+DECLARE_EXPORT(sio2_transfer_reset2)
+DECLARE_EXPORT(sio2_mtap_change_slot_set)
+DECLARE_EXPORT(sio2_mtap_get_slot_max_set)
+DECLARE_EXPORT(sio2_mtap_get_slot_max2_set)
+DECLARE_EXPORT(sio2_mtap_update_slots_set)
+DECLARE_EXPORT(sio2_mtap_change_slot)
+DECLARE_EXPORT(sio2_mtap_get_slot_max)
+DECLARE_EXPORT(sio2_mtap_get_slot_max2)
+DECLARE_EXPORT(sio2_mtap_update_slots)
+DECLARE_EXPORT(sio2_pad2_transfer_init)
+DECLARE_EXPORT(sio2_transfer_reset3)
+DECLARE_EXPORT(sio2_mc2_transfer_init)
+DECLARE_EXPORT(sio2_set_intr_handler)
+DECLARE_EXPORT(sio2_set_ctrl_c)
+DECLARE_EXPORT(sio2_set_ctrl_1)
+DECLARE_EXPORT(sio2_wait_for_intr)
+END_EXPORT_TABLE
+
+DECLARE_EXPORT_TABLE(sio2man1, 1, 2)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_deinit)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(sio2_ctrl_set)
+DECLARE_EXPORT(sio2_ctrl_get)
+DECLARE_EXPORT(sio2_stat6c_get)
+DECLARE_EXPORT(sio2_portN_ctrl1_set)
+DECLARE_EXPORT(sio2_portN_ctrl1_get)
+DECLARE_EXPORT(sio2_portN_ctrl2_set)
+DECLARE_EXPORT(sio2_portN_ctrl2_get)
+DECLARE_EXPORT(sio2_stat70_get)
+DECLARE_EXPORT(sio2_regN_set)
+DECLARE_EXPORT(sio2_regN_get)
+DECLARE_EXPORT(sio2_stat74_get)
+DECLARE_EXPORT(sio2_unkn78_set)
+DECLARE_EXPORT(sio2_unkn78_get)
+DECLARE_EXPORT(sio2_unkn7c_set)
+DECLARE_EXPORT(sio2_unkn7c_get)
+DECLARE_EXPORT(sio2_data_out)
+DECLARE_EXPORT(sio2_data_in)
+DECLARE_EXPORT(sio2_stat_set)
+DECLARE_EXPORT(sio2_stat_get)
+DECLARE_EXPORT(sio2_pad_transfer_init_possiblysdk13x) // originally sio2_pad_transfer_init
+DECLARE_EXPORT(sio2_pad_transfer_init_possiblysdk13x) // originally sio2_mc_transfer_init
+DECLARE_EXPORT(sio2_transfer)
+DECLARE_EXPORT(sio2_transfer_reset)
+DECLARE_EXPORT(sio2_ctrl_set2)
+DECLARE_EXPORT(sio2_ctrl_get2)
+DECLARE_EXPORT(sio2_stat6c_get2)
+DECLARE_EXPORT(sio2_portN_ctrl1_set2)
+DECLARE_EXPORT(sio2_portN_ctrl1_get2)
+DECLARE_EXPORT(sio2_portN_ctrl2_set2)
+DECLARE_EXPORT(sio2_portN_ctrl2_get2)
+DECLARE_EXPORT(sio2_stat70_get2)
+DECLARE_EXPORT(sio2_regN_set2)
+DECLARE_EXPORT(sio2_regN_get2)
+DECLARE_EXPORT(sio2_stat74_get2)
+DECLARE_EXPORT(sio2_unkn78_set2)
+DECLARE_EXPORT(sio2_unkn78_get2)
+DECLARE_EXPORT(sio2_unkn7c_set2)
+DECLARE_EXPORT(sio2_unkn7c_get2)
+DECLARE_EXPORT(sio2_data_out2)
+DECLARE_EXPORT(sio2_data_in2)
+DECLARE_EXPORT(sio2_stat_set2)
+DECLARE_EXPORT(sio2_stat_get2)
+DECLARE_EXPORT(sio2_pad_transfer_init2)
+DECLARE_EXPORT(sio2_mc_transfer_init2)
+DECLARE_EXPORT(sio2_mtap_transfer_init)
+DECLARE_EXPORT(sio2_transfer2)
+DECLARE_EXPORT(sio2_transfer_reset2)
+DECLARE_EXPORT(sio2_mtap_change_slot_set)
+DECLARE_EXPORT(sio2_mtap_get_slot_max_set)
+DECLARE_EXPORT(sio2_mtap_get_slot_max2_set)
+DECLARE_EXPORT(sio2_mtap_update_slots_set)
+DECLARE_EXPORT(sio2_mtap_change_slot)
+DECLARE_EXPORT(sio2_mtap_get_slot_max)
+DECLARE_EXPORT(sio2_mtap_get_slot_max2)
+DECLARE_EXPORT(sio2_mtap_update_slots)
 END_EXPORT_TABLE
 
 void _retonly() {}

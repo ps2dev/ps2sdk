@@ -102,10 +102,12 @@ typedef struct sio0_1_mmio_hwport_
 
 typedef struct sio2_mmio_hwport_
 {
-	vu8 send3_buf[0x40];
-	vu8 send1_2_buf[0x20];
-	vu32 out_fifo; /* PCSX2 says in */
-	vu32 in_fifo;  /* PCSX2 says out */
+	vu32 send3_buf[16];
+	vu32 send1_2_buf[8];
+	vu8 out_fifo; /* PCSX2 says in */
+	u8 pad1[3];
+	vu8 in_fifo;  /* PCSX2 says out */
+	u8 pad2[3];
 	vu32 ctrl;
 	vu32 recv1;
 	vu32 recv2;
