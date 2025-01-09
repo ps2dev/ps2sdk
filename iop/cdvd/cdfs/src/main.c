@@ -296,7 +296,7 @@ static int fio_openDir(iop_file_t *f, const char *path) {
     if (j >= MAX_FOLDERS_OPENED)
         return -ESRCH;
 
-    fod_table[j].files = cdfs_getDir(path, NULL, CDFS_GET_FILES_AND_DIRS, fod_table[j].entries, MAX_FILES_PER_FOLDER);
+    fod_table[j].files = cdfs_getDir(path, fod_table[j].entries, MAX_FILES_PER_FOLDER);
     if (fod_table[j].files < 0) {
         printf("The path doesn't exist\n\n");
         return -ENOENT;
@@ -381,10 +381,10 @@ static int fio_dread(iop_file_t *fd, io_dirent_t *dirent)
     dirent->stat.mode = (entry.fileProperties == CDFS_FILEPROPERTY_DIR) ? FIO_SO_IFDIR : FIO_SO_IFREG;
     dirent->stat.attr = entry.fileProperties;
     dirent->stat.size = entry.fileSize;
-    memcpy(dirent->stat.ctime, entry.dateStamp, 8);
-    memcpy(dirent->stat.atime, entry.dateStamp, 8);
-    memcpy(dirent->stat.mtime, entry.dateStamp, 8);
-    strncpy(dirent->name, entry.filename, 128);
+    memcpy(dirent->stat.ctime, entry.dateStamp, sizeof(entry.dateStamp));
+    memcpy(dirent->stat.atime, entry.dateStamp, sizeof(entry.dateStamp));
+    memcpy(dirent->stat.mtime, entry.dateStamp, sizeof(entry.dateStamp));
+    strncpy(dirent->name, entry.filename, sizeof(dirent->name));
     
     fod_table[i].filesIndex++;
     return fod_table[i].filesIndex;
@@ -411,9 +411,9 @@ static int fio_getstat(iop_file_t *fd, const char *name, io_stat_t *stat)
     stat->mode = (entry.fileProperties == CDFS_FILEPROPERTY_DIR) ? FIO_SO_IFDIR : FIO_SO_IFREG;
     stat->attr = entry.fileProperties;
     stat->size = entry.fileSize;
-    memcpy(stat->ctime, entry.dateStamp, 8);
-    memcpy(stat->atime, entry.dateStamp, 8);
-    memcpy(stat->mtime, entry.dateStamp, 8);
+    memcpy(stat->ctime, entry.dateStamp, sizeof(entry.dateStamp));
+    memcpy(stat->atime, entry.dateStamp, sizeof(entry.dateStamp));
+    memcpy(stat->mtime, entry.dateStamp, sizeof(entry.dateStamp));
 
     return ret;
 }

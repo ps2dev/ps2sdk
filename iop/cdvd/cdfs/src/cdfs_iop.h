@@ -18,12 +18,6 @@ struct TocEntry {
     char filename[128 + 1];
 } __attribute__((packed));
 
-enum CDFS_getMode {
-    CDFS_GET_FILES_ONLY = 1,
-    CDFS_GET_DIRS_ONLY = 2,
-    CDFS_GET_FILES_AND_DIRS = 3
-};
-
 enum Cdvd_Changed_Index {
     CHANGED_TOC = 0,
     CHANGED_FIO = 1,
@@ -35,7 +29,7 @@ extern int cdfs_start(void);
 extern int cdfs_finish(void);
 extern int cdfs_findfile(const char *fname, struct TocEntry *tocEntry);
 extern int cdfs_readSect(u32 lsn, u32 sectors, u8 *buf);
-extern int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode getMode, struct TocEntry tocEntry[], unsigned int req_entries);
+extern int cdfs_getDir(const char *pathname, struct TocEntry tocEntry[], unsigned int req_entries);
 extern int cdfs_checkDiskChanged(enum Cdvd_Changed_Index index);
 
 #endif  // _CDFS_H
