@@ -446,35 +446,6 @@ static enum PathMatch comparePath(const char *path) {
         return NOT_MATCH;
 }
 
-// Check if a TOC Entry matches our extension list
-static int compareTocEntry(char *filename, const char *extensions) {
-    static char ext_list[129];
-
-    char *token;
-
-
-    strncpy(ext_list, extensions, 128);
-    ext_list[128] = 0;
-
-    token = strtok(ext_list, " ,");
-    while (token != NULL) {
-        char *ext_point;
-
-        // if 'token' matches extension of 'filename'
-        // then return a match
-        ext_point = strrchr(filename, '.');
-
-        if (strcasecmp(ext_point, token) == 0)
-            return TRUE;
-
-        /* Get next token: */
-        token = strtok(NULL, " ,");
-    }
-
-    // If not match found then return FALSE
-    return FALSE;
-}
-
 // Find, and cache, the requested directory, for use by GetDir or  (and thus open)
 // provide an optional offset variable, for use when caching dirs of greater than 500 files
 
@@ -897,7 +868,7 @@ int cdfs_readSect(u32 lsn, u32 sectors, u8 *buf) {
     return FALSE;  // error
 }
 
-int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode getMode, struct TocEntry tocEntry[], unsigned int req_entries) {
+int cdfs_getDir(const char *pathname, struct TocEntry tocEntry[], unsigned int req_entries) {
     int matched_entries;
     int dir_entry;
 
@@ -916,165 +887,146 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
 
     DPRINTF("requested directory is %u sectors\n", cacheInfoDir.sector_num);
 
-    if ((getMode == CDFS_GET_DIRS_ONLY) || (getMode == CDFS_GET_FILES_AND_DIRS)) {
-        // Cache the start of the requested directory
-        if (!cdfs_cacheDir(cacheInfoDir.pathname, CACHE_START)) {
-            DPRINTF("cdfs_getDir - Call of cdfs_cacheDir failed\n\n");
-            return -1;
-        }
+    // Cache the start of the requested directory
+    if (!cdfs_cacheDir(cacheInfoDir.pathname, CACHE_START)) {
+        DPRINTF("cdfs_getDir - Call of cdfs_cacheDir failed\n\n");
+        return -1;
+    }
 
-        tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
-        // skip the first self-referencing entry
+    tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
+    // skip the first self-referencing entry
+    tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length);
+
+    // skip the parent entry if this is the root
+    if (cacheInfoDir.path_depth == 0)
         tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length);
 
-        // skip the parent entry if this is the root
-        if (cacheInfoDir.path_depth == 0)
-            tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length);
+    dir_entry = 0;
 
-        dir_entry = 0;
+    while (1) {
+        DPRINTF("cdfs_getDir - inside while-loop\n\n");
 
-        while (1) {
-            DPRINTF("cdfs_getDir - inside while-loop\n\n");
+        // parse the current cache block
+        for (; tocEntryPointer < (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048)); tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length)) {
+            if (tocEntryPointer->length == 0) {
+                // if we have a toc entry length of zero,
+                // then we've either reached the end of the sector, or the end of the dir
+                // so point to next sector (if there is one - will be checked by next condition)
 
-            // parse the current cache block
-            for (; tocEntryPointer < (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048)); tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length)) {
-                if (tocEntryPointer->length == 0) {
-                    // if we have a toc entry length of zero,
-                    // then we've either reached the end of the sector, or the end of the dir
-                    // so point to next sector (if there is one - will be checked by next condition)
+                tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((u8 *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
+            }
 
-                    tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((u8 *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
-                }
-
-                if (tocEntryPointer >= (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048))) {
-                    // we've reached the end of the current cache block (which may be end of entire dir
-                    // so just break the loop
-                    break;
-                }
-
-                // Check if the current entry is a dir or a file
-                if (tocEntryPointer->fileProperties & 0x02) {
-                    DPRINTF("We found a dir, and we want all dirs\n\n");
-                    copyToTocEntry(&localTocEntry, tocEntryPointer);
-
-                    if (dir_entry == 0) {
-                        if (cacheInfoDir.path_depth != 0) {
-                            DPRINTF("It's the first directory entry, so name it '..'\n\n");
-                            strcpy(localTocEntry.filename, "..");
-                        }
-                    }
-
-                    // Copy from localTocEntry
-                    tocEntry[matched_entries] = localTocEntry;
-                    matched_entries++;
-                } else { // it must be a file
-                    DPRINTF("We found a file, but we dont want files (at least not yet)\n\n");
-                }
-
-                dir_entry++;
-
-                if ((unsigned int)matched_entries >= req_entries)  // if we've filled the requested buffer
-                    return (matched_entries);        // then just return
-
-            }  // end of the current cache block
-
-            // if there is more dir to load, then load next chunk, else finish
-            if ((cacheInfoDir.cache_offset + cacheInfoDir.cache_size) < cacheInfoDir.sector_num) {
-                if (!cdfs_cacheDir(cacheInfoDir.pathname, CACHE_NEXT)) {
-                    // failed to cache next block (should return TRUE even if
-                    // there is no more directory, as long as a CD read didnt fail
-                    return -1;
-                }
-            } else
+            if (tocEntryPointer >= (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048))) {
+                // we've reached the end of the current cache block (which may be end of entire dir
+                // so just break the loop
                 break;
+            }
 
-            tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
-        }
+            // Check if the current entry is a dir or a file
+            if (tocEntryPointer->fileProperties & 0x02) {
+                DPRINTF("We found a dir, and we want all dirs\n\n");
+                copyToTocEntry(&localTocEntry, tocEntryPointer);
+
+                if (dir_entry == 0) {
+                    if (cacheInfoDir.path_depth != 0) {
+                        DPRINTF("It's the first directory entry, so name it '..'\n\n");
+                        strcpy(localTocEntry.filename, "..");
+                    }
+                }
+
+                // Copy from localTocEntry
+                tocEntry[matched_entries] = localTocEntry;
+                matched_entries++;
+            } else { // it must be a file
+                DPRINTF("We found a file, but we dont want files (at least not yet)\n\n");
+            }
+
+            dir_entry++;
+
+            if ((unsigned int)matched_entries >= req_entries)  // if we've filled the requested buffer
+                return (matched_entries);        // then just return
+
+        }  // end of the current cache block
+
+        // if there is more dir to load, then load next chunk, else finish
+        if ((cacheInfoDir.cache_offset + cacheInfoDir.cache_size) < cacheInfoDir.sector_num) {
+            if (!cdfs_cacheDir(cacheInfoDir.pathname, CACHE_NEXT)) {
+                // failed to cache next block (should return TRUE even if
+                // there is no more directory, as long as a CD read didnt fail
+                return -1;
+            }
+        } else
+            break;
+
+        tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
     }
 
     // Next do files
-    if ((getMode == CDFS_GET_FILES_ONLY) || (getMode == CDFS_GET_FILES_AND_DIRS)) {
-        // Cache the start of the requested directory
-        if (!cdfs_cacheDir(cacheInfoDir.pathname, CACHE_START)) {
-            DPRINTF("cdfs_getDir - Call of cdfs_cacheDir failed\n\n");
-            return -1;
-        }
+    // Cache the start of the requested directory
+    if (!cdfs_cacheDir(cacheInfoDir.pathname, CACHE_START)) {
+        DPRINTF("cdfs_getDir - Call of cdfs_cacheDir failed\n\n");
+        return -1;
+    }
 
-        tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
+    tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
 
-        // skip the first self-referencing entry
+    // skip the first self-referencing entry
+    tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length);
+
+    // skip the parent entry if this is the root
+    if (cacheInfoDir.path_depth == 0)
         tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length);
 
-        // skip the parent entry if this is the root
-        if (cacheInfoDir.path_depth == 0)
-            tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length);
+    dir_entry = 0;
 
-        dir_entry = 0;
+    while (1) {
+        DPRINTF("cdfs_getDir - inside while-loop\n\n");
 
-        while (1) {
-            DPRINTF("cdfs_getDir - inside while-loop\n\n");
+        // parse the current cache block
+        for (; tocEntryPointer < (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048)); tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length)) {
+            if (tocEntryPointer->length == 0) {
+                // if we have a toc entry length of zero,
+                // then we've either reached the end of the sector, or the end of the dir
+                // so point to next sector (if there is one - will be checked by next condition)
 
-            // parse the current cache block
-            for (; tocEntryPointer < (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048)); tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length)) {
-                if (tocEntryPointer->length == 0) {
-                    // if we have a toc entry length of zero,
-                    // then we've either reached the end of the sector, or the end of the dir
-                    // so point to next sector (if there is one - will be checked by next condition)
+                tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((u8 *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
+            }
 
-                    tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((u8 *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
-                }
-
-                if (tocEntryPointer >= (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048))) {
-                    // we've reached the end of the current cache block (which may be end of entire dir
-                    // so just break the loop
-                    break;
-                }
-
-                // Check if the current entry is a dir or a file
-                if (tocEntryPointer->fileProperties & 0x02) {
-                    DPRINTF("We don't want files now\n\n");
-                } else { // it must be a file
-                    copyToTocEntry(&localTocEntry, tocEntryPointer);
-
-                    if (strlen(extensions) > 0) {
-                        // check if the file matches the extension list
-                        if (compareTocEntry(localTocEntry.filename, extensions)) {
-                            DPRINTF("We found a file that matches the requested extension list\n\n");
-                            // Copy from localTocEntry
-                            tocEntry[matched_entries] = localTocEntry; 
-                            matched_entries++;
-                        } else {
-                            DPRINTF("We found a file, but it didnt match the requested extension list\n\n");
-                        }
-                    } else { // no extension list to match against
-                        DPRINTF("We found a file, and there is not extension list to match against\n\n");
-
-                        // Copy from localTocEntry
-                        tocEntry[matched_entries] = localTocEntry; 
-                        matched_entries++;
-                    }
-                }
-
-                dir_entry++;
-
-                if ((unsigned int)matched_entries >= req_entries)  // if we've filled the requested buffer
-                    return (matched_entries);        // then just return
-
-            }  // end of the current cache block
-
-
-            // if there is more dir to load, then load next chunk, else finish
-            if ((cacheInfoDir.cache_offset + cacheInfoDir.cache_size) < cacheInfoDir.sector_num) {
-                if (!cdfs_cacheDir(cacheInfoDir.pathname, CACHE_NEXT)) {
-                    // failed to cache next block (should return TRUE even if
-                    // there is no more directory, as long as a CD read didnt fail
-                    return -1;
-                }
-            } else
+            if (tocEntryPointer >= (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048))) {
+                // we've reached the end of the current cache block (which may be end of entire dir
+                // so just break the loop
                 break;
+            }
 
-            tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
-        }
+            // Check if the current entry is a dir or a file
+            if (tocEntryPointer->fileProperties & 0x02) {
+                DPRINTF("We don't want files now\n\n");
+            } else { // it must be a file
+                copyToTocEntry(&localTocEntry, tocEntryPointer);
+                // Copy from localTocEntry
+                tocEntry[matched_entries] = localTocEntry; 
+                matched_entries++;
+                }
+
+            dir_entry++;
+
+            if ((unsigned int)matched_entries >= req_entries)  // if we've filled the requested buffer
+                return (matched_entries);        // then just return
+
+        }  // end of the current cache block
+
+
+        // if there is more dir to load, then load next chunk, else finish
+        if ((cacheInfoDir.cache_offset + cacheInfoDir.cache_size) < cacheInfoDir.sector_num) {
+            if (!cdfs_cacheDir(cacheInfoDir.pathname, CACHE_NEXT)) {
+                // failed to cache next block (should return TRUE even if
+                // there is no more directory, as long as a CD read didnt fail
+                return -1;
+            }
+        } else
+            break;
+
+        tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
     }
     // reached the end of the dir, before filling up the requested entries
 
@@ -1083,7 +1035,7 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
 
 // This function uses sceCdTrayReq to check if the disc in the disc drive has changed.
 // Once sceCdTrayReq is called it will reset the flag inside CDVDMAN.
-// Avoid using sceCdTrayReq with SCECdTrayCheck as arguemnt in other code if possible.
+// Avoid using sceCdTrayReq with SCECdTrayCheck as argument in other code if possible.
 
 int cdfs_checkDiskChanged(enum Cdvd_Changed_Index index) {
     u32 res = 0;
