@@ -9,16 +9,19 @@
 
 // 16 sectors worth of toc entry
 #define MAX_FILES_PER_FOLDER 256
-#define MAX_FILES_OPENED 16
-#define MAX_FOLDERS_OPENED 16
+#define MAX_FILES_OPENED 4
+#define MAX_FOLDERS_OPENED 4
 #define MAX_BYTES_READ 16384
 
 #define DRIVER_UNIT_NAME "cdfs"
-#define DRIVER_UNIT_VERSION 2
-#define VERSION_STRINGIFY(x) #x
+#define DRIVER_MAJOR_VERSION 2
+#define DRIVER_MINOR_VERSION 2
 
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define DRIVER_DESC DRIVER_UNIT_NAME " Filedriver v" TOSTRING(DRIVER_MAJOR_VERSION) "." TOSTRING(DRIVER_MINOR_VERSION)
 
-IRX_ID(MODNAME, 1, 1);
+IRX_ID(MODNAME, DRIVER_MAJOR_VERSION, DRIVER_MINOR_VERSION);
 
 struct fdtable
 {
@@ -443,8 +446,8 @@ static iop_device_ops_t fio_ops = {
 static iop_device_t fio_driver = {
     DRIVER_UNIT_NAME,
     IOP_DT_FS,
-    DRIVER_UNIT_VERSION,
-    DRIVER_UNIT_NAME " Filedriver v" VERSION_STRINGIFY(DRIVER_UNIT_VERSION),
+    DRIVER_MAJOR_VERSION,
+    DRIVER_DESC,
     &fio_ops,
 };
 

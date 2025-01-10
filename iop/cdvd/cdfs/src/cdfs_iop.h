@@ -16,6 +16,7 @@ struct TocEntry {
     u8 fileProperties;
     unsigned char dateStamp[8];
     char filename[128 + 1];
+    u8 padding[2]; // Padding to make the structure 4 byte aligned
 } __attribute__((packed));
 
 enum Cdvd_Changed_Index {

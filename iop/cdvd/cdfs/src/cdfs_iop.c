@@ -1035,7 +1035,7 @@ int cdfs_getDir(const char *pathname, struct TocEntry tocEntry[], unsigned int r
 
 // This function uses sceCdTrayReq to check if the disc in the disc drive has changed.
 // Once sceCdTrayReq is called it will reset the flag inside CDVDMAN.
-// Avoid using sceCdTrayReq with SCECdTrayCheck as arguemnt in other code if possible.
+// Avoid using sceCdTrayReq with SCECdTrayCheck as argument in other code if possible.
 
 int cdfs_checkDiskChanged(enum Cdvd_Changed_Index index) {
     u32 res = 0;
