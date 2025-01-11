@@ -148,6 +148,7 @@ int SifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
 
     if (!SifSendCmd(SIF_CMD_RPC_BIND, bind, RPC_PACKET_SIZE, NULL, NULL, 0)) {
         rpc_packet_free(bind);
+        DeleteSema(cd->hdr.sema_id);
         return -E_SIF_PKT_SEND;
     }
 
@@ -214,6 +215,7 @@ int SifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode,
 
     if (!SifSendCmd(SIF_CMD_RPC_CALL, call, RPC_PACKET_SIZE, sendbuf, cd->buff, ssize)) {
         rpc_packet_free(call);
+        DeleteSema(cd->hdr.sema_id);
         return -E_SIF_PKT_SEND;
     }
 
@@ -263,6 +265,7 @@ int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
 
     if (!SifSendCmd(SIF_CMD_RPC_RDATA, other, RPC_PACKET_SIZE, NULL, NULL, 0)) {
         rpc_packet_free(other);
+        DeleteSema(rd->hdr.sema_id);
         return -E_SIF_PKT_SEND;
     }
 
