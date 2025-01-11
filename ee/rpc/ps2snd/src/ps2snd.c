@@ -130,7 +130,7 @@ u16 sceSdPitch2Note(u16 center_note, u16 center_fine, u16 pitch)
 	return(0);
 }
 
-int sceSdProcBatch(sceSdBatch* batch, u32 returns[], u32 num)
+int sceSdProcBatch(const sceSdBatch* batch, u32 returns[], u32 num)
 {
 	(void)batch;
 	(void)returns;
@@ -140,7 +140,7 @@ int sceSdProcBatch(sceSdBatch* batch, u32 returns[], u32 num)
 	return(-1);
 }
 
-int sceSdProcBatchEx(sceSdBatch* batch, u32 returns[], u32 num, u32 voice)
+int sceSdProcBatchEx(const sceSdBatch* batch, u32 returns[], u32 num, u32 voice)
 {
 	(void)batch;
 	(void)returns;
@@ -198,7 +198,7 @@ u32 sceSdBlockTransStatus (s16 channel, s16 flag)
 //void* sceSdSetTransCallback (u16 channel, void SD_TRANS_CBProc(void *) );
 //void *sceSdSetIRQCallback( void SD_IRQ_CBProc(void *) );
 
-int sceSdSetEffectAttr (int core, sceSdEffectAttr *attr)
+int sceSdSetEffectAttr (int core, const sceSdEffectAttr *attr)
 {
 	s32 buf[1+((sizeof(sceSdEffectAttr)+3)/4)] ALIGNED(64);
 	buf[0] = core;

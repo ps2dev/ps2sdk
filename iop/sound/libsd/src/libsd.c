@@ -985,7 +985,7 @@ void sceSdGetEffectAttr(int core, sceSdEffectAttr *attr)
 	attr->depth_R = spu2_mmio_hwport->m_u.m_e.m_different_regs[core].m_evolr;
 }
 
-int sceSdSetEffectAttr(int core, sceSdEffectAttr *attr)
+int sceSdSetEffectAttr(int core, const sceSdEffectAttr *attr)
 {
 	int clearram;
 	int channel;
@@ -1082,7 +1082,7 @@ static int GetEEA(int core)
 	return (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_eea << 17) | 0x1FFFF;
 }
 
-int sceSdSetEffectMode(int core, sceSdEffectAttr *param)
+int sceSdSetEffectMode(int core, const sceSdEffectAttr *param)
 {
 	int clearram;
 	int channel;
@@ -1126,7 +1126,7 @@ int sceSdSetEffectMode(int core, sceSdEffectAttr *param)
 	return clearram ? sceSdCleanEffectWorkArea(core, channel, mode) : 0;
 }
 
-int sceSdSetEffectModeParams(int core, sceSdEffectAttr *attr)
+int sceSdSetEffectModeParams(int core, const sceSdEffectAttr *attr)
 {
 	int mode;
 	struct mode_data_struct mode_data;
@@ -1904,7 +1904,7 @@ static int SifDmaBatch(void *ee_addr, void *iop_addr, int size)
 	return (i < 0) ? -1 : 0;
 }
 
-int sceSdProcBatch(sceSdBatch *batch, u32 *rets, u32 num)
+int sceSdProcBatch(const sceSdBatch *batch, u32 *rets, u32 num)
 {
 	u32 cnt;
 
@@ -1958,7 +1958,7 @@ int sceSdProcBatch(sceSdBatch *batch, u32 *rets, u32 num)
 	return cnt;
 }
 
-int sceSdProcBatchEx(sceSdBatch *batch, u32 *rets, u32 num, u32 voice)
+int sceSdProcBatchEx(const sceSdBatch *batch, u32 *rets, u32 num, u32 voice)
 {
 	u32 cnt;
 	int loop;

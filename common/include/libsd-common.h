@@ -174,11 +174,11 @@ extern u32 sceSdGetSwitch(u16 entry);
 extern u16 sceSdNote2Pitch(u16 center_note, u16 center_fine, u16 note, s16 fine);
 extern u16 sceSdPitch2Note(u16 center_note, u16 center_fine, u16 pitch);
 
-extern int sceSdSetEffectAttr(int core, sceSdEffectAttr *attr);
+extern int sceSdSetEffectAttr(int core, const sceSdEffectAttr *attr);
 extern void sceSdGetEffectAttr(int core, sceSdEffectAttr *attr);
 
-extern int sceSdProcBatch(sceSdBatch *batch, u32 *rets, u32 num);
-extern int sceSdProcBatchEx(sceSdBatch *batch, u32 *rets, u32 num, u32 voice);
+extern int sceSdProcBatch(const sceSdBatch *batch, u32 *rets, u32 num);
+extern int sceSdProcBatchEx(const sceSdBatch *batch, u32 *rets, u32 num, u32 voice);
 
 extern int sceSdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size);
 extern int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...);
@@ -195,8 +195,8 @@ extern void *sceSdGetSpu2IntrHandlerArgument();
 extern int sceSdStopTrans(int channel);
 // The following was added in module version 3.3, export version 1.5, SDK 2.5
 extern int sceSdCleanEffectWorkArea(int core, int channel, int effect_mode);
-extern int sceSdSetEffectMode(int core, sceSdEffectAttr *param);
-extern int sceSdSetEffectModeParams(int core, sceSdEffectAttr *attr);
+extern int sceSdSetEffectMode(int core, const sceSdEffectAttr *param);
+extern int sceSdSetEffectModeParams(int core, const sceSdEffectAttr *attr);
 
 #ifdef __cplusplus
 }
