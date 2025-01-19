@@ -335,7 +335,7 @@ void pdTransfer(void)
 	u32 slot;
 
 #ifdef BUILDING_XPADMAN
-	sio2_pad_transfer_init();
+	sio2_pad_transfer_init2();
 #endif
 
 	transferCount++;
@@ -450,7 +450,7 @@ u32 pdCheckConnection(u32 port, u32 slot)
 #endif
 
 #ifdef BUILDING_XPADMAN
-	sio2_pad_transfer_init();
+	sio2_pad_transfer_init2();
 #endif
 
 	change_slot_buffer[0] = slot;
