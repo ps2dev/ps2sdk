@@ -3,7 +3,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Copyright ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */
@@ -20,7 +20,7 @@
 #include <irx.h>
 #include <libsd-common.h>
 
-#define libsd_IMPORTS_start DECLARE_IMPORT_TABLE(libsd, 1, 4)
+#define libsd_IMPORTS_start DECLARE_IMPORT_TABLE(libsd, 1, 5)
 #define libsd_IMPORTS_end END_IMPORT_TABLE
 
 #define I_sceSdQuit DECLARE_IMPORT(2, sceSdQuit);
