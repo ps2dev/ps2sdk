@@ -805,7 +805,12 @@ int _gettimeofday(struct timeval *tv, struct timezone *tz)
 #ifdef F__times
 // Called from newlib timesr.c
 clock_t _times(struct tms *buffer) {
-	clock_t clk = GetTimerSystemTime() / (kBUSCLK / (1000 * 1000));
+	clock_t clk;
+	u32 busclock_sec;
+	u32 busclock_usec;
+
+	TimerBusClock2USec(GetTimerSystemTime(), &busclock_sec, &busclock_usec);
+	clk = busclock_sec * CLOCKS_PER_SEC + busclock_usec;
 
 	if (buffer != NULL) {
 		buffer->tms_utime  = clk;
