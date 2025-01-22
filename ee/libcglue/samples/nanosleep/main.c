@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     struct timespec tv = {0};
     tv.tv_sec = 1;
     tv.tv_nsec = 0;
-    error_tolerance = 200; // 200 miliseconds of error tolerance
+    error_tolerance = 5; // 5 miliseconds of error tolerance
 
 #if defined(SCREEN_DEBUG)
     init_scr();

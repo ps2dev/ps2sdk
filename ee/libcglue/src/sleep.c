@@ -43,7 +43,8 @@ int nanosleep(const struct timespec *req, struct timespec *rem)
 	__asm__ __volatile__ ("mfc0\t%0, $12" : "=r" (eie));
 	if ((eie & 0x10000) == 0)
 	{
-		return 0;
+		errno = ENOSYS;  // Functionality not available
+        return -1;
 	}
 	sema.max_count = 1;
 	sema.option = (u32)"nanosleep";
@@ -51,13 +52,15 @@ int nanosleep(const struct timespec *req, struct timespec *rem)
 	sema_id = CreateSema(&sema);
 	if (sema_id < 0)
 	{
-		return 0;
+		errno = EAGAIN;  // Resource temporarily unavailable
+        return -1;
 	}
 	timer_alarm_id = SetTimerAlarm(Sec2TimerBusClock(req->tv_sec) + NSec2TimerBusClock(req->tv_nsec), nanosleep_wakeup_callback, (void *)sema_id);
 	if (timer_alarm_id < 0)
 	{
 		DeleteSema(sema_id);
-		return 0;
+		errno = EAGAIN;  // Resource temporarily unavailable
+        return -1;
 	}
 	WaitSema(sema_id);
 	DeleteSema(sema_id);
