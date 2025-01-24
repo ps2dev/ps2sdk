@@ -16,6 +16,7 @@
 #include <assert.h>
 
 #include <kernel.h>
+#include <syscallnr.h>
 #include <rom0_info.h>
 
 #if defined(SCREEN_DEBUG)
@@ -52,7 +53,7 @@ void _libcglue_rtc_update() {}
 // "weak" function called by crt0.o
 void _ps2sdk_memory_init()
 {
-    if (GetMemorySize() == (32 * 1024 * 1024) && IsDESRMachine() == 1) {
+    if (GetMemorySize() == (32 * 1024 * 1024) && GetSyscallHandler(__NR_GetMemoryMode) && GetMemoryMode() == 1) {
         // Switch to 64MiB mode
         SetMemoryMode(0);
         _InitTLB();
