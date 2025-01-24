@@ -665,6 +665,10 @@ SYSCALL(_InitTLB)
 SYSCALL(SetMemoryMode)
 #endif
 
+#ifdef F_GetMemoryMode
+SYSCALL(GetMemoryMode)
+#endif
+
 #ifdef F_GPfuncs
 	.text
 	.align	2
