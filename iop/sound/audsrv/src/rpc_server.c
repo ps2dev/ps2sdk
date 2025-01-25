@@ -183,13 +183,13 @@ static void rpc_server_thread(void *arg)
 {
 	(void)arg;
 
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 
 	DPRINTF("creating rpc server\n");
 
-	SifSetRpcQueue(&qd, GetThreadId());
-	SifRegisterRpc(&sd0, AUDSRV_IRX, (void *)rpc_command, rpc_buffer, NULL, NULL, &qd);
-	SifRpcLoop(&qd);
+	sceSifSetRpcQueue(&qd, GetThreadId());
+	sceSifRegisterRpc(&sd0, AUDSRV_IRX, (void *)rpc_command, rpc_buffer, NULL, NULL, &qd);
+	sceSifRpcLoop(&qd);
 }
 
 int initialize_rpc_thread()

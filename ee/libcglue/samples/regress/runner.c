@@ -23,7 +23,7 @@ extern int libc_add_tests(test_suite *p);
 
 static void iop_start(void)
 {
-    SifInitRpc(0);
+    sceSifInitRpc(0);
 
     sbv_patch_fileio();
 }

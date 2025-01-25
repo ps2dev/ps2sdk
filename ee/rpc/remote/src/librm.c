@@ -79,7 +79,7 @@ int RMMan_Init(void)
         {
             for (i = 0; i < (int)(sizeof(rpc_ids)/sizeof(rpc_ids[0])); i += 1)
             {
-                if ((SifBindRpc(&rpciftmp[i], rpc_ids[i], 0) < 0))
+                if ((sceSifBindRpc(&rpciftmp[i], rpc_ids[i], 0) < 0))
                 {
                     return -1;
                 }
@@ -122,7 +122,7 @@ int RMMan_Init(void)
 
     buffer.cmd.command = (rmman_type == 2) ? RMMAN2_RPCFUNC_INIT : RMMAN_RPCFUNC_INIT;
 
-    if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
         rmman_type = 0;
         return -1;
@@ -149,7 +149,7 @@ u32 RMMan_GetModuleVersion(void)
 {
     buffer.cmd.command = (rmman_type == 2) ? RMMAN2_RPCFUNC_VERSION : RMMAN_RPCFUNC_VERSION;
 
-    if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
         return 0;
     }
@@ -205,7 +205,7 @@ int RMMan_Open(int port, int slot, void *pData)
         }
     }
 
-    if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
         return 0;
     }
@@ -228,7 +228,7 @@ int RMMan_End(void)
 {
     buffer.cmd.command = (rmman_type == 2) ? RMMAN2_RPCFUNC_END : RMMAN_RPCFUNC_END;
 
-    if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
         return 0;
     }
@@ -277,7 +277,7 @@ int RMMan_Close(int port, int slot)
         }
     }
 
-    if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
         return 0;
     }

@@ -315,14 +315,14 @@ padInit(int mode)
     padsif[1].server = NULL;
 
     do {
-        if (SifBindRpc(&padsif[0], PAD_BIND_RPC_ID1, 0) < 0) {
+        if (sceSifBindRpc(&padsif[0], PAD_BIND_RPC_ID1, 0) < 0) {
             return -1;
         }
         nopdelay();
     } while(!padsif[0].server);
 
     do {
-        if (SifBindRpc(&padsif[1], PAD_BIND_RPC_ID2, 0) < 0) {
+        if (sceSifBindRpc(&padsif[1], PAD_BIND_RPC_ID2, 0) < 0) {
             return -3;
         }
         nopdelay();
@@ -362,7 +362,7 @@ int padPortInit(int mode)
 #else
     buffer.command = PAD_RPCCMD_INIT;
 #endif
-    ret = SifCallRpc( &padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL);
+    ret = sceSifCallRpc( &padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL);
 
     return(ret >= 0 ? buffer.padResult.result : 0);
 #else
@@ -379,7 +379,7 @@ padEnd(void)
 
     buffer.command=PAD_RPCCMD_END;
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return -1;
 
     ret = buffer.padResult.result;
@@ -435,7 +435,7 @@ padPortOpen(int port, int slot, void *padArea)
     buffer.padOpenArgs.slot = slot;
     buffer.padOpenArgs.padArea = padArea;
 
-    if(SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if(sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
         return 0;
     }
@@ -458,7 +458,7 @@ padPortClose(int port, int slot)
 	buffer.padCloseArgs.slot = slot;
 	buffer.padCloseArgs.mode = 1;
 
-    ret = SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL);
+    ret = sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL);
 
     if(ret < 0)
         return ret;
@@ -552,7 +552,7 @@ padGetPortMax(void)
 
 	buffer.command = PAD_RPCCMD_GET_PORTMAX;
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return -1;
 
     return buffer.padResult.result;
@@ -565,7 +565,7 @@ padGetSlotMax(int port)
     buffer.padSlotMaxArgs.command = PAD_RPCCMD_GET_SLOTMAX;
     buffer.padSlotMaxArgs.port = port;
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return -1;
 
     return buffer.padResult.result;
@@ -577,7 +577,7 @@ padGetModVersion()
 #ifdef _XPAD
     buffer.command = PAD_RPCCMD_GET_MODVER;
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return -1;
 
     return buffer.padResult.result;
@@ -644,7 +644,7 @@ padInfoMode(int port, int slot, int infoMode, int index)
 	buffer.padInfoModeArgs.infoMode = infoMode;
 	buffer.padInfoModeArgs.index = index;
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
     if (buffer.padModeResult.result == 1) {
@@ -664,7 +664,7 @@ padSetMainMode(int port, int slot, int mode, int lock)
 	buffer.padSetMainModeArgs.mode = mode;
 	buffer.padSetMainModeArgs.lock = lock;
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
     if (buffer.padModeResult.result == 1) {
@@ -709,7 +709,7 @@ padGetButtonMask(int port, int slot)
 	buffer.padGetButtonMaskArgs.port = port;
 	buffer.padGetButtonMaskArgs.slot = slot;
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
     return buffer.padResult.result;
@@ -725,7 +725,7 @@ padSetButtonInfo(int port, int slot, int buttonInfo)
 	buffer.padSetButtonInfoArgs.slot = slot;
 	buffer.padSetButtonInfoArgs.buttonInfo = buttonInfo;
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
     val = buffer.padSetButtonInfoResult.result;
@@ -765,7 +765,7 @@ padInfoAct(int port, int slot, int actuator, int cmd)
 	buffer.padInfoActArgs.actuator = actuator;
 	buffer.padInfoActArgs.act_cmd = cmd;
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
     if (buffer.padModeResult.result == 1) {
@@ -789,7 +789,7 @@ padSetActAlign(int port, int slot, const char actAlign[6])
     for (i=0; i<6; i++)
         ptr[i]=actAlign[i];
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
     if (buffer.padModeResult.result == 1) {
@@ -812,7 +812,7 @@ padSetActDirect(int port, int slot, char actAlign[6])
     for (i=0; i<6; i++)
         ptr[i]=actAlign[i];
 
-    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
     return buffer.padModeResult.result;

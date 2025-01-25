@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	SET_GS_BGCOLOUR(CYAN_BG);
 
 	// Initialize
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 	wipeUserMem();
 
 	//Writeback data cache before loading ELF.
@@ -124,14 +124,14 @@ int main(int argc, char *argv[])
 
 		SET_GS_BGCOLOUR(ORANGE_BG);
 
-        SifInitRpc(0);
+        sceSifInitRpc(0);
         // Load modules.
         SifLoadFileInit();
         SifLoadModule("rom0:SIO2MAN", 0, NULL);
         SifLoadModule("rom0:MCMAN", 0, NULL);
         SifLoadModule("rom0:MCSERV", 0, NULL);
         SifLoadFileExit();
-        SifExitRpc();
+        sceSifExitRpc();
 
 		SET_GS_BGCOLOUR(BROWN_BG);
 
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 		return ExecPS2((void *)elfdata.epc, (void *)elfdata.gp, argc-1, new_argv);
 	} else {
 		SET_GS_BGCOLOUR(MAGENTA_BG);
-		SifExitRpc();
+		sceSifExitRpc();
 		return -ENOENT;
 	}
 }

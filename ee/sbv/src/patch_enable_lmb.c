@@ -111,7 +111,7 @@ int sbv_patch_enable_lmb(void)
 
 	lf_rpc_dispatch = (void *)(loadfile_info.text_start + 0x4c4);
 	SyncDCache(&smem_buf, smem_buf.bytes+128);
-	if(SifRpcGetOtherData(&RData, (void*)lf_rpc_dispatch, &smem_buf, 128, 0)>=0){
+	if(sceSifGetOtherData(&RData, (void*)lf_rpc_dispatch, &smem_buf, 128, 0)>=0){
 		data=smem_buf.words;
 		if(data[0]==0x27bdffe8 && data[1]==0x2c820006 && data[2]==0x14400003 && data[3]==0xafbf0010 && data[5]==0x00001021 && data[6]==0x00041080){
 			void *lf_jump_table_end, *lf_fno_check;
@@ -144,7 +144,7 @@ int sbv_patch_enable_lmb(void)
 			dmat.dest=patch_addr;
 			dmat.attr=0;
 
-			SifSetDma(&dmat, 1);
+			sceSifSetDma(&dmat, 1);
 
 			/* Finally.  The last thing to do is to patch the loadfile RPC dispatch routine
 			   so that it will jump to entry #6 in it's jump table, and to patch the jump

@@ -165,7 +165,7 @@ static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecou
 
         // Do the DMA transfer
         CpuSuspendIntr(&intStatus);
-        SifSetDma(&dmaStruct, 1);
+        sceSifSetDma(&dmaStruct, 1);
         CpuResumeIntr(intStatus);
     }
     return device_count;
@@ -255,7 +255,7 @@ static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_
 	{
 		readlen=MIN(RWBufferSize, (unsigned int)asize);
 
-		while(SifDmaStat(status)>=0);
+		while(sceSifDmaStat(status)>=0);
 
 		rlen=iomanX_read(infd, rwbuf, readlen);
 		if (readlen!=rlen){
@@ -265,7 +265,7 @@ static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_
 			dmaStruct.attr=0;
 			dmaStruct.src =rwbuf;
 			CpuSuspendIntr(&intStatus);
-			SifSetDma(&dmaStruct, 1);
+			sceSifSetDma(&dmaStruct, 1);
 			CpuResumeIntr(intStatus);
 			total	+=rlen;
 			goto EXIT;
@@ -278,7 +278,7 @@ static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_
 			dmaStruct.attr=0;
 			dmaStruct.src =rwbuf;
 			CpuSuspendIntr(&intStatus);
-			status=SifSetDma(&dmaStruct, 1);
+			status=sceSifSetDma(&dmaStruct, 1);
 			CpuResumeIntr(intStatus);
 		}
 	}
@@ -297,7 +297,7 @@ EXIT:
 	dmaStruct.attr=0;
 	dmaStruct.dest=intr_data;
 	CpuSuspendIntr(&intStatus);
-	SifSetDma(&dmaStruct, 1);
+	sceSifSetDma(&dmaStruct, 1);
 	CpuResumeIntr(intStatus);
 	return (total);
 }
@@ -329,7 +329,7 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
 	while(left){
 		int writelen;
 		writelen = MIN(RWBufferSize, (unsigned int)left);
-		SifRpcGetOtherData(&rdata, (void *)pos, rwbuf, writelen, 0);
+		sceSifGetOtherData(&rdata, (void *)pos, rwbuf, writelen, 0);
 		wlen=iomanX_write(outfd, rwbuf, writelen);
 		if (wlen != writelen){
 			if (wlen>0)
@@ -386,7 +386,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
 		}
 		// wait for any previous DMA to complete
 	      // before over-writing localDirEntry
-	      while(SifDmaStat(dmaID)>=0);
+	      while(sceSifDmaStat(dmaID)>=0);
             DirEntryCopy(&localDirEntry, &dirbuf);
 	      // DMA localDirEntry to the address specified by dirEntry[matched_entries]
 	      // setup the dma struct
@@ -396,7 +396,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
 	      dmaStruct.attr = 0;
 	      // Do the DMA transfer
 	      CpuSuspendIntr(&intStatus);
-	      dmaID = SifSetDma(&dmaStruct, 1);
+	      dmaID = sceSifSetDma(&dmaStruct, 1);
 	      CpuResumeIntr(intStatus);
   	      matched_entries++;
           } // if res
@@ -424,7 +424,7 @@ static int fileXio_chstat_RPC(char *filename, void* eeptr, int mask)
 	iox_stat_t localStat;
       SifRpcReceiveData_t rdata;
 
-	SifRpcGetOtherData(&rdata, (void *)eeptr, &localStat, 64, 0);
+	sceSifGetOtherData(&rdata, (void *)eeptr, &localStat, 64, 0);
 
 	res = iomanX_chstat(filename, &localStat, mask);
       return(res);
@@ -449,7 +449,7 @@ static int fileXio_getstat_RPC(char *filename, void* eeptr)
 		dmaStruct.attr = 0;
 		// Do the DMA transfer
 		CpuSuspendIntr(&intStatus);
-		SifSetDma(&dmaStruct, 1);
+		sceSifSetDma(&dmaStruct, 1);
 		CpuResumeIntr(intStatus);
 	}
 
@@ -474,7 +474,7 @@ static int fileXio_dread_RPC(int fd, void* eeptr)
 	  dmaStruct.attr = 0;
 	  // Do the DMA transfer
 	  CpuSuspendIntr(&intStatus);
-	  SifSetDma(&dmaStruct, 1);
+	  sceSifSetDma(&dmaStruct, 1);
 	  CpuResumeIntr(intStatus);
       }
 
@@ -876,7 +876,7 @@ static void* fileXioRpc_Devctl(unsigned int* sbuff)
 			ret_buf->len = 0;
 
 		CpuSuspendIntr(&intStatus);
-		SifSetDma(&dmatrans, 1);
+		sceSifSetDma(&dmatrans, 1);
 		CpuResumeIntr(intStatus);
 	}
 
@@ -928,7 +928,7 @@ static void* fileXioRpc_Ioctl2(unsigned int* sbuff)
 			ret_buf->len = 0;
 
 		CpuSuspendIntr(&intStatus);
-		SifSetDma(&dmatrans, 1);
+		sceSifSetDma(&dmatrans, 1);
 		CpuResumeIntr(intStatus);
 	}
 
@@ -983,7 +983,7 @@ static void fileXio_Thread(void* param)
 	M_PRINTF("fileXio: fileXio RPC Server v1.00\nCopyright (c) 2003 adresd\n");
 	M_DEBUG("fileXio: RPC Initialize\n");
 
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 
 	RWBufferSize=DEFAULT_RWSIZE;
 	CpuSuspendIntr(&OldState);
@@ -996,9 +996,9 @@ static void fileXio_Thread(void* param)
 		SleepThread();
 	}
 
-	SifSetRpcQueue(&qd, GetThreadId());
-	SifRegisterRpc(&sd0, FILEXIO_IRX, &fileXio_rpc_server, fileXio_rpc_buffer, NULL, NULL, &qd);
-	SifRpcLoop(&qd);
+	sceSifSetRpcQueue(&qd, GetThreadId());
+	sceSifRegisterRpc(&sd0, FILEXIO_IRX, &fileXio_rpc_server, fileXio_rpc_buffer, NULL, NULL, &qd);
+	sceSifRpcLoop(&qd);
 }
 
 static void* filexioRpc_SetRWBufferSize(void *sbuff)

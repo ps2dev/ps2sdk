@@ -178,14 +178,14 @@ static void do_recv( void * rpcBuffer, int size )
 	// DMA back the abuffer
 	if(asize)
 	{
-		while(SifDmaStat(dma_id) >= 0);
+		while(sceSifDmaStat(dma_id) >= 0);
 
 		sifdma.src = lwip_buffer + 64;
 		sifdma.dest = abuffer;
 		sifdma.size = asize;
 		sifdma.attr = 0;
 		CpuSuspendIntr(&intr_stat);
-		dma_id = SifSetDma(&sifdma, 1);
+		dma_id = sceSifSetDma(&sifdma, 1);
 		CpuResumeIntr(intr_stat);
 	}
 
@@ -195,14 +195,14 @@ static void do_recv( void * rpcBuffer, int size )
 	rests.sbuf = recv_pkt->ee_addr;
 	rests.ebuf = aebuffer;
 
-	while(SifDmaStat(dma_id) >= 0);
+	while(sceSifDmaStat(dma_id) >= 0);
 
 	sifdma.src = &rests;
 	sifdma.dest = recv_pkt->intr_data;
 	sifdma.size = sizeof(rests_pkt);
 	sifdma.attr = 0;
 	CpuSuspendIntr(&intr_stat);
-	dma_id = SifSetDma(&sifdma, 1);
+	dma_id = sceSifSetDma(&sifdma, 1);
 	CpuResumeIntr(intr_stat);
 
 recv_end:
@@ -277,14 +277,14 @@ static void do_recvfrom( void * rpcBuffer, int size )
 	// DMA back the abuffer
 	if(asize)
 	{
-		while(SifDmaStat(dma_id) >= 0);
+		while(sceSifDmaStat(dma_id) >= 0);
 
 		sifdma.src = lwip_buffer + 64;
 		sifdma.dest = abuffer;
 		sifdma.size = asize;
 		sifdma.attr = 0;
 		CpuSuspendIntr(&intr_stat);
-		dma_id = SifSetDma(&sifdma, 1);
+		dma_id = sceSifSetDma(&sifdma, 1);
 		CpuResumeIntr(intr_stat);
 	}
 
@@ -294,14 +294,14 @@ static void do_recvfrom( void * rpcBuffer, int size )
 	rests.sbuf = recv_pkt->ee_addr;
 	rests.ebuf = aebuffer;
 
-	while(SifDmaStat(dma_id) >= 0);
+	while(sceSifDmaStat(dma_id) >= 0);
 
 	sifdma.src = &rests;
 	sifdma.dest = recv_pkt->intr_data;
 	sifdma.size = sizeof(rests_pkt);
 	sifdma.attr = 0;
 	CpuSuspendIntr(&intr_stat);
-	dma_id = SifSetDma(&sifdma, 1);
+	dma_id = sceSifSetDma(&sifdma, 1);
 	CpuResumeIntr(intr_stat);
 
 recv_end:
@@ -332,7 +332,7 @@ static void do_send( void * rpcBuffer, int size )
 
 	sendlen = MIN(BUFF_SIZE, pkt->length);
 
-	SifRpcGetOtherData(&rdata, ee_pos, lwip_buffer + 64, sendlen - pkt->malign, 0);
+	sceSifGetOtherData(&rdata, ee_pos, lwip_buffer + 64, sendlen - pkt->malign, 0);
 
 	// So actual TCP send
 	slen = send(pkt->socket, lwip_buffer + s_offset, sendlen, pkt->flags);
@@ -365,7 +365,7 @@ static void do_sendto( void * rpcBuffer, int size )
 
 	sendlen = MIN(BUFF_SIZE, pkt->length);
 
-	SifRpcGetOtherData(&rdata, ee_pos, lwip_buffer + 64, sendlen - pkt->malign, 0);
+	sceSifGetOtherData(&rdata, ee_pos, lwip_buffer + 64, sendlen - pkt->malign, 0);
 
 	// So actual UDP sendto
 	slen = sendto(pkt->socket, lwip_buffer + s_offset, sendlen, pkt->flags, &pkt->sockaddr, sizeof(struct sockaddr));
@@ -617,9 +617,9 @@ static void threadRpcFunction(void *arg)
 
 	printf("PS2IPS: RPC Thread Started\n");
 
-	SifSetRpcQueue( &ps2ips_queue , GetThreadId() );
-	SifRegisterRpc( &ps2ips_server, PS2IP_IRX, (void *)rpcHandlerFunction,(u8 *)&_rpc_buffer,NULL,NULL, &ps2ips_queue );
-	SifRpcLoop( &ps2ips_queue );
+	sceSifSetRpcQueue( &ps2ips_queue , GetThreadId() );
+	sceSifRegisterRpc( &ps2ips_server, PS2IP_IRX, (void *)rpcHandlerFunction,(u8 *)&_rpc_buffer,NULL,NULL, &ps2ips_queue );
+	sceSifRpcLoop( &ps2ips_queue );
 }
 
 int _start( int argc, char *argv[])

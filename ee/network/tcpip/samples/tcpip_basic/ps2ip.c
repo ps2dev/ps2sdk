@@ -218,12 +218,12 @@ int main(int argc, char *argv[])
 	int EthernetLinkMode;
 
 	//Reboot IOP
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 	while(!SifIopReset("", 0)){};
 	while(!SifIopSync()){};
 
 	//Initialize SIF services
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 	SifLoadFileInit();
 	SifInitIopHeap();
 	sbv_patch_enable_lmb();
@@ -282,7 +282,7 @@ end:
 	NetManDeinit();
 
 	//Deinitialize SIF services
-	SifExitRpc();
+	sceSifExitRpc();
 
 	return 0;
 }

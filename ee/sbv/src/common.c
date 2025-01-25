@@ -46,7 +46,7 @@ int smem_write_word(void *address, u32 value)
 
 	pDestRounded=(void*)(((u32)address)&0xFFFFFFC0);
 	SyncDCache(&smem_buf, smem_buf.bytes+64);
-	if((result=SifRpcGetOtherData(&RData, pDestRounded, &smem_buf, 64, 0))>=0)
+	if((result=sceSifGetOtherData(&RData, pDestRounded, &smem_buf, 64, 0))>=0)
 	{
 		*(u32*)UNCACHED_SEG((&smem_buf.bytes[((u32)address&0x3F)]))=value;
 
@@ -54,7 +54,7 @@ int smem_write_word(void *address, u32 value)
 		dmat.dest=pDestRounded;
 		dmat.size=64;
 		dmat.attr=0;
-		SifSetDma(&dmat, 1);
+		sceSifSetDma(&dmat, 1);
 	}
 
 	return result;

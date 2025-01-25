@@ -20,40 +20,40 @@ static unsigned char RpcBuffer[0x1000] ALIGNED(64);
 
 int SecrInit(void)
 {
-    SifInitRpc(0);
+    sceSifInitRpc(0);
 
     nopdelay();
-    while (SifBindRpc(&SifRpcClient01, 0x80000A01, 0) < 0 || SifRpcClient01.server == NULL) {
+    while (sceSifBindRpc(&SifRpcClient01, 0x80000A01, 0) < 0 || SifRpcClient01.server == NULL) {
         _printf("libsecr: bind failed\n");
     }
 
     nopdelay();
-    while (SifBindRpc(&SifRpcClient02, 0x80000A02, 0) < 0 || SifRpcClient02.server == NULL) {
+    while (sceSifBindRpc(&SifRpcClient02, 0x80000A02, 0) < 0 || SifRpcClient02.server == NULL) {
         _printf("libsecr: bind failed\n");
     }
 
     nopdelay();
-    while (SifBindRpc(&SifRpcClient03, 0x80000A03, 0) < 0 || SifRpcClient03.server == NULL) {
+    while (sceSifBindRpc(&SifRpcClient03, 0x80000A03, 0) < 0 || SifRpcClient03.server == NULL) {
         _printf("libsecr: bind failed\n");
     }
 
     nopdelay();
-    while (SifBindRpc(&SifRpcClient04, 0x80000A04, 0) < 0 || SifRpcClient04.server == NULL) {
+    while (sceSifBindRpc(&SifRpcClient04, 0x80000A04, 0) < 0 || SifRpcClient04.server == NULL) {
         _printf("libsecr: bind failed\n");
     }
 
     nopdelay();
-    while (SifBindRpc(&SifRpcClient05, 0x80000A05, 0) < 0 || SifRpcClient05.server == NULL) {
+    while (sceSifBindRpc(&SifRpcClient05, 0x80000A05, 0) < 0 || SifRpcClient05.server == NULL) {
         _printf("libsecr: bind failed\n");
     }
 
     nopdelay();
-    while (SifBindRpc(&SifRpcClient06, 0x80000A06, 0) < 0 || SifRpcClient06.server == NULL) {
+    while (sceSifBindRpc(&SifRpcClient06, 0x80000A06, 0) < 0 || SifRpcClient06.server == NULL) {
         _printf("libsecr: bind failed\n");
     }
 
     nopdelay();
-    while (SifBindRpc(&SifRpcClient07, 0x80000A07, 0) < 0 || SifRpcClient07.server == NULL) {
+    while (sceSifBindRpc(&SifRpcClient07, 0x80000A07, 0) < 0 || SifRpcClient07.server == NULL) {
         _printf("libsecr: bind failed\n");
     }
 
@@ -79,7 +79,7 @@ int SecrDownloadHeader(int port, int slot, void *buffer, SecrBitTable_t *BitTabl
     ((struct SecrSifDownloadHeaderParams *)RpcBuffer)->slot = slot;
     memcpy(((struct SecrSifDownloadHeaderParams *)RpcBuffer)->buffer, buffer, sizeof(((struct SecrSifDownloadHeaderParams *)RpcBuffer)->buffer));
 
-    if (SifCallRpc(&SifRpcClient01, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
+    if (sceSifCallRpc(&SifRpcClient01, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
         _printf("sceSecrDownloadHeader: rpc error\n");
         result = 0;
     } else {
@@ -100,7 +100,7 @@ int SecrDownloadBlock(void *src, unsigned int size)
     memcpy(((struct SecrSifDownloadBlockParams *)RpcBuffer)->buffer, src, sizeof(((struct SecrSifDownloadBlockParams *)RpcBuffer)->buffer));
     ((struct SecrSifDownloadBlockParams *)RpcBuffer)->size = size;
 
-    if (SifCallRpc(&SifRpcClient02, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
+    if (sceSifCallRpc(&SifRpcClient02, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
         _printf("sceSecrDownloadBlock: rpc error\n");
         result = 0;
     } else {
@@ -117,7 +117,7 @@ int SecrDownloadGetKbit(int port, int slot, void *kbit)
     ((struct SecrSifDownloadGetKbitParams *)RpcBuffer)->port = port;
     ((struct SecrSifDownloadGetKbitParams *)RpcBuffer)->slot = slot;
 
-    if (SifCallRpc(&SifRpcClient03, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
+    if (sceSifCallRpc(&SifRpcClient03, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
         _printf("sceSecrDownloadGetKbit: rpc error\n");
         result = 0;
     } else {
@@ -135,7 +135,7 @@ int SecrDownloadGetKc(int port, int slot, void *kc)
     ((struct SecrSifDownloadGetKcParams *)RpcBuffer)->port = port;
     ((struct SecrSifDownloadGetKcParams *)RpcBuffer)->slot = slot;
 
-    if (SifCallRpc(&SifRpcClient04, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
+    if (sceSifCallRpc(&SifRpcClient04, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
         _printf("sceSecrDownloadGetKc: rpc error\n");
         result = 0;
     } else {
@@ -150,7 +150,7 @@ int SecrDownloadGetICVPS2(void *icvps2)
 {
     int result;
 
-    if (SifCallRpc(&SifRpcClient05, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
+    if (sceSifCallRpc(&SifRpcClient05, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
         _printf("sceSecrDownloadGetICVPS2: rpc error\n");
         result = 0;
     } else {
@@ -167,7 +167,7 @@ int SecrDiskBootHeader(void *buffer, SecrBitTable_t *BitTable, s32 *pSize)
 
     memcpy(((struct SecrSifDiskBootHeaderParams *)RpcBuffer)->buffer, buffer, sizeof(((struct SecrSifDiskBootHeaderParams *)RpcBuffer)->buffer));
 
-    if (SifCallRpc(&SifRpcClient06, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
+    if (sceSifCallRpc(&SifRpcClient06, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
         _printf("sceSecrDiskBootHeader: rpc error\n");
         result = 0;
     } else {
@@ -188,7 +188,7 @@ int SecrDiskBootBlock(void *src, void *dst, unsigned int size)
     memcpy(((struct SecrSifDiskBootBlockParams *)RpcBuffer)->source, src, size);
     ((struct SecrSifDiskBootBlockParams *)RpcBuffer)->size = size;
 
-    if (SifCallRpc(&SifRpcClient07, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
+    if (sceSifCallRpc(&SifRpcClient07, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL) < 0) {
         _printf("sceSecrDiskBootBlock: rpc error\n");
         result = 0;
     } else {

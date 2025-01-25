@@ -59,12 +59,12 @@ static void napThread(void *arg)
 
     (void)arg;
 
-    SifInitRpc(0);
+    sceSifInitRpc(0);
     pid = GetThreadId();
-    SifSetRpcQueue(&queue, pid);
-    SifRegisterRpc(&server, RPC_NPM_USER, naplinkRpcHandler,
+    sceSifSetRpcQueue(&queue, pid);
+    sceSifRegisterRpc(&server, RPC_NPM_USER, naplinkRpcHandler,
                    rpc_buffer, 0, 0, &queue);
-    SifRpcLoop(&queue);  // Never exits
+    sceSifRpcLoop(&queue);  // Never exits
     ExitDeleteThread();
 }
 

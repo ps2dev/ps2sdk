@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 {
     int result;
 
-    SifInitRpc(0);
+    sceSifInitRpc(0);
 
     //Load modules.
     SifLoadFileInit();
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
     SleepThread();
 
-    SifExitRpc();
+    sceSifExitRpc();
 
     return 0;
 }

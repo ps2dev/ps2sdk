@@ -114,7 +114,7 @@ int fileXioInit(void)
 	sp.option = 0;
 	__lock_sema_id = CreateSema(&sp);
 
-	while(((res = SifBindRpc(&__cd0, FILEXIO_IRX, 0)) >= 0) && (__cd0.server == NULL))
+	while(((res = sceSifBindRpc(&__cd0, FILEXIO_IRX, 0)) >= 0) && (__cd0.server == NULL))
 		nopdelay();
 
 	if(res < 0)
@@ -158,7 +158,7 @@ void fileXioStop(void)
 	if(fileXioInit() < 0)
 		return;
 
-	SifCallRpc(&__cd0, FILEXIO_STOP, 0, __sbuff, 0, __sbuff, 0, 0, 0);
+	sceSifCallRpc(&__cd0, FILEXIO_STOP, 0, __sbuff, 0, __sbuff, 0, 0, 0);
 
 	return;
 }
@@ -180,7 +180,7 @@ int fileXioGetDeviceList(struct fileXioDevice deviceEntry[], unsigned int req_en
 	packet->reqEntries = req_entries;
 
 	// This will get the directory contents, and fill dirEntry via DMA
-	if((rv = SifCallRpc(&__cd0, FILEXIO_GETDEVICELIST, __fileXioBlockMode, __sbuff, sizeof(struct fxio_devlist_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_GETDEVICELIST, __fileXioBlockMode, __sbuff, sizeof(struct fxio_devlist_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -208,13 +208,13 @@ int fileXioGetdir(const char* pathname, struct fileXioDirEntry dirEntry[], unsig
 	// copy the requested pathname to the rpc buffer
 	strncpy(packet->pathname, pathname, sizeof(packet->pathname));
 
-	SifWriteBackDCache(dirEntry, (sizeof(struct fileXioDirEntry) * req_entries));
+	sceSifWriteBackDCache(dirEntry, (sizeof(struct fileXioDirEntry) * req_entries));
 
 	packet->dirEntry = dirEntry;
 	packet->reqEntries = req_entries;
 
 	// This will get the directory contents, and fill dirEntry via DMA
-	if((rv = SifCallRpc(&__cd0, FILEXIO_GETDIR, __fileXioBlockMode, __sbuff, sizeof(struct fxio_getdir_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_GETDIR, __fileXioBlockMode, __sbuff, sizeof(struct fxio_getdir_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -243,7 +243,7 @@ int fileXioMount(const char* mountpoint, const char* mountstring, int flag)
 	strncpy(packet->mountpoint, mountpoint, sizeof(packet->mountpoint));
 	packet->flags = flag;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_MOUNT, __fileXioBlockMode, __sbuff, sizeof(struct fxio_mount_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_MOUNT, __fileXioBlockMode, __sbuff, sizeof(struct fxio_mount_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -270,7 +270,7 @@ int fileXioUmount(const char* mountpoint)
 
 	strncpy(packet->mountpoint, mountpoint, sizeof(packet->mountpoint));
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_UMOUNT, __fileXioBlockMode, __sbuff, sizeof(struct fxio_unmount_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_UMOUNT, __fileXioBlockMode, __sbuff, sizeof(struct fxio_unmount_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -299,7 +299,7 @@ int fileXioCopyfile(const char* source, const char* dest, int mode)
 	strncpy(packet->dest, dest, sizeof(packet->dest));
 	packet->mode = mode;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_COPYFILE, __fileXioBlockMode, __sbuff, sizeof(struct fxio_copyfile_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_COPYFILE, __fileXioBlockMode, __sbuff, sizeof(struct fxio_copyfile_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -327,7 +327,7 @@ int fileXioMkdir(const char* pathname, int mode)
 	strncpy(packet->pathname, pathname, sizeof(packet->pathname));
 	packet->mode = mode;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_MKDIR, __fileXioBlockMode, __sbuff, sizeof(struct fxio_mkdir_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_MKDIR, __fileXioBlockMode, __sbuff, sizeof(struct fxio_mkdir_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -354,7 +354,7 @@ int fileXioRmdir(const char* pathname)
 
 	strncpy(packet->pathname, pathname, sizeof(packet->pathname));
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_RMDIR, __fileXioBlockMode, __sbuff, sizeof(struct fxio_pathsel_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_RMDIR, __fileXioBlockMode, __sbuff, sizeof(struct fxio_pathsel_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -381,7 +381,7 @@ int fileXioRemove(const char* pathname)
 
 	strncpy(packet->pathname, pathname, sizeof(packet->pathname));
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_REMOVE, __fileXioBlockMode, __sbuff, sizeof(struct fxio_pathsel_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_REMOVE, __fileXioBlockMode, __sbuff, sizeof(struct fxio_pathsel_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -409,7 +409,7 @@ int fileXioRename(const char* source, const char* dest)
 	strncpy(packet->source, source, sizeof(packet->source));
 	strncpy(packet->dest, dest, sizeof(packet->dest));
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_RENAME, __fileXioBlockMode, __sbuff, sizeof(struct fxio_rename_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_RENAME, __fileXioBlockMode, __sbuff, sizeof(struct fxio_rename_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -437,7 +437,7 @@ int fileXioSymlink(const char* source, const char* dest)
 	strncpy(packet->source, source, sizeof(packet->source));
 	strncpy(packet->dest, dest, sizeof(packet->dest));
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_SYMLINK, __fileXioBlockMode, __sbuff, sizeof(struct fxio_rename_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_SYMLINK, __fileXioBlockMode, __sbuff, sizeof(struct fxio_rename_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -463,13 +463,13 @@ int fileXioReadlink(const char* source, char* buf, unsigned int buflen)
 	WaitSema(__fileXioCompletionSema);
 
 	if( !IS_UNCACHED_SEG(buf))
-  	  SifWriteBackDCache(buf, buflen);
+  	  sceSifWriteBackDCache(buf, buflen);
 
 	strncpy(packet->source, source, sizeof(packet->source));
 	packet->buffer = buf;
 	packet->buflen = buflen;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_READLINK, __fileXioBlockMode, __sbuff, sizeof(struct fxio_readlink_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_READLINK, __fileXioBlockMode, __sbuff, sizeof(struct fxio_readlink_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -496,7 +496,7 @@ int fileXioChdir(const char* pathname)
 
 	strncpy(packet->pathname, pathname, sizeof(packet->pathname));
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_CHDIR, __fileXioBlockMode, __sbuff, sizeof(struct fxio_pathsel_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_CHDIR, __fileXioBlockMode, __sbuff, sizeof(struct fxio_pathsel_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -529,7 +529,7 @@ int fileXioOpen(const char* source, int flags, ...)
 	strncpy(packet->pathname, source, sizeof(packet->pathname));
 	packet->flags = flags;
 	packet->mode = mode;
-	if((rv = SifCallRpc(&__cd0, FILEXIO_OPEN, __fileXioBlockMode, __sbuff, sizeof(struct fxio_open_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_OPEN, __fileXioBlockMode, __sbuff, sizeof(struct fxio_open_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -556,7 +556,7 @@ int fileXioClose(int fd)
 
 	packet->fd = fd;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_CLOSE, __fileXioBlockMode, __sbuff, sizeof(struct fxio_close_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_CLOSE, __fileXioBlockMode, __sbuff, sizeof(struct fxio_close_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -597,9 +597,9 @@ int fileXioRead(int fd, void *buf, int size)
 	packet->intrData = __intr_data;
 
 	if (!IS_UNCACHED_SEG(buf))
-		SifWriteBackDCache(buf, size);
+		sceSifWriteBackDCache(buf, size);
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_READ, __fileXioBlockMode, __sbuff, sizeof(struct fxio_read_packet), __sbuff, 4, &recv_intr, __intr_data)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_READ, __fileXioBlockMode, __sbuff, sizeof(struct fxio_read_packet), __sbuff, 4, &recv_intr, __intr_data)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -641,9 +641,9 @@ int fileXioWrite(int fd, const void *buf, int size)
 	memcpy(packet->unalignedData, buf, miss);
 
 	if(!IS_UNCACHED_SEG(buf))
-		SifWriteBackDCache((void*)buf, size);
+		sceSifWriteBackDCache((void*)buf, size);
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_WRITE, __fileXioBlockMode, __sbuff, sizeof(struct fxio_write_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_WRITE, __fileXioBlockMode, __sbuff, sizeof(struct fxio_write_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -672,7 +672,7 @@ int fileXioLseek(int fd, int offset, int whence)
 	packet->offset = (u32)offset;
 	packet->whence = whence;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_LSEEK, __fileXioBlockMode, __sbuff, sizeof(struct fxio_lseek_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_LSEEK, __fileXioBlockMode, __sbuff, sizeof(struct fxio_lseek_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -706,7 +706,7 @@ s64 fileXioLseek64(int fd, s64 offset, int whence)
 	packet->offset_hi = (u32)((offset >> 32) & 0xffffffff);
 	packet->whence = whence;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_LSEEK64, __fileXioBlockMode, __sbuff, sizeof(struct fxio_lseek64_packet), __sbuff, 8, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_LSEEK64, __fileXioBlockMode, __sbuff, sizeof(struct fxio_lseek64_packet), __sbuff, 8, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else {
@@ -741,9 +741,9 @@ int fileXioChStat(const char *name, iox_stat_t *stat, int mask)
 	packet->mask = mask;
 
 	if(!IS_UNCACHED_SEG(stat))
-		SifWriteBackDCache(stat, sizeof(iox_stat_t));
+		sceSifWriteBackDCache(stat, sizeof(iox_stat_t));
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_CHSTAT, __fileXioBlockMode, __sbuff, sizeof(struct fxio_chstat_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_CHSTAT, __fileXioBlockMode, __sbuff, sizeof(struct fxio_chstat_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -772,9 +772,9 @@ int fileXioGetStat(const char *name, iox_stat_t *stat)
 	packet->stat = stat;
 
 	if(!IS_UNCACHED_SEG(stat))
-		SifWriteBackDCache(stat, sizeof(iox_stat_t));
+		sceSifWriteBackDCache(stat, sizeof(iox_stat_t));
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_GETSTAT, __fileXioBlockMode, __sbuff, sizeof(struct fxio_getstat_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_GETSTAT, __fileXioBlockMode, __sbuff, sizeof(struct fxio_getstat_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -807,7 +807,7 @@ int fileXioFormat(const char *dev, const char *blockdev, const void *args, int a
 	memcpy(packet->args, args, arglen);
 	packet->arglen = arglen;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_FORMAT, __fileXioBlockMode,  __sbuff, sizeof(struct fxio_format_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_FORMAT, __fileXioBlockMode,  __sbuff, sizeof(struct fxio_format_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -835,7 +835,7 @@ int fileXioSync(const char *devname, int flag)
 	strncpy(packet->device, devname, sizeof(packet->device));
 	packet->flags = flag;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_SYNC, __fileXioBlockMode, __sbuff, sizeof(struct fxio_sync_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_SYNC, __fileXioBlockMode, __sbuff, sizeof(struct fxio_sync_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -861,7 +861,7 @@ int fileXioDopen(const char *name)
 	WaitSema(__fileXioCompletionSema);
 
 	strncpy(packet->pathname, name, sizeof(packet->pathname));
-	if((rv = SifCallRpc(&__cd0, FILEXIO_DOPEN, __fileXioBlockMode, __sbuff, sizeof(struct fxio_pathsel_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_DOPEN, __fileXioBlockMode, __sbuff, sizeof(struct fxio_pathsel_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -887,7 +887,7 @@ int fileXioDclose(int fd)
 	WaitSema(__fileXioCompletionSema);
 
 	packet->fd = fd;
-	if((rv = SifCallRpc(&__cd0, FILEXIO_DCLOSE, __fileXioBlockMode, __sbuff, sizeof(struct fxio_close_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_DCLOSE, __fileXioBlockMode, __sbuff, sizeof(struct fxio_close_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -916,9 +916,9 @@ int fileXioDread(int fd, iox_dirent_t *dirent)
 	packet->dirent = dirent;
 
 	if (!IS_UNCACHED_SEG(dirent))
-		SifWriteBackDCache(dirent, sizeof(iox_dirent_t));
+		sceSifWriteBackDCache(dirent, sizeof(iox_dirent_t));
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_DREAD, __fileXioBlockMode, __sbuff, sizeof(struct fxio_dread_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_DREAD, __fileXioBlockMode, __sbuff, sizeof(struct fxio_dread_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -964,12 +964,12 @@ int fileXioDevctl(const char *name, int cmd, void *arg, unsigned int arglen, voi
 	packet->buflen = buflen;
 	packet->intr_data = __intr_data;
 
-	SifWriteBackDCache(buf, buflen);
+	sceSifWriteBackDCache(buf, buflen);
 
 	if(buflen)
-		rv = SifCallRpc(&__cd0, FILEXIO_DEVCTL, __fileXioBlockMode, packet, sizeof(struct fxio_devctl_packet), __sbuff, 4, &fxio_ctl_intr, __intr_data);
+		rv = sceSifCallRpc(&__cd0, FILEXIO_DEVCTL, __fileXioBlockMode, packet, sizeof(struct fxio_devctl_packet), __sbuff, 4, &fxio_ctl_intr, __intr_data);
 	else
-		rv = SifCallRpc(&__cd0, FILEXIO_DEVCTL, __fileXioBlockMode, packet, sizeof(struct fxio_devctl_packet), __sbuff, 4, (void *)&_fxio_intr, NULL);
+		rv = sceSifCallRpc(&__cd0, FILEXIO_DEVCTL, __fileXioBlockMode, packet, sizeof(struct fxio_devctl_packet), __sbuff, 4, (void *)&_fxio_intr, NULL);
 
 	if(rv >= 0)
 	{
@@ -1000,7 +1000,7 @@ int fileXioIoctl(int fd, int cmd, void *arg){
 	packet->fd = fd;
 	packet->cmd = cmd;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_IOCTL, __fileXioBlockMode, packet, sizeof(struct fxio_ioctl_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_IOCTL, __fileXioBlockMode, packet, sizeof(struct fxio_ioctl_packet), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		if(__fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 		else { rv = __sbuff[0]; }
@@ -1036,12 +1036,12 @@ int fileXioIoctl2(int fd, int command, void *arg, unsigned int arglen, void *buf
 	packet->buflen = buflen;
 	packet->intr_data = __intr_data;
 
-	SifWriteBackDCache(buf, buflen);
+	sceSifWriteBackDCache(buf, buflen);
 
 	if(buflen)
-		rv = SifCallRpc(&__cd0, FILEXIO_IOCTL2, __fileXioBlockMode, packet, sizeof(struct fxio_ioctl2_packet), __sbuff, 4, &fxio_ctl_intr, __intr_data);
+		rv = sceSifCallRpc(&__cd0, FILEXIO_IOCTL2, __fileXioBlockMode, packet, sizeof(struct fxio_ioctl2_packet), __sbuff, 4, &fxio_ctl_intr, __intr_data);
 	else
-		rv = SifCallRpc(&__cd0, FILEXIO_IOCTL2, __fileXioBlockMode, packet, sizeof(struct fxio_ioctl2_packet), __sbuff, 4, (void *)&_fxio_intr, NULL);
+		rv = sceSifCallRpc(&__cd0, FILEXIO_IOCTL2, __fileXioBlockMode, packet, sizeof(struct fxio_ioctl2_packet), __sbuff, 4, (void *)&_fxio_intr, NULL);
 
 	if(rv >= 0)
 	{
@@ -1114,7 +1114,7 @@ int fileXioSetRWBufferSize(int size){
 
 	packet->size = size;
 
-	if((rv = SifCallRpc(&__cd0, FILEXIO_SETRWBUFFSIZE, 0, packet, sizeof(struct fxio_rwbuff), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
+	if((rv = sceSifCallRpc(&__cd0, FILEXIO_SETRWBUFFSIZE, 0, packet, sizeof(struct fxio_rwbuff), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		rv = __sbuff[0];
 	}
