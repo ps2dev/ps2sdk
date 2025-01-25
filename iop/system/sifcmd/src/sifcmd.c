@@ -33,7 +33,7 @@ typedef struct sif_cmd_data_
 	void *sif_1_callback_userdata;
 	SifCmdSysHandlerData_t sys_cmd_handler_handler[32];
 	unsigned int sregs[32];
-} sif_cmd_data_t;
+} __attribute__((aligned(16))) sif_cmd_data_t;
 
 typedef struct t_SifCmdChgAddrData
 {
@@ -42,8 +42,8 @@ typedef struct t_SifCmdChgAddrData
 } SifCmdChgAddrData_t;
 
 static sif_cmd_data_t sif_cmd_data;
-static u8 sif_iop_recvbuf[0x80];
-static u8 sif_unused[0x40];
+static u8 sif_iop_recvbuf[0x80] __attribute__((aligned(16)));
+static u8 sif_unused[0x40] __attribute__((aligned(16)));
 
 static int sif_cmd_int_handler(sif_cmd_data_t *sci);
 
@@ -57,14 +57,14 @@ static void sif_sys_cmd_handler_change_addr(const SifCmdChgAddrData_t *pkt, sif_
 	sci->sif_send_eebuf = pkt->newaddr;
 }
 
-unsigned int sceSifGetSreg(int index)
+unsigned int sceSifGetSreg(int sreg)
 {
-	return sif_cmd_data.sregs[index];
+	return sif_cmd_data.sregs[sreg];
 }
 
-void sceSifSetSreg(int index, unsigned int value)
+void sceSifSetSreg(int sreg, unsigned int value)
 {
-	sif_cmd_data.sregs[index] = value;
+	sif_cmd_data.sregs[sreg] = value;
 }
 
 #if 0
@@ -161,8 +161,8 @@ int sifcmd_deinit(void)
 	DisableIntr(IOP_IRQ_DMA_SIF1, &old_irq);
 	ReleaseIntrHandler(IOP_IRQ_DMA_SIF1);
 #if 0
-  // FIXME: Do we really need this call?
-  sifman_2();
+	// FIXME: Do we really need this call?
+	sifman_2();
 #endif
 	return 0;
 }
@@ -181,15 +181,15 @@ void sceSifExitCmd(void)
 	ReleaseIntrHandler(IOP_IRQ_DMA_SIF1);
 }
 
-void sceSifSetCmdBuffer(SifCmdHandlerData_t *cmdBuffer, int size)
+void sceSifSetCmdBuffer(SifCmdHandlerData_t *db, int size)
 {
-	sif_cmd_data.usr_cmd_handlers = cmdBuffer;
+	sif_cmd_data.usr_cmd_handlers = db;
 	sif_cmd_data.nr_usr_handlers = size;
 }
 
-void sceSifSetSysCmdBuffer(SifCmdSysHandlerData_t *sysCmdBuffer, int size)
+void sceSifSetSysCmdBuffer(SifCmdSysHandlerData_t *db, int size)
 {
-	sif_cmd_data.sys_cmd_handlers = sysCmdBuffer;
+	sif_cmd_data.sys_cmd_handlers = db;
 	sif_cmd_data.nr_sys_handlers = size;
 }
 
@@ -216,7 +216,7 @@ void sceSifRemoveCmdHandler(int cid)
 }
 
 static int sif_send_cmd_common(
-	int cmd,
+	int cid,
 	char flags,
 	SifCmdHeader_t *packet,
 	int packet_size,
@@ -261,7 +261,7 @@ static int sif_send_cmd_common(
 	dmatp = &dmat[dmatc1];
 	dmatc2 = dmatc1 + 1;
 	*(u8 *)packet = packet_size;
-	packet->cid = cmd;
+	packet->cid = cid;
 	dmatp->src = packet;
 	sif_send_eebuf = sif_cmd_data.sif_send_eebuf;
 	dmatp->attr = 4;
@@ -289,13 +289,13 @@ static int sif_send_cmd_common(
 	return dmar1;
 }
 
-unsigned int sceSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra, void *dest_extra, int size_extra)
+unsigned int sceSifSendCmd(int cid, void *packet, int packet_size, void *src_extra, void *dest_extra, int size_extra)
 {
-	return sif_send_cmd_common(cmd, 0, (SifCmdHeader_t *)packet, packet_size, src_extra, dest_extra, size_extra, 0, 0);
+	return sif_send_cmd_common(cid, 0, (SifCmdHeader_t *)packet, packet_size, src_extra, dest_extra, size_extra, 0, 0);
 }
 
 unsigned int sceSifSendCmdIntr(
-	int cmd,
+	int cid,
 	void *packet,
 	int packet_size,
 	void *src_extra,
@@ -305,7 +305,7 @@ unsigned int sceSifSendCmdIntr(
 	void *completion_cb_userdata)
 {
 	return sif_send_cmd_common(
-		cmd,
+		cid,
 		8,
 		(SifCmdHeader_t *)packet,
 		packet_size,
@@ -316,13 +316,13 @@ unsigned int sceSifSendCmdIntr(
 		completion_cb_userdata);
 }
 
-unsigned int isceSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra, void *dest_extra, int size_extra)
+unsigned int isceSifSendCmd(int cid, void *packet, int packet_size, void *src_extra, void *dest_extra, int size_extra)
 {
-	return sif_send_cmd_common(cmd, 1, (SifCmdHeader_t *)packet, packet_size, src_extra, dest_extra, size_extra, 0, 0);
+	return sif_send_cmd_common(cid, 1, (SifCmdHeader_t *)packet, packet_size, src_extra, dest_extra, size_extra, 0, 0);
 }
 
 unsigned int isceSifSendCmdIntr(
-	int cmd,
+	int cid,
 	void *packet,
 	int packet_size,
 	void *src_extra,
@@ -332,7 +332,7 @@ unsigned int isceSifSendCmdIntr(
 	void *completion_cb_userdata)
 {
 	return sif_send_cmd_common(
-		cmd,
+		cid,
 		9,
 		(SifCmdHeader_t *)packet,
 		packet_size,

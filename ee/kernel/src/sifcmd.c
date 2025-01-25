@@ -43,19 +43,21 @@ struct cmd_data
     void *unused;
     /** Address of IOP SIF DMA receive address */
     void *iopbuf;
-    SifCmdHandlerData_t *sys_cmd_handlers;
+    SifCmdSysHandlerData_t *sys_cmd_handlers;
     u32 nr_sys_handlers;
     SifCmdHandlerData_t *usr_cmd_handlers;
     u32 nr_usr_handlers;
     int *sregs;
-};
+} __attribute__((aligned(64)));
 
 extern int _iop_reboot_count;
 extern struct cmd_data _sif_cmd_data;
-int _SifCmdIntHandler(int channel);
+extern unsigned int _SifSendCmd(int cid, int mode, void *pkt, int pktsize, void *src,
+                                void *dest, int size);
+extern int _SifCmdIntHandler(int channel);
 
-#ifdef F_sif_cmd_send
-static unsigned int _SifSendCmd(int cid, int mode, void *pkt, int pktsize, void *src,
+#ifdef F__SifSendCmd
+unsigned int _SifSendCmd(int cid, int mode, void *pkt, int pktsize, void *src,
                                 void *dest, int size)
 {
     SifDmaTransfer_t dmat[2];
@@ -77,7 +79,7 @@ static unsigned int _SifSendCmd(int cid, int mode, void *pkt, int pktsize, void 
         header->dest  = dest;
 
         if (mode & SIF_CMD_M_WBDC) /* if mode is & 4, flush reference cache */
-            SifWriteBackDCache(src, size);
+            sceSifWriteBackDCache(src, size);
 
         dmat[count].src  = src;
         dmat[count].dest = dest;
@@ -92,39 +94,40 @@ static unsigned int _SifSendCmd(int cid, int mode, void *pkt, int pktsize, void 
     dmat[count].attr = SIF_DMA_ERT | SIF_DMA_INT_O;
     count++;
 
-    SifWriteBackDCache(pkt, pktsize);
+    sceSifWriteBackDCache(pkt, pktsize);
 
     if (mode & SIF_CMD_M_INTR) /* INTERRUPT DMA TRANSFER */
-        return iSifSetDma(dmat, count);
+        return isceSifSetDma(dmat, count);
     else
-        return SifSetDma(dmat, count);
-}
-
-unsigned int
-SifSendCmd(int command, void *send_data, int send_len,
-           void *extra_from, void *extra_dest, int extra_len)
-{
-    return _SifSendCmd(command, 0, send_data, send_len,
-                       extra_from, extra_dest, extra_len);
-}
-
-unsigned int
-iSifSendCmd(int command, void *send_data, int send_len,
-            void *extra_from, void *extra_dest, int extra_len)
-{
-    return _SifSendCmd(command, SIF_CMD_M_INTR, send_data, send_len,
-                       extra_from, extra_dest, extra_len);
+        return sceSifSetDma(dmat, count);
 }
 #endif
 
-#ifdef F__sif_cmd_int_handler
+#ifdef F_sceSifSendCmd
+unsigned int sceSifSendCmd(int cid, void *packet, int packet_size, void *src_extra,
+    void *dest_extra, int size_extra)
+{
+    return _SifSendCmd(cid, 0, packet, packet_size,
+                       src_extra, dest_extra, size_extra);
+}
+#endif
+
+#ifdef F_isceSifSendCmd
+unsigned int isceSifSendCmd(int cid, void *packet, int packet_size, void *src_extra,
+    void *dest_extra, int size_extra)
+{
+    return _SifSendCmd(cid, SIF_CMD_M_INTR, packet, packet_size,
+                       src_extra, dest_extra, size_extra);
+}
+#endif
+
+#ifdef F__SifCmdIntHandler
 int _SifCmdIntHandler(int channel)
 {
     u128 packet[8];
     u128 *pktbuf;
     struct cmd_data *cmd_data = &_sif_cmd_data;
     SifCmdHeader_t *header;
-    SifCmdHandlerData_t *cmd_handlers;
     int size, pktquads, id, i = 0;
 
     (void)channel;
@@ -146,7 +149,7 @@ int _SifCmdIntHandler(int channel)
         }
     }
 
-    iSifSetDChain();
+    isceSifSetDChain();
 
     header = (SifCmdHeader_t *)packet;
     /* Get the command handler id and determine which handler list to
@@ -155,18 +158,13 @@ int _SifCmdIntHandler(int channel)
 
     if (header->cid & SIF_CMD_ID_SYSTEM) {
         if ((u32)id < cmd_data->nr_sys_handlers)
-            cmd_handlers = cmd_data->sys_cmd_handlers;
-        else
-            goto out;
+            if (cmd_data->sys_cmd_handlers[id].handler)
+                cmd_data->sys_cmd_handlers[id].handler(packet, cmd_data->sys_cmd_handlers[id].harg);
     } else {
         if ((u32)id < cmd_data->nr_usr_handlers)
-            cmd_handlers = cmd_data->usr_cmd_handlers;
-        else
-            goto out;
+            if (cmd_data->usr_cmd_handlers[id].handler)
+                cmd_data->usr_cmd_handlers[id].handler(packet, cmd_data->usr_cmd_handlers[id].harg);
     }
-
-    if (cmd_handlers[id].handler)
-        cmd_handlers[id].handler(packet, cmd_handlers[id].harg);
 
 out:
     ExitHandler();
@@ -180,7 +178,7 @@ static u8 pktbuf[CMD_PACKET_MAX] __attribute__((aligned(64)));
    to use it, it won't crash.  Otherwise unused.  */
 static u8 sif_unused[64] __attribute__((aligned(64)));
 
-static SifCmdHandlerData_t sys_cmd_handlers[SYS_CMD_HANDLER_MAX];
+static SifCmdSysHandlerData_t sys_cmd_handlers[SYS_CMD_HANDLER_MAX];
 static int sregs[32];
 
 struct cmd_data _sif_cmd_data;
@@ -216,7 +214,7 @@ static void set_sreg(void *packet, void *harg)
     cmd_data->sregs[pkt->sreg] = pkt->val;
 }
 
-void SifInitCmd(void)
+void sceSifInitCmd(void)
 {
     static struct ca_pkt packet __attribute((aligned(64)));
     int i;
@@ -264,36 +262,36 @@ void SifInitCmd(void)
 
     // If SIF0 (IOP -> EE) is not enabled, enable it.
     if (!(_lw(DMAC_SIF0_CHCR) & CHCR_STR))
-        SifSetDChain();
+        sceSifSetDChain();
 
     sif0_id = AddDmacHandler(DMAC_SIF0, &_SifCmdIntHandler, 0);
     EnableDmac(DMAC_SIF0);
 
     init = 1;
 
-    _sif_cmd_data.iopbuf = (void *)SifGetReg(SIF_SYSREG_SUBADDR);
+    _sif_cmd_data.iopbuf = (void *)sceSifGetReg(SIF_SYSREG_SUBADDR);
     if (_sif_cmd_data.iopbuf) {
         /* IOP SIF CMD is already initialized, so give it our new
            receive address.  */
         packet.buf = _sif_cmd_data.pktbuf;
-        SifSendCmd(SIF_CMD_CHANGE_SADDR, &packet, sizeof packet, NULL, NULL, 0);
+        sceSifSendCmd(SIF_CMD_CHANGE_SADDR, &packet, sizeof packet, NULL, NULL, 0);
     } else {
         /* Sync with the IOP side's SIFCMD implementation. */
-        while (!(SifGetReg(SIF_REG_SMFLAG) & SIF_STAT_CMDINIT))
+        while (!(sceSifGetReg(SIF_REG_SMFLAG) & SIF_STAT_CMDINIT))
             ;
 
-        _sif_cmd_data.iopbuf = (void *)SifGetReg(SIF_REG_SUBADDR);
-        SifSetReg(SIF_SYSREG_SUBADDR, (u32)_sif_cmd_data.iopbuf);
+        _sif_cmd_data.iopbuf = (void *)sceSifGetReg(SIF_REG_SUBADDR);
+        sceSifSetReg(SIF_SYSREG_SUBADDR, (u32)_sif_cmd_data.iopbuf);
         /* See the note above about struct cmd_data, and the use of
            this register.  */
-        SifSetReg(SIF_SYSREG_MAINADDR, (u32)&_sif_cmd_data);
+        sceSifSetReg(SIF_SYSREG_MAINADDR, (u32)&_sif_cmd_data);
         packet.header.opt = 0; // SIFCMD initialization on the IOP (opt = 0)
         packet.buf        = _sif_cmd_data.pktbuf;
-        SifSendCmd(SIF_CMD_INIT_CMD, &packet, sizeof packet, NULL, NULL, 0);
+        sceSifSendCmd(SIF_CMD_INIT_CMD, &packet, sizeof packet, NULL, NULL, 0);
     }
 }
 
-void SifExitCmd(void)
+void sceSifExitCmd(void)
 {
     DisableDmac(DMAC_SIF0);
     RemoveDmacHandler(DMAC_SIF0, sif0_id);
@@ -301,45 +299,62 @@ void SifExitCmd(void)
 }
 #endif
 
-#ifdef F_sif_cmd_client
-SifCmdHandlerData_t *SifSetCmdBuffer(SifCmdHandlerData_t *db, int size)
+#ifdef F_sceSifSetCmdBuffer
+void sceSifSetCmdBuffer(SifCmdHandlerData_t *db, int size)
 {
-    SifCmdHandlerData_t *old;
-
-    old                            = _sif_cmd_data.usr_cmd_handlers;
     _sif_cmd_data.usr_cmd_handlers = db;
     _sif_cmd_data.nr_usr_handlers  = size;
-
-    return old;
-}
-
-void SifAddCmdHandler(int pos, SifCmdHandler_t handler, void *harg)
-{
-    SifCmdHandlerData_t *cmd_handlers;
-    u32 id = pos & ~SIF_CMD_ID_SYSTEM;
-
-    cmd_handlers = (pos & SIF_CMD_ID_SYSTEM) ? _sif_cmd_data.sys_cmd_handlers : _sif_cmd_data.usr_cmd_handlers;
-
-    cmd_handlers[id].handler = handler;
-    cmd_handlers[id].harg    = harg;
 }
 #endif
 
-#ifdef F_sif_cmd_remove_cmdhandler
-void SifRemoveCmdHandler(int pos)
+#ifdef F_sceSifSetSysCmdBuffer
+void sceSifSetSysCmdBuffer(SifCmdSysHandlerData_t *db, int size)
 {
-    u32 id = pos & ~SIF_CMD_ID_SYSTEM;
+    _sif_cmd_data.sys_cmd_handlers = db;
+    _sif_cmd_data.nr_sys_handlers = size;
+}
+#endif
 
-    if (pos & SIF_CMD_ID_SYSTEM)
+#ifdef F_sceSifAddCmdHandler
+void sceSifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg)
+{
+    u32 id = cid & ~SIF_CMD_ID_SYSTEM;
+
+    if (cid & SIF_CMD_ID_SYSTEM)
+    {
+        _sif_cmd_data.sys_cmd_handlers[id].handler = handler;
+        _sif_cmd_data.sys_cmd_handlers[id].harg    = harg;
+    }
+    else
+    {
+        _sif_cmd_data.usr_cmd_handlers[id].handler = handler;
+        _sif_cmd_data.usr_cmd_handlers[id].harg    = harg;
+    }
+}
+#endif
+
+#ifdef F_sceSifRemoveCmdHandler
+void sceSifRemoveCmdHandler(int cid)
+{
+    u32 id = cid & ~SIF_CMD_ID_SYSTEM;
+
+    if (cid & SIF_CMD_ID_SYSTEM)
         _sif_cmd_data.sys_cmd_handlers[id].handler = NULL;
     else
         _sif_cmd_data.usr_cmd_handlers[id].handler = NULL;
 }
 #endif
 
-#ifdef F_sif_sreg_get
-int SifGetSreg(int sreg)
+#ifdef F_sceSifGetSreg
+unsigned int sceSifGetSreg(int sreg)
 {
     return _sif_cmd_data.sregs[sreg];
+}
+#endif
+
+#ifdef F_sceSifSetSreg
+void sceSifSetSreg(int sreg, unsigned int value)
+{
+    _sif_cmd_data.sregs[sreg] = value;
 }
 #endif

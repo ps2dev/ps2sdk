@@ -549,8 +549,8 @@ SYSCALL(RFU105)
 SYSCALL(iCpuConfig)
 #endif
 
-#ifdef F_SifStopDma
-SYSCALL(SifStopDma)
+#ifdef F_sceSifStopDma
+SYSCALL(sceSifStopDma)
 #endif
 
 #ifdef F_SetCPUTimerHandler
@@ -601,36 +601,36 @@ SYSCALL(SetSyscall)
 SYSCALL(_print)
 #endif
 
-#ifdef F_SifDmaStat
-SYSCALL(SifDmaStat)
+#ifdef F_sceSifDmaStat
+SYSCALL(sceSifDmaStat)
 #endif
 
-#ifdef F_iSifDmaStat
-SYSCALL(iSifDmaStat)
+#ifdef F_isceSifDmaStat
+SYSCALL(isceSifDmaStat)
 #endif
 
-#ifdef F_SifSetDma
-SYSCALL(SifSetDma)
+#ifdef F_sceSifSetDma
+SYSCALL(sceSifSetDma)
 #endif
 
-#ifdef F_iSifSetDma
-SYSCALL(iSifSetDma)
+#ifdef F_isceSifSetDma
+SYSCALL(isceSifSetDma)
 #endif
 
-#ifdef F_SifSetDChain
-SYSCALL(SifSetDChain)
+#ifdef F_sceSifSetDChain
+SYSCALL(sceSifSetDChain)
 #endif
 
-#ifdef F_iSifSetDChain
-SYSCALL(iSifSetDChain)
+#ifdef F_isceSifSetDChain
+SYSCALL(isceSifSetDChain)
 #endif
 
-#ifdef F_SifSetReg
-SYSCALL(SifSetReg)
+#ifdef F_sceSifSetReg
+SYSCALL(sceSifSetReg)
 #endif
 
-#ifdef F_SifGetReg
-SYSCALL(SifGetReg)
+#ifdef F_sceSifGetReg
+SYSCALL(sceSifGetReg)
 #endif
 
 #ifdef F__ExecOSD
@@ -695,14 +695,14 @@ GetGP:
 .end GetGP
 #endif
 
-#ifdef F_SifWriteBackDCache
+#ifdef F_sceSifWriteBackDCache
 
-	.globl	SifWriteBackDCache
-	.ent	SifWriteBackDCache
+	.globl	sceSifWriteBackDCache
+	.ent	sceSifWriteBackDCache
 	.set	push
 	.set	noreorder
 
-SifWriteBackDCache:	/* DHWBIN: Data cache Hit WriteBack INvalidate.  */
+sceSifWriteBackDCache:	/* DHWBIN: Data cache Hit WriteBack INvalidate.  */
 
 	lui	$25, 0xffff
 	ori	$25, $25, 0xffc0
@@ -754,7 +754,7 @@ last:
 	nop
 
 	.set	pop
-	.end	SifWriteBackDCache
+	.end	sceSifWriteBackDCache
 #endif
 
 #define DXWBIN	0x14		/* Data cache: indeX WriteBack INvalidate.  */

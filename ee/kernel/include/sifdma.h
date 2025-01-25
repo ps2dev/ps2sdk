@@ -61,11 +61,15 @@ typedef struct t_SifDmaTransfer
 extern "C" {
 #endif
 
-extern u32 SifSetDma(SifDmaTransfer_t *sdd, s32 len);
-extern s32 SifDmaStat(u32 id);
+extern int sceSifDmaStat(int trid);
+extern int sceSifSetDma(SifDmaTransfer_t *dmat, int count);
 
 #ifdef __cplusplus
 }
 #endif
+
+// For backwards compatibility
+#define SifDmaStat(...) sceSifDmaStat(__VA_ARGS__)
+#define SifSetDma(...) sceSifSetDma(__VA_ARGS__)
 
 #endif /* __SIFDMA_H__ */

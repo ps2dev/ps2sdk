@@ -77,7 +77,7 @@ enum _sif_regs {
 extern void sceSifDma2Init();
 extern void sceSifInit();
 
-extern void sceSifSetDChain();
+extern void sceSifSetDChain(void);
 
 extern int sceSifSetDma(SifDmaTransfer_t *dmat, int count);
 extern int sceSifDmaStat(int trid);

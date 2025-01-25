@@ -16,17 +16,38 @@ IWAKEUP_THREAD_SYSCALL = _iWakeupThread.o
 ISUSPEND_THREAD_SYSCALL = _iSuspendThread.o
 TLB_SYSCALLS = PutTLBEntry.o iPutTLBEntry.o _SetTLBEntry.o iSetTLBEntry.o GetTLBEntry.o iGetTLBEntry.o ProbeTLBEntry.o iProbeTLBEntry.o ExpandScratchPad.o
 
-### SIFCMD objects objects
+### SIFCMD objects
 
-SIFCMD_OBJS = sif_cmd_send.o _sif_cmd_int_handler.o sif_cmd_main.o \
-	sif_cmd_client.o sif_cmd_remove_cmdhandler.o sif_sreg_get.o
+SIFCMD_OBJS = \
+	_SifSendCmd.o \
+	sceSifSendCmd.o \
+	isceSifSendCmd.o \
+	_SifCmdIntHandler.o \
+	sif_cmd_main.o \
+	sceSifSetCmdBuffer.o \
+	sceSifSetSysCmdBuffer.o \
+	sceSifAddCmdHandler.o \
+	sceSifRemoveCmdHandler.o \
+	sceSifGetSreg.o \
+	sceSifSetSreg.o
 
 ### SIFRPC objects
 
-SIFRPC_OBJS = SifBindRpc.o SifCallRpc.o SifRpcGetOtherData.o \
-	SifRegisterRpc.o SifRemoveRpc.o SifSetRpcQueue.o SifRemoveRpcQueue.o SifGetNextRequest.o \
-	SifExecRequest.o SifRpcLoop.o SifRpcMain.o _rpc_get_packet.o \
-	_rpc_get_fpacket.o SifCheckStatRpc.o
+SIFRPC_OBJS = \
+	_rpc_get_packet.o \
+	_rpc_get_fpacket.o \
+	sceSifBindRpc.o \
+	sceSifCallRpc.o \
+	sceSifGetOtherData.o \
+	SifRpcMain.o \
+	sceSifRegisterRpc.o \
+	sceSifRemoveRpc.o \
+	sceSifSetRpcQueue.o \
+	sceSifRemoveRpcQueue.o \
+	sceSifGetNextRequest.o \
+	sceSifExecRequest.o \
+	sceSifRpcLoop.o \
+	sceSifCheckStatRpc.o
 
 ### FILEIO client objects
 
@@ -189,14 +210,14 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
 	EnableIntcHandler.o iEnableIntcHandler.o DisableIntcHandler.o iDisableIntcHandler.o \
 	EnableDmacHandler.o iEnableDmacHandler.o DisableDmacHandler.o iDisableDmacHandler.o \
 	KSeg0.o EnableCache.o DisableCache.o GetCop0.o FlushCache.o CpuConfig.o \
-	iGetCop0.o iFlushCache.o RFU105.o iCpuConfig.o SifStopDma.o \
+	iGetCop0.o iFlushCache.o RFU105.o iCpuConfig.o sceSifStopDma.o \
 	SetCPUTimerHandler.o SetCPUTimer.o SetOsdConfigParam2.o \
 	GetOsdConfigParam2.o GsGetIMR.o iGsGetIMR.o GsPutIMR.o iGsPutIMR.o \
-	SetPgifHandler.o SetVSyncFlag.o SetSyscall.o SifDmaStat.o iSifDmaStat.o \
-	SifSetDma.o iSifSetDma.o SifSetDChain.o iSifSetDChain.o SifSetReg.o \
-	SifGetReg.o $(EXECOSD_SYSCALL) Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _GetGsDxDyOffset.o \
+	SetPgifHandler.o SetVSyncFlag.o SetSyscall.o sceSifDmaStat.o isceSifDmaStat.o \
+	sceSifSetDma.o isceSifSetDma.o sceSifSetDChain.o isceSifSetDChain.o sceSifSetReg.o \
+	sceSifGetReg.o $(EXECOSD_SYSCALL) Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _GetGsDxDyOffset.o \
 	_InitTLB.o SetMemoryMode.o GetMemoryMode.o \
-	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
+	sceSifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o _print.o
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \

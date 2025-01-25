@@ -48,7 +48,7 @@ struct rpc_data
     int client_table_len;
     int rdata_table_idx;
     void *active_queue;
-};
+} __attribute__((aligned(64)));
 
 extern int _iop_reboot_count;
 extern struct rpc_data _sif_rpc_data;
@@ -109,8 +109,8 @@ void *_rpc_get_fpacket(struct rpc_data *rpc_data)
 }
 #endif
 
-#ifdef F_SifBindRpc
-int SifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
+#ifdef F_sceSifBindRpc
+int sceSifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
 {
     ee_sema_t sema;
     SifRpcBindPkt_t *bind;
@@ -127,10 +127,10 @@ int SifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
 
     bind->sid      = sid;
     bind->pkt_addr = bind;
-    bind->client   = cd;
+    bind->cd       = cd;
 
     if (mode & SIF_RPC_M_NOWAIT) {
-        if (!SifSendCmd(SIF_CMD_RPC_BIND, bind, RPC_PACKET_SIZE, NULL, NULL, 0)) {
+        if (!sceSifSendCmd(SIF_CMD_RPC_BIND, bind, RPC_PACKET_SIZE, NULL, NULL, 0)) {
             rpc_packet_free(bind);
             return -E_SIF_PKT_SEND;
         }
@@ -146,7 +146,7 @@ int SifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
         return -E_LIB_SEMA_CREATE;
     }
 
-    if (!SifSendCmd(SIF_CMD_RPC_BIND, bind, RPC_PACKET_SIZE, NULL, NULL, 0)) {
+    if (!sceSifSendCmd(SIF_CMD_RPC_BIND, bind, RPC_PACKET_SIZE, NULL, NULL, 0)) {
         rpc_packet_free(bind);
         DeleteSema(cd->hdr.sema_id);
         return -E_SIF_PKT_SEND;
@@ -159,10 +159,9 @@ int SifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
 }
 #endif
 
-#ifdef F_SifCallRpc
-int SifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode,
-               void *sendbuf, int ssize, void *recvbuf, int rsize,
-               SifRpcEndFunc_t endfunc, void *efarg)
+#ifdef F_sceSifCallRpc
+int sceSifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode, void *sendbuf,
+    int ssize, void *recvbuf, int rsize, SifRpcEndFunc_t end_function, void *end_param)
 {
     ee_sema_t sema;
     SifRpcCallPkt_t *call;
@@ -174,30 +173,30 @@ int SifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode,
     cd->hdr.pkt_addr = call;
     cd->hdr.rpc_id   = call->rpc_id;
     cd->hdr.sema_id  = -1;
-    cd->end_function = endfunc;
-    cd->end_param    = efarg;
+    cd->end_function = end_function;
+    cd->end_param    = end_param;
 
     call->rpc_number = rpc_number;
     call->send_size  = ssize;
-    call->receive    = recvbuf;
+    call->recvbuf    = recvbuf;
     call->recv_size  = rsize;
     call->rmode      = 1;
     call->pkt_addr   = call;
-    call->client     = cd;
-    call->server     = cd->server;
+    call->cd         = cd;
+    call->sd         = cd->server;
 
     if (!(mode & SIF_RPC_M_NOWBDC)) {
         if (ssize > 0)
-            SifWriteBackDCache(sendbuf, ssize);
+            sceSifWriteBackDCache(sendbuf, ssize);
         if (rsize > 0)
-            SifWriteBackDCache(recvbuf, rsize);
+            sceSifWriteBackDCache(recvbuf, rsize);
     }
 
     if (mode & SIF_RPC_M_NOWAIT) {
-        if (!endfunc)
+        if (!end_function)
             call->rmode = 0;
 
-        if (!SifSendCmd(SIF_CMD_RPC_CALL, call, RPC_PACKET_SIZE, sendbuf, cd->buff, ssize)) {
+        if (!sceSifSendCmd(SIF_CMD_RPC_CALL, call, RPC_PACKET_SIZE, sendbuf, cd->buf, ssize)) {
             rpc_packet_free(call);
             return -E_SIF_PKT_SEND;
         }
@@ -213,7 +212,7 @@ int SifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode,
         return -E_LIB_SEMA_CREATE;
     }
 
-    if (!SifSendCmd(SIF_CMD_RPC_CALL, call, RPC_PACKET_SIZE, sendbuf, cd->buff, ssize)) {
+    if (!sceSifSendCmd(SIF_CMD_RPC_CALL, call, RPC_PACKET_SIZE, sendbuf, cd->buf, ssize)) {
         rpc_packet_free(call);
         DeleteSema(cd->hdr.sema_id);
         return -E_SIF_PKT_SEND;
@@ -226,9 +225,8 @@ int SifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode,
 }
 #endif
 
-#ifdef F_SifRpcGetOtherData
-int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
-                       int size, int mode)
+#ifdef F_sceSifGetOtherData
+int sceSifGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest, int size, int mode)
 {
     ee_sema_t sema;
     SifRpcOtherDataPkt_t *other;
@@ -244,10 +242,10 @@ int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
     other->src     = src;
     other->dest    = dest;
     other->size    = size;
-    other->receive = rd;
+    other->recvbuf = rd;
 
     if (mode & SIF_RPC_M_NOWAIT) {
-        if (!SifSendCmd(SIF_CMD_RPC_RDATA, other, RPC_PACKET_SIZE, NULL, NULL, 0)) {
+        if (!sceSifSendCmd(SIF_CMD_RPC_RDATA, other, RPC_PACKET_SIZE, NULL, NULL, 0)) {
             rpc_packet_free(other);
             return -E_SIF_PKT_SEND;
         }
@@ -263,7 +261,7 @@ int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
         return -E_LIB_SEMA_CREATE;
     }
 
-    if (!SifSendCmd(SIF_CMD_RPC_RDATA, other, RPC_PACKET_SIZE, NULL, NULL, 0)) {
+    if (!sceSifSendCmd(SIF_CMD_RPC_RDATA, other, RPC_PACKET_SIZE, NULL, NULL, 0)) {
         rpc_packet_free(other);
         DeleteSema(rd->hdr.sema_id);
         return -E_SIF_PKT_SEND;
@@ -301,41 +299,41 @@ static int init = 0;
 /* Command 0x80000008 */
 static void _request_end(SifRpcRendPkt_t *request, void *data)
 {
-    SifRpcClientData_t *client = request->client;
+    SifRpcClientData_t *cd = request->cd;
 
     (void)data;
 
     if (request->cid == SIF_CMD_RPC_CALL) {
-        if (client->end_function)
-            client->end_function(client->end_param);
+        if (cd->end_function)
+            cd->end_function(cd->end_param);
     } else if (request->cid == SIF_CMD_RPC_BIND) {
-        client->server = request->server;
-        client->buff   = request->buff;
-        client->cbuff  = request->cbuff;
+        cd->server  = request->sd;
+        cd->buf    = request->buf;
+        cd->cbuf   = request->cbuf;
     }
 
-    if (client->hdr.sema_id >= 0)
-        iSignalSema(client->hdr.sema_id);
+    if (cd->hdr.sema_id >= 0)
+        iSignalSema(cd->hdr.sema_id);
 
-    rpc_packet_free(client->hdr.pkt_addr);
-    client->hdr.pkt_addr = NULL;
+    rpc_packet_free(cd->hdr.pkt_addr);
+    cd->hdr.pkt_addr = NULL;
 }
 
 static void *search_svdata(u32 sid, struct rpc_data *rpc_data)
 {
-    SifRpcServerData_t *server;
+    SifRpcServerData_t *sd;
     SifRpcDataQueue_t *queue = rpc_data->active_queue;
 
     if (!queue)
         return NULL;
 
     while (queue) {
-        server = queue->link;
-        while (server) {
-            if ((u32)(server->sid) == sid)
-                return server;
+        sd = queue->link;
+        while (sd) {
+            if ((u32)(sd->sid) == sid)
+                return sd;
 
-            server = server->link;
+            sd = sd->link;
         }
 
         queue = queue->next;
@@ -348,49 +346,49 @@ static void *search_svdata(u32 sid, struct rpc_data *rpc_data)
 static void _request_bind(SifRpcBindPkt_t *bind, void *data)
 {
     SifRpcRendPkt_t *rend;
-    SifRpcServerData_t *server;
+    SifRpcServerData_t *sd;
 
     rend           = _rpc_get_fpacket(data);
     rend->pkt_addr = bind->pkt_addr;
-    rend->client   = bind->client;
+    rend->cd       = bind->cd;
     rend->cid      = SIF_CMD_RPC_BIND;
 
-    server = search_svdata(bind->sid, data);
-    if (!server) {
-        rend->server = NULL;
-        rend->buff   = NULL;
-        rend->cbuff  = NULL;
+    sd = search_svdata(bind->sid, data);
+    if (!sd) {
+        rend->sd = NULL;
+        rend->buf    = NULL;
+        rend->cbuf   = NULL;
     } else {
-        rend->server = server;
-        rend->buff   = server->buff;
-        rend->cbuff  = server->cbuff;
+        rend->sd     = sd;
+        rend->buf    = sd->buf;
+        rend->cbuf   = sd->cbuf;
     }
 
-    iSifSendCmd(SIF_CMD_RPC_END, rend, RPC_PACKET_SIZE, NULL, NULL, 0);
+    isceSifSendCmd(SIF_CMD_RPC_END, rend, RPC_PACKET_SIZE, NULL, NULL, 0);
 }
 
 /* Command 0x8000000a */
 static void _request_call(SifRpcCallPkt_t *request, void *data)
 {
-    SifRpcServerData_t *server = request->server;
-    SifRpcDataQueue_t *base    = server->base;
+    SifRpcServerData_t *sd     = request->sd;
+    SifRpcDataQueue_t *base    = sd->base;
 
     (void)data;
 
     if (base->start)
-        base->end->next = server;
+        base->end->next = sd;
     else
-        base->start = server;
+        base->start = sd;
 
-    base->end          = server;
-    server->pkt_addr   = request->pkt_addr;
-    server->client     = request->client;
-    server->rpc_number = request->rpc_number;
-    server->size       = request->send_size;
-    server->receive    = request->receive;
-    server->rsize      = request->recv_size;
-    server->rmode      = request->rmode;
-    server->rid        = request->rec_id;
+    base->end      = sd;
+    sd->pkt_addr   = request->pkt_addr;
+    sd->client     = request->cd;
+    sd->rpc_number = request->rpc_number;
+    sd->size       = request->send_size;
+    sd->recvbuf    = request->recvbuf;
+    sd->rsize      = request->recv_size;
+    sd->rmode      = request->rmode;
+    sd->rid        = request->rec_id;
 
     if (base->thread_id < 0 || base->active != 0)
         return;
@@ -405,13 +403,13 @@ static void _request_rdata(SifRpcOtherDataPkt_t *rdata, void *data)
 
     rend           = (SifRpcRendPkt_t *)_rpc_get_fpacket(data);
     rend->pkt_addr = rdata->pkt_addr;
-    rend->client   = (SifRpcClientData_t *)rdata->receive;
+    rend->cd       = (SifRpcClientData_t *)rdata->recvbuf;
     rend->cid      = SIF_CMD_RPC_RDATA;
 
-    iSifSendCmd(SIF_CMD_RPC_END, rend, RPC_PACKET_SIZE, rdata->src, rdata->dest, rdata->size);
+    isceSifSendCmd(SIF_CMD_RPC_END, rend, RPC_PACKET_SIZE, rdata->src, rdata->dest, rdata->size);
 }
 
-void SifInitRpc(int mode)
+void sceSifInitRpc(int mode)
 {
     u32 *cmdp;
 
@@ -420,7 +418,7 @@ void SifInitRpc(int mode)
     static int _rb_count = 0;
     if (_rb_count != _iop_reboot_count) {
         _rb_count = _iop_reboot_count;
-        SifExitCmd();
+        sceSifExitCmd();
         init = 0;
     }
 
@@ -428,7 +426,7 @@ void SifInitRpc(int mode)
         return;
     init = 1;
 
-    SifInitCmd();
+    sceSifInitCmd();
 
     DI();
     _sif_rpc_data.pkt_table    = UNCACHED_SEG(_sif_rpc_data.pkt_table);
@@ -448,36 +446,34 @@ void SifInitRpc(int mode)
         }
     }
 
-    SifAddCmdHandler(SIF_CMD_RPC_END, (void *)_request_end, &_sif_rpc_data);
-    SifAddCmdHandler(SIF_CMD_RPC_BIND, (void *)_request_bind, &_sif_rpc_data);
-    SifAddCmdHandler(SIF_CMD_RPC_CALL, (void *)_request_call, &_sif_rpc_data);
-    SifAddCmdHandler(SIF_CMD_RPC_RDATA, (void *)_request_rdata, &_sif_rpc_data);
+    sceSifAddCmdHandler(SIF_CMD_RPC_END, (void *)_request_end, &_sif_rpc_data);
+    sceSifAddCmdHandler(SIF_CMD_RPC_BIND, (void *)_request_bind, &_sif_rpc_data);
+    sceSifAddCmdHandler(SIF_CMD_RPC_CALL, (void *)_request_call, &_sif_rpc_data);
+    sceSifAddCmdHandler(SIF_CMD_RPC_RDATA, (void *)_request_rdata, &_sif_rpc_data);
     EI();
 
-    if (SifGetReg(SIF_SYSREG_RPCINIT))
+    if (sceSifGetReg(SIF_SYSREG_RPCINIT))
         return;
 
     cmdp    = (u32 *)&pkt_table[64];
     cmdp[3] = 1;
-    SifSendCmd(SIF_CMD_INIT_CMD, cmdp, 16, NULL, NULL, 0);
+    sceSifSendCmd(SIF_CMD_INIT_CMD, cmdp, 16, NULL, NULL, 0);
 
-    while (!SifGetSreg(SIF_SREG_RPCINIT))
+    while (!sceSifGetSreg(SIF_SREG_RPCINIT))
         ;
-    SifSetReg(SIF_SYSREG_RPCINIT, 1);
+    sceSifSetReg(SIF_SYSREG_RPCINIT, 1);
 }
 
-void SifExitRpc(void)
+void sceSifExitRpc(void)
 {
-    SifExitCmd();
+    sceSifExitCmd();
     init = 0;
 }
 #endif
 
-#ifdef F_SifRegisterRpc
-SifRpcServerData_t *
-SifRegisterRpc(SifRpcServerData_t *sd,
-               int sid, SifRpcFunc_t func, void *buff, SifRpcFunc_t cfunc,
-               void *cbuff, SifRpcDataQueue_t *qd)
+#ifdef F_sceSifRegisterRpc
+void sceSifRegisterRpc(SifRpcServerData_t *sd, int sid, SifRpcFunc_t func, void *buf,
+    SifRpcFunc_t cfunc, void *cbuf, SifRpcDataQueue_t *qd)
 {
     SifRpcServerData_t *server;
 
@@ -487,9 +483,9 @@ SifRegisterRpc(SifRpcServerData_t *sd,
     sd->next  = NULL;
     sd->sid   = sid;
     sd->func  = func;
-    sd->buff  = buff;
+    sd->buf   = buf;
     sd->cfunc = cfunc;
-    sd->cbuff = cbuff;
+    sd->cbuf  = cbuf;
     sd->base  = qd;
 
     if (!(server = qd->link)) {
@@ -503,21 +499,18 @@ SifRegisterRpc(SifRpcServerData_t *sd,
     }
 
     EI();
-
-    return server;
 }
 #endif
 
-#ifdef F_SifRemoveRpc
-SifRpcServerData_t *
-SifRemoveRpc(SifRpcServerData_t *sd, SifRpcDataQueue_t *queue)
+#ifdef F_sceSifRemoveRpc
+SifRpcServerData_t *sceSifRemoveRpc(SifRpcServerData_t *sd, SifRpcDataQueue_t *qd)
 {
     SifRpcServerData_t *server;
 
     DI();
 
-    if ((server = queue->link) == sd) {
-        queue->link = server->link;
+    if ((server = qd->link) == sd) {
+        qd->link = server->link;
     } else {
         while (server != NULL) {
             if (server->link == sd) {
@@ -535,9 +528,8 @@ SifRemoveRpc(SifRpcServerData_t *sd, SifRpcDataQueue_t *queue)
 }
 #endif
 
-#ifdef F_SifSetRpcQueue
-SifRpcDataQueue_t *
-SifSetRpcQueue(SifRpcDataQueue_t *qd, int thread_id)
+#ifdef F_sceSifSetRpcQueue
+void sceSifSetRpcQueue(SifRpcDataQueue_t *qd, int thread_id)
 {
     SifRpcDataQueue_t *queue = NULL;
 
@@ -562,14 +554,11 @@ SifSetRpcQueue(SifRpcDataQueue_t *qd, int thread_id)
     }
 
     EI();
-
-    return queue;
 }
 #endif
 
-#ifdef F_SifRemoveRpcQueue
-SifRpcDataQueue_t *
-SifRemoveRpcQueue(SifRpcDataQueue_t *qd)
+#ifdef F_sceSifRemoveRpcQueue
+SifRpcDataQueue_t *sceSifRemoveRpcQueue(SifRpcDataQueue_t *qd)
 {
     SifRpcDataQueue_t *queue;
 
@@ -594,29 +583,28 @@ SifRemoveRpcQueue(SifRpcDataQueue_t *qd)
 }
 #endif
 
-#ifdef F_SifGetNextRequest
-SifRpcServerData_t *
-SifGetNextRequest(SifRpcDataQueue_t *qd)
+#ifdef F_sceSifGetNextRequest
+SifRpcServerData_t *sceSifGetNextRequest(SifRpcDataQueue_t *qd)
 {
-    SifRpcServerData_t *server;
+    SifRpcServerData_t *sd;
 
     DI();
 
-    server = qd->start;
-    if (server != NULL) {
+    sd = qd->start;
+    if (sd != NULL) {
         qd->active = 1;
-        qd->start  = server->next;
+        qd->start  = sd->next;
     } else {
         qd->active = 0;
     }
 
     EI();
 
-    return server;
+    return sd;
 }
 #endif
 
-#ifdef F_SifExecRequest
+#ifdef F_sceSifExecRequest
 static void *_rpc_get_fpacket2(struct rpc_data *rpc_data, int rid)
 {
     if (rid < 0 || rid < rpc_data->client_table_len)
@@ -624,20 +612,19 @@ static void *_rpc_get_fpacket2(struct rpc_data *rpc_data, int rid)
     else
         return rpc_data->client_table + (rid * RPC_PACKET_SIZE);
 }
-
-void SifExecRequest(SifRpcServerData_t *sd)
+void sceSifExecRequest(SifRpcServerData_t *sd)
 {
     SifDmaTransfer_t dmat;
     SifRpcRendPkt_t *rend;
     void *rec = NULL;
 
-    rec = sd->func(sd->rpc_number, sd->buff, sd->size);
+    rec = sd->func(sd->rpc_number, sd->buf, sd->size);
 
     if (sd->size)
-        SifWriteBackDCache(sd->buff, sd->size);
+        sceSifWriteBackDCache(sd->buf, sd->size);
 
     if (sd->rsize)
-        SifWriteBackDCache(rec, sd->rsize);
+        sceSifWriteBackDCache(rec, sd->rsize);
 
     DI();
 
@@ -650,11 +637,11 @@ void SifExecRequest(SifRpcServerData_t *sd)
 
     EI();
 
-    rend->client = sd->client;
+    rend->cd     = sd->client;
     rend->cid    = SIF_CMD_RPC_CALL;
 
     if (sd->rmode) {
-        if (!SifSendCmd(SIF_CMD_RPC_END, rend, RPC_PACKET_SIZE, rec, sd->receive,
+        if (!sceSifSendCmd(SIF_CMD_RPC_END, rend, RPC_PACKET_SIZE, rec, sd->recvbuf,
                         sd->rsize))
             return;
     }
@@ -664,7 +651,7 @@ void SifExecRequest(SifRpcServerData_t *sd)
 
     if (sd->rsize) {
         dmat.src  = rec;
-        dmat.dest = sd->receive;
+        dmat.dest = sd->recvbuf;
         dmat.size = sd->rsize;
         dmat.attr = 0;
     } else {
@@ -674,27 +661,27 @@ void SifExecRequest(SifRpcServerData_t *sd)
         dmat.attr = 0;
     }
 
-    while (!SifSetDma(&dmat, 1))
+    while (!sceSifSetDma(&dmat, 1))
         nopdelay();
 }
 #endif
 
-#ifdef F_SifRpcLoop
-void SifRpcLoop(SifRpcDataQueue_t *qd)
+#ifdef F_sceSifRpcLoop
+void sceSifRpcLoop(SifRpcDataQueue_t *qd)
 {
     while (1) {
-        SifRpcServerData_t *server;
+        SifRpcServerData_t *sd;
 
-        while ((server = SifGetNextRequest(qd)))
-            SifExecRequest(server);
+        while ((sd = sceSifGetNextRequest(qd)))
+            sceSifExecRequest(sd);
 
         SleepThread();
     }
 }
 #endif
 
-#ifdef F_SifCheckStatRpc
-int SifCheckStatRpc(SifRpcClientData_t *cd)
+#ifdef F_sceSifCheckStatRpc
+int sceSifCheckStatRpc(SifRpcClientData_t *cd)
 {
     SifRpcPktHeader_t *packet = (SifRpcPktHeader_t *)cd->hdr.pkt_addr;
 
