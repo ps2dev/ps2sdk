@@ -156,6 +156,7 @@
 #define __NR__InitTLB                 0x82
 #define __NR_FindAddress              0x83
 #define __NR_SetMemoryMode            0x85
+#define __NR_GetMemoryMode            0x86
 #define __NR_ExecPSX                  0x87
 
 #endif /* __SYSCALLNR_H__ */
