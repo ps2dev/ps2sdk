@@ -39,7 +39,7 @@ int SifIopReset(const char *arg, int mode)
 
     _iop_reboot_count++; // increment reboot counter to allow RPC clients to detect unbinding!
 
-    SifStopDma(); // Stop DMA transfers across SIF0 (IOP -> EE).
+    sceSifStopDma(); // Stop DMA transfers across SIF0 (IOP -> EE).
 
     /*	The original did not null-terminate, had no bounds-checking and counted the characters as it copied.
         The IOP side will only copy up to arglen characters. */
@@ -56,20 +56,20 @@ int SifIopReset(const char *arg, int mode)
     reset_pkt.mode         = mode;
 
     dmat.src  = &reset_pkt;
-    dmat.dest = (void *)SifGetReg(SIF_SYSREG_SUBADDR);
+    dmat.dest = (void *)sceSifGetReg(SIF_SYSREG_SUBADDR);
     dmat.size = sizeof(reset_pkt);
     dmat.attr = SIF_DMA_ERT | SIF_DMA_INT_O;
-    SifWriteBackDCache(&reset_pkt, sizeof(reset_pkt));
+    sceSifWriteBackDCache(&reset_pkt, sizeof(reset_pkt));
 
-    SifSetReg(SIF_REG_SMFLAG, SIF_STAT_BOOTEND);
+    sceSifSetReg(SIF_REG_SMFLAG, SIF_STAT_BOOTEND);
 
-    if (!SifSetDma(&dmat, 1))
+    if (!sceSifSetDma(&dmat, 1))
         return 0;
 
-    SifSetReg(SIF_REG_SMFLAG, SIF_STAT_SIFINIT);
-    SifSetReg(SIF_REG_SMFLAG, SIF_STAT_CMDINIT);
-    SifSetReg(SIF_SYSREG_RPCINIT, 0);
-    SifSetReg(SIF_SYSREG_SUBADDR, (int)NULL);
+    sceSifSetReg(SIF_REG_SMFLAG, SIF_STAT_SIFINIT);
+    sceSifSetReg(SIF_REG_SMFLAG, SIF_STAT_CMDINIT);
+    sceSifSetReg(SIF_SYSREG_RPCINIT, 0);
+    sceSifSetReg(SIF_SYSREG_SUBADDR, (int)NULL);
 
     return 1;
 }
@@ -85,8 +85,8 @@ int SifIopReboot(const char *arg)
         return 0;
     }
 
-    SifInitRpc(0);
-    SifExitRpc();
+    sceSifInitRpc(0);
+    sceSifExitRpc();
 
     strcpy(param_str, "rom0:UDNL ");
     strcat(param_str, arg);
@@ -98,13 +98,13 @@ int SifIopReboot(const char *arg)
 #ifdef F_SifIopIsAlive
 int SifIopIsAlive(void)
 {
-    return ((SifGetReg(SIF_REG_SMFLAG) & SIF_STAT_SIFINIT) != 0);
+    return ((sceSifGetReg(SIF_REG_SMFLAG) & SIF_STAT_SIFINIT) != 0);
 }
 #endif
 
 #ifdef F_SifIopSync
 int SifIopSync()
 {
-    return ((SifGetReg(SIF_REG_SMFLAG) & SIF_STAT_BOOTEND) != 0);
+    return ((sceSifGetReg(SIF_REG_SMFLAG) & SIF_STAT_BOOTEND) != 0);
 }
 #endif

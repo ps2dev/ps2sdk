@@ -38,20 +38,20 @@ slib_exp_lib_list_t *slib_exp_lib_list(void)
 
 	/* Read the start of the global module table - this is where we will search.  */
 	SyncDCache(&smem_buf, smem_buf.bytes+sizeof(smod_mod_info_t));
-	if(SifRpcGetOtherData(&RData, (void*)0x800, &smem_buf, sizeof(smod_mod_info_t), 0)>=0){
+	if(sceSifGetOtherData(&RData, (void*)0x800, &smem_buf, sizeof(smod_mod_info_t), 0)>=0){
 		/* The first entry points to LOADCORE's module info.  We then use the
 		   module info to determine the end of LOADCORE's .text segment (just
 		   past the export library we're trying to find.  */
 		NextMod = *smem_buf.words;
 		SyncDCache(&smem_buf, smem_buf.bytes+sizeof(smod_mod_info_t));
-		if(SifRpcGetOtherData(&RData, (void*)NextMod, &smem_buf, sizeof(smod_mod_info_t), 0)>=0){
+		if(sceSifGetOtherData(&RData, (void*)NextMod, &smem_buf, sizeof(smod_mod_info_t), 0)>=0){
 			ModInfo = &smem_buf.mod_info;
 			core_end = ModInfo->text_start+ModInfo->text_size;
 
 			/* Back up so we position ourselves infront of where the export
 			   library will be.  */
 			SyncDCache(&smem_buf, smem_buf.bytes+512);
-			if(SifRpcGetOtherData(&RData, (void*)(core_end - 512), &smem_buf, 512, 0)>=0){
+			if(sceSifGetOtherData(&RData, (void*)(core_end - 512), &smem_buf, 512, 0)>=0){
 				void *pGetLoadcoreInternalData;
 
 				/* Search for LOADCORE's export library.  */
@@ -72,7 +72,7 @@ slib_exp_lib_list_t *slib_exp_lib_list(void)
 				pGetLoadcoreInternalData = core_exps->exports[3];
 
 				SyncDCache(&smem_buf, smem_buf.bytes+8);
-				if(SifRpcGetOtherData(&RData, pGetLoadcoreInternalData, &smem_buf, 8, 0)>=0){
+				if(sceSifGetOtherData(&RData, pGetLoadcoreInternalData, &smem_buf, 8, 0)>=0){
 					u32 *exp_func;
 					exp_func = smem_buf.words;
 
@@ -85,7 +85,7 @@ slib_exp_lib_list_t *slib_exp_lib_list(void)
 					addr = (u32) ((exp_func[0] & 0xFFFF) << 16) + (s16) (exp_func[1] & 0xFFFF);
 
 					SyncDCache(&smem_buf, smem_buf.bytes+8);
-					if(SifRpcGetOtherData(&RData, (void*)addr, &smem_buf, 8, 0)>=0){
+					if(sceSifGetOtherData(&RData, (void*)addr, &smem_buf, 8, 0)>=0){
 						_slib_cur_exp_lib_list.tail = (slib_exp_lib_t *)(smem_buf.words[0]);
 						_slib_cur_exp_lib_list.head = (slib_exp_lib_t *)(smem_buf.words[1]);
 						exp_lib_list = &_slib_cur_exp_lib_list;
@@ -116,7 +116,7 @@ int slib_get_exp_lib(const char *name, slib_exp_lib_t *library)
 
 	while (cur_lib) {
 		SyncDCache(&smem_buf, smem_buf.bytes+EXP_LIB_MAX);
-		if(SifRpcGetOtherData(&RData, cur_lib, exp_lib, EXP_LIB_MAX, 0)>=0){
+		if(sceSifGetOtherData(&RData, cur_lib, exp_lib, EXP_LIB_MAX, 0)>=0){
 			if (!__memcmp(exp_lib->name, name, len)) {
 				while (exp_lib->exports[count] != 0)
 					count++;

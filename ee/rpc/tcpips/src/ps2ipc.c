@@ -67,7 +67,7 @@ int ps2ip_init(void)
 
 	while(1)
 	{
-		if(SifBindRpc(&_ps2ip, PS2IP_IRX, 0) < 0)
+		if(sceSifBindRpc(&_ps2ip, PS2IP_IRX, 0) < 0)
 			return -1;
 
 		if(_ps2ip.server != NULL)
@@ -111,7 +111,7 @@ int ps2ipc_accept(int s, struct sockaddr *addr, int *addrlen)
 
 	pkt->socket = s;
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_ACCEPT, 0, (void*)pkt, sizeof(s32), (void*)pkt, sizeof(cmd_pkt), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_ACCEPT, 0, (void*)pkt, sizeof(s32), (void*)pkt, sizeof(cmd_pkt), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -143,7 +143,7 @@ int ps2ipc_bind(int s, const struct sockaddr *name, int namelen)
 	pkt->len = namelen;
 	memcpy((void *)&pkt->sockaddr, (void *)name, sizeof(struct sockaddr));
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_BIND, 0, (void*)pkt, sizeof(cmd_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_BIND, 0, (void*)pkt, sizeof(cmd_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -166,7 +166,7 @@ int ps2ipc_disconnect(int s)
 
 	_rpc_buffer.s = s;
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_DISCONNECT, 0, (void*)&_rpc_buffer.s, sizeof(s32), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_DISCONNECT, 0, (void*)&_rpc_buffer.s, sizeof(s32), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -192,7 +192,7 @@ int ps2ipc_connect(int s, const struct sockaddr *name, int namelen)
 	pkt->len = namelen;
 	memcpy((void *)&pkt->sockaddr, (void *)name, sizeof(struct sockaddr));
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_CONNECT, 0, (void*)pkt, sizeof(cmd_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_CONNECT, 0, (void*)pkt, sizeof(cmd_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -217,7 +217,7 @@ int ps2ipc_listen(int s, int backlog)
 	pkt->s = s;
 	pkt->backlog = backlog;
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_LISTEN, 0, (void*)pkt, sizeof(listen_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_LISTEN, 0, (void*)pkt, sizeof(listen_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -262,9 +262,9 @@ int ps2ipc_recv(int s, void *mem, int len, unsigned int flags)
 	send_pkt->intr_data = _intr_data;
 
 	if( !IS_UNCACHED_SEG(mem))
-		SifWriteBackDCache(mem, len);
+		sceSifWriteBackDCache(mem, len);
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_RECV, 0, (void*)send_pkt, sizeof(s_recv_pkt),
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_RECV, 0, (void*)send_pkt, sizeof(s_recv_pkt),
 				(void*)recv_pkt, sizeof(r_recv_pkt), recv_intr, _intr_data) < 0)
 	{
 		SignalSema(lock_sema);
@@ -296,9 +296,9 @@ int ps2ipc_recvfrom(int s, void *mem, int len, unsigned int flags,
 	send_pkt->intr_data = _intr_data;
 
 	if( !IS_UNCACHED_SEG(mem))
-		SifWriteBackDCache(mem, len);
+		sceSifWriteBackDCache(mem, len);
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_RECVFROM, 0, (void*)send_pkt, sizeof(s_recv_pkt),
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_RECVFROM, 0, (void*)send_pkt, sizeof(s_recv_pkt),
 				(void*)recv_pkt, sizeof(r_recv_pkt), recv_intr, _intr_data) < 0)
 	{
 		SignalSema(lock_sema);
@@ -341,11 +341,11 @@ int ps2ipc_send(int s, const void *dataptr, int size, unsigned int flags)
 	pkt->malign = miss;
 
 	if( !IS_UNCACHED_SEG(dataptr))
-		SifWriteBackDCache((void *)dataptr, size);
+		sceSifWriteBackDCache((void *)dataptr, size);
 
 	memcpy((void *)pkt->malign_buff, UNCACHED_SEG(dataptr), miss);
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_SEND, 0, (void*)pkt, sizeof(send_pkt),
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_SEND, 0, (void*)pkt, sizeof(send_pkt),
 				(void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
@@ -389,11 +389,11 @@ int ps2ipc_sendto(int s, const void *dataptr, int size, unsigned int flags,
 	pkt->malign = miss;
 
 	if( !IS_UNCACHED_SEG(dataptr))
-		SifWriteBackDCache((void *)dataptr, size);
+		sceSifWriteBackDCache((void *)dataptr, size);
 
 	memcpy((void *)pkt->malign_buff, UNCACHED_SEG(dataptr), miss);
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_SENDTO, 0, (void*)pkt, sizeof(send_pkt),
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_SENDTO, 0, (void*)pkt, sizeof(send_pkt),
 				(void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
@@ -420,7 +420,7 @@ int ps2ipc_socket(int domain, int type, int protocol)
 	pkt->type = type;
 	pkt->protocol = protocol;
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_SOCKET, 0, (void*)pkt, sizeof(socket_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_SOCKET, 0, (void*)pkt, sizeof(socket_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -444,7 +444,7 @@ int ps2ipc_ps2ip_setconfig(const t_ip_info *ip_info)
 	// return config
 	memcpy(&_rpc_buffer.ip_info, ip_info, sizeof(t_ip_info));
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_SETCONFIG, 0, (void*)&_rpc_buffer.ip_info, sizeof(t_ip_info), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_SETCONFIG, 0, (void*)&_rpc_buffer.ip_info, sizeof(t_ip_info), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -467,7 +467,7 @@ int ps2ipc_ps2ip_getconfig(char *netif_name, t_ip_info *ip_info)
 	strncpy(_rpc_buffer.netif_name, netif_name, sizeof(_rpc_buffer.netif_name));
 	_rpc_buffer.netif_name[sizeof(_rpc_buffer.netif_name) - 1] = '\0';
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_GETCONFIG, 0, (void*)_rpc_buffer.netif_name, sizeof(_rpc_buffer.netif_name), (void*)&_rpc_buffer.ip_info, sizeof(t_ip_info), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETCONFIG, 0, (void*)_rpc_buffer.netif_name, sizeof(_rpc_buffer.netif_name), (void*)&_rpc_buffer.ip_info, sizeof(t_ip_info), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -507,7 +507,7 @@ int ps2ipc_select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, 
 	if( exceptset )
 		pkt->exceptset = *exceptset;
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_SELECT, 0, (void*)pkt, sizeof(select_pkt), (void*)pkt, sizeof(select_pkt), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_SELECT, 0, (void*)pkt, sizeof(select_pkt), (void*)pkt, sizeof(select_pkt), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -547,7 +547,7 @@ int ps2ipc_ioctl(int s, long cmd, void *argp)
 	if( argp )
 		pkt->value = *(s32*)argp;
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_IOCTL, 0, (void*)pkt, sizeof(ioctl_pkt), (void*)pkt, sizeof(ioctl_pkt), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_IOCTL, 0, (void*)pkt, sizeof(ioctl_pkt), (void*)pkt, sizeof(ioctl_pkt), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -574,7 +574,7 @@ int ps2ipc_getsockname(int s, struct sockaddr *name, int *namelen)
 
 	pkt->socket = s;
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_GETSOCKNAME, 0, (void*)pkt, sizeof(pkt->socket), (void*)pkt, sizeof(cmd_pkt), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETSOCKNAME, 0, (void*)pkt, sizeof(pkt->socket), (void*)pkt, sizeof(cmd_pkt), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -601,7 +601,7 @@ int ps2ipc_getpeername(int s, struct sockaddr *name, int *namelen)
 
 	pkt->socket = s;
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_GETPEERNAME, 0, (void*)pkt, sizeof(pkt->socket), (void*)pkt, sizeof(cmd_pkt), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETPEERNAME, 0, (void*)pkt, sizeof(pkt->socket), (void*)pkt, sizeof(cmd_pkt), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -631,7 +631,7 @@ int ps2ipc_getsockopt(int s, int level, int optname, void* optval, socklen_t* op
 	pkt->level = level;
 	pkt->optname = optname;
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_GETSOCKOPT, 0, (void*)pkt, sizeof(getsockopt_pkt), (void*)res_pkt, sizeof(getsockopt_res_pkt), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETSOCKOPT, 0, (void*)pkt, sizeof(getsockopt_pkt), (void*)res_pkt, sizeof(getsockopt_res_pkt), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -663,7 +663,7 @@ int ps2ipc_setsockopt(int s, int level, int optname, const void *optval, socklen
 
 	memcpy(pkt->buffer, optval, optlen);
 
-	if (SifCallRpc(&_ps2ip, PS2IPS_ID_SETSOCKOPT, 0, (void*)pkt, sizeof(setsockopt_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_SETSOCKOPT, 0, (void*)pkt, sizeof(setsockopt_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
 		SignalSema(lock_sema);
 		return -1;
@@ -692,7 +692,7 @@ struct hostent *ps2ipc_gethostbyname(const char *name)
 	result = NULL;
 	strncpy(_rpc_buffer.hostname, name, sizeof(_rpc_buffer.hostname));
 	_rpc_buffer.hostname[sizeof(_rpc_buffer.hostname) - 1] = '\0';
-	if(SifCallRpc(&_ps2ip, PS2IPS_ID_GETHOSTBYNAME, 0, (void*)_rpc_buffer.hostname, sizeof(_rpc_buffer.hostname), (void*)res_pkt, sizeof(gethostbyname_res_pkt), NULL, NULL) >=0)
+	if(sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETHOSTBYNAME, 0, (void*)_rpc_buffer.hostname, sizeof(_rpc_buffer.hostname), (void*)res_pkt, sizeof(gethostbyname_res_pkt), NULL, NULL) >=0)
 	{
 		if(res_pkt->result == 0)
 		{
@@ -724,7 +724,7 @@ void ps2ipc_dns_setserver(u8 numdns, const ip_addr_t *dnsserver)
 	pkt->numdns = numdns;
 	pkt->dnsserver = (dnsserver != NULL) ? (*dnsserver) : *IP4_ADDR_ANY;
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_DNS_SETSERVER, 0, (void*)pkt, sizeof(dns_setserver_pkt), NULL, 0, NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_DNS_SETSERVER, 0, (void*)pkt, sizeof(dns_setserver_pkt), NULL, 0, NULL, NULL);
 
 	if (numdns < DNS_MAX_SERVERS)
 		dns_servers[numdns] = (dnsserver != NULL) ? (*dnsserver) : *IP4_ADDR_ANY;
@@ -746,7 +746,7 @@ const ip_addr_t *ps2ipc_dns_getserver(u8 numdns)
 	dns = &dns_servers[numdns];
 
 	//If this fails, use the cached copy.
-	if(SifCallRpc(&_ps2ip, PS2IPS_ID_DNS_GETSERVER, 0, (void*)&_rpc_buffer.numdns, sizeof(u8), (void*)res_pkt, sizeof(dns_getserver_res_pkt), NULL, NULL) >=0)
+	if(sceSifCallRpc(&_ps2ip, PS2IPS_ID_DNS_GETSERVER, 0, (void*)&_rpc_buffer.numdns, sizeof(u8), (void*)res_pkt, sizeof(dns_getserver_res_pkt), NULL, NULL) >=0)
 		ip_addr_copy(*dns, res_pkt->dnsserver);
 
 	SignalSema(lock_sema);

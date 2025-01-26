@@ -94,7 +94,7 @@ int LoadELFFromFileWithPartition(const char *filename, const char *partition, in
 	}
 
 	/* Let's go.  */
-	SifExitRpc();
+	sceSifExitRpc();
 	FlushCache(0);
 	FlushCache(2);
 	

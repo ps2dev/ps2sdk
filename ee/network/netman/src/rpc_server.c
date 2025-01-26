@@ -38,7 +38,7 @@ static void ClearBufferLen(int index, void *packet, void *payload)
 	dmat.dest = &RxIOPFrameBufferStatus[index];
 	dmat.size = sizeof(struct NetManBD);
 	dmat.attr = 0;
-	while(SifSetDma(&dmat, 1) == 0){ };
+	while(sceSifSetDma(&dmat, 1) == 0){ };
 }
 
 static s32 HandleRxEvent(s32 channel)
@@ -50,7 +50,7 @@ static s32 HandleRxEvent(s32 channel)
 	bd = UNCACHED_SEG(&FrameBufferStatus[RxBufferNextRdPtr]);
 	if(bd->length > 0)
 	{
-		iSifSetDChain();
+		isceSifSetDChain();
 
 		if(!IsProcessingRx)
 		{
@@ -161,9 +161,9 @@ static void NETMAN_RPC_Thread(void *arg)
 
 	(void)arg;
 
-	SifSetRpcQueue(&cb_queue, NETMAN_RpcSvr_threadID);
-	SifRegisterRpc(&cb_srv, NETMAN_RPC_NUMBER, &NETMAN_EE_RPC_Handler, cb_rpc_buffer, NULL, NULL, &cb_queue);
-	SifRpcLoop(&cb_queue);
+	sceSifSetRpcQueue(&cb_queue, NETMAN_RpcSvr_threadID);
+	sceSifRegisterRpc(&cb_srv, NETMAN_RPC_NUMBER, &NETMAN_EE_RPC_Handler, cb_rpc_buffer, NULL, NULL, &cb_queue);
+	sceSifRpcLoop(&cb_queue);
 }
 
 static void NETMAN_RxThread(void *arg)
@@ -210,7 +210,7 @@ static void NETMAN_RxThread(void *arg)
 
 		//Now process the received packet.
 		PacketLengthAligned = (PacketLength + 63) & ~63;
-		SifWriteBackDCache(payload, PacketLengthAligned);
+		sceSifWriteBackDCache(payload, PacketLengthAligned);
 		NetManNetProtStackReallocRxPacket(packet, PacketLength);
 		NetManNetProtStackEnQRxPacket(packet);
 	}
@@ -247,8 +247,8 @@ void NetManDeinitRPCServer(void)
 {
 	if(IsInitialized)
 	{
-		SifRemoveRpc(&cb_srv, &cb_queue);
-		SifRemoveRpcQueue(&cb_queue);
+		sceSifRemoveRpc(&cb_srv, &cb_queue);
+		sceSifRemoveRpcQueue(&cb_queue);
 		RemoveDmacHandler(DMAC_SIF0, SifHandlerID);
 
 		if(NETMAN_RpcSvr_threadID>=0)

@@ -16,7 +16,7 @@
 
 int main(int argc, char *argv[])
 {
-  SifInitRpc(0);
+  sceSifInitRpc(0);
   init_scr();
 
   scr_printf("Hello, World!\n");

@@ -230,11 +230,11 @@ void poweroff_rpc_Thread(void* param)
 {
 	(void)param;
 
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 
-	SifSetRpcQueue(&qd, GetThreadId());
-	SifRegisterRpc(&sd0, PWROFF_IRX, poweroff_rpc_server, cmdData, NULL, NULL, &qd);
-	SifRpcLoop(&qd);
+	sceSifSetRpcQueue(&qd, GetThreadId());
+	sceSifRegisterRpc(&sd0, PWROFF_IRX, poweroff_rpc_server, cmdData, NULL, NULL, &qd);
+	sceSifRpcLoop(&qd);
 }
 
 int _start(int argc, char *argv[])

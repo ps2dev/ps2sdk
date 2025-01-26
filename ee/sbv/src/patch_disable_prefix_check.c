@@ -44,7 +44,7 @@ int sbv_patch_disable_prefix_check(void)
 	dmat.dest=modload_lib->exports[15];
 	dmat.attr=0;
 
-	SifSetDma(&dmat, 1);
+	sceSifSetDma(&dmat, 1);
 
 	return 0;
 }

@@ -80,7 +80,7 @@ static int call_rpc_1(int func, int arg)
 	WaitSema(completion_sema);
 
 	sbuff[0] = arg;
-	SifCallRpc(&cd0, func, 0, sbuff, 1*4, sbuff, 4, NULL, NULL);
+	sceSifCallRpc(&cd0, func, 0, sbuff, 1*4, sbuff, 4, NULL, NULL);
 
 	ret = sbuff[0];
 	SignalSema(completion_sema);
@@ -104,7 +104,7 @@ static int call_rpc_2(int func, int arg1, int arg2)
 
 	sbuff[0] = arg1;
 	sbuff[1] = arg2;
-	SifCallRpc(&cd0, func, 0, sbuff, 2*4, sbuff, 4, NULL, NULL);
+	sceSifCallRpc(&cd0, func, 0, sbuff, 2*4, sbuff, 4, NULL, NULL);
 
 	ret = sbuff[0];
 	SignalSema(completion_sema);
@@ -130,7 +130,7 @@ static int call_rpc_3(int func, int arg1, int arg2, int arg3)
 	sbuff[0] = arg1;
 	sbuff[1] = arg2;
 	sbuff[2] = arg3;
-	SifCallRpc(&cd0, func, 0, sbuff, 3*4, sbuff, 4, NULL, NULL);
+	sceSifCallRpc(&cd0, func, 0, sbuff, 3*4, sbuff, 4, NULL, NULL);
 
 	ret = sbuff[0];
 	SignalSema(completion_sema);
@@ -144,11 +144,11 @@ int audsrv_quit()
 {
 	WaitSema(completion_sema);
 
-	SifCallRpc(&cd0, AUDSRV_QUIT, 0, sbuff, 1*4, sbuff, 4, NULL, NULL);
+	sceSifCallRpc(&cd0, AUDSRV_QUIT, 0, sbuff, 1*4, sbuff, 4, NULL, NULL);
 	set_error(AUDSRV_ERR_NOERROR);
 
-	SifRemoveRpc(&cb_srv, &cb_queue);
-	SifRemoveRpcQueue(&cb_queue);
+	sceSifRemoveRpc(&cb_srv, &cb_queue);
+	sceSifRemoveRpcQueue(&cb_queue);
 	TerminateThread(rpc_server_thread_id);
 	DeleteThread(rpc_server_thread_id);
 
@@ -165,7 +165,7 @@ int audsrv_set_format(struct audsrv_fmt_t *fmt)
 	sbuff[0] = fmt->freq;
 	sbuff[1] = fmt->bits;
 	sbuff[2] = fmt->channels;
-	SifCallRpc(&cd0, AUDSRV_SET_FORMAT, 0, sbuff, 3*4, sbuff, 4, NULL, NULL);
+	sceSifCallRpc(&cd0, AUDSRV_SET_FORMAT, 0, sbuff, 3*4, sbuff, 4, NULL, NULL);
 
 	ret = sbuff[0];
 	SignalSema(completion_sema);
@@ -269,7 +269,7 @@ int audsrv_play_audio(const char *chunk, int bytes)
 		sbuff[0] = copy;
 		memcpy(&sbuff[1], chunk, copy);
 		packet_size = copy + sizeof(int);
-		SifCallRpc(&cd0, AUDSRV_PLAY_AUDIO, 0, sbuff, packet_size, sbuff, 1*4, NULL, NULL);
+		sceSifCallRpc(&cd0, AUDSRV_PLAY_AUDIO, 0, sbuff, packet_size, sbuff, 1*4, NULL, NULL);
 
 		copied = sbuff[0];
 		SignalSema(completion_sema);
@@ -320,9 +320,9 @@ static void rpc_server_thread(void *arg)
 
 	(void)arg;
 
-	SifSetRpcQueue(&cb_queue, GetThreadId());
-	SifRegisterRpc(&cb_srv, AUDSRV_IRX, &audsrv_ee_rpc_handler, cb_rpc_buffer, NULL, NULL, &cb_queue);
-	SifRpcLoop(&cb_queue);
+	sceSifSetRpcQueue(&cb_queue, GetThreadId());
+	sceSifRegisterRpc(&cb_srv, AUDSRV_IRX, &audsrv_ee_rpc_handler, cb_rpc_buffer, NULL, NULL, &cb_queue);
+	sceSifRpcLoop(&cb_queue);
 }
 
 int audsrv_init()
@@ -341,7 +341,7 @@ int audsrv_init()
 
 	while (1)
 	{
-		if (SifBindRpc(&cd0, AUDSRV_IRX, 0) < 0)
+		if (sceSifBindRpc(&cd0, AUDSRV_IRX, 0) < 0)
 		{
 			set_error(AUDSRV_ERR_RPC_FAILED);
 			return -1;
@@ -376,7 +376,7 @@ int audsrv_init()
 	rpc_server_thread_id = CreateThread(&rpcThread);
 	StartThread(rpc_server_thread_id, NULL);
 
-	SifCallRpc(&cd0, AUDSRV_INIT, 0, sbuff, 64, sbuff, 64, NULL, NULL);
+	sceSifCallRpc(&cd0, AUDSRV_INIT, 0, sbuff, 64, sbuff, 64, NULL, NULL);
 	ret = sbuff[0];
 	if (ret != 0)
 	{
@@ -445,8 +445,8 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 	sifdma.attr = 0;
 
 	/* send by dma */
-	while((id = SifSetDma(&sifdma, 1)) == 0);
-	while(SifDmaStat(id) >= 0);
+	while((id = sceSifSetDma(&sifdma, 1)) == 0);
+	while(sceSifDmaStat(id) >= 0);
 
 	WaitSema(completion_sema);
 
@@ -454,7 +454,7 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 	sbuff[1] = size;
 	sbuff[2] = (int)adpcm; /* use as id */
 
-	SifCallRpc(&cd0, AUDSRV_LOAD_ADPCM, 0, sbuff, 12, sbuff, 16, NULL, NULL);
+	sceSifCallRpc(&cd0, AUDSRV_LOAD_ADPCM, 0, sbuff, 12, sbuff, 16, NULL, NULL);
 
 	if(sbuff[0] != 0)
 	{

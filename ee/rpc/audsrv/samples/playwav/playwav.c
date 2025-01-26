@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	FILE *wav;
 	struct audsrv_fmt_t format;
 
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 
 	printf("sample: kicking IRXs\n");
 	ret = SifLoadModule("rom0:LIBSD", 0, NULL);

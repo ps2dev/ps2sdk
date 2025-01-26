@@ -1025,9 +1025,9 @@ static int npm_puts_init()
 	if ((npm_puts_sema = CreateSema(&sema)) < 0)
 		return -1;
 
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 
-	while (((res = SifBindRpc(&npm_cd, NPM_RPC_SERVER, 0)) >= 0) &&
+	while (((res = sceSifBindRpc(&npm_cd, NPM_RPC_SERVER, 0)) >= 0) &&
 			(npm_cd.server == NULL))
 		nopdelay();
 
@@ -1058,7 +1058,7 @@ int npmPuts(const char *buf)
 		((char *) p)[511] = '\0';
 	}
 
-	if (SifCallRpc(&npm_cd, NPM_RPC_PUTS, 0, p, 512, NULL, 0, NULL, NULL) < 0)
+	if (sceSifCallRpc(&npm_cd, NPM_RPC_PUTS, 0, p, 512, NULL, 0, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
 	SignalSema(npm_puts_sema);

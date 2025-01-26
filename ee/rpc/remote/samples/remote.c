@@ -258,10 +258,10 @@ int main(int argc, char *argv[])
     ee_sema_t sema;
 
     /* Initialize RPC services */
-    SifInitRpc(0);
+    sceSifInitRpc(0);
     SifIopReset(NULL, 0);
     while (!SifIopSync()) {};
-    SifInitRpc(0);
+    sceSifInitRpc(0);
 
     /* Initialize graphics library */
     init_scr();
@@ -378,7 +378,7 @@ int main(int argc, char *argv[])
 
     /* Terminate RPC services */
     RMMan_End();
-    SifExitRpc();
+    sceSifExitRpc();
 
     return 0;
 }

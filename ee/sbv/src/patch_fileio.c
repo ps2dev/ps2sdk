@@ -82,7 +82,7 @@ int sbv_patch_fileio(void)
 	dmat.dest=patch_addr;
 	dmat.size=sizeof(new_fileio);
 	dmat.attr=0;
-	SifSetDma(&dmat, 1);
+	sceSifSetDma(&dmat, 1);
 
 	//For the dump to sceRemove()
 	new_jump_op =  JMP((u32)patch_addr);

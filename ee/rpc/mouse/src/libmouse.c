@@ -50,7 +50,7 @@ int PS2MouseInit(void)
   mouseif.server = NULL;
 
   do {
-    if (SifBindRpc(&mouseif, PS2MOUSE_BIND_RPC_ID, 0) < 0) {
+    if (sceSifBindRpc(&mouseif, PS2MOUSE_BIND_RPC_ID, 0) < 0) {
       return -1;
     }
     nopdelay();
@@ -71,7 +71,7 @@ int PS2MouseRead(PS2MouseData *data)
       return -1;
     }
 
-  if (SifCallRpc(&mouseif, PS2MOUSE_READ, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_READ, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
 
@@ -85,7 +85,7 @@ int PS2MouseSetReadMode(u32 readMode)
 
 {
   buffer.mode = readMode;
-  if (SifCallRpc(&mouseif, PS2MOUSE_SETREADMODE, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_SETREADMODE, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   return 1;
@@ -96,7 +96,7 @@ u32 PS2MouseGetReadMode()
 {
   u32 *uncached = (u32 *) UNCACHED_SEG(&buffer.mode);
 
-  if (SifCallRpc(&mouseif, PS2MOUSE_GETREADMODE, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_GETREADMODE, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return 0xFF;
 
   return uncached[0];
@@ -106,7 +106,7 @@ int PS2MouseSetThres(u32 thres)
 
 {
   buffer.thres = thres;
-  if (SifCallRpc(&mouseif, PS2MOUSE_SETTHRES, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_SETTHRES, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   return 1;
@@ -116,7 +116,7 @@ u32 PS2MouseGetThres()
 
 {
   u32* uncached = (u32 *) UNCACHED_SEG(&buffer.thres);
-  if (SifCallRpc(&mouseif, PS2MOUSE_GETTHRES, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_GETTHRES, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return 0;
 
   return uncached[0];
@@ -131,7 +131,7 @@ int PS2MouseSetAccel(float accel)
 
   accel_fixed = (u32) (accel * 65536.0);
   buffer.accel = accel_fixed;
-  if (SifCallRpc(&mouseif, PS2MOUSE_SETACCEL, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_SETACCEL, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   return 1;
@@ -143,7 +143,7 @@ float PS2MouseGetAccel()
   u32* uncached = (u32 *) UNCACHED_SEG(&buffer.accel);
   u32 accel_fixed;
 
-  if (SifCallRpc(&mouseif, PS2MOUSE_GETACCEL, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_GETACCEL, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   accel_fixed = uncached[0];
@@ -159,7 +159,7 @@ int PS2MouseSetBoundary(int minx, int maxx, int miny, int maxy)
   buffer.bounds.miny = miny;
   buffer.bounds.maxy = maxy;
 
-  if (SifCallRpc(&mouseif, PS2MOUSE_SETBOUNDARY, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_SETBOUNDARY, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   return 1;
@@ -170,7 +170,7 @@ int PS2MouseGetBoundary(int *minx, int *maxx, int *miny, int *maxy)
 {
   struct mbounds* uncached = (struct mbounds *) UNCACHED_SEG(&buffer.bounds);
 
-  if (SifCallRpc(&mouseif, PS2MOUSE_GETBOUNDARY, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_GETBOUNDARY, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   *minx = uncached->minx;
@@ -187,7 +187,7 @@ int PS2MouseSetPosition(int x, int y)
   buffer.pos.x = x;
   buffer.pos.y = y;
 
-  if (SifCallRpc(&mouseif, PS2MOUSE_SETPOSITION, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_SETPOSITION, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   return 1;
@@ -196,7 +196,7 @@ int PS2MouseSetPosition(int x, int y)
 int PS2MouseReset()
 
 {
-  if (SifCallRpc(&mouseif, PS2MOUSE_RESET, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_RESET, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   return 1;
@@ -207,7 +207,7 @@ u32 PS2MouseEnum()
 {
   u32* uncached = (u32 *) UNCACHED_SEG(&buffer.data);
 
-  if (SifCallRpc(&mouseif, PS2MOUSE_ENUM, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_ENUM, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   return uncached[0];
@@ -218,7 +218,7 @@ u32 PS2MouseGetVersion()
 {
   u32* uncached = (u32 *) UNCACHED_SEG(&buffer.data);
 
-  if (SifCallRpc(&mouseif, PS2MOUSE_GETVERSION, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_GETVERSION, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   return uncached[0];
@@ -229,7 +229,7 @@ int PS2MouseSetDblClickTime(u32 msec)
 {
   buffer.time = msec;
 
-  if (SifCallRpc(&mouseif, PS2MOUSE_SETDBLCLICKTIME, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_SETDBLCLICKTIME, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   return 1;
@@ -240,7 +240,7 @@ u32 PS2MouseGetDblClickTIme()
 {
   u32* uncached = (u32 *) UNCACHED_SEG(&buffer.time);
 
-  if (SifCallRpc(&mouseif, PS2MOUSE_GETDBLCLICKTIME, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+  if (sceSifCallRpc(&mouseif, PS2MOUSE_GETDBLCLICKTIME, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     return -1;
 
   return uncached[0];

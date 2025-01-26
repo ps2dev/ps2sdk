@@ -188,7 +188,7 @@ int sceSifCheckInit()
 	return sif_inited;
 }
 
-void sceSifSetDChain()
+void sceSifSetDChain(void)
 {
 	USE_IOP_MMIO_HWPORT();
 	USE_SIF_MMIO_HWPORT();

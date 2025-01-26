@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     u32 new_pad[2][4];
 	s32 ret;
 
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 
     printf("libmtap sample");
 

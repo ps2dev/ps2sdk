@@ -131,15 +131,15 @@ void rpcMainThread(void* param)
 
   (void)param;
 
-  SifInitRpc(0);
+  sceSifInitRpc(0);
 
   //printf("PS2MOUSE - RPC Initialise\n");
   printf("PS2MOUSE - USB Mouse Library\n");
 
   tid = GetThreadId();
-  SifSetRpcQueue(&ps2mouse_queue, tid);
-  SifRegisterRpc(&ps2mouse_server, PS2MOUSE_BIND_RPC_ID, (void *) rpcCommandHandler, (u8 *) &_rpc_buffer, 0, 0, &ps2mouse_queue);
-  SifRpcLoop(&ps2mouse_queue);
+  sceSifSetRpcQueue(&ps2mouse_queue, tid);
+  sceSifRegisterRpc(&ps2mouse_server, PS2MOUSE_BIND_RPC_ID, (void *) rpcCommandHandler, (u8 *) &_rpc_buffer, 0, 0, &ps2mouse_queue);
+  sceSifRpcLoop(&ps2mouse_queue);
 }
 
 int ps2mouse_probe(int devId)
