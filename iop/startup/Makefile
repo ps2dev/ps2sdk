@@ -24,5 +24,5 @@ release:
 	@$(PRINTF) 'Installing %slinkfile into %s/iop/startup\n' $(IOP_SRC_DIR) $(PS2SDK)
 	$(ECHO) Installing $(IOP_SRC_DIR)linkfile into $(PS2SDK)/iop/startup
 	cp -f $(IOP_SRC_DIR)linkfile $(PS2SDK)/iop/startup
-	@$(ECHO) Installing $(IOP_OBJS_DIR)crt0.o into $(PS2DEV)/ee/mipsel-ps2-irx/lib
-	cp -f $(IOP_OBJS_DIR)crt0.o $(PS2DEV)/iop/mipsel-ps2-irx/lib
+	@$(ECHO) Installing $(IOP_OBJS_DIR)crt0.o into $(PS2DEV)/iop/mipsel-none-elf/lib
+	cp -f $(IOP_OBJS_DIR)crt0.o $(PS2DEV)/iop/mipsel-none-elf/lib
