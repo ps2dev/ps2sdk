@@ -339,7 +339,7 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 	{
 		if(hddDevices[i].status<2)
 		{
-			if(apaJournalRestore(i) != 0)
+			if((hddDevices[i].status != 1) && apaJournalRestore(i) != 0)
 			{
 				APA_PRINTF(APA_DRV_NAME": error: log check failed.\n");
 				return hddInitError();
