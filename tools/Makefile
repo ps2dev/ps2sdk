@@ -12,6 +12,7 @@ SUBDIRS = \
 	ps2-irxgen \
 	ps2adpcm \
 	romimg \
+	srxfixup \
 #	  gensymtab
 
 include $(PS2SDKSRC)/Defs.make
