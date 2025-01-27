@@ -93,7 +93,7 @@ Srx_gen_table *read_conf(const char *indata, const char *infile, int dumpopt)
 	}
 	if ( infile )
 	{
-		fp = fopen(infile, "re");
+		fp = fopen(infile, "r");
 		if ( !fp )
 		{
 			fprintf(stderr, "\"%s\" can't open (errno=%d)\n", infile, errno);
