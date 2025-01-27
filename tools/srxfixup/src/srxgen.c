@@ -310,6 +310,12 @@ int layout_srx_file(elf_file *elf)
 			}
 		}
 	}
+
+	if (error && tp->target == SRX_TARGET_IOP)
+	{
+		fprintf(stderr, "LOADCORE limits possible alignment to 16 bytes\n");
+	}
+
 	free(order);
 	free(neworder);
 	return error;
