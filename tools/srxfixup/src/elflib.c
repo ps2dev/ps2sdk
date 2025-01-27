@@ -9,6 +9,7 @@
 */
 
 #include "srxfixup_internal.h"
+#include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,14 +38,14 @@ elf_file *read_elf(const char *filename)
 	fp = fopen(filename, "rbe");
 	if ( !fp )
 	{
-		fprintf(stderr, "`%s' can't open\n", filename);
+		fprintf(stderr, "\"%s\" can't open (errno=%d)\n", filename, errno);
 		return 0;
 	}
 	elf = (elf_file *)calloc(1, sizeof(elf_file));
 	elf->ehp = (Elf32_Ehdr *)malloc(sizeof(Elf32_Ehdr));
 	if ( fread(elf->ehp, sizeof(Elf32_Ehdr), 1, fp) != 1 )
 	{
-		fprintf(stderr, "%s: Could not read ELF header\n", filename);
+		fprintf(stderr, "%s: Could not read ELF header (errno=%d)\n", filename, errno);
 		exit(1);
 	}
 	swapmemory(elf->ehp, "ccccccccccccccccsslllllssssss", 1);
@@ -104,7 +105,7 @@ elf_file *read_elf(const char *filename)
 		{
 			if ( fread(&elf->php[i_1], sizeof(Elf32_Phdr), 1, fp) != 1 )
 			{
-				fprintf(stderr, "%s: Could not read ELF program header\n", filename);
+				fprintf(stderr, "%s: Could not read ELF program header (errno=%d)\n", filename, errno);
 				exit(1);
 			}
 			swapmemory(&elf->php[i_1], "llllllll", 1);
@@ -127,7 +128,7 @@ elf_file *read_elf(const char *filename)
 			elf->scp[i_2] = (elf_section *)calloc(1, sizeof(elf_section));
 			if ( fread(elf->scp[i_2], sizeof(Elf32_Shdr), 1, fp) != 1 )
 			{
-				fprintf(stderr, "%s: Could not read ELF section header\n", filename);
+				fprintf(stderr, "%s: Could not read ELF section header (errno=%d)\n", filename, errno);
 				exit(1);
 			}
 			swapmemory(elf->scp[i_2], "llllllllll", 1);
@@ -318,7 +319,7 @@ elf_file *read_elf(const char *filename)
 						elf->scp[i_4]->data = (uint8_t *)malloc(size);
 						if ( fread(elf->scp[i_4]->data, size, 1, fp) != 1 )
 						{
-							fprintf(stderr, "%s: Could not read ELF section contents\n", filename);
+							fprintf(stderr, "%s: Could not read ELF section contents, (errno=%d)\n", filename, errno);
 							exit(1);
 						}
 						swapmemory(elf->scp[i_4]->data, "l", size >> 2);
@@ -334,7 +335,7 @@ elf_file *read_elf(const char *filename)
 						elf->scp[i_4]->data = (uint8_t *)malloc(size);
 						if ( fread(elf->scp[i_4]->data, size, 1, fp) != 1 )
 						{
-							fprintf(stderr, "%s: Could not read ELF section contents\n", filename);
+							fprintf(stderr, "%s: Could not read ELF section contents (errno=%d)\n", filename, errno);
 							exit(1);
 						}
 						swapmemory(elf->scp[i_4]->data, "lllllls", 1);
@@ -343,7 +344,7 @@ elf_file *read_elf(const char *filename)
 						elf->scp[i_4]->data = (uint8_t *)malloc(size);
 						if ( fread(elf->scp[i_4]->data, size, 1, fp) != 1 )
 						{
-							fprintf(stderr, "%s: Could not read ELF section contents\n", filename);
+							fprintf(stderr, "%s: Could not read ELF section contents (errno=%d)\n", filename, errno);
 							exit(1);
 						}
 						swapmemory(elf->scp[i_4]->data, "lllllllllls", 1);
@@ -352,7 +353,7 @@ elf_file *read_elf(const char *filename)
 						elf->scp[i_4]->data = (uint8_t *)malloc(size);
 						if ( fread(elf->scp[i_4]->data, size, 1, fp) != 1 )
 						{
-							fprintf(stderr, "%s: Could not read ELF section contents\n", filename);
+							fprintf(stderr, "%s: Could not read ELF section contents (errno=%d)\n", filename, errno);
 							exit(1);
 						}
 						break;
@@ -389,7 +390,7 @@ static void read_symtab(elf_file *elf, int sctindex, FILE *fp)
 		result[i] = (elf_syment *)calloc(1, sizeof(elf_syment));
 		if ( fread(result[i], sp_x->shr.sh_entsize, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF symbol table\n");
+			fprintf(stderr, "elflib: Could not read ELF symbol table (errno=%d)\n", errno);
 			exit(1);
 		}
 		swapmemory(result[i], "lllccs", 1);
@@ -428,7 +429,7 @@ static void read_rel(elf_file *elf, int sctindex, FILE *fp)
 	{
 		if ( fread(&result[i], sp_x->shr.sh_entsize, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF relocations\n");
+			fprintf(stderr, "elflib: Could not read ELF relocations (errno=%d)\n", errno);
 			exit(1);
 		}
 		swapmemory(&result[i], "ll", 1);
@@ -449,7 +450,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 	sycb = (elf_mips_symbolic_data *)malloc(sizeof(elf_mips_symbolic_data));
 	if ( fread(sycb, sizeof(hdrr), 1, fp) != 1 )
 	{
-		fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+		fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 		exit(1);
 	}
 	swapmemory(sycb, "sslllllllllllllllllllllll", 1);
@@ -462,7 +463,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbLineOffset, SEEK_SET);
 		if ( fread(sycb->cbLine_Ptr, size_1, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 	}
@@ -475,7 +476,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbDnOffset, SEEK_SET);
 		if ( fread(sycb->cbDn_Ptr, size_2, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 		swapmemory(sycb->cbDn_Ptr, "ll", sycb->head.idnMax);
@@ -489,7 +490,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbPdOffset, SEEK_SET);
 		if ( fread(sycb->cbPd_Ptr, size_3, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 		swapmemory(sycb->cbPd_Ptr, "lllllllllsslll", sycb->head.ipdMax);
@@ -503,7 +504,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbSymOffset, SEEK_SET);
 		if ( fread(sycb->cbSym_Ptr, size_4, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 		swapmemory(sycb->cbSym_Ptr, "lll", sycb->head.isymMax);
@@ -517,7 +518,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbOptOffset, SEEK_SET);
 		if ( fread(sycb->cbOpt_Ptr, size_5, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 		swapmemory(sycb->cbOpt_Ptr, "lll", sycb->head.ioptMax);
@@ -531,7 +532,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbAuxOffset, SEEK_SET);
 		if ( fread(sycb->cbAux_Ptr, size_6, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 		swapmemory(sycb->cbAux_Ptr, "l", sycb->head.iauxMax);
@@ -545,7 +546,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbSsOffset, SEEK_SET);
 		if ( fread(sycb->cbSs_Ptr, size_7, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 	}
@@ -558,7 +559,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbSsExtOffset, SEEK_SET);
 		if ( fread(sycb->cbSsExt_Ptr, size_8, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 	}
@@ -571,7 +572,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbFdOffset, SEEK_SET);
 		if ( fread(sycb->cbFd_Ptr, size_9, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 		swapmemory(sycb->cbFd_Ptr, "llllllllllsslllllll", sycb->head.ifdMax);
@@ -585,7 +586,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbRfdOffset, SEEK_SET);
 		if ( fread(sycb->cbRfd_Ptr, size_A, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 		swapmemory(sycb->cbRfd_Ptr, "l", sycb->head.crfd);
@@ -599,7 +600,7 @@ static elf_mips_symbolic_data *read_mips_symbolic(FILE *fp)
 		fseek(fp, sycb->head.cbExtOffset, SEEK_SET);
 		if ( fread(sycb->cbExt_Ptr, size_B, 1, fp) != 1 )
 		{
-			fprintf(stderr, "elflib: Could not read ELF debug info contents\n");
+			fprintf(stderr, "elflib: Could not read ELF debug info contents (errno=%d)\n", errno);
 			exit(1);
 		}
 		swapmemory(sycb->cbExt_Ptr, "sslll", sycb->head.iextMax);
@@ -628,7 +629,7 @@ int write_elf(elf_file *elf, const char *filename)
 	fp = fopen(filename, "wbe");
 	if ( !fp )
 	{
-		perror(filename);
+		fprintf(stderr, "\"%s\" can't open (errno=%d)\n", filename, errno);
 		return 1;
 	}
 	renumber_symtab(elf);
