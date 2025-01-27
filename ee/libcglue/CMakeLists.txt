@@ -1,13 +1,11 @@
-add_library(cglue)
-target_include_directories(cglue PUBLIC ${EE_INC} include)
-target_sources(cglue PRIVATE src/rtc.c)
-target_link_libraries(cglue PRIVATE kernel)
+add_library(cglue_iface INTERFACE)
+target_include_directories(cglue_iface INTERFACE ${EE_INC} include)
 
-compile_multiple(cglue src/timezone.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/timezone.c OBJECTS
     _libcglue_timezone_update.o ps2sdk_setTimezone.o ps2sdk_setDaylightSaving.o
 )
 
-compile_multiple(cglue src/fdman.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/fdman.c OBJECTS
 	__fdman_sema.o
 	__descriptor_data_pool.o
 	__descriptormap.o
@@ -19,7 +17,7 @@ compile_multiple(cglue src/fdman.c OBJECTS
 	__fdman_release_descriptor.o
 )
 
-compile_multiple(cglue src/init.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/init.c OBJECTS
 	__gprof_init.o
 	__gprof_cleanup.o
 	__libpthreadglue_init.o
@@ -29,19 +27,19 @@ compile_multiple(cglue src/init.c OBJECTS
 	_libcglue_args_parse.o
 )
 
-compile_multiple(cglue src/sleep.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/sleep.c OBJECTS
     nanosleep.o
 )
 
-compile_multiple(cglue src/sjis.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/sjis.c OBJECTS
     isSpecialSJIS.o isSpecialASCII.o strcpy_ascii.o strcpy_sjis.o
 )
 
-compile_multiple(cglue src/cwd.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/cwd.c OBJECTS
     __cwd.o __cwd_len.o __get_drive.o getcwd.o __path_absolute.o __init_cwd.o
 )
 
-compile_multiple(cglue src/ps2sdkapi.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/ps2sdkapi.c OBJECTS
 	__fioOpsInitialize.o
 	__fioOpenHelper.o
 	__fioGetFdHelper.o
@@ -63,7 +61,7 @@ compile_multiple(cglue src/ps2sdkapi.c OBJECTS
 	_libcglue_fdman_inet_ops.o
 )
 
-compile_multiple(cglue src/glue.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/glue.c OBJECTS
 	__dummy_passwd.o
 	__transform_errno.o
 	__transform64_errno.o
@@ -140,7 +138,7 @@ compile_multiple(cglue src/glue.c OBJECTS
 	dup2.o
 )
 
-compile_multiple(cglue src/lock.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/lock.c OBJECTS
 	__lock___sfp_recursive_mutex.o
 	__lock___atexit_recursive_mutex.o
 	__lock___at_quick_exit_mutex.o
@@ -163,7 +161,7 @@ compile_multiple(cglue src/lock.c OBJECTS
 	__locks_deinit.o
 )
 
-compile_multiple(cglue src/netdb.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/netdb.c OBJECTS
 	gethostbyaddr.o
 	gethostbyname.o
 	gethostbyname_r.o
@@ -171,11 +169,11 @@ compile_multiple(cglue src/netdb.c OBJECTS
 	getaddrinfo.o
 )
 
-compile_multiple(cglue src/select.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/select.c OBJECTS
     select.o
 )
 
-compile_multiple(cglue src/socket.c OBJECTS
+compile_multiple(CGLUE_OBJECTS cglue_iface src/socket.c OBJECTS
 	socket.o
 	accept.o
 	bind.o
@@ -201,5 +199,11 @@ compile_multiple(cglue src/socket.c OBJECTS
 	libcglue_dns_setserver.o
 	libcglue_dns_getserver.o
 )
+
+
+add_library(cglue ${CGLUE_OBJECTS})
+target_include_directories(cglue PUBLIC include)
+target_sources(cglue PRIVATE src/rtc.c)
+target_link_libraries(cglue PRIVATE kernel cglue_iface)
 
 install(TARGETS cglue)

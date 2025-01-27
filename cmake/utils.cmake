@@ -1,21 +1,19 @@
-# TODO investigate using interface libraries, will help with erl generation
 # Compiles the same source file multiple times with different defines
-function(compile_multiple target srcfile)
+function(compile_multiple objlist iface srcfile)
     cmake_parse_arguments(PARSE_ARGV 2 "arg" "" "" "OBJECTS")
 
     foreach(obj ${arg_OBJECTS})
         add_library(${obj} OBJECT ${srcfile})
         get_filename_component(def ${obj} NAME_WLE)
         target_compile_definitions(${obj} PRIVATE "F_${def}")
-
-        get_target_property(target_id ${target} INCLUDE_DIRECTORIES)
-        target_include_directories(${obj} PRIVATE ${target_id})
-
-        target_link_libraries(${target} PRIVATE ${obj})
+        target_link_libraries(${obj} PUBLIC ${iface})
+        list(APPEND ${objlist} $<TARGET_OBJECTS:${obj}>)
     endforeach()
+    set(${objlist} "${${objlist}}" PARENT_SCOPE)
 endfunction()
 
 # Add an erl output for a given target
+# TODO  doesn't work with targets using compile_multiple
 function(target_add_erl target)
     add_custom_command(OUTPUT "lib${target}.erl"
         COMMAND ${CMAKE_C_COMPILER} -nostdlib -Wl,-r -Wl,-d -o "lib${target}.erl" $<TARGET_OBJECTS:${target}>

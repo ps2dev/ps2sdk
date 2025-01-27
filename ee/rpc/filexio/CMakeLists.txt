@@ -1,8 +1,8 @@
-add_library(fileXio)
-target_include_directories(fileXio PUBLIC include)
-target_include_directories(fileXio PRIVATE ${EE_INC} ${PROJECT_SOURCE_DIR}/libcglue/include)
+add_library(fileXio_iface INTERFACE)
+target_include_directories(fileXio_iface INTERFACE include)
+target_include_directories(fileXio_iface INTERFACE ${EE_INC} ${PROJECT_SOURCE_DIR}/libcglue/include)
 
-compile_multiple(fileXio src/fileXio_rpc.c OBJECTS 
+compile_multiple(FILEXIO_OBJECTS fileXio_iface src/fileXio_rpc.c OBJECTS
 	__cd0.o __sbuff.o __intr_data.o __fileXioInited.o __fileXioBlockMode.o __fileXioCompletionSema.o __lock_sema_id.o
 	fileXioInit.o fileXioExit.o fileXioStop.o fileXioGetDeviceList.o fileXioGetdir.o fileXioMount.o fileXioUmount.o
 	fileXioCopyfile.o fileXioMkdir.o fileXioRmdir.o fileXioRemove.o fileXioRename.o fileXioSymlink.o fileXioReadlink.o
@@ -11,7 +11,7 @@ compile_multiple(fileXio src/fileXio_rpc.c OBJECTS
 	fileXioIoctl.o fileXioIoctl2.o fileXioWaitAsync.o fileXioSetBlockMode.o fileXioSetRWBufferSize.o
 )
 
-compile_multiple(fileXio src/fileXio_ps2sdk.c OBJECTS 
+compile_multiple(FILEXIO_OBJECTS fileXio_iface src/fileXio_ps2sdk.c OBJECTS
 	__fileXioOpsInitialize.o
 	__fileXioOpenHelper.o
 	__fileXioGetFdHelper.o
@@ -30,6 +30,10 @@ compile_multiple(fileXio src/fileXio_ps2sdk.c OBJECTS
 	__fileXioOpsInitializeImpl.o
 	_ps2sdk_fileXio_init_deinit.o
 )
+
+add_library(fileXio ${FILEXIO_OBJECTS})
+target_link_libraries(fileXio PRIVATE fileXio_iface)
+target_include_directories(fileXio PUBLIC include)
 
 target_sources(fileXio PRIVATE src/erl-support.c)
 install(TARGETS fileXio)
