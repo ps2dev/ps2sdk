@@ -10,6 +10,7 @@
 
 #include "srxfixup_internal.h"
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -95,7 +96,7 @@ Srx_gen_table *read_conf(const char *indata, const char *infile, int dumpopt)
 		fp = fopen(infile, "re");
 		if ( !fp )
 		{
-			fprintf(stderr, "\"%s\" can't open\n", infile);
+			fprintf(stderr, "\"%s\" can't open (errno=%d)\n", infile, errno);
 			return 0;
 		}
 		fseek(fp, 0, SEEK_END);
