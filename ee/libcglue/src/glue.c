@@ -1146,8 +1146,8 @@ long fpathconf(int fd, int name)
 
 #ifdef F_fsync
 int fsync(int fd) {
-	// TODO: implement in terms of sync
-	return 0;
+	errno = ENOSYS;
+	return -1; /* not supported */
 }
 #endif
 
