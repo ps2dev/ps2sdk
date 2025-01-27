@@ -35,7 +35,7 @@ elf_file *read_elf(const char *filename)
 	elf_file *elf;
 	FILE *fp;
 
-	fp = fopen(filename, "rbe");
+	fp = fopen(filename, "rb");
 	if ( !fp )
 	{
 		fprintf(stderr, "\"%s\" can't open (errno=%d)\n", filename, errno);
@@ -626,7 +626,7 @@ int write_elf(elf_file *elf, const char *filename)
 {
 	FILE *fp;
 
-	fp = fopen(filename, "wbe");
+	fp = fopen(filename, "wb");
 	if ( !fp )
 	{
 		fprintf(stderr, "\"%s\" can't open (errno=%d)\n", filename, errno);
