@@ -79,6 +79,30 @@ extern timer_ee_global_struct g_Timer;
 extern counter_struct_t g_CounterBuf[COUNTER_COUNT] __attribute__((aligned(64)));
 #endif
 
+#ifdef F__ps2sdk_init_timer
+void __attribute__((weak)) _ps2sdk_init_timer_impl(void);
+__attribute__((weak)) void _ps2sdk_init_timer(void)
+{
+    // cppcheck-suppress knownConditionTrueFalse
+    if (&_ps2sdk_init_timer_impl)
+    {
+        _ps2sdk_init_timer_impl();
+    }
+}
+#endif
+
+#ifdef F__ps2sdk_deinit_timer
+void __attribute__((weak)) _ps2sdk_deinit_timer_impl(void);
+__attribute__((weak)) void _ps2sdk_deinit_timer(void)
+{
+    // cppcheck-suppress knownConditionTrueFalse
+    if (&_ps2sdk_deinit_timer_impl)
+    {
+        _ps2sdk_deinit_timer_impl();
+    }
+}
+#endif
+
 #ifdef F_SetT2
 void SetT2(volatile void *ptr, u32 val)
 {
@@ -477,6 +501,18 @@ u64 iGetTimerSystemTime(void)
     timer_system_time_now = (timer_handled_count << 16) | low;
     timer_system_time_now = timer_system_time_now << ((mode & 3) << 2);
     return timer_system_time_now;
+}
+
+void _ps2sdk_init_timer_impl(void)
+{
+    InitTimer(2);
+    StartTimerSystemTime();
+}
+
+void _ps2sdk_deinit_timer_impl(void)
+{
+    StopTimerSystemTime();
+    EndTimer();
 }
 #endif
 

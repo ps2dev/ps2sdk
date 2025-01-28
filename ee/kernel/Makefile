@@ -125,6 +125,8 @@ EXIT_OBJS += _exit_internals.o SetArg.o Exit.o ExecPS2.o LoadExecPS2.o ExecOSD.o
 
 TIMER_OBJS = \
 	timer_data.o \
+	_ps2sdk_init_timer.o \
+	_ps2sdk_deinit_timer.o \
 	SetT2.o \
 	SetT2_COUNT.o \
 	SetT2_MODE.o \
