@@ -175,6 +175,8 @@ static inline ps2_clock_t ps2_clock(void) {
 }
 
 extern s64 _ps2sdk_rtc_offset_from_busclk;
+s64 _libcglue_rtc_get_offset_from_busclk(void);
+extern void _libcglue_rtc_update_impl();
 extern void _libcglue_rtc_update();
 
 // The newlib port does not support 64bit
@@ -183,6 +185,7 @@ typedef int64_t off64_t;
 extern off64_t lseek64(int fd, off64_t offset, int whence);
 
 // Functions to be used related to timezone
+extern void _libcglue_timezone_update_impl();
 extern void _libcglue_timezone_update();
 
 extern void ps2sdk_setTimezone(int timezone);

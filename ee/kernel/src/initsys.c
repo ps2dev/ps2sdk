@@ -21,8 +21,7 @@
 void _InitSys(void)
 {
     InitAlarm();
-    InitTimer(2);
-    StartTimerSystemTime();
+    _ps2sdk_init_timer();
     InitThread();
     InitExecPS2();
     InitTLBFunctions();
@@ -32,8 +31,7 @@ void _InitSys(void)
 #ifdef F_TerminateLibrary
 void TerminateLibrary(void)
 {
-    StopTimerSystemTime();
-    EndTimer();
+    _ps2sdk_deinit_timer();
     InitTLB();
 }
 #endif

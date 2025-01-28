@@ -66,6 +66,11 @@ typedef u64 (*timer_alarm_handler_t)(s32 id, u64 scheduled_time, u64 actual_time
 extern "C" {
 #endif
 
+extern void _ps2sdk_init_timer_impl(void);
+extern void _ps2sdk_init_timer(void);
+extern void _ps2sdk_deinit_timer_impl(void);
+extern void _ps2sdk_deinit_timer(void);
+
 extern s32 InitTimer(s32 in_mode);
 extern s32 EndTimer(void);
 extern s32 GetTimerPreScaleFactor(void);

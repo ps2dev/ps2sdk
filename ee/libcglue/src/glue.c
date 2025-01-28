@@ -788,7 +788,7 @@ int _gettimeofday(struct timeval *tv, struct timezone *tz)
 		u32 busclock_usec;
 
 		TimerBusClock2USec(GetTimerSystemTime(), &busclock_sec, &busclock_usec);
-		tv->tv_sec = (time_t)(_ps2sdk_rtc_offset_from_busclk + ((s64)busclock_sec));
+		tv->tv_sec = (time_t)(_libcglue_rtc_get_offset_from_busclk() + ((s64)busclock_sec));
 		tv->tv_usec = busclock_usec;
 	}
 
