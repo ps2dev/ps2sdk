@@ -8,9 +8,16 @@
 
 EE_LIB = libcglue.a
 
-CORE_OBJS = rtc.o
+RTC_OBJS = \
+	_libcglue_rtc_data.o \
+	_libcglue_rtc_get_offset_from_busclk.o \
+	_libcglue_rtc_update.o
 
-TIMEZONE_OBJS = _libcglue_timezone_update.o ps2sdk_setTimezone.o ps2sdk_setDaylightSaving.o
+TIMEZONE_OBJS = \
+	_libcglue_timezone_update_impl.o \
+	_libcglue_timezone_update.o \
+	ps2sdk_setTimezone.o \
+	ps2sdk_setDaylightSaving.o
 
 FDMAN_OBJS = \
 	__fdman_sema.o \
@@ -229,6 +236,7 @@ SOCKET_OBJS = \
 
 EE_OBJS = \
 	$(CORE_OBJS) \
+	$(RTC_OBJS) \
 	$(TIMEZONE_OBJS) \
 	$(SJIS_OBJS) \
 	$(TIME_OBJS) \
@@ -248,6 +256,10 @@ include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
 include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
+
+$(RTC_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)rtc.c
+	$(DIR_GUARD)
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(TIMEZONE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timezone.c
 	$(DIR_GUARD)

@@ -24,10 +24,17 @@
 // The definition for this function is located in ee/rpc/cdvd/src/scmd.c
 extern time_t ps2time(time_t *t);
 
+#ifdef F__libcglue_rtc_data
 s64 _ps2sdk_rtc_offset_from_busclk = 0;
+#endif
 
-__attribute__((weak))
-void _libcglue_rtc_update()
+#ifdef F__libcglue_rtc_get_offset_from_busclk
+s64 _libcglue_rtc_get_offset_from_busclk(void)
+{
+	return _ps2sdk_rtc_offset_from_busclk;
+}
+
+void _libcglue_rtc_update_impl()
 {
 	time_t rtc_sec;
 	u32 busclock_sec;
@@ -38,3 +45,17 @@ void _libcglue_rtc_update()
 
 	_ps2sdk_rtc_offset_from_busclk = ((s64)rtc_sec) - ((s64)busclock_sec);
 }
+#endif
+
+#ifdef F__libcglue_rtc_update
+void __attribute__((weak)) _libcglue_rtc_update_impl();
+__attribute__((weak))
+void _libcglue_rtc_update()
+{
+	// cppcheck-suppress knownConditionTrueFalse
+	if (&_libcglue_rtc_update_impl)
+	{
+		_libcglue_rtc_update_impl();
+	}
+}
+#endif

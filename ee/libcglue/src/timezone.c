@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <reent.h>
 
 #include <ps2sdkapi.h>
 #define OSD_CONFIG_NO_LIBCDVD
@@ -25,9 +26,8 @@
 
 #define posixIODriver { open, close, (int (*)(int, void *, int))read, O_RDONLY }
 
-#ifdef F__libcglue_timezone_update
-__attribute__((weak))
-void _libcglue_timezone_update()
+#ifdef F__libcglue_timezone_update_impl
+void _libcglue_timezone_update_impl()
 {
     /* Initialize timezone from PS2 OSD configuration */
 	_io_driver driver = posixIODriver;
@@ -42,6 +42,20 @@ void _libcglue_timezone_update()
     sprintf(tz, "GMT%s%02i:%02i%s", tzOffset < 0 ? "+" : "-", hours, minutes, daylight ? "DST" : "");
 	#pragma GCC diagnostic pop
     setenv("TZ", tz, 1);
+}
+#endif
+
+#ifdef F__libcglue_timezone_update
+// Defined in newlib: newlib/libc/time/tzset_r.c
+void __attribute((weak)) _tzset_unlocked_r(struct _reent *reent_ptr);
+__attribute__((weak))
+void _libcglue_timezone_update()
+{
+	// cppcheck-suppress knownConditionTrueFalse
+	if (&_tzset_unlocked_r)
+	{
+		_libcglue_timezone_update_impl();
+	}
 }
 #endif
 
