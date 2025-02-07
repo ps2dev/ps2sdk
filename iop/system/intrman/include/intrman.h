@@ -210,22 +210,23 @@ extern void ResetShouldPreemptCb(void);
 #define intrman_IMPORTS_start DECLARE_IMPORT_TABLE(intrman, 1, 2)
 #define intrman_IMPORTS_end   END_IMPORT_TABLE
 
-#define I_RegisterIntrHandler DECLARE_IMPORT(4, RegisterIntrHandler)
-#define I_ReleaseIntrHandler  DECLARE_IMPORT(5, ReleaseIntrHandler)
-#define I_EnableIntr          DECLARE_IMPORT(6, EnableIntr)
-#define I_DisableIntr         DECLARE_IMPORT(7, DisableIntr)
-#define I_CpuDisableIntr      DECLARE_IMPORT(8, CpuDisableIntr)
-#define I_CpuEnableIntr       DECLARE_IMPORT(9, CpuEnableIntr)
-#define I_CpuInvokeInKmode    DECLARE_IMPORT(14, CpuInvokeInKmode);
-#define I_DisableDispatchIntr DECLARE_IMPORT(15, DisableDispatchIntr);
-#define I_EnableDispatchIntr  DECLARE_IMPORT(16, EnableDispatchIntr);
-#define I_CpuSuspendIntr      DECLARE_IMPORT(17, CpuSuspendIntr)
-#define I_CpuResumeIntr       DECLARE_IMPORT(18, CpuResumeIntr)
-#define I_QueryIntrContext    DECLARE_IMPORT(23, QueryIntrContext)
-#define I_QueryIntrStack      DECLARE_IMPORT(24, QueryIntrStack)
-#define I_iCatchMultiIntr     DECLARE_IMPORT(25, iCatchMultiIntr)
-#define I_SetNewCtxCb         DECLARE_IMPORT(28, SetNewCtxCb)
-#define I_SetShouldPreemptCb  DECLARE_IMPORT(30, SetShouldPreemptCb)
+#define I_GetIntrmanInternalData DECLARE_IMPORT(3, GetIntrmanInternalData)
+#define I_RegisterIntrHandler    DECLARE_IMPORT(4, RegisterIntrHandler)
+#define I_ReleaseIntrHandler     DECLARE_IMPORT(5, ReleaseIntrHandler)
+#define I_EnableIntr             DECLARE_IMPORT(6, EnableIntr)
+#define I_DisableIntr            DECLARE_IMPORT(7, DisableIntr)
+#define I_CpuDisableIntr         DECLARE_IMPORT(8, CpuDisableIntr)
+#define I_CpuEnableIntr          DECLARE_IMPORT(9, CpuEnableIntr)
+#define I_CpuInvokeInKmode       DECLARE_IMPORT(14, CpuInvokeInKmode);
+#define I_DisableDispatchIntr    DECLARE_IMPORT(15, DisableDispatchIntr);
+#define I_EnableDispatchIntr     DECLARE_IMPORT(16, EnableDispatchIntr);
+#define I_CpuSuspendIntr         DECLARE_IMPORT(17, CpuSuspendIntr)
+#define I_CpuResumeIntr          DECLARE_IMPORT(18, CpuResumeIntr)
+#define I_QueryIntrContext       DECLARE_IMPORT(23, QueryIntrContext)
+#define I_QueryIntrStack         DECLARE_IMPORT(24, QueryIntrStack)
+#define I_iCatchMultiIntr        DECLARE_IMPORT(25, iCatchMultiIntr)
+#define I_SetNewCtxCb            DECLARE_IMPORT(28, SetNewCtxCb)
+#define I_SetShouldPreemptCb     DECLARE_IMPORT(30, SetShouldPreemptCb)
 
 /* For compatibility purposes */
 #define INUM_VBLANK IOP_IRQ_VBLANK
