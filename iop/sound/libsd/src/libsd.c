@@ -1548,9 +1548,9 @@ static u32 DmaStartStop(int mainarg, void *vararg2, u32 vararg3)
 	switch ( mainarg & 0xF )
 	{
 		case 2:
-			tsa_tmp = ((u16)(uiptr)vararg2 >> 1) & ~7;
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_tsa.m_pair[1] = tsa_tmp;
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_tsa.m_pair[0] = (tsa_tmp >> 16) & 0xFFFF;
+			tsa_tmp = ((uiptr)vararg2 >> 1) & ~7;
+			spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_tsa.m_pair[0] = (tsa_tmp >> 16) & 0x000F;
+			spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_tsa.m_pair[1] = tsa_tmp & 0xFFFF;
 			return 0;
 		case 4:
 			if ( (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr & SD_DMA_IN_PROCESS) )
