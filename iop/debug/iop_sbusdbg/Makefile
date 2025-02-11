@@ -22,7 +22,7 @@ IOP_INCS += \
 	-I$(PS2SDKSRC)/iop/system/sysmem/include \
 	-I$(PS2SDKSRC)/iop/system/threadman/include
 
-IOP_OBJS = main.o sbus_dbg_low.o sbus_tty.o sbus_dbg.o imports.o
+IOP_OBJS = main.o sbus_tty.o sbus_dbg.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
