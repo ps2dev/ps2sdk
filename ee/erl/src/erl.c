@@ -583,7 +583,7 @@ static int read_erl(int elf_handle, u8 * elf_mem, u32 addr, struct erl_record_t 
     struct elf_header_t head;
     struct elf_section_t * sec = 0;
     struct elf_symbol_t * sym = 0;
-    struct elf_reloc_t reloc;
+    struct elf_reloc_t reloc, next_reloc;
     int i, j;
     // int erx_compressed; // Not used
     char * names = 0, * strtab_names = 0, * reloc_section = 0;
@@ -592,6 +592,8 @@ static int read_erl(int elf_handle, u8 * elf_mem, u32 addr, struct erl_record_t 
     u32 fullsize = 0;
     struct erl_record_t * erl_record = 0;
     struct symbol_t * s;
+
+    int has_next_reloc = 0;
 
     *p_erl_record = 0;
 
@@ -839,11 +841,19 @@ return code
        // We found one relocation section, let's parse it to relocate.
 	dprintf("   Num: Offset   Type           Symbol\n");
 	for (j = 0; (u32)j < (sec[i].sh_size / sec[i].sh_entsize); j++) {
-	    int sym_n;
+	    int sym_n, next_sym_n;
 
 	    reloc = *((struct elf_reloc_t *) (reloc_section + j * sec[i].sh_entsize));
 
 	    sym_n = reloc.r_info >> 8;
+
+        has_next_reloc = 0;
+        if ((u32)j+1 < (sec[i].sh_size / sec[i].sh_entsize)) {
+            next_reloc = *((struct elf_reloc_t *) (reloc_section + ((j+1) * sec[i].sh_entsize)));
+            next_sym_n = reloc.r_info >> 8;
+            has_next_reloc = 1;
+        }
+
 	    dprintf("%6i: %08X %-14s %3i: ", j, reloc.r_offset, reloc_types[reloc.r_info & 255], sym_n);
 
 	    switch(sym[sym_n].st_info & 15) {
@@ -864,7 +874,17 @@ return code
 	    case SECTION:
 		rprintf("internal section reloc to section %i (%s)\n", sym[sym_n].st_shndx, names + sec[sym[sym_n].st_shndx].sh_name);
 		dprintf("Relocating at %08X.\n", erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr);
-		if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, (u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr)) < 0) {
+		
+        if ((reloc.r_info & 255) == R_MIPS_HI16 && 
+            (has_next_reloc && ((next_reloc.r_info & 255) == R_MIPS_LO16)) &&
+            (sec[sym[sym_n].st_shndx].sh_addr == sec[sym[next_sym_n].st_shndx].sh_addr) &&
+            (*(u16*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + next_reloc.r_offset) + ((u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr) & 0x0000ffff)) >= 0x8000
+            ) {
+                u32 data = *(u32*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset);
+                *(u32*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset) = data + !(data & 0xf);
+        }
+        
+        if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, (u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr)) < 0) {
 		    dprintf("Something went wrong in relocation.");
 		    free_and_return(-1);
 		}
