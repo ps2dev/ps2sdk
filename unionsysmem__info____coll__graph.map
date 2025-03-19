@@ -1,0 +1,14 @@
+<map id="sysmem_info_" name="sysmem_info_">
+<area shape="rect" id="Node000001" title=" " alt="" coords="101,286,206,312"/>
+<area shape="rect" id="Node000002" href="$xsysmem_8h.html#structsysmem__blockinfo__" title=" " alt="" coords="5,198,142,223"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,233,144,284,141,288,93,237"/>
+<area shape="rect" id="Node000003" href="$sysmem_8h.html#structsysmem__alloc__table__" title=" " alt="" coords="79,94,225,120"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="136,134,85,199,81,196,131,131"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="242,99,252,107,244,114,226,117,225,112,242,110,247,107,239,103"/>
+<area shape="rect" id="Node000005" href="$xsysmem_8h.html#structsysmem__meminfo__" title=" " alt="" coords="166,198,301,223"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="176,129,188,142,228,196,223,199,183,145,172,133"/>
+<area shape="rect" id="Node000004" href="$sysmem_8h.html#structsysmem__alloc__element__" title=" " alt="" coords="70,5,234,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="155,47,155,94,150,94,150,47"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="251,10,261,18,253,26,235,29,235,23,251,21,256,18,248,15"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="214,237,166,288,163,284,210,233"/>
+</map>
