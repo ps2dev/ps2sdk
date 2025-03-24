@@ -592,6 +592,7 @@ static int read_erl(int elf_handle, u8 * elf_mem, u32 addr, struct erl_record_t 
     u32 fullsize = 0;
     struct erl_record_t * erl_record = 0;
     struct symbol_t * s;
+    u32 addend = 0;
 
     int has_next_reloc = 0;
 
@@ -843,6 +844,8 @@ return code
 	for (j = 0; (u32)j < (sec[i].sh_size / sec[i].sh_entsize); j++) {
 	    int sym_n, next_sym_n;
 
+        addend = (sec[i].sh_type == RELA? ((struct elf_rela_t *)(reloc_section + j * sec[i].sh_entsize))->r_addend : 0);
+
 	    reloc = *((struct elf_reloc_t *) (reloc_section + j * sec[i].sh_entsize));
 
 	    sym_n = reloc.r_info >> 8;
@@ -864,7 +867,7 @@ return code
 		    add_loosy(erl_record, erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, strtab_names + sym[sym_n].st_name);
 		} else {
 		    dprintf("Found symbol at %08X, relocating.\n", s->address);
-		    if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, s->address) < 0) {
+		    if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, s->address+addend) < 0) {
 			dprintf("Something went wrong in relocation.");
 			free_and_return(-1);
 		    }
@@ -878,13 +881,13 @@ return code
         if ((reloc.r_info & 255) == R_MIPS_HI16 && 
             (has_next_reloc && ((next_reloc.r_info & 255) == R_MIPS_LO16)) &&
             (sec[sym[sym_n].st_shndx].sh_addr == sec[sym[next_sym_n].st_shndx].sh_addr) &&
-            (*(u16*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + next_reloc.r_offset) + ((u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr) & 0x0000ffff)) >= 0x8000 
+            (*(u16*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + next_reloc.r_offset) + (((u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr)+addend) & 0x0000ffff)) >= 0x8000 
             ) {
                 u32 data = *(u32*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset);
                 *(u32*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset) = data + !(data & 0xf);
         }
         
-        if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, (u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr)) < 0) {
+        if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, (u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr)+addend) < 0) {
 		    dprintf("Something went wrong in relocation.");
 		    free_and_return(-1);
 		}
@@ -894,14 +897,14 @@ return code
 		rprintf("internal relocation to symbol %s\n", strtab_names + sym[sym_n].st_name);
 		if ((s = erl_find_symbol(strtab_names + sym[sym_n].st_name))) {
 		    dprintf("Symbol already exists at %08X. Let's use it instead.\n", s->address);
-		    if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, s->address) < 0) {
+		    if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, s->address+addend) < 0) {
 			dprintf("Something went wrong in relocation.");
 			free_and_return(-1);
 		    }
 		    add_dependancy(erl_record, s->provider);
 		} else {
     		    dprintf("Relocating at %08X.\n", erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr + sym[sym_n].st_value);
-		    if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, (u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr + sym[sym_n].st_value)) < 0) {
+		    if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, (u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr + sym[sym_n].st_value)+addend) < 0) {
 			dprintf("Something went wrong in relocation.");
 			free_and_return(-1);
 		    }
