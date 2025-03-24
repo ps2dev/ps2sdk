@@ -413,7 +413,7 @@ static int apply_reloc(u8 * reloc, int type, u32 addr) {
 		newstate = (u_current_data & 0xfc000000) | (((u_current_data & 0x03ffffff) + (addr >> 2)) & 0x3ffffff);
 		break;
 	case R_MIPS_HI16:
-		newstate = (u_current_data & 0xffff0000) | ((((s_current_data << 16) >> 16) + (addr >> 16) + ((addr & 0xffff) >= 0x8000 ? 1 : 0)) & 0xffff);
+		newstate = (u_current_data & 0xffff0000) | ((((s_current_data << 16) >> 16) + (addr >> 16) + (((addr & 0xffff) >= 0x8000) && !(u_current_data & 0xf)? 1 : 0)) & 0xffff);
 		break;
 	case R_MIPS_LO16:
 		newstate = (u_current_data & 0xffff0000) | ((((s_current_data << 16) >> 16) + (addr & 0xffff)) & 0xffff);
@@ -878,7 +878,7 @@ return code
         if ((reloc.r_info & 255) == R_MIPS_HI16 && 
             (has_next_reloc && ((next_reloc.r_info & 255) == R_MIPS_LO16)) &&
             (sec[sym[sym_n].st_shndx].sh_addr == sec[sym[next_sym_n].st_shndx].sh_addr) &&
-            (*(u16*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + next_reloc.r_offset) + ((u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr) & 0x0000ffff)) >= 0x8000
+            (*(u16*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + next_reloc.r_offset) + ((u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr) & 0x0000ffff)) >= 0x8000 
             ) {
                 u32 data = *(u32*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset);
                 *(u32*)(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset) = data + !(data & 0xf);
