@@ -125,5 +125,5 @@ $(EE_LIB): $(EE_LIB)_tmp$(MAKE_CURPID)
 
 $(EE_LIB:%.a=%.erl): $(EE_OBJS)
 	$(DIR_GUARD)
-	$(EE_CC) -nostdlib $(EE_NO_CRT) -Wl,-r -Wl,-d -o $(EE_LIB:%.a=%.erl) $(EE_OBJS)
+	$(EE_CC) -nostdlib $(EE_NO_CRT) -flinker-output=nolto-rel -Wl,-r -Wl,-d -o $(EE_LIB:%.a=%.erl) $(EE_OBJS)
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_LIB:%.a=%.erl)
