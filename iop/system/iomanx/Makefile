@@ -15,7 +15,8 @@ IOP_INCS += \
 	-I$(PS2SDKSRC)/iop/system/loadcore/include \
 	-I$(PS2SDKSRC)/iop/system/stdio/include \
 	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include
+	-I$(PS2SDKSRC)/iop/system/sysmem/include \
+	-I$(PS2SDKSRC)/iop/system/threadman/include
 
 IOP_OBJS = iomanX.o ioman_sbv.o exports.o imports.o
 
