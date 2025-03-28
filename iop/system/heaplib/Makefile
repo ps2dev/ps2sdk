@@ -8,9 +8,9 @@
 
 IOP_BIN ?= heaplib.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include
+IOP_IMPORT_INCS += \
+	system/loadcore \
+	system/sysmem
 
 IOP_OBJS = heaplib.o exports.o imports.o
 

@@ -11,9 +11,9 @@ TIMRMAN_PS1 ?= 0
 
 IOP_BIN_ALTNAMES ?= timemani.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include
+IOP_IMPORT_INCS += \
+	system/intrman \
+	system/loadcore
 
 IOP_OBJS = timrman.o imports.o exports.o
 

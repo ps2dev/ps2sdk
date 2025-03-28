@@ -9,6 +9,6 @@
 IOP_SRC_DIR = $(PS2SDKSRC)/iop/usb/usbd/src/
 
 IOP_CFLAGS += -DMINI_DRIVER
-IOP_CFLAGS += -I$(PS2SDKSRC)/iop/usb/usbd/include/
+IOP_IMPORT_INCS += usb/usbd/
 
 include $(PS2SDKSRC)/iop/usb/usbd/Makefile

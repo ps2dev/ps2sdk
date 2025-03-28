@@ -8,13 +8,13 @@
 
 IOP_BIN ?= dvrdrv.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/dev9/dev9/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include
+IOP_IMPORT_INCS += \
+	dev9/dev9 \
+	system/intrman \
+	system/loadcore \
+	system/stdio \
+	system/sysmem \
+	system/threadman
 
 IOP_OBJS = dvrdrv.o exports.o imports.o
 

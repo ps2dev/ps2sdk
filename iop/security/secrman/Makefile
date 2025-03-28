@@ -9,14 +9,14 @@
 # Define to 1, to enable runtime support for both CEX and DEX units.
 DEX_SUPPORT ?= 1
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/cdvd/cdvdman/include \
-	-I$(PS2SDKSRC)/iop/system/ioman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/modload/include \
-	-I$(PS2SDKSRC)/iop/system/sio2man/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include
+IOP_IMPORT_INCS += \
+	cdvd/cdvdman \
+	system/ioman \
+	system/loadcore \
+	system/modload \
+	system/sio2man \
+	system/stdio \
+	system/sysclib
 
 IOP_OBJS = secrman.o MechaAuth.o CardAuth.o keyman.o imports.o exports.o
 

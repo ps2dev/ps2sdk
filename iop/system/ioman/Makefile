@@ -8,12 +8,12 @@
 
 IOP_BIN ?= ioman.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include
+IOP_IMPORT_INCS += \
+	system/intrman \
+	system/loadcore \
+	system/stdio \
+	system/sysclib \
+	system/sysmem
 
 IOP_OBJS = ioman.o exports.o imports.o
 

@@ -8,8 +8,8 @@
 
 IOP_LIB = libdummy.a
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/stdio/include
+IOP_IMPORT_INCS += \
+	system/stdio
 
 IOP_OBJS = crt0.o
 # disable array bounds warning for __do_global_ctors

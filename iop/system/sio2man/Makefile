@@ -14,14 +14,14 @@ SIO2MAN_ENABLE_NANO ?= 0
 
 IOP_BIN_ALTNAMES ?= freesio2.irx rsio2man.irx sio2man-old.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/dmacman/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/ioman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/sio2man/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include
+IOP_IMPORT_INCS += \
+	system/dmacman \
+	system/intrman \
+	system/ioman \
+	system/loadcore \
+	system/sio2man \
+	system/stdio \
+	system/threadman
 
 IOP_OBJS = sio2man.o log.o imports.o exports.o
 

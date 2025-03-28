@@ -8,10 +8,10 @@
 
 IOP_BIN ?= sifinit.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/sifman/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include
+IOP_IMPORT_INCS += \
+	system/loadcore \
+	system/sifman \
+	system/stdio
 
 IOP_OBJS = sifinit.o imports.o
 
