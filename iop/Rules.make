@@ -23,6 +23,10 @@ endif
 # include dir
 IOP_INCS := $(IOP_INCS) -I$(IOP_SRC_DIR) -I$(IOP_SRC_DIR)include -I$(IOP_INC_DIR) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include
 
+ifdef IOP_IMPORT_INCS
+IOP_INCS += $(addprefix -I$(PS2SDKSRC)/iop/, $(addsuffix /include, $(IOP_IMPORT_INCS)))
+endif
+
 # Optimization compiler flags
 IOP_OPTFLAGS ?= -Os
 

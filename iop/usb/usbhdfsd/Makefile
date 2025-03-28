@@ -13,18 +13,19 @@ VFAT_SRC_DIR = $(VFAT_PATH)/src/
 # IOP_CFLAGS += -DDEBUG
 IOP_CFLAGS += -DBUILDING_USBHDFSD
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/cdvd/cdvdman/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/ioman/include \
-	-I$(PS2SDKSRC)/iop/system/iomanx/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include \
-	-I$(PS2SDKSRC)/iop/usb/usbd/include \
-	-I$(VFAT_SRC_DIR)/include
+IOP_IMPORT_INCS += \
+	cdvd/cdvdman \
+	system/intrman \
+	system/ioman \
+	system/iomanx \
+	system/loadcore \
+	system/stdio \
+	system/sysclib \
+	system/sysmem \
+	system/threadman \
+	usb/usbd
+
+IOP_INCS += -I$(VFAT_SRC_DIR)/include
 
 IOP_OBJS = usb_driver.o fs_driver.o part_driver.o fat_driver.o fat_write.o scache.o usbhdfsd.o api.o imports.o exports.o
 

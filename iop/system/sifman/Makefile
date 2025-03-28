@@ -8,9 +8,9 @@
 
 IOP_BIN ?= sifman.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include
+IOP_IMPORT_INCS += \
+	system/intrman \
+	system/loadcore
 
 IOP_OBJS = sifman.o exports.o imports.o
 
