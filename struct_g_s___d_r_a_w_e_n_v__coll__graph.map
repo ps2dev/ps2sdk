@@ -1,0 +1,7 @@
+<map id="GS_DRAWENV" name="GS_DRAWENV">
+<area shape="rect" id="Node000001" title=" " alt="" coords="53,94,166,120"/>
+<area shape="rect" id="Node000002" href="$libgs_8h.html#struct_g_s___u_r_e_c_t" title=" " alt="" coords="5,5,97,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,42,104,92,99,95,65,45"/>
+<area shape="rect" id="Node000003" href="$libgs_8h.html#struct_g_s___r_g_b_a_q" title=" " alt="" coords="121,5,216,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,45,120,95,116,92,150,42"/>
+</map>
