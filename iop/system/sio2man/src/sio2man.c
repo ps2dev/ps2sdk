@@ -40,7 +40,8 @@ struct sio2man_internal_data
 	int m_intr_sema;
 	int m_transfer_semaphore;
 	// Unofficial: backwards compatibility for libraries using 1.3 SDK
-	int m_sdk13x_flag;
+	int m_sdk13x_curflag;
+	int m_sdk13x_totalflag;
 	sio2_mtap_change_slot_cb_t m_mtap_change_slot_cb;
 	sio2_mtap_get_slot_max_cb_t m_mtap_get_slot_max_cb;
 	sio2_mtap_get_slot_max2_cb_t m_mtap_get_slot_max2_cb;
@@ -311,12 +312,14 @@ int _start(int ac, char **av)
 	if ( g_sio2man_data.m_inited )
 		return 1;
 	g_sio2man_data.m_inited = 1;
-	g_sio2man_data.m_sdk13x_flag = 0;
+	g_sio2man_data.m_sdk13x_curflag = 0;
+	g_sio2man_data.m_sdk13x_totalflag = 3;
 	// Unofficial: remove unneeded thread priority argument handler
-	g_sio2man_data.m_mtap_change_slot_cb = 0;
-	g_sio2man_data.m_mtap_get_slot_max_cb = 0;
-	g_sio2man_data.m_mtap_get_slot_max2_cb = 0;
-	g_sio2man_data.m_mtap_update_slots_cb = 0;
+	// Unofficial: use setters instead of setting variable directly
+	sio2_mtap_change_slot_set(NULL);
+	sio2_mtap_get_slot_max_set(NULL);
+	sio2_mtap_get_slot_max2_set(NULL);
+	sio2_mtap_update_slots_set(NULL);
 	// Unofficial: inlined
 	sio2_ctrl_set(0x3BC);
 	CpuSuspendIntr(&state);
@@ -408,7 +411,7 @@ int sio2_transfer(sio2_transfer_data_t *td)
 	sio2_set_ctrl_1();
 	sio2_wait_for_intr();
 	recv_td(td);
-	if ( g_sio2man_data.m_sdk13x_flag )
+	if ( g_sio2man_data.m_sdk13x_curflag )
 		sio2_transfer_reset();
 #ifdef SIO2LOG
 	log_flush(0);
@@ -425,52 +428,35 @@ void sio2_pad_transfer_init(void)
 #ifdef SIO2LOG
 	log_default(LOG_PAD_READY);
 #endif
-	g_sio2man_data.m_sdk13x_flag = 0;
+	g_sio2man_data.m_sdk13x_curflag = 0;
 }
 
 void sio2_pad_transfer_init_possiblysdk13x(void)
 {
 	sio2_pad_transfer_init();
-	g_sio2man_data.m_sdk13x_flag = 1;
+	g_sio2man_data.m_sdk13x_curflag |= g_sio2man_data.m_sdk13x_totalflag & 1;
+}
+
+void sio2_mc_transfer_init_possiblysdk13x(void)
+{
+	sio2_pad_transfer_init();
+	g_sio2man_data.m_sdk13x_curflag |= g_sio2man_data.m_sdk13x_totalflag & 2;
 }
 
 void sio2_transfer_reset(void)
 {
-	g_sio2man_data.m_sdk13x_flag = 0;
+	g_sio2man_data.m_sdk13x_curflag = 0;
 	SignalSema(g_sio2man_data.m_transfer_semaphore);
 #ifdef SIO2LOG
 	log_default(LOG_RESET);
 #endif
 }
 
-void sio2_mtap_change_slot_set(sio2_mtap_change_slot_cb_t cb)
-{
-	g_sio2man_data.m_mtap_change_slot_cb = cb;
-}
-
-void sio2_mtap_get_slot_max_set(sio2_mtap_get_slot_max_cb_t cb)
-{
-	g_sio2man_data.m_mtap_get_slot_max_cb = cb;
-}
-
-void sio2_mtap_get_slot_max2_set(sio2_mtap_get_slot_max2_cb_t cb)
-{
-	g_sio2man_data.m_mtap_get_slot_max2_cb = cb;
-}
-
-void sio2_mtap_update_slots_set(sio2_mtap_update_slots_t cb)
-{
-	g_sio2man_data.m_mtap_update_slots_cb = cb;
-}
-
-int sio2_mtap_change_slot(s32 *arg)
+static int sio2_mtap_change_slot_default(s32 *arg)
 {
 	int sum;
 	int i;
 
-	g_sio2man_data.m_sdk13x_flag = 0;
-	if ( g_sio2man_data.m_mtap_change_slot_cb )
-		return g_sio2man_data.m_mtap_change_slot_cb(arg);
 	sum = 0;
 	for ( i = 0; i < 4; i += 1 )
 	{
@@ -480,18 +466,58 @@ int sio2_mtap_change_slot(s32 *arg)
 	return sum == 4;
 }
 
+static int sio2_mtap_get_slot_max_default(int port)
+{
+	return 1;
+}
+
+static void sio2_mtap_update_slots_default(void) {}
+
+void sio2_mtap_change_slot_set(sio2_mtap_change_slot_cb_t cb)
+{
+	// Unofficial: use default callback if NULL
+	g_sio2man_data.m_mtap_change_slot_cb = cb ? cb : sio2_mtap_change_slot_default;
+}
+
+void sio2_mtap_get_slot_max_set(sio2_mtap_get_slot_max_cb_t cb)
+{
+	// Unofficial: use default callback if NULL
+	g_sio2man_data.m_mtap_get_slot_max_cb = cb ? cb : sio2_mtap_get_slot_max_default;
+}
+
+void sio2_mtap_get_slot_max2_set(sio2_mtap_get_slot_max2_cb_t cb)
+{
+	// Unofficial: use default callback if NULL
+	g_sio2man_data.m_mtap_get_slot_max2_cb = cb ? cb : sio2_mtap_get_slot_max_default;
+}
+
+void sio2_mtap_update_slots_set(sio2_mtap_update_slots_t cb)
+{
+	// Unofficial: use default callback if NULL
+	g_sio2man_data.m_mtap_update_slots_cb = cb ? cb : sio2_mtap_update_slots_default;
+}
+
+int sio2_mtap_change_slot(s32 *arg)
+{
+	g_sio2man_data.m_sdk13x_totalflag &= ~g_sio2man_data.m_sdk13x_curflag;
+	// Unofficial: unconditionally call callback
+	return g_sio2man_data.m_mtap_change_slot_cb(arg);
+}
+
 int sio2_mtap_get_slot_max(int port)
 {
-	return g_sio2man_data.m_mtap_get_slot_max_cb ? g_sio2man_data.m_mtap_get_slot_max_cb(port) : 1;
+	// Unofficial: unconditionally call callback
+	return g_sio2man_data.m_mtap_get_slot_max_cb(port);
 }
 
 int sio2_mtap_get_slot_max2(int port)
 {
-	return g_sio2man_data.m_mtap_get_slot_max2_cb ? g_sio2man_data.m_mtap_get_slot_max2_cb(port) : 1;
+	// Unofficial: unconditionally call callback
+	return g_sio2man_data.m_mtap_get_slot_max2_cb(port);
 }
 
 void sio2_mtap_update_slots(void)
 {
-	if ( g_sio2man_data.m_mtap_update_slots_cb )
-		g_sio2man_data.m_mtap_update_slots_cb();
+	// Unofficial: unconditionally call callback
+	g_sio2man_data.m_mtap_update_slots_cb();
 }
