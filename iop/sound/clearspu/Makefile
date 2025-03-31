@@ -6,11 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include
+IOP_IMPORT_INCS += \
+	system/intrman \
+	system/loadcore \
+	system/stdio \
+	system/sysclib
 
 IOP_OBJS = \
 	clearspu.o \

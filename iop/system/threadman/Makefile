@@ -8,14 +8,14 @@
 
 IOP_BIN ?= threadman.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/heaplib/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include \
-	-I$(PS2SDKSRC)/iop/system/timrman/include
+IOP_IMPORT_INCS += \
+	system/heaplib \
+	system/intrman \
+	system/loadcore \
+	system/stdio \
+	system/sysclib \
+	system/sysmem \
+	system/timrman
 
 IOP_OBJS = thcommon.o thbase.o thsemap.o thmsgbx.o thevent.o thfpool.o thvpool.o imports.o exports.o
 

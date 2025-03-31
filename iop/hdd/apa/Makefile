@@ -26,33 +26,34 @@ IOP_BIN ?= ps2hdd.irx
 
 IOP_CFLAGS += -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_OLD_NAME_ADDDELDRV=0
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/cdvd/cdvdman/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/iomanx/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include \
-	-I$(LIBAPA_PATH)include
+IOP_IMPORT_INCS += \
+	cdvd/cdvdman \
+	system/intrman \
+	system/iomanx \
+	system/loadcore \
+	system/stdio \
+	system/sysclib \
+	system/sysmem \
+	system/threadman
+
+IOP_INCS += -I$(LIBAPA_PATH)include
 
 APA_OBJS = password.o misc.o cache.o apa.o journal.o free.o
 IOP_OBJS = hdd_fio.o hdd_blkio.o hdd.o imports.o $(APA_OBJS)
 
 ifneq (x$(APA_USE_DEV9),x0)
 IOP_CFLAGS += -DAPA_USE_DEV9
-IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
+IOP_IMPORT_INCS += dev9/dev9
 endif
 
 ifneq (x$(APA_USE_ATAD),x0)
 IOP_CFLAGS += -DAPA_USE_ATAD
-IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/atad/include
+IOP_IMPORT_INCS += dev9/atad
 endif
 
 ifneq (x$(APA_USE_BDM),x0)
 IOP_CFLAGS += -DAPA_USE_BDM
-IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
+IOP_IMPORT_INCS += fs/bdm
 endif
 
 ifneq (x$(APA_USE_IOMANX),x0)

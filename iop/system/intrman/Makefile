@@ -11,9 +11,9 @@ INTRMAN_PS1 ?= 0
 
 IOP_BIN ?= intrman.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/excepman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include
+IOP_IMPORT_INCS += \
+	system/excepman \
+	system/loadcore
 
 IOP_OBJS = intrman.o exports.o imports.o
 

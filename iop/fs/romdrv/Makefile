@@ -9,11 +9,11 @@
 # Enable the romGetDevice function?
 ROMDRV_EXPORT_DEVICES ?= 1
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/ioman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include
+IOP_IMPORT_INCS += \
+	system/intrman \
+	system/ioman \
+	system/loadcore \
+	system/sysclib
 
 IOP_OBJS = romdrv.o imports.o exports.o
 

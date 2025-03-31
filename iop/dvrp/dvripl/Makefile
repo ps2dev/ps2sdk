@@ -8,14 +8,14 @@
 
 IOP_CFLAGS += -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_OLD_NAME_ADDDELDRV=0
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/dev9/pvrdrv/include \
-	-I$(PS2SDKSRC)/iop/system/iomanx/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include \
-	-I$(PS2SDKSRC)/iop/system/timrman/include
+IOP_IMPORT_INCS += \
+	dev9/pvrdrv \
+	system/iomanx \
+	system/loadcore \
+	system/stdio \
+	system/sysmem \
+	system/threadman \
+	system/timrman
 
 IOP_OBJS = dvripl.o imports.o
 

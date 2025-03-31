@@ -8,12 +8,12 @@
 
 IOP_BIN ?= sifcmd.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/sifman/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include
+IOP_IMPORT_INCS += \
+	system/intrman \
+	system/loadcore \
+	system/sifman \
+	system/stdio \
+	system/threadman
 
 IOP_OBJS = sifcmd.o sifrpc.o exports.o imports.o
 

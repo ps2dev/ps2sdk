@@ -10,18 +10,18 @@
 
 IOP_CFLAGS += -mno-check-zero-division # -DSIF_CALLBACKS_12_13
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/cdvd/cdvdman/include \
-	-I$(PS2SDKSRC)/iop/fs/bdm/include \
-	-I$(PS2SDKSRC)/iop/iLink/iLinkman/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/ioman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/sifcmd/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include
+IOP_IMPORT_INCS += \
+	cdvd/cdvdman \
+	fs/bdm \
+	iLink/iLinkman \
+	system/intrman \
+	system/ioman \
+	system/loadcore \
+	system/sifcmd \
+	system/stdio \
+	system/sysclib \
+	system/sysmem \
+	system/threadman
 
 IOP_LIBS += -lgcc
 

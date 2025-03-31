@@ -6,13 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/arcade/accore/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/sifcmd/include \
-	-I$(PS2SDKSRC)/iop/system/sifman/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include
+IOP_IMPORT_INCS += \
+	arcade/accore \
+	system/intrman \
+	system/loadcore \
+	system/sifcmd \
+	system/sifman \
+	system/threadman
 
 IOP_OBJS = \
 	acmem-entry.o \

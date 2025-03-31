@@ -8,15 +8,15 @@
 
 IOP_CFLAGS += -DBUILDING_CDVD_MODULE
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/dmacman/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/iomanx/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include
+IOP_IMPORT_INCS += \
+	system/dmacman \
+	system/intrman \
+	system/iomanx \
+	system/loadcore \
+	system/stdio \
+	system/sysclib \
+	system/sysmem \
+	system/threadman
 
 IOP_OBJS = cdvdman.o imports.o exports.o
 

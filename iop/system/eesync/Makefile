@@ -18,13 +18,13 @@ EESYNC_REGISTER_EXPORTS ?= 1
 # Check IOP boot parameter to see if initialization should be skipped?
 EESYNC_CHECK_ILOADP ?= 1
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/ioman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/sifman/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include
+IOP_IMPORT_INCS += \
+	system/intrman \
+	system/ioman \
+	system/loadcore \
+	system/sifman \
+	system/sysclib \
+	system/sysmem
 
 IOP_OBJS = eesync.o exports.o imports.o
 
