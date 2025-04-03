@@ -166,6 +166,7 @@ extern int iomanX_ioctl2(int fd, int cmd, void *arg, unsigned int arglen, void *
 extern int iomanX_AddDrv(iomanX_iop_device_t *device);
 extern int iomanX_DelDrv(const char *name);
 
+extern unsigned int iomanX_GetDevType(int fd);
 extern void iomanX_StdioInit(int mode);
 
 #ifdef _IOP
@@ -205,6 +206,7 @@ extern void iomanX_StdioInit(int mode);
 #define I_iomanX_AddDrv DECLARE_IMPORT(20, iomanX_AddDrv)
 #define I_iomanX_DelDrv DECLARE_IMPORT(21, iomanX_DelDrv)
 #endif
+#define I_iomanX_GetDevType DECLARE_IMPORT(22, iomanX_GetDevType)
 #define I_iomanX_StdioInit DECLARE_IMPORT(23, iomanX_StdioInit)
 #endif
 

@@ -52,10 +52,8 @@ extern struct irx_export_table _exp_ioman;
 #define MAX_FILES 32
 #endif
 
-#ifndef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 void iomanX_StdioInit(int mode);
 static int open_tty_handles(const char *tty_name);
-#endif
 static int xx_stat(int op, const char *name, iox_stat_t *stat, unsigned int statmask);
 static int xx_rename(int op, const char *oldname, const char *newname);
 static int xx_dir(int op, const char *name, int mode);
@@ -64,13 +62,9 @@ static iomanX_iop_file_t *new_iob(void);
 static iomanX_iop_file_t *get_iob(int fd);
 static iomanX_iop_device_t *lookup_dev(const char *name, int show_unkdev_msg);
 static const char *parsefile(const char *path, iomanX_iop_device_t **p_device, int *p_unit);
-#ifndef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
-static int tty_noop(void);
-unsigned int iomanX_GetDevType(int fd);
-#endif
 static void ShowDrv(void);
-#ifndef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 static void register_tty(void);
+#ifdef _IOP
 static void register_dummytty(void);
 #endif
 
@@ -83,7 +77,6 @@ struct ioman_dev_listentry
 #endif
 
 static int showdrvflag = 1;
-#ifndef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 
 IOMANX_RETURN_VALUE_IMPL(0);
 
@@ -123,6 +116,7 @@ static iomanX_iop_device_t dev_tty = {
 	"CONSOLE",
 	&dev_tty_dev_operations,
 };
+#ifdef _IOP
 static iomanX_iop_device_t dev_dummytty = {
 	"dummytty",
 	IOP_DT_CHAR,
@@ -378,7 +372,6 @@ iomanX_iop_file_t *get_file(int fd)
 }
 #endif
 
-#ifndef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 void iomanX_StdioInit(int mode)
 {
 #ifdef _IOP
@@ -432,7 +425,6 @@ static int open_tty_handles(const char *tty_name)
 		return -1;
 	return 0;
 }
-#endif
 
 int iomanX_open(const char *name, int flags, ...)
 {
@@ -1212,7 +1204,6 @@ int iomanX_DelDrv(const char *name)
 #endif
 }
 
-#ifndef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 unsigned int iomanX_GetDevType(int fd)
 {
 	iomanX_iop_file_t *f;
@@ -1222,7 +1213,6 @@ unsigned int iomanX_GetDevType(int fd)
 		return handle_result(-EBADF, f, 0);
 	return f->device->type;
 }
-#endif
 
 static void ShowDrv(void)
 {
@@ -1247,13 +1237,13 @@ static void ShowDrv(void)
 	showdrvflag = 0;
 }
 
-#ifndef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 static void register_tty(void)
 {
 	iomanX_DelDrv(dev_tty.name);
 	iomanX_AddDrv(&dev_tty);
 }
 
+#ifdef _IOP
 static void register_dummytty(void)
 {
 	iomanX_DelDrv(dev_dummytty.name);
