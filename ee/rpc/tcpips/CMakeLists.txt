@@ -1,0 +1,7 @@
+add_library(ps2ips)
+target_include_directories(ps2ips PUBLIC include)
+target_include_directories(ps2ips PRIVATE ${EE_INC} src)
+target_sources(ps2ips PRIVATE src/ps2ipc.c src/ps2ipc_ps2sdk.c src/erl-support.c)
+target_link_libraries(ps2ips PRIVATE cglue)
+install(TARGETS ps2ips)
+target_add_erl(ps2ips)
