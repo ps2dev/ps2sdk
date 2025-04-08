@@ -16,9 +16,11 @@
 #include <irx_imports.h>
 
 #include <iop_mmio_hwport.h>
-#include <spu2_mmio_hwport.h>
 #include <libsd.h>
+#include <spu2_mmio_hwport.h>
 #include <stdarg.h>
+
+#include <spu2regs.h>
 
 IRX_ID("Sound_Device_Library", 3, 3);
 // Based on the module from SDK 3.1.0.
@@ -27,6 +29,15 @@ IRX_ID("Sound_Device_Library", 3, 3);
 #define SD_DMA_START (1 << 24)
 #define SD_DMA_DIR_SPU2IOP 0
 #define SD_DMA_DIR_IOP2SPU 1
+
+#define SD_CORE_0 0
+#define SD_CORE_1 1
+
+#define SD_INTERNAL_MMIO_ATTR 0x2300
+#define SD_INTERNAL_MMIO_STD 0x2500
+#define SD_INTERNAL_MMIO_UNK1AE 0x2600
+#define SD_INTERNAL_MMIO_ADMAS 0x2700
+#define SD_INTERNAL_MMIO_STATX 0x2800
 
 extern struct irx_export_table _exp_libsd;
 
@@ -104,44 +115,44 @@ static void reset_vars(void);
 // clang-format off
 static vu16 *const g_ParamRegList[] =
 {
-	(vu16 *)0xBF900000,
-	(vu16 *)0xBF900002,
-	(vu16 *)0xBF900004,
-	(vu16 *)0xBF900006,
-	(vu16 *)0xBF900008,
-	(vu16 *)0xBF90000A,
-	(vu16 *)0xBF90000C,
-	(vu16 *)0xBF90000E,
-	(vu16 *)0xBF900198,
-	(vu16 *)0xBF900760,
-	(vu16 *)0xBF900762,
-	(vu16 *)0xBF900764,
-	(vu16 *)0xBF900766,
-	(vu16 *)0xBF900768,
-	(vu16 *)0xBF90076A,
-	(vu16 *)0xBF90076C,
-	(vu16 *)0xBF90076E,
-	(vu16 *)0xBF900770,
-	(vu16 *)0xBF900772,
-	(vu16 *)0xBF900180,
-	(vu16 *)0xBF900184,
-	(vu16 *)0xBF9001A0,
-	(vu16 *)0xBF9001A4,
-	(vu16 *)0xBF900340,
-	(vu16 *)0xBF900188,
-	(vu16 *)0xBF90018C,
-	(vu16 *)0xBF900190,
-	(vu16 *)0xBF900194,
-	(vu16 *)0xBF9002E0,
-	(vu16 *)0xBF90033C,
-	(vu16 *)0xBF9001A8,
-	(vu16 *)0xBF90019C,
-	(vu16 *)0xBF9001C0,
-	(vu16 *)0xBF9001C4,
-	(vu16 *)0xBF9001C8,
-	(vu16 *)0xBF90019A,
-	(vu16 *)0xBF9001A8,
-	(vu16 *)0xBF9001AC,
+	SD_VP_VOLL(0, 0),
+	SD_VP_VOLR(0, 0),
+	SD_VP_PITCH(0, 0),
+	SD_VP_ADSR1(0, 0),
+	SD_VP_ADSR2(0, 0),
+	SD_VP_ENVX(0, 0),
+	SD_VP_VOLXL(0, 0),
+	SD_VP_VOLXR(0, 0),
+	SD_P_MMIX(0),
+	SD_P_MVOLL(0),
+	SD_P_MVOLR(0),
+	SD_P_EVOLL(0),
+	SD_P_EVOLR(0),
+	SD_P_AVOLL(0),
+	SD_P_AVOLR(0),
+	SD_P_BVOLL(0),
+	SD_P_BVOLR(0),
+	SD_P_MVOLXL(0),
+	SD_P_MVOLXR(0),
+	SD_S_PMON_HI(0),
+	SD_S_NON_HI(0),
+	SD_A_KON_HI(0),
+	SD_A_KOFF_HI(0),
+	SD_S_ENDX_HI(0),
+	SD_S_VMIXL_HI(0),
+	SD_S_VMIXEL_HI(0),
+	SD_S_VMIXR_HI(0),
+	SD_S_VMIXER_HI(0),
+	SD_A_ESA_HI(0),
+	SD_A_EEA_HI(0),
+	SD_A_TSA_HI(0),
+	SD_CORE_IRQA(0),
+	SD_VA_SSA_HI(0, 0),
+	SD_VA_LSAX(0, 0),
+	SD_VA_NAX(0, 0),
+	SD_CORE_ATTR(0),
+	SD_A_TSA_HI(0),
+	SD_A_STD(0),
 	// 1AE & 1B0 are both related to core attr & dma somehow
 	(vu16 *)0xBF9001AE,
 	(vu16 *)0xBF9001B0,
@@ -975,14 +986,13 @@ int sceSdCleanEffectWorkArea(int core, int channel, int effect_mode)
 
 void sceSdGetEffectAttr(int core, sceSdEffectAttr *attr)
 {
-	USE_SPU2_MMIO_HWPORT();
-
 	attr->core = core;
 	attr->mode = g_EffectAttr[core].mode;
 	attr->delay = g_EffectAttr[core].delay;
 	attr->feedback = g_EffectAttr[core].feedback;
-	attr->depth_L = spu2_mmio_hwport->m_u.m_e.m_different_regs[core].m_evoll;
-	attr->depth_R = spu2_mmio_hwport->m_u.m_e.m_different_regs[core].m_evolr;
+	// Unofficial: use getters/setters instead of MMIO access
+	attr->depth_L = sceSdGetParam(core | SD_PARAM_EVOLL);
+	attr->depth_R = sceSdGetParam(core | SD_PARAM_EVOLR);
 }
 
 int sceSdSetEffectAttr(int core, const sceSdEffectAttr *attr)
@@ -995,7 +1005,6 @@ int sceSdSetEffectAttr(int core, const sceSdEffectAttr *attr)
 	struct mode_data_struct mode_data;
 	int state;
 	int effect_mode;
-	USE_SPU2_MMIO_HWPORT();
 
 	mode_data.m_mode_flags = 0;
 	mode = attr->mode;
@@ -1008,7 +1017,7 @@ int sceSdSetEffectAttr(int core, const sceSdEffectAttr *attr)
 		return -100;
 	g_EffectAttr[core].mode = mode;
 	g_EffectAddr[core] = GetEEA(core) - ((g_EffectSizes[mode] << 3) - 1);
-	// Unoffical: use memcpy from sysclib
+	// Unofficial: use memcpy from sysclib
 	memcpy(&mode_data, &g_EffectParams[mode], sizeof(mode_data));
 	switch ( mode )
 	{
@@ -1045,11 +1054,13 @@ int sceSdSetEffectAttr(int core, const sceSdEffectAttr *attr)
 		mode_data.m_d_wall_vol = 0x102 * g_EffectAttr[core].feedback;
 	}
 	// Disable effects
-	effects_enabled = (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr >> 7) & 1;
+	// Unofficial: use getters/setters instead of MMIO access
+	effects_enabled = (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) >> 7) & 1;
 	if ( effects_enabled )
 	{
 		CpuSuspendIntr(&state);
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr &= ~SD_ENABLE_EFFECTS;
+		// Unofficial: use getters/setters instead of MMIO access
+		sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & (~SD_ENABLE_EFFECTS));
 		CpuResumeIntr(state);
 	}
 	// Clean up after last mode
@@ -1057,19 +1068,21 @@ int sceSdSetEffectAttr(int core, const sceSdEffectAttr *attr)
 	if ( retval >= 0 )
 	{
 		// Depth / Volume
-		spu2_mmio_hwport->m_u.m_e.m_different_regs[core].m_evoll = attr->depth_L;
-		spu2_mmio_hwport->m_u.m_e.m_different_regs[core].m_evolr = attr->depth_R;
+		// Unofficial: use getters/setters instead of MMIO access
+		sceSdSetParam(core | SD_PARAM_EVOLL, attr->depth_L);
+		sceSdSetParam(core | SD_PARAM_EVOLR, attr->depth_R);
 		SetEffectData(core, &mode_data);
 		// Set effect start addr (ESA)
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_esa.m_pair[0] = g_EffectAddr[core] >> 17;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_esa.m_pair[1] = g_EffectAddr[core] >> 1;
+		// Unofficial: use getters/setters instead of MMIO access
+		sceSdSetAddr(core | SD_ADDR_ESA, g_EffectAddr[core]);
 		retval = clearram ? sceSdClearEffectWorkArea(core, channel, mode) : 0;
 	}
 	// Enable effects
 	if ( effects_enabled )
 	{
 		CpuSuspendIntr(&state);
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr |= SD_ENABLE_EFFECTS;
+		// Unofficial: use getters/setters instead of MMIO access
+		sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) | SD_ENABLE_EFFECTS);
 		CpuResumeIntr(state);
 	}
 	return retval;
@@ -1077,9 +1090,8 @@ int sceSdSetEffectAttr(int core, const sceSdEffectAttr *attr)
 
 static int GetEEA(int core)
 {
-	USE_SPU2_MMIO_HWPORT();
-
-	return (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_eea << 17) | 0x1FFFF;
+	// Unofficial: use getters/setters instead of MMIO access
+	return sceSdGetAddr(core | SD_ADDR_EEA);
 }
 
 int sceSdSetEffectMode(int core, const sceSdEffectAttr *param)
@@ -1090,7 +1102,6 @@ int sceSdSetEffectMode(int core, const sceSdEffectAttr *param)
 	int effects_enabled;
 	struct mode_data_struct mode_data;
 	int state;
-	USE_SPU2_MMIO_HWPORT();
 
 	mode_data.m_mode_flags = 0;
 	mode = param->mode;
@@ -1103,24 +1114,28 @@ int sceSdSetEffectMode(int core, const sceSdEffectAttr *param)
 	g_EffectAttr[core].delay = 0;
 	g_EffectAttr[core].feedback = 0;
 	g_EffectAddr[core] = GetEEA(core) - ((g_EffectSizes[mode] << 3) - 1);
-	// Unoffical: don't use inlined memcpy
+	// Unofficial: don't use inlined memcpy
 	memcpy(&mode_data, &g_EffectParams[mode], sizeof(mode_data));
-	effects_enabled = (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr >> 7) & 1;
+	// Unofficial: use getters/setters instead of MMIO access
+	effects_enabled = (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) >> 7) & 1;
 	if ( effects_enabled )
 	{
 		CpuSuspendIntr(&state);
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr &= ~SD_ENABLE_EFFECTS;
+		// Unofficial: use getters/setters instead of MMIO access
+		sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~SD_ENABLE_EFFECTS);
 		CpuResumeIntr(state);
 	}
-	spu2_mmio_hwport->m_u.m_e.m_different_regs[core].m_evoll = 0;
-	spu2_mmio_hwport->m_u.m_e.m_different_regs[core].m_evolr = 0;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetParam(core | SD_PARAM_EVOLL, 0);
+	sceSdSetParam(core | SD_PARAM_EVOLR, 0);
 	SetEffectData(core, &mode_data);
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_esa.m_pair[0] = g_EffectAddr[core] >> 17;
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_esa.m_pair[1] = g_EffectAddr[core] >> 1;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetAddr(core | SD_ADDR_ESA, g_EffectAddr[core]);
 	if ( effects_enabled )
 	{
 		CpuSuspendIntr(&state);
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr |= SD_ENABLE_EFFECTS;
+		// Unofficial: use getters/setters instead of MMIO access
+		sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) | SD_ENABLE_EFFECTS);
 		CpuResumeIntr(state);
 	}
 	return clearram ? sceSdCleanEffectWorkArea(core, channel, mode) : 0;
@@ -1130,7 +1145,6 @@ int sceSdSetEffectModeParams(int core, const sceSdEffectAttr *attr)
 {
 	int mode;
 	struct mode_data_struct mode_data;
-	USE_SPU2_MMIO_HWPORT();
 
 	mode = attr->mode;
 	mode &= 0xFF;
@@ -1142,7 +1156,7 @@ int sceSdSetEffectModeParams(int core, const sceSdEffectAttr *attr)
 	{
 		int delay;
 
-		// Unoffical: don't use inlined memcpy
+		// Unofficial: don't use inlined memcpy
 		memcpy(&mode_data, &g_EffectParams[mode], sizeof(mode_data));
 		mode_data.m_mode_flags = 0xC011C80;
 		delay = attr->delay;
@@ -1161,8 +1175,9 @@ int sceSdSetEffectModeParams(int core, const sceSdEffectAttr *attr)
 		mode_data.m_d_wall_vol = 0x102 * g_EffectAttr[core].feedback;
 		SetEffectData(core, &mode_data);
 	}
-	spu2_mmio_hwport->m_u.m_e.m_different_regs[core].m_evoll = attr->depth_L;
-	spu2_mmio_hwport->m_u.m_e.m_different_regs[core].m_evolr = attr->depth_R;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetParam(core | SD_PARAM_EVOLL, attr->depth_L);
+	sceSdSetParam(core | SD_PARAM_EVOLR, attr->depth_R);
 	return 0;
 }
 
@@ -1199,47 +1214,48 @@ static void InitCoreVolume(int flag)
 
 	spu2_mmio_hwport->m_u.m_e.m_spdif_out = 0xC032;
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	for ( i = 0; i < 2; i += 1 )
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[0].m_cregs.m_attr =
-			(flag ? SD_ENABLE_EFFECTS : 0) | (i ? SD_ENABLE_EX_INPUT : 0) | SD_MUTE | SD_SPU2_ON;
+		sceSdSetParam(
+			SD_CORE_0 | SD_INTERNAL_MMIO_ATTR,
+			(flag ? SD_ENABLE_EFFECTS : 0) | (i ? SD_ENABLE_EX_INPUT : 0) | SD_MUTE | SD_SPU2_ON);
 	// Unofficial: rerolled
 	// HIgh is voices 0-15, Low is 16-23, representing voices 0..23 (24)
 	for ( i = 0; i < 2; i += 1 )
 	{
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_vmixl.m_pair[0] = 0xFFFF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_vmixl.m_pair[1] = 0xFF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_vmixel.m_pair[0] = 0xFFFF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_vmixel.m_pair[1] = 0x00FF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_vmixr.m_pair[0] = 0xFFFF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_vmixr.m_pair[1] = 0x00FF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_vmixer.m_pair[0] = 0xFFFF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_vmixer.m_pair[1] = 0x00FF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_mmix = 0xFF0 + (i * 0xC);
+		sceSdSetSwitch(i | SD_SWITCH_VMIXL, 0xFFFFFF);
+		sceSdSetSwitch(i | SD_SWITCH_VMIXEL, 0xFFFFFF);
+		sceSdSetSwitch(i | SD_SWITCH_VMIXR, 0xFFFFFF);
+		sceSdSetSwitch(i | SD_SWITCH_VMIXER, 0xFFFFFF);
+		sceSdSetParam(i | SD_PARAM_MMIX, 0xFF0 + (i * 0xC));
 	}
 	if ( !flag )
 	{
 		// Unofficial: rerolled
+		// Unofficial: use getters/setters instead of MMIO access
 		for ( i = 0; i < 2; i += 1 )
 		{
-			spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_mvoll = 0;
-			spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_mvolr = 0;
-			spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_evoll = 0;
-			spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_evolr = 0;
+			sceSdSetParam(i | SD_PARAM_MVOLL, 0);
+			sceSdSetParam(i | SD_PARAM_MVOLR, 0);
+			sceSdSetParam(i | SD_PARAM_EVOLL, 0);
+			sceSdSetParam(i | SD_PARAM_EVOLR, 0);
 		}
 		// Unofficial: rerolled
+		// Unofficial: use getters/setters instead of MMIO access
 		// Effect End Address, Upper part
 		for ( i = 0; i < 2; i += 1 )
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_eea = 14 + i;
+			sceSdSetAddr(i | SD_ADDR_EEA, (0x000E + i) << 17);
 	}
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	for ( i = 0; i < 2; i += 1 )
 	{
 		// Core 1 External Input Volume.
 		// The external Input is Core 0's output.
-		spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_avoll = i ? 0x7FFF : 0;
-		spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_avolr = i ? 0x7FFF : 0;
-		spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_bvoll = 0;
-		spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_bvolr = 0;
+		sceSdSetParam(i | SD_PARAM_AVOLL, i ? 0x7FFF : 0);
+		sceSdSetParam(i | SD_PARAM_AVOLR, i ? 0x7FFF : 0);
+		sceSdSetParam(i | SD_PARAM_BVOLL, 0);
+		sceSdSetParam(i | SD_PARAM_BVOLR, 0);
 	}
 }
 
@@ -1428,12 +1444,12 @@ u32 sceSdBlockTransStatus(s16 channel, s16 flag)
 	int core;
 	// Unofficial: inline thunk
 	USE_IOP_MMIO_HWPORT();
-	USE_SPU2_MMIO_HWPORT();
 
 	(void)flag;
 	core = channel & 1;
+	// Unofficial: use getters/setters instead of MMIO access
 	return (g_BlockTransBuff[core] << 24)
-			 | (((spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_admas & 7) ?
+			 | (((sceSdGetParam(core | SD_INTERNAL_MMIO_ADMAS) & 7) ?
 						 (core ? &iop_mmio_hwport->dmac2.newch[0] : &iop_mmio_hwport->dmac1.oldch[4])->madr :
 						 0)
 					& ~0xFF000000);
@@ -1449,44 +1465,47 @@ static int InitSpdif()
 	spu2_mmio_hwport->m_u.m_e.m_spdif_out = 0x8000;
 	libsd_do_busyloop(1);
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	for ( i = 0; i < 2; i += 1 )
 	{
-		spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_mvoll = 0;
-		spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_mvolr = 0;
+		sceSdSetParam(i | SD_PARAM_MVOLL, 0);
+		sceSdSetParam(i | SD_PARAM_MVOLR, 0);
 	}
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	for ( i = 0; i < 2; i += 1 )
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_admas = 0;
+		sceSdSetParam(i | SD_INTERNAL_MMIO_ADMAS, 0);
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	for ( i = 0; i < 2; i += 1 )
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_attr = 0;
+		sceSdSetParam(i | SD_INTERNAL_MMIO_ATTR, 0);
 	libsd_do_busyloop(1);
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	for ( i = 0; i < 2; i += 1 )
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_attr = SD_SPU2_ON;
+		sceSdSetParam(i | SD_INTERNAL_MMIO_ATTR, SD_SPU2_ON);
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	for ( i = 0; i < 2; i += 1 )
 	{
-		spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_mvoll = 0;
-		spu2_mmio_hwport->m_u.m_e.m_different_regs[i].m_mvolr = 0;
+		sceSdSetParam(i | SD_PARAM_MVOLL, 0);
+		sceSdSetParam(i | SD_PARAM_MVOLR, 0);
 	}
-	for ( i = 0; (spu2_mmio_hwport->m_u.m_m.m_core_regs[0].m_cregs.m_statx & 0x7FF)
-							 && (spu2_mmio_hwport->m_u.m_m.m_core_regs[1].m_cregs.m_statx & 0x7FF) && i < 0xF00;
+	// Unofficial: use getters/setters instead of MMIO access
+	for ( i = 0; (sceSdGetParam(SD_CORE_0 | SD_INTERNAL_MMIO_STATX) & 0x7FF)
+							 && (sceSdGetParam(SD_CORE_1 | SD_INTERNAL_MMIO_STATX) & 0x7FF) && i < 0xF00;
 				i += 1 )
 		libsd_do_busyloop(1);
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	for ( i = 0; i < 2; i += 1 )
-	{
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_koff.m_pair[0] = 0xFFFF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_koff.m_pair[1] = 0xFF;
-	}
+		sceSdSetSwitch(i | SD_SWITCH_KOFF, 0xFFFFFF);
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	for ( i = 0; i < 2; i += 1 )
 	{
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_pmon.m_pair[0] = 0;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_pmon.m_pair[1] = 0;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_non.m_pair[0] = 0;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_non.m_pair[1] = 0;
+		sceSdSetSwitch(i | SD_SWITCH_PMON, 0);
+		sceSdSetSwitch(i | SD_SWITCH_NON, 0);
 	}
 	return 0;
 }
@@ -1533,7 +1552,6 @@ static void libsd_do_busyloop(int count)
 static u32 DmaStartStop(int mainarg, void *vararg2, u32 vararg3)
 {
 	int core;
-	u32 tsa_tmp;
 	u32 vararg3_cal;
 	u32 blocktransbufitem;
 	int dma_addr;
@@ -1541,28 +1559,29 @@ static u32 DmaStartStop(int mainarg, void *vararg2, u32 vararg3)
 	int hichk;
 	int state;
 	USE_IOP_MMIO_HWPORT();
-	USE_SPU2_MMIO_HWPORT();
 
 	// Unofficial: restrict core
 	core = (mainarg >> 4) & 1;
 	switch ( mainarg & 0xF )
 	{
 		case 2:
-			tsa_tmp = ((uiptr)vararg2 >> 1) & ~7;
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_tsa.m_pair[0] = (tsa_tmp >> 16) & 0x000F;
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_tsa.m_pair[1] = tsa_tmp & 0xFFFF;
+			// Unofficial: use getters/setters instead of MMIO access
+			sceSdSetAddr(core | SD_ADDR_TSA, (uiptr)vararg2);
 			return 0;
 		case 4:
-			if ( (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr & SD_DMA_IN_PROCESS) )
+			// Unofficial: use getters/setters instead of MMIO access
+			if ( (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & SD_DMA_IN_PROCESS) )
 				return -1;
 			if ( ((core ? &iop_mmio_hwport->dmac2.newch[0] : &iop_mmio_hwport->dmac1.oldch[4])->chcr & SD_DMA_START) )
 				return -1;
-			if ( spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_admas )
+			// Unofficial: use getters/setters instead of MMIO access
+			if ( sceSdGetParam(core | SD_INTERNAL_MMIO_ADMAS) )
 				return -1;
 			return 0;
 		case 5:
 			CpuSuspendIntr(&state);
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr |= SD_DMA_READ;
+			// Unofficial: use getters/setters instead of MMIO access
+			sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) | SD_DMA_READ);
 			CpuResumeIntr(state);
 			SetDmaRead(core);
 			vararg3_cal = (vararg3 >> 6) + (!!(vararg3 & 0x3F));
@@ -1577,8 +1596,9 @@ static u32 DmaStartStop(int mainarg, void *vararg2, u32 vararg3)
 			return vararg3_cal << 6;
 		case 6:
 			CpuSuspendIntr(&state);
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr =
-				(spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr & ~SD_CORE_DMA) | SD_DMA_WRITE;
+			// Unofficial: use getters/setters instead of MMIO access
+			sceSdSetParam(
+				core | SD_INTERNAL_MMIO_ATTR, (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA) | SD_DMA_WRITE);
 			CpuResumeIntr(state);
 			SetDmaWrite(core);
 			vararg3_cal = (vararg3 >> 6) + (!!(vararg3 & 0x3F));
@@ -1599,28 +1619,31 @@ static u32 DmaStartStop(int mainarg, void *vararg2, u32 vararg3)
 				blocktransbufitem = g_BlockTransBuff[core];
 				dma_addr = (core ? &iop_mmio_hwport->dmac2.newch[0] : &iop_mmio_hwport->dmac1.oldch[4])->madr;
 				(core ? &iop_mmio_hwport->dmac2.newch[0] : &iop_mmio_hwport->dmac1.oldch[4])->chcr &= ~SD_DMA_START;
-				if ( (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr & SD_CORE_DMA) )
+				// Unofficial: use getters/setters instead of MMIO access
+				if ( (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & SD_CORE_DMA) )
 				{
-					for ( i = 0; !(spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_statx & 0x80) && i < 0x1000000; i += 1 )
+					// Unofficial: use getters/setters instead of MMIO access
+					for ( i = 0; !(sceSdGetParam(core | SD_INTERNAL_MMIO_STATX) & 0x80) && i < 0x1000000; i += 1 )
 					{
 					}
 				}
 			}
-			if ( (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr & SD_CORE_DMA) )
+			// Unofficial: use getters/setters instead of MMIO access
+			if ( (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & SD_CORE_DMA) )
 			{
 				CpuSuspendIntr(&state);
-				spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr &= ~SD_CORE_DMA;
+				// Unofficial: use getters/setters instead of MMIO access
+				sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA);
 				CpuResumeIntr(state);
-				for ( i = 0; (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr & SD_CORE_DMA) && i < 0xF00; i += 1 )
+				// Unofficial: use getters/setters instead of MMIO access
+				for ( i = 0; (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & SD_CORE_DMA) && i < 0xF00; i += 1 )
 				{
 				}
 			}
-			hichk = 0;
-			if ( (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_admas & 7) )
-			{
-				hichk = 1;
-				spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_admas = 0;
-			}
+			// Unofficial: use getters/setters instead of MMIO access
+			hichk = !!(sceSdGetParam(core | SD_INTERNAL_MMIO_ADMAS) & 7);
+			if ( hichk )
+				sceSdSetParam(core | SD_INTERNAL_MMIO_ADMAS, 0);
 			if ( QueryIntrContext() )
 				iSetEventFlag(g_VoiceTransCompleteEf[core], 1);
 			else
@@ -1640,27 +1663,30 @@ static u32 VoiceTrans_Write_IOMode(const u16 *iopaddr, u32 size, int core)
 	int count;
 	int i;
 	int state;
-	USE_SPU2_MMIO_HWPORT();
 
 	// Unofficial: restrict core
 	core &= 1;
 	for ( size_tmp = size; size_tmp; size_tmp -= count )
 	{
 		count = (size_tmp <= 0x40) ? size_tmp : 0x40;
+		// Unofficial: use getters/setters instead of MMIO access
 		for ( i = 0; i < (count / 2); i += 1 )
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_xferdata = iopaddr[i];
+			sceSdSetParam(core | SD_INTERNAL_MMIO_STD, iopaddr[i]);
 		CpuSuspendIntr(&state);
 		// Set Transfer mode to IO
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr =
-			(spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr & ~SD_CORE_DMA) | SD_DMA_IO;
+		// Unofficial: use getters/setters instead of MMIO access
+		sceSdSetParam(
+			core | SD_INTERNAL_MMIO_ATTR, (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA) | SD_DMA_IO);
 		CpuResumeIntr(state);
 		// Wait for transfer to complete;
-		for ( i = 0; (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_statx & SD_IO_IN_PROCESS) && i < 0xF00; i += 1 )
+		// Unofficial: use getters/setters instead of MMIO access
+		for ( i = 0; (sceSdGetParam(core | SD_INTERNAL_MMIO_STATX) & SD_IO_IN_PROCESS) && i < 0xF00; i += 1 )
 			libsd_do_busyloop(1);
 	}
 	CpuSuspendIntr(&state);
 	// Reset DMA settings
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr &= ~SD_CORE_DMA;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA);
 	CpuResumeIntr(state);
 	g_VoiceTransIoMode[core] = 1;
 	// Unofficial: return size
@@ -1669,10 +1695,9 @@ static u32 VoiceTrans_Write_IOMode(const u16 *iopaddr, u32 size, int core)
 
 static void do_finish_block_clean_xfer(int core)
 {
-	USE_SPU2_MMIO_HWPORT();
-
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr &= ~SD_CORE_DMA;
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_admas = 0;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA);
+	sceSdSetParam(core | SD_INTERNAL_MMIO_ADMAS, 0);
 }
 
 static int TransInterrupt(IntrData *intr)
@@ -1684,7 +1709,6 @@ static int TransInterrupt(IntrData *intr)
 	void *dma_addr;
 	int dma_size;
 	USE_IOP_MMIO_HWPORT();
-	USE_SPU2_MMIO_HWPORT();
 
 	mode = intr->m_mode;
 	switch ( mode & 0xC00 )
@@ -1705,11 +1729,13 @@ static int TransInterrupt(IntrData *intr)
 		case 0x100:
 			// SD_C_STATX(core)
 			// If done elsewise, it doesn't work, havn't figured out why yet.
-			for ( i = 0; !(spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_statx & 0x80) && i < 0x1000000; i += 1 )
+			// Unofficial: use getters/setters instead of MMIO access
+			for ( i = 0; !(sceSdGetParam(core | SD_INTERNAL_MMIO_STATX) & 0x80) && i < 0x1000000; i += 1 )
 			{
 			}
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr &= ~SD_CORE_DMA;
-			for ( i = 0; (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr & SD_CORE_DMA) && i < 0xF00; i += 1 )
+			// Unofficial: use getters/setters instead of MMIO access
+			sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA);
+			for ( i = 0; (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & SD_CORE_DMA) && i < 0xF00; i += 1 )
 			{
 			}
 			if ( dma_dir == SD_DMA_DIR_SPU2IOP )
@@ -1797,7 +1823,6 @@ static u32 BlockTransWriteFrom(u8 *iopaddr, u32 size, int core, int mode, u8 *st
 	int size_align_r6;
 	int state;
 	USE_IOP_MMIO_HWPORT();
-	USE_SPU2_MMIO_HWPORT();
 
 	core &= 1;
 	startaddr_tmp = startaddr;
@@ -1829,11 +1854,12 @@ static u32 BlockTransWriteFrom(u8 *iopaddr, u32 size, int core, int mode, u8 *st
 		size_align = size;
 	}
 	CpuSuspendIntr(&state);
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr &= ~SD_CORE_DMA;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA);
 	CpuResumeIntr(state);
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_tsa.m_pair[0] = 0;
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_tsa.m_pair[1] = 0;
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_admas = 1 << core;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetAddr(core | SD_ADDR_TSA, 0);
+	sceSdSetParam(core | SD_INTERNAL_MMIO_ADMAS, 1 << core);
 	SetDmaWrite(core);
 	(core ? &iop_mmio_hwport->dmac2.newch[0] : &iop_mmio_hwport->dmac1.oldch[4])->madr = (uiptr)startaddr_tmp;
 #pragma GCC diagnostic push
@@ -1852,20 +1878,21 @@ static u32 BlockTransRead(u8 *iopaddr, u32 size, int core, u16 mode)
 {
 	int state;
 	USE_IOP_MMIO_HWPORT();
-	USE_SPU2_MMIO_HWPORT();
 
 	core &= 1;
 	g_BlockTransAddr[core] = iopaddr;
 	g_BlockTransBuff[core] = 0;
 	g_BlockTransSize[core] = size;
 	CpuSuspendIntr(&state);
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr &= ~SD_CORE_DMA;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetParam(core | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA);
 	CpuResumeIntr(state);
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_tsa.m_pair[0] = 0;
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_tsa.m_pair[1] = ((mode & ~0xF0FF) << 1) + 0x400;
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_unk1ae = (mode & ~0xFFF) >> 11;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetAddr(core | SD_ADDR_TSA, (((mode & ~0xF0FF) << 1) + 0x400) << 1);
+	sceSdSetParam(core | SD_INTERNAL_MMIO_UNK1AE, (mode & ~0xFFF) >> 11);
 	libsd_do_busyloop(3);
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_admas = 4;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetParam(core | SD_INTERNAL_MMIO_ADMAS, 4);
 	SetDmaRead(core);
 	(core ? &iop_mmio_hwport->dmac2.newch[0] : &iop_mmio_hwport->dmac1.oldch[4])->madr = (uiptr)iopaddr;
 #pragma GCC diagnostic push
@@ -2107,7 +2134,7 @@ void sceSdSetAddr(u16 entry, u32 value)
 
 	reg1 = &g_ParamRegList[((entry >> 8) & 0xFF)][((entry & 1) << 9) + 3 * (entry & 0x3E)];
 	reg1[0] = value >> 17;
-	if ( (entry & 0xFF00) != 0x1D00 )
+	if ( (entry & 0xFF00) != SD_ADDR_EEA )
 		reg1[1] = (value >> 1) & ~7;
 }
 
@@ -2122,10 +2149,10 @@ u32 sceSdGetAddr(u16 entry)
 	reg1 = &g_ParamRegList[((entry >> 8) & 0xFF)][((entry & 1) << 9) + 3 * (entry & 0x3E)];
 	regmask = entry & 0xFF00;
 	rethi = reg1[0] << 17;
-	if ( regmask != 0x1D00 )
+	if ( regmask != SD_ADDR_EEA )
 	{
 		retlo = reg1[1] << 1;
-		if ( regmask == 0x2100 || regmask == 0x2200 )
+		if ( regmask == SD_VADDR_LSAX || regmask == SD_VADDR_NAX )
 		{
 			rethi = reg1[0] << 17;
 			retlo = reg1[1] << 1;
@@ -2248,9 +2275,10 @@ static int SetSpdifMode(int val)
 void sceSdSetCoreAttr(u16 entry, u16 value)
 {
 	u16 setting_tmp;
-	u16 param_tmp;
+	int core;
 	int state;
 
+	core = entry & 1;
 	switch ( entry & ~0xFFFF0001 )
 	{
 		case SD_CORE_SPDIF_MODE:
@@ -2258,16 +2286,17 @@ void sceSdSetCoreAttr(u16 entry, u16 value)
 			break;
 		case SD_CORE_NOISE_CLK:
 			CpuSuspendIntr(&state);
-			param_tmp = (entry & 1) | 0x2300;
-			sceSdSetParam(param_tmp, (sceSdGetParam(param_tmp) & ~0x3F00) | ((value & 0x3F) << 8));
+			sceSdSetParam(
+				core | SD_INTERNAL_MMIO_ATTR, (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~0x3F00) | ((value & 0x3F) << 8));
 			CpuResumeIntr(state);
 			break;
 		default:
 			// Unofficial: inline the following
 			setting_tmp = g_CoreAttrShifts[((entry & 0xE) >> 1) - 1];
 			CpuSuspendIntr(&state);
-			param_tmp = (entry & 1) | 0x2300;
-			sceSdSetParam(param_tmp, (sceSdGetParam(param_tmp) & ~(1 << setting_tmp)) | ((value & 1) << setting_tmp));
+			sceSdSetParam(
+				core | SD_INTERNAL_MMIO_ATTR,
+				(sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) & ~(1 << setting_tmp)) | ((value & 1) << setting_tmp));
 			CpuResumeIntr(state);
 			break;
 	}
@@ -2276,19 +2305,22 @@ void sceSdSetCoreAttr(u16 entry, u16 value)
 u16 sceSdGetCoreAttr(u16 entry)
 {
 	int core;
-	USE_SPU2_MMIO_HWPORT();
 
 	core = entry & 1;
 	switch ( entry & 0xE )
 	{
 		case SD_CORE_EFFECT_ENABLE:
-			return (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr >> 7) & 1;
+			// Unofficial: use getters/setters instead of MMIO access
+			return (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) >> 7) & 1;
 		case SD_CORE_IRQ_ENABLE:
-			return (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr >> 6) & 1;
+			// Unofficial: use getters/setters instead of MMIO access
+			return (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) >> 6) & 1;
 		case SD_CORE_MUTE_ENABLE:
-			return (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr >> 14) & 1;
+			// Unofficial: use getters/setters instead of MMIO access
+			return (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) >> 14) & 1;
 		case SD_CORE_NOISE_CLK:
-			return (spu2_mmio_hwport->m_u.m_m.m_core_regs[core].m_cregs.m_attr >> 8) & 0x3F;
+			// Unofficial: use getters/setters instead of MMIO access
+			return (sceSdGetParam(core | SD_INTERNAL_MMIO_ATTR) >> 8) & 0x3F;
 		case SD_CORE_SPDIF_MODE:
 			return g_SpdifSettings & 0xFFFF;
 		default:
@@ -2363,7 +2395,8 @@ static int Spu2Interrupt(void *data)
 
 		for ( i = 0; i < 2; i += 1 )
 			if ( val & (1 << i) )
-				spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_attr &= ~0x40;
+				// Unofficial: use getters/setters instead of MMIO access
+				sceSdSetParam(i | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(i | SD_INTERNAL_MMIO_ATTR) & ~0x40);
 		if ( g_Spu2IntrHandler )
 			g_Spu2IntrHandler(val, g_Spu2IntrHandlerData);
 		else if ( g_Spu2IrqCallback )
@@ -2376,71 +2409,64 @@ static int InitVoices(void)
 {
 	int i;
 	int j;
-	USE_SPU2_MMIO_HWPORT();
 
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[0].m_cregs.m_attr &= ~SD_CORE_DMA;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetParam(SD_CORE_0 | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(SD_CORE_0 | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA);
 	// Set Start Address of data to transfer.
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[0].m_cregs.m_tsa.m_pair[0] = 0x0000;
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[0].m_cregs.m_tsa.m_pair[1] = 0x5000 >> 1;
+	sceSdSetAddr(SD_CORE_0 | SD_ADDR_TSA, 0x5000);
 	// Fill with data.
 	// First 16 bytes are reserved.
 	for ( i = 0; i < (int)(sizeof(g_VoiceDataInit) / sizeof(g_VoiceDataInit[0])); i += 1 )
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[0].m_cregs.m_xferdata = g_VoiceDataInit[i];
+		sceSdSetParam(SD_CORE_0 | SD_INTERNAL_MMIO_STD, g_VoiceDataInit[i]);
 
 	// Set Transfer mode to IO
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[0].m_cregs.m_attr =
-		(spu2_mmio_hwport->m_u.m_m.m_core_regs[0].m_cregs.m_attr & ~SD_CORE_DMA) | SD_DMA_IO;
+	sceSdSetParam(
+		SD_CORE_0 | SD_INTERNAL_MMIO_ATTR, (sceSdGetParam(SD_CORE_0 | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA) | SD_DMA_IO);
 	// Wait for transfer to complete;
-	for ( i = 0; (spu2_mmio_hwport->m_u.m_m.m_core_regs[0].m_cregs.m_statx & SD_IO_IN_PROCESS) && i <= 0x1000000; i += 1 )
+	for ( i = 0; (sceSdGetParam(SD_CORE_0 | SD_INTERNAL_MMIO_STATX) & SD_IO_IN_PROCESS) && i <= 0x1000000; i += 1 )
 		libsd_do_busyloop(1);
 	// Reset DMA settings
-	spu2_mmio_hwport->m_u.m_m.m_core_regs[0].m_cregs.m_attr &= ~SD_CORE_DMA;
+	// Unofficial: use getters/setters instead of MMIO access
+	sceSdSetParam(SD_CORE_0 | SD_INTERNAL_MMIO_ATTR, sceSdGetParam(SD_CORE_0 | SD_INTERNAL_MMIO_ATTR) & ~SD_CORE_DMA);
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	// Init voices
 	for ( i = 0; i < 24; i += 1 )
 	{
 		for ( j = 0; j < 2; j += 1 )
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[j ^ 1].m_cregs.m_voice_params[i].m_voll = 0;
+			sceSdSetParam(SD_VOICE(j ^ 1, i) | SD_VPARAM_VOLL, 0);
 		for ( j = 0; j < 2; j += 1 )
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[j ^ 1].m_cregs.m_voice_params[i].m_volr = 0;
+			sceSdSetParam(SD_VOICE(j ^ 1, i) | SD_VPARAM_VOLR, 0);
 		for ( j = 0; j < 2; j += 1 )
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[j ^ 1].m_cregs.m_voice_params[i].m_pitch = 0x3FFF;
+			sceSdSetParam(SD_VOICE(j ^ 1, i) | SD_VPARAM_PITCH, 0x3FFF);
 		for ( j = 0; j < 2; j += 1 )
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[j ^ 1].m_cregs.m_voice_params[i].m_adsr1 = 0;
+			sceSdSetParam(SD_VOICE(j ^ 1, i) | SD_VPARAM_ADSR1, 0);
 		for ( j = 0; j < 2; j += 1 )
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[j ^ 1].m_cregs.m_voice_params[i].m_adsr2 = 0;
-		for ( j = 0; j < 2; j += 1 )
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[j ^ 1].m_cregs.m_voice_address[i].m_ssa.m_pair[0] = 0;
+			sceSdSetParam(SD_VOICE(j ^ 1, i) | SD_VPARAM_ADSR2, 0);
 		// Top address of waveform data
 		for ( j = 0; j < 2; j += 1 )
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[j ^ 1].m_cregs.m_voice_address[i].m_ssa.m_pair[1] = 0x5000 >> 1;
+			sceSdSetAddr(SD_VOICE(j ^ 1, i) | SD_VADDR_SSA, 0x5000);
 	}
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	// Set all voices to ON
 	for ( i = 0; i < 2; i += 1 )
-	{
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i ^ 1].m_cregs.m_kon.m_pair[0] = 0xFFFF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i ^ 1].m_cregs.m_kon.m_pair[1] = 0xFF;
-	}
+		sceSdSetSwitch((i ^ 1) | SD_SWITCH_KON, 0xFFFFFF);
 	// There is no guarantee that voices will be turn on at once.
 	// So we wait to make sure.
 	libsd_do_busyloop(3);
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	// Set all voices to OFF
 	for ( i = 0; i < 2; i += 1 )
-	{
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i ^ 1].m_cregs.m_koff.m_pair[0] = 0xFFFF;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i ^ 1].m_cregs.m_koff.m_pair[1] = 0xFF;
-	}
+		sceSdSetSwitch((i ^ 1) | SD_SWITCH_KOFF, 0xFFFFFF);
 	// There is no guarantee that voices will be turn off at once.
 	// So we wait to make sure.
 	libsd_do_busyloop(3);
 	// Unofficial: rerolled
+	// Unofficial: use getters/setters instead of MMIO access
 	for ( i = 0; i < 2; i += 1 )
-	{
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_endx.m_pair[1] = 0;
-		spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_endx.m_pair[0] = 0;
-	}
+		sceSdSetSwitch(i | SD_SWITCH_ENDX, 0);
 	return 0;
 }
 
@@ -2449,7 +2475,6 @@ static int Reset(int flag)
 	iop_event_t efparam;
 	int intrstate;
 	int i;
-	USE_SPU2_MMIO_HWPORT();
 
 	DisableIntr(IOP_IRQ_DMA_SPU, &intrstate);
 	DisableIntr(IOP_IRQ_DMA_SPU2, &intrstate);
@@ -2481,11 +2506,9 @@ static int Reset(int flag)
 		for ( i = 0; i < 2; i += 1 )
 			g_EffectAddr[i] = 0x1DFFF0 + (0x20000 * i);
 		// Unofficial: rerolled
+		// Unofficial: use getters/setters instead of MMIO access
 		for ( i = 0; i < 2; i += 1 )
-		{
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_esa.m_pair[0] = 0x000E + i;
-			spu2_mmio_hwport->m_u.m_m.m_core_regs[i].m_cregs.m_esa.m_pair[1] = 0xFFF8;
-		}
+			sceSdSetAddr(i | SD_ADDR_ESA, (((0x000E + i) << 16) | 0xFFF8) << 1);
 	}
 	efparam.attr = EA_MULTI;
 	efparam.bits = 1;
