@@ -1,0 +1,13 @@
+<map id="_elf_file_slot::_elf_file_slot_d" name="_elf_file_slot::_elf_file_slot_d">
+<area shape="rect" id="Node000001" title=" " alt="" coords="58,276,178,316"/>
+<area shape="rect" id="Node000002" href="$struct__elf__proghead.html" title=" " alt="" coords="17,187,120,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,225,110,274,105,276,79,227"/>
+<area shape="rect" id="Node000003" href="$struct___elf32___phdr.html" title=" " alt="" coords="5,96,97,122"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="57,136,62,162,67,186,62,187,56,164,52,137"/>
+<area shape="rect" id="Node000004" href="$struct__elf__section.html" title=" " alt="" coords="121,96,213,122"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="162,138,125,276,120,275,157,136"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="144,134,126,150,83,188,80,184,123,146,140,130"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="230,100,239,109,231,118,214,120,213,115,229,113,234,109,227,104"/>
+<area shape="rect" id="Node000005" href="$struct___elf32___shdr.html" title=" " alt="" coords="121,5,213,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="170,46,170,96,164,96,164,46"/>
+</map>
