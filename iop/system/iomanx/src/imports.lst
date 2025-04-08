@@ -1,4 +1,9 @@
 
+intrman_IMPORTS_start
+I_CpuSuspendIntr
+I_CpuResumeIntr
+intrman_IMPORTS_end
+
 sysmem_IMPORTS_start
 I_Kprintf
 sysmem_IMPORTS_end
@@ -13,6 +18,7 @@ I_RegisterLibraryEntries
 I_QueryLibraryEntryTable
 I_FlushDcache
 I_FlushIcache
+I_QueryBootMode
 loadcore_IMPORTS_end
 
 sysclib_IMPORTS_start
@@ -26,7 +32,7 @@ I_strncpy
 I_strtol
 sysclib_IMPORTS_end
 
-intrman_IMPORTS_start
-I_CpuSuspendIntr
-I_CpuResumeIntr
-intrman_IMPORTS_end
+thbase_IMPORTS_start
+I_ReferThreadStatus
+I_ChangeThreadPriority
+thbase_IMPORTS_end
