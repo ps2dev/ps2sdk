@@ -14,7 +14,8 @@ SUBDIRS = \
 	libsnd2 \
 	libspu2 \
 	ps2snd \
-	rspu2drv
+	rspu2drv \
+	sdrdrv
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
