@@ -87,7 +87,7 @@ int part_connect_mbr(struct block_device *bd)
 
     valid_partitions = partitions_sanity_check_mbr(bd, pMbrBlock);
 
-    printf("MBR disk valid_partitions=% \n", valid_partitions);
+    printf("MBR disk valid_partitions=%d \n", valid_partitions);
 
     //Most likely a VDH
     if(valid_partitions == 0) {
