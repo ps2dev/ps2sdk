@@ -9,6 +9,29 @@
 
 #include "module_debug.h"
 
+int partitions_sanity_check_mbr(struct block_device *bd, master_boot_record* pMbrBlock) {
+    //All 4 MBR partitions should be considered valid ones to be mounted, even if some are unused.
+    //At least one of them must be active.
+    int valid = 0;
+    int active = 0;
+    
+    for (int i = 0; i < 4; i++)
+    {
+        
+        if (pMbrBlock->primary_partitions[i] != 0) {
+            
+            if((pMbrBlock->primary_partitions[i].first_lba == 0) || (pMbrBlock->primary_partitions[i].first_lba >= bd->sectorCount))
+                return 0; //invalid
+            
+            active++;
+        }
+        
+        valid++; //Considered at least a valid partition.
+    }
+    
+    return (valid == 4) && (active > 0);
+}
+
 int part_connect_mbr(struct block_device *bd)
 {
     master_boot_record* pMbrBlock = NULL;
@@ -61,10 +84,46 @@ int part_connect_mbr(struct block_device *bd)
     
     // Loop and parse the primary partition entries in the MBR block.
     printf("Found MBR disk\n");
+
+    valid_partitions = partitions_sanity_check_mbr(bd, pMbrBlock);
+
+    printf("MBR disk valid_partitions=% \n", valid_partitions);
+
+    //Most likely a VDH
+    if(valid_partitions == 0) {
+
+        if ((partIndex = GetNextFreePartitionIndex()) == -1)
+        {
+            // No more free partition slots.
+            printf("Can't mount partition, no more free partition slots!\n");
+            continue;
+        }
+
+        // Create the pseudo block device for the partition.
+        g_part[partIndex].bd              = bd;
+        g_part_bd[partIndex].name         = bd->name;
+        g_part_bd[partIndex].devNr        = bd->devNr;
+        g_part_bd[partIndex].parNr        = 1;
+        g_part_bd[partIndex].parId        = 0; //Can be any type of (ex)FATxx, is parsed later.
+        g_part_bd[partIndex].sectorSize   = bd->sectorSize;
+        g_part_bd[partIndex].sectorOffset = bd->sectorOffset;
+        g_part_bd[partIndex].sectorCount  = bd->sectorCount;
+        bdm_connect_bd(&g_part_bd[partIndex]);
+        //TODO, mountCount should only increase on success of bdm_connect_bd
+        mountCount++;
+        
+        FreeSysMemory(pMbrBlock);
+        return 0;
+    }
+    
     for (int i = 0; i < 4; i++)
     {
         // Check if the partition is active, checking the status bit is not reliable so check if the sector_count is greater than zero instead.
         if (pMbrBlock->primary_partitions[i].sector_count == 0)
+            continue;
+
+        //Ignore partitions that are not active. 0 is empty partition_type.
+        if (pMbrBlock->primary_partitions[i].partition_type == 0)
             continue;
 
         printf("Found partition type 0x%02x\n", pMbrBlock->primary_partitions[i].partition_type);
