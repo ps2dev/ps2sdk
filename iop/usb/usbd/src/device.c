@@ -55,7 +55,7 @@ int doGetDeviceLocation(UsbdDevice_t *dev, u8 *path)
 		return USB_RC_BADHUBDEPTH;
 	for ( cpCount = 0; cpCount < 7; cpCount += 1 )
 	{
-		path[cpCount] = (cpCount < count) ? tmpPath[count - cpCount - 1] : 0;
+		path[cpCount] = (cpCount < count) ? tmpPath[count - (cpCount + 1)] : 0;
 	}
 	return USB_RC_OK;
 }
