@@ -18,7 +18,7 @@ int partitions_sanity_check_mbr(struct block_device *bd, master_boot_record* pMb
     for (int i = 0; i < 4; i++)
     {
         
-        if (pMbrBlock->primary_partitions[i] != 0) {
+        if (pMbrBlock->primary_partitions[i].partition_type != 0) {
             
             if((pMbrBlock->primary_partitions[i].first_lba == 0) || (pMbrBlock->primary_partitions[i].first_lba >= bd->sectorCount))
                 return 0; //invalid
