@@ -89,7 +89,7 @@ int part_connect_mbr(struct block_device *bd)
 
     printf("MBR disk valid_partitions=%d \n", valid_partitions);
 
-    //Most likely a VDH
+    //Most likely a VBR
     if(valid_partitions == 0) {
 
         if ((partIndex = GetNextFreePartitionIndex()) == -1)
