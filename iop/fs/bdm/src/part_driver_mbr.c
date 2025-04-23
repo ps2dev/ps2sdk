@@ -97,7 +97,7 @@ int part_connect_mbr(struct block_device *bd)
         {
             // No more free partition slots.
             printf("Can't mount partition, no more free partition slots!\n");
-            continue;
+            return -1;
         }
 
         // Create the pseudo block device for the partition.
@@ -110,8 +110,6 @@ int part_connect_mbr(struct block_device *bd)
         g_part_bd[partIndex].sectorOffset = bd->sectorOffset;
         g_part_bd[partIndex].sectorCount  = bd->sectorCount;
         bdm_connect_bd(&g_part_bd[partIndex]);
-        //TODO, mountCount should only increase on success of bdm_connect_bd
-        mountCount++;
         
         FreeSysMemory(pMbrBlock);
         return 0;
