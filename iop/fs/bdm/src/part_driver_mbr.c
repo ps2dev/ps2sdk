@@ -39,6 +39,7 @@ int part_connect_mbr(struct block_device *bd)
     int ret;
     int mountCount = 0;
     int partIndex;
+    int valid_partitions;
 
     M_DEBUG("%s\n", __func__);
     
