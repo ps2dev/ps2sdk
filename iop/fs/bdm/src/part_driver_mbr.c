@@ -18,7 +18,7 @@ int part_connect_mbr(struct block_device *bd)
     int partIndex;
 
     M_DEBUG("%s\n", __func__);
-    
+
     // Filter out any block device where sectorOffset != 0, as this will be a block device for a file system partition and not
     // the raw device.
     if (bd->sectorOffset != 0)
@@ -58,17 +58,20 @@ int part_connect_mbr(struct block_device *bd)
         FreeSysMemory(pMbrBlock);
         return rval;
     }
-    
+
     // Loop and parse the primary partition entries in the MBR block.
     printf("Found MBR disk\n");
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 5; i++)
     {
-        // Check if the partition is active, checking the status bit is not reliable so check if the sector_count is greater than zero instead.
-        if (pMbrBlock->primary_partitions[i].sector_count == 0)
-            continue;
+        if (i < 4) {
+            // Check if the partition is active, checking the status bit is not reliable so check if the sector_count is greater than zero instead.
+            if (pMbrBlock->primary_partitions[i].sector_count == 0)
+                continue;
 
-        printf("Found partition type 0x%02x\n", pMbrBlock->primary_partitions[i].partition_type);
-        
+            printf("Found partition type 0x%02x\n", pMbrBlock->primary_partitions[i].partition_type);
+        } else
+            printf("Mounting PBR\n");
+
         // TODO: Filter out unsupported partition types.
 
         if ((partIndex = GetNextFreePartitionIndex()) == -1)
@@ -83,10 +86,10 @@ int part_connect_mbr(struct block_device *bd)
         g_part_bd[partIndex].name         = bd->name;
         g_part_bd[partIndex].devNr        = bd->devNr;
         g_part_bd[partIndex].parNr        = i + 1;
-        g_part_bd[partIndex].parId        = pMbrBlock->primary_partitions[i].partition_type;
+        g_part_bd[partIndex].parId        = 0;
         g_part_bd[partIndex].sectorSize   = bd->sectorSize;
-        g_part_bd[partIndex].sectorOffset = bd->sectorOffset + (u64)pMbrBlock->primary_partitions[i].first_lba;
-        g_part_bd[partIndex].sectorCount  = pMbrBlock->primary_partitions[i].sector_count;
+        g_part_bd[partIndex].sectorOffset = bd->sectorOffset + (i < 4) ? (u64)pMbrBlock->primary_partitions[i].first_lba : 0;
+        g_part_bd[partIndex].sectorCount  = (i < 4) ? pMbrBlock->primary_partitions[i].sector_count : bd->sectorCount;
         bdm_connect_bd(&g_part_bd[partIndex]);
         mountCount++;
     }
