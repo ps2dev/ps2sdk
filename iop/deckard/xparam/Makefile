@@ -2,23 +2,27 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Copyright 2001-2024, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN ?= iomanX.irx
+IOP_BIN = xparam.irx
+DATABASE ?= 0#0: Homebrew, 1: ROM 2.20, 2: ROM 2.50
 
-IOP_CFLAGS += -DIOMANX_OLD_NAME_ADDDELDRV=0 -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_ENABLE_LEGACY_IOMAN_HOOK -DIOMAN_USE_FILE_STRUCT_TEMP_STACK
+IOP_OBJS = xparam.o imports.o
 
-IOP_IMPORT_INCS += \
-	system/intrman \
-	system/loadcore \
-	system/stdio \
-	system/sysclib \
-	system/sysmem \
-  system/threadman
 
-IOP_OBJS = iomanX.o ioman_sbv.o exports.o imports.o
+IOP_INCS += $(addprefix -I$(PS2SDKSRC)/iop/system/, sysclib/include loadcore/include)
+
+ifeq ($(DATABASE),0)
+  IOP_OBJS += database_merged.o
+else ifeq ($(DATABASE),1)
+  IOP_OBJS += database_0220_20050620.o
+else ifeq ($(DATABASE),2)
+  IOP_OBJS += database_0250_20100415.o 
+else
+  $(error Unknown DB value)
+endif
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
