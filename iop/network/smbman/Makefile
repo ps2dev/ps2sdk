@@ -8,16 +8,16 @@
 
 # IOP_CFLAGS += -DDEBUG
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/ioman/include \
-	-I$(PS2SDKSRC)/iop/system/iomanx/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/sifman/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include \
-	-I$(PS2SDKSRC)/iop/tcpip/tcpip/include
+IOP_IMPORT_INCS += \
+	system/intrman \
+	system/ioman \
+	system/iomanx \
+	system/loadcore \
+	system/sifman \
+	system/stdio \
+	system/sysclib \
+	system/threadman \
+	tcpip/tcpip
 
 IOP_LIBS += -lgcc
 

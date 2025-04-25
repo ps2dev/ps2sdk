@@ -32,12 +32,12 @@ ATA_USE_AIFDEV9 ?= 0
 
 IOP_BIN ?= ps2atad.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/dev9/dev9/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include
+IOP_IMPORT_INCS += \
+	dev9/dev9 \
+	system/loadcore \
+	system/stdio \
+	system/sysclib \
+	system/threadman
 
 IOP_OBJS = ps2atad.o imports.o exports.o
 

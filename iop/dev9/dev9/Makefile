@@ -20,16 +20,16 @@ DEV9_ENABLE_AIF ?= 0
 
 IOP_BIN ?= ps2dev9.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/dev9/poweroff/include \
-	-I$(PS2SDKSRC)/iop/system/dmacman/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/ioman/include \
-	-I$(PS2SDKSRC)/iop/system/iomanx/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include
+IOP_IMPORT_INCS += \
+	dev9/poweroff \
+	system/dmacman \
+	system/intrman \
+	system/ioman \
+	system/iomanx \
+	system/loadcore \
+	system/stdio \
+	system/sysclib \
+	system/threadman
 
 IOP_OBJS = ps2dev9.o exports.o imports.o
 

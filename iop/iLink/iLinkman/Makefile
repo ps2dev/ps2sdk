@@ -8,16 +8,16 @@
 
 IOP_CFLAGS += -mno-check-zero-division
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/cdvd/cdvdman/include \
-	-I$(PS2SDKSRC)/iop/system/dmacman/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/ioman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include
+IOP_IMPORT_INCS += \
+	cdvd/cdvdman \
+	system/dmacman \
+	system/intrman \
+	system/ioman \
+	system/loadcore \
+	system/stdio \
+	system/sysclib \
+	system/sysmem \
+	system/threadman
 
 IOP_OBJS = imports.o exports.o iLink.o iLink_PHY.o iLink_internal.o iLink_crom.o iLink_intr.o iLink_TxRx.o iLink_DMA.o
 

@@ -17,8 +17,8 @@ USE_FULL_PRINTF ?= 0
 
 IOP_CFLAGS += -D_COMPILING_NEWLIB -DPRINTF_ALIAS_STANDARD_FUNCTION_NAMES=1
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include
+IOP_IMPORT_INCS += \
+	system/loadcore
 
 IOP_OBJS = _start.o imports.o exports.o
 

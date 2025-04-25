@@ -25,15 +25,15 @@ SMAP_RX_PACKETS_POLLING_MODE ?= 1
 IOP_PREFER_GPOPT = 16384
 IOP_CFLAGS += -mno-check-zero-division
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/dev9/dev9/include \
-	-I$(PS2SDKSRC)/iop/system/dmacman/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/modload/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include
+IOP_IMPORT_INCS += \
+	dev9/dev9 \
+	system/dmacman \
+	system/intrman \
+	system/loadcore \
+	system/modload \
+	system/stdio \
+	system/sysclib \
+	system/threadman
 
 IOP_OBJS = ipstack.o main.o smap.o xfer.o imports.o exports.o
 
@@ -47,7 +47,7 @@ endif
 
 ifneq (x$(SMAP_PS2IP),x0)
 IOP_CFLAGS += -DBUILDING_SMAP_PS2IP=1
-IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
+IOP_IMPORT_INCS += tcpip/tcpip
 endif
 
 ifneq (x$(SMAP_MODULAR),x0)

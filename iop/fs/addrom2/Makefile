@@ -6,12 +6,12 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/fs/romdrv/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/ssbusc/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include
+IOP_IMPORT_INCS += \
+	fs/romdrv \
+	system/intrman \
+	system/loadcore \
+	system/ssbusc \
+	system/sysmem
 
 IOP_OBJS = addrom2.o imports.o
 

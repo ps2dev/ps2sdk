@@ -8,10 +8,10 @@
 
 IOP_BIN ?= stdio.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/system/ioman/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include
+IOP_IMPORT_INCS += \
+	system/ioman \
+	system/loadcore \
+	system/sysclib
 
 IOP_OBJS = stdio.o exports.o imports.o
 

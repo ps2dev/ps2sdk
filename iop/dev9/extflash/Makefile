@@ -8,18 +8,18 @@
 
 IOP_BIN_ALTNAMES = flash.irx
 
-IOP_INCS += \
-	-I$(PS2SDKSRC)/iop/dev9/dev9/include \
-	-I$(PS2SDKSRC)/iop/sound/libsd/include \
-	-I$(PS2SDKSRC)/iop/system/dmacman/include \
-	-I$(PS2SDKSRC)/iop/system/intrman/include \
-	-I$(PS2SDKSRC)/iop/system/iomanx/include \
-	-I$(PS2SDKSRC)/iop/system/loadcore/include \
-	-I$(PS2SDKSRC)/iop/system/stdio/include \
-	-I$(PS2SDKSRC)/iop/system/sysclib/include \
-	-I$(PS2SDKSRC)/iop/system/sysmem/include \
-	-I$(PS2SDKSRC)/iop/system/threadman/include \
-	-I$(PS2SDKSRC)/iop/system/vblank/include
+IOP_IMPORT_INCS += \
+	dev9/dev9 \
+	sound/libsd \
+	system/dmacman \
+	system/intrman \
+	system/iomanx \
+	system/loadcore \
+	system/stdio \
+	system/sysclib \
+	system/sysmem \
+	system/threadman \
+	system/vblank
 
 IOP_OBJS = extflash.o exports.o imports.o
 
