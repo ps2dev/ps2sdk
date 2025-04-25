@@ -88,7 +88,7 @@ int part_connect_mbr(struct block_device *bd)
         g_part_bd[partIndex].parNr        = i + 1;
         g_part_bd[partIndex].parId        = 0;
         g_part_bd[partIndex].sectorSize   = bd->sectorSize;
-        g_part_bd[partIndex].sectorOffset = bd->sectorOffset + (i < 4) ? (u64)pMbrBlock->primary_partitions[i].first_lba : 0;
+        g_part_bd[partIndex].sectorOffset = bd->sectorOffset + ((i < 4) ? (u64)pMbrBlock->primary_partitions[i].first_lba : 0);
         g_part_bd[partIndex].sectorCount  = (i < 4) ? pMbrBlock->primary_partitions[i].sector_count : bd->sectorCount;
         bdm_connect_bd(&g_part_bd[partIndex]);
         mountCount++;
