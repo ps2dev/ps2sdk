@@ -92,27 +92,8 @@ int part_connect_mbr(struct block_device *bd)
 
     //Most likely a VBR
     if(valid_partitions == 0) {
-
-        if ((partIndex = GetNextFreePartitionIndex()) == -1)
-        {
-            // No more free partition slots.
-            printf("Can't mount partition, no more free partition slots!\n");
-            return -1;
-        }
-
-        // Create the pseudo block device for the partition.
-        g_part[partIndex].bd              = bd;
-        g_part_bd[partIndex].name         = bd->name;
-        g_part_bd[partIndex].devNr        = bd->devNr;
-        g_part_bd[partIndex].parNr        = 1;
-        g_part_bd[partIndex].parId        = 0; //Can be any type of (ex)FATxx, is parsed later.
-        g_part_bd[partIndex].sectorSize   = bd->sectorSize;
-        g_part_bd[partIndex].sectorOffset = bd->sectorOffset;
-        g_part_bd[partIndex].sectorCount  = bd->sectorCount;
-        bdm_connect_bd(&g_part_bd[partIndex]);
-        
         FreeSysMemory(pMbrBlock);
-        return 0;
+        return -1;
     }
     
     for (int i = 0; i < 4; i++)
@@ -133,6 +114,7 @@ int part_connect_mbr(struct block_device *bd)
         {
             // No more free partition slots.
             printf("Can't mount partition, no more free partition slots!\n");
+            FreeSysMemory(pMbrBlock);
             continue;
         }
 
