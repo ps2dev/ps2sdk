@@ -57,6 +57,10 @@ IOP_CFLAGS += -DIOMANX_OLD_NAME_COMPATIBILITY=0
 IOP_CFLAGS += -DIOMANX_OLD_NAME_ADDDELDRV=0
 endif
 
+ifneq (x$(MCMAN_BUILDING_DONGLEMAN),x0)
+IOP_CFLAGS += -DBUILDING_DONGLEMAN
+endif
+
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
