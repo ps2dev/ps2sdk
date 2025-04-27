@@ -83,19 +83,19 @@ int part_connect_mbr(struct block_device *bd)
         return rval;
     }
     
-    // Loop and parse the primary partition entries in the MBR block.
-    printf("Found MBR disk\n");
-
+    
     valid_partitions = partitions_sanity_check_mbr(bd, pMbrBlock);
-
-    printf("MBR disk valid_partitions=%d \n", valid_partitions);
 
     //Most likely a VBR
     if(valid_partitions == 0) {
+        printf("MBR disk valid_partitions=%d \n", valid_partitions);
         FreeSysMemory(pMbrBlock);
         return -1;
     }
-    
+
+    printf("Found MBR disk\n");
+
+    // Loop and parse the primary partition entries in the MBR block.
     for (int i = 0; i < 4; i++)
     {
         // Check if the partition is active, checking the status bit is not reliable so check if the sector_count is greater than zero instead.
@@ -114,7 +114,6 @@ int part_connect_mbr(struct block_device *bd)
         {
             // No more free partition slots.
             printf("Can't mount partition, no more free partition slots!\n");
-            FreeSysMemory(pMbrBlock);
             continue;
         }
 
