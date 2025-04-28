@@ -614,6 +614,13 @@ static int usb_mass_probe(int devId)
     return 1;
 }
 
+static void usb_get_port_number(int devId, mass_dev *dev) {
+    dev->usbPortNumber = -1;
+    u8 path[16];
+    if(sceUsbdGetDeviceLocation(devId, path) == 0)
+        dev->usbPortNumber = path[0];
+}
+
 static int usb_mass_connect(int devId)
 {
     int i;
@@ -643,6 +650,8 @@ static int usb_mass_connect(int devId)
     dev->bulkEpI = -1;
     dev->bulkEpO = -1;
 
+    usb_get_port_number(devId, mass_dev);
+    
     /* open the config endpoint */
     dev->controlEp = sceUsbdOpenPipe(devId, NULL);
 
