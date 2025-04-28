@@ -36,4 +36,5 @@ I_sceUsbdClosePipe
 I_sceUsbdSetPrivateData
 I_sceUsbdTransferPipe
 I_sceUsbdRegisterLdd
+I_sceUsbdGetDeviceLocation
 usbd_IMPORTS_end
