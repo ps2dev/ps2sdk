@@ -37,6 +37,8 @@ typedef struct bd_fragment {
 #define USBMASS_IOCTL_GET_FRAGLIST   0x0005
 /** Get the device number for the block device backing the mass partition */
 #define USBMASS_IOCTL_GET_DEVICE_NUMBER     0x0006
+/** Get the physical USB port number where device is connected. 00 = Root Hub, 01=Rightmost port, 02=Leftmost Port */
+#define USBMASS_IOCTL_GET_USB_DEVICE_PORT_NUMBER     0x0007
 
 // DEVCTL function codes
 /** Issues the SCSI STOP UNIT command to the specified device. Use this to shut down devices properly. */
