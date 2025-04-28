@@ -712,7 +712,7 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
 
             ret = -ENXIO;
             
-            if(bdu && (strncmp(bd->name, "mass", 4) == 0)) {
+            if(bdu && (strncmp(bdu->name, "mass", 4) == 0)) {
                 struct scsi_interface *scsi = (struct scsi_interface *)bdu->priv;
                 if (scsi) {
                     mass_dev *dev = (mass_dev *)scsi->priv;
