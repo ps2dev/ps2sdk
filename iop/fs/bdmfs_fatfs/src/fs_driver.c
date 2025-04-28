@@ -709,28 +709,25 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
             break;
         case USBMASS_IOCTL_GET_USB_DEVICE_PORT_NUMBER:
             struct block_device* bd = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
-            if (bd == NULL)
-                ret = -ENXIO;
 
-            if(strncmp(bd->name, "mass", 4) != 0)
-                ret = -ENXIO;
-
-            struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
-            if (scsi == NULL)
-                ret = -ENXIO;
+            ret = -ENXIO;
             
-            mass_dev *dev = (mass_dev *)scsi->priv;
-
-            if (dev == NULL)
-                ret = -ENXIO;
-
-            /*
-            <0 = Invalid
-            00 = Root Hub,
-            01 = Rightmost port, 
-            02 = Leftmost Port
-            */
-            ret = dev->usbPortNumber;
+            if(bd && (strncmp(bd->name, "mass", 4) == 0)) {
+                struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
+                if (scsi) {
+                    mass_dev *dev = (mass_dev *)scsi->priv;
+                    if(dev) {
+                        /*
+                        <0 = Invalid
+                        00 = Root Hub,
+                        01 = Rightmost port, 
+                        02 = Leftmost Port
+                        */
+                        ret = dev->usbPortNumber;
+                    }
+                }
+            }
+            
             break;
         }
         default:
