@@ -37,20 +37,6 @@
 #define CBW_TAG 0x43425355
 #define CSW_TAG 0x53425355
 
-typedef struct _mass_dev
-{
-    int controlEp;          // config endpoint id
-    int bulkEpI;            // in endpoint id
-    int bulkEpO;            // out endpoint id
-    int devId;              // device id
-    unsigned char configId; // configuration id
-    unsigned char status;
-    unsigned char interfaceNumber; // interface number
-    unsigned char interfaceAlt;    // interface alternate setting
-    int usbPortNumber; //physical port number the USB device is connected to
-    int ioSema;
-    struct scsi_interface scsi;
-} mass_dev;
 
 typedef struct _cbw_packet
 {
