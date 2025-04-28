@@ -47,6 +47,7 @@ typedef struct _mass_dev
     unsigned char status;
     unsigned char interfaceNumber; // interface number
     unsigned char interfaceAlt;    // interface alternate setting
+    int usbPortNumber; //physical port number the USB device is connected to
     int ioSema;
     struct scsi_interface scsi;
 } mass_dev;
