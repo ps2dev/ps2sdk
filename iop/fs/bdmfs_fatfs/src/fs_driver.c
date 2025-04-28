@@ -708,12 +708,12 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
             }
             break;
         case USBMASS_IOCTL_GET_USB_DEVICE_PORT_NUMBER:
-            struct block_device* bd = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
+            struct block_device* bdu = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
 
             ret = -ENXIO;
             
-            if(bd && (strncmp(bd->name, "mass", 4) == 0)) {
-                struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
+            if(bdu && (strncmp(bd->name, "mass", 4) == 0)) {
+                struct scsi_interface *scsi = (struct scsi_interface *)bdu->priv;
                 if (scsi) {
                     mass_dev *dev = (mass_dev *)scsi->priv;
                     if(dev) {
