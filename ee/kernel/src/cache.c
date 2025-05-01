@@ -42,6 +42,13 @@ static inline void _InvalidDCache(u32 start, u32 end)
     }
 }
 
+#ifdef F_sceSifWriteBackDCache
+void sceSifWriteBackDCache(void *ptr, int size)
+{
+    _SyncDCache((u32)ptr & LINE_MASK, ((u32)(ptr) + size - 1) & LINE_MASK);
+}
+#endif
+
 #ifdef F_SyncDCache
 void SyncDCache(void *start, void *end)
 {

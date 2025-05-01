@@ -82,6 +82,7 @@ GLUE_OBJS += iEnableIntc.o iDisableIntc.o iEnableDmac.o iDisableDmac.o
 
 ### Cache
 CACHE_OBJS = SyncDCache.o iSyncDCache.o InvalidDCache.o iInvalidDCache.o
+CACHE_OBJS += sceSifWriteBackDCache.o
 
 ### SIO objects
 
@@ -220,8 +221,8 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
 	SetPgifHandler.o SetVSyncFlag.o SetSyscall.o sceSifDmaStat.o isceSifDmaStat.o \
 	sceSifSetDma.o isceSifSetDma.o sceSifSetDChain.o isceSifSetDChain.o sceSifSetReg.o \
 	sceSifGetReg.o $(EXECOSD_SYSCALL) Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _GetGsDxDyOffset.o \
-	_InitTLB.o SetMemoryMode.o GetMemoryMode.o sceSifWriteBackDCache.o \
-	__errno.o errno.o strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o _print.o
+	_InitTLB.o SetMemoryMode.o GetMemoryMode.o __errno.o errno.o strncpy.o strlen.o memcpy.o \
+	memset.o __syscall.o GPfuncs.o _print.o
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(ROM0_OBJS) $(CONFIG_OBJS) \
