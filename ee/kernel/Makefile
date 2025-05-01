@@ -79,7 +79,9 @@ IOPCONTROL_OBJS = SifIopReboot.o SifIopReset.o SifIopIsAlive.o SifIopSync.o __io
 
 GLUE_OBJS = DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o
 GLUE_OBJS += iEnableIntc.o iDisableIntc.o iEnableDmac.o iDisableDmac.o
-GLUE_OBJS += SyncDCache.o iSyncDCache.o InvalidDCache.o iInvalidDCache.o
+
+### Cache
+CACHE_OBJS = SyncDCache.o iSyncDCache.o InvalidDCache.o iInvalidDCache.o
 
 ### SIO objects
 
@@ -218,14 +220,13 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
 	SetPgifHandler.o SetVSyncFlag.o SetSyscall.o sceSifDmaStat.o isceSifDmaStat.o \
 	sceSifSetDma.o isceSifSetDma.o sceSifSetDChain.o isceSifSetDChain.o sceSifSetReg.o \
 	sceSifGetReg.o $(EXECOSD_SYSCALL) Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _GetGsDxDyOffset.o \
-	_InitTLB.o SetMemoryMode.o GetMemoryMode.o \
-	sceSifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
-	strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o _print.o
+	_InitTLB.o SetMemoryMode.o GetMemoryMode.o sceSifWriteBackDCache.o \
+	__errno.o errno.o strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o _print.o
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(ROM0_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(TIMER_ALARM_OBJS) $(DELAYTHREAD_OBJS) $(GETKERNEL_OBJS) \
-	$(INITSYS_OBJS) $(KERNEL_UTIL_OBJS) deci2.o tty.o erl-support.o
+	$(CACHE_OBJS) $(INITSYS_OBJS) $(KERNEL_UTIL_OBJS) deci2.o tty.o erl-support.o
 
 
 EE_OBJS += $(THREAD_OBJS) $(LIBOSD_OBJS) $(TLBFUNC_OBJS) $(ALARM_OBJS) $(EXIT_OBJS) $(SETUP_OBJS) setup_syscalls.o debug.o
@@ -292,6 +293,10 @@ $(IOPCONTROL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)iopcontrol.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(GLUE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)glue.c
+	$(DIR_GUARD)
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(CACHE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)cache.c
 	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
