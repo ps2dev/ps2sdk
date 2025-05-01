@@ -52,15 +52,7 @@ void sceSifWriteBackDCache(void *ptr, int size)
 #ifdef F_SyncDCache
 void SyncDCache(void *start, void *end)
 {
-    int oldintr;
-
-    oldintr = DIntr();
-
     _SyncDCache((u32)start & LINE_MASK, (u32)end & LINE_MASK);
-
-    if (oldintr) {
-        EIntr();
-    }
 }
 #endif
 
@@ -74,15 +66,7 @@ void iSyncDCache(void *start, void *end)
 #ifdef F_InvalidDCache
 void InvalidDCache(void *start, void *end)
 {
-    int oldintr;
-
-    oldintr = DIntr();
-
     _InvalidDCache((u32)start & LINE_MASK, (u32)end & LINE_MASK);
-
-    if (oldintr) {
-        EIntr();
-    }
 }
 #endif
 
