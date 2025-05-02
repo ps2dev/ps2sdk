@@ -1,78 +1,48 @@
+#include "cache.h"
+
 #include "kernel.h"
 
-#define LINE_SIZE 0x40
-#define LINE_MASK (~(LINE_SIZE - 1))
-
-#define DXWBIN 0x14 /* Data cache: indeX WriteBack INvalidate.  */
-#define DXIN   0x16 /* Data cache: indeX INvalidate.  */
-#define DHWBIN 0x18 /* Data cache: Hit WriteBack INvalidate.  */
-#define DHIN   0x1a /* Data cache: Hit INvalidate.  */
-
-#define DCACHE_OP_LINE(op, line) \
-    __asm__ volatile(            \
-        ".set push          \n"  \
-        ".set noreorder     \n"  \
-        "sync.l             \n"  \
-        "cache %0, 0(%1)    \n"  \
-        "sync.l             \n"  \
-        ".set pop           \n"  \
-        :                        \
-        : "i"(op), "r"(start));
-
-
-static inline void _SyncDCache(u32 start, u32 end)
-{
-    while (1) {
-        DCACHE_OP_LINE(DHWBIN, start);
-        if (start == end) {
-            break;
-        }
-        start += LINE_SIZE;
-    }
-}
-
-static inline void _InvalidDCache(u32 start, u32 end)
-{
-    while (1) {
-        DCACHE_OP_LINE(DHIN, start);
-        if (start == end) {
-            break;
-        }
-        start += LINE_SIZE;
-    }
-}
-
+/*
+ * Write back data cache lines corresponding to range [start, end)
+ */
 #ifdef F_sceSifWriteBackDCache
 void sceSifWriteBackDCache(void *ptr, int size)
 {
-    _SyncDCache((u32)ptr & LINE_MASK, ((u32)(ptr) + size - 1) & LINE_MASK);
+    dcache_writeback_range((u32)ptr, (u32)ptr + size);
 }
 #endif
+
+/*
+ * These functions affect range [start, end]
+ * (Inclusive on both sides)
+ *
+ * e.g. SyncDCache(0x0, 0x40) would affect two cache lines.
+ */
 
 #ifdef F_SyncDCache
 void SyncDCache(void *start, void *end)
 {
-    _SyncDCache((u32)start & LINE_MASK, (u32)end & LINE_MASK);
+    dcache_writeback_range((u32)start, (u32)end + 1);
 }
 #endif
 
 #ifdef F_iSyncDCache
 void iSyncDCache(void *start, void *end)
 {
-    _SyncDCache((u32)start & LINE_MASK, (u32)end & LINE_MASK);
+    dcache_writeback_range((u32)start, (u32)end + 1);
 }
 #endif
 
 #ifdef F_InvalidDCache
 void InvalidDCache(void *start, void *end)
 {
-    _InvalidDCache((u32)start & LINE_MASK, (u32)end & LINE_MASK);
+    dcache_invalid_range((u32)start, (u32)end + 1);
 }
 #endif
 
 #ifdef F_iInvalidDCache
 void iInvalidDCache(void *start, void *end)
 {
-    _InvalidDCache((u32)start & LINE_MASK, (u32)end & LINE_MASK);
+    dcache_invalid_range((u32)start, (u32)end + 1);
 }
 #endif
