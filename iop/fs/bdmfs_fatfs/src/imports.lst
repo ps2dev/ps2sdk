@@ -28,6 +28,7 @@ I_memcmp
 I_memcpy
 I_strlen
 I_strcmp
+I_strncmp
 I_strcpy
 I_strncpy
 I_strtol
