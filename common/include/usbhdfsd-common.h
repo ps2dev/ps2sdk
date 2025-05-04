@@ -22,20 +22,6 @@ typedef struct bd_fragment {
     u32 count;  /// number of sector in this fragment
 } __attribute__((packed)) bd_fragment_t;
 
-typedef struct _mass_dev
-{
-    int controlEp;          // config endpoint id
-    int bulkEpI;            // in endpoint id
-    int bulkEpO;            // out endpoint id
-    int devId;              // device id
-    unsigned char configId; // configuration id
-    unsigned char status;
-    unsigned char interfaceNumber; // interface number
-    unsigned char interfaceAlt;    // interface alternate setting
-    int usbPortNumber; //physical port number the USB device is connected to
-    int ioSema;
-    struct scsi_interface scsi;
-} mass_dev;
 
 // IOCTL function codes
 /** Rename opened file. Data input to ioctl() -> new, full filename of file. */
