@@ -650,7 +650,7 @@ static int usb_mass_connect(int devId)
     dev->bulkEpI = -1;
     dev->bulkEpO = -1;
 
-    usb_get_port_number(devId, mass_dev);
+    usb_get_port_number(devId, dev);
     
     /* open the config endpoint */
     dev->controlEp = sceUsbdOpenPipe(devId, NULL);
