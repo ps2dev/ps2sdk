@@ -275,6 +275,7 @@ void scsi_connect(struct scsi_interface *scsi)
 
             bd->priv = scsi;
             bd->name = scsi->name;
+            bd->devNr = scsi->devNr;
             scsi_warmup(bd);
             bdm_connect_bd(bd);
             break;
@@ -305,7 +306,6 @@ int scsi_init(void)
     M_DEBUG("%s\n", __func__);
 
     for (i = 0; i < NUM_DEVICES; ++i) {
-        g_scsi_bd[i].devNr = i;
         g_scsi_bd[i].parNr = 0;
         g_scsi_bd[i].parId = 0x00;
 
