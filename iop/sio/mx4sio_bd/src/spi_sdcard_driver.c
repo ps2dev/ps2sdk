@@ -52,7 +52,7 @@ spisd_t sdcard;
 struct block_device bd = {
     NULL,        /* priv */
     "sdc",       /* name */
-    0,           /* devNr */
+    1,           /* devNr, mx4sio is always in the second port */
     0,           /* parNr */
     0x00,        /* parId */
     SECTOR_SIZE, /* sectorSize */
@@ -64,7 +64,7 @@ struct block_device bd = {
     spisd_stop };
 
 /* NOTE: SIO2 does *NOT* allow for direct control of /CS line.
- * It's controlled by the SIO2 hardware and automatically asserted at the start 
+ * It's controlled by the SIO2 hardware and automatically asserted at the start
  * of a transfer and deasserted at the end. This has lead to the need for some
  * conditions surrounding dummy writes to avoid timing disruption. */
 static uint8_t spisd_send_cmd(uint8_t cmd, uint32_t arg)
@@ -123,12 +123,12 @@ static uint8_t spisd_send_cmd_recv_data(uint8_t cmd, uint32_t arg, uint8_t *data
 static uint8_t spisd_read_register(uint8_t *buff, uint32_t len)
 {
     uint8_t results = SPISD_RESULT_ERROR;
-    
+
     results = mx_sio2_wait_equal(0xFE, 2000);
     if (results == SPISD_RESULT_OK) {
         /* got read token, start SIO2 PIO RX transfer */
         mx_sio2_rx_pio(buff, len);
-    } 
+    }
 
     return results;
 }
@@ -179,11 +179,11 @@ int spisd_init_card()
     /* send CMD8 with check pattern, store R3 response in buffer */
     response = spisd_send_cmd_recv_data(CMD8, 0x1AA, buffer, sizeof(buffer));
 
-    /* if CMD8 response is idle, card is CSD v2 */  
+    /* if CMD8 response is idle, card is CSD v2 */
     if (response == SPISD_R1_IDLE_FLAG) {
-        
+
         /* valid check pattern */
-        if (buffer[2] == 0x01 && buffer[3] == 0xAA) {          
+        if (buffer[2] == 0x01 && buffer[3] == 0xAA) {
             /* CMD55 / ACMD41 pairs */
             for (int i = 0; i < 0xFFF; i++) {
                 response = spisd_send_cmd(CMD55, 0);
@@ -262,7 +262,7 @@ int spisd_init_card()
             sdcard.card_type = CARD_TYPE_SDV1;
             M_DEBUG("Card Type : CSD v1\r\n");
         }
-        
+
         /* set baud to 25MHz */
         mx_sio2_set_baud(SIO2_BAUD_DIV_FAST);
 
@@ -280,7 +280,7 @@ int spisd_init_card()
             M_DEBUG("ERROR: CMD16 returned 0x%x, exp 0x0\n", response);
             return SPISD_RESULT_TIMEOUT;
         }
-    
+
     /* CMD8 response invalid */
     } else {
         M_DEBUG("ERROR: CMD8 returned 0x%x, exp 0x1 or 0x4\n", response);
@@ -295,7 +295,7 @@ int spisd_get_card_info()
 {
     /* 16 bytes + 2 byte CRC16 */
     uint8_t reg_data[18];
-    
+
     /* send CMD9, read CSD */
     uint8_t result = spisd_send_cmd(CMD9, 0);
     if (result != 0x0) {
@@ -303,7 +303,7 @@ int spisd_get_card_info()
     }
 
     result = spisd_read_register(sdcard.csd, sizeof(reg_data));
-    
+
     /* dummy write between reg reads */
     mx_sio2_write_dummy();
 
@@ -319,7 +319,7 @@ int spisd_get_card_info()
     }
 
     result = spisd_read_register(reg_data, sizeof(reg_data));
-    
+
     mx_sio2_write_dummy();
 
     if (result != 0x0) {
@@ -362,7 +362,7 @@ int spisd_get_card_info()
 
     struct t_csdVer1 *csdv1 = (struct t_csdVer1 *)sdcard.csd;
     struct t_csdVer2 *csdv2 = (struct t_csdVer2 *)sdcard.csd;
-    
+
     /* CSD v1 - SDSC */
     if (csdv1->csd_structure == 0) {
         unsigned int c_size_mult = (csdv1->c_size_multHi << 1) | csdv1->c_size_multLo;
@@ -418,7 +418,7 @@ static int spisd_read_multi_begin(uint32_t sector)
         }
 
         /* send CMD18 to being multi block read */
-        results = spisd_send_cmd(CMD18, sector); 
+        results = spisd_send_cmd(CMD18, sector);
         if (results == SPISD_RESULT_OK) {
             /* wait for first read token (0xFE) */
             results = mx_sio2_wait_equal(0xFE, 100000);
@@ -449,9 +449,9 @@ static int spisd_read_multi_do(void *buffer, uint16_t count)
 
         if (resbits & EF_SIO2_INTR_REVERSE) {
             ClearEventFlag(sio2_event_flag, ~EF_SIO2_INTR_REVERSE);
-            
+
             while (cmd.sectors_reversed < cmd.sectors_transferred && cmd.abort == 0) {
-                void *buf = (uint32_t *)&cmd.buffer[cmd.sectors_reversed * SECTOR_SIZE]; 
+                void *buf = (uint32_t *)&cmd.buffer[cmd.sectors_reversed * SECTOR_SIZE];
                 reverse_buffer(buf, SECTOR_SIZE / 4);
 
 #ifdef CONFIG_USE_CRC16
@@ -492,7 +492,7 @@ static void spisd_read_multi_end()
 static int spisd_write_multi_begin(uint32_t sector, uint16_t count)
 {
     uint8_t results = SPISD_RESULT_ERROR;
-    
+
     /* get idle */
     results = mx_sio2_wait_equal(0xFF, 4000);
 
@@ -517,7 +517,7 @@ static int spisd_write_multi_begin(uint32_t sector, uint16_t count)
     mx_sio2_write_dummy();
 
     return results;
-} 
+}
 
 static int spisd_write_multi_do(void* buffer, uint16_t count)
 {
@@ -533,7 +533,7 @@ static int spisd_write_multi_do(void* buffer, uint16_t count)
 
     /* send initial write token */
     mx_sio2_write_byte(0xFC);
-    
+
     /* start transfer */
     mx_sio2_start_tx_dma(buffer);
 
@@ -603,10 +603,10 @@ int spisd_read(struct block_device *bd, uint64_t sector, void *buffer, uint16_t 
         /* start reading blocks */
         results = spisd_read_multi_do(buffer, sectors_left);
         sectors_left = sectors_left - results;
-        
+
         /* fail condition */
         if (sectors_left > 0) {
-            buffer = (uint8_t *)buffer + (results * 512); 
+            buffer = (uint8_t *)buffer + (results * 512);
             M_DEBUG("ERROR: failed to read all sectors, read:%i, abort:%i\n", sectors_left, cmd.abort);
 
             if (cmd.abort == CMD_ABORT_NO_READ_TOKEN) {
@@ -633,7 +633,7 @@ int spisd_read(struct block_device *bd, uint64_t sector, void *buffer, uint16_t 
 int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, uint16_t count)
 {
     (void)bd;
-    
+
     uint16_t sectors_left = count;
     uint16_t results = 0;
     uint16_t retries = 0;
@@ -647,7 +647,7 @@ int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, ui
     void *write_buffer = (uint32_t*)buffer;
 
     /* pre-reverse the entire buffer */
-    reverse_buffer(write_buffer, ((count * SECTOR_SIZE) / 4)); 
+    reverse_buffer(write_buffer, ((count * SECTOR_SIZE) / 4));
 
     mx_sio2_lock(INTR_TX);
 
@@ -681,7 +681,7 @@ int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, ui
     }
 
     sdcard.used = 1;
-    
+
     mx_sio2_unlock(INTR_TX);
 
     return count - sectors_left;
@@ -694,7 +694,7 @@ void spisd_flush(struct block_device *bd)
 }
 
 int spisd_stop(struct block_device *bd)
-{   
+{
     (void)bd;
     return 0;
 }
