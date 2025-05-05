@@ -764,7 +764,9 @@ static void usb_mass_update(void *arg)
         for (i = 0; i < new_devs_count; i += 1) {
             mass_dev *dev = new_devs[i];
             {
+                u8 path[16] = {0};
                 int ret;
+
                 if ((ret = usb_set_configuration(dev, dev->configId)) != USB_RC_OK) {
                     M_PRINTF("ERROR: sending set_configuration %d\n", ret);
                     usb_mass_release(dev);
@@ -783,6 +785,14 @@ static void usb_mass_update(void *arg)
                         continue;
                     }
                 }
+
+                sceUsbdGetDeviceLocation(dev->devId, path);
+                if (path[0] == 1)
+                    dev->scsi.devNr = 0; // first USB port
+                else if  (path[0] == 2)
+                    dev->scsi.devNr = 1; // second USB port
+                else
+                    dev->scsi.devNr = 2; // hub?
 
                 dev->status |= USBMASS_DEV_STAT_CONF;
                 scsi_connect(&dev->scsi);
