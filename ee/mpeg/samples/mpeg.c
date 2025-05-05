@@ -287,7 +287,7 @@ static void* InitCB ( void* apParam, MPEGSequenceInfo* apInfo ) {
  q++;
  PACK_GIFTAG(q, GS_SET_UV( 0, 0 ), GS_REG_UV  );
  q++;
- PACK_GIFTAG(q, GS_SET_XYZ( 0, 0, 0 ), GS_REG_XYZ2 );
+ PACK_GIFTAG(q, GS_SET_XYZ( (2048 << 4), (2048 << 4), 0 ), GS_REG_XYZ2 );
  q++;
  PACK_GIFTAG(q, GS_SET_UV( apInfo -> m_Width << 4, apInfo -> m_Height << 4 ), GS_REG_UV );
  q++;
