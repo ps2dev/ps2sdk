@@ -174,7 +174,7 @@ static int scsi_warmup(struct block_device *bd)
     bd->sectorSize   = getBI32(&rcd.block_length);
     bd->sectorOffset = 0;
     bd->sectorCount  = getBI32(&rcd.last_lba);
-    M_PRINTF("%u %u-byte logical blocks: (%uMB / %uMiB)\n", bd->sectorCount, bd->sectorSize, bd->sectorCount / ((1000 * 1000) / bd->sectorSize), bd->sectorCount / ((1024 * 1024) / bd->sectorSize));
+    M_PRINTF("%lu %u-byte logical blocks: (%luMB / %luMiB)\n", (u32)bd->sectorCount, bd->sectorSize, (u32)bd->sectorCount / ((1000 * 1000) / bd->sectorSize), (u32)bd->sectorCount / ((1024 * 1024) / bd->sectorSize));
 
     return 0;
 }

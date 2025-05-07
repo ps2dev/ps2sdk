@@ -14,21 +14,21 @@ int partitions_sanity_check_mbr(struct block_device *bd, master_boot_record* pMb
     //At least one of them must be active.
     int valid = 0;
     int active = 0;
-    
+
     for (int i = 0; i < 4; i++)
     {
-        
+
         if (pMbrBlock->primary_partitions[i].partition_type != 0) {
-            
+
             if((pMbrBlock->primary_partitions[i].first_lba == 0) || (pMbrBlock->primary_partitions[i].first_lba >= bd->sectorCount))
                 return 0; //invalid
-            
+
             active++;
         }
-        
+
         valid++; //Considered at least a valid partition.
     }
-    
+
     return (valid == 4) && (active > 0);
 }
 
@@ -42,7 +42,7 @@ int part_connect_mbr(struct block_device *bd)
     int valid_partitions;
 
     M_DEBUG("%s\n", __func__);
-    
+
     // Filter out any block device where sectorOffset != 0, as this will be a block device for a file system partition and not
     // the raw device.
     if (bd->sectorOffset != 0)
@@ -82,18 +82,18 @@ int part_connect_mbr(struct block_device *bd)
         FreeSysMemory(pMbrBlock);
         return rval;
     }
-    
-    
+
+
     valid_partitions = partitions_sanity_check_mbr(bd, pMbrBlock);
 
     //Most likely a VBR
     if(valid_partitions == 0) {
-        printf("MBR disk valid_partitions=%d \n", valid_partitions);
+        M_PRINTF("MBR disk valid_partitions=%d \n", valid_partitions);
         FreeSysMemory(pMbrBlock);
         return -1;
     }
 
-    printf("Found MBR disk\n");
+    M_PRINTF("Found MBR disk\n");
 
     // Loop and parse the primary partition entries in the MBR block.
     for (int i = 0; i < 4; i++)
@@ -106,14 +106,14 @@ int part_connect_mbr(struct block_device *bd)
         if (pMbrBlock->primary_partitions[i].partition_type == 0)
             continue;
 
-        printf("Found partition type 0x%02x\n", pMbrBlock->primary_partitions[i].partition_type);
-        
+        M_PRINTF("Found partition type 0x%02x\n", pMbrBlock->primary_partitions[i].partition_type);
+
         // TODO: Filter out unsupported partition types.
 
         if ((partIndex = GetNextFreePartitionIndex()) == -1)
         {
             // No more free partition slots.
-            printf("Can't mount partition, no more free partition slots!\n");
+            M_PRINTF("Can't mount partition, no more free partition slots!\n");
             continue;
         }
 
