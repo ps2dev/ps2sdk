@@ -5,6 +5,7 @@ struct scsi_interface
 {
     void *priv;
     char *name;
+    // cppcheck-suppress unusedStructMember
     unsigned int devNr;
     unsigned int max_sectors;
 
