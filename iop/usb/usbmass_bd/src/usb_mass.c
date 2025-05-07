@@ -787,9 +787,9 @@ static void usb_mass_update(void *arg)
                 }
 
                 sceUsbdGetDeviceLocation(dev->devId, path);
-                if (path[0] == 1)
+                if (path[0] == 2)
                     dev->scsi.devNr = 0; // first USB port
-                else if  (path[0] == 2)
+                else if  (path[0] == 1)
                     dev->scsi.devNr = 1; // second USB port
                 else
                     dev->scsi.devNr = 2; // hub?
