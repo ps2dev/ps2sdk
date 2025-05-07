@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_OBJS = libmpeg.o libmpeg_core.o erl-support.o
+EE_OBJS = libmpeg.o libmpeg_core.o libmpeg_op.o erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
