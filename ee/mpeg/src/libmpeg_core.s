@@ -894,48 +894,4 @@ _MPEG_dma_ref_image:
     jr      $ra
     sw      $at, -11264($v0)
 
-_MPEG_do_mc:
-    addiu   $v0, $zero, 16
-    lw      $a1,  0($a0)
-    addiu   $sp, $sp, -16
-    lw      $a2,  4($a0)
-    lw      $a3, 12($a0)
-    lw      $a4, 16($a0)
-    lw      $a5, 20($a0)
-    lw      $a6, 24($a0)
-    lw      $t0, 28($a0)
-    subu    $a4, $a4, $t0
-    lw      $t1, 32($a0)
-    sll     $t0, $t0, 4
-    addu    $a1, $a1, $t0
-    subu    $v1, $v0, $a4
-    sllv    $a7, $v0, $a6
-    srlv    $v1, $v1, $a6
-    sll     $at, $a4, 4
-    sw      $ra, 0($sp)
-    addu    $a1, $a1, $at
-    jalr    $t1
-    subu    $at, $a5, $v1
-    lw      $a1,  0($a0)
-    lw      $a2,  8($a0)
-    lw      $t1, 36($a0)
-    addiu   $a1, $a1, 256
-    srl     $t0, $t0, 1
-    srl     $a3, $a3, 1
-    srl     $a4, $a4, 1
-    srl     $a5, $a5, 1
-    lw      $ra, 0($sp)
-    srlv    $a4, $a4, $a6
-    addu    $a1, $a1, $t0
-    addiu   $v0, $zero, 8
-    sllv    $a4, $a4, $a6
-    subu    $v1, $v0, $a4
-    sllv    $a7, $v0, $a6
-    srlv    $v1, $v1, $a6
-    sll     $at, $a4, 3
-    addu    $a1, $a1, $at
-    subu    $at, $a5, $v1
-    jr      $t1
-    addiu   $sp, $sp, 16
-
 .set pop

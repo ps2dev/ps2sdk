@@ -15,2667 +15,704 @@
 #include <string.h>
 #include <kernel.h>
 #include <ee_regs.h>
+#include <dma_tags.h>
 
 #include "libmpeg.h"
 #include "libmpeg_internal.h"
 
-static u8 s_DMAPack[128];
-static u32 s_DataBuf[2];
-static int ( * s_SetDMA_func) ( void* );
-static void * s_SetDMA_arg;
-static u32 s_IPUState[8];
-static int* s_pEOF;
+#define READ_ONCE(x)       (*(const volatile typeof(x) *)(&x))
+#define WRITE_ONCE(x, val) (*(volatile typeof(x) *)(&x) = (val))
+
+struct CSCParam
+{
+    u32 source;
+    u32 dest;
+    u32 blocks;
+};
+
+struct IPUState
+{
+    u32 d4_chcr;
+    u32 d4_madr;
+    u32 d4_qwc;
+
+    u32 d3_chcr;
+    u32 d3_madr;
+    u32 d3_qwc;
+
+    u32 ipu_ctrl;
+    u32 ipu_bp;
+};
+
+static qword_t s_DMAPack[17] __attribute__((aligned(64)));
+static int (*s_SetDMA_func)(void *);
+static void *s_SetDMA_arg;
+static struct IPUState s_IPUState;
+static int *s_pEOF;
 static int s_Sema;
-static u32 s_CSCParam[3];
+static struct CSCParam s_CSCParam;
 static int s_CSCID;
 static u8 s_CSCFlag;
+static u32 s_BitsBuffered;
+static u32 s_LocalBits;
 
-extern s32 _mpeg_dmac_handler( s32 channel, void *arg, void *addr );
+static u32 s_QmIntra[16] __attribute__((aligned(16))) = {
+    0x13101008,
+    0x16161310,
+    0x16161616,
+    0x1B1A181A,
+    0x1A1A1B1B,
+    0x1B1B1A1A,
+    0x1D1D1D1B,
+    0x1D222222,
+    0x1B1B1D1D,
+    0x20201D1D,
+    0x26252222,
+    0x22232325,
+    0x28262623,
+    0x30302828,
+    0x38382E2E,
+    0x5345453A,
+};
 
-void _MPEG_Initialize ( _MPEGContext* arg0, int ( * arg1) ( void* ), void* arg2, int* arg3)
+static u32 s_QmNonIntra[16] __attribute__((aligned(16))) = {
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+    0x10101010,
+};
+
+
+extern s32 _mpeg_dmac_handler(s32 channel, void *arg, void *addr);
+
+#define IPU_CMD_BUSY (1ull << 63)
+
+#define IPU_CTRL_BUSY (1 << 31)
+#define IPU_CTRL_RST  (1 << 30)
+#define IPU_CTRL_MP1  (1 << 23)
+#define IPU_CTRL_ECD  (1 << 14)
+
+
+// clang-format off
+#define IPU_COMMAND_BCLR         0x00000000
+#define IPU_COMMAND_IDEC         0x10000000
+#define IPU_COMMAND_BDEC         0x20000000
+#define IPU_COMMAND_VDEC         0x30000000
+#define  IPU_COMMAND_VDEC_MBAI   0x00000000
+#define  IPU_COMMAND_VDEC_MBTYPE 0x04000000
+#define  IPU_COMMAND_VDEC_MCODE  0x08000000
+#define  IPU_COMMAND_VDEC_DMV    0x0C000000
+#define IPU_COMMAND_FDEC         0x40000000
+#define IPU_COMMAND_SETIQ        0x50000000
+#define IPU_COMMAND_SETVQ        0x60000000
+#define IPU_COMMAND_CSC          0x70000000
+#define IPU_COMMAND_PACK         0x80000000
+#define IPU_COMMAND_SETTH        0x90000000
+// clang-format on
+
+void _MPEG_Initialize(_MPEGContext *mc, int (*data_cb)(void *), void *cb_user, int *eof_flag)
 {
-	(void)arg0;
+    (void)mc;
+    ee_sema_t sema;
 
-	*R_EE_IPU_CTRL = 0x40000000;
-	while ((s32)*R_EE_IPU_CTRL < 0);
-	*R_EE_IPU_CMD = 0;
-	while ((s32)*R_EE_IPU_CTRL < 0);
-	*R_EE_IPU_CTRL |= 0x800000;
-	*R_EE_D3_QWC = 0;
-	*R_EE_D4_QWC = 0;
-	s_SetDMA_func = arg1;
-	s_SetDMA_arg = arg2;
-	s_pEOF = arg3;
-	*s_pEOF = 0;
-	// TODO: check if this is the correct options for the semaphore
-	ee_sema_t sema;
-	memset(&sema, 0, sizeof(sema));
-	sema.init_count = 0;
-	sema.max_count = 1;
-	sema.option = 0;
-	s_Sema = CreateSema(&sema);
-	s_CSCID = AddDmacHandler2(3, _mpeg_dmac_handler, 0, &s_CSCParam);
-	s_DataBuf[0] = 0;
-	s_DataBuf[1] = 0;
+    *R_EE_IPU_CTRL = IPU_CTRL_RST;
+    while (*R_EE_IPU_CTRL & IPU_CTRL_BUSY)
+        ;
+    *R_EE_IPU_CMD = IPU_COMMAND_BCLR;
+    while (*R_EE_IPU_CTRL & IPU_CTRL_BUSY)
+        ;
+    *R_EE_IPU_CTRL |= IPU_CTRL_MP1;
+    *R_EE_D3_QWC  = 0;
+    *R_EE_D4_QWC  = 0;
+    s_SetDMA_func = data_cb;
+    s_SetDMA_arg  = cb_user;
+    s_pEOF        = eof_flag;
+    *s_pEOF       = 0;
+    // TODO: check if this is the correct options for the semaphore
+    // Everything except init_count is uninitialized stack garbage in the ASM version
+    memset(&sema, 0, sizeof(sema));
+    sema.init_count = 0;
+    sema.max_count  = 1;
+    sema.option     = 0;
+    s_Sema          = CreateSema(&sema);
+    s_CSCID         = AddDmacHandler2(3, _mpeg_dmac_handler, 0, &s_CSCParam);
+    s_BitsBuffered  = 0;
+    s_LocalBits     = 0;
 }
 
-void _MPEG_Destroy ( void )
+void _MPEG_Destroy(void)
 {
-	while (s_CSCFlag != 0);
-	RemoveDmacHandler(3, s_CSCID);
-	DeleteSema(s_Sema);
+    while (READ_ONCE(s_CSCFlag) != 0)
+        ;
+    RemoveDmacHandler(3, s_CSCID);
+    DeleteSema(s_Sema);
 }
 
-void _ipu_suspend ( void )
+void _ipu_suspend(void)
 {
-	int eie;
-	do
-	{
-		DI();
-		EE_SYNCP();
-		asm volatile ("mfc0\t%0, $12" : "=r" (eie));
-		eie &= 0x10000;
-	}
-	while (eie != 0);
-	*R_EE_D4_CHCR &= ~0x100;
-	*R_EE_D_ENABLEW = *R_EE_D_ENABLER & ~0x100;
-	EI();
-	s_IPUState[0] = *R_EE_D4_CHCR;
-	s_IPUState[1] = *R_EE_D4_MADR;
-	s_IPUState[2] = *R_EE_D4_QWC;
-	while ((*R_EE_IPU_CTRL & 0xf0) != 0);
-	do
-	{
-		DI();
-		EE_SYNCP();
-		asm volatile ("mfc0\t%0, $12" : "=r" (eie));
-		eie &= 0x10000;
-	}
-	while (eie != 0);
-	*R_EE_D3_CHCR &= ~0x100;
-	*R_EE_D_ENABLEW = *R_EE_D_ENABLER & ~0x100;
-	EI();
-	s_IPUState[3] = *R_EE_D3_CHCR;
-	s_IPUState[4] = *R_EE_D3_MADR;
-	s_IPUState[5] = *R_EE_D3_QWC;
-	s_IPUState[6] = *R_EE_IPU_CTRL;
-	s_IPUState[7] = *R_EE_IPU_BP;
+    int oldintr;
+    u32 enabler;
+
+    /* Stop ch 4 */
+    oldintr = DIntr();
+    enabler = *R_EE_D_ENABLER;
+
+    *R_EE_D_ENABLEW = enabler | 0x10000;
+    EE_SYNCL();
+
+    *R_EE_D4_CHCR &= ~0x100;
+    s_IPUState.d4_chcr = *R_EE_D4_CHCR;
+    s_IPUState.d4_madr = *R_EE_D4_MADR;
+    s_IPUState.d4_qwc  = *R_EE_D4_QWC;
+
+    *R_EE_D_ENABLEW = enabler;
+    if (oldintr) {
+        EIntr();
+    }
+
+    /* Wait for IPU output fifo to drain */
+    while (*R_EE_IPU_CTRL & 0xf0)
+        ;
+
+    /* Stop ch 3 */
+    oldintr = DIntr();
+    enabler = *R_EE_D_ENABLER;
+
+    *R_EE_D_ENABLEW = enabler | 0x10000;
+    EE_SYNCL();
+
+    *R_EE_D3_CHCR &= ~0x100;
+    s_IPUState.d3_chcr  = *R_EE_D3_CHCR;
+    s_IPUState.d3_madr  = *R_EE_D3_MADR;
+    s_IPUState.d3_qwc   = *R_EE_D3_QWC;
+    s_IPUState.ipu_ctrl = *R_EE_IPU_CTRL;
+    s_IPUState.ipu_bp   = *R_EE_IPU_BP;
+
+    *R_EE_D_ENABLEW = enabler;
+    if (oldintr) {
+        EIntr();
+    }
 }
 
-void _MPEG_Suspend ( void )
+void _MPEG_Suspend(void)
 {
-	while (s_CSCFlag != 0);
-	return _ipu_suspend();
+    while (READ_ONCE(s_CSCFlag) != 0)
+        ;
+
+    _ipu_suspend();
 }
 
-void _ipu_resume ( void )
+void _ipu_resume(void)
 {
-	if (s_IPUState[5] != 0)
-	{
-		*R_EE_D3_MADR = s_IPUState[4];
-		*R_EE_D3_QWC = s_IPUState[5];
-		*R_EE_D3_CHCR = s_IPUState[3] | 0x100;
-	}
-	u32 var2 = (s_IPUState[7] >> 0x10 & 3) + (s_IPUState[7] >> 8 & 0xf);
-	u32 var3 = (s_IPUState[2]) + var2;
-	if (var3 != 0)
-	{
-		*R_EE_IPU_CMD = (s_IPUState[7]) & 0x7f;
-		while (((*R_EE_IPU_CTRL) & 0x80000000) != 0);
-		*R_EE_IPU_CTRL = s_IPUState[6];
-		*R_EE_D4_MADR = (s_IPUState[1]) - var2 * 0x10;
-		*R_EE_D4_QWC = var3;
-		*R_EE_D4_CHCR = s_IPUState[0] | 0x100;
-	}
+    if (s_IPUState.d3_qwc != 0) {
+        *R_EE_D3_MADR = s_IPUState.d3_madr;
+        *R_EE_D3_QWC  = s_IPUState.d3_qwc;
+        *R_EE_D3_CHCR = s_IPUState.d3_chcr | 0x100;
+    }
+    u32 qw_to_reinsert = (s_IPUState.ipu_bp >> 16 & 3) + (s_IPUState.ipu_bp >> 8 & 0xf);
+    u32 actual_qwc     = s_IPUState.d4_qwc + qw_to_reinsert;
+    if (actual_qwc != 0) {
+        *R_EE_IPU_CMD = IPU_COMMAND_BCLR | (s_IPUState.ipu_bp & 0x7f);
+        while (*R_EE_IPU_CMD & IPU_CMD_BUSY)
+            ;
+        *R_EE_IPU_CTRL = s_IPUState.ipu_ctrl;
+        *R_EE_D4_MADR  = s_IPUState.d4_madr - (qw_to_reinsert * 16);
+        *R_EE_D4_QWC   = actual_qwc;
+        *R_EE_D4_CHCR  = s_IPUState.d4_chcr | 0x100;
+    }
 }
 
-void _MPEG_Resume ( void )
+void _MPEG_Resume(void)
 {
-	return _ipu_resume();
+    _ipu_resume();
 }
 
-s32 _mpeg_dmac_handler( s32 channel, void *arg, void *addr )
+s32 _mpeg_dmac_handler(s32 channel, void *arg, void *addr)
 {
-	(void)channel;
-	(void)addr;
+    (void)channel;
+    (void)addr;
 
-	u32 *carg = arg;
-	u32 var1 = carg[2];
-	if (var1 == 0)
-	{
-		iDisableDmac(3);
-		iSignalSema(s_Sema);
-		s_CSCFlag = 0;
-		return ~0;
-	}
-	u32 var2 = var1;
-	if (0x3fe < (int)var1)
-	{
-		var2 = 0x3ff;
-	}
-	*R_EE_D3_MADR = carg[1];
-	*R_EE_D4_MADR = carg[0];
-	carg[0] += var2 * 0x180;
-	carg[1] += var2 * 0x400;
-	carg[2] = var1 - var2;
-	*R_EE_D3_QWC = var2 * 0x400 >> 4;
-	*R_EE_D4_QWC = var2 * 0x180 >> 4;
-	*R_EE_D4_CHCR = 0x101;
-	*R_EE_IPU_CMD = var2 | 0x70000000;
-	*R_EE_D3_CHCR = 0x100;
-	return ~0;
+    struct CSCParam *cp = arg;
+
+    if (cp->blocks == 0) {
+        iDisableDmac(3);
+        iSignalSema(s_Sema);
+        WRITE_ONCE(s_CSCFlag, 0);
+        return -1;
+    }
+
+    u32 mbc = cp->blocks;
+    if (mbc > 0x3ff) {
+        mbc = 0x3ff;
+    }
+    *R_EE_D3_MADR = cp->dest;
+    *R_EE_D4_MADR = cp->source;
+    cp->source += mbc * 0x180;
+    cp->dest += mbc * 0x400;
+    cp->blocks    = cp->blocks - mbc;
+    *R_EE_D3_QWC  = (mbc * 0x400) >> 4;
+    *R_EE_D4_QWC  = (mbc * 0x180) >> 4;
+    *R_EE_D4_CHCR = 0x101;
+    *R_EE_IPU_CMD = IPU_COMMAND_CSC | mbc;
+    *R_EE_D3_CHCR = 0x100;
+
+    ExitHandler();
+    return -1;
 }
 
-int _MPEG_CSCImage ( void* arg0, void* arg1, int arg2 )
+int _MPEG_CSCImage(void *source, void *dest, int mbcount)
 {
-	_ipu_suspend();
-	*R_EE_IPU_CMD = 0;
-	*R_EE_D_STAT = 8;
-	int var1 = arg2;
-	if (0x3fe < var1)
-	{
-		var1 = 0x3ff;
-	}
-	s_CSCParam[2] = arg2 - var1;
-	*R_EE_D3_MADR = (u32)arg1;
-	*R_EE_D4_MADR = (u32)arg0;
-	s_CSCParam[0] = (int)arg0 + var1 * 0x180;
-	s_CSCParam[1] = (int)arg1 + var1 * 0x400;
-	*R_EE_D4_QWC = var1 * 0x180;
-	*R_EE_D3_QWC = var1 * 0x400;
-	EnableDmac(3);
-	var1 |= 0x70000000;
-	*R_EE_D4_CHCR = 0x101;
-	*R_EE_IPU_CMD = var1;
-	*R_EE_D3_CHCR = 0x100;
-	s_CSCFlag = 68; // TODO: validate this
-	WaitSema(s_Sema);
-	_ipu_resume();
-	return var1;
+    _ipu_suspend();
+    *R_EE_IPU_CMD = IPU_COMMAND_BCLR;
+    *R_EE_D_STAT  = 8; // ack ch3
+    int mbc       = mbcount;
+    if (mbc > 0x3ff) {
+        mbc = 0x3ff;
+    }
+
+    *R_EE_D3_MADR = (u32)dest;
+    *R_EE_D4_MADR = (u32)source;
+
+    s_CSCParam.source = (u32)source + mbc * sizeof(_MPEGMacroBlock8); // 0x180
+    s_CSCParam.dest   = (u32)dest + mbc * 0x400;                      // 1024
+    s_CSCParam.blocks = mbcount - mbc;
+
+    *R_EE_D4_QWC = (mbc * 0x180) >> 4;
+    *R_EE_D3_QWC = (mbc * 0x400) >> 4;
+    EnableDmac(3);
+    *R_EE_D4_CHCR = 0x101;
+    *R_EE_IPU_CMD = IPU_COMMAND_CSC | mbc;
+    *R_EE_D3_CHCR = 0x100;
+
+    WRITE_ONCE(s_CSCFlag, 1);
+    WaitSema(s_Sema);
+    _ipu_resume();
+    return mbc;
+}
+static int _ipu_bits_in_fifo()
+{
+    u32 bp_reg;
+    u32 bp, ifc, fp;
+
+    bp_reg = *R_EE_IPU_BP;
+    bp     = bp_reg & 0x7f;
+    ifc    = (bp_reg >> 8) & 0xf;
+    fp     = (bp_reg >> 16) & 0x3;
+
+    return (ifc << 7) + (fp << 7) - bp;
 }
 
-void _ipu_sync( void )
+static int _ipu_needs_bits()
 {
-	if ((s32)*R_EE_IPU_CTRL >= 0)
-	{
-		return;
-	}
-	while (1)
-	{
-		while (1)
-		{
-			if ((*R_EE_IPU_CTRL & 0x4000) != 0)
-			{
-				return;
-			}
-			u32 var0 = *R_EE_IPU_BP;
-			if ((int)((((var0 & 0xff00) >> 1) + ((var0 & 0x30000) >> 9)) - (var0 & 0x7f)) < 0x20)
-			{
-				break;
-			}
-LAB_0001041c:
-			if ((u32)(-1) < *R_EE_IPU_CTRL)
-			{
-				return;
-			}
-		}
-
-		if ((int)*R_EE_D4_QWC < 1)
-		{
-			if (s_SetDMA_func(s_SetDMA_arg) == 0)
-			{
-				*s_pEOF = 0x20;
-				s_DataBuf[0] = 0x20;
-				s_DataBuf[1] = 0x1b7;
-			}
-			goto LAB_0001041c;
-		}
-	}
+    return _ipu_bits_in_fifo() < 32;
 }
 
-u32 _ipu_sync_data( void )
+static int _req_data()
 {
-	if ((u64)(-1) < *R_EE_IPU_CMD)
-	{
-		return *R_EE_IPU_BP;
-	}
-	u32 var3 = *R_EE_IPU_BP;
-	do
-	{
-		while (0x1f < (((var3 & 0xff00) >> 1) + ((var3 & 0x30000) >> 9)) - (var3 & 0x7f))
-		{
-LAB_000104b8:
-			if ((u64)(-1) < *R_EE_IPU_CMD)
-			{
-				return var3;
-			}
-			var3 = *R_EE_IPU_BP;
-		}
-		if (*R_EE_D4_QWC < 1)
-		{
-			if (s_SetDMA_func(s_SetDMA_arg) == 0)
-			{
-				*s_pEOF = 0x20;
-				return var3;
-			}
-			goto LAB_000104b8;
-		}
-		var3 = *R_EE_IPU_BP;
-	}
-	while (1);
+    if (*R_EE_D4_QWC == 0) {
+        if (s_SetDMA_func(s_SetDMA_arg) == 0) {
+            s_BitsBuffered = 32;
+            s_LocalBits    = _MPEG_CODE_SEQ_END;
+            *s_pEOF        = 1;
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
-unsigned int _ipu_get_bits( unsigned int arg0 )
+void _ipu_sync(void)
 {
-	_ipu_sync();
-	if (s_DataBuf[0] < arg0)
-	{
-		*R_EE_IPU_CMD = 0x40000000;
-		s_DataBuf[1] = _ipu_sync_data();
-		s_DataBuf[0] = 0x20;
-	}
-	*R_EE_IPU_CMD = arg0 | 0x40000000;
-	u32 var3 = s_DataBuf[1] >> (-arg0 & 0x1f);
-	s_DataBuf[0] = s_DataBuf[0] - arg0;
-	s_DataBuf[1] = s_DataBuf[1] << (arg0 & 0x1f);
-	return var3;
+    u32 ctrl = *R_EE_IPU_CTRL;
+
+    while ((ctrl & IPU_CTRL_ECD) == 0) {
+        if (_ipu_needs_bits()) {
+            if (_req_data()) {
+                return;
+            }
+        }
+
+        if ((ctrl & IPU_CTRL_BUSY) == 0) {
+            return;
+        }
+
+        ctrl = *R_EE_IPU_CTRL;
+    }
 }
 
-unsigned int _MPEG_GetBits ( unsigned int arg0 )
+u32 _ipu_sync_data(void)
 {
-	return _ipu_get_bits(arg0);
+    u32 ctrl = *R_EE_IPU_CTRL;
+    u64 cmd  = *R_EE_IPU_CMD;
+
+    while ((ctrl & IPU_CTRL_ECD) == 0) {
+        if (_ipu_needs_bits()) {
+            if (_req_data()) {
+                return _MPEG_CODE_SEQ_END;
+            }
+        }
+
+        if ((cmd & IPU_CMD_BUSY) == 0) {
+            return cmd;
+        }
+
+        cmd  = *R_EE_IPU_CMD;
+        ctrl = *R_EE_IPU_CTRL;
+    }
+
+    return cmd;
 }
 
-unsigned int _ipu_show_bits ( unsigned int arg0 )
+unsigned int _ipu_get_bits(unsigned int bits)
 {
-	if (s_DataBuf[0] < arg0)
-	{
-		_ipu_sync();
-		*R_EE_IPU_CMD = 0x40000000;
-		s_DataBuf[1] = _ipu_sync_data();
-		s_DataBuf[0] = 0x20;
-	}
-	return s_DataBuf[1] >> (-arg0 & 0x1f);
+    u32 ret;
+
+    _ipu_sync();
+    if (s_BitsBuffered < bits) {
+        *R_EE_IPU_CMD  = IPU_COMMAND_FDEC;
+        s_LocalBits    = _ipu_sync_data();
+        s_BitsBuffered = 32;
+    }
+    *R_EE_IPU_CMD  = IPU_COMMAND_FDEC | bits;
+    s_BitsBuffered = s_BitsBuffered - bits;
+    ret            = s_LocalBits >> ((32 - bits) & 0x1f);
+    s_LocalBits    = s_LocalBits << (bits & 0x1f);
+    // printf("_ipu_get_bits %d bits ==  %x (%08x)\n", bits, ret, s_LocalBits);
+
+    return ret;
 }
 
-unsigned int _MPEG_ShowBits ( unsigned int arg0 )
+
+unsigned int _MPEG_GetBits(unsigned int bits)
 {
-	return _ipu_show_bits(arg0);
+    return _ipu_get_bits(bits);
 }
 
-void _ipu_align_bits( void )
+unsigned int _ipu_show_bits(unsigned int bits)
 {
-	_ipu_sync();
-	u32 var3 = -(*R_EE_IPU_BP & 7) & 7;
-	if (var3 != 0)
-	{
-		_MPEG_GetBits(var3);
-	}
+    if (s_BitsBuffered < bits) {
+        _ipu_sync();
+        *R_EE_IPU_CMD  = IPU_COMMAND_FDEC;
+        s_LocalBits    = _ipu_sync_data();
+        s_BitsBuffered = 32;
+    }
+
+    // printf("_ipu_show_bits %d bits ==  %x (%08x)\n", bits, s_LocalBits >> ((32 - bits) & 0x1f), s_LocalBits);
+    return s_LocalBits >> ((32 - bits) & 0x1f);
 }
 
-void _MPEG_AlignBits ( void )
+unsigned int _MPEG_ShowBits(unsigned int bits)
 {
-	return _ipu_align_bits();
+    return _ipu_show_bits(bits);
 }
 
-unsigned int _MPEG_NextStartCode ( void )
+void _ipu_align_bits(void)
 {
-	_MPEG_AlignBits();
-	while (_MPEG_ShowBits(0x18) != 1)
-	{
-		_MPEG_GetBits(8);
-	}
-	return _MPEG_ShowBits(0x20);
+    _ipu_sync();
+    u32 var3 = -(*R_EE_IPU_BP & 7) & 7;
+    if (var3 != 0) {
+        _MPEG_GetBits(var3);
+    }
 }
 
-void _MPEG_SetDefQM ( int arg0 )
+void _MPEG_AlignBits(void)
 {
-	(void)arg0;
-
-	_ipu_suspend();
-	*R_EE_IPU_CMD = 0;
-	while (((*R_EE_IPU_CTRL) & 0x80000000) != 0);
-	R_EE_IPU_in_FIFO[0] = 0x13101008;
-	R_EE_IPU_in_FIFO[1] = 0x16161310;
-	R_EE_IPU_in_FIFO[2] = 0x16161616;
-	R_EE_IPU_in_FIFO[3] = 0x1B1A181A;
-	R_EE_IPU_in_FIFO[0] = 0x1A1A1B1B;
-	R_EE_IPU_in_FIFO[1] = 0x1B1B1A1A;
-	R_EE_IPU_in_FIFO[2] = 0x1D1D1D1B;
-	R_EE_IPU_in_FIFO[3] = 0x1D222222;
-	R_EE_IPU_in_FIFO[0] = 0x1B1B1D1D;
-	R_EE_IPU_in_FIFO[1] = 0x20201D1D;
-	R_EE_IPU_in_FIFO[2] = 0x26252222;
-	R_EE_IPU_in_FIFO[3] = 0x22232325;
-	R_EE_IPU_in_FIFO[0] = 0x28262623;
-	R_EE_IPU_in_FIFO[1] = 0x30302828;
-	R_EE_IPU_in_FIFO[2] = 0x38382E2E;
-	R_EE_IPU_in_FIFO[3] = 0x5345453A;
-	*R_EE_IPU_CMD = 0x50000000;
-	while (((*R_EE_IPU_CTRL) & 0x80000000) != 0);
-	R_EE_IPU_in_FIFO[0] = 0x10101010;
-	R_EE_IPU_in_FIFO[1] = 0x10101010;
-	R_EE_IPU_in_FIFO[2] = 0x10101010;
-	R_EE_IPU_in_FIFO[3] = 0x10101010;
-	R_EE_IPU_in_FIFO[0] = 0x10101010;
-	R_EE_IPU_in_FIFO[1] = 0x10101010;
-	R_EE_IPU_in_FIFO[2] = 0x10101010;
-	R_EE_IPU_in_FIFO[3] = 0x10101010;
-	R_EE_IPU_in_FIFO[0] = 0x10101010;
-	R_EE_IPU_in_FIFO[1] = 0x10101010;
-	R_EE_IPU_in_FIFO[2] = 0x10101010;
-	R_EE_IPU_in_FIFO[3] = 0x10101010;
-	R_EE_IPU_in_FIFO[0] = 0x10101010;
-	R_EE_IPU_in_FIFO[1] = 0x10101010;
-	R_EE_IPU_in_FIFO[2] = 0x10101010;
-	R_EE_IPU_in_FIFO[3] = 0x10101010;
-	*R_EE_IPU_CMD = 0x58000000;
-	while (((*R_EE_IPU_CTRL) & 0x80000000) != 0);
-	_MPEG_Resume();
+    _ipu_align_bits();
 }
 
-void _MPEG_SetQM ( int arg0 )
+unsigned int _MPEG_NextStartCode(void)
 {
-	_ipu_sync();
-	*R_EE_IPU_CMD = arg0 << 0x1b | 0x50000000;
-	s_DataBuf[0] = 0;
+    _MPEG_AlignBits();
+    while (_MPEG_ShowBits(24) != 1) {
+        _MPEG_GetBits(8);
+    }
+
+    return _MPEG_ShowBits(32);
 }
 
-int _MPEG_GetMBAI ( void )
+void _MPEG_SetDefQM(int arg0)
 {
-	_ipu_sync();
-	int var5 = 0;
-	u32 var4 = 0;
-	while (1)
-	{
-		*R_EE_IPU_CMD = 0x30000000;
-		var4 = _ipu_sync_data();
-		var4 &= 0xffff;
-		if (var4 == 0)
-		{
-			return 0;
-		}
-		if (var4 < 0x22)
-		{
-			break;
-		}
-		if (var4 == 0x23)
-		{
-			var5 += 0x21;
-		}
-	}
-	s_DataBuf[0] = 0x20;
-	s_DataBuf[1] = *R_EE_IPU_TOP;
-	return var5 + (int)var4;
+    (void)arg0;
+    qword_t *q;
+    int i;
+
+    _ipu_suspend();
+    *R_EE_IPU_CMD = IPU_COMMAND_BCLR;
+    while (*R_EE_IPU_CTRL & IPU_CTRL_BUSY)
+        ;
+
+    q = (qword_t *)s_QmIntra;
+    for (i = 0; i < 4; i++) {
+        __asm__ volatile(
+            "lq $2, 0(%0)    \n"
+            "sq $2, 0(%1)    \n"
+            :
+            : "d"(&q[i]), "d"(A_EE_IPU_in_FIFO)
+            : "2");
+    }
+
+    *R_EE_IPU_CMD = IPU_COMMAND_SETIQ;
+    while (*R_EE_IPU_CTRL & IPU_CTRL_BUSY)
+        ;
+
+    q = (qword_t *)s_QmNonIntra;
+    for (i = 0; i < 4; i++) {
+        __asm__ volatile(
+            "lq $2, 0(%0)    \n"
+            "sq $2, 0(%1)    \n"
+            :
+            : "d"(&q[i]), "d"(A_EE_IPU_in_FIFO)
+            : "2");
+    }
+
+    *R_EE_IPU_CMD = IPU_COMMAND_SETIQ | 0x08000000;
+    while (*R_EE_IPU_CTRL & IPU_CTRL_BUSY)
+        ;
+
+    _ipu_resume();
 }
 
-int _MPEG_GetMBType ( void )
+void _MPEG_SetQM(int iqm)
 {
-	_ipu_sync();
-	*R_EE_IPU_CMD = 0x34000000;
-	u32 var4 = _ipu_sync_data();
-	if (var4 != 0)
-	{
-		var4 &= 0xffff;
-		s_DataBuf[0] = 0x20;
-		s_DataBuf[1] = *R_EE_IPU_TOP;
-	}
-	return (int)var4;
+    _ipu_sync();
+    *R_EE_IPU_CMD  = IPU_COMMAND_SETIQ | iqm << 27;
+    s_BitsBuffered = 0;
 }
 
-int _MPEG_GetMotionCode ( void )
+int _MPEG_GetMBAI(void)
 {
-	_ipu_sync();
-	*R_EE_IPU_CMD = 0x38000000;
-	u32 var4 = _ipu_sync_data();
-	if (var4 == 0)
-	{
-		var4 = 0x8000;
-	}
-	else
-	{
-		var4 &= 0xffff;
-		s_DataBuf[0] = 0x20;
-		s_DataBuf[1] = *R_EE_IPU_TOP;
-	}
-	return (int)var4;
+    u32 mbai = 0, ret;
+    _ipu_sync();
+    while (1) {
+        *R_EE_IPU_CMD = IPU_COMMAND_VDEC | IPU_COMMAND_VDEC_MBAI;
+        ret           = _ipu_sync_data() & 0xffff;
+
+        if (ret == 0) {
+            return 0;
+        }
+
+        // Stuffing
+        if (ret == 0x22) {
+        }
+
+        // MB escape
+        if (ret == 0x23) {
+            mbai += 0x21;
+        }
+
+        if (ret < 0x22) {
+            mbai += ret;
+            break;
+        }
+    }
+
+    s_BitsBuffered = 32;
+    s_LocalBits    = *R_EE_IPU_TOP;
+    return mbai;
 }
 
-int _MPEG_GetDMVector ( void )
+int _MPEG_GetMBType(void)
 {
-	_ipu_sync();
-	*R_EE_IPU_CMD = 0x3c000000;
-	u32 var4 = _ipu_sync_data();
-	var4 &= 0xffff;
-	s_DataBuf[0] = 0x20;
-	s_DataBuf[1] = *R_EE_IPU_TOP;
-	return (int)var4;
+    _ipu_sync();
+    *R_EE_IPU_CMD = IPU_COMMAND_VDEC | IPU_COMMAND_VDEC_MBTYPE;
+    u32 ret       = _ipu_sync_data();
+    if (ret != 0) {
+        ret &= 0xffff;
+        s_BitsBuffered = 32;
+        s_LocalBits    = *R_EE_IPU_TOP;
+    }
+    return ret;
 }
 
-void _MPEG_SetIDCP ( void )
+int _MPEG_GetMotionCode(void)
 {
-	unsigned int var1 = _MPEG_GetBits(2);
-	*R_EE_IPU_CTRL = (*R_EE_IPU_CTRL & ~0x30000) | var1 << 0x10;
+    short mcode;
+    u32 ret;
+
+    _ipu_sync();
+    *R_EE_IPU_CMD = IPU_COMMAND_VDEC | IPU_COMMAND_VDEC_MCODE;
+    ret           = _ipu_sync_data();
+
+    if (ret == 0) {
+        return -32768;
+    }
+
+    s_BitsBuffered = 32;
+    s_LocalBits    = *R_EE_IPU_TOP;
+
+    mcode = (short)ret;
+
+    return mcode;
+}
+int _MPEG_GetDMVector(void)
+{
+    u32 ret;
+
+    _ipu_sync();
+    *R_EE_IPU_CMD  = IPU_COMMAND_VDEC | IPU_COMMAND_VDEC_DMV;
+    ret            = _ipu_sync_data() & 0xffff;
+    s_BitsBuffered = 32;
+    s_LocalBits    = *R_EE_IPU_TOP;
+    return ret;
 }
 
-void _MPEG_SetQSTIVFAS ( void )
+void _MPEG_SetIDCP(void)
 {
-	unsigned int var1 = _MPEG_GetBits(1);
-	unsigned int var2 = _MPEG_GetBits(1);
-	unsigned int var3 = _MPEG_GetBits(1);
-	*R_EE_IPU_CTRL = (*R_EE_IPU_CTRL & ~0x700000) | var1 << 0x16 | var2 << 0x15 | var3 << 0x14;
+    unsigned int var1 = _MPEG_GetBits(2);
+    *R_EE_IPU_CTRL    = (*R_EE_IPU_CTRL & ~0x30000) | var1 << 0x10;
 }
 
-void _MPEG_SetPCT ( unsigned int arg0 )
+void _MPEG_SetQSTIVFAS(void)
 {
-	u32 var3 = *R_EE_IPU_CTRL;
-	if (-1 < (int)var3)
-	{
-		*R_EE_IPU_CTRL = (var3 & ~0x7000000) | arg0 << 0x18;
-		return;
-	}
-	// TODO: validate. Bugged and in wrong place?
-	_ipu_sync();
+    unsigned int qst = _MPEG_GetBits(1);
+    unsigned int ivf = _MPEG_GetBits(1);
+    unsigned int as  = _MPEG_GetBits(1);
+    *R_EE_IPU_CTRL   = (*R_EE_IPU_CTRL & ~0x700000) | qst << 22 | ivf << 21 | as << 20;
 }
 
-void _MPEG_BDEC ( int arg0, int arg1, int arg2, int arg3, void* arg4 )
+void _MPEG_SetPCT(unsigned int arg0)
 {
-	*R_EE_D3_MADR = ((uint32_t)arg4 & ~0xf0000000) | 0x80000000;
-	*R_EE_D3_QWC = 0x30;
-	*R_EE_D3_CHCR = 0x100;
-	_ipu_sync();
-	*R_EE_IPU_CMD = arg0 << 0x1b | 0x20000000 | arg1 << 0x1a | arg2 << 0x19 | arg3 << 0x10;
+    _ipu_sync();
+    *R_EE_IPU_CTRL = (*R_EE_IPU_CTRL & ~0x07000000) | arg0 << 0x18;
 }
 
-int _MPEG_WaitBDEC ( void )
+void _MPEG_BDEC(int mbi, int dcr, int dt, int qsc, void *spaddr)
 {
-	while (1)
-	{
-		_ipu_sync();
-		if ((*s_pEOF != 0))
-		{
-			break;
-		}
-		u32 var1 = *R_EE_D3_QWC;
-		if ((*R_EE_IPU_CTRL & 0x4000) != 0)
-		{
-			break;
-		}
-		if (var1 == 0)
-		{
-			s_DataBuf[0] = 0x20;
-			s_DataBuf[1] = *R_EE_IPU_TOP;
-			return 1;
-		}
-	}
-	_ipu_suspend();
-	// XXX: $t1 is not set in this function, so probably from another function?
-	*R_EE_IPU_CTRL = 0x40000000;
-	_ipu_resume();
-	int eie;
-	do
-	{
-		DI();
-		EE_SYNCP();
-		asm volatile ("mfc0\t%0, $12" : "=r" (eie));
-		eie &= 0x10000;
-	}
-	while (eie != 0);
-	*R_EE_D_ENABLEW = *R_EE_D_ENABLER | 0x10000;
-	*R_EE_D3_CHCR = 0;
-	*R_EE_D_ENABLEW = *R_EE_D_ENABLER & ~0x10000;
-	EI();
-	*R_EE_D3_QWC = 0;
-	s_DataBuf[0] = 0;
-	s_DataBuf[1] = 0;
-	return 0;
+    *R_EE_D3_MADR = ((u32)spaddr & ~0xf0000000) | 0x80000000;
+    *R_EE_D3_QWC  = 0x30;
+    *R_EE_D3_CHCR = 0x100;
+    _ipu_sync();
+    *R_EE_IPU_CMD = IPU_COMMAND_BDEC | mbi << 27 | dcr << 26 | dt << 25 | qsc << 16;
 }
 
-void _MPEG_dma_ref_image ( _MPEGMacroBlock8* arg0, _MPEGMotion* arg1, s64 arg2, int arg3 )
+int _MPEG_WaitBDEC(void)
 {
-	u8* var00 = (u8*)arg0;
-	_MPEGMotion* var01 = (_MPEGMotion*)arg1;
-	u32 var3 = 4;
-	if (arg2 < 5)
-	{
-		var3 = arg2;
-	}
-	u64 var5 = (uint64_t)var3;
-	if (arg2 >> 0x1f < 1)
-	{
-		// TODO: correct implementation of CONCAT44?
-		var5 = ((u64)(arg2 >> 0x1f) << 32) | var3;
-	}
-	if (0 < var5)
-	{
-		while ((*R_EE_D9_CHCR & 0x100) != 0);
-		*R_EE_D9_QWC = 0;
-		*R_EE_D9_SADR = (u32)arg0 & ~0xf0000000;
-		*R_EE_D9_SADR = (u32)&s_DMAPack;
-		u32 *var2 = (u32 *)((u32)&s_DMAPack | 0x20000000);
-		u32 *var6;
-		do
-		{
-			var6 = var2;
-			u8 * var1 = var01->m_pSrc;
-			var5 -= 1;
-			var6[0] = 0x30000030;
-			var6[1] = (u32)var1;
-			var6[4] = 0x30000030;
-			var6[5] = (u32)var1 + arg3 * 0x180;
-			var01->m_pSrc = var00;
-			var00 += 4;
-			var2 = var6 + 2; // + 8 bytewise
-			var01 += 1;
-		}
-		while (var5 != 0);
-		var6[4] = 0x30;
-		var01 += 1;
-		var01->MC_Luma = (void *)0x0;
-		EE_SYNCL();
-		*R_EE_D9_CHCR = 0x105;
-	}
+    int oldintr;
+
+    while (1) {
+        _ipu_sync();
+        if ((*s_pEOF != 0)) {
+            break;
+        }
+
+        if (*R_EE_IPU_CTRL & IPU_CTRL_ECD) {
+            break;
+        }
+
+        if (*R_EE_D3_QWC == 0) {
+            s_BitsBuffered = 32;
+            s_LocalBits    = *R_EE_IPU_TOP;
+            return 1;
+        }
+    }
+
+    _ipu_suspend();
+    *R_EE_IPU_CTRL = IPU_CTRL_RST;
+    _ipu_resume();
+
+    oldintr         = DIntr();
+    *R_EE_D_ENABLEW = *R_EE_D_ENABLER | 0x10000;
+    *R_EE_D3_CHCR   = 0;
+    *R_EE_D_ENABLEW = *R_EE_D_ENABLER & ~0x10000;
+    if (oldintr) {
+        EIntr();
+    }
+    *R_EE_D3_QWC   = 0;
+    s_BitsBuffered = 0;
+    s_LocalBits    = 0;
+    return 0;
 }
 
-void _MPEG_put_block_fr(_MPEGMotions *a1)
+void _MPEG_dma_ref_image(_MPEGMacroBlock8 *mb, _MPEGMotion *motions, s64 n_motions, int width)
 {
-	u8 *m_pMBDstY;
-	u8 *m_pSrc;
-	int count;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9;
+    const u32 mbwidth = width * sizeof(*mb);
+    qword_t *q;
+    int i;
 
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		: [reg1] "=r"(reg1)
-	);
-	m_pMBDstY = a1->m_pMBDstY;
-	m_pSrc = a1->m_pSrc;
-	count = 6;
-	__asm__
-	(
-		"psrlh   %[reg1],  %[reg1], 8\n"
-		: [reg1] "+r"(reg1)
-	);
-	do
-	{
-		reg2 = ((u128 *)m_pSrc)[0];
-		reg9 = ((u128 *)m_pSrc)[1];
-		reg8 = ((u128 *)m_pSrc)[2];
-		reg7 = ((u128 *)m_pSrc)[3];
-		count -= 1;
-		reg3 = ((u128 *)m_pSrc)[4];
-		reg4 = ((u128 *)m_pSrc)[5];
-		reg5 = ((u128 *)m_pSrc)[6];
-		reg6 = ((u128 *)m_pSrc)[7];
-		m_pSrc += 128;
-		__asm__
-		(
-			"pmaxh   %[reg2], $zero, %[reg2]\n"
-			"pmaxh   %[reg9], $zero, %[reg9]\n"
-			"pmaxh   %[reg8], $zero, %[reg8]\n"
-			"pmaxh   %[reg7], $zero, %[reg7]\n"
-			"pmaxh   %[reg3], $zero, %[reg3]\n"
-			"pmaxh   %[reg4], $zero, %[reg4]\n"
-			"pmaxh   %[reg5], $zero, %[reg5]\n"
-			"pmaxh   %[reg6], $zero, %[reg6]\n"
-			"pminh   %[reg2], %[reg1], %[reg2]\n"
-			"pminh   %[reg9], %[reg1], %[reg9]\n"
-			"pminh   %[reg8], %[reg1], %[reg8]\n"
-			"pminh   %[reg7], %[reg1], %[reg7]\n"
-			"pminh   %[reg3], %[reg1], %[reg3]\n"
-			"pminh   %[reg4], %[reg1], %[reg4]\n"
-			"pminh   %[reg5], %[reg1], %[reg5]\n"
-			"pminh   %[reg6], %[reg1], %[reg6]\n"
-			"ppacb   %[reg2], %[reg9], %[reg2]\n"
-			"ppacb   %[reg8], %[reg7], %[reg8]\n"
-			"ppacb   %[reg3], %[reg4], %[reg3]\n"
-			"ppacb   %[reg5], %[reg6], %[reg5]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstY)[0] = reg2;
-		((u128 *)m_pMBDstY)[1] = reg8;
-		((u128 *)m_pMBDstY)[2] = reg3;
-		((u128 *)m_pMBDstY)[3] = reg5;
-		m_pMBDstY += 64;
-	}
-	while ( count > 0 );
+    if (n_motions > 0) {
+        while (*R_EE_D9_CHCR & 0x100)
+            ;
+
+        *R_EE_D9_QWC  = 0;
+        *R_EE_D9_SADR = (u32)mb & 0xFFFFFFF;
+        *R_EE_D9_TADR = (u32)s_DMAPack;
+
+        q = UNCACHED_SEG(s_DMAPack);
+        for (i = 0; i < n_motions; i++) {
+            DMATAG_REF(q, 0x30, (u32)motions[i].m_pSrc, 0, 0, 0);
+            q++;
+            DMATAG_REF(q, 0x30, (u32)motions[i].m_pSrc + mbwidth, 0, 0, 0);
+            q++;
+
+            motions[i].m_pSrc = (unsigned char *)mb;
+            mb += 4;
+        }
+
+        DMATAG_REFE(q, 0, 0, 0, 0, 0);
+        motions[i].MC_Luma = NULL;
+
+        EE_SYNCL();
+        *R_EE_D9_CHCR = 0x105;
+    }
 }
 
-void _MPEG_put_block_fl(_MPEGMotions *a1)
-{
-	u8 *m_pMBDstY;
-	u8 *m_pSrc;
-	int count;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9;
-
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		: [reg1] "=r"(reg1)
-	);
-	m_pMBDstY = a1->m_pMBDstY;
-	m_pSrc = a1->m_pSrc;
-	count = 4;
-	__asm__
-	(
-		"psrlh   %[reg1], %[reg1], 8\n"
-		: [reg1] "+r"(reg1)
-	);
-	do
-	{
-		reg2 = ((u128 *)m_pSrc)[0x00];
-		reg9 = ((u128 *)m_pSrc)[0x01];
-		reg8 = ((u128 *)m_pSrc)[0x02];
-		reg7 = ((u128 *)m_pSrc)[0x03];
-		count -= 1;
-		reg3 = ((u128 *)m_pSrc)[0x10];
-		reg4 = ((u128 *)m_pSrc)[0x11];
-		reg5 = ((u128 *)m_pSrc)[0x12];
-		reg6 = ((u128 *)m_pSrc)[0x13];
-		m_pSrc += 64;
-		__asm__
-		(
-			"pmaxh   %[reg2], $zero, %[reg2]\n"
-			"pmaxh   %[reg9], $zero, %[reg9]\n"
-			"pmaxh   %[reg8], $zero, %[reg8]\n"
-			"pmaxh   %[reg7], $zero, %[reg7]\n"
-			"pmaxh   %[reg3], $zero, %[reg3]\n"
-			"pmaxh   %[reg4], $zero, %[reg4]\n"
-			"pmaxh   %[reg5], $zero, %[reg5]\n"
-			"pmaxh   %[reg6], $zero, %[reg6]\n"
-			"pminh   %[reg2], %[reg1], %[reg2]\n"
-			"pminh   %[reg9], %[reg1], %[reg9]\n"
-			"pminh   %[reg8], %[reg1], %[reg8]\n"
-			"pminh   %[reg7], %[reg1], %[reg7]\n"
-			"pminh   %[reg3], %[reg1], %[reg3]\n"
-			"pminh   %[reg4], %[reg1], %[reg4]\n"
-			"pminh   %[reg5], %[reg1], %[reg5]\n"
-			"pminh   %[reg6], %[reg1], %[reg6]\n"
-			"ppacb   %[reg2], %[reg9], %[reg2]\n"
-			"ppacb   %[reg8], %[reg7], %[reg8]\n"
-			"ppacb   %[reg3], %[reg4], %[reg3]\n"
-			"ppacb   %[reg5], %[reg6], %[reg5]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstY)[0] = reg2;
-		((u128 *)m_pMBDstY)[1] = reg3;
-		((u128 *)m_pMBDstY)[2] = reg8;
-		((u128 *)m_pMBDstY)[3] = reg5;
-		m_pMBDstY += 64;
-	}
-	while ( count > 0 );
-	count += 2;
-	do
-	{
-		reg2 = ((u128 *)m_pSrc)[0x10];
-		reg9 = ((u128 *)m_pSrc)[0x11];
-		reg8 = ((u128 *)m_pSrc)[0x12];
-		reg7 = ((u128 *)m_pSrc)[0x13];
-		count -= 1;
-		reg3 = ((u128 *)m_pSrc)[0x14];
-		reg4 = ((u128 *)m_pSrc)[0x15];
-		reg5 = ((u128 *)m_pSrc)[0x16];
-		reg6 = ((u128 *)m_pSrc)[0x17];
-		m_pSrc += 128;
-		__asm__
-		(
-			"pmaxh   %[reg2], $zero, %[reg2]\n"
-			"pmaxh   %[reg9], $zero, %[reg9]\n"
-			"pmaxh   %[reg8], $zero, %[reg8]\n"
-			"pmaxh   %[reg7], $zero, %[reg7]\n"
-			"pmaxh   %[reg3], $zero, %[reg3]\n"
-			"pmaxh   %[reg4], $zero, %[reg4]\n"
-			"pmaxh   %[reg5], $zero, %[reg5]\n"
-			"pmaxh   %[reg6], $zero, %[reg6]\n"
-			"pminh   %[reg2], %[reg1], %[reg2]\n"
-			"pminh   %[reg9], %[reg1], %[reg9]\n"
-			"pminh   %[reg8], %[reg1], %[reg8]\n"
-			"pminh   %[reg7], %[reg1], %[reg7]\n"
-			"pminh   %[reg3], %[reg1], %[reg3]\n"
-			"pminh   %[reg4], %[reg1], %[reg4]\n"
-			"pminh   %[reg5], %[reg1], %[reg5]\n"
-			"pminh   %[reg6], %[reg1], %[reg6]\n"
-			"ppacb   %[reg2], %[reg9], %[reg2]\n"
-			"ppacb   %[reg8], %[reg7], %[reg8]\n"
-			"ppacb   %[reg3], %[reg4], %[reg3]\n"
-			"ppacb   %[reg5], %[reg6], %[reg5]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstY)[0] = reg2;
-		((u128 *)m_pMBDstY)[1] = reg8;
-		((u128 *)m_pMBDstY)[2] = reg3;
-		((u128 *)m_pMBDstY)[3] = reg5;
-		m_pMBDstY += 64;
-	}
-	while ( count > 0 );
-}
-
-void _MPEG_put_block_il(_MPEGMotions *a1)
-{
-	u8 *m_pMBDstY;
-	u8 *m_pSrc;
-	int count;
-	u8 *m_pMBDstCbCr;
-	u8 *v28;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9;
-
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		: [reg1] "=r"(reg1)
-	);
-	m_pMBDstY = a1->m_pMBDstY;
-	m_pSrc = a1->m_pSrc;
-	count = 4;
-	v28 = &m_pMBDstY[a1->m_Stride];
-	__asm__
-	(
-		"psrlh   %[reg1], %[reg1], 8\n"
-		: [reg1] "+r"(reg1)
-	);
-	do
-	{
-		reg2 = ((u128 *)m_pSrc)[0x00];
-		reg9 = ((u128 *)m_pSrc)[0x01];
-		reg8 = ((u128 *)m_pSrc)[0x02];
-		reg7 = ((u128 *)m_pSrc)[0x03];
-		count -= 1;
-		reg3 = ((u128 *)m_pSrc)[0x10];
-		reg4 = ((u128 *)m_pSrc)[0x11];
-		reg5 = ((u128 *)m_pSrc)[0x12];
-		reg6 = ((u128 *)m_pSrc)[0x13];
-		m_pSrc += 64;
-		__asm__
-		(
-			"pmaxh   %[reg2], $zero, %[reg2]\n"
-			"pmaxh   %[reg9], $zero, %[reg9]\n"
-			"pmaxh   %[reg8], $zero, %[reg8]\n"
-			"pmaxh   %[reg7], $zero, %[reg7]\n"
-			"pmaxh   %[reg3], $zero, %[reg3]\n"
-			"pmaxh   %[reg4], $zero, %[reg4]\n"
-			"pmaxh   %[reg5], $zero, %[reg5]\n"
-			"pmaxh   %[reg6], $zero, %[reg6]\n"
-			"pminh   %[reg2], %[reg1], %[reg2]\n"
-			"pminh   %[reg9], %[reg1], %[reg9]\n"
-			"pminh   %[reg8], %[reg1], %[reg8]\n"
-			"pminh   %[reg7], %[reg1], %[reg7]\n"
-			"pminh   %[reg3], %[reg1], %[reg3]\n"
-			"pminh   %[reg4], %[reg1], %[reg4]\n"
-			"pminh   %[reg5], %[reg1], %[reg5]\n"
-			"pminh   %[reg6], %[reg1], %[reg6]\n"
-			"ppacb   %[reg2], %[reg9], %[reg2]\n"
-			"ppacb   %[reg8], %[reg7], %[reg8]\n"
-			"ppacb   %[reg3], %[reg4], %[reg3]\n"
-			"ppacb   %[reg5], %[reg6], %[reg5]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstY)[0x00] = reg2;
-		((u128 *)m_pMBDstY)[0x02] = reg8;
-		m_pMBDstY += 64;
-		((u128 *)v28)[0x00] = reg3;
-		((u128 *)v28)[0x02] = reg5;
-		v28 += 64;
-	}
-	while ( count > 0 );
-	m_pMBDstCbCr = a1->m_pMBDstCbCr;
-	count = 2;
-	v28 = &m_pMBDstCbCr[a1->m_Stride];
-	do
-	{
-		reg2 = ((u128 *)m_pSrc)[0x10];
-		reg9 = ((u128 *)m_pSrc)[0x11];
-		reg8 = ((u128 *)m_pSrc)[0x12];
-		reg7 = ((u128 *)m_pSrc)[0x13];
-		count -= 1;
-		reg3 = ((u128 *)m_pSrc)[0x14];
-		reg4 = ((u128 *)m_pSrc)[0x15];
-		reg5 = ((u128 *)m_pSrc)[0x16];
-		reg6 = ((u128 *)m_pSrc)[0x17];
-		m_pSrc += 128;
-		__asm__
-		(
-			"pmaxh   %[reg2], $zero, %[reg2]\n"
-			"pmaxh   %[reg9], $zero, %[reg9]\n"
-			"pmaxh   %[reg8], $zero, %[reg8]\n"
-			"pmaxh   %[reg7], $zero, %[reg7]\n"
-			"pmaxh   %[reg3], $zero, %[reg3]\n"
-			"pmaxh   %[reg4], $zero, %[reg4]\n"
-			"pmaxh   %[reg5], $zero, %[reg5]\n"
-			"pmaxh   %[reg6], $zero, %[reg6]\n"
-			"pminh   %[reg2], %[reg1], %[reg2]\n"
-			"pminh   %[reg9], %[reg1], %[reg9]\n"
-			"pminh   %[reg8], %[reg1], %[reg8]\n"
-			"pminh   %[reg7], %[reg1], %[reg7]\n"
-			"pminh   %[reg3], %[reg1], %[reg3]\n"
-			"pminh   %[reg4], %[reg1], %[reg4]\n"
-			"pminh   %[reg5], %[reg1], %[reg5]\n"
-			"pminh   %[reg6], %[reg1], %[reg6]\n"
-			"ppacb   %[reg2], $zero, %[reg2]\n"
-			"ppacb   %[reg9], $zero, %[reg9]\n"
-			"ppacb   %[reg8], $zero, %[reg8]\n"
-			"ppacb   %[reg7], $zero, %[reg7]\n"
-			"ppacb   %[reg3], $zero, %[reg3]\n"
-			"ppacb   %[reg4], $zero, %[reg4]\n"
-			"ppacb   %[reg5], $zero, %[reg5]\n"
-			"ppacb   %[reg6], $zero, %[reg6]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u64 *)m_pMBDstCbCr)[0x00] = reg2;
-		((u64 *)m_pMBDstCbCr)[0x02] = reg9;
-		((u64 *)m_pMBDstCbCr)[0x04] = reg8;
-		((u64 *)m_pMBDstCbCr)[0x06] = reg7;
-		((u64 *)v28)[0x00] = reg3;
-		((u64 *)v28)[0x02] = reg4;
-		((u64 *)v28)[0x04] = reg5;
-		((u64 *)v28)[0x06] = reg6;
-		m_pMBDstCbCr += 64;
-		v28 += 64;
-	}
-	while ( count > 0 );
-}
-
-void _MPEG_add_block_frfr(_MPEGMotions *a1)
-{
-	u8 *m_pMBDstY;
-	u8 *m_pSPRBlk;
-	u8 *m_pSPRRes;
-	int count;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9;
-
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		: [reg1] "=r"(reg1)
-	);
-	m_pMBDstY = a1->m_pMBDstY;
-	m_pSPRBlk = a1->m_pSPRBlk;
-	m_pSPRRes = a1->m_pSPRRes;
-	count = 6;
-	__asm__
-	(
-		"psrlh   %[reg1], %[reg1], 8\n"
-		: [reg1] "+r"(reg1)
-	);
-	do
-	{
-		reg2 = ((u128 *)m_pSPRBlk)[0x00];
-		reg9 = ((u128 *)m_pSPRBlk)[0x01];
-		reg8 = ((u128 *)m_pSPRBlk)[0x02];
-		reg7 = ((u128 *)m_pSPRBlk)[0x03];
-		count -= 1;
-		reg3 = ((u128 *)m_pSPRRes)[0x00];
-		reg4 = ((u128 *)m_pSPRRes)[0x01];
-		reg5 = ((u128 *)m_pSPRRes)[0x02];
-		reg6 = ((u128 *)m_pSPRRes)[0x03];
-		__asm__
-		(
-			"paddh   %[reg2], %[reg2], %[reg3]\n"
-			"paddh   %[reg9], %[reg9], %[reg4]\n"
-			"paddh   %[reg8], %[reg8], %[reg5]\n"
-			"paddh   %[reg7], %[reg7], %[reg6]\n"
-			"pmaxh   %[reg2], $zero, %[reg2]\n"
-			"pmaxh   %[reg9], $zero, %[reg9]\n"
-			"pmaxh   %[reg8], $zero, %[reg8]\n"
-			"pmaxh   %[reg7], $zero, %[reg7]\n"
-			"pminh   %[reg2], %[reg1], %[reg2]\n"
-			"pminh   %[reg9], %[reg1], %[reg9]\n"
-			"pminh   %[reg8], %[reg1], %[reg8]\n"
-			"pminh   %[reg7], %[reg1], %[reg7]\n"
-			"ppacb   %[reg2], %[reg9], %[reg2]\n"
-			"ppacb   %[reg8], %[reg7], %[reg8]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstY)[0x00] = reg2;
-		((u128 *)m_pMBDstY)[0x01] = reg8;
-		reg3 = ((u128 *)m_pSPRBlk)[0x04];
-		reg4 = ((u128 *)m_pSPRBlk)[0x05];
-		reg5 = ((u128 *)m_pSPRBlk)[0x06];
-		reg6 = ((u128 *)m_pSPRBlk)[0x07];
-		m_pSPRBlk += 128;
-		reg2 = ((u128 *)m_pSPRRes)[0x04];
-		reg9 = ((u128 *)m_pSPRRes)[0x05];
-		reg8 = ((u128 *)m_pSPRRes)[0x06];
-		reg7 = ((u128 *)m_pSPRRes)[0x07];
-		m_pSPRRes += 128;
-		__asm__
-		(
-			"paddh   %[reg3], %[reg3], %[reg2]\n"
-			"paddh   %[reg4], %[reg4], %[reg9]\n"
-			"paddh   %[reg5], %[reg5], %[reg8]\n"
-			"paddh   %[reg6], %[reg6], %[reg7]\n"
-			"pmaxh   %[reg3], $zero, %[reg3]\n"
-			"pmaxh   %[reg4], $zero, %[reg4]\n"
-			"pmaxh   %[reg5], $zero, %[reg5]\n"
-			"pmaxh   %[reg6], $zero, %[reg6]\n"
-			"pminh   %[reg3], %[reg1], %[reg3]\n"
-			"pminh   %[reg4], %[reg1], %[reg4]\n"
-			"pminh   %[reg5], %[reg1], %[reg5]\n"
-			"pminh   %[reg6], %[reg1], %[reg6]\n"
-			"ppacb   %[reg3], %[reg4], %[reg3]\n"
-			"ppacb   %[reg5], %[reg6], %[reg5]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstY)[0x02] = reg3;
-		((u128 *)m_pMBDstY)[0x03] = reg5;
-		m_pMBDstY += 64;
-	}
-	while ( count > 0 );
-}
-
-void _MPEG_add_block_ilfl(_MPEGMotions *a1)
-{
-	u8 *m_pMBDstY;
-	u8 *m_pSPRBlk;
-	u8 *m_pSPRRes;
-	int count;
-	u8 *v6;
-	u8 *m_pMBDstCbCr;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9;
-
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		: [reg1] "=r"(reg1)
-	);
-	m_pMBDstY = a1->m_pMBDstY;
-	m_pSPRBlk = a1->m_pSPRBlk;
-	m_pSPRRes = a1->m_pSPRRes;
-	count = 4;
-	__asm__
-	(
-		"psrlh   %[reg1], %[reg1], 8\n"
-		: [reg1] "+r"(reg1)
-	);
-	v6 = &m_pMBDstY[a1->m_Stride];
-	do
-	{
-		reg2 = ((u128 *)m_pSPRBlk)[0x00];
-		reg9 = ((u128 *)m_pSPRBlk)[0x01];
-		reg8 = ((u128 *)m_pSPRBlk)[0x02];
-		reg7 = ((u128 *)m_pSPRBlk)[0x03];
-		count -= 1;
-		reg3 = ((u128 *)m_pSPRRes)[0x00];
-		reg4 = ((u128 *)m_pSPRRes)[0x01];
-		reg5 = ((u128 *)m_pSPRRes)[0x02];
-		reg6 = ((u128 *)m_pSPRRes)[0x03];
-		__asm__
-		(
-			"paddh   %[reg2], %[reg2], %[reg3]\n"
-			"paddh   %[reg9], %[reg9], %[reg4]\n"
-			"paddh   %[reg8], %[reg8], %[reg5]\n"
-			"paddh   %[reg7], %[reg7], %[reg6]\n"
-			"pmaxh   %[reg2], $zero, %[reg2]\n"
-			"pmaxh   %[reg9], $zero, %[reg9]\n"
-			"pmaxh   %[reg8], $zero, %[reg8]\n"
-			"pmaxh   %[reg7], $zero, %[reg7]\n"
-			"pminh   %[reg2], %[reg1], %[reg2]\n"
-			"pminh   %[reg9], %[reg1], %[reg9]\n"
-			"pminh   %[reg8], %[reg1], %[reg8]\n"
-			"pminh   %[reg7], %[reg1], %[reg7]\n"
-			"ppacb   %[reg2], %[reg9], %[reg2]\n"
-			"ppacb   %[reg8], %[reg7], %[reg8]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstY)[0] = reg2;
-		((u128 *)m_pMBDstY)[2] = reg8;
-		reg3 = ((u128 *)m_pSPRBlk)[0x10];
-		reg4 = ((u128 *)m_pSPRBlk)[0x11];
-		reg5 = ((u128 *)m_pSPRBlk)[0x12];
-		reg6 = ((u128 *)m_pSPRBlk)[0x13];
-		m_pSPRBlk += 64;
-		reg2 = ((u128 *)m_pSPRRes)[0x10];
-		reg9 = ((u128 *)m_pSPRRes)[0x11];
-		reg8 = ((u128 *)m_pSPRRes)[0x12];
-		reg7 = ((u128 *)m_pSPRRes)[0x13];
-		__asm__
-		(
-			"paddh   %[reg3], %[reg3], %[reg2]\n"
-			"paddh   %[reg4], %[reg4], %[reg9]\n"
-			"paddh   %[reg5], %[reg5], %[reg8]\n"
-			"paddh   %[reg6], %[reg6], %[reg7]\n"
-			"pmaxh   %[reg3], $zero, %[reg3]\n"
-			"pmaxh   %[reg4], $zero, %[reg4]\n"
-			"pmaxh   %[reg5], $zero, %[reg5]\n"
-			"pmaxh   %[reg6], $zero, %[reg6]\n"
-			"pminh   %[reg3], %[reg1], %[reg3]\n"
-			"pminh   %[reg4], %[reg1], %[reg4]\n"
-			"pminh   %[reg5], %[reg1], %[reg5]\n"
-			"pminh   %[reg6], %[reg1], %[reg6]\n"
-			"ppacb   %[reg3], %[reg4], %[reg3]\n"
-			"ppacb   %[reg5], %[reg6], %[reg5]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)v6)[0x00] = reg3;
-		((u128 *)v6)[0x02] = reg5;
-		v6 += 64;
-		m_pSPRRes += 64;
-	}
-	while ( count > 0 );
-	m_pMBDstCbCr = a1->m_pMBDstCbCr;
-	count = 2;
-	v6 = &m_pMBDstCbCr[a1->m_Stride];
-	do
-	{
-		reg2 = ((u128 *)m_pSPRBlk)[0x10];
-		reg9 = ((u128 *)m_pSPRBlk)[0x11];
-		reg8 = ((u128 *)m_pSPRBlk)[0x12];
-		reg7 = ((u128 *)m_pSPRBlk)[0x13];
-		count -= 1;
-		reg3 = ((u128 *)m_pSPRRes)[0x10];
-		reg4 = ((u128 *)m_pSPRRes)[0x11];
-		reg5 = ((u128 *)m_pSPRRes)[0x12];
-		reg6 = ((u128 *)m_pSPRRes)[0x13];
-		__asm__
-		(
-			"paddh   %[reg2], %[reg2], %[reg3]\n"
-			"paddh   %[reg9], %[reg9], %[reg4]\n"
-			"paddh   %[reg8], %[reg8], %[reg5]\n"
-			"paddh   %[reg7], %[reg7], %[reg6]\n"
-			"pmaxh   %[reg2], $zero, %[reg2]\n"
-			"pmaxh   %[reg9], $zero, %[reg9]\n"
-			"pmaxh   %[reg8], $zero, %[reg8]\n"
-			"pmaxh   %[reg7], $zero, %[reg7]\n"
-			"pminh   %[reg2], %[reg1], %[reg2]\n"
-			"pminh   %[reg9], %[reg1], %[reg9]\n"
-			"pminh   %[reg8], %[reg1], %[reg8]\n"
-			"pminh   %[reg7], %[reg1], %[reg7]\n"
-			"ppacb   %[reg2], $zero, %[reg2]\n"
-			"ppacb   %[reg9], $zero, %[reg9]\n"
-			"ppacb   %[reg8], $zero, %[reg8]\n"
-			"ppacb   %[reg7], $zero, %[reg7]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u64 *)m_pMBDstCbCr)[0] = reg2;
-		((u64 *)m_pMBDstCbCr)[2] = reg9;
-		((u64 *)m_pMBDstCbCr)[4] = reg8;
-		((u64 *)m_pMBDstCbCr)[6] = reg7;
-		reg3 = ((u128 *)m_pSPRBlk)[0x14];
-		reg4 = ((u128 *)m_pSPRBlk)[0x15];
-		reg5 = ((u128 *)m_pSPRBlk)[0x16];
-		reg6 = ((u128 *)m_pSPRBlk)[0x17];
-		m_pSPRBlk += 128;
-		reg2 = ((u128 *)m_pSPRRes)[0x14];
-		reg9 = ((u128 *)m_pSPRRes)[0x15];
-		reg8 = ((u128 *)m_pSPRRes)[0x16];
-		reg7 = ((u128 *)m_pSPRRes)[0x17];
-		__asm__
-		(
-			"paddh   %[reg3], %[reg3], %[reg2]\n"
-			"paddh   %[reg4], %[reg4], %[reg9]\n"
-			"paddh   %[reg5], %[reg5], %[reg8]\n"
-			"paddh   %[reg6], %[reg6], %[reg7]\n"
-			"pmaxh   %[reg3], $zero, %[reg3]\n"
-			"pmaxh   %[reg4], $zero, %[reg4]\n"
-			"pmaxh   %[reg5], $zero, %[reg5]\n"
-			"pmaxh   %[reg6], $zero, %[reg6]\n"
-			"pminh   %[reg3], %[reg1], %[reg3]\n"
-			"pminh   %[reg4], %[reg1], %[reg4]\n"
-			"pminh   %[reg5], %[reg1], %[reg5]\n"
-			"pminh   %[reg6], %[reg1], %[reg6]\n"
-			"ppacb   %[reg3], $zero, %[reg3]\n"
-			"ppacb   %[reg4], $zero, %[reg4]\n"
-			"ppacb   %[reg5], $zero, %[reg5]\n"
-			"ppacb   %[reg6], $zero, %[reg6]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u64 *)v6)[0x00] = reg3;
-		((u64 *)v6)[0x02] = reg4;
-		((u64 *)v6)[0x04] = reg5;
-		((u64 *)v6)[0x06] = reg6;
-		m_pMBDstCbCr += 64;
-		v6 += 64;
-	}
-	while ( count > 0 );
-}
-
-void _MPEG_add_block_frfl(_MPEGMotions *a1)
-{
-	u8 *m_pSPRBlk;
-	u8 *m_pSPRRes;
-	int count;
-	u8 *m_pMBDstCbCr;
-	u8 *m_pMBDstY;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9;
-
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		: [reg1] "=r"(reg1)
-	);
-	m_pSPRBlk = a1->m_pSPRBlk;
-	m_pSPRRes = a1->m_pSPRRes;
-	m_pMBDstY = a1->m_pMBDstY;
-	count = 4;
-	__asm__
-	(
-		"psrlh   %[reg1], %[reg1], 8\n"
-		: [reg1] "+r"(reg1)
-	);
-	do
-	{
-		reg2 = ((u128 *)m_pSPRBlk)[0x00];
-		reg9 = ((u128 *)m_pSPRBlk)[0x01];
-		reg8 = ((u128 *)m_pSPRBlk)[0x02];
-		reg7 = ((u128 *)m_pSPRBlk)[0x03];
-		count -= 1;
-		reg3 = ((u128 *)m_pSPRRes)[0x00];
-		reg4 = ((u128 *)m_pSPRRes)[0x01];
-		reg5 = ((u128 *)m_pSPRRes)[0x10];
-		reg6 = ((u128 *)m_pSPRRes)[0x11];
-		__asm__
-		(
-			"paddh   %[reg2], %[reg2], %[reg3]\n"
-			"paddh   %[reg9], %[reg9], %[reg4]\n"
-			"paddh   %[reg8], %[reg8], %[reg5]\n"
-			"paddh   %[reg7], %[reg7], %[reg6]\n"
-			"pmaxh   %[reg2], $zero, %[reg2]\n"
-			"pmaxh   %[reg9], $zero, %[reg9]\n"
-			"pmaxh   %[reg8], $zero, %[reg8]\n"
-			"pmaxh   %[reg7], $zero, %[reg7]\n"
-			"pminh   %[reg2], %[reg1], %[reg2]\n"
-			"pminh   %[reg9], %[reg1], %[reg9]\n"
-			"pminh   %[reg8], %[reg1], %[reg8]\n"
-			"pminh   %[reg7], %[reg1], %[reg7]\n"
-			"ppacb   %[reg2], %[reg9], %[reg2]\n"
-			"ppacb   %[reg8], %[reg7], %[reg8]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstY)[0x00] = reg2;
-		((u128 *)m_pMBDstY)[0x01] = reg8;
-		reg3 = ((u128 *)m_pSPRBlk)[0x04];
-		reg4 = ((u128 *)m_pSPRBlk)[0x05];
-		reg5 = ((u128 *)m_pSPRBlk)[0x06];
-		reg6 = ((u128 *)m_pSPRBlk)[0x07];
-		m_pSPRBlk += 128;
-		reg2 = ((u128 *)m_pSPRRes)[0x02];
-		reg9 = ((u128 *)m_pSPRRes)[0x03];
-		reg8 = ((u128 *)m_pSPRRes)[0x12];
-		reg7 = ((u128 *)m_pSPRRes)[0x13];
-		__asm__
-		(
-			"paddh   %[reg3], %[reg3], %[reg2]\n"
-			"paddh   %[reg4], %[reg4], %[reg9]\n"
-			"paddh   %[reg5], %[reg5], %[reg8]\n"
-			"paddh   %[reg6], %[reg6], %[reg7]\n"
-			"pmaxh   %[reg3], $zero, %[reg3]\n"
-			"pmaxh   %[reg4], $zero, %[reg4]\n"
-			"pmaxh   %[reg5], $zero, %[reg5]\n"
-			"pmaxh   %[reg6], $zero, %[reg6]\n"
-			"pminh   %[reg3], %[reg1], %[reg3]\n"
-			"pminh   %[reg4], %[reg1], %[reg4]\n"
-			"pminh   %[reg5], %[reg1], %[reg5]\n"
-			"pminh   %[reg6], %[reg1], %[reg6]\n"
-			"ppacb   %[reg3], %[reg4], %[reg3]\n"
-			"ppacb   %[reg5], %[reg6], %[reg5]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstY)[0x02] = reg3;
-		((u128 *)m_pMBDstY)[0x03] = reg5;
-		m_pSPRRes += 64;
-		m_pMBDstY += 64;
-	}
-	while ( count > 0 );
-	m_pMBDstCbCr = a1->m_pMBDstCbCr;
-	count = 2;
-	do
-	{
-		reg2 = ((u128 *)m_pSPRBlk)[0x00];
-		reg9 = ((u128 *)m_pSPRBlk)[0x01];
-		reg8 = ((u128 *)m_pSPRBlk)[0x02];
-		reg7 = ((u128 *)m_pSPRBlk)[0x03];
-		count -= 1;
-		reg3 = ((u128 *)m_pSPRRes)[0x10];
-		reg4 = ((u128 *)m_pSPRRes)[0x14];
-		reg5 = ((u128 *)m_pSPRRes)[0x11];
-		reg6 = ((u128 *)m_pSPRRes)[0x15];
-		__asm__
-		(
-			"paddh   %[reg2], %[reg2], %[reg3]\n"
-			"paddh   %[reg9], %[reg9], %[reg4]\n"
-			"paddh   %[reg8], %[reg8], %[reg5]\n"
-			"paddh   %[reg7], %[reg7], %[reg6]\n"
-			"pmaxh   %[reg2], $zero, %[reg2]\n"
-			"pmaxh   %[reg9], $zero, %[reg9]\n"
-			"pmaxh   %[reg8], $zero, %[reg8]\n"
-			"pmaxh   %[reg7], $zero, %[reg7]\n"
-			"pminh   %[reg2], %[reg1], %[reg2]\n"
-			"pminh   %[reg9], %[reg1], %[reg9]\n"
-			"pminh   %[reg8], %[reg1], %[reg8]\n"
-			"pminh   %[reg7], %[reg1], %[reg7]\n"
-			"ppacb   %[reg2], %[reg9], %[reg2]\n"
-			"ppacb   %[reg8], %[reg7], %[reg8]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstCbCr)[0x00] = reg2;
-		((u128 *)m_pMBDstCbCr)[0x01] = reg8;
-		reg3 = ((u128 *)m_pSPRBlk)[0x04];
-		reg4 = ((u128 *)m_pSPRBlk)[0x05];
-		reg5 = ((u128 *)m_pSPRBlk)[0x06];
-		reg6 = ((u128 *)m_pSPRBlk)[0x07];
-		m_pSPRBlk += 128;
-		reg2 = ((u128 *)m_pSPRRes)[0x12];
-		reg9 = ((u128 *)m_pSPRRes)[0x16];
-		reg8 = ((u128 *)m_pSPRRes)[0x13];
-		reg7 = ((u128 *)m_pSPRRes)[0x17];
-		__asm__
-		(
-			"paddh   %[reg3], %[reg3], %[reg2]\n"
-			"paddh   %[reg4], %[reg4], %[reg9]\n"
-			"paddh   %[reg5], %[reg5], %[reg8]\n"
-			"paddh   %[reg6], %[reg6], %[reg7]\n"
-			"pmaxh   %[reg3], $zero, %[reg3]\n"
-			"pmaxh   %[reg4], $zero, %[reg4]\n"
-			"pmaxh   %[reg5], $zero, %[reg5]\n"
-			"pmaxh   %[reg6], $zero, %[reg6]\n"
-			"pminh   %[reg3], %[reg1], %[reg3]\n"
-			"pminh   %[reg4], %[reg1], %[reg4]\n"
-			"pminh   %[reg5], %[reg1], %[reg5]\n"
-			"pminh   %[reg6], %[reg1], %[reg6]\n"
-			"ppacb   %[reg3], %[reg4], %[reg3]\n"
-			"ppacb   %[reg5], %[reg6], %[reg5]\n"
-			: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			: [reg1] "r"(reg1)
-		);
-		((u128 *)m_pMBDstCbCr)[0x02] = reg3;
-		((u128 *)m_pMBDstCbCr)[0x03] = reg5;
-		m_pMBDstCbCr += 64;
-		m_pSPRRes += 128;
-	}
-	while ( count > 0 );
-}
-
+/*
 // TODO: verify delay slots
-void _MPEG_do_mc ( _MPEGMotion* arg0 )
+void _MPEG_do_mc(_MPEGMotion *arg0)
 {
-	int var0 = 16; // addiu   $v0, $zero, 16
-	u8* arg1 = arg0->m_pSrc; // lw      $a1,  0($a0)
-	// addiu   $sp, $sp, -16
-	u16* arg2 = (u16 *)arg0->m_pDstY; // lw      $a2,  4($a0)
-	int arg3 = arg0->m_X; // lw      $a3, 12($a0)
-	int tmp0 = arg0->m_Y; // lw      $t0, 16($a0)
-	int tmp1 = arg0->m_H; // lw      $t1, 20($a0)
-	int tmp2 = arg0->m_fInt; // lw      $t2, 24($a0)
-	int tmp4 = arg0->m_Field; // lw      $t4, 28($a0)
-	// lw      $t5, 32($a0) <-- MC_Luma
-	tmp0 -= tmp4; // subu    $t0, $t0, $t4
-	tmp4 <<= 4; // sll     $t4, $t4, 4
-	arg1 += tmp4; // addu    $a1, $a1, $t4
-	int var1 = var0 - tmp0; // subu    $v1, $v0, $t0
-	int tmp3 = var0 << tmp2; // sllv    $t3, $v0, $t2
-	var1 >>= tmp2; // srlv    $v1, $v1, $t2
-	int ta = tmp0 << 4; // sll     $at, $t0, 4
-	// sw      $ra, 0($sp)
-	arg1 += ta; // addu    $a1, $a1, $at
-	ta = tmp1 - var1; // subu    $at, $t1, $v1
-	arg0->MC_Luma(arg1, arg2, arg3, tmp3, var1, ta); // jalr    $t5
-	arg1 = arg0->m_pSrc; // lw      $a1,  0($a0)
-	arg2 = (u16 *)arg0->m_pDstCbCr; // lw      $a2,  8($a0)
-	// lw      $t5, 36($a0) <-- MC_Chroma
-	arg1 += 256; // addiu   $a1, $a1, 256
-	tmp4 >>= 1; // srl     $t4, $t4, 1
-	arg3 >>= 1; // srl     $a3, $a3, 1
-	tmp0 >>= 1; // srl     $t0, $t0, 1
-	tmp1 >>= 1; // srl     $t1, $t1, 1
-	// lw      $ra, 0($sp)
-	tmp0 >>= tmp2; // srlv    $t0, $t0, $t2
-	arg1 += tmp4; // addu    $a1, $a1, $t4
-	var0 = 8; // addiu   $v0, $zero, 8
-	tmp0 <<= tmp2; // sllv    $t0, $t0, $t2
-	var1 = var0 - tmp0; // subu    $v1, $v0, $t0
-	tmp3 = var0 << tmp2; // sllv    $t3, $v0, $t2
-	var1 >>= tmp2; // srlv    $v1, $v1, $t2
-	ta = tmp0 << 3; // sll     $at, $t0, 3
-	arg1 += ta; // addu    $a1, $a1, $at
-	ta = tmp1 - var1; // subu    $at, $t1, $v1
-	arg0->MC_Chroma(arg1, arg2, arg3, tmp3, var1, ta); // jr      $t5
-	// addiu   $sp, $sp, 16
+    int var0 = 16;           // addiu   $v0, $zero, 16
+    u8 *arg1 = arg0->m_pSrc; // lw      $a1,  0($a0)
+    // addiu   $sp, $sp, -16
+    u16 *arg2 = (u16 *)arg0->m_pDstY; // lw      $a2,  4($a0)
+    int arg3  = arg0->m_X;            // lw      $a3, 12($a0)
+    int tmp0  = arg0->m_Y;            // lw      $t0, 16($a0)
+    int tmp1  = arg0->m_H;            // lw      $t1, 20($a0)
+    int tmp2  = arg0->m_fInt;         // lw      $t2, 24($a0)
+    int tmp4  = arg0->m_Field;        // lw      $t4, 28($a0)
+    // lw      $t5, 32($a0) <-- MC_Luma
+    tmp0 -= tmp4;            // subu    $t0, $t0, $t4
+    tmp4 <<= 4;              // sll     $t4, $t4, 4
+    arg1 += tmp4;            // addu    $a1, $a1, $t4
+    int var1 = var0 - tmp0;  // subu    $v1, $v0, $t0
+    int tmp3 = var0 << tmp2; // sllv    $t3, $v0, $t2
+    var1 >>= tmp2;           // srlv    $v1, $v1, $t2
+    int ta = tmp0 << 4;      // sll     $at, $t0, 4
+    // sw      $ra, 0($sp)
+    arg1 += ta;                                      // addu    $a1, $a1, $at
+    ta = tmp1 - var1;                                // subu    $at, $t1, $v1
+    arg0->MC_Luma(arg1, arg2, arg3, tmp3, var1, ta); // jalr    $t5
+    arg1 = arg0->m_pSrc;                             // lw      $a1,  0($a0)
+    arg2 = (u16 *)arg0->m_pDstCbCr;                  // lw      $a2,  8($a0)
+    // lw      $t5, 36($a0) <-- MC_Chroma
+    arg1 += 256; // addiu   $a1, $a1, 256
+    tmp4 >>= 1;  // srl     $t4, $t4, 1
+    arg3 >>= 1;  // srl     $a3, $a3, 1
+    tmp0 >>= 1;  // srl     $t0, $t0, 1
+    tmp1 >>= 1;  // srl     $t1, $t1, 1
+    // lw      $ra, 0($sp)
+    tmp0 >>= tmp2;                                     // srlv    $t0, $t0, $t2
+    arg1 += tmp4;                                      // addu    $a1, $a1, $t4
+    var0 = 8;                                          // addiu   $v0, $zero, 8
+    tmp0 <<= tmp2;                                     // sllv    $t0, $t0, $t2
+    var1 = var0 - tmp0;                                // subu    $v1, $v0, $t0
+    tmp3 = var0 << tmp2;                               // sllv    $t3, $v0, $t2
+    var1 >>= tmp2;                                     // srlv    $v1, $v1, $t2
+    ta = tmp0 << 3;                                    // sll     $at, $t0, 3
+    arg1 += ta;                                        // addu    $a1, $a1, $at
+    ta = tmp1 - var1;                                  // subu    $at, $t1, $v1
+    arg0->MC_Chroma(arg1, arg2, arg3, tmp3, var1, ta); // jr      $t5
+                                                       // addiu   $sp, $sp, 16
 }
-
-
-static inline void set_mtsab_to_value(int value)
-{
-	if (value == 1)
-	{
-		// XXX: mtsab difference?
-#if 1
-		__asm__ volatile
-		(
-			"mtsab   $zero, 1\n"
-		);
-#else
-		int tmp;
-		__asm__ volatile
-		(
-			"addiu   %[tmp], $zero, 1\n"
-			"mtsab   %[tmp], 0\n"
-			: [tmp] "=r"(tmp)
-		);
-#endif
-	}
-	else
-	{
-		int tmp = value;
-		__asm__ volatile
-		(
-			"mtsab   %[tmp], 0\n"
-			:
-			: [tmp] "r"(tmp)
-		);
-	}
-}
-
-void _MPEG_put_luma(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstY;
-	u128 reg1, reg2;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstY = a2;
-	set_mtsab_to_value(a3);
-	do
-	{
-		do
-		{
-			reg1 = ((u128 *)m_pSrc)[0x00];
-			reg2 = ((u128 *)m_pSrc)[0x18];
-			m_pSrc += a4;
-			count -= 1;
-			__asm__
-			(
-				"qfsrv   %[reg1], %[reg2], %[reg1]\n"
-				"pextlb  %[reg2], $zero, %[reg1]\n"
-				"pextub  %[reg1], $zero, %[reg1]\n"
-				: [reg1] "+r"(reg1), [reg2] "+r"(reg2)
-			);
-			((u128 *)m_pDstY)[0x00] = reg2;
-			((u128 *)m_pDstY)[0x01] = reg1;
-		}
-		while ( count > 0 );
-		m_pDstY += 16;
-		count = count2;
-		m_pSrc += 512;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_put_chroma(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstCbCr;
-	u128 reg1, reg2, reg3, reg4;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstCbCr = a2;
-	set_mtsab_to_value(a3);
-	do
-	{
-		do
-		{
-			reg1 = ((u64 *)m_pSrc)[0x00];
-			reg2 = ((u64 *)m_pSrc)[0x01];
-			reg3 = ((u64 *)m_pSrc)[0x06];
-			reg4 = ((u64 *)m_pSrc)[0x07];
-			m_pSrc += a4;
-			count -= 1;
-			__asm__
-			(
-				"pcpyld  %[reg1], %[reg3], %[reg1]\n"
-				"pcpyld  %[reg2], %[reg4], %[reg2]\n"
-				"qfsrv   %[reg1], %[reg1], %[reg1]\n"
-				"qfsrv   %[reg2], %[reg2], %[reg2]\n"
-				"pextlb  %[reg1], $zero, %[reg1]\n"
-				"pextlb  %[reg2], $zero, %[reg2]\n"
-				: [reg1] "+r"(reg1), [reg2] "+r"(reg2)
-				: [reg3] "r"(reg3), [reg4] "r"(reg4)
-			);
-			((u128 *)m_pDstCbCr)[0x00] = reg1;
-			((u128 *)m_pDstCbCr)[0x08] = reg2;
-		}
-		while ( count > 0 );
-		m_pDstCbCr += 8;
-		count = count2;
-		m_pSrc += 704;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_put_luma_X(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstY;
-	u128 reg1, reg2, reg3, reg4, reg5;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstY = a2;
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		"psrlh   %[reg1], %[reg1], 0xF\n"
-		: [reg1] "=r"(reg1)
-	);
-	do
-	{
-		do
-		{
-			reg2 = ((u128 *)m_pSrc)[0x00];
-			reg3 = ((u128 *)m_pSrc)[0x18];
-			set_mtsab_to_value(a3);
-			__asm__
-			(
-				"qfsrv   %[reg4], %[reg3], %[reg2]\n"
-				"qfsrv   %[reg5], %[reg2], %[reg3]\n"
-				"pextlb  %[reg2], $zero, %[reg4]\n"
-				"pextub  %[reg3], $zero, %[reg4]\n"
-				: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "=r"(reg4), [reg5] "=r"(reg5)
-			);
-			m_pSrc += a4;
-			set_mtsab_to_value(1);
-			count -= 1;
-			__asm__
-			(
-				"qfsrv   %[reg5], %[reg5], %[reg4]\n"
-				"pextlb  %[reg4], $zero, %[reg5]\n"
-				"pextub  %[reg5], $zero, %[reg5]\n"
-				"paddh   %[reg2], %[reg2], %[reg4]\n"
-				"paddh   %[reg3], %[reg3], %[reg5]\n"
-				"paddh   %[reg2], %[reg2], %[reg1]\n"
-				"paddh   %[reg3], %[reg3], %[reg1]\n"
-				"psrlh   %[reg2], %[reg2], 1\n"
-				"psrlh   %[reg3], %[reg3], 1\n"
-				: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5)
-				: [reg1] "r"(reg1)
-			);
-			((u128 *)m_pDstY)[0x00] = reg2;
-			((u128 *)m_pDstY)[0x01] = reg3;
-		}
-		while ( count > 0 );
-		m_pDstY += 16;
-		count = count2;
-		m_pSrc += 512;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_put_chroma_X(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstCbCr;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstCbCr = a2;
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		"psrlh   %[reg1], %[reg1], 0xF\n"
-		: [reg1] "=r"(reg1)
-	);
-	do
-	{
-		do
-		{
-			reg2 = ((u64 *)m_pSrc)[0x00];
-			reg3 = ((u64 *)m_pSrc)[0x01];
-			reg4 = ((u64 *)m_pSrc)[0x06];
-			reg5 = ((u64 *)m_pSrc)[0x07];
-			__asm__
-			(
-				"pcpyld  %[reg2], %[reg4], %[reg2]\n"
-				"pcpyld  %[reg3], %[reg5], %[reg3]\n"
-				: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5)
-			);
-			set_mtsab_to_value(a3);
-			__asm__
-			(
-				"qfsrv   %[reg2], %[reg2], %[reg2]\n"
-				"qfsrv   %[reg3], %[reg3], %[reg3]\n"
-				: [reg2] "+r"(reg2), [reg3] "+r"(reg3)
-			);
-			m_pSrc += a4;
-			count -= 1;
-			set_mtsab_to_value(1);
-			__asm__
-			(
-				"qfsrv   %[reg7], %[reg2], %[reg2]\n"
-				"qfsrv   %[reg6], %[reg3], %[reg3]\n"
-				"pextlb  %[reg2], $zero, %[reg2]\n"
-				"pextlb  %[reg3], $zero, %[reg3]\n"
-				"pextlb  %[reg7], $zero, %[reg7]\n"
-				"pextlb  %[reg6], $zero, %[reg6]\n"
-				"paddh   %[reg2], %[reg2], %[reg7]\n"
-				"paddh   %[reg3], %[reg3], %[reg6]\n"
-				"paddh   %[reg2], %[reg2], %[reg1]\n"
-				"paddh   %[reg3], %[reg3], %[reg1]\n"
-				"psrlh   %[reg2], %[reg2], 1\n"
-				"psrlh   %[reg3], %[reg3], 1\n"
-				: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg6] "=r"(reg6), [reg7] "=r"(reg7)
-				: [reg1] "r"(reg1)
-			);
-			((u128 *)m_pDstCbCr)[0x00] = reg2;
-			((u128 *)m_pDstCbCr)[0x08] = reg3;
-		}
-		while ( count > 0 );
-		m_pDstCbCr += 8;
-		count = count2;
-		m_pSrc += 704;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_put_luma_Y(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstY;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstY = a2;
-	set_mtsab_to_value(a3);
-	reg5 = ((u128 *)m_pSrc)[0x00];
-	reg6 = ((u128 *)m_pSrc)[0x18];
-	m_pSrc = &m_pSrc[a4];
-	count -= 1;
-	__asm__
-	(
-		"qfsrv   %[reg5], %[reg6], %[reg5]\n"
-		"pextub  %[reg6], $zero, %[reg5]\n"
-		"pextlb  %[reg5], $zero, %[reg5]\n"
-		: [reg5] "+r"(reg5), [reg6] "+r"(reg6)
-	);
-	if ( !count )
-		goto LABEL_5;
-	count2 += 1;
-	do
-	{
-		do
-		{
-			reg3 = ((u128 *)m_pSrc)[0x00];
-			reg4 = ((u128 *)m_pSrc)[0x18];
-			m_pSrc += a4;
-			count -= 1;
-			__asm__
-			(
-				"qfsrv   %[reg3], %[reg4], %[reg3]\n"
-				"pextub  %[reg4], $zero, %[reg3]\n"
-				"pextlb  %[reg3], $zero, %[reg3]\n"
-				"paddh   %[reg2], %[reg4], %[reg6]\n"
-				"pnor    %[reg6], $zero, $zero\n"
-				"paddh   %[reg1], %[reg3], %[reg5]\n"
-				"psrlh   %[reg6], %[reg6], 0xF\n"
-				"por     %[reg5], $zero, %[reg3]\n"
-				"paddh   %[reg1], %[reg1], %[reg6]\n"
-				"paddh   %[reg2], %[reg2], %[reg6]\n"
-				"por     %[reg6], $zero, %[reg4]\n"
-				"psrlh   %[reg1], %[reg1], 1\n"
-				"psrlh   %[reg2], %[reg2], 1\n"
-				: [reg1] "=r"(reg1), [reg2] "=r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6)
-			);
-			((u128 *)m_pDstY)[0x00] = reg1;
-			((u128 *)m_pDstY)[0x01] = reg2;
-		}
-		while ( count > 0 );
-		m_pDstY += 16;
-LABEL_5:
-		count = count2;
-		m_pSrc += 512;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_put_chroma_Y(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstCbCr;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9, regA;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstCbCr = a2;
-	set_mtsab_to_value(a3);
-	reg2 = ((u64 *)m_pSrc)[0x00];
-	reg3 = ((u64 *)m_pSrc)[0x01];
-	regA = ((u64 *)m_pSrc)[0x06];
-	reg9 = ((u64 *)m_pSrc)[0x07];
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		: [reg1] "=r"(reg1)
-	);
-	m_pSrc = &m_pSrc[a4];
-	count -= 1;
-	__asm__
-	(
-		"psrlh   %[reg1], %[reg1], 0xF\n"
-		"pcpyld  %[reg2], %[regA], %[reg2]\n"
-		"pcpyld  %[reg3], %[reg9], %[reg3]\n"
-		"qfsrv   %[reg2], %[reg2], %[reg2]\n"
-		"qfsrv   %[reg3], %[reg3], %[reg3]\n"
-		"pextlb  %[reg2], $zero, %[reg2]\n"
-		"pextlb  %[reg3], $zero, %[reg3]\n"
-		: [reg1] "+r"(reg1), [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg9] "+r"(reg9), [regA] "+r"(regA)
-	);
-	if ( !count )
-		goto LABEL_5;
-	count2 += 1;
-	do
-	{
-		do
-		{
-			reg4 = ((u64 *)m_pSrc)[0x00];
-			reg5 = ((u64 *)m_pSrc)[0x01];
-			reg6 = ((u64 *)m_pSrc)[0x06];
-			reg7 = ((u64 *)m_pSrc)[0x07];
-			m_pSrc += a4;
-			count -= 1;
-			__asm__
-			(
-				"pcpyld  %[reg4], %[reg6], %[reg4]\n"
-				"pcpyld  %[reg5], %[reg7], %[reg5]\n"
-				"qfsrv   %[reg4], %[reg4], %[reg4]\n"
-				"qfsrv   %[reg5], %[reg5], %[reg5]\n"
-				"pextlb  %[reg4], $zero, %[reg4]\n"
-				"pextlb  %[reg5], $zero, %[reg5]\n"
-				"paddh   %[reg9], %[reg4], %[reg2]\n"
-				"paddh   %[reg8], %[reg5], %[reg3]\n"
-				"por     %[reg2], $zero, %[reg4]\n"
-				"por     %[reg3], $zero, %[reg5]\n"
-				"paddh   %[reg9], %[reg9], %[reg1]\n"
-				"paddh   %[reg8], %[reg8], %[reg1]\n"
-				"psrlh   %[reg9], %[reg9], 1\n"
-				"psrlh   %[reg8], %[reg8], 1\n"
-				: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg8] "=r"(reg8), [reg9] "=r"(reg9)
-				: [reg1] "r"(reg1), [reg6] "r"(reg6), [reg7] "r"(reg7)
-			);
-			((u128 *)m_pDstCbCr)[0x00] = reg9;
-			((u128 *)m_pDstCbCr)[0x08] = reg8;
-		}
-		while ( count > 0 );
-		m_pDstCbCr += 8;
-LABEL_5:
-		count = count2;
-		m_pSrc += 704;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_put_luma_XY(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstY;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstY = a2;
-	set_mtsab_to_value(a3);
-	reg2 = ((u128 *)m_pSrc)[0x00];
-	reg5 = ((u128 *)m_pSrc)[0x18];
-	m_pSrc = &m_pSrc[a4];
-	__asm__
-	(
-		"qfsrv   %[reg6], %[reg5], %[reg2]\n"
-		"qfsrv   %[reg1], %[reg2], %[reg5]\n"
-		: [reg1] "=r"(reg1), [reg6] "=r"(reg6)
-		: [reg2] "r"(reg2), [reg5] "r"(reg5)
-	);
-	count -= 1;
-	__asm__
-	(
-		"pextlb  %[reg2], $zero, %[reg6]\n"
-		"pextub  %[reg5], $zero, %[reg6]\n"
-		: [reg2] "+r"(reg2), [reg5] "+r"(reg5)
-		: [reg6] "r"(reg6)
-	);
-	set_mtsab_to_value(1);
-	__asm__
-	(
-		"qfsrv   %[reg1], %[reg1], %[reg6]\n"
-		"pextlb  %[reg6], $zero, %[reg1]\n"
-		"pextub  %[reg1], $zero, %[reg1]\n"
-		"paddh   %[reg2], %[reg2], %[reg6]\n"
-		"paddh   %[reg5], %[reg5], %[reg1]\n"
-		: [reg1] "+r"(reg1), [reg2] "+r"(reg2), [reg5] "+r"(reg5), [reg6] "+r"(reg6)
-	);
-	if ( !count )
-		goto LABEL_5;
-	count2 += 1;
-	do
-	{
-		do
-		{
-			reg3 = ((u128 *)m_pSrc)[0x00];
-			reg4 = ((u128 *)m_pSrc)[0x18];
-			set_mtsab_to_value(a3);
-			m_pSrc += a4;
-			__asm__
-			(
-				"qfsrv   %[reg6], %[reg4], %[reg3]\n"
-				"qfsrv   %[reg1], %[reg3], %[reg4]\n"
-				: [reg1] "+r"(reg1), [reg6] "+r"(reg6)
-				: [reg3] "r"(reg3), [reg4] "r"(reg4)
-			);
-			count -= 1;
-			__asm__
-			(
-				"pextlb  %[reg3], $zero, %[reg6]\n"
-				"pextub  %[reg4], $zero, %[reg6]\n"
-				: [reg3] "=r"(reg3), [reg4] "=r"(reg4)
-				: [reg6] "r"(reg6)
-			);
-			set_mtsab_to_value(1);
-			__asm__
-			(
-				"qfsrv   %[reg1], %[reg1], %[reg6]\n"
-				"pextlb  %[reg6], $zero, %[reg1]\n"
-				"pextub  %[reg1], $zero, %[reg1]\n"
-				"paddh   %[reg3], %[reg3], %[reg6]\n"
-				"paddh   %[reg4], %[reg4], %[reg1]\n"
-				"paddh   %[reg6], %[reg2], %[reg3]\n"
-				"paddh   %[reg1], %[reg5], %[reg4]\n"
-				"por     %[reg2], $zero, %[reg3]\n"
-				"pnor    %[reg3], $zero, $zero\n"
-				"por     %[reg5], $zero, %[reg4]\n"
-				"psrlh   %[reg3], %[reg3], 0xF\n"
-				"psllh   %[reg3], %[reg3], 1\n"
-				"paddh   %[reg6], %[reg6], %[reg3]\n"
-				"paddh   %[reg1], %[reg1], %[reg3]\n"
-				"psrlh   %[reg6], %[reg6], 2\n"
-				"psrlh   %[reg1], %[reg1], 2\n"
-				: [reg1] "+r"(reg1), [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6)
-			);
-			((u128 *)m_pDstY)[0x00] = reg6;
-			((u128 *)m_pDstY)[0x01] = reg1;
-		}
-		while ( count > 0 );
-		m_pDstY += 16;
-LABEL_5:
-		count = count2;
-		m_pSrc += 512;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_put_chroma_XY(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstCbCr;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstCbCr = a2;
-	set_mtsab_to_value(a3);
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		: [reg1] "=r"(reg1)
-	);
-	reg3 = ((u64 *)m_pSrc)[0x00];
-	reg2 = ((u64 *)m_pSrc)[0x01];
-	set_mtsab_to_value(1);
-	reg9 = ((u64 *)m_pSrc)[0x06];
-	reg8 = ((u64 *)m_pSrc)[0x07];
-	__asm__
-	(
-		"pcpyld  %[reg3], %[reg9], %[reg3]\n"
-		"pcpyld  %[reg2], %[reg8], %[reg2]\n"
-		"qfsrv   %[reg3], %[reg3], %[reg3]\n"
-		"qfsrv   %[reg2], %[reg2], %[reg2]\n"
-		"psrlh   %[reg1], %[reg1], 0xF\n"
-		"psllh   %[reg1], %[reg1], 1\n"
-		: [reg1] "+r"(reg1), [reg2] "+r"(reg2), [reg3] "+r"(reg3)
-		: [reg8] "r"(reg8), [reg9] "r"(reg9)
-	);
-	m_pSrc = &m_pSrc[a4];
-	count -= 1;
-	__asm__
-	(
-		"qfsrv   %[reg9], %[reg3], %[reg3]\n"
-		"qfsrv   %[reg8], %[reg2], %[reg2]\n"
-		"pextlb  %[reg3], $zero, %[reg3]\n"
-		"pextlb  %[reg2], $zero, %[reg2]\n"
-		"pextlb  %[reg9], $zero, %[reg9]\n"
-		"pextlb  %[reg8], $zero, %[reg8]\n"
-		"paddh   %[reg3], %[reg3], %[reg9]\n"
-		"paddh   %[reg9], %[reg2], %[reg8]\n"
-		: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-	);
-	if ( !count )
-		goto LABEL_5;
-	count2 += 1;
-	do
-	{
-		do
-		{
-			reg4 = ((u64 *)m_pSrc)[0x00];
-			reg6 = ((u64 *)m_pSrc)[0x01];
-			set_mtsab_to_value(a3);
-			reg5 = ((u64 *)m_pSrc)[0x06];
-			reg7 = ((u64 *)m_pSrc)[0x07];
-			__asm__
-			(
-				"pcpyld  %[reg4], %[reg5], %[reg4]\n"
-				"pcpyld  %[reg6], %[reg7], %[reg6]\n"
-				"qfsrv   %[reg4], %[reg4], %[reg4]\n"
-				"qfsrv   %[reg6], %[reg6], %[reg6]\n"
-				: [reg4] "+r"(reg4), [reg6] "+r"(reg6)
-				: [reg5] "r"(reg5), [reg7] "r"(reg7)
-			);
-			m_pSrc += a4;
-			count -= 1;
-			set_mtsab_to_value(1);
-			__asm__
-			(
-				"qfsrv   %[reg5], %[reg4], %[reg4]\n"
-				"qfsrv   %[reg7], %[reg6], %[reg6]\n"
-				"pextlb  %[reg4], $zero, %[reg4]\n"
-				"pextlb  %[reg6], $zero, %[reg6]\n"
-				"pextlb  %[reg5], $zero, %[reg5]\n"
-				"pextlb  %[reg7], $zero, %[reg7]\n"
-				"paddh   %[reg4], %[reg4], %[reg5]\n"
-				"paddh   %[reg5], %[reg6], %[reg7]\n"
-				"paddh   %[reg6], %[reg3], %[reg4]\n"
-				"paddh   %[reg7], %[reg9], %[reg5]\n"
-				"por     %[reg3], $zero, %[reg4]\n"
-				"por     %[reg9], $zero, %[reg5]\n"
-				"paddh   %[reg6], %[reg6], %[reg1]\n"
-				"paddh   %[reg7], %[reg7], %[reg1]\n"
-				"psrlh   %[reg6], %[reg6], 2\n"
-				"psrlh   %[reg7], %[reg7], 2\n"
-				: [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg9] "+r"(reg9)
-				: [reg1] "r"(reg1)
-			);
-			((u128 *)m_pDstCbCr)[0x00] = reg6;
-			((u128 *)m_pDstCbCr)[0x08] = reg7;
-		}
-		while ( count > 0 );
-		m_pDstCbCr += 8;
-LABEL_5:
-		count = count2;
-		m_pSrc += 704;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_avg_luma(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstY;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstY = a2;
-	set_mtsab_to_value(a3);
-	do
-	{
-		do
-		{
-			reg3 = ((u128 *)m_pSrc)[0x00];
-			reg4 = ((u128 *)m_pSrc)[0x18];
-			m_pSrc += a4;
-			count -= 1;
-			__asm__
-			(
-				"qfsrv   %[reg3], %[reg4], %[reg3]\n"
-				"pextlb  %[reg4], $zero, %[reg3]\n"
-				"pextub  %[reg3], $zero, %[reg3]\n"
-				: [reg3] "+r"(reg3), [reg4] "+r"(reg4)
-			);
-			reg6 = ((u128 *)m_pDstY)[0x00];
-			reg1 = ((u128 *)m_pDstY)[0x01];
-			__asm__
-			(
-				"paddh   %[reg4], %[reg4], %[reg6]\n"
-				"paddh   %[reg3], %[reg3], %[reg1]\n"
-				"pcgth   %[reg6], %[reg4], $zero\n"
-				"pcgth   %[reg1], %[reg3], $zero\n"
-				"pceqh   %[reg2], %[reg4], $zero\n"
-				"pceqh   %[reg5], %[reg3], $zero\n"
-				"psrlh   %[reg6], %[reg6], 0xF\n"
-				"psrlh   %[reg1], %[reg1], 0xF\n"
-				"psrlh   %[reg2], %[reg2], 0xF\n"
-				"psrlh   %[reg5], %[reg5], 0xF\n"
-				"por     %[reg6], %[reg6], %[reg2]\n"
-				"por     %[reg1], %[reg1], %[reg5]\n"
-				"paddh   %[reg4], %[reg4], %[reg6]\n"
-				"paddh   %[reg3], %[reg3], %[reg1]\n"
-				"psrlh   %[reg4], %[reg4], 1\n"
-				"psrlh   %[reg3], %[reg3], 1\n"
-				: [reg1] "+r"(reg1), [reg2] "=r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "=r"(reg5), [reg6] "+r"(reg6)
-			);
-			((u128 *)m_pDstY)[0x00] = reg4;
-			((u128 *)m_pDstY)[0x01] = reg3;
-		}
-		while ( count > 0 );
-		m_pDstY += 16;
-		count = count2;
-		m_pSrc += 512;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_avg_chroma(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstCbCr;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstCbCr = a2;
-	set_mtsab_to_value(a3);
-	do
-	{
-		do
-		{
-			reg3 = ((u64 *)m_pSrc)[0x00];
-			reg4 = ((u64 *)m_pSrc)[0x01];
-			count -= 1;
-			reg5 = ((u64 *)m_pSrc)[0x06];
-			reg6 = ((u64 *)m_pSrc)[0x07];
-			m_pSrc += a4;
-			__asm__
-			(
-				"pcpyld  %[reg3], %[reg5], %[reg3]\n"
-				"pcpyld  %[reg4], %[reg6], %[reg4]\n"
-				"qfsrv   %[reg3], %[reg3], %[reg3]\n"
-				"qfsrv   %[reg4], %[reg4], %[reg4]\n"
-				"pextlb  %[reg3], $zero, %[reg3]\n"
-				"pextlb  %[reg4], $zero, %[reg4]\n"
-				: [reg3] "+r"(reg3), [reg4] "+r"(reg4)
-				: [reg5] "r"(reg5), [reg6] "r"(reg6)
-			);
-			reg8 = ((u128 *)m_pDstCbCr)[0x00];
-			reg7 = ((u128 *)m_pDstCbCr)[0x08];
-			__asm__
-			(
-				"paddh   %[reg3], %[reg3], %[reg8]\n"
-				"paddh   %[reg4], %[reg4], %[reg7]\n"
-				"pcgth   %[reg8], %[reg3], $zero\n"
-				"pcgth   %[reg7], %[reg4], $zero\n"
-				"pceqh   %[reg2], %[reg3], $zero\n"
-				"pceqh   %[reg1], %[reg4], $zero\n"
-				"psrlh   %[reg8], %[reg8], 0xF\n"
-				"psrlh   %[reg7], %[reg7], 0xF\n"
-				"psrlh   %[reg2], %[reg2], 0xF\n"
-				"psrlh   %[reg1], %[reg1], 0xF\n"
-				"por     %[reg8], %[reg8], %[reg2]\n"
-				"por     %[reg7], %[reg7], %[reg1]\n"
-				"paddh   %[reg3], %[reg3], %[reg8]\n"
-				"paddh   %[reg4], %[reg4], %[reg7]\n"
-				"psrlh   %[reg3], %[reg3], 1\n"
-				"psrlh   %[reg4], %[reg4], 1\n"
-				: [reg1] "=r"(reg1), [reg2] "=r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg7] "+r"(reg7), [reg8] "+r"(reg8)
-			);
-			((u128 *)m_pDstCbCr)[0x00] = reg4;
-			((u128 *)m_pDstCbCr)[0x08] = reg3;
-		}
-		while ( count > 0 );
-		m_pDstCbCr += 8;
-		count = count2;
-		m_pSrc += 704;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_avg_luma_X(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstY;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstY = a2;
-	__asm__
-	(
-		"pnor    %[reg2], $zero, $zero\n"
-		"psrlh   %[reg2], %[reg2], 0xF\n"
-		: [reg2] "=r"(reg2)
-	);
-	do
-	{
-		do
-		{
-			reg3 = ((u128 *)m_pSrc)[0x00];
-			reg4 = ((u128 *)m_pSrc)[0x18];
-			set_mtsab_to_value(a3);
-			__asm__
-			(
-				"qfsrv   %[reg5], %[reg4], %[reg3]\n"
-				"qfsrv   %[reg6], %[reg3], %[reg4]\n"
-				"pextlb  %[reg3], $zero, %[reg5]\n"
-				"pextub  %[reg4], $zero, %[reg5]\n"
-				: [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "=r"(reg5), [reg6] "=r"(reg6)
-			);
-			m_pSrc += a4;
-			set_mtsab_to_value(1);
-			count -= 1;
-			__asm__
-			(
-				"qfsrv   %[reg6], %[reg6], %[reg5]\n"
-				"pextlb  %[reg5], $zero, %[reg6]\n"
-				"pextub  %[reg6], $zero, %[reg6]\n"
-				"paddh   %[reg3], %[reg3], %[reg5]\n"
-				"paddh   %[reg4], %[reg4], %[reg6]\n"
-				"paddh   %[reg3], %[reg3], %[reg2]\n"
-				"paddh   %[reg4], %[reg4], %[reg2]\n"
-				"psrlh   %[reg3], %[reg3], 1\n"
-				"psrlh   %[reg4], %[reg4], 1\n"
-				: [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6)
-				: [reg2] "r"(reg2)
-			);
-			reg6 = ((u128 *)m_pDstY)[0x00];
-			reg1 = ((u128 *)m_pDstY)[0x01];
-			__asm__
-			(
-				"paddh   %[reg3], %[reg3], %[reg6]\n"
-				"paddh   %[reg4], %[reg4], %[reg1]\n"
-				"pcgth   %[reg6], %[reg3], $zero\n"
-				"pceqh   %[reg1], %[reg3], $zero\n"
-				"psrlh   %[reg6], %[reg6], 0xF\n"
-				"psrlh   %[reg1], %[reg1], 0xF\n"
-				"por     %[reg6], %[reg6], %[reg1]\n"
-				"paddh   %[reg3], %[reg3], %[reg6]\n"
-				"pcgth   %[reg6], %[reg4], $zero\n"
-				"pceqh   %[reg1], %[reg4], $zero\n"
-				"psrlh   %[reg6], %[reg6], 0xF\n"
-				"psrlh   %[reg1], %[reg1], 0xF\n"
-				"por     %[reg6], %[reg6], %[reg1]\n"
-				"paddh   %[reg4], %[reg4], %[reg6]\n"
-				"psrlh   %[reg3], %[reg3], 1\n"
-				"psrlh   %[reg4], %[reg4], 1\n"
-				: [reg1] "+r"(reg1), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg6] "+r"(reg6)
-			);
-			((u128 *)m_pDstY)[0x00] = reg3;
-			((u128 *)m_pDstY)[0x01] = reg4;
-		}
-		while ( count > 0 );
-		m_pDstY += 16;
-		count = count2;
-		m_pSrc += 512;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_avg_chroma_X(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstCbCr;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstCbCr = a2;
-	__asm__
-	(
-		"pnor    %[reg2], $zero, $zero\n"
-		"psrlh   %[reg2], %[reg2], 0xF\n"
-		: [reg2] "=r"(reg2)
-	);
-	do
-	{
-		do
-		{
-			reg4 = ((u64 *)m_pSrc)[0x00];
-			reg5 = ((u64 *)m_pSrc)[0x01];
-			set_mtsab_to_value(a3);
-			reg6 = ((u64 *)m_pSrc)[0x06];
-			reg7 = ((u64 *)m_pSrc)[0x07];
-			__asm__
-			(
-				"pcpyld  %[reg4], %[reg6], %[reg4]\n"
-				"pcpyld  %[reg5], %[reg7], %[reg5]\n"
-				"qfsrv   %[reg4], %[reg4], %[reg4]\n"
-				"qfsrv   %[reg5], %[reg5], %[reg5]\n"
-				: [reg4] "+r"(reg4), [reg5] "+r"(reg5)
-				: [reg6] "r"(reg6), [reg7] "r"(reg7)
-			);
-			m_pSrc += a4;
-			count -= 1;
-			set_mtsab_to_value(1);
-			__asm__
-			(
-				"qfsrv   %[reg9], %[reg4], %[reg4]\n"
-				"qfsrv   %[reg8], %[reg5], %[reg5]\n"
-				"pextlb  %[reg4], $zero, %[reg4]\n"
-				"pextlb  %[reg5], $zero, %[reg5]\n"
-				"pextlb  %[reg9], $zero, %[reg9]\n"
-				"pextlb  %[reg8], $zero, %[reg8]\n"
-				"paddh   %[reg4], %[reg4], %[reg9]\n"
-				"paddh   %[reg5], %[reg5], %[reg8]\n"
-				"paddh   %[reg4], %[reg4], %[reg2]\n"
-				"paddh   %[reg5], %[reg5], %[reg2]\n"
-				"psrlh   %[reg4], %[reg4], 1\n"
-				"psrlh   %[reg5], %[reg5], 1\n"
-				: [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg8] "=r"(reg8), [reg9] "=r"(reg9)
-				: [reg2] "r"(reg2)
-			);
-			reg9 = ((u128 *)m_pDstCbCr)[0x00];
-			reg8 = ((u128 *)m_pDstCbCr)[0x08];
-			__asm__
-			(
-				"paddh   %[reg4], %[reg4], %[reg9]\n"
-				"paddh   %[reg5], %[reg5], %[reg8]\n"
-				"pcgth   %[reg9], %[reg4], $zero\n"
-				"pcgth   %[reg8], %[reg5], $zero\n"
-				"pceqh   %[reg1], %[reg4], $zero\n"
-				"pceqh   %[reg3], %[reg5], $zero\n"
-				"psrlh   %[reg9], %[reg9], 0xF\n"
-				"psrlh   %[reg8], %[reg8], 0xF\n"
-				"psrlh   %[reg1], %[reg1], 0xF\n"
-				"psrlh   %[reg3], %[reg3], 0xF\n"
-				"por     %[reg9], %[reg9], %[reg1]\n"
-				"por     %[reg8], %[reg8], %[reg3]\n"
-				"paddh   %[reg4], %[reg4], %[reg9]\n"
-				"paddh   %[reg5], %[reg5], %[reg8]\n"
-				"psrlh   %[reg4], %[reg4], 1\n"
-				"psrlh   %[reg5], %[reg5], 1\n"
-				: [reg1] "=r"(reg1), [reg3] "=r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			);
-			((u128 *)m_pDstCbCr)[0x00] = reg4;
-			((u128 *)m_pDstCbCr)[0x08] = reg5;
-		}
-		while ( count > 0 );
-		m_pDstCbCr += 8;
-		count = count2;
-		m_pSrc += 704;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_avg_luma_Y(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstY;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstY = a2;
-	set_mtsab_to_value(a3);
-	reg5 = ((u128 *)m_pSrc)[0x00];
-	reg6 = ((u128 *)m_pSrc)[0x18];
-	m_pSrc = &m_pSrc[a4];
-	count -= 1;
-	__asm__
-	(
-		"qfsrv   %[reg5], %[reg6], %[reg5]\n"
-		"pextub  %[reg6], $zero, %[reg5]\n"
-		"pextlb  %[reg5], $zero, %[reg5]\n"
-		: [reg5] "+r"(reg5), [reg6] "+r"(reg6)
-	);
-	if ( !count )
-		goto LABEL_5;
-	count2 += 1;
-	do
-	{
-		do
-		{
-			reg3 = ((u128 *)m_pSrc)[0x00];
-			reg4 = ((u128 *)m_pSrc)[0x18];
-			m_pSrc += a4;
-			count -= 1;
-			__asm__
-			(
-				"qfsrv   %[reg3], %[reg4], %[reg3]\n"
-				"pextub  %[reg4], $zero, %[reg3]\n"
-				"pextlb  %[reg3], $zero, %[reg3]\n"
-				"paddh   %[reg2], %[reg4], %[reg6]\n"
-				"pnor    %[reg6], $zero, $zero\n"
-				"paddh   %[reg1], %[reg3], %[reg5]\n"
-				"psrlh   %[reg6], %[reg6], 0xF\n"
-				"por     %[reg5], $zero, %[reg3]\n"
-				"paddh   %[reg1], %[reg1], %[reg6]\n"
-				"paddh   %[reg2], %[reg2], %[reg6]\n"
-				"por     %[reg6], $zero, %[reg4]\n"
-				"psrlh   %[reg1], %[reg1], 1\n"
-				"psrlh   %[reg2], %[reg2], 1\n"
-				: [reg1] "=r"(reg1), [reg2] "=r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6)
-			);
-			reg3 = ((u128 *)m_pDstY)[0x00];
-			reg4 = ((u128 *)m_pDstY)[0x01];
-			__asm__
-			(
-				"paddh   %[reg1], %[reg1], %[reg3]\n"
-				"paddh   %[reg2], %[reg2], %[reg4]\n"
-				"pcgth   %[reg3], %[reg1], $zero\n"
-				"pceqh   %[reg4], %[reg1], $zero\n"
-				"psrlh   %[reg3], %[reg3], 0xF\n"
-				"psrlh   %[reg4], %[reg4], 0xF\n"
-				"por     %[reg3], %[reg3], %[reg4]\n"
-				"paddh   %[reg1], %[reg1], %[reg3]\n"
-				"pcgth   %[reg3], %[reg2], $zero\n"
-				"pceqh   %[reg4], %[reg2], $zero\n"
-				"psrlh   %[reg3], %[reg3], 0xF\n"
-				"psrlh   %[reg4], %[reg4], 0xF\n"
-				"por     %[reg3], %[reg3], %[reg4]\n"
-				"paddh   %[reg2], %[reg2], %[reg3]\n"
-				"psrlh   %[reg1], %[reg1], 1\n"
-				"psrlh   %[reg2], %[reg2], 1\n"
-				: [reg1] "+r"(reg1), [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4)
-			);
-			((u128 *)m_pDstY)[0x00] = reg1;
-			((u128 *)m_pDstY)[0x01] = reg2;
-		}
-		while ( count > 0 );
-		m_pDstY += 16;
-LABEL_5:
-		count = count2;
-		m_pSrc += 512;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_avg_chroma_Y(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstCbCr;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9, regA;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstCbCr = a2;
-	set_mtsab_to_value(a3);
-	reg2 = ((u64 *)m_pSrc)[0x00];
-	reg3 = ((u64 *)m_pSrc)[0x01];
-	regA = ((u64 *)m_pSrc)[0x06];
-	reg9 = ((u64 *)m_pSrc)[0x07];
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		: [reg1] "=r"(reg1)
-	);
-	m_pSrc = &m_pSrc[a4];
-	count -= 1;
-	__asm__
-	(
-		"psrlh   %[reg1], %[reg1], 0xF\n"
-		"pcpyld  %[reg2], %[regA], %[reg2]\n"
-		"pcpyld  %[reg3], %[reg9], %[reg3]\n"
-		"qfsrv   %[reg2], %[reg2], %[reg2]\n"
-		"qfsrv   %[reg3], %[reg3], %[reg3]\n"
-		"pextlb  %[reg2], $zero, %[reg2]\n"
-		"pextlb  %[reg3], $zero, %[reg3]\n"
-		: [reg1] "+r"(reg1), [reg2] "+r"(reg2), [reg3] "+r"(reg3)
-		: [reg9] "r"(reg9), [regA] "r"(regA)
-	);
-	if ( !count )
-		goto LABEL_5;
-	count2 += 1;
-	do
-	{
-		do
-		{
-			reg4 = ((u64 *)m_pSrc)[0x00];
-			reg5 = ((u64 *)m_pSrc)[0x01];
-			count -= 1;
-			reg6 = ((u64 *)m_pSrc)[0x06];
-			reg7 = ((u64 *)m_pSrc)[0x07];
-			m_pSrc += a4;
-			__asm__
-			(
-				"pcpyld  %[reg4], %[reg6], %[reg4]\n"
-				"pcpyld  %[reg5], %[reg7], %[reg5]\n"
-				"qfsrv   %[reg4], %[reg4], %[reg4]\n"
-				"qfsrv   %[reg5], %[reg5], %[reg5]\n"
-				"pextlb  %[reg4], $zero, %[reg4]\n"
-				"pextlb  %[reg5], $zero, %[reg5]\n"
-				"paddh   %[reg9], %[reg4], %[reg2]\n"
-				"paddh   %[reg8], %[reg5], %[reg3]\n"
-				"por     %[reg2], $zero, %[reg4]\n"
-				"por     %[reg3], $zero, %[reg5]\n"
-				"paddh   %[reg9], %[reg9], %[reg1]\n"
-				"paddh   %[reg8], %[reg8], %[reg1]\n"
-				"psrlh   %[reg9], %[reg9], 1\n"
-				"psrlh   %[reg8], %[reg8], 1\n"
-				: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg8] "=r"(reg8), [reg9] "=r"(reg9)
-				: [reg1] "r"(reg1), [reg6] "r"(reg6), [reg7] "r"(reg7)
-			);
-			reg4 = ((u128 *)m_pDstCbCr)[0x00];
-			reg5 = ((u128 *)m_pDstCbCr)[0x80];
-			__asm__
-			(
-				"paddh   %[reg9], %[reg9], %[reg4]\n"
-				"paddh   %[reg8], %[reg8], %[reg5]\n"
-				"pcgth   %[reg4], %[reg9], $zero\n"
-				"pceqh   %[reg5], %[reg9], $zero\n"
-				"psrlh   %[reg4], %[reg4], 0xF\n"
-				"psrlh   %[reg5], %[reg5], 0xF\n"
-				"por     %[reg4], %[reg4], %[reg5]\n"
-				"paddh   %[reg9], %[reg9], %[reg4]\n"
-				"pcgth   %[reg4], %[reg8], $zero\n"
-				"pceqh   %[reg5], %[reg8], $zero\n"
-				"psrlh   %[reg4], %[reg4], 0xF\n"
-				"psrlh   %[reg5], %[reg5], 0xF\n"
-				"por     %[reg4], %[reg4], %[reg5]\n"
-				"paddh   %[reg8], %[reg8], %[reg4]\n"
-				"psrlh   %[reg9], %[reg9], 1\n"
-				"psrlh   %[reg8], %[reg8], 1\n"
-				: [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg8] "+r"(reg8), [reg9] "+r"(reg9)
-			);
-			((u128 *)m_pDstCbCr)[0x00] = reg9;
-			((u128 *)m_pDstCbCr)[0x08] = reg8;
-		}
-		while ( count > 0 );
-		m_pDstCbCr += 8;
-LABEL_5:
-		count = count2;
-		m_pSrc += 704;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_avg_luma_XY(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstY;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstY = a2;
-	set_mtsab_to_value(a3);
-	reg2 = ((u128 *)m_pSrc)[0x00];
-	reg5 = ((u128 *)m_pSrc)[0x18];
-	m_pSrc = &m_pSrc[a4];
-	__asm__
-	(
-		"qfsrv   %[reg6], %[reg5], %[reg2]\n"
-		"qfsrv   %[reg1], %[reg2], %[reg5]\n"
-		: [reg1] "=r"(reg1), [reg6] "=r"(reg6)
-		: [reg2] "r"(reg2), [reg5] "r"(reg5)
-	);
-	count -= 1;
-	__asm__
-	(
-		"pextlb  %[reg2], $zero, %[reg6]\n"
-		"pextub  %[reg5], $zero, %[reg6]\n"
-		: [reg2] "+r"(reg2), [reg5] "+r"(reg5)
-		: [reg6] "r"(reg6)
-	);
-	set_mtsab_to_value(1);
-	__asm__
-	(
-		"qfsrv   %[reg1], %[reg1], %[reg6]\n"
-		"pextlb  %[reg6], $zero, %[reg1]\n"
-		"pextub  %[reg1], $zero, %[reg1]\n"
-		"paddh   %[reg2], %[reg2], %[reg6]\n"
-		"paddh   %[reg5], %[reg5], %[reg1]\n"
-		: [reg1] "+r"(reg1), [reg2] "+r"(reg2), [reg5] "+r"(reg5), [reg6] "+r"(reg6)
-	);
-	if ( !count )
-		goto LABEL_5;
-	count2 += 1;
-	do
-	{
-		do
-		{
-			reg3 = ((u128 *)m_pSrc)[0x00];
-			reg4 = ((u128 *)m_pSrc)[0x18];
-			set_mtsab_to_value(a3);
-			m_pSrc += a4;
-			__asm__
-			(
-				"qfsrv   %[reg6], %[reg4], %[reg3]\n"
-				"qfsrv   %[reg1], %[reg3], %[reg4]\n"
-				: [reg1] "=r"(reg1), [reg6] "=r"(reg6)
-				: [reg3] "r"(reg3), [reg4] "r"(reg4)
-			);
-			count -= 1;
-			__asm__
-			(
-				"pextlb  %[reg3], $zero, %[reg6]\n"
-				"pextub  %[reg4], $zero, %[reg6]\n"
-				: [reg3] "=r"(reg3), [reg4] "=r"(reg4)
-				: [reg6] "r"(reg6)
-			);
-			set_mtsab_to_value(1);
-			__asm__
-			(
-				"qfsrv   %[reg1], %[reg1], %[reg6]\n"
-				"pextlb  %[reg6], $zero, %[reg1]\n"
-				"pextub  %[reg1], $zero, %[reg1]\n"
-				"paddh   %[reg3], %[reg3], %[reg6]\n"
-				"paddh   %[reg4], %[reg4], %[reg1]\n"
-				"paddh   %[reg6], %[reg2], %[reg3]\n"
-				"paddh   %[reg1], %[reg5], %[reg4]\n"
-				"por     %[reg2], $zero, %[reg3]\n"
-				"pnor    %[reg3], $zero, $zero\n"
-				"por     %[reg5], $zero, %[reg4]\n"
-				"psrlh   %[reg3], %[reg3], 0xF\n"
-				"psllh   %[reg3], %[reg3], 1\n"
-				"paddh   %[reg6], %[reg6], %[reg3]\n"
-				"paddh   %[reg1], %[reg1], %[reg3]\n"
-				"psrlh   %[reg6], %[reg6], 2\n"
-				"psrlh   %[reg1], %[reg1], 2\n"
-				: [reg1] "+r"(reg1), [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6)
-			);
-			reg3 = ((u128 *)m_pDstY)[0x00];
-			reg4 = ((u128 *)m_pDstY)[0x01];
-			__asm__
-			(
-				"paddh   %[reg6], %[reg6], %[reg3]\n"
-				"paddh   %[reg1], %[reg1], %[reg4]\n"
-				"pcgth   %[reg3], %[reg6], $zero\n"
-				"pceqh   %[reg4], %[reg6], $zero\n"
-				"psrlh   %[reg3], %[reg3], 0xF\n"
-				"psrlh   %[reg4], %[reg4], 0xF\n"
-				"por     %[reg3], %[reg3], %[reg4]\n"
-				"paddh   %[reg6], %[reg6], %[reg3]\n"
-				"pcgth   %[reg3], %[reg1], $zero\n"
-				"pceqh   %[reg4], %[reg1], $zero\n"
-				"psrlh   %[reg3], %[reg3], 0xF\n"
-				"psrlh   %[reg4], %[reg4], 0xF\n"
-				"por     %[reg3], %[reg3], %[reg4]\n"
-				"paddh   %[reg1], %[reg1], %[reg3]\n"
-				"psrlh   %[reg6], %[reg6], 1\n"
-				"psrlh   %[reg1], %[reg1], 1\n"
-				: [reg1] "+r"(reg1), [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg6] "+r"(reg6)
-			);
-			((u128 *)m_pDstY)[0x00] = reg6;
-			((u128 *)m_pDstY)[0x01] = reg1;
-		}
-		while ( count > 0 );
-		m_pDstY += 16;
-LABEL_5:
-		count = count2;
-		m_pSrc += 512;
-	}
-	while ( count2 > 0 );
-}
-
-void _MPEG_avg_chroma_XY(u8 *a1, u16 *a2, int a3, int a4, int var1, int ta)
-{
-	int count;
-	int count2;
-	u8 *m_pSrc;
-	u16 *m_pDstCbCr;
-	u128 reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8, reg9;
-
-	count = var1;
-	count2 = ta;
-	m_pSrc = a1;
-	m_pDstCbCr = a2;
-	set_mtsab_to_value(a3);
-	__asm__
-	(
-		"pnor    %[reg1], $zero, $zero\n"
-		: [reg1] "=r"(reg1)
-	);
-	reg3 = ((u64 *)m_pSrc)[0x00];
-	reg2 = ((u64 *)m_pSrc)[0x01];
-	set_mtsab_to_value(1);
-	reg9 = ((u64 *)m_pSrc)[0x06];
-	reg8 = ((u64 *)m_pSrc)[0x07];
-	__asm__
-	(
-		"pcpyld  %[reg3], %[reg9], %[reg3]\n"
-		"pcpyld  %[reg2], %[reg8], %[reg2]\n"
-		"qfsrv   %[reg3], %[reg3], %[reg3]\n"
-		"qfsrv   %[reg2], %[reg2], %[reg2]\n"
-		"psrlh   %[reg1], %[reg1], 0xF\n"
-		"psllh   %[reg1], %[reg1], 1\n"
-		: [reg1] "+r"(reg1), [reg2] "+r"(reg2), [reg3] "+r"(reg3)
-		: [reg8] "r"(reg8), [reg9] "r"(reg9)
-	);
-	m_pSrc = &m_pSrc[a4];
-	count -= 1;
-	__asm__
-	(
-		"qfsrv   %[reg9], %[reg3], %[reg3]\n"
-		"qfsrv   %[reg8], %[reg2], %[reg2]\n"
-		"pextlb  %[reg3], $zero, %[reg3]\n"
-		"pextlb  %[reg2], $zero, %[reg2]\n"
-		"pextlb  %[reg9], $zero, %[reg9]\n"
-		"pextlb  %[reg8], $zero, %[reg8]\n"
-		"paddh   %[reg3], %[reg3], %[reg9]\n"
-		"paddh   %[reg9], %[reg2], %[reg8]\n"
-		: [reg2] "+r"(reg2), [reg3] "+r"(reg3), [reg8] "=r"(reg8), [reg9] "=r"(reg9)
-	);
-	if ( !count )
-		goto LABEL_5;
-	count2 += 1;
-	do
-	{
-		do
-		{
-			reg4 = ((u64 *)m_pSrc)[0x00];
-			reg6 = ((u64 *)m_pSrc)[0x01];
-			set_mtsab_to_value(a3);
-			reg5 = ((u64 *)m_pSrc)[0x06];
-			reg7 = ((u64 *)m_pSrc)[0x07];
-			__asm__
-			(
-				"pcpyld  %[reg4], %[reg5], %[reg4]\n"
-				"pcpyld  %[reg6], %[reg7], %[reg6]\n"
-				"qfsrv   %[reg4], %[reg4], %[reg4]\n"
-				"qfsrv   %[reg6], %[reg6], %[reg6]\n"
-				: [reg4] "+r"(reg4), [reg6] "+r"(reg6)
-				: [reg5] "r"(reg5), [reg7] "r"(reg7)
-			);
-			m_pSrc += a4;
-			count -= 1;
-			set_mtsab_to_value(1);
-			__asm__
-			(
-				"qfsrv   %[reg5], %[reg4], %[reg4]\n"
-				"qfsrv   %[reg7], %[reg6], %[reg6]\n"
-				"pextlb  %[reg4], $zero, %[reg4]\n"
-				"pextlb  %[reg6], $zero, %[reg6]\n"
-				"pextlb  %[reg5], $zero, %[reg5]\n"
-				"pextlb  %[reg7], $zero, %[reg7]\n"
-				"paddh   %[reg4], %[reg4], %[reg5]\n"
-				"paddh   %[reg5], %[reg6], %[reg7]\n"
-				"paddh   %[reg6], %[reg3], %[reg4]\n"
-				"paddh   %[reg7], %[reg9], %[reg5]\n"
-				"por     %[reg3], $zero, %[reg4]\n"
-				"por     %[reg9], $zero, %[reg5]\n"
-				"paddh   %[reg6], %[reg6], %[reg1]\n"
-				"paddh   %[reg7], %[reg7], %[reg1]\n"
-				"psrlh   %[reg6], %[reg6], 2\n"
-				"psrlh   %[reg7], %[reg7], 2\n"
-				: [reg3] "+r"(reg3), [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7), [reg9] "+r"(reg9)
-				: [reg1] "r"(reg1)
-			);
-			reg4 = ((u128 *)m_pDstCbCr)[0x00];
-			reg5 = ((u128 *)m_pDstCbCr)[0x08];
-			__asm__
-			(
-				"paddh   %[reg6], %[reg6], %[reg4]\n"
-				"paddh   %[reg7], %[reg7], %[reg5]\n"
-				"pcgth   %[reg4], %[reg6], $zero\n"
-				"pceqh   %[reg5], %[reg6], $zero\n"
-				"psrlh   %[reg4], %[reg4], 0xF\n"
-				"psrlh   %[reg5], %[reg5], 0xF\n"
-				"por     %[reg4], %[reg4], %[reg5]\n"
-				"paddh   %[reg6], %[reg6], %[reg4]\n"
-				"pcgth   %[reg4], %[reg7], $zero\n"
-				"pceqh   %[reg5], %[reg7], $zero\n"
-				"psrlh   %[reg4], %[reg4], 0xF\n"
-				"psrlh   %[reg5], %[reg5], 0xF\n"
-				"por     %[reg4], %[reg4], %[reg5]\n"
-				"paddh   %[reg7], %[reg7], %[reg4]\n"
-				"psrlh   %[reg6], %[reg6], 1\n"
-				"psrlh   %[reg7], %[reg7], 1\n"
-				: [reg4] "+r"(reg4), [reg5] "+r"(reg5), [reg6] "+r"(reg6), [reg7] "+r"(reg7)
-			);
-			((u128 *)m_pDstCbCr)[0x00] = reg6;
-			((u128 *)m_pDstCbCr)[0x08] = reg7;
-		}
-		while ( count > 0 );
-		m_pDstCbCr += 8;
-LABEL_5:
-		count = count2;
-		m_pSrc += 704;
-	}
-	while ( count2 > 0 );
-}
-
+*/

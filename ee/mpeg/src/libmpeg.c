@@ -21,11 +21,11 @@
 static _MPEGContext s_MPEG12Ctx;
 static s64 *s_pCurPTS;
 
-static void (*LumaOp[8])(u8 *arg1, u16 *arg2, int arg3, int arg4, int var1, int ta) = {
+static void (*LumaOp[8])(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int) = {
     _MPEG_put_luma, _MPEG_put_luma_X, _MPEG_put_luma_Y, _MPEG_put_luma_XY,
     _MPEG_avg_luma, _MPEG_avg_luma_X, _MPEG_avg_luma_Y, _MPEG_avg_luma_XY};
 
-static void (*ChromaOp[8])(u8 *arg1, u16 *arg2, int arg3, int arg4, int var1, int ta) = {
+static void (*ChromaOp[8])(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int) = {
     _MPEG_put_chroma, _MPEG_put_chroma_X, _MPEG_put_chroma_Y, _MPEG_put_chroma_XY,
     _MPEG_avg_chroma, _MPEG_avg_chroma_X, _MPEG_avg_chroma_Y, _MPEG_avg_chroma_XY};
 
@@ -189,6 +189,11 @@ static void _destroy_seq(void)
     s_MPEG12Ctx.m_MBHeight = 0;
 }
 
+/*
+ * decode headers from one input stream
+ * until an End of Sequence or picture start code
+ * is found
+ */
 static int _get_hdr(void)
 {
     while (1) {
@@ -523,6 +528,7 @@ static int _get_first_picture(void *apData, s64 *apPTS)
     if (retVal) {
         s_MPEG12Ctx.m_SI.m_FrameCnt = 0;
 
+        printf("hi first picture init seq\n");
         apData = _init_seq();
         _mpeg12_picture_data();
 
@@ -598,6 +604,7 @@ static void _mpeg12_do_first_mc(void)
     DoMC = _mpeg12_do_next_mc;
 }
 
+/* Decode all macroblocks of the current picture */
 static void _mpeg12_picture_data(void)
 {
     int lMBAMax = s_MPEG12Ctx.m_MBWidth * s_MPEG12Ctx.m_MBHeight;
@@ -645,6 +652,8 @@ static void _mpeg12_picture_data(void)
     DoMC();
 }
 
+/* calculate motion vector component */
+/* ISO/IEC 13818-2 section 7.6.3.1: Decoding the motion vectors */
 static void _mpeg12_decode_motion_vector(int *apPred, int aRSize, int aMotionCode,
                                          int aMotionResidual, int aFullPelVector)
 {
@@ -667,6 +676,7 @@ static void _mpeg12_decode_motion_vector(int *apPred, int aRSize, int aMotionCod
     *apPred = aFullPelVector ? lVec << 1 : lVec;
 }
 
+/* ISO/IEC 13818-2 section 7.6.3.6: Dual prime additional arithmetic */
 static void _mpeg12_dual_prime_vector(int aDMV[][2], const int *apDMVector, int aMVX, int aMVY)
 {
     if (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) {
@@ -694,11 +704,17 @@ static void _mpeg12_dual_prime_vector(int aDMV[][2], const int *apDMVector, int 
     }
 }
 
+/* get and decode motion vector and differential motion vector
+   for one prediction */
 static void _mpeg12_motion_vector(int *apPMV, int *apDMVector, int aHRSize,
                                   int aVRSize, int aDMV, int aMVScale, int aFullPelVector)
 {
-    int lMotionCode     = _MPEG_GetMotionCode();
-    int lMotionResidual = aHRSize && lMotionCode ? _MPEG_GetBits(aHRSize) : 0;
+    int lMotionCode;
+    int lMotionResidual;
+
+    /* horizontal component */
+    lMotionCode     = _MPEG_GetMotionCode();
+    lMotionResidual = aHRSize && lMotionCode ? _MPEG_GetBits(aHRSize) : 0;
 
     _mpeg12_decode_motion_vector(&apPMV[0], aHRSize, lMotionCode, lMotionResidual, aFullPelVector);
 
@@ -707,6 +723,7 @@ static void _mpeg12_motion_vector(int *apPMV, int *apDMVector, int aHRSize,
 
     s_MPEG12Ctx.m_fError = lMotionCode == -32768;
 
+    /* vertical component */
     lMotionCode     = _MPEG_GetMotionCode();
     lMotionResidual = aVRSize && lMotionCode ? _MPEG_GetBits(aVRSize) : 0;
 
@@ -869,7 +886,7 @@ static void _mpeg12_get_ref(_MPEGMacroBlock8 *apMBSrc, int aX, int anY,
     __asm__ __volatile__(
         "pnor     $v1, $zero, $zero \n"
         "ld       $v0, %4           \n"
-        "pextlw   %0, %3, %0        \n"
+        "pextlw   %0, %3, %2        \n"
         "paddw    $v0, $v0, $v1     \n"
         "pmaxw    %0, %0, $zero     \n"
         "pminw    %0, %0, $v0       \n"
@@ -889,7 +906,6 @@ static void _mpeg12_get_ref(_MPEGMacroBlock8 *apMBSrc, int aX, int anY,
     lpMotion->MC_Luma    = LumaOp[lDXY + afAvg];
     lpMotion->MC_Chroma  = ChromaOp[lUVXY + afAvg];
 }
-
 
 static void _mpeg12_get_refs(int aBX, int aBY, int aMBType, int aMotionType, int aPMV[2][2][2],
                              int aMVFS[2][2], int aDMVector[2])
@@ -991,10 +1007,12 @@ static void _mpeg12_get_refs(int aBX, int aBY, int aMBType, int aMotionType, int
                         s_MPEG12Ctx.m_pCurMotions->m_nMotions, s_MPEG12Ctx.m_MBWidth);
 }
 
+/* Motion compensation */
 static void _mpeg2_mc(int aMBA, int aMBType, int aMotionType,
                       int aPMV[2][2][2], int aMVFS[2][2],
                       int aDMVector[2], int aMBAI)
 {
+    /* block x,y */
     int lBX, lBY;
     int lfField;
     int lfIntra;
@@ -1032,9 +1050,9 @@ static void _mpeg2_mc(int aMBA, int aMBType, int aMotionType,
     }
 }
 
+/* decode all macroblocks of the current picture */
 static int _mpeg12_slice(int aMBAMax)
 {
-
     int lPMV[2][2][2];
     int lMVFS[2][2];
     int lDMVector[2];
@@ -1044,6 +1062,7 @@ static int _mpeg12_slice(int aMBAMax)
     s_MPEG12Ctx.m_fError = 0;
     lMBType              = _MPEG_NextStartCode();
 
+    /* only slice headers are allowed in picture_data */
     if (lMBType < _MPEG_CODE_SLICE_MIN || lMBType > _MPEG_CODE_SLICE_MAX)
         return -1;
 

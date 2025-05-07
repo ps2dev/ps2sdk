@@ -103,7 +103,7 @@
 
 /** Insert anywhere, qwc at addr is sent, then ends transfer */
 #define DMATAG_REFE(Q,QWC,ADDR,SPR,W2,W3) \
-	Q->dw[0] = DMATAG(qwc, 0, DMA_TAG_REFE, 0, addr, spr), \
+	Q->dw[0] = DMATAG(QWC,0,DMA_TAG_REFE,0,ADDR,SPR), \
 	Q->sw[2] = (u32)(W2), \
 	Q->sw[3] = (u32)(W3)
 
