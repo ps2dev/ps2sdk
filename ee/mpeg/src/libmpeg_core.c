@@ -301,6 +301,7 @@ int _MPEG_CSCImage(void *source, void *dest, int mbcount)
     _ipu_resume();
     return mbc;
 }
+
 static int _ipu_bits_in_fifo()
 {
     u32 bp_reg;
@@ -336,9 +337,17 @@ static int _req_data()
 void _ipu_sync(void)
 {
     u32 ctrl = *R_EE_IPU_CTRL;
+    int i    = 0;
 
     while ((ctrl & IPU_CTRL_ECD) == 0) {
         if (_ipu_needs_bits()) {
+            if (_req_data()) {
+                return;
+            }
+        }
+
+        // Are we stuck? try throwing more data at the problem
+        if (i > 500) {
             if (_req_data()) {
                 return;
             }
@@ -349,6 +358,7 @@ void _ipu_sync(void)
         }
 
         ctrl = *R_EE_IPU_CTRL;
+        i++;
     }
 }
 
@@ -356,9 +366,17 @@ u32 _ipu_sync_data(void)
 {
     u32 ctrl = *R_EE_IPU_CTRL;
     u64 cmd  = *R_EE_IPU_CMD;
+    int i    = 0;
 
     while ((ctrl & IPU_CTRL_ECD) == 0) {
         if (_ipu_needs_bits()) {
+            if (_req_data()) {
+                return _MPEG_CODE_SEQ_END;
+            }
+        }
+
+        // Are we stuck? try throwing more data at the problem
+        if (i > 500) {
             if (_req_data()) {
                 return _MPEG_CODE_SEQ_END;
             }
@@ -370,6 +388,7 @@ u32 _ipu_sync_data(void)
 
         cmd  = *R_EE_IPU_CMD;
         ctrl = *R_EE_IPU_CTRL;
+        i++;
     }
 
     return cmd;
