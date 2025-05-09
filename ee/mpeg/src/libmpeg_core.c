@@ -409,7 +409,6 @@ unsigned int _ipu_show_bits(unsigned int bits)
         s_BitsBuffered = 32;
     }
 
-    // printf("_ipu_show_bits %d bits ==  %x (%08x)\n", bits, s_LocalBits >> ((32 - bits) & 0x1f), s_LocalBits);
     return s_LocalBits >> ((32 - bits) & 0x1f);
 }
 
