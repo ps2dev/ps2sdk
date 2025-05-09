@@ -140,8 +140,7 @@ void _MPEG_Initialize(_MPEGContext *mc, int (*data_cb)(void *), void *cb_user, i
     s_SetDMA_arg  = cb_user;
     s_pEOF        = eof_flag;
     *s_pEOF       = 0;
-    // TODO: check if this is the correct options for the semaphore
-    // Everything except init_count is uninitialized stack garbage in the ASM version
+
     memset(&sema, 0, sizeof(sema));
     sema.init_count = 0;
     sema.max_count  = 1;
@@ -408,7 +407,6 @@ unsigned int _ipu_get_bits(unsigned int bits)
     s_BitsBuffered = s_BitsBuffered - bits;
     ret            = s_LocalBits >> ((32 - bits) & 0x1f);
     s_LocalBits    = s_LocalBits << (bits & 0x1f);
-    // printf("_ipu_get_bits %d bits ==  %x (%08x)\n", bits, ret, s_LocalBits);
 
     return ret;
 }

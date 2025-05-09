@@ -528,7 +528,6 @@ static int _get_first_picture(void *apData, s64 *apPTS)
     if (retVal) {
         s_MPEG12Ctx.m_SI.m_FrameCnt = 0;
 
-        printf("hi first picture init seq\n");
         apData = _init_seq();
         _mpeg12_picture_data();
 
