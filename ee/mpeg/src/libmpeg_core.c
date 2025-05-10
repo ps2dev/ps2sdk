@@ -658,31 +658,33 @@ void _MPEG_dma_ref_image(_MPEGMacroBlock8 *mb, _MPEGMotion *motions, s64 n_motio
     qword_t *q;
     int i;
 
-    if (n_motions > 0) {
-        while (*R_EE_D9_CHCR & 0x100)
-            ;
-
-        *R_EE_D9_QWC  = 0;
-        *R_EE_D9_SADR = (u32)mb & 0xFFFFFFF;
-        *R_EE_D9_TADR = (u32)s_DMAPack;
-
-        q = UNCACHED_SEG(s_DMAPack);
-        for (i = 0; i < n_motions; i++) {
-            DMATAG_REF(q, 0x30, (u32)motions[i].m_pSrc, 0, 0, 0);
-            q++;
-            DMATAG_REF(q, 0x30, (u32)motions[i].m_pSrc + mbwidth, 0, 0, 0);
-            q++;
-
-            motions[i].m_pSrc = (unsigned char *)mb;
-            mb += 4;
-        }
-
-        DMATAG_REFE(q, 0, 0, 0, 0, 0);
-        motions[i].MC_Luma = NULL;
-
-        EE_SYNCL();
-        *R_EE_D9_CHCR = 0x105;
+    if (n_motions <= 0) {
+        return;
     }
+
+    while (*R_EE_D9_CHCR & 0x100)
+        ;
+
+    *R_EE_D9_QWC  = 0;
+    *R_EE_D9_SADR = (u32)mb & 0xFFFFFFF;
+    *R_EE_D9_TADR = (u32)s_DMAPack;
+
+    q = UNCACHED_SEG(s_DMAPack);
+    for (i = 0; i < n_motions; i++) {
+        DMATAG_REF(q, 0x30, (u32)motions[i].m_pSrc, 0, 0, 0);
+        q++;
+        DMATAG_REF(q, 0x30, (u32)motions[i].m_pSrc + mbwidth, 0, 0, 0);
+        q++;
+
+        motions[i].m_pSrc = (unsigned char *)mb;
+        mb += 4;
+    }
+
+    DMATAG_REFE(q, 0, 0, 0, 0, 0);
+    motions[i].MC_Luma = NULL;
+
+    EE_SYNCL();
+    *R_EE_D9_CHCR = 0x105;
 }
 
 /*

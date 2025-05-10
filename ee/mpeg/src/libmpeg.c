@@ -117,7 +117,6 @@ void MPEG_Destroy(void)
 static void *_init_seq(void)
 {
     int lMBWidth, lMBHeight;
-    unsigned int lAllocSize;
     char *pA;
 
     if (!s_MPEG12Ctx.m_fMPEG2) {
@@ -134,6 +133,7 @@ static void *_init_seq(void)
     }
 
     if (lMBWidth != s_MPEG12Ctx.m_MBWidth || lMBHeight != s_MPEG12Ctx.m_MBHeight) {
+        unsigned int lAllocSize;
         int i, lSize;
 
         if (s_MPEG12Ctx.m_pFwdFrame)
@@ -607,7 +607,6 @@ static void _mpeg12_picture_data(void)
 {
     int lMBAMax = s_MPEG12Ctx.m_MBWidth * s_MPEG12Ctx.m_MBHeight;
     _MPEGMacroBlock8 *lpMB;
-    s64 lPTS;
 
     if (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME && s_MPEG12Ctx.m_fSecField)
         s_MPEG12Ctx.m_fSecField = 0;
@@ -616,6 +615,8 @@ static void _mpeg12_picture_data(void)
         s_MPEG12Ctx.m_pCurFrame = s_MPEG12Ctx.m_pAuxFrame;
         s_MPEG12Ctx.m_AuxPTS    = *s_pCurPTS;
     } else {
+        s64 lPTS;
+
         if (!s_MPEG12Ctx.m_fSecField) {
             lpMB                    = s_MPEG12Ctx.m_pFwdFrame;
             lPTS                    = s_MPEG12Ctx.m_FwdPTS;
