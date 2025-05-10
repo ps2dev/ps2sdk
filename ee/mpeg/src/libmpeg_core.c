@@ -97,13 +97,14 @@ static u32 s_QmNonIntra[16] __attribute__((aligned(16))) = {
 
 extern s32 _mpeg_dmac_handler(s32 channel, void *arg, void *addr);
 
+#define RGBA32_BLOCK_SIZE (16 * 16 * 4)
+
 #define IPU_CMD_BUSY (1ull << 63)
 
 #define IPU_CTRL_BUSY (1 << 31)
 #define IPU_CTRL_RST  (1 << 30)
 #define IPU_CTRL_MP1  (1 << 23)
 #define IPU_CTRL_ECD  (1 << 14)
-
 
 // clang-format off
 #define IPU_COMMAND_BCLR         0x00000000
@@ -258,11 +259,11 @@ s32 _mpeg_dmac_handler(s32 channel, void *arg, void *addr)
     }
     *R_EE_D3_MADR = cp->dest;
     *R_EE_D4_MADR = cp->source;
-    cp->source += mbc * 0x180;
-    cp->dest += mbc * 0x400;
+    cp->source += mbc * sizeof(_MPEGMacroBlock8);
+    cp->dest += mbc * RGBA32_BLOCK_SIZE;
     cp->blocks    = cp->blocks - mbc;
-    *R_EE_D3_QWC  = (mbc * 0x400) >> 4;
-    *R_EE_D4_QWC  = (mbc * 0x180) >> 4;
+    *R_EE_D3_QWC  = (mbc * sizeof(_MPEGMacroBlock8)) >> 4;
+    *R_EE_D4_QWC  = (mbc * RGBA32_BLOCK_SIZE) >> 4;
     *R_EE_D4_CHCR = 0x101;
     *R_EE_IPU_CMD = IPU_COMMAND_CSC | mbc;
     *R_EE_D3_CHCR = 0x100;
@@ -284,12 +285,12 @@ int _MPEG_CSCImage(void *source, void *dest, int mbcount)
     *R_EE_D3_MADR = (u32)dest;
     *R_EE_D4_MADR = (u32)source;
 
-    s_CSCParam.source = (u32)source + mbc * sizeof(_MPEGMacroBlock8); // 0x180
-    s_CSCParam.dest   = (u32)dest + mbc * 0x400;                      // 1024
+    s_CSCParam.source = (u32)source + mbc * sizeof(_MPEGMacroBlock8);
+    s_CSCParam.dest   = (u32)dest + mbc * RGBA32_BLOCK_SIZE;
     s_CSCParam.blocks = mbcount - mbc;
 
-    *R_EE_D4_QWC = (mbc * 0x180) >> 4;
-    *R_EE_D3_QWC = (mbc * 0x400) >> 4;
+    *R_EE_D4_QWC = (mbc * sizeof(_MPEGMacroBlock8)) >> 4;
+    *R_EE_D3_QWC = (mbc * RGBA32_BLOCK_SIZE) >> 4;
     EnableDmac(3);
     *R_EE_D4_CHCR = 0x101;
     *R_EE_IPU_CMD = IPU_COMMAND_CSC | mbc;
