@@ -29,18 +29,24 @@ in this Software without prior written authorization from the X Consortium.
  * Author:  Keith Packard, MIT X Consortium
  */
 
-	.globl	ps2GetReturnAddress
-	.ent	ps2GetReturnAddress
-ps2GetReturnAddress:
-	.frame	$sp, 0, $31
-	move	$2,$31
-	j	$31
-	.end	ps2GetReturnAddress
+__asm__
+(
+	"\t" "\t" ".globl	ps2GetReturnAddress" "\n"
+	"\t" "\t" ".ent	ps2GetReturnAddress" "\n"
+	"\t" "ps2GetReturnAddress:" "\n"
+	"\t" "\t" ".frame	$sp, 0, $31" "\n"
+	"\t" "\t" "move	$2,$31" "\n"
+	"\t" "\t" "j	$31" "\n"
+	"\t" "\t" ".end	ps2GetReturnAddress" "\n"
+);
 
-	.globl	ps2GetStackPointer
-	.ent	ps2GetStackPointer
-ps2GetStackPointer:
-	.frame	$sp, 0, $31
-	move	$2,$29
-	j	$31
-	.end	ps2GetStackPointer
+__asm__
+(
+	"\t" "\t" ".globl	ps2GetStackPointer" "\n"
+	"\t" "\t" ".ent	ps2GetStackPointer" "\n"
+	"\t" "ps2GetStackPointer:" "\n"
+	"\t" "\t" ".frame	$sp, 0, $31" "\n"
+	"\t" "\t" "move	$2,$29" "\n"
+	"\t" "\t" "j	$31" "\n"
+	"\t" "\t" ".end	ps2GetStackPointer" "\n"
+);
