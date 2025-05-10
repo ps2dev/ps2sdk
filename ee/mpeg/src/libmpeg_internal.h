@@ -98,7 +98,10 @@ typedef struct _MPEGMotion
     int m_fInt;
     int m_Field;
 
+    // These are used from assembly, supress linter warnings.
+    // cppcheck-suppress unusedStructMember
     void (*MC_Luma)(struct _MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int tmpa, int, int);
+    // cppcheck-suppress unusedStructMember
     void (*MC_Chroma)(struct _MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int tmpa, int, int);
 } _MPEGMotion;
 
