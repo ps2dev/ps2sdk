@@ -124,6 +124,7 @@ typedef struct _MPEGContext
     s64 m_AuxPTS;
     int m_MBWidth;
     int m_MBHeight;
+    void *m_pFrameArena;
     _MPEGMacroBlock8 *m_pFwdFrame;
     _MPEGMacroBlock8 *m_pBckFrame;
     _MPEGMacroBlock8 *m_pAuxFrame;

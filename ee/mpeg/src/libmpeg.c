@@ -117,6 +117,8 @@ void MPEG_Destroy(void)
 static void *_init_seq(void)
 {
     int lMBWidth, lMBHeight;
+    unsigned int lAllocSize;
+    char *pA;
 
     if (!s_MPEG12Ctx.m_fMPEG2) {
         s_MPEG12Ctx.m_fProgSeq   = 1;
@@ -146,11 +148,20 @@ static void *_init_seq(void)
 
         lSize = lMBWidth * (lMBHeight + 1) * sizeof(_MPEGMacroBlock8) + sizeof(_MPEGMacroBlock8);
 
-        s_MPEG12Ctx.m_pFwdFrame = memalign(64, lSize);
-        s_MPEG12Ctx.m_pBckFrame = memalign(64, lSize);
-        s_MPEG12Ctx.m_pAuxFrame = memalign(64, lSize);
+        s_MPEG12Ctx.m_MBCount = s_MPEG12Ctx.m_MBWidth * s_MPEG12Ctx.m_MBHeight;
 
-        s_MPEG12Ctx.m_pMBXY = malloc(sizeof(_MPEGMBXY) * (s_MPEG12Ctx.m_MBCount = s_MPEG12Ctx.m_MBWidth * s_MPEG12Ctx.m_MBHeight));
+        lAllocSize = (lSize * 3) + (s_MPEG12Ctx.m_MBCount * sizeof(_MPEGMBXY));
+
+        pA = memalign(64, lAllocSize);
+
+        s_MPEG12Ctx.m_pFrameArena = pA;
+        s_MPEG12Ctx.m_pFwdFrame   = (_MPEGMacroBlock8 *)pA;
+        pA += lSize;
+        s_MPEG12Ctx.m_pBckFrame = (_MPEGMacroBlock8 *)pA;
+        pA += lSize;
+        s_MPEG12Ctx.m_pAuxFrame = (_MPEGMacroBlock8 *)pA;
+        pA += lSize;
+        s_MPEG12Ctx.m_pMBXY = (_MPEGMBXY *)pA;
 
         for (i = 0; i < s_MPEG12Ctx.m_MBCount; ++i) {
             s_MPEG12Ctx.m_pMBXY[i].m_X = i % lMBWidth;
@@ -165,24 +176,12 @@ static void _destroy_seq(void)
 {
     MPEG_Picture = _get_first_picture;
 
-    if (s_MPEG12Ctx.m_pAuxFrame) {
-        free(s_MPEG12Ctx.m_pAuxFrame);
+    if (s_MPEG12Ctx.m_pFrameArena) {
+        free(s_MPEG12Ctx.m_pFrameArena);
         s_MPEG12Ctx.m_pAuxFrame = NULL;
-    }
-
-    if (s_MPEG12Ctx.m_pBckFrame) {
-        free(s_MPEG12Ctx.m_pBckFrame);
         s_MPEG12Ctx.m_pBckFrame = NULL;
-    }
-
-    if (s_MPEG12Ctx.m_pFwdFrame) {
-        free(s_MPEG12Ctx.m_pFwdFrame);
         s_MPEG12Ctx.m_pFwdFrame = NULL;
-    }
-
-    if (s_MPEG12Ctx.m_pMBXY) {
-        free(s_MPEG12Ctx.m_pMBXY);
-        s_MPEG12Ctx.m_pMBXY = NULL;
+        s_MPEG12Ctx.m_pMBXY     = NULL;
     }
 
     s_MPEG12Ctx.m_MBWidth  = 0;
