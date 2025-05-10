@@ -1,0 +1,14 @@
+<map id="spu2_regs_main_" name="spu2_regs_main_">
+<area shape="rect" id="Node000001" title=" " alt="" coords="138,529,262,555"/>
+<area shape="rect" id="Node000002" href="$spu2__mmio__hwport_8h.html#structspu2__core__regs__padded__" title=" " alt="" coords="116,441,285,466"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,482,203,529,198,529,198,482"/>
+<area shape="rect" id="Node000003" href="$spu2__mmio__hwport_8h.html#structspu2__core__regs__" title=" " alt="" coords="140,352,260,378"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="203,393,203,440,198,440,198,393"/>
+<area shape="rect" id="Node000004" href="$spu2__mmio__hwport_8h.html#structspu2__voice__params__" title=" " alt="" coords="5,194,150,219"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="72,235,67,281,71,305,82,326,93,338,108,347,140,358,139,363,105,352,90,342,77,330,66,307,62,281,67,234"/>
+<area shape="rect" id="Node000005" href="$spu2__mmio__hwport_8h.html#structspu2__u16pair__" title=" " alt="" coords="169,5,274,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="222,46,215,124,203,352,198,351,210,124,216,46"/>
+<area shape="rect" id="Node000006" href="$spu2__mmio__hwport_8h.html#structspu2__voice__address__" title=" " alt="" coords="317,194,464,219"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="244,40,382,191,378,195,240,44"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="368,232,301,291,218,354,215,349,297,287,365,228"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="iop/network/spduart/include/modem.h" name="iop/network/spduart/include/modem.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,141,46"/>
+<area shape="rect" id="Node000002" href="$iop_2network_2spduart_2src_2irx__imports_8h_source.html" title=" " alt="" coords="5,94,141,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="76,62,76,94,70,94,70,62"/>
+<area shape="rect" id="Node000003" href="$spduart_8c_source.html" title=" " alt="" coords="5,183,141,223"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="76,150,76,182,70,182,70,150"/>
+</map>

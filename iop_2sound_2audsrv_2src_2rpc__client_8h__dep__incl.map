@@ -1,0 +1,11 @@
+<map id="iop/sound/audsrv/src/rpc_client.h" name="iop/sound/audsrv/src/rpc_client.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="255,5,397,46"/>
+<area shape="rect" id="Node000002" href="$audsrv_8c.html" title=" " alt="" coords="5,94,148,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="256,54,134,96,132,91,254,49"/>
+<area shape="rect" id="Node000003" href="$cdrom_8c.html" title=" " alt="" coords="172,94,314,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="298,59,264,95,260,92,295,56"/>
+<area shape="rect" id="Node000004" href="$iop_2sound_2audsrv_2src_2rpc__client_8c_source.html" title=" " alt="" coords="339,94,481,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="357,56,393,92,389,95,354,59"/>
+<area shape="rect" id="Node000005" href="$iop_2sound_2audsrv_2src_2rpc__server_8c.html" title=" " alt="" coords="505,94,648,135"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="398,49,520,91,519,96,396,54"/>
+</map>

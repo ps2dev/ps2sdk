@@ -1,0 +1,15 @@
+<map id="common/include/aifregs.h" name="common/include/aifregs.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="362,5,531,31"/>
+<area shape="rect" id="Node000002" href="$atahw_8h.html" title=" " alt="" coords="184,86,349,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="406,40,295,88,293,84,404,35"/>
+<area shape="rect" id="Node000006" href="$aifdev9_8h_source.html" title=" " alt="" coords="373,79,520,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="449,46,449,79,444,79,444,46"/>
+<area shape="rect" id="Node000007" href="$ps2dev9_8c.html" title=" " alt="" coords="545,86,732,112"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="491,35,610,84,608,88,489,40"/>
+<area shape="rect" id="Node000003" href="$acatad_8c_source.html" title=" " alt="" coords="5,168,152,208"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="227,122,122,170,120,165,225,117"/>
+<area shape="rect" id="Node000004" href="$ps2atad_8c.html" title=" " alt="" coords="176,175,357,201"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="269,128,269,175,264,175,264,128"/>
+<area shape="rect" id="Node000005" href="$hdproatad_8c_source.html" title=" " alt="" coords="381,168,520,208"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="307,117,410,165,408,170,305,122"/>
+</map>
