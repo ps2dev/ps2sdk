@@ -538,9 +538,6 @@ extern int SetMemoryMode(int mode); // Arbitrarily named.
 /* (DESR kernels only) Get the value set by SetMemoryMode. */
 extern int GetMemoryMode(void); // Arbitrarily named.
 
-extern void _SyncDCache(void *start, void *end);
-extern void _InvalidDCache(void *start, void *end);
-
 extern void *GetSyscallHandler(int syscall_no);
 extern void *GetExceptionHandler(int except_no);
 extern void *GetInterruptHandler(int intr_no);
