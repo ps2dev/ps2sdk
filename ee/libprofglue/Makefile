@@ -8,7 +8,9 @@
 
 EE_LIB = libprofglue.a
 
-EE_OBJS = prof.o mcount.o
+EE_FATLTOFLAGS ?=
+
+EE_OBJS = prof.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
