@@ -153,7 +153,7 @@ DECLARE_EXPORT(sio2_data_in)
 DECLARE_EXPORT(sio2_stat_set)
 DECLARE_EXPORT(sio2_stat_get)
 DECLARE_EXPORT(sio2_pad_transfer_init_possiblysdk13x) // originally sio2_pad_transfer_init
-DECLARE_EXPORT(sio2_pad_transfer_init_possiblysdk13x) // originally sio2_mc_transfer_init
+DECLARE_EXPORT(sio2_mc_transfer_init_possiblysdk13x) // originally sio2_mc_transfer_init
 DECLARE_EXPORT(sio2_transfer)
 DECLARE_EXPORT(sio2_transfer_reset)
 DECLARE_EXPORT(sio2_ctrl_set2)
