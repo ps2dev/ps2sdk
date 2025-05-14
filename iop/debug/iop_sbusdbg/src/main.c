@@ -47,8 +47,10 @@ int tid;
 
 extern void soft_break(void);
 
-void _controller_thread(void)
+void _controller_thread(void *arg)
 {
+	(void)arg;
+
     while(1)
     {
 //        printf("IOP: Controller thread going to sleep(%d)...\n", _iop_exception_state);
@@ -63,7 +65,7 @@ void create_th(void)
 	iop_thread_t param;
 
 	param.attr = TH_C;
-	param.thread = (void *) _controller_thread;
+	param.thread = _controller_thread;
 	param.priority = 9; // highest possible priority
 	param.stacksize = 512; // tiny stack, not much is needed!
 	param.option = 0;

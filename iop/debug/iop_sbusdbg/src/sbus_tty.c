@@ -27,14 +27,16 @@ Of course this requires that the EE-side code accept this command and output the
 
 extern void sbus_tty_puts(const char *str);
 
-static int ttyfs_init()
+static int ttyfs_init(iop_device_t *device)
 {
+    (void)device;
     //DBG_puts("SIOTTY: FS Init()\n");
 	return 0;
 }
 
-static int ttyfs_deinit()
+static int ttyfs_deinit(iop_device_t *device)
 {
+    (void)device;
     //DBG_puts("SIOTTY: FS Deinit()\n");
 	return 0;
 }

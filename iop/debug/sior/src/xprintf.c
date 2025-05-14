@@ -182,11 +182,11 @@ static int getdigit(long double *val, int *cnt){
 ** will run.
 */
 
-int vxprintf(func,arg,format,ap)
-  void (*func)(char*,int,void*);
-  void *arg;
-  const char *format;
-  va_list ap;
+int vxprintf(
+  void (*func)(char*,int,void*),
+  void *arg,
+  const char *format,
+  va_list ap)
 {
   register const char *fmt; /* The format string. */
   register int c;           /* Next character in the format string */
@@ -692,10 +692,10 @@ struct s_strargument {    /* Describes the string being written to */
 
 void __sout(char *, int, void *);
 #ifdef F___sout
-void __sout(txt,amt,arg)
-  char *txt;
-  int amt;
-  void *arg;
+void __sout(
+  char *txt,
+  int amt,
+  void *arg)
 {
   register char *head;
   register const char *t;

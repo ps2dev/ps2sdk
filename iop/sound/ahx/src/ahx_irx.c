@@ -93,7 +93,7 @@ int _start(int argc, char *argv[])
     (void)argv;
 
     FlushDcache();
-    CpuEnableIntr(0);
+    CpuEnableIntr();
     EnableIntr(40); // Enables SPU DMA (channel 1) interrupt.
     param.attr      = TH_C;
     param.thread    = AHX_Thread;

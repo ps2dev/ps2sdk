@@ -561,7 +561,7 @@ int _start(int argc, char *argv[])
 	(void)argv;
 
 	FlushDcache();
-	CpuEnableIntr(0);
+	CpuEnableIntr();
 
 	printf("greetings from version " VERSION " !\n");
 

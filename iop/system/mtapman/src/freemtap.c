@@ -150,8 +150,10 @@ s32 get_slot_number(u32 port, u32 retries)
 }
 
 
-void update_slot_numbers_thread()
+void update_slot_numbers_thread(void *arg)
 {
+	(void)arg;
+
 	while(1)
 	{
 		u32 resbits, port;

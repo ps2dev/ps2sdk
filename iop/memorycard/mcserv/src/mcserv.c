@@ -156,7 +156,7 @@ int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 
 	DPRINTF("starting RPC thread...\n");
  	thread_param.attr = TH_C;
- 	thread_param.thread = (void *)thread_rpc_S_0400;
+ 	thread_param.thread = thread_rpc_S_0400;
  	thread_param.priority = 0x68;
  	thread_param.stacksize = 0x1000;
  	thread_param.option = 0;
