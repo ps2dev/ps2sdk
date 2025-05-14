@@ -8,6 +8,8 @@
 
 IOP_BIN ?= dvrdrv.irx
 
+IOP_CSTDFLAGS ?= -std=gnu99
+
 IOP_IMPORT_INCS += \
 	dev9/dev9 \
 	system/intrman \

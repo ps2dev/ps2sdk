@@ -6,6 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+EE_CSTDFLAGS ?= -std=gnu99
 
 EXEC_SYSCALLS = KExit.o _LoadExecPS2.o _ExecPS2.o
 EXECOSD_SYSCALL = _ExecOSD.o

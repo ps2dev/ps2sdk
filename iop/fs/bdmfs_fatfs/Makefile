@@ -8,6 +8,8 @@
 
 FATFS := $(PS2SDKSRC)/common/external_deps/fatfs
 
+IOP_CSTDFLAGS ?= -std=gnu99
+
 DEBUG ?= 0
 DEBUG_EXTREME ?= 0
 

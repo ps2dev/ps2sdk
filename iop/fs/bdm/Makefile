@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+IOP_CSTDFLAGS ?= -std=gnu99
+
 # IOP_CFLAGS += -DDEBUG
 
 IOP_IMPORT_INCS += \

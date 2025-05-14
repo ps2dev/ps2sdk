@@ -15,6 +15,8 @@ USE_SIZE_OPTIMIZED ?= 0
 # Use full version of printf? This will massively increase the file size
 USE_FULL_PRINTF ?= 0
 
+IOP_CSTDFLAGS ?= -std=gnu99
+
 IOP_CFLAGS += -D_COMPILING_NEWLIB -DPRINTF_ALIAS_STANDARD_FUNCTION_NAMES=1
 
 IOP_IMPORT_INCS += \

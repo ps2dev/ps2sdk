@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+IOP_CSTDFLAGS ?= -std=c99
+
 IOP_IMPORT_INCS += \
 	sound/libsd \
 	system/intrman \

@@ -8,6 +8,8 @@
 
 IOP_BIN ?= threadman.irx
 
+IOP_CSTDFLAGS ?= -std=gnu99
+
 IOP_IMPORT_INCS += \
 	system/heaplib \
 	system/intrman \

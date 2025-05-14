@@ -22,6 +22,14 @@ else()
     message(FATAL_ERROR "The environment variable PS2DEV needs to be defined.")
 endif()
 
+if(NOT DEFINED CMAKE_C_STANDARD)
+set(CMAKE_C_STANDARD 90)
+endif()
+
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+set(CMAKE_CXX_STANDARD 98)
+endif()
+
 SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
 SET(CMAKE_SYSTEM_PROCESSOR mips)
