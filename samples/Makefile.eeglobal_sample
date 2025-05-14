@@ -34,11 +34,17 @@ EE_WARNFLAGS ?= -Wall
 # Debug information flags
 EE_DBGINFOFLAGS ?= -gdwarf-2 -gz
 
+# C standard compiler flags
+EE_CSTDFLAGS ?= -std=gnu89
+
+# C++ standard compiler flags
+EE_CXXSTDFLAGS ?= -std=gnu++98
+
 # C compiler flags
-EE_CFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_DBGINFOFLAGS) $(EE_CFLAGS)
+EE_CFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_DBGINFOFLAGS) $(EE_CSTDFLAGS) $(EE_CFLAGS)
 
 # C++ compiler flags
-EE_CXXFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_DBGINFOFLAGS) $(EE_CXXFLAGS)
+EE_CXXFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_DBGINFOFLAGS) $(EE_CXXSTDFLAGS) $(EE_CXXFLAGS)
 
 # Linker flags
 EE_LDFLAGS := -L$(PS2SDK)/ee/lib -Wl,-zmax-page-size=128 $(EE_LDFLAGS)

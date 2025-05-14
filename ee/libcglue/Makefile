@@ -8,6 +8,8 @@
 
 EE_LIB = libcglue.a
 
+EE_CSTDFLAGS ?= -std=gnu99
+
 RTC_OBJS = \
 	_libcglue_rtc_data.o \
 	_libcglue_rtc_get_offset_from_busclk.o \

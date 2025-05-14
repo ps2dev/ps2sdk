@@ -9,6 +9,7 @@
 EE_BIN   = gprofbasic.elf
 EE_OBJS  = main.o
 
+EE_CSTDFLAGS ?= -std=gnu99
 EE_CFLAGS = -Os -pg -g
 EE_LDFLAGS += -pg -g
 

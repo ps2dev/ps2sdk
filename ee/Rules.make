@@ -38,18 +38,24 @@ EE_WARNFLAGS ?= -Wall -Werror
 # Debug information flags
 EE_DBGINFOFLAGS ?= -gdwarf-2 -gz
 
+# C standard compiler flags
+EE_CSTDFLAGS ?= -std=gnu89
+
+# C++ standard compiler flags
+EE_CXXSTDFLAGS ?= -std=gnu++98
+
 # These flags will generate LTO and non-LTO code in the same object file,
 # allowing the choice of using LTO or not in the final linked binary.
 EE_FATLTOFLAGS ?= -flto -ffat-lto-objects
 
 # C compiler flags
-EE_CFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_DBGINFOFLAGS) $(EE_INCS) $(EE_CFLAGS)
+EE_CFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_DBGINFOFLAGS) $(EE_CSTDFLAGS) $(EE_INCS) $(EE_CFLAGS)
 
 ifeq ($(DEBUG),1)
 EE_CFLAGS += -DDEBUG
 endif
 # C++ compiler flags
-EE_CXXFLAGS := -D_EE -G0 -$(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_DBGINFOFLAGS) $(EE_INCS) $(EE_CXXFLAGS)
+EE_CXXFLAGS := -D_EE -G0 -$(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_DBGINFOFLAGS) $(EE_CXXSTDFLAGS) $(EE_INCS) $(EE_CXXFLAGS)
 
 # Linker flags
 # EE_LDFLAGS := $(EE_LDFLAGS)

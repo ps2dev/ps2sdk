@@ -12,6 +12,7 @@ VERBOSE = 0
 EE_BIN   = mem_test.elf
 EE_OBJS  = main.o
 
+EE_CSTDFLAGS ?= -std=gnu99
 EE_CFLAGS = -Os -g
 # EE_CFLAGS += -fdata-sections -ffunction-sections
 # EE_LDFLAGS += -s

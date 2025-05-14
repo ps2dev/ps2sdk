@@ -7,7 +7,10 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 IOP_BIN = xparam.irx
+
 DATABASE ?= 0#0: Homebrew, 1: ROM 2.20, 2: ROM 2.50
+
+IOP_CSTDFLAGS ?= -std=gnu99
 
 IOP_OBJS = xparam.o imports.o
 

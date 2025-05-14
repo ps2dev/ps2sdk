@@ -9,6 +9,8 @@
 # Enable compatibility with PS1 mode?
 TIMRMAN_PS1 ?= 0
 
+IOP_CSTDFLAGS ?= -std=gnu99
+
 IOP_BIN_ALTNAMES ?= timemani.irx
 
 IOP_IMPORT_INCS += \
