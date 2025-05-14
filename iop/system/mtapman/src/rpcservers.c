@@ -58,8 +58,10 @@ void* rpc_server_change_slot(s32 fno, u32 *data, s32 size)
 }
 
 
-void rpc_thread_change_slot()
+void rpc_thread_change_slot(void *arg)
 {
+	(void)arg;
+
 	if( sceSifCheckInit() == 0)
 	{
 		M_PRINTF("Sif not initialized.\n");
@@ -84,8 +86,10 @@ void* rpc_server_get_slot_number(s32 fno, u32 *data, s32 size)
 }
 
 
-void rpc_thread_get_slot_number()
+void rpc_thread_get_slot_number(void *arg)
 {
+	(void)arg;
+
 	if( sceSifCheckInit() == 0)
 	{
 		M_PRINTF("Sif not initialized.\n");
@@ -108,8 +112,10 @@ void* RpcServerGetConnection(s32 fno, u32 *data, s32 size)
 	return data;
 }
 
-void RpcThreadGetConnection()
+void RpcThreadGetConnection(void *arg)
 {
+	(void)arg;
+
 	if( sceSifCheckInit() == 0)
 	{
 		M_PRINTF("Sif not initialized.\n");
@@ -132,8 +138,10 @@ void* RpcServerPortClose(s32 fno, u32 *data, s32 size)
 	return data;
 }
 
-void RpcThreadPortClose()
+void RpcThreadPortClose(void *arg)
 {
+	(void)arg;
+
 	if( sceSifCheckInit() == 0)
 	{
 		M_PRINTF("Sif not initialized.\n");
@@ -156,8 +164,10 @@ void* RpcServerPortOpen(s32 fno, u32 *data, s32 size)
 	return data;
 }
 
-void RpcThreadPortOpen()
+void RpcThreadPortOpen(void *arg)
 {
+	(void)arg;
+
 	if( sceSifCheckInit() == 0)
 	{
 		M_PRINTF("Sif not initialized.\n");

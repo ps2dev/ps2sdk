@@ -311,7 +311,7 @@ static int sif_dma_setup_tag(SifDmaTransfer_t *a1)
 	return ++sifman_internals.dmatag_index;
 }
 
-static int set_dma_inner(SifDmaTransfer_t *dmat, int count, void (*func)(), void *data)
+static int set_dma_inner(SifDmaTransfer_t *dmat, int count, void (*func)(void *), void *data)
 {
 	u8 dmatag_index;
 	int dma_count;
@@ -380,7 +380,7 @@ int sceSifSetDma(SifDmaTransfer_t *dmat, int count)
 	return set_dma_inner(dmat, count, 0, 0);
 }
 
-unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int len, void (*func)(), void *data)
+unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int len, void (*func)(void *), void *data)
 {
 	return set_dma_inner(dmat, len, func, data);
 }

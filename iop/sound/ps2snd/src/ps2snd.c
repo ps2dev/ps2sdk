@@ -103,7 +103,7 @@ int _start(int argc, char *argv[])
 	int threadid;
 
 	FlushDcache();
-	CpuEnableIntr(0);
+	CpuEnableIntr();
 
 	if (argc>=1)
 	{

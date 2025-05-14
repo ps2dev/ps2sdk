@@ -668,8 +668,9 @@ static void spduart_init_hw(struct spduart_internals_ *priv)
 	}
 }
 
-static void spduart_thread_proc(struct spduart_internals_ *priv)
+static void spduart_thread_proc(void *arg)
 {
+	struct spduart_internals_ *priv = arg;
 	int i;
 	int m_cur_xfer_len;
 	int v10;
@@ -1267,7 +1268,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 				if ( spduart_internals.spduart_ef > 0 )
 				{
 					v18.attr = 0x2000000;
-					v18.thread = (void (*)(void *))spduart_thread_proc;
+					v18.thread = spduart_thread_proc;
 					v18.option = 0;
 					v18.priority = spduart_internals.spduart_thpri_;
 					v18.stacksize = spduart_internals.spduart_thstack_;

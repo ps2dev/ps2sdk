@@ -1959,13 +1959,8 @@ static void ps2netfs_Listener(int sock)
  * 'ps2netfs_active' is set to 0.
  * Handles accepting connections and passing them onto the listener
  * function to handle them.
- *
- * status returns:
- *   0 if exiting and finished.
- *  -1 if error starting thread.
  */
-int
-ps2netfs_serv(void *argv)
+void ps2netfs_serv(void *argv)
 {
  struct sockaddr_in server_addr;
  struct sockaddr_in client_addr;
@@ -1988,7 +1983,6 @@ ps2netfs_serv(void *argv)
  while ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
  {
    DPRINTF("ps2netfs: socket creation error (%d)\n", sock);
-   return -1;
  }
 
  ret = bind(sock, (struct sockaddr *)&server_addr,
@@ -1997,7 +1991,6 @@ ps2netfs_serv(void *argv)
  {
    DPRINTF("ps2netfs: bind error (%d)\n", ret);
    ps2netfs_close_socket();
-   return -1;
  }
 
  ret = listen(sock, 5);
@@ -2006,7 +1999,6 @@ ps2netfs_serv(void *argv)
  {
    DPRINTF("ps2netfs: listen error (%d)\n", ret);
    disconnect(sock);
-   return -1;
  }
 
  // Active flag kinda sux, cause it wont be checked until a new client has
@@ -2057,7 +2049,6 @@ ps2netfs_serv(void *argv)
  disconnect(sock);
 
  ExitDeleteThread();
- return 0;
 }
 
 /** Init ps2netfs.
@@ -2078,7 +2069,7 @@ int ps2netfs_Init(void)
 
   mythread.attr = 0x02000000; // attr
   mythread.option = 0; // option
-  mythread.thread = (void *)ps2netfs_serv; // entry
+  mythread.thread = ps2netfs_serv; // entry
   mythread.stacksize = 0x800;
   mythread.priority = 0x43; // just above ps2link
 

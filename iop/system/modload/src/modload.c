@@ -188,12 +188,12 @@ static void linked_list_set_self(modload_ll_t *ll);
 static void get_updater_boot_argument(char *str, int *updater_argc, char **updater_argv, int updater_argv_count);
 static int spGetfsize(void *userdata, int in_fd);
 static int spLseek(void *userdata, int in_fd, long offset, int whence);
-static int spRead(void *userdata, int in_fd, void *buffer, unsigned int read_size);
-static int spBread();
-static int spSetBufSize();
+static int spRead(void *userdata, int in_fd, void *buffer, size_t read_size);
+static int spBread(void *opt, int fd, size_t nbyte);
+static int spSetBufSize(void *opt, int fd, size_t size);
 static int spClose(void *userdata, int in_fd);
-static int spAfterOpen();
-static int spBeforeOpen();
+static int spAfterOpen(void *opt, int fd);
+static int spBeforeOpen(void *opt, const char *filename, int flag);
 static int spOpen(LDfilefunc *functbl, void *userdata, const char *filename, int filemode);
 static void free_module_block(modload_ll_t *buf, char flags);
 static int load_memory_helper_cmpinner(modload_ll_t *a1, int a2, modload_ll_t *a3, modload_ll_t *a4);
@@ -1799,41 +1799,57 @@ static int spOpen(LDfilefunc *functbl, void *userdata, const char *filename, int
 	return ret_fd;
 }
 
-static int spBeforeOpen()
+static int spBeforeOpen(void *opt, const char *filename, int flag)
 {
+	(void)opt;
+	(void)filename;
+	(void)flag;
 	return 0;
 }
 
-static int spAfterOpen()
+static int spAfterOpen(void *opt, int fd)
 {
+	(void)opt;
+	(void)fd;
 	return 0;
 }
 
 static int spClose(void *userdata, int in_fd)
 {
 	(void)userdata;
+	(void)in_fd;
 	return close(in_fd);
 }
 
-static int spSetBufSize()
+static int spSetBufSize(void *opt, int fd, size_t size)
 {
+	(void)opt;
+	(void)fd;
+	(void)size;
 	return 0;
 }
 
-static int spBread()
+static int spBread(void *opt, int fd, size_t nbyte)
 {
+	(void)opt;
+	(void)fd;
+	(void)nbyte;
 	return 0;
 }
 
-static int spRead(void *userdata, int in_fd, void *buffer, unsigned int read_size)
+static int spRead(void *userdata, int in_fd, void *buffer, size_t read_size)
 {
 	(void)userdata;
+	(void)buffer;
+	(void)read_size;
 	return read(in_fd, buffer, read_size);
 }
 
 static int spLseek(void *userdata, int in_fd, long offset, int whence)
 {
 	(void)userdata;
+	(void)offset;
+	(void)whence;
 	return lseek(in_fd, offset, whence);
 }
 

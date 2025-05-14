@@ -24,7 +24,7 @@
  * Creates a thread based on the given parameter. Upon completion,
  * thread is started.
 */
-extern int create_thread(void *func, int priority, void *param);
+extern int create_thread(void (*func)(void *), int priority, void *param);
 
 /** Helper to print buffer in hex. Useful for debugging.
  * @param ptr   pointer to buffer

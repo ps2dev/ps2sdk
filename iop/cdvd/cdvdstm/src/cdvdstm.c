@@ -9,6 +9,7 @@
 */
 
 #include "irx_imports.h"
+#include "iomanX.h"
 
 #include <cdvd-ioctl.h>
 #include <errno.h>
@@ -24,12 +25,10 @@ int cdvdstm_termcall();
 static unsigned int iop_stream_handler(
 	unsigned int posszarg1, unsigned int posszarg2, void *buffer, int cmdid, const sceCdRMode *rmode, int *error_ptr);
 static unsigned int iop_stream_intr_cb(void *userdata);
-static int cdrom_stm_init();
-static int cdrom_stm_deinit();
+static int cdrom_stm_init(iop_device_t *device);
+static int cdrom_stm_deinit(iop_device_t *device);
 static int cdrom_stm_devctl(
 	iop_file_t *f, const char *name, int cmd, void *inbuf, unsigned int inbuf_len, void *outbuf, unsigned int outbuf_len);
-static int cdrom_stm_nulldev();
-static s64 cdrom_stm_nulldev64();
 static void ee_stream_handler_normal(cdrom_stm_devctl_t *instruct, int inbuf_len, int *outres_ptr);
 static unsigned int ee_stream_intr_cb_normal(void *userdata);
 static void ee_stream_handler_cdda(cdrom_stm_devctl_t *instruct, int inbuf_len, int *outres_ptr);
@@ -61,34 +60,37 @@ static unsigned int g_cdvdstm_sectorcount = 0;
 static int g_cdvdstm_last_error_for_iop = 0;
 static int g_cdvdstm_retryerr_iop = 0;
 static int g_cdvdstm_retrycnt_iop = 0;
+
+IOMANX_RETURN_VALUE_IMPL(EIO);
+
 static iop_device_ops_t g_cdrom_stm_dev_ops = {
-	&cdrom_stm_init,
-	&cdrom_stm_deinit,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev64,
+	&cdrom_stm_init, // init,
+	&cdrom_stm_deinit, // deinit,
+	IOMANX_RETURN_VALUE(EIO), // format,
+	IOMANX_RETURN_VALUE(EIO), // open,
+	IOMANX_RETURN_VALUE(EIO), // close,
+	IOMANX_RETURN_VALUE(EIO), // read,
+	IOMANX_RETURN_VALUE(EIO), // write,
+	IOMANX_RETURN_VALUE(EIO), // lseek,
+	IOMANX_RETURN_VALUE(EIO), // ioctl,
+	IOMANX_RETURN_VALUE(EIO), // remove,
+	IOMANX_RETURN_VALUE(EIO), // mkdir,
+	IOMANX_RETURN_VALUE(EIO), // rmdir,
+	IOMANX_RETURN_VALUE(EIO), // dopen,
+	IOMANX_RETURN_VALUE(EIO), // dclose,
+	IOMANX_RETURN_VALUE(EIO), // dread,
+	IOMANX_RETURN_VALUE(EIO), // getstat,
+	IOMANX_RETURN_VALUE(EIO), // chstat,
+	IOMANX_RETURN_VALUE(EIO), // rename,
+	IOMANX_RETURN_VALUE(EIO), // chdir,
+	IOMANX_RETURN_VALUE(EIO), // sync,
+	IOMANX_RETURN_VALUE(EIO), // mount,
+	IOMANX_RETURN_VALUE(EIO), // umount,
+	IOMANX_RETURN_VALUE_S64(EIO), // lseek64,
 	&cdrom_stm_devctl,
-	(void *)&cdrom_stm_nulldev,
-	(void *)&cdrom_stm_nulldev,
-	&cdrom_stm_nulldev,
+	IOMANX_RETURN_VALUE(EIO), // symlink
+	IOMANX_RETURN_VALUE(EIO), // readlink
+	IOMANX_RETURN_VALUE(EIO), // ioctl2
 };
 static iop_device_t g_cdrom_stm_dev = {"cdrom_stm", IOP_DT_FSEXT | IOP_DT_FS, 1, "CD-ROM_STM ", &g_cdrom_stm_dev_ops};
 static int g_cdvdstm_last_error_for_ee = 0;
@@ -585,8 +587,9 @@ static unsigned int iop_stream_intr_cb(void *userdata)
 	return 0;
 }
 
-static int cdrom_stm_init()
+static int cdrom_stm_init(iop_device_t *device)
 {
+	(void)device;
 	iop_sema_t semaparam;
 
 	semaparam.attr = SA_THPRI;
@@ -597,8 +600,9 @@ static int cdrom_stm_init()
 	return 0;
 }
 
-static int cdrom_stm_deinit()
+static int cdrom_stm_deinit(iop_device_t *device)
 {
+	(void)device;
 	SignalSema(g_cdvdstm_semid);
 	DeleteSema(g_cdvdstm_semid);
 	return 0;
@@ -658,18 +662,6 @@ static int cdrom_stm_devctl(
 	return retres;
 }
 
-static int cdrom_stm_nulldev()
-{
-	PRINTF("nulldev0 call\n");
-	return -EIO;
-}
-
-static s64 cdrom_stm_nulldev64()
-{
-	PRINTF("nulldev0 call\n");
-	return -EIO;
-}
-
 int _start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 {
 	int last_error;
@@ -705,7 +697,7 @@ int _start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 	DelDrv(g_cdrom_stm_dev.name);
 	if ( AddDrv(&g_cdrom_stm_dev) )
 	{
-		cdrom_stm_deinit();
+		cdrom_stm_deinit(&g_cdrom_stm_dev);
 		return MODULE_NO_RESIDENT_END;
 	}
 	g_cdvdman_intr_efid = sceCdSC(0xFFFFFFF5, &scres_unused);

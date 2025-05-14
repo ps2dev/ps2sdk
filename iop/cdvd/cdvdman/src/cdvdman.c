@@ -9,6 +9,7 @@
 */
 
 #include "irx_imports.h"
+#include "iomanX.h"
 
 #include <cdvdman.h>
 
@@ -155,7 +156,7 @@ typedef struct iso9660_dirent_
 
 static int cdrom_init(iop_device_t *dev);
 void cdvdman_termcall(int with_stop);
-static int cdrom_deinit();
+static int cdrom_deinit(iop_device_t *dev);
 static int cdrom_dopen(iop_file_t *f, const char *dirname);
 static int cdrom_getstat(iop_file_t *f, const char *name, iox_stat_t *buf);
 static int cdrom_dread(iop_file_t *f, iox_dirent_t *buf);
@@ -167,8 +168,6 @@ static int cdrom_ioctl2(iop_file_t *f, int request, void *argp, size_t arglen, v
 static int
 cdrom_devctl(iop_file_t *f, const char *, int cmd, void *argp, unsigned int arglen, void *bufp, unsigned int buflen);
 static int cdrom_lseek(iop_file_t *f, int offset, int pos);
-static int cdrom_nulldev();
-static s64 cdrom_nulldev64();
 static int CdSearchFileInner(cdvdman_filetbl_entry_t *fp, const char *name, int layer);
 static int sceCdSearchDir(char *dirname, int layer);
 static int sceCdReadDir(sceCdlFILE *fp, int dsec, int index, int layer);
@@ -211,34 +210,37 @@ static int g_cdvdman_iocache = 0;
 static unsigned int g_cdvdman_lcn_offset = 0;
 static unsigned int g_cdvdman_numbytes_offset = 0;
 static int g_cdvdman_strmerr = 0;
+
+IOMANX_RETURN_VALUE_IMPL(EIO);
+
 static iop_device_ops_t g_cdvdman_cddev_ops = {
-	&cdrom_init,
-	&cdrom_deinit,
-	(void *)&cdrom_nulldev,
-	&cdrom_open,
-	&cdrom_close,
-	&cdrom_read,
-	(void *)&cdrom_nulldev,
-	&cdrom_lseek,
-	&cdrom_ioctl,
-	(void *)&cdrom_nulldev,
-	(void *)&cdrom_nulldev,
-	(void *)&cdrom_nulldev,
-	&cdrom_dopen,
-	&cdrom_close,
-	&cdrom_dread,
-	&cdrom_getstat,
-	(void *)&cdrom_nulldev,
-	(void *)&cdrom_nulldev,
-	(void *)&cdrom_nulldev,
-	(void *)&cdrom_nulldev,
-	(void *)&cdrom_nulldev,
-	(void *)&cdrom_nulldev,
-	(void *)&cdrom_nulldev64,
-	&cdrom_devctl,
-	(void *)&cdrom_nulldev,
-	(void *)&cdrom_nulldev,
-	&cdrom_ioctl2,
+	&cdrom_init, // init,
+	&cdrom_deinit, // deinit,
+	IOMANX_RETURN_VALUE(EIO), // format,
+	&cdrom_open, // open,
+	&cdrom_close, // close,
+	&cdrom_read, // read,
+	IOMANX_RETURN_VALUE(EIO), // write,
+	&cdrom_lseek, // lseek,
+	&cdrom_ioctl, // ioctl,
+	IOMANX_RETURN_VALUE(EIO), // remove,
+	IOMANX_RETURN_VALUE(EIO), // mkdir,
+	IOMANX_RETURN_VALUE(EIO), // rmdir,
+	&cdrom_dopen, // dopen,
+	&cdrom_close, // close,
+	&cdrom_dread, // dread
+	&cdrom_getstat, // getstat
+	IOMANX_RETURN_VALUE(EIO), // chstat,
+	IOMANX_RETURN_VALUE(EIO), // rename,
+	IOMANX_RETURN_VALUE(EIO), // chdir
+	IOMANX_RETURN_VALUE(EIO), // sync
+	IOMANX_RETURN_VALUE(EIO), // mount,
+	IOMANX_RETURN_VALUE(EIO), // umount,
+	IOMANX_RETURN_VALUE_S64(EIO), // lseek64,
+	&cdrom_devctl, // devctl,
+	IOMANX_RETURN_VALUE(EIO), // readdir,
+	IOMANX_RETURN_VALUE(EIO), // readlink,
+	&cdrom_ioctl2, // ioctl2,
 };
 static iop_device_t g_cdvdman_cddev = {"cdrom", IOP_DT_FSEXT | IOP_DT_FS, 1, "CD-ROM ", &g_cdvdman_cddev_ops};
 static int g_cdvdman_sync_timeout = 15000;
@@ -320,7 +322,7 @@ int _start(int ac, char **av)
 	DelDrv(g_cdvdman_cddev.name);
 	if ( AddDrv(&g_cdvdman_cddev) )
 	{
-		cdrom_deinit();
+		cdrom_deinit(&g_cdvdman_cddev);
 		return MODULE_NO_RESIDENT_END;
 	}
 	g_cdvdman_ptoc = (u8 *)&g_cdvdman_fsvrbuf[0x924];
@@ -432,9 +434,11 @@ void cdvdman_termcall(int with_stop)
 	ReleaseIntrHandler(IOP_IRQ_CDVD);
 }
 
-static int cdrom_deinit()
+static int cdrom_deinit(iop_device_t *dev)
 {
 	unsigned int i;
+
+	(void)dev;
 
 	for ( i = 0; i < (sizeof(g_cdvdman_fhinfo) / sizeof(g_cdvdman_fhinfo[0])); i += 1 )
 	{
@@ -1891,18 +1895,6 @@ static int cdrom_lseek(iop_file_t *f, int offset, int pos)
 	}
 	SetEventFlag(g_fio_fsv_evid, 1);
 	return retval;
-}
-
-static int cdrom_nulldev()
-{
-	PRINTF("nulldev0 call\n");
-	return -EIO;
-}
-
-static s64 cdrom_nulldev64()
-{
-	PRINTF("nulldev0 call\n");
-	return -EIO;
 }
 
 static int sync_timeout_alarm_cb(const iop_sys_clock_t *sys_clock)

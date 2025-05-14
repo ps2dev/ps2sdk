@@ -76,9 +76,7 @@
  * Ignores `locale' stuff.  Assumes that the upper and lower case
  * alphabets and digits are each contiguous.
  */
-long strtol(nptr, endptr, base) const char* nptr;
-char** endptr;
-int base;
+long strtol(const char* nptr, char** endptr, int base)
 {
 	const char* s = nptr;
 	unsigned long acc;

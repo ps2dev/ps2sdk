@@ -26,8 +26,9 @@ static int tty_sema = -1;
 
 extern void tty_puts(const char *str);
 
-static int ttyfs_init()
+static int ttyfs_init(iop_device_t *device)
 {
+    (void)device;
     DPRINTF("FS Init()\n");
     if ((tty_sema = CreateMutex(IOP_MUTEX_UNLOCKED)) < 0)
     {
@@ -37,8 +38,9 @@ static int ttyfs_init()
 	return 0;
 }
 
-static int ttyfs_deinit()
+static int ttyfs_deinit(iop_device_t *device)
 {
+    (void)device;
     DPRINTF("FS Deinit()\n");
     DeleteSema(tty_sema);
 	return 0;
