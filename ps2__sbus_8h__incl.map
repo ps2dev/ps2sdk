@@ -1,0 +1,14 @@
+<map id="common/sbus/include/ps2_sbus.h" name="common/sbus/include/ps2_sbus.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,154,46"/>
+<area shape="rect" id="Node000002" href="$tamtypes_8h.html" title=" " alt="" coords="80,241,164,267"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,46,79,94,79,119,94,177,113,226,108,228,89,179,74,120,74,94,76,46"/>
+<area shape="rect" id="Node000003" href="$ps2__reg__defs_8h.html" title=" " alt="" coords="89,94,198,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="97,45,126,80,122,83,93,48"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="137,122,123,143,113,168,111,198,116,226,111,227,105,198,108,167,119,140,132,119"/>
+<area shape="rect" id="Node000004" href="$ee__regs_8h.html" title=" " alt="" coords="122,168,200,193"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="149,119,157,152,152,153,144,121"/>
+<area shape="rect" id="Node000005" href="$iop__regs_8h.html" title=" " alt="" coords="223,168,304,193"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="165,118,231,157,229,162,162,123"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="157,195,138,229,134,226,152,192"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="241,196,161,236,159,232,238,191"/>
+</map>
