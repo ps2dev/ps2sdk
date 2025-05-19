@@ -1,0 +1,8 @@
+<map id="alarm" name="alarm">
+<area shape="rect" id="Node000001" title=" " alt="" coords="38,98,91,124"/>
+<area shape="rect" id="Node000002" href="$structheaptag.html" title=" " alt="" coords="5,8,73,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="49,47,64,97,58,99,44,49"/>
+<area shape="rect" id="Node000003" href="$structlist__head.html" title=" " alt="" coords="97,8,170,33"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="117,47,76,100,71,96,113,44"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="188,11,197,20,189,29,171,32,171,26,186,25,192,20,184,15"/>
+</map>

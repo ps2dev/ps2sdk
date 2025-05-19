@@ -1,0 +1,17 @@
+<map id="common/include/iop_mmio_hwport.h" name="common/include/iop_mmio_hwport.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="491,5,628,46"/>
+<area shape="rect" id="Node000002" href="$libsd_8c.html" title=" " alt="" coords="5,94,136,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="476,41,323,65,148,97,137,99,136,94,147,91,322,60,475,36"/>
+<area shape="rect" id="Node000003" href="$boardinf_8c_source.html" title=" " alt="" coords="159,94,294,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="477,51,294,98,293,93,475,46"/>
+<area shape="rect" id="Node000004" href="$eeconf_8c_source.html" title=" " alt="" coords="317,94,466,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="509,56,431,96,429,91,507,51"/>
+<area shape="rect" id="Node000005" href="$igreeting_8c_source.html" title=" " alt="" coords="491,94,628,135"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="562,62,562,94,557,94,557,62"/>
+<area shape="rect" id="Node000006" href="$intrman_8c_source.html" title=" " alt="" coords="653,94,784,135"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="611,51,684,91,681,96,608,56"/>
+<area shape="rect" id="Node000007" href="$sifman_8c_source.html" title=" " alt="" coords="808,94,957,135"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="644,47,810,91,808,96,643,52"/>
+<area shape="rect" id="Node000008" href="$sio2man_8c.html" title=" " alt="" coords="982,94,1119,135"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="644,36,796,60,970,91,982,94,981,99,969,97,795,65,643,42"/>
+</map>

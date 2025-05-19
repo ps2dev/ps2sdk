@@ -1,0 +1,16 @@
+<map id="ee/kernel/src/sifcmd.c" name="ee/kernel/src/sifcmd.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="30,5,179,31"/>
+<area shape="rect" id="Node000002" href="$tamtypes_8h.html" title=" " alt="" coords="74,226,158,252"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,33,60,60,28,96,17,116,10,137,9,157,16,177,37,201,64,218,61,222,33,205,11,180,4,158,5,136,12,114,24,93,56,56,86,29"/>
+<area shape="rect" id="Node000003" href="$kernel_8h.html" title=" " alt="" coords="71,79,137,105"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="107,31,107,63,102,63,102,31"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="161,79,231,105"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="121,29,171,67,167,72,118,34"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="25,153,93,178"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="99,106,77,141,72,138,94,103"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="117,153,185,178"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="114,103,137,138,132,141,110,106"/>
+<area shape="rect" id="Node000006" href="$sifdma_8h.html" title=" " alt="" coords="209,153,279,178"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="129,103,208,143,206,148,127,108"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="224,181,153,221,150,216,221,177"/>
+</map>
