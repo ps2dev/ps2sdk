@@ -6,7 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-TOOLS_CFLAGS += -std=c99
 TOOLS_LDFLAGS += -lm
 
 TOOLS_OBJS = main.o adpcm.o
