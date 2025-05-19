@@ -13,19 +13,14 @@ This also decreases memory fragmentation, and freeing structures
 --------------------------------------------------------------------
 */
 
+# include "recycle.h"
+
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef STANDARD
-# include "standard.h"
-#endif
-#ifndef RECYCLE
-# include "recycle.h"
-#endif
-
-reroot *remkroot(size)
-size_t  size;
-{
+reroot *remkroot(
+   size_t size
+) {
    reroot *r = (reroot *)remalloc(sizeof(reroot));
    r->list = (recycle *)0;
    r->trash = (recycle *)0;
@@ -35,9 +30,9 @@ size_t  size;
    return r;
 }
 
-void  refree(r)
-struct reroot *r;
-{
+void refree(
+   struct reroot *r
+) {
    while (r->list)
    {
       recycle *temp = r->list->next;
@@ -49,9 +44,9 @@ struct reroot *r;
 }
 
 /* to be called from the macro renew only */
-char  *renewx(r)
-struct reroot *r;
-{
+char  *renewx(
+   struct reroot *r
+) {
    recycle *temp;
    if (r->trash)
    {  /* pull a node off the trash heap */
@@ -61,7 +56,7 @@ struct reroot *r;
    }
    else
    {  /* allocate a new block of nodes */
-      r->numleft = r->size*((ub4)1<<r->logsize);
+      r->numleft = r->size*((uint32_t)1<<r->logsize);
       if (r->numleft < REMAX) ++r->logsize;
       temp = (recycle *)remalloc(sizeof(recycle) + r->numleft);
       temp->next = r->list;
@@ -72,9 +67,9 @@ struct reroot *r;
    return (char *)temp;
 }
 
-char   *remalloc(len)
-size_t  len;
-{
+char   *remalloc(
+   size_t len
+) {
   char *x = (char *)malloc(len);
   if (!x)
   {

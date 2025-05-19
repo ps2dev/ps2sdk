@@ -5,12 +5,11 @@ Use this code however you wish.  Public Domain.  No warranty.
 Source is http://burtleburtle.net/bob/c/lookupa.c
 --------------------------------------------------------------------
 */
-#ifndef STANDARD
-#include "standard.h"
-#endif
 #ifndef LOOKUPA
 #include "lookupa.h"
 #endif
+
+#include <stdint.h>
 
 /*
 --------------------------------------------------------------------
@@ -67,7 +66,7 @@ use a bitmask.  For example, if you need only 10 bits, do
   h = (h & hashmask(10));
 In which case, the hash table should have hashsize(10) elements.
 
-If you are hashing n strings (ub1 **)k, do it like this:
+If you are hashing n strings (const char **)k, do it like this:
   for (i=0, h=0; i<n; ++i) h = lookup( k[i], len[i], h);
 
 By Bob Jenkins, 1996.  bob_jenkins@burtleburtle.net.  You may use this
@@ -79,12 +78,12 @@ acceptable.  Do NOT use for cryptographic purposes.
 --------------------------------------------------------------------
 */
 
-ub4 lookup( k, length, level)
-register ub1 *k;        /* the key */
-register ub4  length;   /* the length of the key */
-register ub4  level;    /* the previous hash, or an arbitrary value */
-{
-   register ub4 a,b,c,len;
+uint32_t lookup(
+  const char *k, /* the key */
+  size_t length, /* the length of the key */
+  uint32_t level /* the previous hash, or an arbitrary value */
+) {
+   register uint32_t a,b,c,len;
 
    /* Set up the internal state */
    len = length;
@@ -94,9 +93,9 @@ register ub4  level;    /* the previous hash, or an arbitrary value */
    /*---------------------------------------- handle most of the key */
    while (len >= 12)
    {
-      a += (k[0] +((ub4)k[1]<<8) +((ub4)k[2]<<16) +((ub4)k[3]<<24));
-      b += (k[4] +((ub4)k[5]<<8) +((ub4)k[6]<<16) +((ub4)k[7]<<24));
-      c += (k[8] +((ub4)k[9]<<8) +((ub4)k[10]<<16)+((ub4)k[11]<<24));
+      a += (k[0] +((uint32_t)k[1]<<8) +((uint32_t)k[2]<<16) +((uint32_t)k[3]<<24));
+      b += (k[4] +((uint32_t)k[5]<<8) +((uint32_t)k[6]<<16) +((uint32_t)k[7]<<24));
+      c += (k[8] +((uint32_t)k[9]<<8) +((uint32_t)k[10]<<16)+((uint32_t)k[11]<<24));
       mix(a,b,c);
       k += 12; len -= 12;
    }
@@ -105,17 +104,17 @@ register ub4  level;    /* the previous hash, or an arbitrary value */
    c += length;
    switch(len)              /* all the case statements fall through */
    {
-   case 11: c+=((ub4)k[10]<<24);
-   case 10: c+=((ub4)k[9]<<16);
-   case 9 : c+=((ub4)k[8]<<8);
+   case 11: c+=((uint32_t)k[10]<<24);
+   case 10: c+=((uint32_t)k[9]<<16);
+   case 9 : c+=((uint32_t)k[8]<<8);
       /* the first byte of c is reserved for the length */
-   case 8 : b+=((ub4)k[7]<<24);
-   case 7 : b+=((ub4)k[6]<<16);
-   case 6 : b+=((ub4)k[5]<<8);
+   case 8 : b+=((uint32_t)k[7]<<24);
+   case 7 : b+=((uint32_t)k[6]<<16);
+   case 6 : b+=((uint32_t)k[5]<<8);
    case 5 : b+=k[4];
-   case 4 : a+=((ub4)k[3]<<24);
-   case 3 : a+=((ub4)k[2]<<16);
-   case 2 : a+=((ub4)k[1]<<8);
+   case 4 : a+=((uint32_t)k[3]<<24);
+   case 3 : a+=((uint32_t)k[2]<<16);
+   case 2 : a+=((uint32_t)k[1]<<8);
    case 1 : a+=k[0];
      /* case 0: nothing left to add */
    }
@@ -154,7 +153,7 @@ checksum() -- hash a variable-length key into a 256-bit value
 The state is the checksum.  Every bit of the key affects every bit of
 the state.  There are no funnels.  About 112+6.875len instructions.
 
-If you are hashing n strings (ub1 **)k, do it like this:
+If you are hashing n strings (const char **)k, do it like this:
   for (i=0; i<8; ++i) state[i] = 0x9e3779b9;
   for (i=0, h=0; i<n; ++i) checksum( k[i], len[i], state);
 
@@ -167,12 +166,12 @@ Use to detect changes between revisions of documents, assuming nobody
 is trying to cause collisions.  Do NOT use for cryptography.
 --------------------------------------------------------------------
 */
-void  checksum( k, len, state)
-register ub1 *k;
-register ub4  len;
-register ub4 *state;
-{
-   register ub4 a,b,c,d,e,f,g,h,length;
+void checksum(
+  const char *k,
+  size_t len,
+  uint32_t *state
+) {
+   register uint32_t a,b,c,d,e,f,g,h,length;
 
    /* Use the length and level; add in the golden ratio. */
    length = len;

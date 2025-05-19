@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-TOOLS_CFLAGS += -std=c99 -D_BSD_SOURCE=1
+TOOLS_CFLAGS += -D_BSD_SOURCE=1
 TOOLS_LDFLAGS +=
 
 TOOLS_OBJS = main.o
