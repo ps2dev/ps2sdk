@@ -7,23 +7,21 @@ Source is http://burtleburtle.net/bob/c/lookupa.h
 ------------------------------------------------------------------------------
 */
 
-#ifndef STANDARD
-#include "standard.h"
-#endif
+#ifndef LOOKUPA_H
+#define LOOKUPA_H
 
-#ifndef LOOKUPA
-#define LOOKUPA
+#include "standard.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define CHECKSTATE 8
-#define hashsize(n) ((ub4)1<<(n))
+#define hashsize(n) ((size_t)1<<(n))
 #define hashmask(n) (hashsize(n)-1)
 
-extern ub4  lookup(/*_ ub1 *k, ub4 length, ub4 level _*/);
-extern void checksum(/*_ ub1 *k, ub4 length, ub4 *state _*/);
+extern uint32_t lookup(const char *k, size_t length, uint32_t level);
+extern void checksum(const char *k, size_t length, uint32_t *state);
 
 #ifdef __cplusplus
 }

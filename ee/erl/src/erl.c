@@ -512,7 +512,7 @@ static void add_loosy(struct erl_record_t * erl, u8 * reloc, int type, const cha
 	l->next = hstuff(loosy_relocs);
 	hstuff(loosy_relocs) = l;
     } else {
-	hkey(loosy_relocs) = (ub1 *)strdup(symbol);
+	hkey(loosy_relocs) = strdup(symbol);
     }
 }
 
@@ -530,7 +530,7 @@ static int fix_loosy(struct erl_record_t * provider, const char * symbol, u32 ad
 	    count++;
 	}
 	r_destroy_loosy(hstuff(loosy_relocs));
-	free(hkey(loosy_relocs));
+	free((void *)hkey(loosy_relocs));
 	hdel(loosy_relocs);
     }
 
@@ -1177,7 +1177,7 @@ void erl_flush_symbols(struct erl_record_t * erl) {
 
     if (hfirst(erl->symbols)) do {
 	destroy_symbol((struct symbol_t *) hstuff(erl->symbols));
-	free(hkey(erl->symbols));
+	free((void *)hkey(erl->symbols));
 	hdel(erl->symbols);
     } while (hcount(erl->symbols));
 

@@ -30,30 +30,23 @@ This implements a hash table.
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-#ifndef STANDARD
-#include "standard.h"
-#endif
-#ifndef LOOKUPA
 #include "lookupa.h"
-#endif
-#ifndef HASHTAB
 #include "hashtab.h"
-#endif
-#ifndef RECYCLE
 #include "recycle.h"
-#endif
 
 /* sanity check -- make sure ipos, apos, and count make sense */
 #ifdef HSANITY
-static void  hsanity(t)
-htab *t;
-{
-  ub4    i, end, counter;
+static void  hsanity(
+  htab *t
+) {
+  uint32_t    i, end, counter;
   hitem *h;
 
   /* test that apos makes sense */
-  end = (ub4)1<<(t->logsize);
+  end = (uint32_t)1<<(t->logsize);
   if (end < t->apos)
     printf("error:  end %lu  apos %lu\n", end, t->apos);
 
@@ -83,12 +76,12 @@ htab *t;
  * move everything from the old array to the new array,
  * then free the old array.
  */
-static void hgrow( t)
-htab  *t;    /* table */
-{
-  register ub4     newsize = (ub4)1<<(++t->logsize);
-  register ub4     newmask = newsize-1;
-  register ub4     i;
+static void hgrow(
+  htab *t /* table */
+) {
+  register uint32_t     newsize = (uint32_t)1<<(++t->logsize);
+  register uint32_t     newmask = newsize-1;
+  register uint32_t     i;
   register hitem **oldtab = t->table;
   register hitem **newtab = (hitem **)malloc(newsize*sizeof(hitem *));
 
@@ -117,23 +110,22 @@ htab  *t;    /* table */
 
   /* free the old array */
   free((char *)oldtab);
-
 }
 
 /* hcreate - create a hash table initially of size power(2,logsize) */
-htab *hcreate(logsize)
-word  logsize;    /* log base 2 of the size of the hash table */
-{
-  ub4 i,len;
+htab *hcreate(
+  int logsize /* log base 2 of the size of the hash table */
+) {
+  uint32_t i,len;
   htab *t = (htab *)malloc(sizeof(htab));
 
-  len = ((ub4)1<<logsize);
-  t->table = (hitem **)malloc(sizeof(hitem *)*(ub4)len);
+  len = ((uint32_t)1<<logsize);
+  t->table = (hitem **)malloc(sizeof(hitem *)*(uint32_t)len);
   for (i=0; i<len; ++i) t->table[i] = (hitem *)0;
   t->logsize = logsize;
   t->mask = len-1;
   t->count = 0;
-  t->apos = (ub4)0;
+  t->apos = (uint32_t)0;
   t->ipos = (hitem *)0;
   t->space = remkroot(sizeof(hitem));
   t->bcount = 0;
@@ -141,9 +133,9 @@ word  logsize;    /* log base 2 of the size of the hash table */
 }
 
 /* hdestroy - destroy the hash table and free all its memory */
-void hdestroy( t)
-htab  *t;    /* the table */
-{
+void hdestroy(
+  htab *t /* the table */
+) {
   refree(t->space);
   free((char *)t->table);
   free((char *)t);
@@ -155,14 +147,14 @@ htab  *t;    /* the table */
 /* hstuff() is a macro, see hashtab.h */
 
 /* hfind - find an item with a given key in a hash table */
-word   hfind( t, key, keyl )
-htab  *t;     /* table */
-ub1   *key;   /* key to find */
-ub4    keyl;  /* key length */
-{
+int hfind(
+  htab *t, /* table */
+  const char *key, /* key to find */
+  size_t keyl /* key length */
+) {
   hitem *h;
-  ub4    x = lookup(key,keyl,0);
-  ub4    y;
+  uint32_t    x = lookup(key,keyl,0);
+  uint32_t    y;
   for (h = t->table[y=(x&t->mask)]; h; h = h->next)
   {
     if ((x == h->hval) &&
@@ -171,24 +163,24 @@ ub4    keyl;  /* key length */
     {
       t->apos = y;
       t->ipos = h;
-      return TRUE;
+      return true;
     }
   }
-  return FALSE;
+  return false;
 }
 
 /*
  * hadd - add an item to a hash table.
  * return FALSE if the key is already there, otherwise TRUE.
  */
-word hadd( t, key, keyl, stuff)
-htab  *t;      /* table */
-ub1   *key;    /* key to add to hash table */
-ub4    keyl;   /* key length */
-void  *stuff;  /* stuff to associate with this key */
-{
+int hadd(
+  htab *t, /* table */
+  const char *key, /* key to add to hash table */
+  size_t keyl, /* key length */
+  void *stuff /* stuff to associate with this key */
+) {
   register hitem  *h,**hp;
-  register ub4     y, x = lookup(key,keyl,0);
+  register uint32_t     y, x = lookup(key,keyl,0);
 
   /* make sure the key is not already there */
   for (h = t->table[(y=(x&t->mask))]; h; h = h->next)
@@ -199,7 +191,7 @@ void  *stuff;  /* stuff to associate with this key */
     {
       t->apos = y;
       t->ipos = h;
-      return FALSE;
+      return false;
     }
   }
 
@@ -207,7 +199,7 @@ void  *stuff;  /* stuff to associate with this key */
   h = (hitem *)renew(t->space);
 
   /* make the hash table bigger if it is getting full */
-  if (++t->count > (ub4)1<<(t->logsize))
+  if (++t->count > (uint32_t)1<<(t->logsize))
   {
     hgrow(t);
     y = (x&t->mask);
@@ -228,18 +220,18 @@ void  *stuff;  /* stuff to associate with this key */
   hsanity(t);
 #endif  /* HSANITY */
 
-  return TRUE;
+  return true;
 }
 
 /* hdel - delete the item at the current position */
-word  hdel(t)
-htab *t;      /* the hash table */
-{
+int hdel(
+  htab *t /* the hash table */
+) {
   hitem  *h;    /* item being deleted */
   hitem **ip;   /* a counter */
 
   /* check for item not existing */
-  if (!(h = t->ipos)) return FALSE;
+  if (!(h = t->ipos)) return false;
 
   /* remove item from its list */
   for (ip = &t->table[t->apos]; *ip != h; ip = &(*ip)->next)
@@ -257,13 +249,13 @@ htab *t;      /* the hash table */
   hsanity(t);
 #endif  /* HSANITY */
 
-  return TRUE;
+  return true;
 }
 
 /* hfirst - position on the first element in the table */
-word hfirst(t)
-htab  *t;    /* the hash table */
-{
+int hfirst(
+  htab *t /* the hash table */
+) {
   t->apos = t->mask;
   (void)hnbucket(t);
   return (t->ipos != (hitem *)0);
@@ -275,12 +267,12 @@ htab  *t;    /* the hash table */
  * hnbucket - Move position to the first item in the next bucket.
  * Return TRUE if we did not wrap around to the beginning of the table
  */
-word hnbucket(t)
-htab *t;
-{
-  ub4  oldapos = t->apos;
-  ub4  end = (ub4)1<<(t->logsize);
-  ub4  i;
+int hnbucket(
+  htab *t /* hash table */
+) {
+  uint32_t  oldapos = t->apos;
+  uint32_t  end = (uint32_t)1<<(t->logsize);
+  uint32_t  i;
 
   /* see if the element can be found without wrapping around */
   for (i=oldapos+1; i<end; ++i)
@@ -289,7 +281,7 @@ htab *t;
     {
       t->apos = i;
       t->ipos = t->table[i];
-      return TRUE;
+      return true;
     }
   }
 
@@ -300,18 +292,18 @@ htab *t;
     {
       t->apos = i;
       t->ipos = t->table[i];
-      return FALSE;
+      return false;
     }
   }
 
-  return FALSE;
+  return false;
 }
 
 #ifdef HSTAT
-void hstat(t)
-htab  *t;
-{
-  ub4     i,j;
+void hstat(
+  htab *t
+) {
+  uint32_t     i,j;
   double  total = 0.0;
   hitem  *h;
   hitem  *walk, *walk2, *stat = (hitem *)0;
@@ -360,7 +352,7 @@ htab  *t;
     printf("items %ld:  %ld buckets\n", walk->keyl, walk->hval);
   }
   printf("\nbuckets: %lu  items: %ld  existing: %g\n\n",
-         ((ub4)1<<t->logsize), t->count, total);
+         ((uint32_t)1<<t->logsize), t->count, total);
 
   /* clean up */
   while (stat)

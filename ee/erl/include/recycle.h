@@ -13,12 +13,10 @@ This also decreases memory fragmentation, and freeing all structures
 --------------------------------------------------------------------
 */
 
-#ifndef STANDARD
-#include "standard.h"
-#endif
+#ifndef RECYCLE_H
+#define RECYCLE_H
 
-#ifndef RECYCLE
-#define RECYCLE
+#include "standard.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,21 +37,21 @@ struct reroot
    struct recycle *trash;    /* list of deleted items */
    size_t          size;     /* size of an item */
    size_t          logsize;  /* log_2 of number of items in a block */
-   word            numleft;  /* number of bytes left in this block */
+   int             numleft;  /* number of bytes left in this block */
 };
 typedef  struct reroot  reroot;
 
 /* make a new recycling root */
-extern reroot  *remkroot(/*_ size_t mysize _*/);
+extern reroot  *remkroot(size_t mysize);
 
 /* free a recycling root and all the items it has made */
-extern void     refree(/*_ struct reroot *r _*/);
+extern void     refree(struct reroot *r);
 
 /* get a new (cleared) item from the root */
 #define renew(r) ((r)->numleft ? \
    (((char *)((r)->list+1))+((r)->numleft-=(r)->size)) : renewx(r))
 
-extern char    *renewx(/*_ struct reroot *r _*/);
+extern char    *renewx(struct reroot *r);
 
 /* delete an item; let the root recycle it */
 /* void     redel(/o_ struct reroot *r, struct recycle *item _o/); */
@@ -64,10 +62,10 @@ extern char    *renewx(/*_ struct reroot *r _*/);
 
 /* malloc, but exit program if no joy */
 /* use plain free() to free memory allocated by remalloc() */
-extern char    *remalloc(/*_ size_t len _*/);
+extern char    *remalloc(size_t len);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* RECYCLE */
+#endif  /* RECYCLE_H */

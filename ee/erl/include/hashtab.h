@@ -28,12 +28,10 @@ This implements a hash table.
 --------------------------------------------------------------------
 */
 
-#ifndef STANDARD
-#include "standard.h"
-#endif
+#ifndef HASHTAB_H
+#define HASHTAB_H
 
-#ifndef HASHTAB
-#define HASHTAB
+#include "standard.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,11 +41,11 @@ extern "C" {
 
 struct hitem
 {
-  ub1          *key;      /* key that is hashed */
-  ub4           keyl;     /* length of key */
-  void         *stuff;    /* stuff stored in this hitem */
-  ub4           hval;     /* hash value */
-  struct hitem *next;     /* next hitem in list */
+  const char     *key;      /* key that is hashed */
+  size_t         keyl;     /* length of key */
+  void          *stuff;    /* stuff stored in this hitem */
+  size_t         hval;     /* hash value */
+  struct hitem  *next;     /* next hitem in list */
 };
 typedef  struct hitem  hitem;
 
@@ -55,13 +53,13 @@ typedef  struct hitem  hitem;
 struct htab
 {
   struct hitem **table;   /* hash table, array of size 2^logsize */
-  word           logsize; /* log of size of table */
-  size_t         mask;    /* (hashval & mask) is position in table */
-  ub4            count;   /* how many items in this hash table so far? */
-  ub4            apos;    /* position in the array */
+  int           logsize;  /* log of size of table */
+  size_t        mask;     /* (hashval & mask) is position in table */
+  size_t        count;    /* how many items in this hash table so far? */
+  size_t        apos;     /* position in the array */
   struct hitem  *ipos;    /* current item in the array */
   struct reroot *space;   /* space for the hitems */
-  ub4            bcount;  /* # hitems useable in current block */
+  size_t        bcount;   /* # hitems useable in current block */
 };
 typedef  struct htab  htab;
 
@@ -77,7 +75,7 @@ typedef  struct htab  htab;
    RETURNS:
      the new table
  */
-extern htab *hcreate(/*_ word logsize _*/);
+extern htab *hcreate(int logsize);
 
 
 /* hdestroy - destroy a hash table
@@ -88,16 +86,16 @@ extern htab *hcreate(/*_ word logsize _*/);
    RETURNS:
      nothing
  */
-extern void  hdestroy(/*_ htab *t _*/);
+extern void  hdestroy(htab *t);
 
 
 /* hcount, hkey, hkeyl, hstuff
      ARGUMENTS:
      t - the hash table
    RETURNS:
-     hcount - (ub4)    The number of items in the hash table
-     hkey   - (ub1 *)  key for the current item
-     hkeyl  - (ub4)    key length for the current item
+     hcount - (size_t)    The number of items in the hash table
+     hkey   - (const char *)  key for the current item
+     hkeyl  - (size_t)    key length for the current item
      hstuff - (void *) stuff for the current item
    NOTE:
      The current position always has an item as long as there
@@ -121,7 +119,7 @@ extern void  hdestroy(/*_ htab *t _*/);
      TRUE if the item exists, FALSE if it does not.
      If the item exists, moves the current position to that item.
  */
-extern word  hfind(/*_ htab *t, ub1 *key, ub4 keyl _*/);
+extern int hfind(htab *t, const char *key, size_t keyl);
 
 
 /* hadd - add a new item to the hash table
@@ -134,7 +132,7 @@ extern word  hfind(/*_ htab *t, ub1 *key, ub4 keyl _*/);
    RETURNS:
      FALSE if the operation fails (because that key is already there).
  */
-extern word  hadd(/*_ htab *t, ub1 *key, ub4 keyl, void *stuff _*/);
+extern int hadd(htab *t, const char *key, size_t keyl, void *stuff);
 
 
 /* hdel - delete the item at the current position
@@ -153,7 +151,7 @@ extern word  hadd(/*_ htab *t, ub1 *key, ub4 keyl, void *stuff _*/);
         hdel(tab);
       }
  */
-extern word  hdel(/* htab *t */);
+extern int  hdel(htab *t);
 
 
 /* hfirst - move position to the first item in the table
@@ -163,7 +161,7 @@ extern word  hdel(/* htab *t */);
     FALSE if there is no current item (meaning the table is empty)
   NOTE:
  */
-extern word hfirst(/*_ htab *t _*/);
+extern int hfirst(htab *t);
 
 
 /* hnext - move position to the next item in the table
@@ -193,7 +191,7 @@ extern word hfirst(/*_ htab *t _*/);
   NOTE:
     This is private to hashtab; do not use it externally.
  */
-extern word hnbucket(/*_ htab *t _*/);
+extern int hnbucket(htab *t);
 
 
 /* hstat - print statistics about the hash table
@@ -218,4 +216,4 @@ extern void hstat(/*_ htab *t _*/);
 }
 #endif
 
-#endif   /* HASHTAB */
+#endif   /* HASHTAB_H */
