@@ -2,18 +2,15 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Copyright 2001-2024, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = startup erl kernel libcglue libpthreadglue libprofglue rpc debug \
-	eedebug sbv dma graph math3d \
-	packet packet2 draw libgs \
-	libvux font input inputx network iopreboot \
-	mpeg \
-	elf-loader elf-loader-nocolour \
-	hddboot
+IOP_BIN ?= hddload.irx
+IOP_OBJS = hddload.o imports.o exports.o
+IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include -I -I$(PS2SDKSRC)/iop/dev9/atad/include
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
-include $(PS2SDKSRC)/ee/Rules.release
+include $(PS2SDKSRC)/iop/Rules.bin.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
