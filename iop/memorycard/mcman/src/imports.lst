@@ -107,6 +107,9 @@ secrman_IMPORTS_start
 I_SecrSetMcCommandHandler
 I_SecrSetMcDevIDHandler
 I_SecrAuthCard
+#ifdef BUILDING_DONGLEMAN
+I_SecrAuthDongle
+#endif
 secrman_IMPORTS_end
 #endif
 
