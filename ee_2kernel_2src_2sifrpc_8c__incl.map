@@ -1,0 +1,20 @@
+<map id="ee/kernel/src/sifrpc.c" name="ee/kernel/src/sifrpc.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="100,5,242,31"/>
+<area shape="rect" id="Node000002" href="$tamtypes_8h.html" title=" " alt="" coords="74,226,159,252"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,31,53,48,33,62,16,80,10,98,9,122,14,150,25,177,46,200,73,217,70,221,43,204,21,180,8,152,3,123,5,97,12,78,29,58,51,44,99,26"/>
+<area shape="rect" id="Node000003" href="$ps2lib__err_8h.html" title=" " alt="" coords="26,79,114,105"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="156,34,101,72,98,67,152,29"/>
+<area shape="rect" id="Node000004" href="$kernel_8h.html" title=" " alt="" coords="138,79,204,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="174,31,174,63,169,63,169,31"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="228,79,298,105"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="188,29,238,67,234,72,185,34"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="322,79,386,105"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="203,29,310,71,308,75,201,34"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="35,153,102,178"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="155,107,100,146,97,141,152,103"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="127,153,194,178"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="172,105,167,138,162,137,167,104"/>
+<area shape="rect" id="Node000007" href="$sifdma_8h.html" title=" " alt="" coords="219,153,289,178"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="187,103,230,140,227,144,183,107"/>
+<area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="232,181,155,221,152,216,229,177"/>
+</map>
