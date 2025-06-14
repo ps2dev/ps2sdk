@@ -16,6 +16,7 @@ SUBDIRS = \
 	fs \
 	hdd \
 	iLink \
+	input \
 	kernel \
 	memorycard \
 	network \
