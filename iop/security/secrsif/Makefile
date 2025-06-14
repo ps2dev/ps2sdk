@@ -8,10 +8,10 @@
 
 IOP_IMPORT_INCS += \
 	security/secrman \
+	sio/sio2man \
 	system/loadcore \
 	system/sifcmd \
 	system/sifman \
-	system/sio2man \
 	system/stdio \
 	system/sysclib \
 	system/threadman

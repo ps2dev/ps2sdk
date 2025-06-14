@@ -8,11 +8,11 @@
 
 IOP_BIN_ALTNAMES =
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/rmman/src/
-IOP_INC_DIR = $(PS2SDKSRC)/iop/system/rmman/include/
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/sio/sio2man/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/sio/sio2man/include/
 
-IOP_BIN ?= rmman2.irx
+IOP_BIN ?= sio2log.irx
 
-RMMAN_BUILDING_RMMAN2 ?= 1
+SIO2MAN_ENABLE_LOGGING ?= 1
 
-include $(PS2SDKSRC)/iop/system/rmman/Makefile
+include $(PS2SDKSRC)/iop/sio/sio2man/Makefile
