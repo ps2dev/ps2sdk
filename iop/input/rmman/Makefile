@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+IOP_BIN_ALTNAMES ?= rmman-2000.irx
+
 IOP_IMPORT_INCS += \
 	cdvd/cdvdman \
 	sio/sio2man \

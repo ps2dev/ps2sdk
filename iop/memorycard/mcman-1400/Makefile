@@ -8,8 +8,11 @@
 
 IOP_BIN_ALTNAMES = 
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/sio/mtapman/src/
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/memorycard/mcman/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/memorycard/mcman/include/
 
-IOP_CFLAGS += -DSIO2MAN_V2
+IOP_BIN ?= mcman-1400.irx
 
-include $(PS2SDKSRC)/iop/sio/mtapman/Makefile
+MCMAN_BUILDING_XMCMAN_V2 ?= 0
+
+include $(PS2SDKSRC)/iop/memorycard/mcman/Makefile

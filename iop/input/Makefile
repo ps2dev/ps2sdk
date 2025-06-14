@@ -8,11 +8,11 @@
 
 SUBDIRS = \
     padman \
-    padman-old \
+    padman-1300 \
+    padman-1400 \
     rmman \
     rmman2 \
-    rmmanx \
-    rpadman
+    rmmanx
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

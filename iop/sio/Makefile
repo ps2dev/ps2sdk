@@ -8,9 +8,9 @@
 
 SUBDIRS = \
     mtapman \
+    mtapman-1400 \
     mx4sio_bd \
     mx4sio_bd_mini \
-    rmtapman \
     sio2log \
     sio2man \
     sio2man-nano
