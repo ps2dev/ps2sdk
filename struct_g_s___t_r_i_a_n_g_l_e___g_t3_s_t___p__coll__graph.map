@@ -1,0 +1,19 @@
+<map id="GS_TRIANGLE_GT3ST_P" name="GS_TRIANGLE_GT3ST_P">
+<area shape="rect" id="Node000001" title=" " alt="" coords="152,213,331,238"/>
+<area shape="rect" id="Node000002" href="$libgs_8h.html#struct_g_s___r___p_r_i_m" title=" " alt="" coords="5,94,102,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,127,120,157,165,186,213,210,210,214,163,191,117,161,78,131"/>
+<area shape="rect" id="Node000003" href="$libgs_8h.html#struct_g_s___p_r_i_m" title=" " alt="" coords="13,5,94,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="56,47,56,94,51,94,51,47"/>
+<area shape="rect" id="Node000004" href="$libgs_8h.html#struct_g_s___r___r_g_b_a_q" title=" " alt="" coords="126,94,237,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="194,133,221,187,236,211,231,214,216,190,190,135"/>
+<area shape="rect" id="Node000005" href="$libgs_8h.html#struct_g_s___r_g_b_a_q" title=" " alt="" coords="134,5,229,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="184,47,184,94,179,94,179,47"/>
+<area shape="rect" id="Node000006" href="$libgs_8h.html#struct_g_s___r___s_t" title=" " alt="" coords="261,94,342,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="291,135,263,190,250,214,245,211,258,187,286,132"/>
+<area shape="rect" id="Node000007" href="$libgs_8h.html#struct_g_s___s_t" title=" " alt="" coords="269,5,334,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="304,47,304,94,299,94,299,47"/>
+<area shape="rect" id="Node000008" href="$libgs_8h.html#struct_g_s___r___x_y_z" title=" " alt="" coords="366,94,456,120"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="388,132,311,191,269,214,266,210,308,186,385,127"/>
+<area shape="rect" id="Node000009" href="$libgs_8h.html#struct_g_s___x_y_z" title=" " alt="" coords="374,5,448,31"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="414,47,414,94,408,94,408,47"/>
+</map>
