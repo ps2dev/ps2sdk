@@ -2,17 +2,16 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright ps2dev - http://www.ps2dev.org
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
 IOP_BIN_ALTNAMES =
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/sio2man/src/
-IOP_INC_DIR = $(PS2SDKSRC)/iop/system/sio2man/include/
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/input/padman/src/
 
-IOP_BIN ?= sio2man-nano.irx
+IOP_BIN ?= padman-old.irx
 
-SIO2MAN_ENABLE_NANO ?= 1
+PADMAN_BUILDING_XPADMAN ?= 0
 
-include $(PS2SDKSRC)/iop/system/sio2man/Makefile
+include $(PS2SDKSRC)/iop/input/padman/Makefile

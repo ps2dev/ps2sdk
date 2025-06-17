@@ -24,12 +24,12 @@ IOP_IMPORT_INCS += \
     cdvd/cdvdman \
     debug/sior \
     security/secrman \
+    sio/sio2man \
     system/intrman \
     system/ioman \
     system/iomanx \
     system/loadcore \
     system/modload \
-    system/sio2man \
     system/stdio \
     system/sysclib \
     system/threadman \

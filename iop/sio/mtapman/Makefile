@@ -6,12 +6,19 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN_ALTNAMES =
+IOP_BIN_ALTNAMES ?= freemtap.irx
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/padman/src/
+IOP_IMPORT_INCS += \
+	sio/sio2man \
+	system/loadcore \
+	system/sifcmd \
+	system/sifman \
+	system/stdio \
+	system/threadman
 
-IOP_BIN ?= padman-old.irx
+IOP_OBJS = freemtap.o rpcservers.o exports.o imports.o
 
-PADMAN_BUILDING_XPADMAN ?= 0
-
-include $(PS2SDKSRC)/iop/system/padman/Makefile
+include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
