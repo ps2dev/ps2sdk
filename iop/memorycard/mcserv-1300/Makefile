@@ -6,12 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN_ALTNAMES =
+IOP_BIN_ALTNAMES = mcserv-old.irx
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/input/padman/src/
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/memorycard/mcserv/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/memorycard/mcserv/include/
 
-IOP_BIN ?= rpadman.irx
+IOP_BIN ?= mcserv-1300.irx
 
-PADMAN_BUILDING_XPADMAN_V2 ?= 1
+MCMAN_BUILDING_XMCSERV ?= 0
 
-include $(PS2SDKSRC)/iop/input/padman/Makefile
+include $(PS2SDKSRC)/iop/memorycard/mcserv/Makefile

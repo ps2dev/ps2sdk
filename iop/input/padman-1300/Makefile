@@ -2,19 +2,16 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2025, ps2dev - http://www.ps2dev.org
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN_ALTNAMES = 
+IOP_BIN_ALTNAMES = padman-old.irx
 
-PARENT_DIR=$(PS2SDKSRC)/iop/memorycard/mcman
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/input/padman/src/
 
-IOP_SRC_DIR = $(PARENT_DIR)/src/
-IOP_INC_DIR = $(PARENT_DIR)/include/
+IOP_BIN ?= padman-1300.irx
 
-IOP_BIN = dongleman.irx
+PADMAN_BUILDING_XPADMAN ?= 0
 
-MCMAN_BUILDING_DONGLEMAN ?= 1
-
-include $(PARENT_DIR)/Makefile
+include $(PS2SDKSRC)/iop/input/padman/Makefile

@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN_ALTNAMES ?= freepad.irx
+IOP_BIN_ALTNAMES ?= freepad.irx rpadman.irx padman-2000.irx
 
 # IOP_CFLAGS += -DDEBUG
 
@@ -28,7 +28,7 @@ IOP_OBJS = freepad.o rpcserver.o exports.o imports.o padInit.o padPortOpen.o pad
 PADMAN_BUILDING_XPADMAN ?= 1
 
 # Build the newer version of the gamepad module that links against the remote-compatible SIO2MAN?
-PADMAN_BUILDING_XPADMAN_V2 ?= 0
+PADMAN_BUILDING_XPADMAN_V2 ?= 1
 
 ifneq (x$(PADMAN_BUILDING_XPADMAN),x0)
 IOP_CFLAGS += -DBUILDING_XPADMAN
