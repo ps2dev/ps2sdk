@@ -14,7 +14,15 @@
 #include <tamtypes.h>
 #include <timer.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern s32 DelayThread(s32 microseconds);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
