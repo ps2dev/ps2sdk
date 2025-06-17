@@ -499,7 +499,7 @@ void sio2_mtap_update_slots_set(sio2_mtap_update_slots_t cb)
 
 int sio2_mtap_change_slot(s32 *arg)
 {
-	g_sio2man_data.m_sdk13x_totalflag &= ~g_sio2man_data.m_sdk13x_curflag;
+	g_sio2man_data.m_sdk13x_curflag &= ~g_sio2man_data.m_sdk13x_totalflag;
 	// Unofficial: unconditionally call callback
 	return g_sio2man_data.m_mtap_change_slot_cb(arg);
 }
