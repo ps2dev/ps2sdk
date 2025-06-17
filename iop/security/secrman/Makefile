@@ -11,10 +11,10 @@ DEX_SUPPORT ?= 1
 
 IOP_IMPORT_INCS += \
 	cdvd/cdvdman \
+	sio/sio2man \
 	system/ioman \
 	system/loadcore \
 	system/modload \
-	system/sio2man \
 	system/stdio \
 	system/sysclib
 

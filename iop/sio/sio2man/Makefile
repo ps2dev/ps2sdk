@@ -15,11 +15,11 @@ SIO2MAN_ENABLE_NANO ?= 0
 IOP_BIN_ALTNAMES ?= freesio2.irx rsio2man.irx sio2man-old.irx
 
 IOP_IMPORT_INCS += \
+	sio/sio2man \
 	system/dmacman \
 	system/intrman \
 	system/ioman \
 	system/loadcore \
-	system/sio2man \
 	system/stdio \
 	system/threadman
 

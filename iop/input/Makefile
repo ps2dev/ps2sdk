@@ -6,12 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN_ALTNAMES =
+SUBDIRS = \
+    padman \
+    padman-old \
+    rmman \
+    rmman2 \
+    rmmanx \
+    rpadman
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/padman/src/
-
-IOP_BIN ?= rpadman.irx
-
-PADMAN_BUILDING_XPADMAN_V2 ?= 1
-
-include $(PS2SDKSRC)/iop/system/padman/Makefile
+include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/Rules.make
