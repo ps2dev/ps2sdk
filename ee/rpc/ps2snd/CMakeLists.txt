@@ -1,0 +1,6 @@
+add_library(ps2snd)
+target_include_directories(ps2snd PUBLIC include)
+target_include_directories(ps2snd PRIVATE ${EE_INC})
+target_sources(ps2snd PRIVATE src/ps2snd.c src/erl-support.c)
+install(TARGETS ps2snd)
+target_add_erl(ps2snd)
