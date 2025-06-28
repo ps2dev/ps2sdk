@@ -185,7 +185,7 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...)
 		{
 			return DmaStop(core);
 
-		} break;
+		} //break; // Fix codacy issue: Consecutive return, break, continue, goto or throw statements are unnecessary.
 
 		case SD_TRANS_WRITE_FROM:
 		{
