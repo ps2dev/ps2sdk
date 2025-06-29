@@ -9,9 +9,10 @@
 SUBDIRS = \
 	dongleman \
 	mcman \
-	mcman-old \
+	mcman-1300 \
+	mcman-1400 \
 	mcserv \
-	mcserv-old \
+	mcserv-1300 \
 	vmcman \
 	xfromman
 

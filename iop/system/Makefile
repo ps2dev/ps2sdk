@@ -25,23 +25,12 @@ SUBDIRS = \
 	loadcore \
 	loadfile \
 	modload \
-	mtapman \
-	padman \
-	padman-old \
 	reboot \
-	rmman \
-	rmman2 \
-	rmmanx \
-	rmtapman \
-	rpadman \
 	sbusintr \
 	sifcmd \
 	sifinit \
 	sifman \
 	siftoo \
-	sio2log \
-	sio2man \
-	sio2man-nano \
 	ssbusc \
 	stdio \
 	sysclib \
