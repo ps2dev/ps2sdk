@@ -1,0 +1,7 @@
+add_library(hdd)
+target_include_directories(hdd PUBLIC include)
+target_include_directories(hdd PRIVATE ${EE_INC})
+target_link_libraries(hdd PRIVATE poweroff fileXio)
+target_sources(hdd PRIVATE src/libhdd.c src/erl-support.c)
+install(TARGETS hdd)
+target_add_erl(hdd)
