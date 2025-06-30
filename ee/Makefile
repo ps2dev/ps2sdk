@@ -11,7 +11,7 @@ SUBDIRS = startup erl kernel libcglue libpthreadglue libprofglue rpc debug \
 	packet packet2 draw libgs \
 	libvux font input inputx network iopreboot \
 	mpeg \
-	elf-loader elf-loader-nocolour \
+	elf-loader elf-loader-nocolour elf-loader2 \
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
