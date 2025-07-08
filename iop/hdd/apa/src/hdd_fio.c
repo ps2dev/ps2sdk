@@ -515,8 +515,10 @@ static int apaRename(s32 device, const apa_params_t *oldParams, const apa_params
     }
 
     // Do not allow system partitions (__*) to be renamed.
+#ifndef APA_ALLOW_REMOVE_PARTITION_WITH_LEADING_UNDERSCORE
     if (oldParams->id[0] == '_' && oldParams->id[1] == '_')
         return -EACCES;
+#endif
 
     // find :)
     if ((clink = apaFindPartition(device, oldParams->id, &rv)) == NULL) {
@@ -536,6 +538,9 @@ static int apaRename(s32 device, const apa_params_t *oldParams, const apa_params
     // Update passwords
     memcpy(clink->header->rpwd, newParams->rpwd, APA_PASSMAX);
     memcpy(clink->header->fpwd, newParams->fpwd, APA_PASSMAX);
+    // touch creation time
+    apaGetTime(&clink->header->created);
+    clink->header->checksum = apaCheckSum(clink->header, 1);
 
     clink->flags |= APA_CACHE_FLAG_DIRTY;
 
@@ -763,8 +768,7 @@ int hddDread(iomanX_iop_file_t *f, iox_dirent_t *dirent)
 /*  Originally, SONY provided no function for renaming partitions.
     Syntax: rename <Old ID>,<fpwd> <New ID>,<fpwd>
 
-    The full-access password (fpwd) is required.
-    System partitions (__*) cannot be renamed. */
+    The full-access password (fpwd) is optional. */
 int hddReName(iomanX_iop_file_t *f, const char *oldname, const char *newname)
 {
     apa_params_t oldParams;
