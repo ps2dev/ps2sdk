@@ -377,8 +377,12 @@ static void RecoverPartitionIfSub(int device, apa_cache_t *clink)
 static apa_cache_t *apaCreateAlignedEmptyPartition(apa_cache_t *clink, u32 lba, u32 length)
 {
     apa_cache_t *result;
+    u32 minsize = 0x3FFFF; // 128MB
+#ifdef APA_8MB_PARTITION_SIZE
+    minsize = 0x3FFF; // 8MB
+#endif
 
-    for (length >>= 1; 0x0003FFFF < length; length >>= 1) {
+    for (length >>= 1; minsize < length; length >>= 1) {
         if (lba % length == 0) {
             result              = apaRemovePartition(clink->device, lba, lba + length, clink->header->start, length);
             clink->header->next = lba;

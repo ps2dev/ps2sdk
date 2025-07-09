@@ -44,9 +44,37 @@ static const char *formatPartList[] = {
     "__net", "__system", "__sysconf", "__common", NULL};
 #endif
 
+#ifndef APA_8MB_PARTITION_SIZE
 #define APA_NUMBER_OF_SIZES 9
 static const char *sizeList[APA_NUMBER_OF_SIZES] = {
-    "128M", "256M", "512M", "1G", "2G", "4G", "8G", "16G", "32G"};
+    "128M",
+    "256M",
+    "512M",
+    "1G",
+    "2G",
+    "4G",
+    "8G",
+    "16G",
+    "32G",
+};
+#else
+#define APA_NUMBER_OF_SIZES 13
+static const char *sizeList[APA_NUMBER_OF_SIZES] = {
+    "8M",
+    "16M",
+    "32M",
+    "64M",
+    "128M",
+    "256M",
+    "512M",
+    "1G",
+    "2G",
+    "4G",
+    "8G",
+    "16G",
+    "32G",
+};
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // Function declarations
@@ -66,7 +94,11 @@ static int fioPartitionSizeLookUp(char *str)
 
     for (i = 0; i < APA_NUMBER_OF_SIZES; i++) {
         if (strcmp(str, sizeList[i]) == 0)
-            return (256 * 1024) << i;
+#ifndef APA_8MB_PARTITION_SIZE
+            return (2 * 128 * 1024) << i; // 128MB
+#else
+            return (2 * 8 * 1024) << i; // 8MB
+#endif
     }
     APA_PRINTF(APA_DRV_NAME ": Error: Invalid partition size, %s.\n", str);
     return -EINVAL;
@@ -663,19 +695,27 @@ int hddLseek(iomanX_iop_file_t *f, int post, int whence)
 
 static void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
 {
-    stat->mode = clink->header->type;
-    stat->attr = clink->header->flags;
+    stat->mode   = clink->header->type;
+    stat->attr   = clink->header->flags;
     stat->hisize = 0;
-    stat->size = clink->header->length;
+    stat->size   = clink->header->length;
     memcpy(&stat->ctime, &clink->header->created, sizeof(apa_ps2time_t));
     memcpy(&stat->atime, &clink->header->created, sizeof(apa_ps2time_t));
     memcpy(&stat->mtime, &clink->header->created, sizeof(apa_ps2time_t));
-    if (clink->header->flags & APA_FLAG_SUB)
-        stat->private_0 = clink->header->number;
-    else
-        stat->private_0 = clink->header->nsub;
     stat->private_1 = 0;
     stat->private_2 = 0;
+    if (clink->header->flags & APA_FLAG_SUB)
+        stat->private_0 = clink->header->number;
+    else {
+        stat->private_0 = clink->header->nsub;
+
+        u64 totalsize = (u64)clink->header->length;
+        for (int i = 0; i < clink->header->nsub; i++) {
+            totalsize += (u64)clink->header->subs[i].length;
+        }
+        stat->private_1 = (u32)(totalsize & 0xFFFFFFFF); // low size
+        stat->private_2 = (u32)(totalsize >> 32);        // high size
+    }
     stat->private_3 = 0;
     stat->private_4 = 0;
 #ifndef APA_STAT_RETURN_PART_LBA

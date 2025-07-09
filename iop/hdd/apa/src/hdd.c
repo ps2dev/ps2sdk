@@ -116,6 +116,10 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 	u32			i;
 	u32			tmp, some_size, part_end;
 	u32			tempSize;
+    u32			minsize = 0x3FFFF; // 128MB
+#ifdef APA_8MB_PARTITION_SIZE
+    minsize = 0x3FFF; // 8Mb
+#endif
 
 	// walk empty blocks in case can use one :)
 	for(i=0;i< 32;i++)
@@ -147,7 +151,7 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 	while(part_end%params->size)
 	{
 		tempSize=params->size>>1;
-		while(0x3FFFF<tempSize)
+		while (minsize < tempSize) // 128MB
 		{
 			if(!(part_end%tempSize))
 			{
