@@ -1,0 +1,9 @@
+<map id="ee/rpc/poweroff/include/libpwroff.h" name="ee/rpc/poweroff/include/libpwroff.h">
+<area shape="rect" id="Node000001" title="Power&#45;off library." alt="" coords="80,5,235,46"/>
+<area shape="rect" id="Node000002" href="$libhdd_8h.html" title=" " alt="" coords="18,94,145,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,60,101,95,97,92,128,56"/>
+<area shape="rect" id="Node000004" href="$ee_2rpc_2poweroff_2src_2poweroff_8c_source.html" title=" " alt="" coords="169,94,301,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="187,56,219,92,215,95,183,60"/>
+<area shape="rect" id="Node000003" href="$libhdd_8c_source.html" title=" " alt="" coords="5,183,158,208"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="84,150,84,182,79,182,79,150"/>
+</map>

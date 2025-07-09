@@ -1,0 +1,11 @@
+<map id="common/include/librm&#45;common.h" name="common/include/librm&#45;common.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="106,5,254,46"/>
+<area shape="rect" id="Node000002" href="$librm_8h.html" title="RPC Interface for PS2 Remote Control Driver (RMMAN)" alt="" coords="15,94,161,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,59,111,96,107,92,146,55"/>
+<area shape="rect" id="Node000004" href="$rmman_8h.html" title=" " alt="" coords="185,94,359,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="214,55,253,92,249,96,210,59"/>
+<area shape="rect" id="Node000003" href="$librm_8c.html" title=" " alt="" coords="5,190,171,216"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,150,91,190,85,190,85,150"/>
+<area shape="rect" id="Node000005" href="$rmman_8c_source.html" title=" " alt="" coords="197,183,347,223"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="275,150,275,182,269,182,269,150"/>
+</map>
