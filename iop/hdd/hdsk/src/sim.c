@@ -27,20 +27,25 @@ void hdskSimGetFreeSectors(s32 device, struct hdskStat *stat, apa_device_t *devi
 
     sectors    = 0;
     stat->free = 0;
+    u32 maxsize = 0x1FFFFF; // 1GB
+    u32 minsize = 0x3FFFF; // 128MB
+#ifdef APA_8MB_PARTITION_SIZE
+    minsize = 0x3FFF; // 8MB
+#endif
     for (i = 0; hdskBitmap[i].next != hdskBitmap; sectors += hdskBitmap[i].length, i++) {
         if (hdskBitmap[i].type == 0) {
-            if ((0x001FFFFF < hdskBitmap[i].length) || ((stat->free & hdskBitmap[i].length) == 0)) {
+            if ((maxsize < hdskBitmap[i].length) || ((stat->free & hdskBitmap[i].length) == 0)) {
                 stat->free += hdskBitmap[i].length;
             }
             sectors += hdskBitmap[i].length;
         }
     }
 
-    for (partMax = deviceinfo[device].partitionMaxSize; 0x0003FFFF < partMax; partMax = deviceinfo[device].partitionMaxSize) { // As weird as it looks, this was how it was done in the original HDD.IRX.
-        for (; 0x0003FFFF < partMax; partMax /= 2) {
+    for (partMax = deviceinfo[device].partitionMaxSize; minsize < partMax; partMax = deviceinfo[device].partitionMaxSize) { // As weird as it looks, this was how it was done in the original HDD.IRX.
+        for (; minsize < partMax; partMax /= 2) {
             // Non-SONY: Perform 64-bit arithmetic here to avoid overflows when dealing with large disks.
             if ((sectors % partMax == 0) && ((u64)sectors + partMax < deviceinfo[device].totalLBA)) {
-                if ((0x001FFFFF < partMax) || (stat->free & partMax) == 0) {
+                if ((maxsize < partMax) || (stat->free & partMax) == 0) {
                     stat->free += partMax;
                 }
                 sectors += partMax;
@@ -48,7 +53,7 @@ void hdskSimGetFreeSectors(s32 device, struct hdskStat *stat, apa_device_t *devi
             }
         }
 
-        if (0x0003FFFF >= partMax) {
+        if (minsize >= partMax) {
             break;
         }
     }

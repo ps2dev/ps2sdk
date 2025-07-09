@@ -44,9 +44,37 @@ static const char *formatPartList[] = {
     "__net", "__system", "__sysconf", "__common", NULL};
 #endif
 
+#ifndef APA_8MB_PARTITION_SIZE
 #define APA_NUMBER_OF_SIZES 9
 static const char *sizeList[APA_NUMBER_OF_SIZES] = {
-    "128M", "256M", "512M", "1G", "2G", "4G", "8G", "16G", "32G"};
+    "128M",
+    "256M",
+    "512M",
+    "1G",
+    "2G",
+    "4G",
+    "8G",
+    "16G",
+    "32G",
+};
+#else
+#define APA_NUMBER_OF_SIZES 13
+static const char *sizeList[APA_NUMBER_OF_SIZES] = {
+    "8M",
+    "16M",
+    "32M",
+    "64M",
+    "128M",
+    "256M",
+    "512M",
+    "1G",
+    "2G",
+    "4G",
+    "8G",
+    "16G",
+    "32G",
+};
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // Function declarations
@@ -66,7 +94,11 @@ static int fioPartitionSizeLookUp(char *str)
 
     for (i = 0; i < APA_NUMBER_OF_SIZES; i++) {
         if (strcmp(str, sizeList[i]) == 0)
-            return (256 * 1024) << i;
+#ifndef APA_8MB_PARTITION_SIZE
+            return (2 * 128 * 1024) << i; // 128MB
+#else
+            return (2 * 8 * 1024) << i; // 8MB
+#endif
     }
     APA_PRINTF(APA_DRV_NAME ": Error: Invalid partition size, %s.\n", str);
     return -EINVAL;
