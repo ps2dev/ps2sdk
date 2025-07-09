@@ -695,19 +695,27 @@ int hddLseek(iomanX_iop_file_t *f, int post, int whence)
 
 static void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
 {
-    stat->mode = clink->header->type;
-    stat->attr = clink->header->flags;
+    stat->mode   = clink->header->type;
+    stat->attr   = clink->header->flags;
     stat->hisize = 0;
-    stat->size = clink->header->length;
+    stat->size   = clink->header->length;
     memcpy(&stat->ctime, &clink->header->created, sizeof(apa_ps2time_t));
     memcpy(&stat->atime, &clink->header->created, sizeof(apa_ps2time_t));
     memcpy(&stat->mtime, &clink->header->created, sizeof(apa_ps2time_t));
-    if (clink->header->flags & APA_FLAG_SUB)
-        stat->private_0 = clink->header->number;
-    else
-        stat->private_0 = clink->header->nsub;
     stat->private_1 = 0;
     stat->private_2 = 0;
+    if (clink->header->flags & APA_FLAG_SUB)
+        stat->private_0 = clink->header->number;
+    else {
+        stat->private_0 = clink->header->nsub;
+
+        u64 totalsize = (u64)clink->header->length;
+        for (int i = 0; i < clink->header->nsub; i++) {
+            totalsize += (u64)clink->header->subs[i].length;
+        }
+        stat->private_1 = (u32)(totalsize & 0xFFFFFFFF); // low size
+        stat->private_2 = (u32)(totalsize >> 32);        // high size
+    }
     stat->private_3 = 0;
     stat->private_4 = 0;
 #ifndef APA_STAT_RETURN_PART_LBA
