@@ -6,13 +6,12 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN_ALTNAMES =
+IOP_BIN_ALTNAMES = 
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/rmman/src/
-IOP_INC_DIR = $(PS2SDKSRC)/iop/system/rmman/include/
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/sio/mtapman/src/
 
-IOP_BIN ?= rmman2.irx
+IOP_BIN ?= mtapman-1400.irx
 
-RMMAN_BUILDING_RMMAN2 ?= 1
+MTAPMAN_BUILDING_XMTAPMAN_V2 ?= 0
 
-include $(PS2SDKSRC)/iop/system/rmman/Makefile
+include $(PS2SDKSRC)/iop/sio/mtapman/Makefile
