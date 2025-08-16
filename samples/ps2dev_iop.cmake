@@ -25,10 +25,9 @@ endif()
 SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
 SET(CMAKE_SYSTEM_PROCESSOR mips)
-SET(CMAKE_C_COMPILER mipsel-none-elf-gcc)
-SET(CMAKE_CXX_COMPILER mipsel-none-elf-g++)
-SET(CMAKE_C_COMPILER_WORKS 1) #Hack by f0bes
-SET(CMAKE_CXX_COMPILER_WORKS 1) #Hack by f0bes
+SET(CMAKE_C_COMPILER mipsel-ps2-irx-gcc)
+SET(CMAKE_CXX_COMPILER mipsel-ps2-irx-g++)
+SET(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 
 #
@@ -41,8 +40,8 @@ SET(IOP_ASFLAGS_TARGET "-mcpu=r3000")
 INCLUDE_DIRECTORIES($ENV{PS2SDK}/iop/include $ENV{PS2SDK}/common/include $ENV{PS2SDK}/ports_iop/include)
 ADD_DEFINITIONS(-D_IOP -DPS2 -D__PS2__)
 
-SET(IOP_CFLAGS "${IOP_CFLAGS_TARGET} -O2 -G0 -fno-builtin" CACHE STRING "IOP C compiler flags" FORCE)
-SET(IOP_LDFLAGS "${IOP_LDFLAGS_TARGET} -T$ENV{PS2SDK}/iop/startup/linkfile -L$ENV{PS2SDK}/iop/lib -L$ENV{PS2SDK}/ports_iop/lib -Wl,-zmax-page-size=128 -nostdlib -Os -Wall" CACHE STRING "IOP linker flags" FORCE)
+SET(IOP_CFLAGS "${IOP_CFLAGS_TARGET} -Os -G0 -fno-builtin -Wall -gdwarf-2 -gz -msoft-float -mno-explicit-relocs -fno-toplevel-reorder " CACHE STRING "IOP C compiler flags" FORCE)
+SET(IOP_LDFLAGS "${IOP_LDFLAGS_TARGET} -L$ENV{PS2SDK}/iop/lib -L$ENV{PS2SDK}/ports_iop/lib -nostdlib -s" CACHE STRING "IOP linker flags" FORCE)
 SET(IOP_ASFLAGS "${IOP_ASFLAGS_TARGET} -EL -G0" CACHE STRING "IOP assembler flags" FORCE)
 
 SET(CMAKE_C_FLAGS_INIT ${IOP_CFLAGS})
