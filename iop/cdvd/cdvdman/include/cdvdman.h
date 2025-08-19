@@ -113,8 +113,26 @@ typedef struct cdvdman_internal_struct_
 	u16 m_dec_mode_set;
 	u16 m_dec_mode_last_set;
 	int m_waf_set_test;
+	// OSD add
+	int m_cd_mode_ps2_atapi;
+	void (*m_cd_atapi_intr_callback)(int writer_drive);
+	int (*m_chgsys_callback)(void *userdata, int writer_drive);
+	int m_chgsys_callback_next_disktype;
+	int m_unusedosd1;
+	int m_field_0DC;
+	int m_var_sc_ffffffdb;
+	// OSD add end
 	int m_interupt_read_state;
+	// OSD add
+	int m_atapi_disk_ejected;
+	// OSD add end
 	int m_cd_inited;
+	// OSD add
+	int m_medium_removal_state;
+	int m_chgsys_callback_next_disktype_last;
+	int m_chgsys_writer_drive_shell_is_open;
+	int m_unusedosd2[6];
+	// OSD add end
 	int m_tray_is_open;
 	int m_break_cdvdfsv_readchain;
 	int m_unused[10];
