@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+IOP_BIN_ALTNAMES ?= mcserv-1400.irx mcserv-2000.irx
+
 # Build the newer version of the memory card server module?
 MCMAN_BUILDING_XMCSERV ?= 1
 
