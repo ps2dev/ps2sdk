@@ -4,31 +4,41 @@ on:
   push:
     branches:
       - master
+      - main
     tags:
       - v*
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+  workflow_dispatch: {}
   repository_dispatch:
     types: [run_build]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+      BASE_DOCKER_IMAGE_NAME: ${{ (github.event.repository.name == 'ps2sdk' && 'ps2toolchain') || (github.event.repository.name == 'ps2sdk-ports' && 'ps2sdk') || (github.event.repository.name == 'ps2-packer' && 'ps2sdk') || (github.event.repository.name == 'ps2dev' && 'ps2sdk-ports') || 'none' }}
+    strategy:
+      matrix:
+        runs-on: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runs-on }}
+    timeout-minutes: 180
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
     - name: Extract DOCKER_TAG using tag name
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        printf '%s\n' "DOCKER_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
-
+        printf 'DOCKER_TAG=%s\n' "${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+    
     - name: Use default DOCKER_TAG
       if: startsWith(github.ref, 'refs/tags/') != true
       run: |
-        printf '%s\n' "DOCKER_TAG=latest" >> $GITHUB_ENV
+        echo "DOCKER_TAG=latest" >> $GITHUB_ENV
 
     - name: Login to DockerHub
       uses: docker/login-action@v3
@@ -47,12 +57,12 @@ jobs:
     - name: Set docker tag list to include DockerHub if credentials available
       if: env.DOCKER_USERNAME != null
       run: |
-        printf '%s\n' "DOCKER_TAG_LIST=ghcr.io/${{ github.repository }}:${{ env.DOCKER_TAG }},${{ github.repository }}:${{ env.DOCKER_TAG }}" >> $GITHUB_ENV
+        printf 'DOCKER_TAG_LIST=%s\n' "ghcr.io/${{ github.repository }}:${{ env.DOCKER_TAG }},${{ github.repository }}:${{ env.DOCKER_TAG }}" >> $GITHUB_ENV
 
     - name: Set docker tag list to not include DockerHub if credentials not available
       if: env.DOCKER_USERNAME == null
       run: |
-        printf '%s\n' "DOCKER_TAG_LIST=ghcr.io/${{ github.repository }}:${{ env.DOCKER_TAG }}" >> $GITHUB_ENV
+        printf 'DOCKER_TAG_LIST=%s\n' "ghcr.io/${{ github.repository }}:${{ env.DOCKER_TAG }}" >> $GITHUB_ENV
 
     - name: Build and Push to container registry
       uses: docker/build-push-action@v5
@@ -60,27 +70,48 @@ jobs:
         push: true
         tags: ${{ env.DOCKER_TAG_LIST }}
         build-args: |
-          BASE_DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/ps2toolchain:${{ env.DOCKER_TAG }}
+          BASE_DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/${{ env.BASE_DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }}
+          BASE_DOCKER_DVP_IMAGE=ghcr.io/${{ github.repository_owner }}/ps2toolchain-dvp:${{ env.DOCKER_TAG }}
+          BASE_DOCKER_IOP_IMAGE=ghcr.io/${{ github.repository_owner }}/ps2toolchain-iop:${{ env.DOCKER_TAG }}
+          BASE_DOCKER_EE_IMAGE=ghcr.io/${{ github.repository_owner }}/ps2toolchain-ee:${{ env.DOCKER_TAG }}
 
+    - name: Gather information for repository dispatch
+      id: dest-repo
+      run: if test -f ./config/repository-dispatch.ini; then cat ./config/repository-dispatch.ini >> $GITHUB_OUTPUT; fi
+
+  perform-repository-dispatch:
+    needs: [build]
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+      options: "--user 0"
+    timeout-minutes: 20
+    env:
+      DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+    strategy:
+      matrix:
+        dest-repo: ${{ fromJson(needs.build.outputs.DEST_REPO) }}
+
+    steps:
     - name: Send Compile action
       run: |
-        export DISPATCH_ACTION="$(printf '%s\n' run_build)"
-        printf '%s\n' "NEW_DISPATCH_ACTION=$DISPATCH_ACTION" >> $GITHUB_ENV
+        export DISPATCH_ACTION="$(printf 'run_build\n')"
+        printf 'NEW_DISPATCH_ACTION=%s\n' "$DISPATCH_ACTION" >> $GITHUB_ENV
 
-    - name: Repository Dispatch to ps2sdk-ports
+    - name: Repository Dispatch to ${{ matrix.dest-repo }}
       uses: peter-evans/repository-dispatch@v3
-      if: env.DISPATCH_TOKEN != null
+      if: env.DISPATCH_TOKEN != null && !contains(matrix.dest-repo, '/')
       with:
-        repository: ${{ github.repository_owner }}/ps2sdk-ports
+        repository: ${{ github.repository_owner }}/${{ matrix.dest-repo }}
         token: ${{ secrets.DISPATCH_TOKEN }}
         event-type: ${{ env.NEW_DISPATCH_ACTION }}
         client-payload: '{"ref": "${{ github.ref }}"}'
 
-    - name: Repository Dispatch to ps2-packer
+    - name: Repository Dispatch to specific ${{ matrix.dest-repo }}
       uses: peter-evans/repository-dispatch@v3
-      if: env.DISPATCH_TOKEN != null
+      if: env.DISPATCH_TOKEN != null && contains(matrix.dest-repo, '/')
       with:
-        repository: ${{ github.repository_owner }}/ps2-packer
+        repository: ${{ matrix.dest-repo }}
         token: ${{ secrets.DISPATCH_TOKEN }}
         event-type: ${{ env.NEW_DISPATCH_ACTION }}
         client-payload: '{"ref": "${{ github.ref }}"}'
