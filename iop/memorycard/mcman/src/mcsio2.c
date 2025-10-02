@@ -917,18 +917,11 @@ int mcman_probePS2Card(int port, int slot) //2
             SecrAuthDongle(2, slot, mcman_getcnum(port, slot));
         }
 #endif
-		if (r > 0)
-		{
+        if (r != 0) {
+            HAKAMA_SIGNALSEMA();
 			DPRINTF("mcman_probePS2Card sio2cmd succeeded\n");
-            HAKAMA_SIGNALSEMA();
-			return sceMcResSucceed;
-		}
-		else if (r < 0)
-		{
-			DPRINTF("mcman_probePS2Card sio2cmd failed (no format)\n");
-            HAKAMA_SIGNALSEMA();
-			return sceMcResNoFormat;
-		}
+            return sceMcResSucceed;
+        }
 	}
 
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
