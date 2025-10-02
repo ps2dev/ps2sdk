@@ -1,0 +1,7 @@
+<map id="RomdirFileStat" name="RomdirFileStat">
+<area shape="rect" id="Node000001" title=" " alt="" coords="62,94,170,120"/>
+<area shape="rect" id="Node000002" href="$struct_rom_dir_entry.html" title=" " alt="" coords="5,5,99,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="72,42,109,92,105,95,68,45"/>
+<area shape="rect" id="Node000003" href="$struct_ext_info_field_entry.html" title=" " alt="" coords="122,5,240,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="170,46,153,72,131,95,127,92,149,68,165,43"/>
+</map>
