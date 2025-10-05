@@ -103,9 +103,6 @@ static const u8 mcman_xortable[256] = {
 };
 // clang-format on
 
-#ifdef BUILDING_DONGLEMAN
-int sema_hakama_id = 0;
-#endif
 
 //--------------------------------------------------------------
 void long_multiply(u32 v1, u32 v2, u32 *HI, u32 *LO)
@@ -1166,8 +1163,6 @@ int McReadPage(int port, int slot, int page, void *buf) // Export #18
 	u8 eccbuf[32];
 	u8 *pdata, *peccb;
 
-    HAKAMA_WAITSEMA();
-
 	count = (mcdi->pagesize + 127) >> 7;
 	erase_byte = (mcdi->cardflags & CF_ERASE_ZEROES) ? 0x0 : 0xFF;
 
@@ -1208,8 +1203,6 @@ int McReadPage(int port, int slot, int page, void *buf) // Export #18
 			}
 		}
 	} while (++retries < 5);
-
-    HAKAMA_SIGNALSEMA();
 
 	if (retries < 5)
 		return sceMcResSucceed;
