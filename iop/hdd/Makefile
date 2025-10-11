@@ -19,7 +19,8 @@ SUBDIRS = \
 	hdck \
 	hdsk \
 	fsck \
-	fssk
+	fssk \
+	hddload
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
