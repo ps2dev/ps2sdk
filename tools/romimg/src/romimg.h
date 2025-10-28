@@ -21,11 +21,10 @@
 #define __ROMING_H__
 
 #include "dprintf.h"
-#if defined(_WIN32) || defined(WIN32)
-#define RMIMG_PTRCAST unsigned int
-#else
-#define RMIMG_PTRCAST unsigned char *
-#endif
+#include <stdint.h> // for uintptr_t
+
+#define RMIMG_PTRCAST uintptr_t
+
 struct RomDirEntry
 {
 	char name[10];
