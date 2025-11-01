@@ -20,7 +20,7 @@ jobs:
       matrix:
         os: [
           [macos-latest, arm64, bash],
-          [macos-13, x86_64, bash],
+          [macos-15-intel, x86_64, bash],
           [ubuntu-latest, x86_64, bash],
           [windows-latest, x86_64, msys2]
         ]
