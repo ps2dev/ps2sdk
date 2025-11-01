@@ -1,0 +1,16 @@
+<map id="ee/draw/include/draw3d.h" name="ee/draw/include/draw3d.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="45,5,213,31"/>
+<area shape="rect" id="Node000002" href="$tamtypes_8h.html" title=" " alt="" coords="107,226,191,252"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,34,73,60,34,95,19,115,10,136,9,157,17,177,32,194,50,207,93,225,91,230,48,212,28,198,12,180,4,157,5,135,15,113,30,92,69,56,107,29"/>
+<area shape="rect" id="Node000003" href="$draw__primitives_8h.html" title=" " alt="" coords="27,153,149,178"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="128,32,98,138,93,137,123,31"/>
+<area shape="rect" id="Node000004" href="$draw__types_8h.html" title=" " alt="" coords="125,79,222,105"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="139,30,160,64,155,67,134,33"/>
+<area shape="rect" id="Node000006" href="$gif__tags_8h.html" title=" " alt="" coords="247,79,324,105"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="157,29,246,70,244,75,155,34"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="100,177,131,213,127,216,96,180"/>
+<area shape="rect" id="Node000005" href="$math3d_8h.html" title=" " alt="" coords="173,153,248,178"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="182,104,200,138,195,140,177,106"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="202,180,172,216,168,213,198,177"/>
+<area shape="poly" id="edge8_Node000006_Node000002" title=" " alt="" coords="287,105,281,141,273,161,262,180,234,205,203,222,200,218,231,200,258,177,269,159,276,139,282,104"/>
+</map>
