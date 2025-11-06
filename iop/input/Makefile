@@ -6,11 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/memorycard/mcman/src/
-IOP_INC_DIR = $(PS2SDKSRC)/iop/memorycard/mcman/include/
+SUBDIRS = \
+    padman \
+    padman-1300 \
+    padman-1400 \
+    rmman \
+    rmman2 \
+    rmmanx
 
-IOP_BIN ?= mcman-old.irx
-
-MCMAN_BUILDING_XMCMAN ?= 0
-
-include $(PS2SDKSRC)/iop/memorycard/mcman/Makefile
+include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/Rules.make

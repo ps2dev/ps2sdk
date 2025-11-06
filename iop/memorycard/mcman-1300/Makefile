@@ -6,14 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN_ALTNAMES =
+IOP_BIN_ALTNAMES = mcman-old.irx
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/rmman/src/
-IOP_INC_DIR = $(PS2SDKSRC)/iop/system/rmman/include/
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/memorycard/mcman/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/memorycard/mcman/include/
 
-IOP_BIN ?= rmmanx.irx
+IOP_BIN ?= mcman-1300.irx
 
-RMMAN_BUILDING_RMMAN2 ?= 1
-RMMAN_BUILDING_RMMANX ?= 1
+MCMAN_BUILDING_XMCMAN ?= 0
 
-include $(PS2SDKSRC)/iop/system/rmman/Makefile
+include $(PS2SDKSRC)/iop/memorycard/mcman/Makefile

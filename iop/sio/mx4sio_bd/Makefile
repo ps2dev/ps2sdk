@@ -8,10 +8,10 @@
 
 IOP_IMPORT_INCS += \
 	fs/bdm \
+	sio/sio2man \
 	system/dmacman \
 	system/intrman \
 	system/loadcore \
-	system/sio2man \
 	system/stdio \
 	system/sysclib \
 	system/threadman
