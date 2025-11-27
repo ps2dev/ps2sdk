@@ -50,23 +50,26 @@ DECLARE_EXPORT_TABLE(ps2ip, 2, 6)
 	DECLARE_EXPORT(ip4addr_ntoa_r)		//45
 	DECLARE_EXPORT(lwip_shutdown)
 	DECLARE_EXPORT(lwip_fcntl)
+	DECLARE_EXPORT(acd_netif_ip_addr_changed)
+	DECLARE_EXPORT(acd_network_changed_link_down)
+	DECLARE_EXPORT(acd_arp_reply)	//50
 #ifdef PS2IP_DNS
 	DECLARE_EXPORT(lwip_gethostbyname)
 	DECLARE_EXPORT(lwip_gethostbyname_r)
-	DECLARE_EXPORT(lwip_freeaddrinfo)	//50
+	DECLARE_EXPORT(lwip_freeaddrinfo)	
 	DECLARE_EXPORT(lwip_getaddrinfo)
 	DECLARE_EXPORT(dns_setserver)
-	DECLARE_EXPORT(dns_getserver)
+	DECLARE_EXPORT(dns_getserver) //50
 #else
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)
-	DECLARE_EXPORT(_retonly)		//50
+	DECLARE_EXPORT(_retonly)		
 	DECLARE_EXPORT(_retonly)
-	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)	//55
 	DECLARE_EXPORT(_retonly)
 #endif
 	DECLARE_EXPORT(netif_set_link_up)
-	DECLARE_EXPORT(netif_set_link_down)	//55
-	DECLARE_EXPORT(tcpip_callback_with_block)
-	DECLARE_EXPORT(pbuf_coalesce)
+	DECLARE_EXPORT(netif_set_link_down)	
+	DECLARE_EXPORT(tcpip_callback)
+	DECLARE_EXPORT(pbuf_coalesce)	//60
 END_EXPORT_TABLE

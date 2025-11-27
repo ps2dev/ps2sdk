@@ -236,6 +236,8 @@
  */
 #define LWIP_CHECKSUM_ON_COPY	1
 
+/* Use PS2SDK's errno.h instead of lwIP's own errno definitions */
+#define LWIP_ERRNO_STDINCLUDE	1
 /*
    ------------------------------------
    ---------- Socket options ----------
