@@ -182,6 +182,12 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg){
 	return result;
 }
 
+err_t sys_mbox_trypost_fromisr(sys_mbox_t *mbox, void *msg)
+{
+	// On PS2 IOP, ISR and task level are the same, so just call trypost
+	return sys_mbox_trypost(mbox, msg);
+}
+
 void sys_mbox_post(sys_mbox_t *mbox, void *msg)
 {
 	arch_message *MsgPkt;

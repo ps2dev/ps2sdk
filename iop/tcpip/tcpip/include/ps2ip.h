@@ -61,13 +61,7 @@ extern err_t     tcpip_input(struct pbuf *p, struct netif *inp);
 /** Function prototype for functions passed to tcpip_callback() */
 typedef void (*tcpip_callback_fn)(void *ctx);
 
-extern err_t  tcpip_callback_with_block(tcpip_callback_fn function, void *ctx, u8 block);
-
-/**
- * @ingroup lwip_os
- * @see tcpip_callback_with_block
- */
-#define tcpip_callback(f, ctx)  tcpip_callback_with_block(f, ctx, 1)
+extern err_t  tcpip_callback(tcpip_callback_fn function, void *ctx);
 
 /* From include/lwip/netif.h:  */
 extern struct netif *netif_add(struct netif *netif,
@@ -188,7 +182,7 @@ extern const ip_addr_t* dns_getserver(u8 numdns);
 #define I_lwip_fcntl DECLARE_IMPORT(47, lwip_fcntl)
 #define I_etharp_output DECLARE_IMPORT(23, etharp_output)
 #define I_tcpip_input DECLARE_IMPORT(25, tcpip_input)
-#define I_tcpip_callback_with_block DECLARE_IMPORT(56, tcpip_callback_with_block)
+#define I_tcpip_callback DECLARE_IMPORT(56, tcpip_callback)
 #define I_netif_add DECLARE_IMPORT(26, netif_add)
 #define I_netif_find DECLARE_IMPORT(27, netif_find)
 #define I_netif_set_default DECLARE_IMPORT(28, netif_set_default)

@@ -14,14 +14,14 @@ if [ "x$1" != "xlocked" ]; then
 fi
 
 ## Download LWIP
-LWIP_REPO_URL="https://github.com/ps2dev/lwip.git"
+LWIP_REPO_URL="https://github.com/lwip-tcpip/lwip.git"
 LWIP_REPO_FOLDER="common/external_deps/lwip"
-LWIP_BRANCH_NAME="ps2-v2.0.3"
+LWIP_BRANCH_NAME="STABLE-2_2_1_RELEASE"
 if test ! -d "$LWIP_REPO_FOLDER"; then
   git clone --depth 1 -b $LWIP_BRANCH_NAME $LWIP_REPO_URL "$LWIP_REPO_FOLDER"_inprogress || exit 1
   mv "$LWIP_REPO_FOLDER"_inprogress "$LWIP_REPO_FOLDER"
 else
-  (cd "$LWIP_REPO_FOLDER" && git fetch origin && git reset --hard "origin/${LWIP_BRANCH_NAME}" && git checkout "$LWIP_BRANCH_NAME" && cd - )|| exit 1
+  (cd "$LWIP_REPO_FOLDER" && git fetch origin --tags && git reset --hard "${LWIP_BRANCH_NAME}" && git checkout "$LWIP_BRANCH_NAME" && cd - )|| exit 1
 fi
 
 ## Download libsmb2
