@@ -27,7 +27,7 @@ fi
 ## Download libsmb2
 FATFS_REPO_URL="https://github.com/fjtrujy/FatFs.git"
 FATFS_REPO_FOLDER="common/external_deps/fatfs"
-FATFS_BRANCH_NAME="iop-r0.15"
+FATFS_BRANCH_NAME="iop-r0.16"
 if test ! -d "$FATFS_REPO_FOLDER"; then
   git clone --depth 1 -b $FATFS_BRANCH_NAME $FATFS_REPO_URL "$FATFS_REPO_FOLDER"_inprogress || exit 1
   mv "$FATFS_REPO_FOLDER"_inprogress "$FATFS_REPO_FOLDER"
