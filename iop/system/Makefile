@@ -32,6 +32,7 @@ SUBDIRS = \
 	rmman \
 	rmman2 \
 	rmmanx \
+	rmreset \
 	rmtapman \
 	rpadman \
 	sbusintr \
