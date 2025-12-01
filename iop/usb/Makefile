@@ -6,7 +6,16 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = usbd usbd_mini keyboard camera mouse usbhdfsd usbmass_bd usbmass_bd_mini
+SUBDIRS = \
+	usbd \
+	usbd_mini \
+	keyboard \
+	camera \
+	mouse \
+	usbhdfsd \
+	usbmass_bd \
+	usbmass_bd_mini \
+	usbmload
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
