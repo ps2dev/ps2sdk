@@ -7,6 +7,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 SUBDIRS = \
+	netcnf \
+	netcnfif \
 	netman \
 	smap \
 	smap-modular-netman \
