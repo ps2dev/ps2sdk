@@ -25,6 +25,7 @@ SUBDIRS = \
 	loadcore \
 	loadfile \
 	modload \
+	msifrpc \
 	mtapman \
 	padman \
 	padman-old \
