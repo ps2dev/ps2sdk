@@ -45,9 +45,42 @@ IOP_INCS += \
 	-I$(LWIP)/src/include/ipv4 \
 	-I$(PS2IP_BASE)/include
 
-ps2api_OBJECTS = api_lib.o api_msg.o api_netbuf.o err.o sockets.o tcpip.o
-ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o
-ps2ip_OBJECTS = sys.o lwip_init.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o ethernet.o etharp.o raw.o def.o timeouts.o $(ps2api_IPV4) $(ps2api_OBJECTS)
+ps2api_OBJECTS = \
+	api_lib.o \
+	api_msg.o \
+	api_netbuf.o \
+	err.o \
+	sockets.o \
+	tcpip.o
+
+ps2api_IPV4 = \
+	acd.o \
+	icmp.o \
+	ip.o \
+	ip4.o \
+	ip4_addr.o \
+	ip4_frag.o \
+	inet_chksum.o
+
+ps2ip_OBJECTS = \
+	sys.o \
+	lwip_init.o \
+	mem.o \
+	netif.o \
+	pbuf.o \
+	stats.o \
+	tcp_in.o \
+	tcp_out.o \
+	udp.o \
+	memp.o \
+	tcp.o \
+	ethernet.o \
+	etharp.o \
+	raw.o \
+	def.o \
+	timeouts.o \
+	$(ps2api_IPV4) \
+	$(ps2api_OBJECTS)
 
 ifdef PS2IP_DHCP
 ps2ip_OBJECTS += dhcp.o
@@ -90,6 +123,9 @@ $(IOP_OBJS_DIR)api_msg.o: $(LWIP)/src/api/api_msg.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 $(IOP_OBJS_DIR)api_netbuf.o: $(LWIP)/src/api/netbuf.c
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
+
+$(IOP_OBJS_DIR)acd.o: $(LWIP)/src/core/ipv4/acd.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 $(IOP_OBJS_DIR)icmp.o: $(LWIP)/src/core/ipv4/icmp.c
