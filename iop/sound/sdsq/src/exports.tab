@@ -1,0 +1,21 @@
+
+DECLARE_EXPORT_TABLE(sdsq, 1, 1)
+    DECLARE_EXPORT(_start)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(sceSdSqGetMaxMidiNumber)
+    DECLARE_EXPORT(sceSdSqGetMaxSongNumber)
+    DECLARE_EXPORT(sceSdSqInitMidiData)
+    DECLARE_EXPORT(sceSdSqReadMidiData)
+    DECLARE_EXPORT(sceSdSqInitSongData)
+    DECLARE_EXPORT(sceSdSqReadSongData)
+    DECLARE_EXPORT(sceSdSqGetMaxCompTableIndex)
+    DECLARE_EXPORT(sceSdSqGetCompTableOffset)
+    DECLARE_EXPORT(sceSdSqGetCompTableDataByIndex)
+    DECLARE_EXPORT(sceSdSqGetNoteOnEventByPolyKeyPress)
+    DECLARE_EXPORT(sceSdSqCopyMidiData)
+    DECLARE_EXPORT(sceSdSqCopySongData)
+END_EXPORT_TABLE
+
+void _retonly() {}
