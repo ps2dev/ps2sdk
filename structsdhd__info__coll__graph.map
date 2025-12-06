@@ -1,0 +1,15 @@
+<map id="sdhd_info" name="sdhd_info">
+<area shape="rect" id="Node000001" title=" " alt="" coords="314,129,391,155"/>
+<area shape="rect" id="Node000002" href="$structsce_hard_synth_version_chunk__.html" title=" " alt="" coords="15,5,207,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,33,250,49,291,72,322,100,344,127,340,131,318,104,288,76,248,54,205,38"/>
+<area shape="rect" id="Node000003" href="$structsce_hard_synth_header_chunk__.html" title=" " alt="" coords="16,55,206,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="202,82,291,108,329,126,327,131,289,113,201,87"/>
+<area shape="rect" id="Node000004" href="$structsce_hard_synth_program_chunk__.html" title=" " alt="" coords="13,104,209,130"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="225,126,313,135,313,141,225,131"/>
+<area shape="rect" id="Node000005" href="$structsce_hard_synth_sample_set_chunk__.html" title=" " alt="" coords="5,153,217,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="231,165,289,159,312,153,314,158,290,164,232,170"/>
+<area shape="rect" id="Node000006" href="$structsce_hard_synth_sample_chunk__.html" title=" " alt="" coords="15,203,207,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="221,203,256,195,289,184,314,170,335,154,338,158,317,174,291,189,257,200,223,208"/>
+<area shape="rect" id="Node000007" href="$structsce_hard_synth_vag_info_chunk.html" title=" " alt="" coords="18,252,204,278"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="218,249,255,236,288,219,306,204,321,187,342,154,346,157,325,190,309,208,291,223,257,241,220,254"/>
+</map>

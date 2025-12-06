@@ -1,0 +1,8 @@
+<map id="nameserver" name="nameserver">
+<area shape="rect" id="Node000001" title=" " alt="" coords="140,98,229,124"/>
+<area shape="rect" id="Node000002" href="$structsce_net_cnf_command.html" title=" " alt="" coords="5,8,148,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,41,172,96,168,100,101,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="165,12,174,20,166,28,149,31,148,26,164,23,169,20,162,16"/>
+<area shape="rect" id="Node000003" href="$structsce_net_cnf_address.html" title=" " alt="" coords="227,8,358,33"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="268,45,201,100,197,96,265,41"/>
+</map>

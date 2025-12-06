@@ -1,0 +1,17 @@
+<map id="acd_softc" name="acd_softc">
+<area shape="rect" id="Node000001" title=" " alt="" coords="188,183,266,208"/>
+<area shape="rect" id="Node000002" href="$structatapi__mode__drive.html" title=" " alt="" coords="5,94,129,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,125,206,180,203,184,102,130"/>
+<area shape="rect" id="Node000003" href="$structatapi__mode__h.html" title=" " alt="" coords="77,5,180,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="81,41,66,56,62,75,65,93,60,94,57,74,62,54,77,37"/>
+<area shape="rect" id="Node000005" href="$structatapi__mode__error.html" title=" " alt="" coords="325,94,446,120"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="184,34,231,53,256,68,329,91,327,96,254,72,228,57,182,39"/>
+<area shape="rect" id="Node000006" href="$structatapi__mode__capmach.html" title=" " alt="" coords="153,94,301,120"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="126,46,127,58,132,68,145,82,162,91,159,96,142,86,127,72,122,59,121,46"/>
+<area shape="rect" id="Node000004" href="$structatapi__mode.html" title=" " alt="" coords="280,5,368,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="266,36,196,57,165,72,104,96,102,91,163,68,194,53,265,30"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="351,40,363,54,383,92,379,95,358,56,347,44"/>
+<area shape="poly" id="edge9_Node000006_Node000004" title=" " alt="" coords="315,47,297,72,260,96,257,91,293,68,311,44"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="351,130,251,184,248,180,349,125"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="230,135,230,182,224,182,224,135"/>
+</map>
