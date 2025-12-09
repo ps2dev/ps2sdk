@@ -78,6 +78,10 @@ IOP_BIN_ELF := $(IOP_BIN:.irx=.notiopmod.elf)
 
 IOP_BIN_STRIPPED_ELF := $(IOP_BIN:.irx=.notiopmod.stripped.elf)
 
+ifeq (,$(findstring .irx,$(IOP_BIN)))
+    $(warning IOP_BIN must have .irx extension to avoid makefile circular dependency)
+endif
+
 # Externally defined variables: IOP_BIN, IOP_OBJS, IOP_LIB
 
 # These macros can be used to simplify certain build rules.
