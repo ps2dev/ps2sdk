@@ -20,8 +20,8 @@ IRX_ID("cdvd_st_driver", 2, 2);
 
 extern struct irx_export_table _exp_cdvdstm;
 
-int cdvdstm_dummyentry();
-int cdvdstm_termcall();
+extern int cdvdstm_dummyentry(void);
+extern int cdvdstm_termcall(void);
 static unsigned int iop_stream_handler(
 	unsigned int posszarg1, unsigned int posszarg2, void *buffer, int cmdid, const sceCdRMode *rmode, int *error_ptr);
 static unsigned int iop_stream_intr_cb(void *userdata);
@@ -33,7 +33,7 @@ static void ee_stream_handler_normal(cdrom_stm_devctl_t *instruct, int inbuf_len
 static unsigned int ee_stream_intr_cb_normal(void *userdata);
 static void ee_stream_handler_cdda(cdrom_stm_devctl_t *instruct, int inbuf_len, int *outres_ptr);
 static unsigned int ee_stream_intr_cb_cdda(void *userdata);
-unsigned int optimized_memcpy(char *dst, const char *src, unsigned int n);
+extern unsigned int optimized_memcpy(char *dst, const char *src, unsigned int n);
 
 static void iop_stream_intr_cb_thunk(int userdata)
 {
@@ -64,33 +64,33 @@ static int g_cdvdstm_retrycnt_iop = 0;
 IOMANX_RETURN_VALUE_IMPL(EIO);
 
 static iop_device_ops_t g_cdrom_stm_dev_ops = {
-	&cdrom_stm_init, // init,
-	&cdrom_stm_deinit, // deinit,
-	IOMANX_RETURN_VALUE(EIO), // format,
-	IOMANX_RETURN_VALUE(EIO), // open,
-	IOMANX_RETURN_VALUE(EIO), // close,
-	IOMANX_RETURN_VALUE(EIO), // read,
-	IOMANX_RETURN_VALUE(EIO), // write,
-	IOMANX_RETURN_VALUE(EIO), // lseek,
-	IOMANX_RETURN_VALUE(EIO), // ioctl,
-	IOMANX_RETURN_VALUE(EIO), // remove,
-	IOMANX_RETURN_VALUE(EIO), // mkdir,
-	IOMANX_RETURN_VALUE(EIO), // rmdir,
-	IOMANX_RETURN_VALUE(EIO), // dopen,
-	IOMANX_RETURN_VALUE(EIO), // dclose,
-	IOMANX_RETURN_VALUE(EIO), // dread,
-	IOMANX_RETURN_VALUE(EIO), // getstat,
-	IOMANX_RETURN_VALUE(EIO), // chstat,
-	IOMANX_RETURN_VALUE(EIO), // rename,
-	IOMANX_RETURN_VALUE(EIO), // chdir,
-	IOMANX_RETURN_VALUE(EIO), // sync,
-	IOMANX_RETURN_VALUE(EIO), // mount,
-	IOMANX_RETURN_VALUE(EIO), // umount,
-	IOMANX_RETURN_VALUE_S64(EIO), // lseek64,
+	&cdrom_stm_init,               // init,
+	&cdrom_stm_deinit,             // deinit,
+	IOMANX_RETURN_VALUE(EIO),      // format,
+	IOMANX_RETURN_VALUE(EIO),      // open,
+	IOMANX_RETURN_VALUE(EIO),      // close,
+	IOMANX_RETURN_VALUE(EIO),      // read,
+	IOMANX_RETURN_VALUE(EIO),      // write,
+	IOMANX_RETURN_VALUE(EIO),      // lseek,
+	IOMANX_RETURN_VALUE(EIO),      // ioctl,
+	IOMANX_RETURN_VALUE(EIO),      // remove,
+	IOMANX_RETURN_VALUE(EIO),      // mkdir,
+	IOMANX_RETURN_VALUE(EIO),      // rmdir,
+	IOMANX_RETURN_VALUE(EIO),      // dopen,
+	IOMANX_RETURN_VALUE(EIO),      // dclose,
+	IOMANX_RETURN_VALUE(EIO),      // dread,
+	IOMANX_RETURN_VALUE(EIO),      // getstat,
+	IOMANX_RETURN_VALUE(EIO),      // chstat,
+	IOMANX_RETURN_VALUE(EIO),      // rename,
+	IOMANX_RETURN_VALUE(EIO),      // chdir,
+	IOMANX_RETURN_VALUE(EIO),      // sync,
+	IOMANX_RETURN_VALUE(EIO),      // mount,
+	IOMANX_RETURN_VALUE(EIO),      // umount,
+	IOMANX_RETURN_VALUE_S64(EIO),  // lseek64,
 	&cdrom_stm_devctl,
-	IOMANX_RETURN_VALUE(EIO), // symlink
-	IOMANX_RETURN_VALUE(EIO), // readlink
-	IOMANX_RETURN_VALUE(EIO), // ioctl2
+	IOMANX_RETURN_VALUE(EIO),  // symlink
+	IOMANX_RETURN_VALUE(EIO),  // readlink
+	IOMANX_RETURN_VALUE(EIO),  // ioctl2
 };
 static iop_device_t g_cdrom_stm_dev = {"cdrom_stm", IOP_DT_FSEXT | IOP_DT_FS, 1, "CD-ROM_STM ", &g_cdrom_stm_dev_ops};
 static int g_cdvdstm_last_error_for_ee = 0;
@@ -133,23 +133,23 @@ static int vCancelAlarm(unsigned int (*alarm_cb)(void *), void *arg)
 	return (QueryIntrContext() ? iCancelAlarm : CancelAlarm)(alarm_cb, arg);
 }
 
-static int vSetEventFlag()
+static int vSetEventFlag(void)
 {
 	return (QueryIntrContext() ? iSetEventFlag : SetEventFlag)(g_cdvdman_intr_efid, 8);
 }
 
-static int vClearEventFlag()
+static int vClearEventFlag(void)
 {
 	return (QueryIntrContext() ? iClearEventFlag : ClearEventFlag)(g_cdvdman_intr_efid, ~8);
 }
 
-int cdvdstm_dummyentry()
+int cdvdstm_dummyentry(void)
 {
 	VERBOSE_PRINTF(1, "Dummy Entry Called\n");
 	return 0;
 }
 
-int cdvdstm_termcall()
+int cdvdstm_termcall(void)
 {
 	cdrom_stm_devctl_t instruct;
 	int outres;
@@ -440,7 +440,11 @@ static unsigned int iop_stream_intr_cb(void *userdata)
 	sceCdSC(0xFFFFFFFF, &last_error);
 	if ( !last_error )
 	{
+#ifdef CDVD_VARIANT_XOSD
+		switch ( sceCdSC(0xFFFFFFDA, &scres_unused) )
+#else
 		switch ( sceCdGetDiskType() )
+#endif
 		{
 			case SCECdPSCD:
 			case SCECdPSCDDA:
@@ -654,6 +658,7 @@ static int cdrom_stm_devctl(
 			ee_stream_handler_cdda(instruct, inbuf_len, outres_ptr);
 			break;
 		default:
+			// The following printf was removed for ioprp300x
 			PRINTF("Un-support devctl %08x\n", cmd);
 			retres = -EIO;
 			break;
@@ -707,6 +712,23 @@ int _start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 	if ( mi && ((mi->newflags & 2) != 0) )
 		mi->newflags |= 0x10;
 	return MODULE_RESIDENT_END;
+#endif
+}
+
+static int vsceSifDmaStat(int dmat)
+{
+#ifdef CDVD_VARIANT_XOSD
+	int st;
+	int state;
+
+	if ( QueryIntrContext() )
+		return sceSifDmaStat(dmat);
+	CpuSuspendIntr(&state);
+	st = sceSifDmaStat(dmat);
+	CpuResumeIntr(state);
+	return st;
+#else
+	return sceSifDmaStat(dmat);
 #endif
 }
 
@@ -939,7 +961,7 @@ static void ee_stream_handler_normal(cdrom_stm_devctl_t *instruct, int inbuf_len
 				DelayThread(500);
 			}
 			g_cdvdstm_bankoffs_ee += posszarg2_bytes_clamped;
-			while ( sceSifDmaStat(dmat1) >= 0 )
+			while ( vsceSifDmaStat(dmat1) >= 0 )
 				;
 		}
 		if ( (unsigned int)g_cdvdstm_bankoffs_ee >= (unsigned int)g_cdvdstm_chunksz2 )
@@ -1003,7 +1025,11 @@ static unsigned int ee_stream_intr_cb_normal(void *userdata)
 	sceCdSC(0xFFFFFFFF, &g_cdvdstm_last_error_for_ee);
 	if ( !g_cdvdstm_last_error_for_ee )
 	{
+#ifdef CDVD_VARIANT_XOSD
+		switch ( sceCdSC(0xFFFFFFDA, &scres_unused) )
+#else
 		switch ( sceCdGetDiskType() )
+#endif
 		{
 			case SCECdPSCD:
 			case SCECdPSCDDA:
@@ -1401,7 +1427,7 @@ static void ee_stream_handler_cdda(cdrom_stm_devctl_t *instruct, int inbuf_len, 
 				DelayThread(500);
 			}
 			g_cdvdstm_bankoffs_ee += posszarg2_bytes_clamped;
-			while ( sceSifDmaStat(dmat2) >= 0 )
+			while ( vsceSifDmaStat(dmat2) >= 0 )
 				;
 		}
 		if ( (unsigned int)g_cdvdstm_bankoffs_ee >= (unsigned int)g_cdvdstm_chunksz2 )
@@ -1468,7 +1494,11 @@ static unsigned int ee_stream_intr_cb_cdda(void *userdata)
 	sceCdSC(0xFFFFFFFF, &g_cdvdstm_last_error_for_ee);
 	if ( !g_cdvdstm_last_error_for_ee )
 	{
+#ifdef CDVD_VARIANT_XOSD
+		switch ( sceCdSC(0xFFFFFFDA, &scres_unused) )
+#else
 		switch ( sceCdGetDiskType() )
+#endif
 		{
 			case SCECdPSCDDA:
 			case SCECdPS2CDDA:
