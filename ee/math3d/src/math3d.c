@@ -516,7 +516,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
    "addi		%1, -1		\n"
    "bne			$0, %1, 1b	\n"
 #endif
-   : : "r" (output), "r" (count), "r" (normals), "r" (local_light)
+   : "+r" (output), "+r" (count), "+r" (normals) : "r" (local_light)
    : "memory"
   );
  }
@@ -646,7 +646,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
    "addi		%2, 0x10	\n"
    "addi		%1, -1		\n"
    "bne			$0, %1, 1b	\n"
-   : : "r" (output), "r" (count), "r" (vertices), "r" (local_screen)
+   : "+r" (output), "+r" (count), "+r" (vertices) : "r" (local_screen)
    : "$10", "memory"
   );
  }
