@@ -16,6 +16,22 @@ IRX_ID(MODNAME, 1, 1);
 
 #ifdef UDNL_T300
 int CpuExecuteKmode(void *function, ...); // Exactly the same function as INTRMAN's export 14.
+__asm__
+(
+    "\t" ".set push" "\n"
+    "\t" ".set noat" "\n"
+    "\t" ".set noreorder" "\n"
+
+    "\t" ".globl CpuExecuteKmode" "\n"
+    "\t" ".ent CpuExecuteKmode" "\n"
+    "\t" "CpuExecuteKmode:" "\n"
+    "\t" "\t" "li      $v0, 0x0C" "\n"
+    "\t" "\t" "syscall" "\n"
+    "\t" "\t" "jr      $ra" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" ".end CpuExecuteKmode" "\n"
+    "\t" ".set pop" "\n"
+);
 #endif
 
 //#define DEBUG 1 //Comment out to disable debug messages.
@@ -367,6 +383,36 @@ static volatile unsigned int *func_00000f80(volatile unsigned int *address)
 
 // 0x00001b38
 void func_00001b38(unsigned int arg1);
+__asm__
+(
+    "\t" ".set push" "\n"
+    "\t" ".set noat" "\n"
+    "\t" ".set noreorder" "\n"
+
+    "\t" ".globl func_00001b38" "\n"
+    "\t" ".ent func_00001b38" "\n"
+    "\t" "func_00001b38:" "\n"
+    "\t" "\t" "mfc0    $t0, $12" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "la      $t4, func_00001b38_main" "\n"
+    "\t" "\t" "lui     $at, 0xA000" "\n"
+    "\t" "\t" "or      $t4, $t4, $at" "\n"
+    "\t" "\t" "jr      $t4" "\n"
+    "\t" "\t" "mtc0    $zero, $12" "\n"
+    "\t" "func_00001b38_main:" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "lui     $at, 0xFFFE" "\n"
+    "\t" "\t" "sw      $a0, 0x0130($at)" "\n"
+    "\t" "\t" "lui     $at, 0xFFFE" "\n"
+    "\t" "\t" "lw      $zero, 0x0130($at)" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "mtc0    $t0, $12" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "jr      $ra" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" ".end func_00001b38" "\n"
+    "\t" ".set pop" "\n"
+);
 
 // 0x00000c98
 static void TerminateResidentEntriesDI(unsigned int options)
@@ -415,6 +461,111 @@ void func_00001930(void);
 #else
 void func_00001440(void);
 #endif
+
+__asm__
+(
+    "\t" ".set push" "\n"
+    "\t" ".set noat" "\n"
+    "\t" ".set noreorder" "\n"
+
+#ifdef UDNL_T300
+    "\t" ".globl func_00001930" "\n"
+    "\t" ".ent func_00001930" "\n"
+    "\t" "func_00001930:" "\n"
+#else
+    "\t" ".globl func_00001440" "\n"
+    "\t" ".ent func_00001440" "\n"
+    "\t" "func_00001440:" "\n"
+#endif
+    "\t" "\t" "mfc0    $t0, $12" "\n"
+    "\t" "\t" "nop" "\n"
+#ifdef UDNL_T300
+    "\t" "\t" "la      $t4, func_00001930_main" "\n"
+#else
+    "\t" "\t" "la      $t4, func_00001440_main" "\n"
+#endif
+    "\t" "\t" "lui     $at, 0xA000" "\n"
+    "\t" "\t" "or      $t4, $t4, $at" "\n"
+    "\t" "\t" "jr      $t4" "\n"
+#ifdef UDNL_T300
+    "\t" "func_00001930_main:" "\n"
+#else
+    "\t" "func_00001440_main:" "\n"
+#endif
+    "\t" "\t" "mtc0    $zero, $12" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "lui     $t6, 0xbf80" "\n"
+    "\t" "\t" "lw      $t6, 0x1450($t6)" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "addiu   $t7, $zero, 0xfffe" "\n"
+    "\t" "\t" "and     $t1, $t6, $t7" "\n"
+    "\t" "\t" "lui     $at, 0xbf80" "\n"
+    "\t" "\t" "sw      $t1, 0x1450($at)" "\n"
+    "\t" "\t" "lui     $at, 0xbf80" "\n"
+    "\t" "\t" "lw      $zero, 0x1450($at)" "\n"
+    "\t" "\t" "lui     $t7, 0xbf80" "\n"
+    "\t" "\t" "lw      $t7, 0x1578($t7)" "\n"
+    "\t" "\t" "lui     $at, 0xbf80" "\n"
+    "\t" "\t" "sw      $zero, 0x1578($at)" "\n"
+    "\t" "\t" "lui     $at, 0xbf80" "\n"
+    "\t" "\t" "lw      $zero, 0x1578($at)" "\n"
+    "\t" "\t" "lui     $t5, 0xfffe" "\n"
+    "\t" "\t" "lw      $t5, 0x0130($t5)" "\n"
+    "\t" "\t" "addiu   $t1, $zero, 0x0c04" "\n"
+    "\t" "\t" "lui     $at, 0xfffe" "\n"
+    "\t" "\t" "sw      $t1, 0x0130($at)" "\n"
+    "\t" "\t" "lui     $t4, 0x0001" "\n"
+    "\t" "\t" "mtc0    $t4, $12" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "addiu   $t2, $zero, 0x0000" "\n"
+    "\t" "\t" "addiu   $t3, $zero, 0x0f80" "\n"
+#ifdef UDNL_T300
+    "\t" "func_00001930_loop:" "\n"
+#else
+    "\t" "func_00001440_loop:" "\n"
+#endif
+    "\t" "\t" "sw      $zero, 0x0000($t2)" "\n"
+    "\t" "\t" "sw      $zero, 0x0010($t2)" "\n"
+    "\t" "\t" "sw      $zero, 0x0020($t2)" "\n"
+    "\t" "\t" "sw      $zero, 0x0030($t2)" "\n"
+    "\t" "\t" "sw      $zero, 0x0040($t2)" "\n"
+    "\t" "\t" "sw      $zero, 0x0050($t2)" "\n"
+    "\t" "\t" "sw      $zero, 0x0060($t2)" "\n"
+    "\t" "\t" "sw      $zero, 0x0070($t2)" "\n"
+#ifdef UDNL_T300
+    "\t" "\t" "bne     $t2, $t3, func_00001930_loop" "\n"
+#else
+    "\t" "\t" "bne     $t2, $t3, func_00001440_loop" "\n"
+#endif
+    "\t" "\t" "addi    $t2, $t2, 0x0080" "\n"
+    "\t" "\t" "mtc0    $zero, $12" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "lui     $at, 0xfffe" "\n"
+    "\t" "\t" "sw      $t5, 0x0130($at)" "\n"
+    "\t" "\t" "lui     $at, 0xfffe" "\n"
+    "\t" "\t" "lw      $zero, 0x0130($at)" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "lui     $at, 0xbf80" "\n"
+    "\t" "\t" "sw      $t7, 0x1578($at)" "\n"
+    "\t" "\t" "lui     $at, 0xbf80" "\n"
+    "\t" "\t" "lw      $zero, 0x1578($at)" "\n"
+    "\t" "\t" "lui     $at, 0xbf80" "\n"
+    "\t" "\t" "sw      $t6, 0x1450($at)" "\n"
+    "\t" "\t" "lui     $at, 0xbf80" "\n"
+    "\t" "\t" "lw      $zero, 0x1450($at)" "\n"
+    "\t" "\t" "mtc0    $t0, $12" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "jr      $ra" "\n"
+    "\t" "\t" "nop" "\n"
+#ifdef UDNL_T300
+    "\t" ".end func_00001930" "\n"
+#else
+    "\t" ".end func_00001440" "\n"
+#endif
+    "\t" ".set pop" "\n"
+);
 
 enum IOP_MODULE_TYPES {
     IOP_MOD_TYPE_COFF = 1,
@@ -1277,3 +1428,111 @@ static void *AllocMemory(int nbytes)
 
     return AllocSysMemory(2, nbytes, BlockTopAddress);
 }
+
+#ifdef THIS_IS_UNUSED
+__asm__
+(
+    "\t" ".set push" "\n"
+    "\t" ".set noat" "\n"
+    "\t" ".set noreorder" "\n"
+
+// Note: This doesn't seem to be used.
+#ifdef UDNL_T300
+    "\t" ".globl func_00001a34" "\n"
+    "\t" ".ent func_00001a34" "\n"
+    "\t" "func_00001a34:" "\n"
+#else
+    "\t" ".globl func_00001544" "\n"
+    "\t" ".ent func_00001544" "\n"
+    "\t" "func_00001544:" "\n"
+#endif
+    "\t" "\t" "mfc0     $t0, $12" "\n"
+    "\t" "\t" "nop" "\n"
+#ifdef UDNL_T300
+    "\t" "\t" "la       $t4, func_00001a34_main" "\n"
+#else
+    "\t" "\t" "la       $t4, func_00001544_main" "\n"
+#endif
+    "\t" "\t" "lui      $at, 0xa000" "\n"
+    "\t" "\t" "or       $t4, $t4, $at" "\n"
+    "\t" "\t" "jr       $t4" "\n"
+#ifdef UDNL_T300
+    "\t" "func_00001a34_main:" "\n"
+#else
+    "\t" "func_00001544_main:" "\n"
+#endif
+    "\t" "\t" "mtc0     $zero, $12" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "lui      $t6, 0xbf80" "\n"
+    "\t" "\t" "lw       $t6, 0x1450($t6)" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "addiu    $t7, $zero, 0xfffe" "\n"
+    "\t" "\t" "and      $t1, $t6, $t7" "\n"
+    "\t" "\t" "lui      $at, 0xbf80" "\n"
+    "\t" "\t" "sw       $t1, 0x1450($at)" "\n"
+    "\t" "\t" "lui      $at, 0xbf80" "\n"
+    "\t" "\t" "lw       $zero, 0x1450($at)" "\n"
+    "\t" "\t" "lui      $t7, 0xbf80" "\n"
+    "\t" "\t" "lw       $t7, 0x1578($t7)" "\n"
+    "\t" "\t" "lui      $at, 0xbf80" "\n"
+    "\t" "\t" "sw       $zero, 0x1578($at)" "\n"
+    "\t" "\t" "lui      $at, 0xbf80" "\n"
+    "\t" "\t" "lw       $zero, 0x1578($at)" "\n"
+    "\t" "\t" "lui      $t5, 0xfffe" "\n"
+    "\t" "\t" "lw       $t5, 0x0130($t5)" "\n"
+    "\t" "\t" "addiu    $t1, $zero, 0x00c4" "\n"
+    "\t" "\t" "lui      $at, 0xfffe" "\n"
+    "\t" "\t" "sw       $t1, 0x0130($at)" "\n"
+    "\t" "\t" "lui      $t4, 0x0001" "\n"
+    "\t" "\t" "mtc0     $t4, $12" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "addiu    $t2, $zero, 0x0000" "\n"
+    "\t" "\t" "addiu    $t3, $zero, 0x0380" "\n"
+#ifdef UDNL_T300
+    "\t" "func_00001a34_loop:" "\n"
+#else
+    "\t" "func_00001544_loop:" "\n"
+#endif
+    "\t" "\t" "sw       $zero, 0x0000($t2)" "\n"
+    "\t" "\t" "sw       $zero, 0x0010($t2)" "\n"
+    "\t" "\t" "sw       $zero, 0x0020($t2)" "\n"
+    "\t" "\t" "sw       $zero, 0x0030($t2)" "\n"
+    "\t" "\t" "sw       $zero, 0x0040($t2)" "\n"
+    "\t" "\t" "sw       $zero, 0x0050($t2)" "\n"
+    "\t" "\t" "sw       $zero, 0x0060($t2)" "\n"
+    "\t" "\t" "sw       $zero, 0x0070($t2)" "\n"
+#ifdef UDNL_T300
+    "\t" "\t" "bne      $t2, $t3, func_00001a34_loop" "\n"
+#else
+    "\t" "\t" "bne      $t2, $t3, func_00001544_loop" "\n"
+#endif
+    "\t" "\t" "addi     $t2, $t2, 0x0080" "\n"
+    "\t" "\t" "mtc0     $zero, $12" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "lui      $at, 0xfffe" "\n"
+    "\t" "\t" "sw       $t5, 0x0130($at)" "\n"
+    "\t" "\t" "lui      $at, 0xfffe" "\n"
+    "\t" "\t" "lw       $zero, 0x0130($at)" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "lui      $at, 0xbf80" "\n"
+    "\t" "\t" "sw       $t7, 0x1578($at)" "\n"
+    "\t" "\t" "lui      $at, 0xbf80" "\n"
+    "\t" "\t" "lw       $zero, 0x1578($at)" "\n"
+    "\t" "\t" "lui      $at, 0xbf80" "\n"
+    "\t" "\t" "sw       $t6, 0x1450($at)" "\n"
+    "\t" "\t" "lui      $at, 0xbf80" "\n"
+    "\t" "\t" "lw       $zero, 0x1450($at)" "\n"
+    "\t" "\t" "mtc0     $t0, $12" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "jr       $ra" "\n"
+    "\t" "\t" "nop" "\n"
+#ifdef UDNL_T300
+    "\t" ".end func_00001a34" "\n"
+#else
+    "\t" ".end func_00001544" "\n"
+#endif
+    "\t" ".set pop" "\n"
+);
+#endif
