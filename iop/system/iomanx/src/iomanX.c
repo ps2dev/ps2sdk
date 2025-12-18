@@ -326,11 +326,11 @@ int mode2modex(int mode)
 {
 	int modex = 0;
 
-	if ( FIO_SO_ISLNK(mode) )
+	if ( (mode & FIO_SO_IFLNK) != 0 )
 		modex |= FIO_S_IFLNK;
-	if ( FIO_SO_ISREG(mode) )
+	if ( (mode & FIO_SO_IFREG) != 0 )
 		modex |= FIO_S_IFREG;
-	if ( FIO_SO_ISDIR(mode) )
+	if ( (mode & FIO_SO_IFDIR) != 0 )
 		modex |= FIO_S_IFDIR;
 
 	/* Convert the file access modes.  */
@@ -348,11 +348,11 @@ int modex2mode(int modex)
 {
 	int mode = 0;
 
-	if ( FIO_S_ISLNK(modex) )
+	if ( (modex & FIO_S_IFLNK) != 0 )
 		mode |= FIO_SO_IFLNK;
-	if ( FIO_S_ISREG(modex) )
+	if ( (modex & FIO_S_IFREG) != 0 )
 		mode |= FIO_SO_IFREG;
-	if ( FIO_S_ISDIR(modex) )
+	if ( (modex & FIO_S_IFDIR) != 0 )
 		mode |= FIO_SO_IFDIR;
 
 	/* Convert the file access modes.  */
