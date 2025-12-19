@@ -240,20 +240,20 @@ extern int padSetButtonInfo(int port, int slot, int buttonInfo);
  * If padInfoAct(port, slot, -1, 0) != 0, the controller has actuators
  * (i think ;) )
  */
-extern unsigned char padInfoAct(int port, int slot, int word, int byte);
+extern unsigned char padInfoAct(int port, int slot, int actuator, int cmd);
 
 /** Initalise actuators. On dual shock controller:
  * act_align[0] = 0 enables 'small' engine
  * act_align[1] = 1 enables 'big' engine
  * set act_align[2-5] to 0xff (disable)
  */
-extern int padSetActAlign(int port, int slot, const char act_align[6]);
+extern int padSetActAlign(int port, int slot, const char actAlign[6]);
 
 /** Set actuator status on dual shock controller,
  * act_align[0] = 0/1 turns off/on 'small' engine
  * act_align[1] = 0-255 sets 'big' engine speed
  */
-extern int padSetActDirect(int port, int slot, char act_align[6]);
+extern int padSetActDirect(int port, int slot, const char actAlign[6]);
 
 /** Returns whether the device at port,slot is connected (1 = connected)
  * Appears to have been removed very early during the PS2's lifetime.
