@@ -34,7 +34,7 @@ iop_dbg_get_dcic:
 .global iop_dbg_get_bpc
 .ent iop_dbg_get_bpc
 iop_dbg_get_bpc:
-                        mtc0    $v0, IOP_COP0_BPC
+                        mfc0    $v0, IOP_COP0_BPC
                         nop
                         jr      $ra
                         nop
