@@ -1,0 +1,18 @@
+<map id="t_SifRpcRendPkt" name="t_SifRpcRendPkt">
+<area shape="rect" id="Node000001" title=" " alt="" coords="110,306,231,331"/>
+<area shape="rect" id="Node000002" href="$sifcmd-common_8h.html#structt___sif_cmd_header" title=" " alt="" coords="5,185,123,210"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="76,223,91,252,112,280,145,303,142,307,108,284,87,255,72,226"/>
+<area shape="rect" id="Node000003" href="$sifrpc-common_8h.html#structt___sif_rpc_client_data" title=" " alt="" coords="149,94,280,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="204,134,186,183,175,252,173,305,168,305,170,251,180,182,199,132"/>
+<area shape="rect" id="Node000005" href="$sifrpc-common_8h.html#structt___sif_rpc_server_data" title=" " alt="" coords="212,185,348,210"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="210,135,210,147,214,157,226,172,243,182,241,187,223,176,209,160,205,148,205,135"/>
+<area shape="rect" id="Node000004" href="$sifrpc-common_8h.html#structt___sif_rpc_header" title=" " alt="" coords="158,5,271,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="217,47,217,94,212,94,212,47"/>
+<area shape="poly" id="edge10_Node000001_Node000005" title=" " alt="" coords="258,223,244,238,183,307,179,304,240,235,255,220"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="266,173,249,145,227,122,231,118,253,142,270,170"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="365,189,375,198,367,206,349,209,348,203,364,201,370,198,362,194"/>
+<area shape="rect" id="Node000006" href="$sifrpc-common_8h.html#structt___sif_rpc_data_queue" title=" " alt="" coords="258,306,395,331"/>
+<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="272,225,267,253,268,267,272,280,283,293,297,303,294,307,279,297,268,283,262,268,261,253,267,225"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="317,292,299,238,285,212,290,209,304,236,322,290"/>
+<area shape="poly" id="edge9_Node000006_Node000006" title=" " alt="" coords="412,309,421,318,414,328,396,332,395,327,411,323,416,319,408,313"/>
+</map>
