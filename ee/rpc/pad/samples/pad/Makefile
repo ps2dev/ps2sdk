@@ -6,9 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_SRC_DIR = $(PS2SDKSRC)/ee/rpc/pad/src/
-EE_INC_DIR = $(PS2SDKSRC)/ee/rpc/pad/include/
+SAMPLE_DIR = rpc/pad
 
-EE_CFLAGS += -D_XPAD
-
-include $(PS2SDKSRC)/ee/rpc/pad/Makefile
+include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/samples/Rules.samples

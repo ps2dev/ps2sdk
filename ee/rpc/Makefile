@@ -17,7 +17,6 @@ SUBDIRS += memorycard
 SUBDIRS += mouse
 SUBDIRS += multitap
 SUBDIRS += pad
-SUBDIRS += padx
 SUBDIRS += poweroff
 SUBDIRS += ps2snd
 SUBDIRS += remote
