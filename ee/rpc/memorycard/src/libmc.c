@@ -230,9 +230,11 @@ static void mcStoreDir(void* arg)
 int mcInit(int type)
 {
 	int ret=0;
+	int err=0;
 	mcRpcStat_t *rpcStat = (mcRpcStat_t*)UNCACHED_SEG(&g_rdata.rpcStat);
 	static int _rb_count = 0;
 
+	(void)type;
 	if(_rb_count != _iop_reboot_count)
 	{
 		_rb_count = _iop_reboot_count;
@@ -243,9 +245,6 @@ int mcInit(int type)
 		return -1;
 
 	sceSifInitRpc(0);
-
-	// set which modules to use
-	g_mcType = type;
 
 	// bind to mc rpc on iop
 	do
@@ -266,65 +265,98 @@ int mcInit(int type)
 	// for some reason calling this init sif function with 'mcserv' makes all other
 	// functions not work properly. although NOT calling it means that detecting
 	// whether or not cards are formatted doesnt seem to work :P
-	if(g_mcType == MC_TYPE_MC)
+
+	// Start with calling flush with an invalid fd (so it sets the return value to
+	// sceMcResDeniedPermit, which MC_RPCCMD_INIT will not return)
+	g_descParam.fd = 0xFFFFFFFF;
+	sceSifCallRpc(&g_cdata, mcRpcCmd[MC_TYPE_XMC][MC_RPCCMD_FLUSH], 0, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL);
+	sceSifCallRpc(&g_cdata, mcRpcCmd[MC_TYPE_MC][MC_RPCCMD_FLUSH], 0, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL);
+#ifdef MC_DEBUG
+	printf("libmc: using XMCMAN & XMCSERV\n");
+#endif
+
+	// Try XMCSERV RPC
+	g_mcType = MC_TYPE_XMC;
+	// call init function
+	if((ret = sceSifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_INIT], 0, &g_descParam, sizeof(g_descParam), &g_rdata, 12, NULL, NULL)) < 0)
 	{
+		// init error
 #ifdef MC_DEBUG
-		printf("libmc: using MCMAN & MCSERV\n");
-
+		printf("libmc: initialisation error\n");
 #endif
-		g_descParam.offset = -217;
-
-		// call init function
-		if((ret = sceSifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_INIT], 0, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL))>=0)
-		{
-			ret = g_rdata.result;
-		}
-		else{
-			// init error
-#ifdef MC_DEBUG
-			printf("libmc: initialisation error\n");
-#endif
-			g_mclibInited = 0;
-			return g_rdata.result - 100;
-		}
+		err = ret - 100;
 	}
-	else if(g_mcType == MC_TYPE_XMC)
+
+	// If result was sceMcResDeniedPermit, RPC was unhandled
+	if (!err && rpcStat->result == sceMcResDeniedPermit)
 	{
-#ifdef MC_DEBUG
-		printf("libmc: using XMCMAN & XMCSERV\n");
-#endif
+		err = -122;
+	}
 
-		// call init function
-		if((ret = sceSifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_INIT], 0, &g_descParam, sizeof(g_descParam), &g_rdata, 12, NULL, NULL)) < 0)
-		{
-			// init error
-#ifdef MC_DEBUG
-			printf("libmc: initialisation error\n");
-#endif
-			g_mclibInited = 0;
-			return ret - 100;
-		}
-
+	if (!err)
+	{
 		// check if old version of mcserv loaded
-		if(rpcStat->mcserv_version < 0x205)
+		if (rpcStat->mcserv_version < 0x205)
 		{
 #ifdef MC_DEBUG
 			printf("libmc: mcserv is too old (%x)\n", rpcStat->mcserv_version);
 #endif
-			g_mclibInited = 0;
-			return -120;
+			err = -120;
 		}
 
 		// check if old version of mcman loaded
-		if(rpcStat->mcman_version < 0x206)
+		if (rpcStat->mcman_version < 0x206)
 		{
 #ifdef MC_DEBUG
 			printf("libmc: mcman is too old (%x)\n", rpcStat->mcman_version);
 #endif
-			g_mclibInited = 0;
-			return -121;
+			err = -121;
 		}
+	}
+
+	if (!err)
+	{
 		ret = rpcStat->result;
+	}
+
+	if (err && rpcStat->result == sceMcResDeniedPermit)
+	{
+		err = 0;
+
+		// Try MCSERV RPC
+		g_mcType = MC_TYPE_MC;
+#ifdef MC_DEBUG
+		printf("libmc: using MCMAN & MCSERV\n");
+#endif
+
+		g_descParam.offset = -217;
+
+		// call init function
+		if((ret = sceSifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_INIT], 0, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL)) < 0)
+		{
+			// init error
+#ifdef MC_DEBUG
+			printf("libmc: initialisation error\n");
+#endif
+			err = ret - 100;
+		}
+
+		// If result was sceMcResDeniedPermit, RPC was unhandled
+		if (!err && rpcStat->result == sceMcResDeniedPermit)
+		{
+			err = -122;
+		}
+
+		if (!err)
+		{
+			ret = g_rdata.result;
+		}
+	}
+
+	if (err)
+	{
+		g_mclibInited = 0;
+		return err;
 	}
 
 	// successfully inited
