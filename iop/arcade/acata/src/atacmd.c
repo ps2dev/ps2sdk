@@ -215,7 +215,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					{
 						sr = *((volatile acUint16 *)0xB6160000);
 						ret_v20 = sr & 0xFF;
-						while ( (*((volatile acUint16 *)0xB6160000) & 0x80) != 0 )
+						while ( (ret_v20 & 0x80) != 0 )
 						{
 							ret_v20 = -116;
 							if ( SleepThread() != 0 )
@@ -226,7 +226,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					else
 					{
 						ret_v20 = *((volatile acUint16 *)0xB6070000);
-						while ( (*((volatile acUint16 *)0xB6070000) & 0x80) != 0 )
+						while ( (ret_v20 & 0x80) != 0 )
 						{
 							sr = *((volatile acUint16 *)0xB6070000);
 							ret_v20 = sr & 0xFF;
@@ -257,7 +257,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					{
 						sr_v25 = *((volatile acUint16 *)0xB6160000);
 						sr_v25 = sr_v25 & 0xFF;
-						while ( (*((volatile acUint16 *)0xB6160000) & 0x80) != 0 )
+						while ( (sr_v25 & 0x80) != 0 )
 						{
 							sr_v25 = -116;
 							if ( SleepThread() )
@@ -268,7 +268,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					else
 					{
 						sr_v25 = *((volatile acUint16 *)0xB6070000);
-						while ( (*((volatile acUint16 *)0xB6070000) & 0x80) != 0 )
+						while ( (sr_v25 & 0x80) != 0 )
 						{
 							sr_v25 = *((volatile acUint16 *)0xB6070000);
 							sr_v25 = sr_v25 & 0xFF;

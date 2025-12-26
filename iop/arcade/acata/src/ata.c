@@ -190,7 +190,13 @@ int ata_probe(acAtaReg atareg)
 	while ( (*((volatile acUint16 *)0xB6070000) & 0x80) != 0 )
 		;
 	*((volatile acUint16 *)0xB6020000) = 4660;
+	// cppcheck-suppress knownConditionTrueFalse
+	if ( *((volatile acUint16 *)0xB6020000) != 52 )
+		return 0;
 	*((volatile acUint16 *)0xB6030000) = 18;
+	// cppcheck-suppress knownConditionTrueFalse
+	if ( *((volatile acUint16 *)0xB6030000) != 18 )
+		return 0;
 	active = 0;
 	unit = 0;
 	*((volatile acUint16 *)0xB6160000) = 2;
@@ -199,6 +205,7 @@ int ata_probe(acAtaReg atareg)
 	while ( unit < 2 )
 	{
 		*((volatile acUint16 *)0xB6060000) = 16 * (unit != 0);
+		*((volatile acUint16 *)0xB6070000) = 0;
 		*((volatile acUint16 *)0xB6070000) = 0;
 		while ( count <= 1999999 )
 		{

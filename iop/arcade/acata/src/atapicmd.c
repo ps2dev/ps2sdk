@@ -86,6 +86,7 @@ static int atapi_packet_send(acAtaReg atareg, acAtapiPacketData *pkt, int flag)
 	*((volatile acUint16 *)0xB6010000) = flag & 1;
 	*((volatile acUint16 *)0xB6070000) = 160;
 	tmout = 999;
+	v6 = 1000;
 	// cppcheck-suppress knownConditionTrueFalse
 	while ( (*((volatile acUint16 *)0xB6070000) & 0x80) != 0 )
 	{
@@ -138,7 +139,7 @@ static int atapi_pio_read(acAtaReg atareg, acUint16 *buf, int count, int flag)
 		if ( !sr )
 		{
 			sr_v5 = *((volatile acUint16 *)0xB6070000);
-			while ( (*((volatile acUint16 *)0xB6070000) & 0x80) != 0 )
+			while ( (sr_v5 & 0x80) != 0 )
 			{
 				xlen = *((volatile acUint16 *)0xB6070000);
 				sr_v5 = xlen & 0xFF;
@@ -148,7 +149,7 @@ static int atapi_pio_read(acAtaReg atareg, acUint16 *buf, int count, int flag)
 		{
 			xlen = *((volatile acUint16 *)0xB6160000);
 			sr_v5 = xlen & 0xFF;
-			while ( (*((volatile acUint16 *)0xB6160000) & 0x80) != 0 )
+			while ( (sr_v5 & 0x80) != 0 )
 			{
 				sr_v5 = -116;
 				if ( SleepThread() != 0 )
@@ -314,7 +315,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 						{
 							xlen = *((volatile acUint16 *)0xB6160000);
 							sr_v14 = xlen & 0xFF;
-							while ( (*((volatile acUint16 *)0xB6160000) & 0x80) != 0 )
+							while ( (sr_v14 & 0x80) != 0 )
 							{
 								sr_v14 = -116;
 								if ( SleepThread() != 0 )
@@ -325,7 +326,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 						else
 						{
 							sr_v14 = *((volatile acUint16 *)0xB6070000);
-							while ( (*((volatile acUint16 *)0xB6070000) & 0x80) != 0 )
+							while ( (sr_v14 & 0x80) != 0 )
 							{
 								xlen = *((volatile acUint16 *)0xB6070000);
 								sr_v14 = xlen & 0xFF;
