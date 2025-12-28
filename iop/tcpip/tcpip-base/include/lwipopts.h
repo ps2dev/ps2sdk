@@ -167,6 +167,10 @@
 #define LWIP_DHCP		1
 #endif
 
+/* ---------- ACD options ---------- */
+#define LWIP_ACD		0
+#define LWIP_DHCP_DOES_ACD_CHECK	0
+
 /**
  * DHCP_DOES_ARP_CHECK==1: Do an ARP check on the offered address.
  */
@@ -236,6 +240,8 @@
  */
 #define LWIP_CHECKSUM_ON_COPY	1
 
+/* Use PS2SDK's errno.h instead of lwIP's own errno definitions */
+#define LWIP_ERRNO_STDINCLUDE	1
 /*
    ------------------------------------
    ---------- Socket options ----------
