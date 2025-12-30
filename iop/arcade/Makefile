@@ -25,7 +25,13 @@ SUBDIRS = \
 	acsram \
 	actimer \
 	acuart \
-	acuart_tty
+	acuart_tty \
+	romwrite \
+	s147ctrl \
+	s147link \
+	s147mdev \
+	s147nand \
+	s147netb
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
