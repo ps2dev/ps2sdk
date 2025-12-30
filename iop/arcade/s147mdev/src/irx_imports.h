@@ -1,3 +1,4 @@
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -5,33 +6,19 @@
 # Copyright ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
+#
+# Defines all IRX imports.
+*/
 
-SUBDIRS = \
-	acata \
-	acatad \
-	accdvd \
-	accdvde \
-	accore \
-	acdev \
-	acdev9 \
-	acflash \
-	acfpgald \
-	acjv \
-	acjvld \
-	acmem \
-	acmeme \
-	acram \
-	acrtc \
-	acsram \
-	actimer \
-	acuart \
-	acuart_tty \
-	romwrite \
-	s147ctrl \
-	s147link \
-	s147mdev \
-	s147nand \
-	s147netb
+#ifndef IOP_IRX_IMPORTS_H
+#define IOP_IRX_IMPORTS_H
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+#include <irx.h>
+
+/* Please keep these in alphabetical order!  */
+#include <ioman.h>
+#include <loadcore.h>
+#include <sysclib.h>
+#include <sysmem.h>
+
+#endif /* IOP_IRX_IMPORTS_H */
