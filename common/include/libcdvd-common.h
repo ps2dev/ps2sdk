@@ -1166,6 +1166,30 @@ extern int sceCdReadRegionParams(u32 *arg1, u32 *result);
  */
 extern int sceCdWriteRegionParams(u8 arg1, u32 *arg2, u8 *arg3, u32 *result);
 
+/** Gets temperature of the temperature sensor connected to Mechacon in Celsius
+ * Minimum Mechacon firmware version: 50400
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @return 1 on success, 0 on failure
+ */
+extern int cdvdman_152_get_temperature(u32 *param, u32 *status);
+
+/** Stores some sort of buffer from ATAPI drive to PS2 drive.
+ * Minimum Mechacon firmware version: 50400
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+extern int cdvdman_167_atapi2dragon(u8 *inbuf, u32 *status);
+
+/** Stores some sort of buffer from PS2 drive to ATAPI drive.
+ * Minimum Mechacon firmware version: 50400
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+extern int cdvdman_169_dragon2atapi(u8 *outbuf, u32 *status);
+
 // Compatibility names for older ps2sdk versions.
 
 // sceCdlFILE renames

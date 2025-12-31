@@ -12,6 +12,7 @@ SUBDIRS = \
 	cdvdman \
 	cdvdstm \
 	poffsim \
+	xatapi \
 	xesdrv
 
 include $(PS2SDKSRC)/Defs.make

@@ -7808,7 +7808,7 @@ int sceCdSetFanProfile(u8 param, u32 *status)
 	return retval;
 }
 
-int cdvdman_152(u32 *param, u32 *status)
+int cdvdman_152_get_temperature(u32 *param, u32 *status)
 {
 	int retval;
 	char rdata[3];
@@ -8667,7 +8667,7 @@ int sceCdBuzzerCtl(u32 *status)
 #endif
 
 #ifdef CDVD_VARIANT_XOSD
-int sceCdResetWakeupReason(u32 *inbuf, u32 *status)
+int cdvdman_167_atapi2dragon(u8 *inbuf, u32 *status)
 {
 	if ( !g_cdvdman_minver_50600 )
 	{
@@ -8675,12 +8675,12 @@ int sceCdResetWakeupReason(u32 *inbuf, u32 *status)
 		return 1;
 	}
 	*status = SCECdErNO;
-	return cdvdman_write_scmd_swap_dev5(0x2F, (char *)inbuf, 16, (char *)status, 1, 1);
+	return cdvdman_write_scmd_swap_dev5(0x2F, inbuf, 16, (char *)status, 1, 1);
 }
 #endif
 
 #ifdef CDVD_VARIANT_XOSD
-int cdvdman_169(u32 *arg1, u32 *status)
+int cdvdman_169_dragon2atapi(u8 *outbuf, u32 *status)
 {
 	int i;
 	int retval;
@@ -8698,7 +8698,7 @@ int cdvdman_169(u32 *arg1, u32 *status)
 	{
 		return 0;
 	}
-	memset(arg1, 0, 16);
+	memset(outbuf, 0, 16);
 	if ( *status )
 	{
 		vSetEventFlag(g_scmd_evfid, 1);
@@ -8713,7 +8713,7 @@ int cdvdman_169(u32 *arg1, u32 *status)
 		{
 			DelayThread(2000);
 			retval = cdvdman_write_scmd_swap_dev5(0x30, wdata, sizeof(wdata), rdata, sizeof(rdata), 0);
-			memcpy(&arg1[i * 2], &rdata[1], sizeof(rdata) - 1);
+			memcpy(&outbuf[i * 8], &rdata[1], sizeof(rdata) - 1);
 			*status = rdata[0];
 		}
 	}
