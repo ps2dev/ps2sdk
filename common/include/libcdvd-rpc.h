@@ -639,7 +639,7 @@ typedef struct cdvdfsv_rpc3_3B_outpacket_
 {
     int m_retres;
     u32 m_arg2;
-    u32 m_arg1;
+    u8 m_arg1[16];
 } cdvdfsv_rpc3_3B_outpacket_t;
 
 typedef struct cdvdfsv_rpc3_3C_outpacket_
