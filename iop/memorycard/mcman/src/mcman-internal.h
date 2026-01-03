@@ -367,9 +367,8 @@ extern u8 mcman_sio2outbufs_PS1PDA[0x90];
 
 #ifdef BUILDING_DONGLEMAN
 extern int sema_hakama_id;
-/// El_isra: Not sure why it hangs... I still need to determine their actual purpose. disabled for now...
-#define HAKAMA_SIGNALSEMA() //SignalSema(sema_hakama_id)
-#define HAKAMA_WAITSEMA() //WaitSema(sema_hakama_id)
+#define HAKAMA_SIGNALSEMA() SignalSema(sema_hakama_id)
+#define HAKAMA_WAITSEMA() WaitSema(sema_hakama_id)
 #else
 #define HAKAMA_SIGNALSEMA() //while(0) {} /* SignalSema wrapper for an additional semaphore used by arcade MCMAN */
 #define HAKAMA_WAITSEMA() //while(0) {} /* WaitSema wrapper for an additional semaphore used by arcade MCMAN */
