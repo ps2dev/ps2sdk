@@ -1,0 +1,21 @@
+<map id="_sifm_smsg_data" name="_sifm_smsg_data">
+<area shape="rect" id="Node000001" title=" " alt="" coords="78,394,203,420"/>
+<area shape="rect" id="Node000002" href="$struct__sifm__rpc__data.html" title=" " alt="" coords="5,5,116,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="53,46,45,75,42,106,42,319,48,344,64,364,86,379,109,391,106,396,83,384,60,367,43,346,37,320,37,105,40,74,48,45"/>
+<area shape="rect" id="Node000005" href="$struct__sifm__client__data.html" title=" " alt="" coords="147,94,270,120"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="95,37,189,91,186,96,93,41"/>
+<area shape="rect" id="Node000003" href="$struct__sifm__serve__entry.html" title=" " alt="" coords="77,306,204,331"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="143,347,143,394,138,394,138,347"/>
+<area shape="poly" id="edge12_Node000003_Node000003" title=" " alt="" coords="221,310,231,318,223,326,205,329,204,324,220,321,226,319,218,315"/>
+<area shape="rect" id="Node000004" href="$struct__sifm__serve__data.html" title=" " alt="" coords="212,185,336,210"/>
+<area shape="poly" id="edge11_Node000004_Node000003" title=" " alt="" coords="184,296,209,280,263,209,267,212,213,284,187,301"/>
+<area shape="poly" id="edge13_Node000001_Node000004" title=" " alt="" coords="285,225,287,236,291,265,291,288,285,310,269,333,248,354,223,372,175,396,173,391,221,367,245,350,265,330,280,307,286,287,285,265,282,237,280,226"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="198,211,174,222,154,238,145,254,141,272,141,305,136,305,136,271,140,252,150,235,171,217,196,206"/>
+<area shape="poly" id="edge7_Node000004_Node000004" title=" " alt="" coords="353,189,363,198,355,206,337,209,336,203,352,201,357,198,350,194"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="260,173,242,145,220,122,224,118,247,142,264,170"/>
+<area shape="rect" id="Node000006" href="$struct__sifm__queue__data.html" title=" " alt="" coords="345,306,472,331"/>
+<area shape="poly" id="edge9_Node000006_Node000004" title=" " alt="" coords="304,219,321,235,335,258,348,280,383,303,380,308,345,284,330,261,317,238,301,222"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="207,135,213,157,225,172,242,182,239,187,222,176,208,160,202,136"/>
+<area shape="poly" id="edge8_Node000004_Node000006" title=" " alt="" coords="402,291,393,263,376,239,356,224,333,213,335,209,359,219,380,235,397,261,407,289"/>
+<area shape="poly" id="edge10_Node000006_Node000006" title=" " alt="" coords="489,310,499,318,491,326,473,329,472,324,488,321,494,319,486,315"/>
+</map>
