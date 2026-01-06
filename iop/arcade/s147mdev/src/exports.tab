@@ -1,0 +1,11 @@
+
+DECLARE_EXPORT_TABLE(s147mdev, 1, 1)
+    DECLARE_EXPORT(_start)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(s147mdev_4_addfs)
+    DECLARE_EXPORT(s147mdev_5_delfs)
+END_EXPORT_TABLE
+
+void _retonly() {}

@@ -6,32 +6,23 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	acata \
-	acatad \
-	accdvd \
-	accdvde \
-	accore \
-	acdev \
-	acdev9 \
-	acflash \
-	acfpgald \
-	acjv \
-	acjvld \
-	acmem \
-	acmeme \
-	acram \
-	acrtc \
-	acsram \
-	actimer \
-	acuart \
-	acuart_tty \
-	romwrite \
-	s147ctrl \
-	s147link \
-	s147mdev \
-	s147nand \
-	s147netb
+IOP_BIN ?= s147nand.irx
+
+IOP_IMPORT_INCS += \
+	arcade/acdev \
+	system/dmacman \
+	system/intrman \
+	system/ioman \
+	system/loadcore \
+	arcade/s147mdev \
+	system/stdio \
+	system/sysclib \
+	system/sysmem \
+	system/threadman
+
+IOP_OBJS = s147nand.o exports.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
