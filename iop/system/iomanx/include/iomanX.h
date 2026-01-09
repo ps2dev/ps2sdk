@@ -151,14 +151,14 @@ extern int iomanX_format(const char *dev, const char *blockdev, void *arg, int a
 
 #ifndef IOMAN_NO_EXTENDED
 /* The newer calls - these are NOT supported by the older IOMAN.  */
-extern int iomanX_rename(const char *old, const char *new);
+extern int iomanX_rename(const char *old, const char *new_);
 extern int iomanX_chdir(const char *name);
 extern int iomanX_sync(const char *dev, int flag);
 extern int iomanX_mount(const char *fsname, const char *devname, int flag, void *arg, int arglen);
 extern int iomanX_umount(const char *fsname);
 extern s64 iomanX_lseek64(int fd, s64 offset, int whence);
 extern int iomanX_devctl(const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int iomanX_symlink(const char *old, const char *new);
+extern int iomanX_symlink(const char *old, const char *new_);
 extern int iomanX_readlink(const char *path, char *buf, unsigned int buflen);
 extern int iomanX_ioctl2(int fd, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 #endif /* IOMAN_NO_EXTENDED */
@@ -296,9 +296,9 @@ static inline int format(const char *dev, const char *blockdev, void *arg, int a
 
 #ifndef IOMAN_NO_EXTENDED
 /* The newer calls - these are NOT supported by the older IOMAN.  */
-static inline int rename(const char *old, const char *new)
+static inline int rename(const char *old, const char *new_)
 {
-	return iomanX_rename(old, new);
+	return iomanX_rename(old, new_);
 }
 static inline int chdir(const char *name)
 {
@@ -324,9 +324,9 @@ static inline int devctl(const char *name, int cmd, void *arg, unsigned int argl
 {
 	return iomanX_devctl(name, cmd, arg, arglen, buf, buflen);
 }
-static inline int symlink(const char *old, const char *new)
+static inline int symlink(const char *old, const char *new_)
 {
-	return iomanX_symlink(old, new);
+	return iomanX_symlink(old, new_);
 }
 static inline int readlink(const char *path, char *buf, unsigned int buflen)
 {

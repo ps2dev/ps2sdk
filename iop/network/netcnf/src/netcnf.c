@@ -29,7 +29,7 @@ typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
 typedef uintptr_t uiptr;
-#define iomanX_rename(old, new) rename(old, new)
+#define iomanX_rename(old, new_) rename(old, new_)
 #define iomanX_sync(...) 0
 typedef struct
 {

@@ -566,7 +566,7 @@ int rmdir(const char *path) {
 
 #ifdef F__link
 // Called from newlib linkr.c
-int _link(const char *old, const char *new) {
+int _link(const char *old, const char *new_) {
 	errno = ENOSYS;
 	return -1; /* not supported */
 }
@@ -593,7 +593,7 @@ int _unlink(const char *path) {
 
 #ifdef F__rename
 // Called from newlib renamer.c
-int _rename(const char *old, const char *new) {
+int _rename(const char *old, const char *new_) {
 	char oldname[MAXNAMLEN + 1];
 	char newname[MAXNAMLEN + 1];
 
@@ -602,7 +602,7 @@ int _rename(const char *old, const char *new) {
 		return -1;
 	}
 
-	if(__path_absolute(new, newname, MAXNAMLEN) < 0) {
+	if(__path_absolute(new_, newname, MAXNAMLEN) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
