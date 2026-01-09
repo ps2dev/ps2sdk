@@ -144,8 +144,8 @@ typedef struct
     int feedback;
 } sceSdEffectAttr;
 
-typedef int (*sceSdSpu2IntrHandler)(int, void *);
-typedef int (*sceSdTransIntrHandler)(int, void *);
+typedef int (*sceSdSpu2IntrHandler)(int core_bit, void *arg);
+typedef int (*sceSdTransIntrHandler)(int core, void *arg);
 typedef int (*SdIntrCallback)(void *data);
 typedef int (*sceSdBlockTransHandler)(int channel, void *userdata, void **addr, int *size);
 

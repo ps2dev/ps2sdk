@@ -429,7 +429,7 @@ void ps2kbd_led_set(int resultCode, int bytes, void *arg)
   //printf("LED Set\n");
 }
 
-void ps2kbd_build_uniquekeys(u8 *res, const u8 *new, const u8 *old)
+void ps2kbd_build_uniquekeys(u8 *res, const u8 *new_, const u8 *old)
 
      /* Builds a list of unique keys */
 
@@ -440,12 +440,12 @@ void ps2kbd_build_uniquekeys(u8 *res, const u8 *new, const u8 *old)
 
   for(loopNew = 0; loopNew < PS2KBD_MAXKEYS; loopNew++)
     {
-      if(new[loopNew] != 0)
+      if(new_[loopNew] != 0)
 	{
 	  foundKey = 0;
 	  for(loopOld = 0; loopOld < PS2KBD_MAXKEYS; loopOld++)
 	    {
-	      if(new[loopNew] == old[loopOld])
+	      if(new_[loopNew] == old[loopOld])
 		{
 		  foundKey = 1;
 		  break;
@@ -453,7 +453,7 @@ void ps2kbd_build_uniquekeys(u8 *res, const u8 *new, const u8 *old)
 	    }
 	  if(!foundKey)
 	    {
-	      res[loopRes++] = new[loopNew];
+	      res[loopRes++] = new_[loopNew];
 	    }
 	}
     }
@@ -617,7 +617,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
 }
 
 
-void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new, const u8 *old)
+void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new_, const u8 *old)
 
 {
   int loopKey;
@@ -674,14 +674,14 @@ void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new, const u8 *o
 	  return;
 	}
 
-      if(new[loopKey] != 0)
+      if(new_[loopKey] != 0)
 	{
 	  lineBuffer[lineEndP++] = PS2KBD_RAWKEY_DOWN;
 	  lineEndP %= lineSize;
-	  lineBuffer[lineEndP++] = new[loopKey];
+	  lineBuffer[lineEndP++] = new_[loopKey];
 	  lineEndP %= lineSize;
 	  byteCount += 2;
-	  //printf("Key down\nKey %d\n", new[loopKey]);
+	  //printf("Key down\nKey %d\n", new_[loopKey]);
 	}
 
     }

@@ -104,7 +104,7 @@ extern intrman_internals_t *GetIntrmanInternalData(void);
  * @param arg An optional pointer to data that will be passed to the interrupt handler, whenever it is to be invoked.
  * @return 0 on success, non-zero error code on failure.
  */
-extern int RegisterIntrHandler(int irq, int mode, int (*handler)(void *), void *arg);
+extern int RegisterIntrHandler(int irq, int mode, int (*handler)(void *arg), void *arg);
 
 /**
  * Releases (deregisters) the interrupt handler for the specified interrupt.

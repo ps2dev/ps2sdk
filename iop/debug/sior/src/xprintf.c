@@ -183,7 +183,7 @@ static int getdigit(long double *val, int *cnt){
 */
 
 int vxprintf(
-  void (*func)(char*,int,void*),
+  void (*func)(char*buf,int cnt,void*arg),
   void *arg,
   const char *format,
   va_list ap)
@@ -663,7 +663,7 @@ int vxprintf(
 ** This non-standard function is still occasionally useful....
 */
 int xprintf(
-  void (*func)(char*,int,void*),
+  void (*func)(char*buf,int cnt,void*arg),
   void *arg,
   const char *format,
   ...

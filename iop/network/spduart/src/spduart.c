@@ -184,15 +184,21 @@ static void spduart_dump_msr(u8 msr)
 		"spduart:          CTS=%d  DSR=%d   RI=%d  DCD=%d)\n", (msr >> 4) & 1, (msr >> 5) & 1, (msr >> 6) & 1, msr >> 7);
 }
 
-static unsigned int alarm_cb_1e4(struct spduart_internals_ *priv)
+static unsigned int alarm_cb_1e4(void *userdata)
 {
+	struct spduart_internals_ *priv;
+
+	priv = (struct spduart_internals_ *)userdata;
 	priv->spduart_modem_ops.rcv_len = priv->recv_buf_struct.m_cur_xfer_len;
 	iSetEventFlag(priv->spduart_modem_ops.evfid, 0x100u);
 	return 0;
 }
 
-static u32 alarm_cb_1e6(struct spduart_internals_ *priv)
+static unsigned int alarm_cb_1e6(void *userdata)
 {
+	struct spduart_internals_ *priv;
+
+	priv = (struct spduart_internals_ *)userdata;
 	iSetEventFlag(priv->spduart_ef, 4u);
 	return priv->spduart_clock_1e6.lo;
 }
@@ -686,12 +692,12 @@ static void spduart_thread_proc(void *arg)
 			SpdIntrDisable(4096);
 			if ( priv->spduart_alarm_1e4_flag )
 			{
-				CancelAlarm((unsigned int (*)(void *))alarm_cb_1e4, priv);
+				CancelAlarm(alarm_cb_1e4, priv);
 				priv->spduart_alarm_1e4_flag = 0;
 			}
 			if ( priv->spduart_alarm_1e6_flag )
 			{
-				CancelAlarm((unsigned int (*)(void *))alarm_cb_1e6, priv);
+				CancelAlarm(alarm_cb_1e6, priv);
 				priv->spduart_alarm_1e6_flag = 0;
 			}
 			priv->spduart_signal_pin = 0;
@@ -752,7 +758,7 @@ static void spduart_thread_proc(void *arg)
 			{
 				if ( priv->spduart_alarm_1e4_flag )
 				{
-					CancelAlarm((unsigned int (*)(void *))alarm_cb_1e4, priv);
+					CancelAlarm(alarm_cb_1e4, priv);
 					priv->spduart_alarm_1e4_flag = 0;
 				}
 				v10 = priv->recv_buf_struct.m_cur_xfer_len;
@@ -763,7 +769,7 @@ static void spduart_thread_proc(void *arg)
 				}
 				else
 				{
-					SetAlarm(&priv->spduart_clock_1e4, (unsigned int (*)(void *))alarm_cb_1e4, priv);
+					SetAlarm(&priv->spduart_clock_1e4, alarm_cb_1e4, priv);
 					priv->spduart_alarm_1e4_flag = 1;
 				}
 			}
@@ -787,39 +793,45 @@ static void spduart_thread_proc(void *arg)
 				SetEventFlag(priv->spduart_modem_ops.evfid, 0x10u);
 			}
 			priv->spduart_start_flag = 0;
-			SetAlarm(&priv->spduart_clock_1e6, (unsigned int (*)(void *))alarm_cb_1e6, priv);
+			SetAlarm(&priv->spduart_clock_1e6, alarm_cb_1e6, priv);
 			priv->spduart_alarm_1e6_flag = 1;
 			SpdIntrEnable(4096);
 		}
 	}
 }
 
-static int spduart_op_start(struct spduart_internals_ *priv, int flags)
+static int spduart_op_start(void *userdata, int flags)
 {
-	(void)flags;
+	struct spduart_internals_ *priv;
 
+	(void)flags;
+	priv = (struct spduart_internals_ *)userdata;
 	priv->spduart_stop_flag = 0;
 	SetEventFlag(priv->spduart_ef, 1u);
 	return 0;
 }
 
-static int spduart_op_stop(struct spduart_internals_ *priv, int flags)
+static int spduart_op_stop(void *userdata, int flags)
 {
-	(void)flags;
+	struct spduart_internals_ *priv;
 
+	(void)flags;
+	priv = (struct spduart_internals_ *)userdata;
 	priv->spduart_stop_flag = 1;
 	SetEventFlag(priv->spduart_ef, 2u);
 	return 0;
 }
 
-static size_t spduart_op_recv(struct spduart_internals_ *priv, void *ptr, int len)
+static int spduart_op_recv(void *userdata, void *ptr, int len)
 {
 	int m_cur_xfer_len;
 	size_t v7;
 	int v8;
 	size_t v9;
 	int state;
+	struct spduart_internals_ *priv;
 
+	priv = (struct spduart_internals_ *)userdata;
 	m_cur_xfer_len = len;
 	v7 = 0;
 	if ( priv->recv_buf_struct.m_cur_xfer_len < len )
@@ -857,14 +869,16 @@ static size_t spduart_op_recv(struct spduart_internals_ *priv, void *ptr, int le
 	return v7;
 }
 
-static int spduart_op_send(struct spduart_internals_ *priv, void *ptr, int len)
+static int spduart_op_send(void *userdata, void *ptr, int len)
 {
 	int v4;
 	int v7;
 	int v8;
 	size_t v9;
 	int state;
+	struct spduart_internals_ *priv;
 
+	priv = (struct spduart_internals_ *)userdata;
 	v4 = len;
 	v7 = 0;
 	if ( 1024 - priv->send_buf_struct.m_cur_xfer_len < len )
@@ -896,14 +910,16 @@ static int spduart_op_send(struct spduart_internals_ *priv, void *ptr, int len)
 	return v7;
 }
 
-static int spduart_op_control(struct spduart_internals_ *priv, int code, void *ptr, int len)
+static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 {
 	int v22;
 	int state;
 	int priority;
 	unsigned int v25;
 	int v26;
+	struct spduart_internals_ *priv;
 
+	priv = (struct spduart_internals_ *)userdata;
 	switch ( code )
 	{
 		case 0xC0000110:
@@ -1287,14 +1303,14 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 							spduart_internals.spduart_modem_ops.vendor_name = "SCE";
 							spduart_internals.spduart_modem_ops.device_name = "Modem (Network Adaptor)";
 							spduart_internals.spduart_modem_ops.bus_type = 5;
-							spduart_internals.spduart_modem_ops.start = (int (*)(void *, int))spduart_op_start;
-							spduart_internals.spduart_modem_ops.stop = (int (*)(void *, int))spduart_op_stop;
-							spduart_internals.spduart_modem_ops.recv = (int (*)(void *, void *, int))spduart_op_recv;
-							spduart_internals.spduart_modem_ops.send = (int (*)(void *, void *, int))spduart_op_send;
+							spduart_internals.spduart_modem_ops.start = spduart_op_start;
+							spduart_internals.spduart_modem_ops.stop = spduart_op_stop;
+							spduart_internals.spduart_modem_ops.recv = spduart_op_recv;
+							spduart_internals.spduart_modem_ops.send = spduart_op_send;
 							spduart_internals.spduart_modem_ops.prot_ver = 0;
 							spduart_internals.spduart_modem_ops.impl_ver = 0;
 							spduart_internals.spduart_modem_ops.priv = &spduart_internals;
-							spduart_internals.spduart_modem_ops.control = (int (*)(void *, int, void *, int))spduart_op_control;
+							spduart_internals.spduart_modem_ops.control = spduart_op_control;
 							if ( sceModemRegisterDevice(&spduart_internals.spduart_modem_ops) >= 0 )
 							{
 #if 0
@@ -1342,9 +1358,9 @@ static int module_stop(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 	DeleteThread(spduart_internals.spduart_thread);
 	DeleteEventFlag(spduart_internals.spduart_ef);
 	if ( spduart_internals.spduart_alarm_1e4_flag )
-		CancelAlarm((unsigned int (*)(void *))alarm_cb_1e4, &spduart_internals);
+		CancelAlarm(alarm_cb_1e4, &spduart_internals);
 	if ( spduart_internals.spduart_alarm_1e6_flag )
-		CancelAlarm((unsigned int (*)(void *))alarm_cb_1e6, &spduart_internals);
+		CancelAlarm(alarm_cb_1e6, &spduart_internals);
 	Dev9RegisterPowerOffHandler(1, 0);
 	ReleaseLibraryEntries(&_exp_spduart);
 	SpdIntrDisable(4096);

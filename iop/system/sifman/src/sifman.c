@@ -212,15 +212,17 @@ void sceSifResetDmaIntrHandler()
 	sifman_internals.dma_intr_handler_userdata = NULL;
 }
 
-static int sifman_interrupt_handler(sifman_internals_t *smi)
+static int sifman_interrupt_handler(void *userdata)
 {
-	void (*dma_intr_handler)(void *);
+	void (*dma_intr_handler)(void *userdata);
 	sif_completion_cb_info_arr_t *sif_otherbufcom;
 	int v4;
 	sif_completion_cb_info_arr_t *p_sif_bufcom1;
+	sifman_internals_t *smi;
 	USE_IOP_MMIO_HWPORT();
 	USE_SIF_MMIO_HWPORT();
 
+	smi = (sifman_internals_t *)userdata;
 	dma_intr_handler = smi->dma_intr_handler;
 	if ( dma_intr_handler )
 		dma_intr_handler(smi->dma_intr_handler_userdata);
@@ -280,7 +282,7 @@ static int sif_dma_init(void)
 	sifman_internals.dma_intr_handler = 0;
 	sifman_internals.dma_intr_handler_userdata = 0;
 	CpuSuspendIntr(&state);
-	RegisterIntrHandler(IOP_IRQ_DMA_SIF0, 1, (int (*)(void *))sifman_interrupt_handler, &sifman_internals);
+	RegisterIntrHandler(IOP_IRQ_DMA_SIF0, 1, sifman_interrupt_handler, &sifman_internals);
 	EnableIntr(IOP_IRQ_DMA_SIF0);
 	return CpuResumeIntr(state);
 }
@@ -311,7 +313,7 @@ static int sif_dma_setup_tag(SifDmaTransfer_t *a1)
 	return ++sifman_internals.dmatag_index;
 }
 
-static int set_dma_inner(SifDmaTransfer_t *dmat, int count, void (*func)(void *), void *data)
+static int set_dma_inner(SifDmaTransfer_t *dmat, int count, void (*func)(void *userdata), void *data)
 {
 	u8 dmatag_index;
 	int dma_count;
@@ -380,9 +382,9 @@ int sceSifSetDma(SifDmaTransfer_t *dmat, int count)
 	return set_dma_inner(dmat, count, 0, 0);
 }
 
-unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int len, void (*func)(void *), void *data)
+unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int count, void (*completioncb)(void *userdata), void *userdata)
 {
-	return set_dma_inner(dmat, len, func, data);
+	return set_dma_inner(dmat, count, completioncb, userdata);
 }
 
 static int dma_stat_inner(unsigned int a1)

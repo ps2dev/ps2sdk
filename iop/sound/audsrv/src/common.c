@@ -31,7 +31,7 @@
  * Creates a thread based on the given parameter. Upon completion,
  * thread is started.
  */
-int create_thread(void (*func)(void *), int priority, void *param)
+int create_thread(void (*func)(void *param), int priority, void *param)
 {
 	int tid;
 	iop_thread_t thr;

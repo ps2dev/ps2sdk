@@ -12,7 +12,7 @@
 
 static void fetchNextReportDescriptor(UsbdIoRequest_t *req);
 static void requestDeviceDescriptor(UsbdIoRequest_t *req);
-static void hubSetFuncAddress(UsbdEndpoint_t *ep);
+static void hubSetFuncAddress(void *userdata);
 
 static const char *usbdVersionString = "Version 1.6.0";
 
@@ -298,8 +298,11 @@ static void requestDeviceDescriptor(UsbdIoRequest_t *req)
 		requestDeviceDescrptorCB);
 }
 
-static void hubPeekDeviceDescriptor(UsbdIoRequest_t *req)
+static void hubPeekDeviceDescriptor(void *userdata)
 {
+	UsbdIoRequest_t *req;
+
+	req = (UsbdIoRequest_t *)userdata;
 	req->m_length = 8;
 	requestDeviceDescriptor(req);
 
@@ -311,7 +314,7 @@ static void hubSetFuncAddressCB(UsbdIoRequest_t *req)
 {
 	void *cb_arg;
 	UsbdDevice_t *dev;
-	void (*cb_func)(void *);
+	void (*cb_func)(void *userdata);
 	int cb_delay;
 
 	dev = req->m_correspEndpoint->m_correspDevice;
@@ -324,13 +327,13 @@ static void hubSetFuncAddressCB(UsbdIoRequest_t *req)
 			killDevice(dev, req->m_correspEndpoint);
 			return;
 		}
-		cb_func = (void (*)(void *))hubSetFuncAddress;
+		cb_func = hubSetFuncAddress;
 		cb_arg = req->m_correspEndpoint;
 		cb_delay = dev->m_functionDelay | 1;
 	}
 	else
 	{
-		cb_func = (void (*)(void *))hubPeekDeviceDescriptor;
+		cb_func = hubPeekDeviceDescriptor;
 		cb_arg = req;
 		cb_delay = 5;
 		req->m_correspEndpoint->m_hcEd->m_hcArea.stru.m_hcArea |= dev->m_functionAddress & 0x7F;
@@ -339,8 +342,11 @@ static void hubSetFuncAddressCB(UsbdIoRequest_t *req)
 	addTimerCallback(&dev->m_timer, cb_func, cb_arg, cb_delay);
 }
 
-static void hubSetFuncAddress(UsbdEndpoint_t *ep)
+static void hubSetFuncAddress(void *userdata)
 {
+	UsbdEndpoint_t *ep;
+
+	ep = (UsbdEndpoint_t *)userdata;
 	// dbg_printf("setting FA %02X\n", ep->m_correspDevice->m_functionAddress);
 	doControlTransfer(
 		ep,
@@ -357,7 +363,7 @@ static void hubSetFuncAddress(UsbdEndpoint_t *ep)
 int hubTimedSetFuncAddress(UsbdDevice_t *dev)
 {
 	dev->m_functionDelay = 20;
-	addTimerCallback(&dev->m_timer, (TimerCallback)hubSetFuncAddress, dev->m_endpointListStart, 21);
+	addTimerCallback(&dev->m_timer, hubSetFuncAddress, dev->m_endpointListStart, 21);
 	return 0;
 }
 

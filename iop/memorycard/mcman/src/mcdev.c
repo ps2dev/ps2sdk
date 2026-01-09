@@ -48,14 +48,14 @@ int mc_chstat(MC_IO_FIL_T *f, const char *filename, MC_IO_STA_T *stat, unsigned 
 int mc_ioctl(MC_IO_FIL_T *f, int cmd, void* param);
 
 #if MCMAN_ENABLE_EXTENDED_DEV_OPS
-int mc_rename(MC_IO_FIL_T *f, const char *old, const char *new);
+int mc_rename(MC_IO_FIL_T *f, const char *old, const char *new_);
 int mc_chdir(MC_IO_FIL_T *f, const char *name);
 int mc_sync(MC_IO_FIL_T *f, const char *dev, int flag);
 int mc_mount(MC_IO_FIL_T *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
 int mc_umount(MC_IO_FIL_T *f, const char *fsname);
 s64 mc_lseek64(MC_IO_FIL_T *f, s64 pos, int where);
 int mc_devctl(MC_IO_FIL_T *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-int mc_symlink(MC_IO_FIL_T *f, const char *old, const char *new);
+int mc_symlink(MC_IO_FIL_T *f, const char *old, const char *new_);
 int mc_readlink(MC_IO_FIL_T *f, const char *path, char *buf, unsigned int buflen);
 int mc_ioctl2(MC_IO_FIL_T *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 #endif
@@ -589,11 +589,11 @@ int mc_ioctl(MC_IO_FIL_T *f, int cmd, void* param)
 
 #if MCMAN_ENABLE_EXTENDED_DEV_OPS
 //--------------------------------------------------------------
-int mc_rename(MC_IO_FIL_T *f, const char *old, const char *new)
+int mc_rename(MC_IO_FIL_T *f, const char *old, const char *new_)
 {
 	(void)f;
 	(void)old;
-	(void)new;
+	(void)new_;
 
 	register int r;
 	sceMcTblGetDir mctbl;
@@ -605,9 +605,9 @@ int mc_rename(MC_IO_FIL_T *f, const char *old, const char *new)
 	if (r >= -1) {
 		int l;
 
-		l = strlen(new);
+		l = strlen(new_);
 		if (l < 32) {
-			memcpy((void *)mctbl.EntryName, new, l);
+			memcpy((void *)mctbl.EntryName, new_, l);
 			mctbl.EntryName[l] = 0;
 			r = McSetFileInfo(mcman_mc_port, mcman_mc_slot, old, &mctbl, sceMcFileAttrFile);
 			r = mcman_ioerrcode(r);
@@ -709,11 +709,11 @@ int mc_devctl(MC_IO_FIL_T *f, const char *name, int cmd, void *arg, unsigned int
 }
 
 //--------------------------------------------------------------
-int mc_symlink(MC_IO_FIL_T *f, const char *old, const char *new)
+int mc_symlink(MC_IO_FIL_T *f, const char *old, const char *new_)
 {
 	(void)f;
 	(void)old;
-	(void)new;
+	(void)new_;
 
 	WaitSema(mcman_io_sema);
 	SignalSema(mcman_io_sema);

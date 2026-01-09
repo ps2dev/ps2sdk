@@ -198,7 +198,7 @@ static es_regs_t *const es_regs = (void *)0xBF415000;
 struct DevctlCmdTbl_t
 {
 	u16 cmd;
-	int (*fn)(iomanX_iop_file_t *, int, void *, unsigned int, void *, unsigned int);
+	int (*fn)(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 } DevctlCmdTbl[16] = {
 	{0x5464, &esioctl2_func_1},
 	{0x5465, &esioctl2_func_2},

@@ -27,7 +27,7 @@ enum sif2_errors {
     SIF2_E_INIT = 0xd700, 
 };
 
-typedef int (*sif2_pipe_handler_t)(u32, void *, u32);
+typedef int (*sif2_pipe_handler_t)(u32 id, void *buf, u32 size);
 
 extern int sif2_init(void);
 extern int sif2_exit(void);

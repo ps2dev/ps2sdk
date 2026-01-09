@@ -18,7 +18,7 @@
 
 #include <irx.h>
 
-typedef void (*pwoffcb)(void*);
+typedef void (*pwoffcb)(void *param);
 
 extern void SetPowerButtonHandler(pwoffcb func, void* param);
 extern void AddPowerOffHandler(pwoffcb func, void* param);

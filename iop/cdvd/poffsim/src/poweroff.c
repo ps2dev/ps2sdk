@@ -15,15 +15,18 @@
 struct poffemu_param_stru
 {
 	int m_cdvdman_intr_efid;
-	void (*m_cdvdman_poff_cb)(void *);
+	void (*m_cdvdman_poff_cb)(void *arg);
 	void *m_cdvdman_poffarg;
 	int m_sema_id;
 };
 
 static struct poffemu_param_stru sCdPtbl;
 
-static unsigned int _sceCdPoffEmu(struct poffemu_param_stru *arg)
+static unsigned int _sceCdPoffEmu(void *userdata)
 {
+	struct poffemu_param_stru *arg;
+
+	arg = (struct poffemu_param_stru *)userdata;
 	Kprintf("PowerOff Simulation Start\n");
 	iSetEventFlag(arg->m_cdvdman_intr_efid, 4);
 	iSetEventFlag(arg->m_cdvdman_intr_efid, 0x10);
@@ -60,7 +63,7 @@ int _start(int ac, char **av)
 	}
 	sCdPoff_time.hi = 0;
 	sCdPoff_time.lo = 0x90000;
-	SetAlarm(&sCdPoff_time, (unsigned int (*)(void *))_sceCdPoffEmu, &sCdPtbl);
+	SetAlarm(&sCdPoff_time, _sceCdPoffEmu, &sCdPtbl);
 	WaitSema(sCdPtbl.m_sema_id);
 	DeleteSema(sCdPtbl.m_sema_id);
 	return 1;

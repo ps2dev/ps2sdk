@@ -21,18 +21,18 @@
 static _MPEGContext s_MPEG12Ctx;
 static s64 *s_pCurPTS;
 
-static void (*LumaOp[8])(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int) = {
+static void (*LumaOp[8])(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8) = {
     _MPEG_put_luma, _MPEG_put_luma_X, _MPEG_put_luma_Y, _MPEG_put_luma_XY,
     _MPEG_avg_luma, _MPEG_avg_luma_X, _MPEG_avg_luma_Y, _MPEG_avg_luma_XY};
 
-static void (*ChromaOp[8])(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int) = {
+static void (*ChromaOp[8])(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8) = {
     _MPEG_put_chroma, _MPEG_put_chroma_X, _MPEG_put_chroma_Y, _MPEG_put_chroma_XY,
     _MPEG_avg_chroma, _MPEG_avg_chroma_X, _MPEG_avg_chroma_Y, _MPEG_avg_chroma_XY};
 
-static void (*PutBlockOp[3])(_MPEGMotions *) = {
+static void (*PutBlockOp[3])(_MPEGMotions *arg0) = {
     _MPEG_put_block_il, _MPEG_put_block_fr, _MPEG_put_block_fl};
 
-static void (*AddBlockOp[2][2])(_MPEGMotions *) = {
+static void (*AddBlockOp[2][2])(_MPEGMotions *arg0) = {
     {_MPEG_add_block_frfr, _MPEG_add_block_frfl},
     {_MPEG_add_block_ilfl, _MPEG_add_block_ilfl}};
 
@@ -42,7 +42,7 @@ static float s_FrameRate[16] = {
     30.0F, 50.0F, ((60.0F * 1000.0F) / 1001.0F),
     60.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F};
 
-static void *(*_init_cb)(void *, MPEGSequenceInfo *);
+static void *(*_init_cb)(void *userdata, MPEGSequenceInfo *si);
 static void *s_pInitCBParam;
 
 static void *_init_seq(void);
@@ -66,20 +66,20 @@ static void _ext_pic_ssc(void);
 static void _ext_pic_tsc(void);
 static void _xtra_bitinf(void);
 
-static int _get_next_picture(void *, s64 *);
-static int _get_first_picture(void *, s64 *);
+static int _get_next_picture(void *apData, s64 *apPTS);
+static int _get_first_picture(void *apData, s64 *apPTS);
 
-int (*MPEG_Picture)(void *, s64 *);
+int (*MPEG_Picture)(void *apData, s64 *apPTS);
 
 static void (*DoMC)(void);
 
 static void _mpeg12_picture_data(void);
-static int _mpeg12_slice(int);
-static int _mpeg12_dec_mb(int *, int *, int[2][2][2], int[2][2], int[2]);
+static int _mpeg12_slice(int aMBAMax);
+static int _mpeg12_dec_mb(int *apMBType, int *apMotionType, int aPMV[2][2][2], int aMVFS[2][2], int aDMVector[2]);
 
 void MPEG_Initialize(
-    int (*apDataCB)(void *), void *apDataCBParam,
-    void *(*apInitCB)(void *, MPEGSequenceInfo *), void *apInitCBParam,
+    int (*apDataCB)(void *userdata), void *apDataCBParam,
+    void *(*apInitCB)(void *userdata, MPEGSequenceInfo *si), void *apInitCBParam,
     s64 *apCurPTS)
 {
     memset(&s_MPEG12Ctx, 0, sizeof(s_MPEG12Ctx));

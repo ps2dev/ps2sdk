@@ -220,7 +220,7 @@ static int allocate_module_block(
 	unsigned int distoffset,
 	int *result_out);
 static int ModuleLoaderThread(module_thread_args_t *mltargs);
-static void ExecModuleLoad(module_thread_args_t *mltargs);
+static void ExecModuleLoad(void *userdata);
 
 static intrman_callbacks_t intrman_callbacks = {&CpuSuspendIntr, &CpuResumeIntr, &QueryIntrContext};
 
@@ -270,7 +270,7 @@ int _start(int argc, char *argv[])
 		}
 	}
 	thparam.attr = 0x2000000;
-	thparam.thread = (void (*)(void *))ExecModuleLoad;
+	thparam.thread = ExecModuleLoad;
 	thparam.priority = 8;
 	thparam.stacksize = 4096;
 	thparam.option = 0;
@@ -739,12 +739,14 @@ void GetModloadInternalData(void **pInternalData)
 	*pInternalData = NULL;
 }
 
-static void ExecModuleLoad(module_thread_args_t *mltargs)
+static void ExecModuleLoad(void *userdata)
 {
 	ModuleInfo_t *mi;
 	int modid_2;
 	int res_tmp;
+	module_thread_args_t *mltargs;
 
+	mltargs = (module_thread_args_t *)userdata;
 	mi = NULL;
 	res_tmp = 0;
 	switch ( mltargs->command )
@@ -849,7 +851,7 @@ static int ModuleLoaderThread(module_thread_args_t *mltargs)
 	if ( result == modLoadCB )
 	{
 		mltargs->thread_ef = 0;
-		ExecModuleLoad(mltargs);
+		ExecModuleLoad((void *)mltargs);
 	}
 	else
 	{
@@ -993,7 +995,7 @@ static int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 					}
 					else
 					{
-						module_result = -1;
+				module_result = -1;
 					}
 					CpuSuspendIntr(&state);
 					FreeSysMemory(iop_exec_encrypted_buffer);
@@ -1016,7 +1018,7 @@ static int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 		if ( module_result == 0 )
 		{
 			module_result =
-				((int (*)(int, char **, u32, ModuleInfo_t *))module_info->entry)(updater_argc, updater_argv, 0, module_info);
+				((int (*)(int argc, char **argv, elf_header_t **eh, ModuleInfo_t *mi))module_info->entry)(updater_argc, updater_argv, 0, module_info);
 			printf("return from updater '%s' return value = %d\n", updater_argv[0], module_result);
 			__builtin_trap();
 		}
@@ -1072,7 +1074,7 @@ static int start_module(ModuleInfo_t *module_info, const char *data, int arglen,
 	module_info->newflags &= 0xFFF0;
 	module_info->newflags |= 2;
 	module_result =
-		((int (*)(int, char **, u32, ModuleInfo_t *))module_info->entry)(in_argc, in_argv_ptrs, 0, module_info);
+		((int (*)(int argc, char **argv, elf_header_t **eh, ModuleInfo_t *mi))module_info->entry)(in_argc, in_argv_ptrs, 0, module_info);
 	ChangeThreadPriority(0, 8);
 	if ( result_out )
 	{
@@ -1181,7 +1183,7 @@ stop_module(ModuleInfo_t *module_info, int command, int modid_2, int arglen, con
 		module_info->newflags |= 1;
 	// TODO: save/restore gp register
 	module_result =
-		((int (*)(int, char **, u32, ModuleInfo_t *))module_info->entry)(-in_argc, in_argv_ptrs, 0, module_info);
+		((int (*)(int argc, char **argv, elf_header_t **eh, ModuleInfo_t *mi))module_info->entry)(-in_argc, in_argv_ptrs, 0, module_info);
 	ChangeThreadPriority(0, 8);
 	if ( result_out )
 		*result_out = module_result;
@@ -2077,7 +2079,7 @@ static void TerminateResidentEntriesDI(const char *command, unsigned int options
 			flagstmp = 1;
 			command_ptr = 0;
 		}
-		((int (*)(u32, int, char *, u32))iopboot_entrypoint)(ram_size_in_mb, flagstmp, command_ptr, 0);
+		((int (*)(u32 ram_mb, int flags, char *cmdptr, u32 xunk))iopboot_entrypoint)(ram_size_in_mb, flagstmp, command_ptr, 0);
 	}
 }
 

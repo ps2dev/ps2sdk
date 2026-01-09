@@ -193,8 +193,8 @@ static int CD_cachefile(int dsec, int layer);
 static int disc_read(int size, int loc, void *buffer, int layer);
 static int path_tbl_init(u32 blocks, char *fname, int action);
 extern unsigned int optimized_memcpy(char *dst, const char *src, unsigned int n);
-static int vSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void *arg);
-static int vCancelAlarm(unsigned int (*alarm_cb)(void *), void *arg);
+static int vSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *arg), void *arg);
+static int vCancelAlarm(unsigned int (*alarm_cb)(void *arg), void *arg);
 static int vSetEventFlag(int ef, u32 bits);
 static int vDelayThread(int usec);
 static int DvdDual_infochk();
@@ -349,13 +349,13 @@ static int (*g_cdvdman_atapi_eject_bs_power_callback)(int interrupt_nr, void *us
 #endif
 static sceCdCBFunc g_cdvdman_user_cb;
 static void *g_cdvdman_power_off_callback_userdata;
-static void (*g_cdvdman_cdstm0cb)(int);
+static void (*g_cdvdman_cdstm0cb)(int val);
 static sceCdCLOCK g_cdvdman_clock;
 static void (*g_cdvdman_power_off_callback)(void *userdata);
 #ifdef CDVD_VARIANT_XOSD
 static void *g_cdvdman_atapi_eject_bs_power_callback_userdata;
 #endif
-static void (*g_cdvdman_cdstm1cb)(int);
+static void (*g_cdvdman_cdstm1cb)(int val);
 static int g_cdvdman_cmdfunc;
 static cdvdman_fhinfo_t g_cdvdman_fhinfo[16];
 static char g_cdvdman_sfname[1024];
@@ -2066,8 +2066,11 @@ static int cdrom_lseek(iop_file_t *f, int offset, int pos)
 	return retval;
 }
 
-static int sync_timeout_alarm_cb(const iop_sys_clock_t *sys_clock)
+static unsigned int sync_timeout_alarm_cb(void *userdata)
 {
+	const iop_sys_clock_t *sys_clock;
+
+	sys_clock = (const iop_sys_clock_t *)userdata;
 	KPRINTF("Cdvd Time Out %d(msec)\n", sys_clock->lo / 0x9000);
 	return !sceCdBreak();
 }
@@ -2111,22 +2114,22 @@ int sceCdSync(int mode)
 		case 3:
 			sysclk.hi = 0;
 			sysclk.lo = 0x9000 * g_cdvdman_sync_timeout;
-			vSetAlarm(&sysclk, (unsigned int (*)(void *))sync_timeout_alarm_cb, &sysclk);
+			vSetAlarm(&sysclk, sync_timeout_alarm_cb, &sysclk);
 			while ( !sceCdCheckCmd() || g_cdvdman_istruct.m_read2_flag )
 			{
 				WaitEventFlag(g_cdvdman_intr_evfid, 1, WEF_AND, &efbits);
 			}
-			vCancelAlarm((unsigned int (*)(void *))sync_timeout_alarm_cb, &sysclk);
+			vCancelAlarm(sync_timeout_alarm_cb, &sysclk);
 			break;
 		case 4:
 			sysclk.hi = 0;
 			sysclk.lo = 0x41EB0000;
-			vSetAlarm(&sysclk, (unsigned int (*)(void *))sync_timeout_alarm_cb, &sysclk);
+			vSetAlarm(&sysclk, sync_timeout_alarm_cb, &sysclk);
 			while ( !sceCdCheckCmd() || g_cdvdman_istruct.m_read2_flag )
 			{
 				WaitEventFlag(g_cdvdman_intr_evfid, 1, WEF_AND, &efbits);
 			}
-			vCancelAlarm((unsigned int (*)(void *))sync_timeout_alarm_cb, &sysclk);
+			vCancelAlarm(sync_timeout_alarm_cb, &sysclk);
 			break;
 		case 5:
 			while ( !sceCdCheckCmd() )
@@ -2137,12 +2140,12 @@ int sceCdSync(int mode)
 		case 6:
 			sysclk.hi = 0;
 			sysclk.lo = 0x9000 * g_cdvdman_sync_timeout;
-			vSetAlarm(&sysclk, (unsigned int (*)(void *))sync_timeout_alarm_cb, &sysclk);
+			vSetAlarm(&sysclk, sync_timeout_alarm_cb, &sysclk);
 			while ( !sceCdCheckCmd() || g_cdvdman_istruct.m_read2_flag )
 			{
 				WaitEventFlag(g_cdvdman_intr_evfid, 1, WEF_AND, &efbits);
 			}
-			vCancelAlarm((unsigned int (*)(void *))sync_timeout_alarm_cb, &sysclk);
+			vCancelAlarm(sync_timeout_alarm_cb, &sysclk);
 			break;
 		case 16:
 			while ( !sceCdCheckCmd() || g_cdvdman_istruct.m_read2_flag || g_cdvdman_ee_rpc_fno
@@ -3643,12 +3646,12 @@ static int cdvdman_initcfg(void)
 	return 0;
 }
 
-static int vSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void *arg)
+static int vSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *arg), void *arg)
 {
 	return (QueryIntrContext() ? iSetAlarm : SetAlarm)(sys_clock, alarm_cb, arg);
 }
 
-static int vCancelAlarm(unsigned int (*alarm_cb)(void *), void *arg)
+static int vCancelAlarm(unsigned int (*alarm_cb)(void *arg), void *arg)
 {
 	return (QueryIntrContext() ? iCancelAlarm : CancelAlarm)(alarm_cb, arg);
 }
@@ -3876,7 +3879,7 @@ sceCdCBFunc sceCdCallback(sceCdCBFunc function)
 }
 
 // cppcheck-suppress funcArgNamesDifferent
-void *sceCdPOffCallback(void (*func)(void *), void *userdata)
+void *sceCdPOffCallback(void (*func)(void *userdata), void *userdata)
 {
 	void *old_cb;
 	int state;
@@ -3890,7 +3893,7 @@ void *sceCdPOffCallback(void (*func)(void *), void *userdata)
 }
 
 #ifdef CDVD_VARIANT_XOSD
-void *sceCdSetAtapiEjectCallback(int (*func)(int, void *), void *userdata)
+void *sceCdSetAtapiEjectCallback(int (*func)(int reason, void *userdata), void *userdata)
 {
 	void *old_cb;
 	int state;
@@ -3904,13 +3907,13 @@ void *sceCdSetAtapiEjectCallback(int (*func)(int, void *), void *userdata)
 }
 #endif
 
-int sceCdstm0Cb(void (*p)(int))
+int sceCdstm0Cb(void (*p)(int val))
 {
 	g_cdvdman_cdstm0cb = p;
 	return 0;
 }
 
-int sceCdstm1Cb(void (*p)(int))
+int sceCdstm1Cb(void (*p)(int val))
 {
 	g_cdvdman_cdstm1cb = p;
 	return 0;

@@ -40,13 +40,13 @@ extern int pfsFioDclose(iomanX_iop_file_t *f);
 extern int pfsFioDread(iomanX_iop_file_t *f, iox_dirent_t *buf);
 extern int pfsFioGetstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat);
 extern int pfsFioChstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask);
-extern int pfsFioRename(iomanX_iop_file_t *f, const char *old, const char *new);
+extern int pfsFioRename(iomanX_iop_file_t *f, const char *old, const char *new_);
 extern int pfsFioChdir(iomanX_iop_file_t *f, const char *name);
 extern int pfsFioSync(iomanX_iop_file_t *f, const char *dev, int flag);
 extern int pfsFioMount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
 extern int pfsFioUmount(iomanX_iop_file_t *f, const char *fsname);
 extern s64 pfsFioLseek64(iomanX_iop_file_t *f, s64 offset, int whence);
-extern int pfsFioSymlink(iomanX_iop_file_t *f, const char *old, const char *new);
+extern int pfsFioSymlink(iomanX_iop_file_t *f, const char *old, const char *new_);
 extern int pfsFioReadlink(iomanX_iop_file_t *f, const char *path, char *buf, unsigned int buflen);
 
 #endif /* _PFS_FIO_H */

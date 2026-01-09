@@ -1030,7 +1030,7 @@ int	pfsFioChstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat, unsig
 	return pfsFioCheckForLastError(pfsMount, rv);
 }
 
-int pfsFioRename(iomanX_iop_file_t *ff, const char *old, const char *new)
+int pfsFioRename(iomanX_iop_file_t *ff, const char *old, const char *new_)
 {
 	char path1[256], path2[256];
 	int result=0;
@@ -1061,7 +1061,7 @@ int pfsFioRename(iomanX_iop_file_t *ff, const char *old, const char *new)
 
 		if ((iFileOld=pfsInodeGetFileInDir(parentOld, path1, &result))==NULL) goto exit;
 
-		if ((parentNew=pfsInodeGetParent(pfsMount, NULL, new, path2, &result))==NULL) goto exit;
+		if ((parentNew=pfsInodeGetParent(pfsMount, NULL, new_, path2, &result))==NULL) goto exit;
 
 		f=(iFileOld->u.inode->mode & FIO_S_IFMT) == FIO_S_IFDIR;
 
@@ -1330,19 +1330,19 @@ int pfsFioUmount(iomanX_iop_file_t *f, const char *fsname)
 	return rv;
 }
 
-int pfsFioSymlink(iomanX_iop_file_t *f, const char *old, const char *new)
+int pfsFioSymlink(iomanX_iop_file_t *f, const char *old, const char *new_)
 {
 	int rv;
 	pfs_mount_t *pfsMount;
 	int mode = 0x10000 | FIO_S_IFLNK | 0x1FF;
 
-	if(old==NULL || new==NULL)
+	if(old==NULL || new_==NULL)
 		return -ENOENT;
 
 	if(!(pfsMount=pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
 
-	rv = openFile(pfsMount, (pfs_file_slot_t *)old, (const char *)new, FIO_O_CREAT|FIO_O_WRONLY, mode);
+	rv = openFile(pfsMount, (pfs_file_slot_t *)old, (const char *)new_, FIO_O_CREAT|FIO_O_WRONLY, mode);
 	SignalSema(pfsFioSema);
 	return rv;
 }

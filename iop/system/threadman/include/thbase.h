@@ -40,7 +40,7 @@ typedef struct _iop_thread
 {
     u32 attr;
     u32 option;
-    void (*thread)(void *);
+    void (*thread)(void *userdata);
     u32 stacksize;
     u32 priority;
 } iop_thread_t;
@@ -158,10 +158,10 @@ extern int iResumeThread(int thid);
 extern int DelayThread(int usec);
 
 extern int GetSystemTime(iop_sys_clock_t *sys_clock);
-extern int SetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void *arg);
-extern int iSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void *arg);
-extern int CancelAlarm(unsigned int (*alarm_cb)(void *), void *arg);
-extern int iCancelAlarm(unsigned int (*alarm_cb)(void *), void *arg);
+extern int SetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *userdata), void *arg);
+extern int iSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *userdata), void *arg);
+extern int CancelAlarm(unsigned int (*alarm_cb)(void *userdata), void *arg);
+extern int iCancelAlarm(unsigned int (*alarm_cb)(void *userdata), void *arg);
 extern void USec2SysClock(u32 usec, iop_sys_clock_t *sys_clock);
 extern void SysClock2USec(iop_sys_clock_t *sys_clock, u32 *sec, u32 *usec);
 

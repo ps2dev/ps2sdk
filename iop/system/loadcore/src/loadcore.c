@@ -433,7 +433,7 @@ void loadcore_init(boot_params *in_params)
 						if ( i == 3 )
 							next.callback = (void *)*reboot_handler_ptr;
 						__asm__ __volatile__("\tmove $gp, %0\n" : : "r"(reboot_handler_ptr[1]));
-						((void (*)(iop_init_entry_t *, int))(*reboot_handler_ptr & (~3)))(&next, 1);
+						((BootupCallback_t)(*reboot_handler_ptr & (~3)))(&next, 1);
 					}
 					reboot_handler_ptr += 2;
 				}
@@ -492,7 +492,7 @@ void loadcore_init(boot_params *in_params)
 			if ( LinkLibraryEntries(fi.text_start, fi.text_size) == 0 )
 			{
 				FlushIcache();
-				entrypoint_ret = ((int (*)(u32, u32, elf_header_t **, u32))fi.EntryPoint)(0, 0, cur_module_addr, 0);
+				entrypoint_ret = ((int (*)(int argc, char **argv, elf_header_t **eh, ModuleInfo_t *mi))fi.EntryPoint)(0, 0, cur_module_addr, 0);
 				if ( (entrypoint_ret & 3) != 1 )
 				{
 					RegisterModule(mi);
@@ -576,7 +576,7 @@ int AddRebootNotifyHandler(BootupCallback_t func, int priority, int *stat)
 	{
 		int stat_tmp;
 
-		stat_tmp = ((int (*)(iop_init_entry_t *, u32))func)(&next, 0);
+		stat_tmp = ((BootupCallback_t)func)(&next, 0);
 		if ( stat )
 			*stat = stat_tmp;
 		return 0;

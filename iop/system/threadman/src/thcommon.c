@@ -336,7 +336,7 @@ void do_delete_thread()
 
 void schedule_next()
 {
-    struct thread *cur, *new;
+    struct thread *cur, *new_;
     u32 prio;
 
     cur            = thctx.current_thread;
@@ -351,7 +351,7 @@ void schedule_next()
         return;
     }
 
-    new = list_first_entry(&thctx.ready_queue[prio], struct thread, queue);
+    new_ = list_first_entry(&thctx.ready_queue[prio], struct thread, queue);
 
     if (thctx.current_thread->status == THS_RUN) {
         if (thctx.debug_flags & 4) {
@@ -362,14 +362,14 @@ void schedule_next()
             if (thctx.debug_flags & 4) {
                 Kprintf("  readyq = %x, newrun = %x:%d, prio = %d",
                         &thctx.ready_queue[prio],
-                        new,
-                        new->tag.id,
+                        new_,
+                        new_->tag.id,
                         prio);
             }
 
-            readyq_remove(new, prio);
-            new->status    = THS_RUN;
-            thctx.run_next = new;
+            readyq_remove(new_, prio);
+            new_->status   = THS_RUN;
+            thctx.run_next = new_;
             cur->status    = THS_READY;
             readyq_insert_front(cur);
         }
@@ -379,14 +379,14 @@ void schedule_next()
 
             Kprintf(" readyq = %x, newrun = %x:%d, prio = %d",
                     &thctx.ready_queue[prio],
-                    new,
-                    new->tag.id,
+                    new_,
+                    new_->tag.id,
                     prio);
         }
 
-        readyq_remove(new, prio);
-        new->status    = THS_RUN;
-        thctx.run_next = new;
+        readyq_remove(new_, prio);
+        new_->status   = THS_RUN;
+        thctx.run_next = new_;
     }
 
     if ((thctx.debug_flags & 4) != 0)

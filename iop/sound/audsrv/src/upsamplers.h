@@ -22,7 +22,7 @@ typedef struct upsample_t
 	const unsigned char *src;
 } upsample_t;
 
-typedef int (*upsampler_t)(struct upsample_t *);
+typedef int (*upsampler_t)(struct upsample_t *up);
 
 extern upsampler_t find_upsampler(int freq, int bits, int channels);
 

@@ -385,7 +385,7 @@ static inline output_gadget_t buffer_gadget(char* buffer, size_t buffer_size)
   return result;
 }
 
-static inline output_gadget_t function_gadget(void (*function)(char, void*), void* extra_arg)
+static inline output_gadget_t function_gadget(void (*function)(char c, void *extra_arg), void* extra_arg)
 {
   output_gadget_t result = discarding_gadget();
   result.function = function;

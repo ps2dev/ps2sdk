@@ -57,9 +57,9 @@ typedef struct MPEGSequenceInfo {
 extern "C" {
 #endif
 
-extern void MPEG_Initialize (  int ( * ) ( void* ), void*, void* ( * ) ( void*, MPEGSequenceInfo* ), void*, s64*  );
+extern void MPEG_Initialize(int (*apDataCB)(void *userdata), void *apDataCBParam, void *(*apInitCB)(void *userdata, MPEGSequenceInfo *si), void *apInitCBParam, s64 *apCurPTS);
 extern void MPEG_Destroy    ( void );
-extern int  ( *MPEG_Picture ) ( void*, s64* );
+extern int  ( *MPEG_Picture ) ( void *apData, s64 *apPTS );
 
 #ifdef __cplusplus
 }

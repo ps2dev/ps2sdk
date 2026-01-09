@@ -44,8 +44,8 @@ typedef struct __attribute__((aligned(4))) drvdrv_exec_cmd_ack_
 extern int DvrdrvResetSystem();
 extern int DvrdrvEnableIntr(u16 a1);
 extern int DvrdrvDisableIntr(s16 a1);
-extern int DvrdrvRegisterIntrHandler(int a1, void *arg, void (*a3)(int, void *));
-extern int DvrdrvUnregisterIntrHandler(void (*a1)(int, void *));
+extern int DvrdrvRegisterIntrHandler(int a1, void *arg, void (*a3)(int intrnr, void *arg));
+extern int DvrdrvUnregisterIntrHandler(void (*a1)(int intrnr, void *arg));
 extern int DvrdrvExecCmdAck(drvdrv_exec_cmd_ack *a1);
 extern int DvrdrvExecCmdAckComp(drvdrv_exec_cmd_ack *a1);
 extern int DvrdrvExecCmdAckDmaSendComp(drvdrv_exec_cmd_ack *a1);

@@ -414,10 +414,12 @@ static void *cbrpc_rpc4_fscall(int fno, void *buffer, int length)
 	return (void *)&g_cdvdfsv_srchres;
 }
 
-static int read_timeout_alarm_cb(const iop_sys_clock_t *sys_clock)
+static unsigned int read_timeout_alarm_cb(void *userdata)
 {
 	int read_timeout;
+	const iop_sys_clock_t *sys_clock;
 
+	sys_clock = (const iop_sys_clock_t *)userdata;
 	read_timeout = sys_clock->lo / 0x9000;
 	KPRINTF("Read Time Out %d(msec)\n", read_timeout);
 	sceCdSC(0xFFFFFFEE, &read_timeout);
@@ -648,7 +650,7 @@ static int readproc2(
 				CpuResumeIntr(state);
 				if ( read_res_tmp )
 				{
-					SetAlarm(&g_cdvdfsv_read_timeout, (unsigned int (*)(void *))read_timeout_alarm_cb, &g_cdvdfsv_read_timeout);
+					SetAlarm(&g_cdvdfsv_read_timeout, read_timeout_alarm_cb, &g_cdvdfsv_read_timeout);
 					csec_comm = 0;
 					retry_flag1 = 0;
 					break;
@@ -854,7 +856,7 @@ static int readproc2(
 			CpuResumeIntr(state);
 		}
 		sceCdSync(5);
-		CancelAlarm((unsigned int (*)(void *))read_timeout_alarm_cb, &g_cdvdfsv_read_timeout);
+		CancelAlarm(read_timeout_alarm_cb, &g_cdvdfsv_read_timeout);
 		g_cdvdman_istruct_ptr->m_dec_mode_set = 0;
 		g_cdvdman_istruct_ptr->m_dec_state = 0;
 		error_code = sceCdGetError();
@@ -929,9 +931,9 @@ static int readproc1(
 			0);
 		CpuResumeIntr(state);
 		if ( cmd_error )
-			SetAlarm(&g_cdvdfsv_read_timeout, (unsigned int (*)(void *))read_timeout_alarm_cb, &g_cdvdfsv_read_timeout);
+			SetAlarm(&g_cdvdfsv_read_timeout, read_timeout_alarm_cb, &g_cdvdfsv_read_timeout);
 		sceCdSync(5);
-		CancelAlarm((unsigned int (*)(void *))read_timeout_alarm_cb, &g_cdvdfsv_read_timeout);
+		CancelAlarm(read_timeout_alarm_cb, &g_cdvdfsv_read_timeout);
 		g_cdvdman_istruct_ptr->m_dec_state = 0;
 		error_code = sceCdGetError();
 		if ( error_code != SCECdErNO || !cmd_error || g_cdvdfsv_err_count >= 5 )

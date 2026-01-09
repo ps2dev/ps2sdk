@@ -288,8 +288,11 @@ static void recv_td(sio2_transfer_data_t *td)
 #endif
 }
 
-static int sio2_intr_handler(const struct sio2man_internal_data *arg)
+static int sio2_intr_handler(void *userdata)
 {
+	const struct sio2man_internal_data *arg;
+
+	arg = (const struct sio2man_internal_data *)userdata;
 	sio2_stat_set(sio2_stat_get());
 	iSignalSema(arg->m_intr_sema);
 	return 1;
@@ -323,7 +326,7 @@ int _start(int ac, char **av)
 	// Unofficial: inlined
 	sio2_ctrl_set(0x3BC);
 	CpuSuspendIntr(&state);
-	RegisterIntrHandler(IOP_IRQ_SIO2, 1, (int (*)(void *))sio2_intr_handler, &g_sio2man_data);
+	RegisterIntrHandler(IOP_IRQ_SIO2, 1, sio2_intr_handler, &g_sio2man_data);
 	EnableIntr(IOP_IRQ_SIO2);
 	CpuResumeIntr(state);
 	sceSetDMAPriority(IOP_DMAC_SIO2in, 3);
@@ -370,7 +373,7 @@ void _deinit()
 }
 
 #ifndef SIO2MAN_NANO
-void sio2_set_intr_handler(int (*handler)(void *), void *userdata)
+void sio2_set_intr_handler(int (*handler)(void *userdata), void *userdata)
 {
 	int state;
 
@@ -378,7 +381,7 @@ void sio2_set_intr_handler(int (*handler)(void *), void *userdata)
 	DisableIntr(IOP_IRQ_SIO2, 0);
 	ReleaseIntrHandler(IOP_IRQ_SIO2);
 	RegisterIntrHandler(
-		IOP_IRQ_SIO2, 1, handler ? handler : (int (*)(void *))sio2_intr_handler, handler ? userdata : &g_sio2man_data);
+		IOP_IRQ_SIO2, 1, handler ? handler : sio2_intr_handler, handler ? userdata : &g_sio2man_data);
 	EnableIntr(IOP_IRQ_SIO2);
 	CpuResumeIntr(state);
 }

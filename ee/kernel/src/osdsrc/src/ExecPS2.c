@@ -48,7 +48,7 @@ struct TCB
     struct TCB *next;       //+00
     struct TCB *prev;       //+04
     int status;             //+08
-    void (*entry)(void *);  //+0C
+    void (*entry)(void *d); //+0C
     void *stack_res;        //+10 initial $sp
     void *gpReg;            //+14
     short currentPriority;  //+18
@@ -58,7 +58,7 @@ struct TCB
         wakeupCount,        //+24
         attr,               //+28
         option;             //+2C
-    void (*entry_)(void *); //+30
+    void (*entry_)(void *d);//+30
     int argc;               //+34
     char *argstring;        //+38
     void *stack;            //+3C

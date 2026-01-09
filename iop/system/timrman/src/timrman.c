@@ -75,9 +75,9 @@ struct Timer
     u16 timeup_flags;
     u16 overflow_flags;
     u32 compare_value;
-    unsigned int (*timeup_handler)(void *);
+    unsigned int (*timeup_handler)(void *userdata);
     void *timeup_common;
-    unsigned int (*overflow_handler)(void *);
+    unsigned int (*overflow_handler)(void *userdata);
     void *overflow_common;
 };
 
@@ -442,7 +442,7 @@ u32 (*GetTimerReadFunc(int timid))()
 }
 
 
-int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void *), void *common)
+int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void *userdata), void *common)
 {
     struct Timer *timer;
     int oldstat;
@@ -472,7 +472,7 @@ int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeup
     return 0;
 }
 
-int SetOverflowHandler(int timid, unsigned int (*handler)(void *), void *common)
+int SetOverflowHandler(int timid, unsigned int (*handler)(void *userdata), void *common)
 {
     struct Timer *timer;
     int oldstat;

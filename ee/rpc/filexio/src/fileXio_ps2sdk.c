@@ -454,7 +454,7 @@ int __fileXioLseekDirHelper(void *userdata, int offset, int whence);
 #ifdef F___fileXioOpsInitializeImpl
 int __attribute__((weak)) _open(const char *buf, int flags, ...);
 int __attribute__((weak)) _unlink(const char *path);
-int __attribute__((weak)) _rename(const char *old, const char *new);
+int __attribute__((weak)) _rename(const char *old, const char *new_);
 int __attribute__((weak)) mkdir(const char *path, mode_t mode);
 int __attribute__((weak)) rmdir(const char *path);
 int __attribute__((weak)) _stat(const char *path, struct stat *buf);

@@ -104,7 +104,7 @@ void _SetIntcHandler(int irq, void *handler)
     i_state = DI();
     u_state = (ee_kmode_enter() >> 3) & 3;
 
-    ((void (*)(int, void *))(0x80000700))(irq, handler);
+    ((void (*)(int irq, void *handler))(0x80000700))(irq, handler);
 
     if (u_state) {
         ee_kmode_exit();

@@ -133,7 +133,7 @@ struct alarm
     struct heaptag tag;
     struct list_head alarm_list;
     u64 target;
-    unsigned int (*cb)(void *);
+    unsigned int (*cb)(void *userdata);
     void *userptr;
 };
 

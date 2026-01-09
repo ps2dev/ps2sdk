@@ -35,7 +35,7 @@ static acData buffer;
 static SifRpcDataQueue_t qd;
 static SifRpcServerData_t sd;
 
-static int start_thread(void (*func)(void *), int size, int attr, int prio, void *argp)
+static int start_thread(void (*func)(void *arg), int size, int attr, int prio, void *argp)
 {
 	iop_thread_t thread_param;
 	int thid;

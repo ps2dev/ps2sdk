@@ -916,10 +916,10 @@ extern int sceCdStSeekF(unsigned int lsn);
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
  *
  * @param func pointer of callback function to be called when power-off processing is activated
- * @param addr an argument which will be passed to the callback function
+ * @param userdata an argument which will be passed to the callback function
  * returns: a pointer to the previous handler function, or a null pointer if nothing has been set eariler
  */
-extern void *sceCdPOffCallback(void (*func)(void *), void *addr);
+extern void *sceCdPOffCallback(void (*func)(void *userdata), void *userdata);
 
 /** Sets the timeout lengths for the certain CDVDMAN's operations.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY

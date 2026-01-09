@@ -1369,7 +1369,7 @@ static int ps2netfs_op_format(char *buf, int len)
  *   +X if handled ok, valid FD returned.
  *   -X if error.
  */
-// int rename(const char *old, const char *new);
+// int rename(const char *old, const char *new_);
 static int ps2netfs_op_rename(char *buf, int len)
 {
   ps2netfs_pkt_symlink_req *cmd;
@@ -1691,7 +1691,7 @@ static int ps2netfs_op_devctl(char *buf, int len)
  *   +X if handled ok, valid FD returned.
  *   -X if error.
  */
-// int symlink(const char *old, const char *new);
+// int symlink(const char *old, const char *new_);
 static int ps2netfs_op_symlink(char *buf, int len)
 {
   ps2netfs_pkt_symlink_req *cmd;

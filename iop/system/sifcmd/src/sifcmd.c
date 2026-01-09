@@ -45,7 +45,7 @@ static sif_cmd_data_t sif_cmd_data;
 static u8 sif_iop_recvbuf[0x80] __attribute__((aligned(16)));
 static u8 sif_unused[0x40] __attribute__((aligned(16)));
 
-static int sif_cmd_int_handler(sif_cmd_data_t *sci);
+static int sif_cmd_int_handler(void *userdata);
 
 static void sif_sys_cmd_handler_set_sreg(const SifCmdSRegData_t *pkt, sif_cmd_data_t *sci)
 {
@@ -146,7 +146,7 @@ int _start(int ac, char **av)
 		sif_cmd_data.ef = GetSystemStatusFlag();
 		sif_cmd_data.sys_cmd_handler_handler[2].handler = (SifCmdHandler_t)sif_sys_cmd_handler_init_from_ee;
 		sif_cmd_data.sys_cmd_handler_handler[2].harg = &sif_cmd_data;
-		RegisterIntrHandler(IOP_IRQ_DMA_SIF1, 1, (int (*)(void *))sif_cmd_int_handler, &sif_cmd_data);
+		RegisterIntrHandler(IOP_IRQ_DMA_SIF1, 1, sif_cmd_int_handler, &sif_cmd_data);
 		EnableIntr(0x22B);
 		sceSifSetSubAddr((u32)sif_iop_recvbuf);
 		return 0;
@@ -223,7 +223,7 @@ static int sif_send_cmd_common(
 	void *src_extra,
 	void *dest_extra,
 	int size_extra,
-	void (*completion_cb)(void *),
+	void (*completion_cb)(void *userdata),
 	void *completion_cb_userdata)
 {
 	int dmatc1;
@@ -301,7 +301,7 @@ unsigned int sceSifSendCmdIntr(
 	void *src_extra,
 	void *dest_extra,
 	int size_extra,
-	void (*completion_cb)(void *),
+	void (*completion_cb)(void *userdata),
 	void *completion_cb_userdata)
 {
 	return sif_send_cmd_common(
@@ -312,7 +312,7 @@ unsigned int sceSifSendCmdIntr(
 		src_extra,
 		dest_extra,
 		size_extra,
-		(void (*)(void *))completion_cb,
+		completion_cb,
 		completion_cb_userdata);
 }
 
@@ -328,7 +328,7 @@ unsigned int isceSifSendCmdIntr(
 	void *src_extra,
 	void *dest_extra,
 	int size_extra,
-	void (*completion_cb)(void *),
+	void (*completion_cb)(void *userdata),
 	void *completion_cb_userdata)
 {
 	return sif_send_cmd_common(
@@ -339,7 +339,7 @@ unsigned int isceSifSendCmdIntr(
 		src_extra,
 		dest_extra,
 		size_extra,
-		(void (*)(void *))completion_cb,
+		completion_cb,
 		completion_cb_userdata);
 }
 
@@ -355,9 +355,9 @@ void sceSifClearSif1CB(void)
 	sif_cmd_data.sif_1_callback_userdata = NULL;
 }
 
-static int sif_cmd_int_handler(sif_cmd_data_t *sci)
+static int sif_cmd_int_handler(void *userdata)
 {
-	void (*sif_1_callback)(void *);
+	void (*sif_1_callback)(void *userdata);
 	SifCmdHeader_t *pktbuf1;
 	int size;
 	int size_calc1;
@@ -366,7 +366,9 @@ static int sif_cmd_int_handler(sif_cmd_data_t *sci)
 	int i;
 	u32 tmp1;
 	u32 tmpbuf1[32];
+	sif_cmd_data_t *sci;
 
+	sci = (sif_cmd_data_t *)userdata;
 	sif_1_callback = sci->sif_1_callback;
 	if ( sif_1_callback )
 		sif_1_callback(sci->sif_1_callback_userdata);
