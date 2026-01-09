@@ -142,8 +142,8 @@ typedef struct cdvdman_internal_struct_
 extern int sceCdCheckCmd(void);
 extern int sceCdNop(void);
 extern void *sceGetFsvRbuf(void);
-extern int sceCdstm0Cb(void (*p)(int));
-extern int sceCdstm1Cb(void (*p)(int));
+extern int sceCdstm0Cb(void (*p)(int val));
+extern int sceCdstm1Cb(void (*p)(int val));
 extern int sceCdSC(int code, int *param);
 /*	Within all CDVDMAN modules, sceCdReadClock and sceCdRC both exist. In the old one, both have exactly the same code.
 	In the newer ones, sceCdReadClock would automatically file off the most significant bit within the month field,

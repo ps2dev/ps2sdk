@@ -93,36 +93,36 @@ typedef struct _iomanX_iop_device {
 #define IOMANX_RETURN_VALUE_S64(val) ((void*)&my_iomanx_retval_##val##_s64)
 
 typedef struct _iomanX_iop_device_ops {
-	int	(*init)(iomanX_iop_device_t *);
-	int	(*deinit)(iomanX_iop_device_t *);
-	int	(*format)(iomanX_iop_file_t *, const char *, const char *, void *, int);
-	int	(*open)(iomanX_iop_file_t *, const char *, int, int);
-	int	(*close)(iomanX_iop_file_t *);
-	int	(*read)(iomanX_iop_file_t *, void *, int);
-	int	(*write)(iomanX_iop_file_t *, void *, int);
-	int	(*lseek)(iomanX_iop_file_t *, int, int);
-	int	(*ioctl)(iomanX_iop_file_t *, int, void *);
-	int	(*remove)(iomanX_iop_file_t *, const char *);
-	int	(*mkdir)(iomanX_iop_file_t *, const char *, int);
-	int	(*rmdir)(iomanX_iop_file_t *, const char *);
-	int	(*dopen)(iomanX_iop_file_t *, const char *);
-	int	(*dclose)(iomanX_iop_file_t *);
-	int	(*dread)(iomanX_iop_file_t *, iox_dirent_t *);
-	int	(*getstat)(iomanX_iop_file_t *, const char *, iox_stat_t *);
-	int	(*chstat)(iomanX_iop_file_t *, const char *, iox_stat_t *, unsigned int);
+	int	(*init)(iomanX_iop_device_t *device);
+	int	(*deinit)(iomanX_iop_device_t *device);
+	int	(*format)(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen);
+	int	(*open)(iomanX_iop_file_t *f, const char *name, int flags, int mode);
+	int	(*close)(iomanX_iop_file_t *f);
+	int	(*read)(iomanX_iop_file_t *f, void *ptr, int size);
+	int	(*write)(iomanX_iop_file_t *f, void *ptr, int size);
+	int	(*lseek)(iomanX_iop_file_t *f, int offset, int mode);
+	int	(*ioctl)(iomanX_iop_file_t *f, int cmd, void *param);
+	int	(*remove)(iomanX_iop_file_t *f, const char *name);
+	int	(*mkdir)(iomanX_iop_file_t *f, const char *path, int mode);
+	int	(*rmdir)(iomanX_iop_file_t *f, const char *path);
+	int	(*dopen)(iomanX_iop_file_t *f, const char *path);
+	int	(*dclose)(iomanX_iop_file_t *f);
+	int	(*dread)(iomanX_iop_file_t *f, iox_dirent_t *buf);
+	int	(*getstat)(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat_);
+	int	(*chstat)(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat_, unsigned int statmask);
 
 #ifndef IOMAN_NO_EXTENDED
 	/* Extended ops start here.  */
-	int	(*rename)(iomanX_iop_file_t *, const char *, const char *);
-	int	(*chdir)(iomanX_iop_file_t *, const char *);
-	int	(*sync)(iomanX_iop_file_t *, const char *, int);
-	int	(*mount)(iomanX_iop_file_t *, const char *, const char *, int, void *, int);
-	int	(*umount)(iomanX_iop_file_t *, const char *);
-	s64	(*lseek64)(iomanX_iop_file_t *, s64, int);
-	int	(*devctl)(iomanX_iop_file_t *, const char *, int, void *, unsigned int, void *, unsigned int);
-	int	(*symlink)(iomanX_iop_file_t *, const char *, const char *);
-	int	(*readlink)(iomanX_iop_file_t *, const char *, char *, unsigned int);
-	int	(*ioctl2)(iomanX_iop_file_t *, int, void *, unsigned int, void *, unsigned int);
+	int	(*rename)(iomanX_iop_file_t *f, const char *old, const char *new_);
+	int	(*chdir)(iomanX_iop_file_t *f, const char *name);
+	int	(*sync)(iomanX_iop_file_t *f, const char *dev, int flag);
+	int	(*mount)(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
+	int	(*umount)(iomanX_iop_file_t *f, const char *fsname);
+	s64	(*lseek64)(iomanX_iop_file_t *f, s64 offset, int whence);
+	int	(*devctl)(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+	int	(*symlink)(iomanX_iop_file_t *f, const char *old, const char *new_);
+	int	(*readlink)(iomanX_iop_file_t *f, const char *path, char *buf, unsigned int buflen);
+	int	(*ioctl2)(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 #endif /* IOMAN_NO_EXTENDED */
 } iomanX_iop_device_ops_t;
 

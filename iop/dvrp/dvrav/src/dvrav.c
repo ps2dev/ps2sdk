@@ -69,7 +69,7 @@ extern int avioctl2_set_acs_position_euro(iomanX_iop_file_t *a1, int cmd, void *
 struct DevctlCmdTbl_t
 {
     u16 cmd;
-    int (*fn)(iomanX_iop_file_t *, int, void *, unsigned int, void *, unsigned int);
+    int (*fn)(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 } DevctlCmdTbl[33] =
     {
         {0x5616, &avioctl2_select_position},

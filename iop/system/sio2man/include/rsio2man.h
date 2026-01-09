@@ -36,7 +36,7 @@ extern void sio2_transfer_reset3(void);
 extern void sio2_mc2_transfer_init(void);
 
 // The following was added with export version 2.7 in SDK 3.0.3.
-extern void sio2_set_intr_handler(int (*handler)(void *), void *userdata);
+extern void sio2_set_intr_handler(int (*handler)(void *userdata), void *userdata);
 extern void sio2_set_ctrl_c(void);
 extern void sio2_set_ctrl_1(void);
 extern void sio2_wait_for_intr(void);

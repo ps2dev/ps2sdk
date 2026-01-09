@@ -132,7 +132,7 @@ extern void graph_set_bgcolor(unsigned char r, unsigned char g, unsigned char b)
 extern void graph_set_output(int rc1, int rc2, int alpha_select, int alpha_output, int blend_method, unsigned char alpha);
 
 /** Add a vsync interrupt handler */
-extern int graph_add_vsync_handler(int (*vsync_callback)(int));
+extern int graph_add_vsync_handler(int (*vsync_callback)(int cause));
 
 /** Remove a vsync interrupt handler */
 extern void graph_remove_vsync_handler(int callback_id);

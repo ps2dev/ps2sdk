@@ -72,7 +72,7 @@ unsigned char dvrpAuth_tbl[256] = {0x00};
 struct DevctlCmdTbl_t
 {
     u16 cmd;
-    int (*fn)(iomanX_iop_file_t *, const char *, int, void *, unsigned int, void *, unsigned int);
+    int (*fn)(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 } DevctlCmdTbl[31] =
     {
         {0x5663, &dvrioctl2_get_status_register},

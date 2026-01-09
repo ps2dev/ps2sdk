@@ -138,7 +138,7 @@ extern void sceSifIntrMain();
 
 extern int sceSifCheckInit();
 
-extern void sceSifSetDmaIntrHandler(void (*handler)(void *), void *arg);
+extern void sceSifSetDmaIntrHandler(void (*handler)(void *userdata), void *arg);
 extern void sceSifResetDmaIntrHandler();
 
 extern unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int count, void (*completioncb)(void *userdata), void *userdata);

@@ -26,7 +26,7 @@ void InitDebug(void)
         if ((jalPrintf & 0xFC000000) == 0xC000000)
         {
             // Get the call target which is the address of printf.
-            krnl_print = (void(*)(const char*, ...))(0x80000000 + ((jalPrintf & 0x3FFFFFF) << 2));
+            krnl_print = (void(*)(const char* format, ...))(0x80000000 + ((jalPrintf & 0x3FFFFFF) << 2));
             break;
         }
     }

@@ -17,23 +17,23 @@ typedef struct
 {
 	u8 id;
 	u8 pad[3];
-	void (*readdata)(u8 *);
-	u32 (*getportctrl1)(u32, u32);
-	u32 (*getportctrl2)(u32);
+	void (*readdata)(u8 *a);
+	u32 (*getportctrl1)(u32 a, u32 b);
+	u32 (*getportctrl2)(u32 a);
 	u32 (*reg_data)(void);
 	u32 (*size1)(void);
 	u32 (*size2)(void);
-	u32 (*enterconfigmode)(u8 *);
-	u32 (*exitconfigmode)(u8 *);
-	u32 (*querymodel)(u8 *);
-	u32 (*queryact)(u8 *);
-	u32 (*querycomb)(u8 *);
-	u32 (*querymode)(u8 *);
-	u32 (*querybuttonmask)(u8 *);
-	u32 (*setbuttoninfo)(u8 *);
-	u32 (*setvrefparam)(u8 *);
-	u32 (*setmainmode)(u8 *);
-	u32 (*setactalign)(u8 *);
+	u32 (*enterconfigmode)(u8 *a);
+	u32 (*exitconfigmode)(u8 *a);
+	u32 (*querymodel)(u8 *a);
+	u32 (*queryact)(u8 *a);
+	u32 (*querycomb)(u8 *a);
+	u32 (*querymode)(u8 *a);
+	u32 (*querybuttonmask)(u8 *a);
+	u32 (*setbuttoninfo)(u8 *a);
+	u32 (*setvrefparam)(u8 *a);
+	u32 (*setmainmode)(u8 *a);
+	u32 (*setactalign)(u8 *a);
 } sio2Cmds_t;
 
 static sio2Cmds_t sio2Cmds[SIO2_CMD_MAX];

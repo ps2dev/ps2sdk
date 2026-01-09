@@ -67,14 +67,14 @@ s32 DvrdrvUnblockPhase();
 int DvrdrvEnd();
 int DVR_INTR_HANDLER(int flag);
 void INTR_DVRRDY_HANDLER(int a1, void *a2v);
-int INTR_DVRRDY_TO_HANDLER(void *a1);
-void INTR_CMD_ACK_HANDLER(int, void *);
-int INTR_CMD_ACK_TO_HANDLER(struct_itr_sid_tbl *a1);
-void INTR_CMD_COMP_HANDLER(int, void *);
-unsigned int INTR_CMD_COMP_TO_HANDLER(struct_itr_sid_tbl *a1);
-void INTR_DMAACK_HANDLER(int, void *);
-unsigned int INTR_DMAACK_TO_HANDLER(struct_itr_sid_tbl *a1);
-void INTR_DMAEND_HANDLER(int, void *);
+unsigned int INTR_DVRRDY_TO_HANDLER(void *a1);
+void INTR_CMD_ACK_HANDLER(int a1, void *a2);
+unsigned int INTR_CMD_ACK_TO_HANDLER(void *arg);
+void INTR_CMD_COMP_HANDLER(int a1, void *a2);
+unsigned int INTR_CMD_COMP_TO_HANDLER(void *arg);
+void INTR_DMAACK_HANDLER(int a1, void *a2);
+unsigned int INTR_DMAACK_TO_HANDLER(void *arg);
+void INTR_DMAEND_HANDLER(int a1, void *a2);
 int BlockAPI();
 int UnblockAPI();
 struct_itr_sid_tbl *SetItrSidTbl(int itrsid_index, u16 command, int sema);
@@ -87,7 +87,7 @@ extern struct irx_export_table _exp_pvrdrv;
 struct_dvrdrv DVRDRV;
 s32 api_sema_id;
 s32 phase_sema_id;
-void (*intrhandler_callbacks[32])(int, void *);
+void (*intrhandler_callbacks[32])(int intrnr, void *arg);
 int intrhandler_intrnum[32];
 void *intrhandler_callbacksarg[32];
 struct_itr_sid_tbl itrsid_table[3][32];
@@ -200,9 +200,9 @@ int DvrdrvResetSystem()
     SPD_REG8(0x4008) |= 1u;
     DVRDRV.mainthread_id = GetThreadId();
     USec2SysClock(0x1C9C380u, &v4);
-    SetAlarm(&v4, (unsigned int (*)(void *))INTR_DVRRDY_TO_HANDLER, &DVRDRV);
+    SetAlarm(&v4, INTR_DVRRDY_TO_HANDLER, &DVRDRV);
     v0 = SleepThread();
-    CancelAlarm((unsigned int (*)(void *))INTR_DVRRDY_TO_HANDLER, &DVRDRV);
+    CancelAlarm(INTR_DVRRDY_TO_HANDLER, &DVRDRV);
     v1 = v0 != 0;
     v2 = -2;
     if (!v1) {
@@ -225,10 +225,8 @@ int DvrdrvSendCmdAck(struct_itr_sema *itrsema, u16 command, u16 *input_word, s32
     u16 *v16;
     s16 v17;
     int v18;
-    unsigned int (*v19)(void *);
     int v20;
     int v21;
-    unsigned int (*v22)(void *);
     s16 v23;
     unsigned int v24;
     int v25;
@@ -270,14 +268,12 @@ int DvrdrvSendCmdAck(struct_itr_sema *itrsema, u16 command, u16 *input_word, s32
     USec2SysClock(0x1C9C380u, &v28);
     v18 = (u16)(command & 0xF00) >> 8;
     if (v18 == 1) {
-        v19 = (unsigned int (*)(void *))INTR_CMD_ACK_TO_HANDLER;
-    LABEL_18:
-        SetAlarm(&v28, v19, v14);
+        SetAlarm(&v28, INTR_CMD_ACK_TO_HANDLER, v14);
         goto LABEL_19;
     }
     if (v18 && (u16)(command & 0xF00) >> 8 < 4u) {
-        v19 = (unsigned int (*)(void *))INTR_DMAACK_TO_HANDLER;
-        goto LABEL_18;
+        SetAlarm(&v28, INTR_DMAACK_TO_HANDLER, v14);
+        goto LABEL_19;
     }
 LABEL_19:
     v20 = itrsema->sema;
@@ -285,15 +281,14 @@ LABEL_19:
     WaitSema(v20);
     v21 = (u16)(command & 0xF00) >> 8;
     if (v21 == 1) {
-        v22 = (unsigned int (*)(void *))INTR_CMD_ACK_TO_HANDLER;
+        CancelAlarm(INTR_CMD_ACK_TO_HANDLER, v14);
     } else {
         if (!v21 || (u16)(command & 0xF00) >> 8 >= 4u) {
             printf("DvrdrvSendCmdAck() -> Error!\n");
             goto LABEL_26;
         }
-        v22 = (unsigned int (*)(void *))INTR_DMAACK_TO_HANDLER;
+        CancelAlarm(INTR_DMAACK_TO_HANDLER, v14);
     }
-    CancelAlarm(v22, v14);
 LABEL_26:
     if (!v14->timed_out || v14->error) {
         v23 = v14->error;
@@ -514,7 +509,7 @@ int DvrdrvPrepareWaitCmdComp(struct_itr_sema *itrsema, u16 command, u32 timeout)
         v6 = 0;
         v8 = SetItrSidTbl(2, command, v7);
         USec2SysClock(timeout, &v10);
-        SetAlarm(&v10, (unsigned int (*)(void *))INTR_CMD_COMP_TO_HANDLER, v8);
+        SetAlarm(&v10, INTR_CMD_COMP_TO_HANDLER, v8);
     } else {
         v6 = -1;
         printf("DvrdrvPrepareWaitCmdComp : itrsema==NULL\n");
@@ -533,7 +528,7 @@ int DvrdrvCancelWaitCmdComp(u16 command)
     v2 = GetItrSidTbl(2, command);
     v3 = v2;
     if (v2) {
-        CancelAlarm((unsigned int (*)(void *))INTR_CMD_COMP_TO_HANDLER, v2);
+        CancelAlarm(INTR_CMD_COMP_TO_HANDLER, v2);
         ClearItrSidTbl(v3);
         v4 = 0;
     } else {
@@ -553,7 +548,7 @@ int DvrdrvWaitCmdComp(struct_itr_sema *itrsema, u16 command, u16 *status_4220, u
 
     WaitSema(itrsema->sema);
     v8 = GetItrSidTbl(2, command);
-    CancelAlarm((unsigned int (*)(void *))INTR_CMD_COMP_TO_HANDLER, v8);
+    CancelAlarm(INTR_CMD_COMP_TO_HANDLER, v8);
     v9 = -2;
     if (!v8->timed_out) {
         s16 v10;
@@ -625,7 +620,7 @@ int DvrdrvDisableIntr(s16 a1)
     return 0;
 }
 
-int DvrdrvRegisterIntrHandler(int a1, void *arg, void (*a3)(int, void *))
+int DvrdrvRegisterIntrHandler(int a1, void *arg, void (*a3)(int intrnr, void *arg))
 {
     int i;
 
@@ -645,7 +640,7 @@ int DvrdrvRegisterIntrHandler(int a1, void *arg, void (*a3)(int, void *))
     return -1;
 }
 
-int DvrdrvUnregisterIntrHandler(void (*a1)(int, void *))
+int DvrdrvUnregisterIntrHandler(void (*a1)(int intrnr, void *arg))
 {
     int i;
 
@@ -730,7 +725,7 @@ void INTR_DVRRDY_HANDLER(int a1, void *a2v)
         iWakeupThread(a2->mainthread_id);
 }
 
-int INTR_DVRRDY_TO_HANDLER(void *a1)
+unsigned int INTR_DVRRDY_TO_HANDLER(void *a1)
 {
     s32 v1;
 
@@ -781,12 +776,14 @@ void INTR_CMD_ACK_HANDLER(int a1, void *a2)
     }
 }
 
-int INTR_CMD_ACK_TO_HANDLER(struct_itr_sid_tbl *a1)
+unsigned int INTR_CMD_ACK_TO_HANDLER(void *arg)
 {
     unsigned int v1;
     s32 v3;
     iop_sys_clock_t clock;
+    struct_itr_sid_tbl *a1;
 
+    a1 = (struct_itr_sid_tbl *)arg;
     GetSystemTime(&clock);
     v1 = clock.lo;
     Kprintf("CMDACK_TO:[%u]\n", v1);
@@ -837,12 +834,14 @@ void INTR_CMD_COMP_HANDLER(int a1, void *a2)
     }
 }
 
-unsigned int INTR_CMD_COMP_TO_HANDLER(struct_itr_sid_tbl *a1)
+unsigned int INTR_CMD_COMP_TO_HANDLER(void *arg)
 {
     unsigned int v1;
     s32 v3;
     iop_sys_clock_t clock;
+    struct_itr_sid_tbl *a1;
 
+    a1 = (struct_itr_sid_tbl *)arg;
     GetSystemTime(&clock);
     v1 = clock.lo;
     Kprintf("COMP TO:[%u]\n", v1);
@@ -874,11 +873,13 @@ void INTR_DMAACK_HANDLER(int a1, void *a2)
     }
 }
 
-unsigned int INTR_DMAACK_TO_HANDLER(struct_itr_sid_tbl *a1)
+unsigned int INTR_DMAACK_TO_HANDLER(void *arg)
 {
     unsigned int v1;
     iop_sys_clock_t clock;
+    struct_itr_sid_tbl *a1;
 
+    a1 = (struct_itr_sid_tbl *)arg;
     GetSystemTime(&clock);
     v1 = clock.lo;
     Kprintf("DMAACK_TO:[%u]\n", v1);

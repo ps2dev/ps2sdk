@@ -53,9 +53,9 @@ extern void WaitVblankEnd();
 extern void WaitVblank();
 extern void WaitNonVblank();
 
-extern int RegisterVblankHandler(int startend, int priority, int (*handler)(void *),
+extern int RegisterVblankHandler(int startend, int priority, int (*handler)(void *userdata),
         void *arg);
-extern int ReleaseVblankHandler(int startend, int (*handler)(void *));
+extern int ReleaseVblankHandler(int startend, int (*handler)(void *userdata));
 
 #define vblank_IMPORTS_start DECLARE_IMPORT_TABLE(vblank, 1, 1)
 #define vblank_IMPORTS_end END_IMPORT_TABLE

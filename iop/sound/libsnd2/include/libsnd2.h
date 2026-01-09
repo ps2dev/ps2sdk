@@ -229,16 +229,16 @@ typedef struct SndVoiceStats
 	s16 pan;
 } SndVoiceStats;
 
-typedef void (*SsMarkCallbackProc)(s16, s16, s16);
+typedef void (*SsMarkCallbackProc)(s16 sep_no, s16 seq_no, s16 control_value);
 
 typedef struct _SsFCALL_
 {
-	void (*noteon)(s16, s16, u8, u8);
-	void (*programchange)(s16, s16, u8);
-	void (*pitchbend)(s16, s16);
-	void (*metaevent)(s16, s16, u8);
-	void (*control[CC_MAX])(s16, s16, u8);
-	void (*ccentry[DE_MAX])(s16, s16, s16, VagAtr, s16, u8);
+	void (*noteon)(s16 sep_no, s16 seq_no, u8 midi_byte_next, u8 midi_byte);
+	void (*programchange)(s16 sep_no, s16 seq_no, u8 midi_byte);
+	void (*pitchbend)(s16 sep_no, s16 seq_no);
+	void (*metaevent)(s16 sep_no, s16 seq_no, u8 midi_byte);
+	void (*control[CC_MAX])(s16 sep_no, s16 seq_no, u8 midi_byte);
+	void (*ccentry[DE_MAX])(s16 vab_id, s16 prog, s16 tone, VagAtr vag_attr, s16 fn_idx, u8 attribute_value);
 } _SsFCALL;
 
 extern void _SsContBankChange(s16 sep_no, s16 seq_no, u8 control_value);

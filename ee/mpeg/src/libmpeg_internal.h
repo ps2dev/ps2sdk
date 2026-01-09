@@ -100,9 +100,9 @@ typedef struct _MPEGMotion
 
     // These are used from assembly, supress linter warnings.
     // cppcheck-suppress unusedStructMember
-    void (*MC_Luma)(struct _MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int tmpa, int, int);
+    void (*MC_Luma)(struct _MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int tmpa, int a7, int a8);
     // cppcheck-suppress unusedStructMember
-    void (*MC_Chroma)(struct _MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int tmpa, int, int);
+    void (*MC_Chroma)(struct _MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int tmpa, int a7, int a8);
 } _MPEGMotion;
 
 typedef struct _MPEGMotions
@@ -115,7 +115,7 @@ typedef struct _MPEGMotions
     unsigned char *m_pSPRMC;
     int m_Stride;
     int m_nMotions;
-    void (*BlockOp)(struct _MPEGMotions *);
+    void (*BlockOp)(struct _MPEGMotions *arg0);
     _MPEGMotion m_Motion[7];
 } _MPEGMotions;
 
@@ -160,48 +160,48 @@ typedef struct _MPEGContext
     _MPEGMotions *m_pCurMotions;
 } _MPEGContext;
 
-extern void _MPEG_Initialize(_MPEGContext *, int (*)(void *), void *, int *);
+extern void _MPEG_Initialize(_MPEGContext *mc, int (*data_cb)(void *userdata), void *cb_user, int *eof_flag);
 extern void _MPEG_Destroy(void);
-extern int _MPEG_CSCImage(void *, void *, int);
-extern void _MPEG_SetDefQM(int);
-extern void _MPEG_SetQM(int);
+extern int _MPEG_CSCImage(void *source, void *dest, int mbcount);
+extern void _MPEG_SetDefQM(int arg0);
+extern void _MPEG_SetQM(int iqm);
 extern int _MPEG_GetMBAI(void);
 extern int _MPEG_GetMBType(void);
 extern int _MPEG_GetMotionCode(void);
 extern int _MPEG_GetDMVector(void);
 extern unsigned int _MPEG_NextStartCode(void);
 extern void _MPEG_AlignBits(void);
-extern unsigned int _MPEG_GetBits(unsigned int);
-extern unsigned int _MPEG_ShowBits(unsigned int);
+extern unsigned int _MPEG_GetBits(unsigned int bits);
+extern unsigned int _MPEG_ShowBits(unsigned int bits);
 extern void _MPEG_SetIDCP(void);
 extern void _MPEG_SetQSTIVFAS(void);
-extern void _MPEG_SetPCT(unsigned int);
-extern void _MPEG_BDEC(int, int, int, int, void *);
+extern void _MPEG_SetPCT(unsigned int arg0);
+extern void _MPEG_BDEC(int mbi, int dcr, int dt, int qsc, void *spaddr);
 extern int _MPEG_WaitBDEC(void);
-extern void _MPEG_dma_ref_image(_MPEGMacroBlock8 *, _MPEGMotion *, s64, int);
-extern void _MPEG_do_mc(_MPEGMotion *);
-extern void _MPEG_put_luma(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_put_luma_X(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_put_luma_Y(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_put_luma_XY(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_put_chroma(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_put_chroma_X(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_put_chroma_Y(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_put_chroma_XY(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_avg_luma(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_avg_luma_X(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_avg_luma_Y(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_avg_luma_XY(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_avg_chroma(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_avg_chroma_X(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_avg_chroma_Y(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_avg_chroma_XY(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int, int);
-extern void _MPEG_put_block_fr(_MPEGMotions *);
-extern void _MPEG_put_block_fl(_MPEGMotions *);
-extern void _MPEG_put_block_il(_MPEGMotions *);
-extern void _MPEG_add_block_ilfl(_MPEGMotions *);
-extern void _MPEG_add_block_frfr(_MPEGMotions *);
-extern void _MPEG_add_block_frfl(_MPEGMotions *);
+extern void _MPEG_dma_ref_image(_MPEGMacroBlock8 *mb, _MPEGMotion *motions, s64 n_motions, int width);
+extern void _MPEG_do_mc(_MPEGMotion *arg0);
+extern void _MPEG_put_luma(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_put_luma_X(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_put_luma_Y(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_put_luma_XY(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_put_chroma(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_put_chroma_X(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_put_chroma_Y(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_put_chroma_XY(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_avg_luma(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_avg_luma_X(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_avg_luma_Y(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_avg_luma_XY(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_avg_chroma(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_avg_chroma_X(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_avg_chroma_Y(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_avg_chroma_XY(_MPEGMotion *m, u8 *a2, short *a3, int a4, int var1, int ta, int a7, int a8);
+extern void _MPEG_put_block_fr(_MPEGMotions *arg0);
+extern void _MPEG_put_block_fl(_MPEGMotions *arg0);
+extern void _MPEG_put_block_il(_MPEGMotions *arg0);
+extern void _MPEG_add_block_ilfl(_MPEGMotions *arg0);
+extern void _MPEG_add_block_frfr(_MPEGMotions *arg0);
+extern void _MPEG_add_block_frfl(_MPEGMotions *arg0);
 extern void _MPEG_Suspend(void);
 extern void _MPEG_Resume(void);
 

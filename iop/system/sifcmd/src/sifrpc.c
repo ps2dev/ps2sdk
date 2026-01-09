@@ -222,8 +222,11 @@ static void sif_cmd_handler_end(SifRpcRendPkt_t *data, sif_rpc_data_t *harg)
 	client3->hdr.pkt_addr = 0;
 }
 
-static unsigned int sif_cmd_handler_rdata_alarm_retry(SifRpcRendPkt_t *a1)
+static unsigned int sif_cmd_handler_rdata_alarm_retry(void *userdata)
 {
+	SifRpcRendPkt_t *a1;
+
+	a1 = (SifRpcRendPkt_t *)userdata;
 	if ( isceSifSendCmd(SIF_CMD_RPC_END, a1, 64, a1->sd, a1->buf, (int)a1->cbuf) != 0 )
 		return 0;
 	return 0xF000;
@@ -252,7 +255,7 @@ static void sif_cmd_handler_rdata(SifRpcOtherDataPkt_t *data, sif_rpc_data_t *ha
 	{
 		clk.hi = 0;
 		clk.lo = 0xF000;
-		iSetAlarm(&clk, (unsigned int (*)(void *))sif_cmd_handler_rdata_alarm_retry, fpacket2);
+		iSetAlarm(&clk, sif_cmd_handler_rdata_alarm_retry, fpacket2);
 	}
 }
 
@@ -367,7 +370,7 @@ static void sif_cmd_handler_bind(SifRpcBindPkt_t *data, sif_rpc_data_t *harg)
 	{
 		clk.hi = 0;
 		clk.lo = 0xF000;
-		iSetAlarm(&clk, (unsigned int (*)(void *))sif_cmd_handler_bind_alarm_retry, fpacket);
+		iSetAlarm(&clk, sif_cmd_handler_bind_alarm_retry, fpacket);
 	}
 }
 

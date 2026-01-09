@@ -43,9 +43,9 @@ struct thmon_almlist_item
     void *m_userptr;
 };
 
-static int CreateThmonThread(u32 attr, void (*thread)(void *), u32 priority, u32 stacksize, u32 option);
+static int CreateThmonThread(u32 attr, void (*thread)(void *arg), u32 priority, u32 stacksize, u32 option);
 static int do_get_thread_count();
-static void ThmonMonitorThread(struct thmon_thcpuwatch_param *usrptr);
+static void ThmonMonitorThread(void *arg);
 static void ThmonMainThread(void *arg);
 
 static const char *g_help_msg[] =
@@ -100,14 +100,14 @@ int _start(int ac, char **av)
         6u,
         28 * (do_get_thread_count() + margen_val) + 3584,
         0);
-    g_monitorThreadId = CreateThmonThread(0x2000000u, (void (*)(void *))ThmonMonitorThread, 4u, 0x800u, 0);
+    g_monitorThreadId = CreateThmonThread(0x2000000u, ThmonMonitorThread, 4u, 0x800u, 0);
     if (main_thread_id <= 0 || g_monitorThreadId <= 0)
         return 1;
     StartThread(main_thread_id, 0);
     return 0;
 }
 
-static int CreateThmonThread(u32 attr, void (*thread)(void *), u32 priority, u32 stacksize, u32 option)
+static int CreateThmonThread(u32 attr, void (*thread)(void *arg), u32 priority, u32 stacksize, u32 option)
 {
     iop_thread_t thparam;
 
@@ -557,7 +557,7 @@ static char *do_output_progress_bar_carriageret(int curlen)
     return g_progspace2;
 }
 
-static void ThmonMonitorThread(struct thmon_thcpuwatch_param *usrptr)
+static void ThmonMonitorThread(void *arg)
 {
     int chrcnt;
     int delayval;
@@ -574,7 +574,9 @@ static void ThmonMonitorThread(struct thmon_thcpuwatch_param *usrptr)
     struct thread *this_thread;
     u32 sec;
     u32 usec;
+    struct thmon_thcpuwatch_param *usrptr;
 
+    usrptr                      = (struct thmon_thcpuwatch_param *)arg;
     chrcnt                      = 0;
     delayval                    = 1000 * (1000 / usrptr->m_sample_count);
     usrptr->m_start_stop_status = 1;

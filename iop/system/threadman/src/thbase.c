@@ -915,7 +915,7 @@ int GetSystemTime(iop_sys_clock_t *sys_clock)
     return CpuInvokeInKmode(read_sys_time, sys_clock);
 }
 
-int SetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void *arg)
+int SetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *userdata), void *arg)
 {
     iop_sys_clock_t systime;
     struct alarm *alarm;
@@ -965,7 +965,7 @@ int SetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void 
     return KE_OK;
 }
 
-int iSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void *arg)
+int iSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *userdata), void *arg)
 {
     struct alarm *alarm;
     iop_sys_clock_t systime;
@@ -1004,7 +1004,7 @@ int iSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void
     return KE_OK;
 }
 
-int CancelAlarm(unsigned int (*alarm_cb)(void *), void *arg)
+int CancelAlarm(unsigned int (*alarm_cb)(void *userdata), void *arg)
 {
     struct alarm *alarm;
     int state;
@@ -1036,7 +1036,7 @@ int CancelAlarm(unsigned int (*alarm_cb)(void *), void *arg)
     return KE_NOTFOUND_HANDLER;
 }
 
-int iCancelAlarm(unsigned int (*alarm_cb)(void *), void *arg)
+int iCancelAlarm(unsigned int (*alarm_cb)(void *userdata), void *arg)
 {
     struct alarm *alarm;
 

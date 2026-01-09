@@ -122,7 +122,7 @@ intrman_internals_t *GetIntrmanInternalData(void)
 	return &intrman_internals;
 }
 
-int RegisterIntrHandler(int irq, int mode, int (*handler)(void *), void *arg)
+int RegisterIntrHandler(int irq, int mode, int (*handler)(void *arg), void *arg)
 {
 	int intr_handler_offset;
 	int state;
@@ -153,7 +153,7 @@ int RegisterIntrHandler(int irq, int mode, int (*handler)(void *), void *arg)
 	if ( irq < IOP_IRQ_DMA_MDEC_IN || irq > IOP_IRQ_DMA_SIO2_OUT )
 	{
 		intrman_internals.interrupt_handler_table[intr_handler_offset].handler =
-			(int (*)(void *))((uiptr)handler | (mode & 3));
+			(int (*)(void *arg))((uiptr)handler | (mode & 3));
 	}
 	else
 	{

@@ -52,7 +52,7 @@ typedef struct exception_frame
 
 /* Beware: the handler will be run in a 'bad' state. Consider you are
    on interrupt mode, so, only i* functions. */
-typedef void (*trap_exception_handler_t)(exception_type_t, exception_frame_t *);
+typedef void (*trap_exception_handler_t)(exception_type_t type, exception_frame_t *ex);
 
 #define DCIC_WR (1 << 27)
 #define DCIC_RD (1 << 26)

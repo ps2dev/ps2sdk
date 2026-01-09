@@ -19,7 +19,7 @@ typedef struct _sifm_rpc_data
 	unsigned int mode;
 } sceSifMRpcData;
 
-typedef void (*sceSifMEndFunc)(void *);
+typedef void (*sceSifMEndFunc)(void *end_param);
 
 typedef struct _sifm_client_data
 {
@@ -32,7 +32,7 @@ typedef struct _sifm_client_data
 	struct _sifm_serve_data *serve;
 } sceSifMClientData;
 
-typedef void *(*sceSifMRpcFunc)(unsigned int, void *, int);
+typedef void *(*sceSifMRpcFunc)(unsigned int fno, void *buffer, int length);
 
 typedef struct _sifm_serve_data
 {

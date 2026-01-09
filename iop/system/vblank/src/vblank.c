@@ -21,10 +21,10 @@ IRX_ID("Vblank_service", 1, 1);
 
 static vblank_internals_t vblank_internals;
 
-static int irq_vblank_interrupt_handler(vblank_internals_t *vbi);
-static int irq_evblank_interrupt_handler(vblank_internals_t *vbi);
-static int vblank_handler_base_beginning(vblank_internals_t *vbi);
-static int vblank_handler_base_end(vblank_internals_t *vbi);
+static int irq_vblank_interrupt_handler(void *userdata);
+static int irq_evblank_interrupt_handler(void *userdata);
+static int vblank_handler_base_beginning(void *userdata);
+static int vblank_handler_base_end(void *userdata);
 static void linked_list_set_self(vblank_ll_t *ll);
 static int linked_list_next_is_self(const vblank_ll_t *ll);
 static void linked_list_remove(vblank_ll_t *ll);
@@ -58,10 +58,10 @@ int _start(int ac, char **av)
 	evfp.attr = EA_MULTI;
 	evfp.option = 0;
 	vblank_internals.ef = CreateEventFlag(&evfp);
-	RegisterVblankHandler(0, 128, (int (*)(void *))vblank_handler_base_beginning, &vblank_internals);
-	RegisterVblankHandler(1, 128, (int (*)(void *))vblank_handler_base_end, &vblank_internals);
-	RegisterIntrHandler(IOP_IRQ_VBLANK, 1, (int (*)(void *))irq_vblank_interrupt_handler, &vblank_internals);
-	RegisterIntrHandler(IOP_IRQ_EVBLANK, 1, (int (*)(void *))irq_evblank_interrupt_handler, &vblank_internals);
+	RegisterVblankHandler(0, 128, vblank_handler_base_beginning, &vblank_internals);
+	RegisterVblankHandler(1, 128, vblank_handler_base_end, &vblank_internals);
+	RegisterIntrHandler(IOP_IRQ_VBLANK, 1, irq_vblank_interrupt_handler, &vblank_internals);
+	RegisterIntrHandler(IOP_IRQ_EVBLANK, 1, irq_evblank_interrupt_handler, &vblank_internals);
 	EnableIntr(IOP_IRQ_VBLANK);
 	EnableIntr(IOP_IRQ_EVBLANK);
 	CpuResumeIntr(state);
@@ -73,7 +73,7 @@ vblank_internals_t *GetVblankInternalData(void)
 	return &vblank_internals;
 }
 
-int RegisterVblankHandler(int startend, int priority, int (*handler)(void *), void *arg)
+int RegisterVblankHandler(int startend, int priority, int (*handler)(void *userdata), void *arg)
 {
 	const vblank_ll_t *list;
 	vblank_ll_t *item;
@@ -129,7 +129,7 @@ int RegisterVblankHandler(int startend, int priority, int (*handler)(void *), vo
 }
 
 // cppcheck-suppress constParameterPointer
-int ReleaseVblankHandler(int startend, int (*handler)(void *))
+int ReleaseVblankHandler(int startend, int (*handler)(void *userdata))
 {
 	const vblank_ll_t *list;
 	vblank_ll_t *item;
@@ -170,12 +170,14 @@ int ReleaseVblankHandler(int startend, int (*handler)(void *))
 	return 0;
 }
 
-static int irq_vblank_interrupt_handler(vblank_internals_t *vbi)
+static int irq_vblank_interrupt_handler(void *userdata)
 {
 	int item_count;
 	vblank_ll_t *item;
 	vblank_ll_t *item_tmp;
+	vblank_internals_t *vbi;
 
+	vbi = (vblank_internals_t *)userdata;
 	item_count = vbi->item_count;
 	if ( !item_count )
 	{
@@ -203,12 +205,14 @@ static int irq_vblank_interrupt_handler(vblank_internals_t *vbi)
 	return 1;
 }
 
-static int irq_evblank_interrupt_handler(vblank_internals_t *vbi)
+static int irq_evblank_interrupt_handler(void *userdata)
 {
 	vblank_ll_t *item;
 	const vblank_ll_t *list_tail;
 	vblank_ll_t *item_tmp;
+	vblank_internals_t *vbi;
 
+	vbi = (vblank_internals_t *)userdata;
 	item = vbi->list_11.next;
 	list_tail = &vbi->list_11;
 	if ( item != list_tail )
@@ -235,16 +239,22 @@ static int irq_evblank_interrupt_handler(vblank_internals_t *vbi)
 #define EF_VBLANK 2
 #define EF_NON_VBLANK 8
 
-static int vblank_handler_base_beginning(vblank_internals_t *vbi)
+static int vblank_handler_base_beginning(void *userdata)
 {
+	vblank_internals_t *vbi;
+
+	vbi = (vblank_internals_t *)userdata;
 	iSetEventFlag(vbi->ef, EF_VBLANK_START);
 	iSetEventFlag(vbi->ef, EF_VBLANK);
 	iClearEventFlag(vbi->ef, ~(9));
 	return 1;
 }
 
-static int vblank_handler_base_end(vblank_internals_t *vbi)
+static int vblank_handler_base_end(void *userdata)
 {
+	vblank_internals_t *vbi;
+
+	vbi = (vblank_internals_t *)userdata;
 	iSetEventFlag(vbi->ef, EF_VBLANK_END);
 	iSetEventFlag(vbi->ef, EF_NON_VBLANK);
 	iClearEventFlag(vbi->ef, ~(6));

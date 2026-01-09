@@ -42,7 +42,7 @@ extern int dvrioctl2_get_dvcam_name(iomanX_iop_file_t *a1, const char *name, int
 struct DevctlCmdTbl_t
 {
     u16 cmd;
-    int (*fn)(iomanX_iop_file_t *, const char *, int, void *, unsigned int, void *, unsigned int);
+    int (*fn)(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 } DevctlCmdTbl[6] =
     {
         {0x5601, &dvrioctl2_dv_dubb_start},

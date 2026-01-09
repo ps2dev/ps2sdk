@@ -135,7 +135,7 @@ static int sbv_DelDrv(const char *name)
 	res = DelDrv(name);
 
 	if (Addr_IOMAN_DelDrv)
-        return(((int (*)(const char *)) (Addr_IOMAN_DelDrv))(name));
+        return(((int (*)(const char *name)) (Addr_IOMAN_DelDrv))(name));
 
 	return res;
 }

@@ -62,7 +62,7 @@ extern int dvrioctl2_diag_test(iomanX_iop_file_t *a1, int cmd, void *arg, unsign
 struct DevctlCmdTbl_t
 {
     u16 cmd;
-    int (*fn)(iomanX_iop_file_t *, int, void *, unsigned int, void *, unsigned int);
+    int (*fn)(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 } DevctlCmdTbl[25] =
     {
         {0x5668, &dvrioctl2_get_sircs},

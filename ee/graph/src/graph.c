@@ -26,7 +26,7 @@ int graph_initialize(int fbp, int width, int height, int psm, int x, int y)
 
 }
 
-int graph_add_vsync_handler(int (*vsync_callback)(int))
+int graph_add_vsync_handler(int (*vsync_callback)(int cause))
 {
 
 	int callback_id;

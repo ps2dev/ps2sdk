@@ -327,7 +327,7 @@ static void sif_cmdh_bindrpcparam_80000019(struct msif_cmd_bindrpcparam_80000019
 	{
 		sysclks.hi = 0;
 		sysclks.lo = 0xF000;
-		iSetAlarm(&sysclks, (unsigned int (*)(void *))alarm_cb_cmd_80000018_1, fpacket);
+		iSetAlarm(&sysclks, alarm_cb_cmd_80000018_1, fpacket);
 	}
 }
 
@@ -384,7 +384,7 @@ static void sif_cmdh_unbindrpc_8000001D(struct msif_cmd_unbindrpc_8000001D *data
 	{
 		alarmdat.hi = 0;
 		alarmdat.lo = 0xF000;
-		iSetAlarm(&alarmdat, (unsigned int (*)(void *))alarm_cb_cmd_80000018_2, fpacket);
+		iSetAlarm(&alarmdat, alarm_cb_cmd_80000018_2, fpacket);
 	}
 }
 
@@ -588,14 +588,16 @@ static void do_msif_rpc_loop(sceSifMQueueData *qd)
 	}
 }
 
-static void thread_proc_80000019(struct msif_msgbox_msg *msgboxdat)
+static void thread_proc_80000019(void *userdata)
 {
 	sceSifMServeData *sd;
 	sceSifMQueueData *qd;
 	void *funcbuf;
 	SifMRpcCallPkt_t *fpacket;
 	int state;
+	struct msif_msgbox_msg *msgboxdat;
 
+	msgboxdat = (struct msif_msgbox_msg *)userdata;
 	CpuSuspendIntr(&state);
 	sd = (sceSifMServeData *)AllocSysMemory(0, sizeof(sceSifMServeData), 0);
 	if ( !sd )
@@ -695,7 +697,7 @@ void sceSifMEntryLoop(sceSifMServeEntry *se, int request, sceSifMRpcFunc func, s
 		switch ( arg->m_in_cmd )
 		{
 			case 0x80000019:
-				thparam_1.thread = (void (*)(void *))thread_proc_80000019;
+				thparam_1.thread = thread_proc_80000019;
 				thparam_1.attr = TH_C;
 				thparam_1.stacksize = arg->m_msg2.m_stacksize;
 				thparam_1.priority = arg->m_msg2.m_priority;

@@ -24,7 +24,7 @@
 #define OSD_CONFIG_NO_LIBCDVD
 #include "osd_config.h"
 
-#define posixIODriver { open, close, (int (*)(int, void *, int))read, O_RDONLY }
+#define posixIODriver { open, close, (int (*)(int fd, void *buf, int nbyte))read, O_RDONLY }
 
 #ifdef F__libcglue_timezone_update_impl
 void _libcglue_timezone_update_impl()

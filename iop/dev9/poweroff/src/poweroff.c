@@ -50,7 +50,7 @@ static void Shutdown(void* data);
 static void SendCmd(void* data);
 
 //---------------------------------------------------------------------
-typedef int (*intrhandler)(void*);
+typedef int (*intrhandler)(void *param);
 
 static intrhandler	oldCdHandler=0;
 

@@ -26,8 +26,8 @@ extern "C" {
 #define TC_PIXEL    2
 #define TC_HLINE    4
 
-extern int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void *), void *common);
-extern int SetOverflowHandler(int timid, unsigned int (*handler)(void *), void *common);
+extern int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void *userdata), void *common);
+extern int SetOverflowHandler(int timid, unsigned int (*handler)(void *userdata), void *common);
 extern int SetupHardTimer(int timid, int source, int mode, int prescale);
 extern int StartHardTimer(int timid);
 extern int StopHardTimer(int timid);

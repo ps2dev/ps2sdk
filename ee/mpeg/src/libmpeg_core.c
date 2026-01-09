@@ -45,7 +45,7 @@ struct IPUState
 };
 
 static qword_t s_DMAPack[17] __attribute__((aligned(64)));
-static int (*s_SetDMA_func)(void *);
+static int (*s_SetDMA_func)(void *userdata);
 static void *s_SetDMA_arg;
 static struct IPUState s_IPUState;
 static int *s_pEOF;
@@ -123,7 +123,7 @@ extern s32 _mpeg_dmac_handler(s32 channel, void *arg, void *addr);
 #define IPU_COMMAND_SETTH        0x90000000
 // clang-format on
 
-void _MPEG_Initialize(_MPEGContext *mc, int (*data_cb)(void *), void *cb_user, int *eof_flag)
+void _MPEG_Initialize(_MPEGContext *mc, int (*data_cb)(void *userdata), void *cb_user, int *eof_flag)
 {
     (void)mc;
     ee_sema_t sema;

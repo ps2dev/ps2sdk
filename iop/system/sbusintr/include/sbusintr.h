@@ -31,7 +31,7 @@ enum sbus_errors {
 	SBUS_E_IRQ,
 };
 
-typedef int (*sbus_intr_handler_t)(u32, void *);
+typedef int (*sbus_intr_handler_t)(u32 irq, void *arg);
 
 extern int sbus_intr_init();
 extern void sbus_intr_exit();

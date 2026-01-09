@@ -79,23 +79,23 @@ typedef struct _iop_io_device {
 #define IOMAN_RETURN_VALUE_S64(val) ((void*)&my_ioman_retval_##val##_s64)
 
 typedef struct _iop_io_device_ops {
-	int	(*io_init)(iop_io_device_t *);
-	int	(*io_deinit)(iop_io_device_t *);
-	int	(*io_format)(iop_io_file_t *);
-	int	(*io_open)(iop_io_file_t *, const char *, int);
-	int	(*io_close)(iop_io_file_t *);
-	int	(*io_read)(iop_io_file_t *, void *, int);
-	int	(*io_write)(iop_io_file_t *, void *, int);
-	int	(*io_lseek)(iop_io_file_t *, int, int);
-	int	(*io_ioctl)(iop_io_file_t *, unsigned long, void *);
-	int	(*io_remove)(iop_io_file_t *, const char *);
-	int	(*io_mkdir)(iop_io_file_t *, const char *);
-	int	(*io_rmdir)(iop_io_file_t *, const char *);
-	int	(*io_dopen)(iop_io_file_t *, const char *);
-	int	(*io_dclose)(iop_io_file_t *);
-	int	(*io_dread)(iop_io_file_t *, io_dirent_t *);
-	int	(*io_getstat)(iop_io_file_t *, const char *, io_stat_t *);
-	int	(*io_chstat)(iop_io_file_t *, const char *, io_stat_t *, unsigned int);
+	int	(*io_init)(iop_io_device_t *device);
+	int	(*io_deinit)(iop_io_device_t *device);
+	int	(*io_format)(iop_io_file_t *f);
+	int	(*io_open)(iop_io_file_t *f, const char *name, int flags);
+	int	(*io_close)(iop_io_file_t *f);
+	int	(*io_read)(iop_io_file_t *f, void *ptr, int size);
+	int	(*io_write)(iop_io_file_t *f, void *ptr, int size);
+	int	(*io_lseek)(iop_io_file_t *f, int offset, int mode);
+	int	(*io_ioctl)(iop_io_file_t *f, unsigned long cmd, void *param);
+	int	(*io_remove)(iop_io_file_t *f, const char *name);
+	int	(*io_mkdir)(iop_io_file_t *f, const char *path);
+	int	(*io_rmdir)(iop_io_file_t *f, const char *path);
+	int	(*io_dopen)(iop_io_file_t *f, const char *path);
+	int	(*io_dclose)(iop_io_file_t *f);
+	int	(*io_dread)(iop_io_file_t *f, io_dirent_t *buf);
+	int	(*io_getstat)(iop_io_file_t *f, const char *name, io_stat_t *stat_);
+	int	(*io_chstat)(iop_io_file_t *f, const char *name, io_stat_t *stat_, unsigned int statmask);
 } iop_io_device_ops_t;
 
 extern int io_AddDrv(iop_io_device_t *device);
