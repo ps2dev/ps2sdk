@@ -231,7 +231,7 @@ ___iop_ex_def_handler_start:
                         lw      $s0, 0x040($s0) // restore s0
                         nop
                         jr      $k1
-                        cop0    0x10
+                        rfe
                         nop
                         nop
 .end _iop_ex_def_handler
@@ -280,7 +280,7 @@ _iop_ex_dbg_handler:
                         lw      $s0, 0x040($s0) // restore s0
                         nop
                         jr      $k1
-                        cop0    0x10
+                        rfe
                         nop
                         nop
 .end _iop_ex_dbg_handler
