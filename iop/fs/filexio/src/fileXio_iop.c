@@ -386,7 +386,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
 		}
 		// wait for any previous DMA to complete
 	      // before over-writing localDirEntry
-	      while(sceSifDmaStat(dmaID)>=0);
+	      while(sceSifDmaStat(dmaID)>=0) {}
             DirEntryCopy(&localDirEntry, &dirbuf);
 	      // DMA localDirEntry to the address specified by dirEntry[matched_entries]
 	      // setup the dma struct

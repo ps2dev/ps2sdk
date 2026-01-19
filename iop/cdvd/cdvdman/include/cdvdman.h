@@ -64,7 +64,7 @@ typedef struct cdvdman_dma3_parameter_
 typedef struct cdvdman_internal_struct_
 {
 	char m_cdvdman_command;
-	char m_last_error;
+	unsigned char m_last_error;
 	char m_unused_002;
 	char m_ncmd_intr_count;
 	int m_wait_flag;

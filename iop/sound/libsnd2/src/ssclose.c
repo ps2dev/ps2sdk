@@ -25,7 +25,7 @@ static void _SsClose(s16 seq_sep_no)
 
 		score_struct = &_ss_score[sep_no][seq_no];
 		score_struct->m_flags = 0;
-		score_struct->m_next_sep = 255;
+		score_struct->m_next_sep = -1;
 		score_struct->m_next_seq = 0;
 		score_struct->m_unk48 = 0;
 		score_struct->m_unk4A = 0;

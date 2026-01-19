@@ -38,7 +38,7 @@ void SsSetTableSize(char *table, s16 s_max, s16 t_max)
 
 			score_struct = &_ss_score[i][j];
 			score_struct->m_flags = 0;
-			score_struct->m_next_sep = 255;
+			score_struct->m_next_sep = -1;
 			score_struct->m_next_seq = 0;
 			score_struct->m_unk48 = 0;
 			score_struct->m_unk4A = 0;
