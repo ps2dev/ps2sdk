@@ -34,7 +34,7 @@ int acAtaEntry(int argc, char **argv)
 	{
 		return ret;
 	}
-	if ( !RegisterLibraryEntries(&_exp_acata) == 0 )
+	if ( RegisterLibraryEntries(&_exp_acata) != 0 )
 		return -16;
 	return 0;
 }

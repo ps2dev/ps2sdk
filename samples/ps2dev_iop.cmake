@@ -27,9 +27,7 @@ SET(CMAKE_SYSTEM_VERSION 1)
 SET(CMAKE_SYSTEM_PROCESSOR mips)
 SET(CMAKE_C_COMPILER mipsel-none-elf-gcc)
 SET(CMAKE_CXX_COMPILER mipsel-none-elf-g++)
-SET(CMAKE_C_COMPILER_WORKS 1) #Hack by f0bes
-SET(CMAKE_CXX_COMPILER_WORKS 1) #Hack by f0bes
-
+SET(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 #
 # set arch flags depending on gcc version

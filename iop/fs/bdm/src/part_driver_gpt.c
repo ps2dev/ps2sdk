@@ -67,7 +67,7 @@ int part_connect_gpt(struct block_device *bd)
     entriesPerSector = bd->sectorSize / sizeof(gpt_partition_table_entry);
 
     // Loop through all the partition table entries and attempt to mount each one.
-    printf("Found GPT disk '%08x...'\n", *(u32*)&pGptHeader->disk_guid);
+    M_PRINTF("Found GPT disk '%08x...'\n", *(u32*)&pGptHeader->disk_guid);
     for (int i = 0; i < pGptHeader->partition_count && endOfTable == 0; )
     {
         // Check if we need to buffer more data, GPT usually uses LBA 2-33 for partition table entries. Typically there will
@@ -133,7 +133,7 @@ int part_connect_gpt(struct block_device *bd)
                 if ((partIndex = GetNextFreePartitionIndex()) == -1)
                 {
                     // No more free partition slots.
-                    printf("Can't mount partition, no more free partition slots!\n");
+                    M_PRINTF("Can't mount partition, no more free partition slots!\n");
                     continue;
                 }
 

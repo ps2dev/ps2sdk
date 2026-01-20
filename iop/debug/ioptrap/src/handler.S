@@ -147,7 +147,7 @@ def_exc_handler:
     lw      $k1, 0($k0)
     lw      $k0, 0x410($0)      # k0 saved here by exception prologue (at 0x80)
     jr      $k1
-    cop0    0x10
+    rfe
     nop
     .set pop
     .end def_exc_handler
@@ -288,7 +288,7 @@ bp_exc_handler:
     lw      $k1, 0($k0)
     lw      $k0, 0x420($0)      # k0 saved here by debug exception prologue (at 0x40)
     jr      $k1
-    cop0    0x10
+    rfe
     nop
     .set    pop
     .end    bp_exc_handler
