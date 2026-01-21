@@ -15,8 +15,8 @@
 
 /*
 	NOTE: These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
-	modules stored in rom0. To determine which one you are using, send the
-	appropriate arg to the mcInit() function (MC_TYPE_MC or MC_TYPE_XMC)
+	modules stored in rom0. The library will automatically detect which
+    module is used and will use the appropriate RPC commands accordingly.
 
         NOTE: These functions seem to work for both psx and ps2 memcards
 
@@ -193,6 +193,7 @@ typedef struct
 } mcTable __attribute__((deprecated, aligned (64)));
 
 // values to send to mcInit() to use either mcserv or xmcserv
+// These definitions are retained for backwards compatibility
 #define MC_TYPE_MC	0
 #define MC_TYPE_XMC	1
 
@@ -202,7 +203,7 @@ extern "C" {
 
 /** init memcard lib
  *
- * @param type MC_TYPE_MC = use MCSERV/MCMAN; MC_TYPE_XMC = use XMCSERV/XMCMAN
+ * @param type Retained for backwards compatibility. Nominally specify MC_TYPE_MC.
  * @return 0 = successful; < 0 = error
  */
 extern int mcInit(int type);
