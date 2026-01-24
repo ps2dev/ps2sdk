@@ -43,6 +43,7 @@ I_ReceiveMbx
 thmsgbx_IMPORTS_end
 
 sysclib_IMPORTS_start
+I_look_ctype_table
 I_memset
 I_strcpy
 I_strncpy
@@ -52,8 +53,10 @@ I_strncmp
 I_strtok
 I_strtoul
 I_memcmp
+I_memmove
 I_strtol
 I_strcmp
+I_tolower
 sysclib_IMPORTS_end
 
 sysmem_IMPORTS_start

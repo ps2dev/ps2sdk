@@ -11,6 +11,7 @@
 #ifndef IOP_PS2IP_INTERNAL_H
 #define	IOP_PS2IP_INTERNAL_H
 
+#include <sys/select.h>
 #include "lwip/sockets.h"
 
 typedef struct

@@ -63,6 +63,8 @@ extern "C" {
 /** Blank (space) */
 #define	_B		0x80
 
+extern unsigned char look_ctype_table(char character);
+
 #define	isalpha(c)	(look_ctype_table((unsigned int)(c)) & (_U|_L))
 #define	isupper(c)	(look_ctype_table((unsigned int)(c)) & (_U))
 #define	islower(c)	(look_ctype_table((unsigned int)(c)) & (_L))

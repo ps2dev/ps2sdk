@@ -67,6 +67,6 @@ DECLARE_EXPORT_TABLE(ps2ip, 2, 6)
 #endif
 	DECLARE_EXPORT(netif_set_link_up)
 	DECLARE_EXPORT(netif_set_link_down)	//55
-	DECLARE_EXPORT(tcpip_callback_with_block)
+	DECLARE_EXPORT(tcpip_callback)
 	DECLARE_EXPORT(pbuf_coalesce)
 END_EXPORT_TABLE
