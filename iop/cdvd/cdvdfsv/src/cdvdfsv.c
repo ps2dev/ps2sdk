@@ -2362,7 +2362,7 @@ cdvdfsv_rpc3_2B_setfanprofile(const cdvdfsv_rpc3_inpacket_t *inbuf, int buflen, 
 #endif
 
 #ifdef CDVD_VARIANT_OSD
-static void cdvdfsv_rpc3_2C_i_152(const cdvdfsv_rpc3_inpacket_t *inbuf, int buflen, cdvdfsv_rpc3_outpacket_t *outbuf)
+static void cdvdfsv_rpc3_2C_i_152_gettemperature(const cdvdfsv_rpc3_inpacket_t *inbuf, int buflen, cdvdfsv_rpc3_outpacket_t *outbuf)
 {
 	int i;
 	u32 efbits;
@@ -2373,12 +2373,7 @@ static void cdvdfsv_rpc3_2C_i_152(const cdvdfsv_rpc3_inpacket_t *inbuf, int bufl
 	for ( i = 0; i < 3 && !outbuf->m_retres; i += 1 )
 	{
 		WaitEventFlag(g_scmd_evfid, 1, WEF_AND, &efbits);
-#if 0
-		// TODO FIXME IMPORT
-		outbuf->m_retres = cdvdman_152(&outbuf->m_pkt_2C.m_arg1, &outbuf->m_pkt_2C.m_arg2);
-#else
-		outbuf->m_retres = 1;
-#endif
+		outbuf->m_retres = cdvdman_152_get_temperature(&outbuf->m_pkt_2C.m_arg1, &outbuf->m_pkt_2C.m_arg2);
 	}
 }
 #endif
@@ -2572,7 +2567,7 @@ cdvdfsv_rpc3_39_buzzerctl(const cdvdfsv_rpc3_inpacket_t *inbuf, int buflen, cdvd
 
 #ifdef CDVD_VARIANT_XOSD
 static void
-cdvdfsv_rpc3_3A_resetwakeupreason(const cdvdfsv_rpc3_inpacket_t *inbuf, int buflen, cdvdfsv_rpc3_outpacket_t *outbuf)
+cdvdfsv_rpc3_3A_i_167_atapi2dragon(const cdvdfsv_rpc3_inpacket_t *inbuf, int buflen, cdvdfsv_rpc3_outpacket_t *outbuf)
 {
 	int i;
 	u32 efbits;
@@ -2582,19 +2577,13 @@ cdvdfsv_rpc3_3A_resetwakeupreason(const cdvdfsv_rpc3_inpacket_t *inbuf, int bufl
 	for ( i = 0; i < 3 && !outbuf->m_retres; i += 1 )
 	{
 		WaitEventFlag(g_scmd_evfid, 1, WEF_AND, &efbits);
-#if 0
-		// TODO FIXME IMPORT
-		outbuf->m_retres = sceCdResetWakeupReason((u32 *)inbuf, &outbuf->m_pkt_3A.m_arg2);
-#else
-		(void)inbuf;
-		outbuf->m_retres = 1;
-#endif
+		outbuf->m_retres = cdvdman_167_atapi2dragon((char *)inbuf, &outbuf->m_pkt_3A.m_arg2);
 	}
 }
 #endif
 
 #ifdef CDVD_VARIANT_XOSD
-static void cdvdfsv_rpc3_3B_i_169(const cdvdfsv_rpc3_inpacket_t *inbuf, int buflen, cdvdfsv_rpc3_outpacket_t *outbuf)
+static void cdvdfsv_rpc3_3B_i_169_dragon2atapi(const cdvdfsv_rpc3_inpacket_t *inbuf, int buflen, cdvdfsv_rpc3_outpacket_t *outbuf)
 {
 	int i;
 	u32 efbits;
@@ -2605,12 +2594,7 @@ static void cdvdfsv_rpc3_3B_i_169(const cdvdfsv_rpc3_inpacket_t *inbuf, int bufl
 	for ( i = 0; i < 3 && !outbuf->m_retres; i += 1 )
 	{
 		WaitEventFlag(g_scmd_evfid, 1, WEF_AND, &efbits);
-#if 0
-		// TODO FIXME IMPORT
-		outbuf->m_retres = cdvdman_169(&outbuf->m_pkt_3B.m_arg1, &outbuf->m_pkt_3B.m_arg2);
-#else
-		outbuf->m_retres = 1;
-#endif
+		outbuf->m_retres = cdvdman_169_dragon2atapi(outbuf->m_pkt_3B.m_arg1, &outbuf->m_pkt_3B.m_arg2);
 	}
 }
 #endif
@@ -3159,7 +3143,7 @@ static void *cbrpc_rpc3_cdvdscmds(int fno, void *buffer, int length)
 			cdvdfsv_rpc3_2B_setfanprofile(buffer, length, &g_outbuf);
 			break;
 		case 44:
-			cdvdfsv_rpc3_2C_i_152(buffer, length, &g_outbuf);
+			cdvdfsv_rpc3_2C_i_152_gettemperature(buffer, length, &g_outbuf);
 			break;
 #endif
 #ifdef CDVD_VARIANT_XOSD
@@ -3195,10 +3179,10 @@ static void *cbrpc_rpc3_cdvdscmds(int fno, void *buffer, int length)
 			cdvdfsv_rpc3_39_buzzerctl(buffer, length, &g_outbuf);
 			break;
 		case 58:
-			cdvdfsv_rpc3_3A_resetwakeupreason(buffer, length, &g_outbuf);
+			cdvdfsv_rpc3_3A_i_167_atapi2dragon(buffer, length, &g_outbuf);
 			break;
 		case 59:
-			cdvdfsv_rpc3_3B_i_169(buffer, length, &g_outbuf);
+			cdvdfsv_rpc3_3B_i_169_dragon2atapi(buffer, length, &g_outbuf);
 			break;
 		case 60:
 			cdvdfsv_rpc3_3C_xbspowerctl(buffer, length, &g_outbuf);

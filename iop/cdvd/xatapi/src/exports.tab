@@ -1,0 +1,21 @@
+
+DECLARE_EXPORT_TABLE(xatapi, 1, 1)
+    DECLARE_EXPORT(_start)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(xatapi_2_terminate)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(xatapi_4_sceAtaSoftReset)
+    DECLARE_EXPORT(xatapi_5_sceAtaExecCmd)
+    DECLARE_EXPORT(xatapi_6_sceAtaWaitResult)
+    DECLARE_EXPORT(xatapi_7_sceCdAtapiExecCmd)
+    DECLARE_EXPORT(xatapi_8_sceCdAtapiWaitResult)
+    DECLARE_EXPORT(xatapi_9_sceCdSpdAtaDmaStart)
+    DECLARE_EXPORT(xatapi_10_sceCdSpdAtaDmaEnd)
+    DECLARE_EXPORT(xatapi_11_sceAtaGetError)
+    DECLARE_EXPORT(xatapi_12_get_ata_control)
+    DECLARE_EXPORT(xatapi_13_get_speed_reg)
+    DECLARE_EXPORT(xatapi_14_set_speed_reg)
+    DECLARE_EXPORT(xatapi_15_exec_f6_f9_scsi)
+END_EXPORT_TABLE
+
+void _retonly() {}
