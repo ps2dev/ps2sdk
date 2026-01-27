@@ -1,0 +1,25 @@
+<map id="ee/kernel/src/alarm.c" name="ee/kernel/src/alarm.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="115,5,257,31"/>
+<area shape="rect" id="Node000002" href="$kernel_8h.html" title=" " alt="" coords="153,79,219,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,31,189,63,184,63,184,31"/>
+<area shape="rect" id="Node000007" href="$timer_8h.html" title=" " alt="" coords="396,226,456,252"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="201,30,404,214,400,218,198,34"/>
+<area shape="rect" id="Node000008" href="$stdio_8h.html" title=" " alt="" coords="70,79,129,105"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="173,34,127,71,124,67,170,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="174,300,241,326"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="190,105,208,284,202,285,185,105"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="74,153,141,178"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="175,107,134,144,130,140,171,103"/>
+<area shape="rect" id="Node000005" href="$sifdma_8h.html" title=" " alt="" coords="302,226,372,252"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="200,103,316,214,312,218,197,107"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="295,300,379,326"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="340,252,340,284,334,284,334,252"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="413,255,365,292,362,288,409,250"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="103,105,107,137,102,138,98,105"/>
+<area shape="rect" id="Node000009" href="$irx_8h.html" title=" " alt="" coords="5,153,50,178"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="89,107,52,143,49,140,86,103"/>
+<area shape="rect" id="Node000010" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="215,226,277,252"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="51,172,63,176,201,221,200,226,61,181,49,177"/>
+<area shape="poly" id="edge12_Node000010_Node000003" title=" " alt="" coords="242,253,224,287,219,285,237,251"/>
+<area shape="poly" id="edge13_Node000010_Node000006" title=" " alt="" coords="263,250,312,288,308,293,260,255"/>
+</map>

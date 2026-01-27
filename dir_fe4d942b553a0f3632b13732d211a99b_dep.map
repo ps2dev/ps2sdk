@@ -1,0 +1,17 @@
+<map id="iop/sound/ahx/src" name="iop/sound/ahx/src">
+<area shape="rect" id="node1" href="dir_8806379264ffea16411011c87cd5d5d1.html" title="include" alt="" coords="26,137,88,162"/>
+<area shape="poly" id="edge2" href="dir_000493_000195.html" alt="" coords="60,88,60,121,55,121,55,88"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000493_000195.html" title="2" alt="" coords="62,111,69,126"/>
+<area shape="rect" id="node4" href="dir_40ac35421bc63b72c26b6c69b1517fd6.html" title="system" alt="" coords="195,137,258,162"/>
+<area shape="poly" id="edge1" href="dir_000493_000571.html" alt="" coords="73,86,91,97,181,131,179,136,88,102,70,91"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000493_000571.html" title="13" alt="" coords="173,117,187,132"/>
+<area shape="rect" id="node5" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="282,137,339,162"/>
+<area shape="poly" id="edge3" href="dir_000493_000256.html" alt="" coords="72,86,90,97,137,113,176,120,216,125,267,133,267,139,215,130,175,125,135,118,88,102,70,91"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000493_000256.html" title="1" alt="" coords="263,120,270,135"/>
+<area shape="rect" id="node6" href="dir_b3b65c61938638f28675fc77a7fe35e3.html" title="libsd" alt="" coords="362,137,411,162"/>
+<area shape="poly" id="edge4" href="dir_000493_000268.html" alt="" coords="72,86,90,97,158,117,215,122,274,124,348,134,347,139,273,129,215,127,157,122,88,102,70,91"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000493_000268.html" title="1" alt="" coords="343,120,350,135"/>
+<area shape="rect" id="node3" href="dir_40c561062edbd99ebfb63c3ad64cebed.html" title="include" alt="" coords="101,63,163,89"/>
+<area shape="rect" id="clust2" href="dir_fe4d942b553a0f3632b13732d211a99b.html" alt="" coords="27,52,173,99"/>
+<area shape="rect" id="clust1" href="dir_9337eeae2b875a84dbe6e00bf944922d.html" title="ahx" alt="" coords="16,16,184,173"/>
+</map>

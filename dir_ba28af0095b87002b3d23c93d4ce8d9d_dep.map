@@ -1,0 +1,16 @@
+<map id="iop/system/stdio/src" name="iop/system/stdio/src">
+<area shape="rect" id="node1" href="dir_ba28af0095b87002b3d23c93d4ce8d9d.html" title="src" alt="" coords="150,52,189,78"/>
+<area shape="rect" id="node2" href="dir_1bd32d4ef826aeeda00870843eb45c97.html" title="sysclib" alt="" coords="5,126,67,152"/>
+<area shape="poly" id="edge1" href="dir_000533_000569.html" alt="" coords="150,80,73,121,71,116,148,75"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000533_000569.html" title="1" alt="" coords="75,117,82,132"/>
+<area shape="rect" id="node3" href="dir_1d64e5e9f20206636d72b5bbe3d2b274.html" title="loadcore" alt="" coords="90,126,160,152"/>
+<area shape="poly" id="edge2" href="dir_000533_000272.html" alt="" coords="164,80,143,114,139,111,160,77"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000533_000272.html" title="1" alt="" coords="146,107,153,122"/>
+<area shape="rect" id="node4" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="185,126,242,152"/>
+<area shape="poly" id="edge3" href="dir_000533_000256.html" alt="" coords="179,77,200,111,196,114,174,80"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000533_000256.html" title="1" alt="" coords="200,98,207,113"/>
+<area shape="rect" id="node5" href="dir_d204d0cf134f4cdf6ccf23f48ed9ae60.html" title="ioman" alt="" coords="265,126,322,152"/>
+<area shape="poly" id="edge4" href="dir_000533_000247.html" alt="" coords="191,76,260,116,258,120,188,80"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000533_000247.html" title="1" alt="" coords="257,102,264,117"/>
+<area shape="rect" id="clust1" href="dir_952a988346c879bc3b2834e2377036db.html" title="stdio" alt="" coords="139,16,200,89"/>
+</map>
