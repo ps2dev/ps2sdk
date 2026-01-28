@@ -78,21 +78,51 @@
 
 /*** Taken from src/include/lwip/opt.h. If changes were made to lwipopts.h, please update this section.
     Some settings affect the fields present in structures like struct netif! ****/
+#ifndef MEMP_NUM_UDP_PCB
 #define MEMP_NUM_UDP_PCB              4
+#endif
+#ifndef MEMP_NUM_TCP_PCB
 #define MEMP_NUM_TCP_PCB              5
+#endif
+#ifndef MEMP_NUM_NETCONN
 #define MEMP_NUM_NETCONN              (MEMP_NUM_TCP_PCB + MEMP_NUM_UDP_PCB)
+#endif
+#ifndef LWIP_NETIF_STATUS_CALLBACK
 #define LWIP_NETIF_STATUS_CALLBACK    0
+#endif
+#ifndef LWIP_NETIF_LINK_CALLBACK
 #define LWIP_NETIF_LINK_CALLBACK      0
+#endif
+#ifndef LWIP_AUTOIP
 #define LWIP_AUTOIP                   0
+#endif
+#ifndef LWIP_NETIF_HOSTNAME
 #define LWIP_NETIF_HOSTNAME           0
+#endif
+#ifndef LWIP_SNMP
 #define LWIP_SNMP                     0
+#endif
+#ifndef LWIP_IGMP
 #define LWIP_IGMP                     0
+#endif
+#ifndef LWIP_NETIF_HWADDRHINT
 #define LWIP_NETIF_HWADDRHINT         0
+#endif
+#ifndef LWIP_LOOPBACK_MAX_PBUFS
 #define LWIP_LOOPBACK_MAX_PBUFS       0
+#endif
+#ifndef LWIP_NUM_NETIF_CLIENT_DATA
 #define LWIP_NUM_NETIF_CLIENT_DATA    0
+#endif
+#ifndef LWIP_SOCKET_OFFSET
 #define LWIP_SOCKET_OFFSET            0
+#endif
+#ifndef LWIP_IPV6_SEND_ROUTER_SOLICIT
 #define LWIP_IPV6_SEND_ROUTER_SOLICIT 1
+#endif
+#ifndef DNS_MAX_SERVERS
 #define DNS_MAX_SERVERS               2
+#endif
 
 /*
  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
