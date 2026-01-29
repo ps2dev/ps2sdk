@@ -1,0 +1,6 @@
+add_library(audsrv)
+target_include_directories(audsrv PUBLIC include)
+target_include_directories(audsrv PRIVATE ${EE_INC})
+target_sources(audsrv PRIVATE src/audsrv_rpc.c src/erl-support.c)
+install(TARGETS audsrv)
+target_add_erl(audsrv)
