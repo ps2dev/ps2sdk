@@ -14,6 +14,9 @@ int graph_vram_allocate(int width, int height, int psm, int alignment)
 
 	graph_vram_pointer += size;
 
+	// Align the pointer
+	graph_vram_pointer = -alignment & (graph_vram_pointer + (alignment-1));
+
 	// If the pointer overflows the vram size
 	if (graph_vram_pointer > GRAPH_VRAM_MAX_WORDS)
 	{
