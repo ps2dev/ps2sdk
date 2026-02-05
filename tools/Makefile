@@ -11,6 +11,7 @@ SUBDIRS = \
 	bin2c \
 	ps2-irxgen \
 	ps2adpcm \
+	ps2sdkinfo \
 	romimg \
 	srxfixup \
 #	  gensymtab
