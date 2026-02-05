@@ -1,0 +1,5 @@
+<map id="dns_getserver_res_pkt" name="dns_getserver_res_pkt">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,94,159,120"/>
+<area shape="rect" id="Node000002" href="$tcpip_8h.html#structip4__addr" title=" " alt="" coords="47,5,117,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,47,85,94,79,94,79,47"/>
+</map>

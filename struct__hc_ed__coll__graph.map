@@ -1,0 +1,11 @@
+<map id="_hcEd" name="_hcEd">
+<area shape="rect" id="Node000001" title=" " alt="" coords="86,198,143,223"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="160,200,167,204,170,211,161,221,144,223,143,217,159,216,164,210,163,207,158,205"/>
+<area shape="rect" id="Node000002" href="$usbdpriv_8h.html#union__hc_ed_hc_area_u" title=" " alt="" coords="5,94,117,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="65,135,69,154,76,172,98,195,94,199,71,175,63,155,60,136"/>
+<area shape="rect" id="Node000003" href="$usbdpriv_8h.html#struct__hc_ed_hc_area" title=" " alt="" coords="10,5,112,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="64,47,64,94,58,94,58,47"/>
+<area shape="rect" id="Node000004" href="$usbdpriv_8h.html#struct__hc_td" title=" " alt="" coords="140,94,198,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="159,134,138,175,124,199,119,196,133,172,154,132"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="215,98,224,107,216,116,198,118,198,112,214,111,219,107,212,102"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="iop/cdvd/cdvdman/include/cdvdman.h" name="iop/cdvd/cdvdman/include/cdvdman.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="28,5,200,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,94,68,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,48,61,84,57,81,93,45"/>
+<area shape="rect" id="Node000003" href="$irx_8h.html" title=" " alt="" coords="92,94,136,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="116,46,116,78,111,78,111,46"/>
+<area shape="rect" id="Node000007" href="$libcdvd-common_8h.html" title=" " alt="" coords="155,168,281,193"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="129,45,203,153,199,156,125,48"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="68,168,130,193"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="114,120,107,153,102,152,109,119"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="66,241,133,267"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="102,194,102,226,96,226,96,194"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="166,241,251,267"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="119,192,179,230,176,235,116,196"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="219,194,215,226,209,226,214,193"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="NetManRegNetworkStack" name="NetManRegNetworkStack">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,94,179,120"/>
+<area shape="rect" id="Node000002" href="$netman__rpc_8h.html#struct_net_man_b_d" title=" " alt="" coords="49,5,135,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,47,95,94,89,94,89,47"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="opcode_table_entry_" name="opcode_table_entry_">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,183,146,208"/>
+<area shape="rect" id="Node000002" href="$structopcode__table__.html" title=" " alt="" coords="23,271,128,297"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="47,220,39,233,37,243,41,252,58,269,54,273,36,255,32,243,34,231,43,218"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,256,81,233,76,209,81,208,86,232,85,257"/>
+<area shape="rect" id="Node000003" href="$structdisasm__result.html" title=" " alt="" coords="24,94,127,120"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="78,135,78,182,73,182,73,135"/>
+<area shape="rect" id="Node000004" href="$structoperand.html" title=" " alt="" coords="42,5,109,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="78,47,78,94,73,94,73,47"/>
+</map>

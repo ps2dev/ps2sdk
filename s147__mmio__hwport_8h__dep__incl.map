@@ -1,0 +1,11 @@
+<map id="common/include/s147_mmio_hwport.h" name="common/include/s147_mmio_hwport.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="234,5,382,46"/>
+<area shape="rect" id="Node000002" href="$romwrite_8c_source.html" title=" " alt="" coords="5,94,141,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="241,54,127,96,126,91,240,49"/>
+<area shape="rect" id="Node000003" href="$s147ctrl_8c_source.html" title=" " alt="" coords="165,94,296,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="282,60,250,95,246,92,278,56"/>
+<area shape="rect" id="Node000004" href="$s147link_8c_source.html" title=" " alt="" coords="320,94,453,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="338,56,371,92,367,95,334,60"/>
+<area shape="rect" id="Node000005" href="$s147nand_8c_source.html" title=" " alt="" coords="477,94,618,135"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="377,49,494,91,492,96,375,54"/>
+</map>

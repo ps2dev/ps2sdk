@@ -1,0 +1,21 @@
+<map id="common/include/iop_mmio_hwport.h" name="common/include/iop_mmio_hwport.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="675,5,813,46"/>
+<area shape="rect" id="Node000002" href="$s147nand_8c_source.html" title=" " alt="" coords="5,94,147,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="660,36,433,59,296,76,159,97,148,99,147,93,158,91,295,70,432,53,659,31"/>
+<area shape="rect" id="Node000003" href="$cdvdman_8c_source.html" title=" " alt="" coords="171,94,320,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="660,42,508,66,332,97,321,99,320,94,332,91,507,61,659,37"/>
+<area shape="rect" id="Node000004" href="$boardinf_8c_source.html" title=" " alt="" coords="344,94,478,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="661,51,479,98,477,93,660,46"/>
+<area shape="rect" id="Node000005" href="$eeconf_8c_source.html" title=" " alt="" coords="501,94,651,135"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="694,56,615,96,613,91,691,51"/>
+<area shape="rect" id="Node000006" href="$igreeting_8c_source.html" title=" " alt="" coords="675,94,813,135"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="747,62,747,94,741,94,741,62"/>
+<area shape="rect" id="Node000007" href="$intrman_8c_source.html" title=" " alt="" coords="837,94,968,135"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="795,51,868,91,866,96,792,56"/>
+<area shape="rect" id="Node000008" href="$rmreset_8c_source.html" title=" " alt="" coords="992,94,1125,135"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="829,47,993,92,991,97,827,52"/>
+<area shape="rect" id="Node000009" href="$sifman_8c_source.html" title=" " alt="" coords="1149,94,1299,135"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="828,38,1138,91,1149,94,1148,99,1137,97,828,43"/>
+<area shape="rect" id="Node000010" href="$sio2man_8c.html" title=" " alt="" coords="1323,94,1461,135"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="829,31,1048,54,1180,71,1311,91,1323,94,1322,99,1310,97,1179,76,1047,59,828,37"/>
+</map>

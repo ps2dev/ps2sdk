@@ -1,0 +1,24 @@
+<map id="iop/sound/libsd/src/batch.c" name="iop/sound/libsd/src/batch.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="90,5,221,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="28,168,91,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,43,47,63,28,77,12,95,8,110,12,126,34,155,30,158,7,128,3,110,8,93,24,73,44,58,89,38"/>
+<area shape="rect" id="Node000003" href="$sifman_8h.html" title=" " alt="" coords="120,94,191,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="158,46,158,78,153,78,153,46"/>
+<area shape="rect" id="Node000008" href="$intrman_8h.html" title=" " alt="" coords="22,94,97,120"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="133,48,88,86,84,82,130,44"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="214,94,273,120"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="179,44,220,81,217,85,175,48"/>
+<area shape="rect" id="Node000010" href="$spu2regs_8h.html" title=" " alt="" coords="297,94,382,120"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="202,44,298,85,296,90,200,49"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="141,122,89,161,86,156,138,118"/>
+<area shape="rect" id="Node000004" href="$irx_8h.html" title=" " alt="" coords="124,168,168,193"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="157,120,152,153,147,152,151,120"/>
+<area shape="rect" id="Node000005" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="115,241,177,267"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="149,194,149,226,143,226,143,194"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="63,315,130,341"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="140,269,116,304,111,301,136,266"/>
+<area shape="rect" id="Node000007" href="$tamtypes_8h.html" title=" " alt="" coords="155,315,239,341"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="157,266,182,301,177,304,152,269"/>
+<area shape="poly" id="edge9_Node000008_Node000002" title=" " alt="" coords="62,120,62,152,57,152,57,120"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="76,118,122,156,118,160,72,122"/>
+</map>

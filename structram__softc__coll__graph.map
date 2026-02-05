@@ -1,0 +1,11 @@
+<map id="ram_softc" name="ram_softc">
+<area shape="rect" id="Node000001" title=" " alt="" coords="43,187,122,213"/>
+<area shape="rect" id="Node000002" href="$structac__dma.html" title=" " alt="" coords="121,98,188,124"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,138,95,188,91,185,133,134"/>
+<area shape="rect" id="Node000003" href="$structac__queue.html" title=" " alt="" coords="5,8,83,33"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="48,49,59,123,80,186,75,187,54,125,43,49"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="72,41,141,96,138,100,69,45"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="100,11,109,20,101,29,84,32,83,26,99,24,104,20,96,15"/>
+<area shape="rect" id="Node000004" href="$structac__dma__ops.html" title=" " alt="" coords="172,8,268,33"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="204,47,165,100,161,97,200,44"/>
+</map>

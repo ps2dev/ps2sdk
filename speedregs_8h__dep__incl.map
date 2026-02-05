@@ -1,0 +1,40 @@
+<map id="common/include/speedregs.h" name="common/include/speedregs.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1202,5,1392,31"/>
+<area shape="rect" id="Node000002" href="$atahw_8h.html" title=" " alt="" coords="276,86,441,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1187,31,442,94,441,88,1186,26"/>
+<area shape="rect" id="Node000006" href="$smapregs_8h.html" title=" " alt="" coords="674,86,862,112"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1193,36,880,82,838,88,837,83,879,76,1192,31"/>
+<area shape="rect" id="Node000007" href="$ps2dev9_8c.html" title=" " alt="" coords="544,175,731,201"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="1187,26,1038,32,875,43,737,60,690,70,664,81,649,102,641,128,639,175,633,175,636,127,644,100,661,77,688,65,736,54,874,38,1038,27,1186,20"/>
+<area shape="rect" id="Node000008" href="$smap_8c_source.html" title=" " alt="" coords="755,168,901,208"/>
+<area shape="poly" id="edge18_Node000001_Node000008" title=" " alt="" coords="1187,28,1075,45,1017,60,961,81,927,101,896,124,847,169,844,165,892,120,924,96,959,77,1015,55,1074,40,1186,22"/>
+<area shape="rect" id="Node000009" href="$xfer_8c_source.html" title=" " alt="" coords="925,168,1072,208"/>
+<area shape="poly" id="edge19_Node000001_Node000009" title=" " alt="" coords="1186,28,1123,35,1060,45,1008,60,989,70,977,81,968,101,969,123,977,146,988,166,983,169,972,148,964,124,963,100,972,77,986,65,1006,55,1059,40,1122,29,1186,23"/>
+<area shape="rect" id="Node000010" href="$extflash_8c_source.html" title=" " alt="" coords="987,79,1127,120"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="1247,39,1118,81,1116,76,1245,34"/>
+<area shape="rect" id="Node000011" href="$dvrdrv_8c_source.html" title=" " alt="" coords="1151,79,1283,120"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="1276,44,1239,81,1235,77,1272,40"/>
+<area shape="rect" id="Node000012" href="$dvr_8c_source.html" title=" " alt="" coords="1307,86,1450,112"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="1322,40,1368,84,1364,88,1319,44"/>
+<area shape="rect" id="Node000013" href="$dvrav_8c_source.html" title=" " alt="" coords="1474,79,1600,120"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="1349,34,1478,76,1476,81,1348,39"/>
+<area shape="rect" id="Node000014" href="$dvrdv_8c_source.html" title=" " alt="" coords="1624,79,1749,120"/>
+<area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="1383,32,1612,76,1624,79,1623,84,1611,82,1382,37"/>
+<area shape="rect" id="Node000015" href="$dvrfile_8c_source.html" title=" " alt="" coords="1774,79,1901,120"/>
+<area shape="poly" id="edge15_Node000001_Node000015" title=" " alt="" coords="1408,27,1575,47,1762,76,1774,79,1772,84,1761,82,1574,52,1407,33"/>
+<area shape="rect" id="Node000016" href="$dvripl_8c_source.html" title=" " alt="" coords="1924,79,2049,120"/>
+<area shape="poly" id="edge16_Node000001_Node000016" title=" " alt="" coords="1408,22,1641,40,1778,56,1914,76,1924,78,1923,84,1913,82,1777,61,1641,46,1408,28"/>
+<area shape="rect" id="Node000017" href="$dvrmisc_8c_source.html" title=" " alt="" coords="2073,79,2212,120"/>
+<area shape="poly" id="edge17_Node000001_Node000017" title=" " alt="" coords="1408,20,1704,37,1883,53,2062,76,2073,78,2072,84,2061,82,1882,59,1704,42,1408,26"/>
+<area shape="rect" id="Node000018" href="$spduart_8c_source.html" title=" " alt="" coords="2236,79,2372,120"/>
+<area shape="poly" id="edge20_Node000001_Node000018" title=" " alt="" coords="1408,18,1568,22,1772,32,1998,49,2224,76,2236,78,2235,84,2223,82,1997,54,1772,37,1568,28,1408,23"/>
+<area shape="rect" id="Node000003" href="$acatad_8c_source.html" title=" " alt="" coords="5,168,152,208"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="305,120,143,170,141,165,304,115"/>
+<area shape="rect" id="Node000004" href="$ps2atad_8c.html" title=" " alt="" coords="176,175,357,201"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="336,125,281,177,277,173,333,121"/>
+<area shape="rect" id="Node000005" href="$hdproatad_8c_source.html" title=" " alt="" coords="381,168,520,208"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="384,121,432,165,428,169,381,125"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="739,123,657,177,654,172,736,119"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="787,123,817,166,812,169,783,126"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="816,116,947,165,945,170,814,121"/>
+</map>

@@ -1,0 +1,21 @@
+<map id="iop/sound/libsd/src/voice.c" name="iop/sound/libsd/src/voice.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="82,5,212,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,168,68,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,49,56,68,31,95,26,109,24,123,29,152,24,153,19,123,21,108,26,93,52,64,85,44"/>
+<area shape="rect" id="Node000003" href="$irx_8h.html" title=" " alt="" coords="108,168,152,193"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="148,47,136,152,130,152,142,46"/>
+<area shape="rect" id="Node000007" href="$sifman_8h.html" title=" " alt="" coords="40,94,110,120"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="131,48,99,84,95,80,127,45"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="184,94,252,120"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="167,45,199,80,195,84,163,48"/>
+<area shape="rect" id="Node000009" href="$spu2regs_8h.html" title=" " alt="" coords="276,94,360,120"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="191,44,279,85,277,90,189,49"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="99,241,161,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="132,194,132,226,127,226,127,194"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="47,315,114,341"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="124,269,100,304,95,301,119,266"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="138,315,223,341"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="140,266,165,301,161,304,136,269"/>
+<area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="71,121,53,155,48,153,66,119"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="86,118,114,154,109,157,82,122"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="SpuCommonAttr_" name="SpuCommonAttr_">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,217,130,243"/>
+<area shape="rect" id="Node000002" href="$struct_spu_volume__.html" title=" " alt="" coords="20,5,115,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="66,47,61,94,62,163,68,216,63,217,57,164,56,94,61,46"/>
+<area shape="rect" id="Node000003" href="$struct_spu_ext_attr__.html" title=" " alt="" coords="130,104,221,129"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="94,39,164,101,160,105,90,43"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="155,142,81,218,77,215,151,139"/>
+</map>

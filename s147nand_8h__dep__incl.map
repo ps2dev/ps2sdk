@@ -1,0 +1,9 @@
+<map id="iop/arcade/s147nand/include/s147nand.h" name="iop/arcade/s147nand/include/s147nand.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="84,5,225,46"/>
+<area shape="rect" id="Node000002" href="$iop_2arcade_2romwrite_2src_2irx__imports_8h_source.html" title=" " alt="" coords="5,94,141,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,59,93,95,89,92,124,56"/>
+<area shape="rect" id="Node000004" href="$s147nand_8c_source.html" title=" " alt="" coords="165,94,306,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,56,219,92,215,95,181,59"/>
+<area shape="rect" id="Node000003" href="$romwrite_8c_source.html" title=" " alt="" coords="5,183,141,223"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="76,150,76,182,70,182,70,150"/>
+</map>

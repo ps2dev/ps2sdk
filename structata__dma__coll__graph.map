@@ -1,0 +1,18 @@
+<map id="ata_dma" name="ata_dma">
+<area shape="rect" id="Node000001" title=" " alt="" coords="137,276,209,301"/>
+<area shape="rect" id="Node000002" href="$structac__dma.html" title=" " alt="" coords="118,98,185,124"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,139,165,212,174,275,169,275,160,213,152,139"/>
+<area shape="rect" id="Node000003" href="$structac__queue.html" title=" " alt="" coords="125,8,202,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="163,49,156,98,151,98,157,48"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="220,11,229,20,221,29,203,32,202,26,218,24,224,20,216,15"/>
+<area shape="rect" id="Node000006" href="$structac__ata__h.html" title=" " alt="" coords="217,98,292,124"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="194,41,214,57,247,96,243,100,210,61,191,45"/>
+<area shape="rect" id="Node000004" href="$structac__dma__ops.html" title=" " alt="" coords="5,8,101,33"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="79,41,140,96,137,100,76,45"/>
+<area shape="rect" id="Node000005" href="$structac__ata.html" title=" " alt="" coords="224,187,284,213"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="235,226,186,277,182,273,231,222"/>
+<area shape="poly" id="edge9_Node000005_Node000005" title=" " alt="" coords="302,191,311,200,303,209,285,211,285,205,300,204,306,200,298,195"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="257,140,257,187,252,187,252,140"/>
+<area shape="rect" id="Node000007" href="$structac__ata__ops.html" title=" " alt="" coords="292,8,380,33"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="324,49,303,76,275,100,271,96,299,73,319,45"/>
+</map>

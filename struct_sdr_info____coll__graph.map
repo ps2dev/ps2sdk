@@ -1,0 +1,18 @@
+<map id="SdrInfo_" name="SdrInfo_">
+<area shape="rect" id="Node000001" title=" " alt="" coords="104,217,175,243"/>
+<area shape="rect" id="Node000002" href="$sifrpc-common_8h.html#structt___sif_rpc_data_queue" title=" " alt="" coords="162,5,298,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,38,112,51,75,69,41,94,14,125,9,140,10,154,19,167,32,179,67,200,105,215,103,220,65,204,28,183,15,170,5,155,3,140,9,123,37,90,72,65,110,46,149,33"/>
+<area shape="poly" id="edge8_Node000002_Node000002" title=" " alt="" coords="316,8,325,18,317,28,300,31,298,26,315,23,320,18,312,12"/>
+<area shape="rect" id="Node000003" href="$sifrpc-common_8h.html#structt___sif_rpc_server_data" title=" " alt="" coords="219,126,356,152"/>
+<area shape="poly" id="edge7_Node000003_Node000002" title=" " alt="" coords="253,42,261,54,277,92,287,125,282,127,272,94,256,56,248,45"/>
+<area shape="poly" id="edge9_Node000001_Node000003" title=" " alt="" coords="256,162,161,219,158,214,253,158"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="245,119,230,101,223,83,221,64,225,31,230,32,227,64,229,82,235,99,249,115"/>
+<area shape="poly" id="edge6_Node000003_Node000003" title=" " alt="" coords="373,131,382,139,374,147,357,150,356,145,372,142,377,139,370,135"/>
+<area shape="rect" id="Node000004" href="$sifrpc-common_8h.html#structt___sif_rpc_client_data" title=" " alt="" coords="319,217,451,243"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="298,165,313,191,330,204,349,214,346,219,327,209,309,195,293,168"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="371,205,354,180,336,166,316,155,319,150,339,161,358,176,376,201"/>
+<area shape="rect" id="Node000005" href="$sifrpc-common_8h.html#structt___sif_rpc_header" title=" " alt="" coords="428,126,542,152"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="462,164,400,219,396,215,459,160"/>
+<area shape="rect" id="Node000006" href="$libsd-common_8h.html#structsce_sd_effect_attr" title=" " alt="" coords="83,126,196,152"/>
+<area shape="poly" id="edge10_Node000001_Node000006" title=" " alt="" coords="142,167,142,217,137,217,137,167"/>
+</map>

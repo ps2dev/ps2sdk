@@ -1,0 +1,11 @@
+<map id="iop/system/ssbusc/include/ssbusc.h" name="iop/system/ssbusc/include/ssbusc.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,181,46"/>
+<area shape="rect" id="Node000002" href="$irx_8h.html" title=" " alt="" coords="71,94,115,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,46,96,78,90,78,90,46"/>
+<area shape="rect" id="Node000003" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="62,168,124,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="96,120,96,152,90,152,90,120"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="10,241,77,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,195,63,230,58,227,83,192"/>
+<area shape="rect" id="Node000005" href="$tamtypes_8h.html" title=" " alt="" coords="102,241,186,267"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="104,192,129,227,124,230,99,195"/>
+</map>

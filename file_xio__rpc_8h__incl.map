@@ -1,0 +1,13 @@
+<map id="ee/rpc/filexio/include/fileXio_rpc.h" name="ee/rpc/filexio/include/fileXio_rpc.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="78,5,217,46"/>
+<area shape="rect" id="Node000002" href="$file_xio_8h.html" title=" " alt="" coords="66,94,133,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,48,117,82,112,79,133,45"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="157,94,234,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="162,45,183,79,178,82,157,48"/>
+<area shape="rect" id="Node000003" href="$tamtypes_8h.html" title=" " alt="" coords="5,168,90,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="93,121,67,157,63,153,89,118"/>
+<area shape="rect" id="Node000004" href="$iox__stat_8h.html" title=" " alt="" coords="113,168,190,193"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="110,118,136,153,132,157,106,121"/>
+<area shape="rect" id="Node000005" href="$time_8h.html" title=" " alt="" coords="111,241,192,267"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="154,194,154,226,149,226,149,194"/>
+</map>

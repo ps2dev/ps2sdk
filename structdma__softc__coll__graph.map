@@ -1,0 +1,6 @@
+<map id="dma_softc" name="dma_softc">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,98,88,124"/>
+<area shape="rect" id="Node000002" href="$structac__queue.html" title=" " alt="" coords="8,8,85,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="49,48,49,98,44,98,44,48"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="102,11,112,20,103,29,86,32,85,26,101,24,107,20,99,15"/>
+</map>

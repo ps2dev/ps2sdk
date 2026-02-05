@@ -1,0 +1,7 @@
+<map id="cmd_data" name="cmd_data">
+<area shape="rect" id="Node000001" title=" " alt="" coords="142,94,220,120"/>
+<area shape="rect" id="Node000002" href="$sifcmd-common_8h.html#structt___sif_cmd_sys_handler_data" title=" " alt="" coords="5,5,175,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,41,134,68,164,92,161,96,131,72,106,45"/>
+<area shape="rect" id="Node000003" href="$sifcmd-common_8h.html#structt___sif_cmd_handler_data" title=" " alt="" coords="199,5,346,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="263,47,245,72,211,96,208,91,241,68,259,43"/>
+</map>

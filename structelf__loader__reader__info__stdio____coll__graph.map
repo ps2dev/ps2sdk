@@ -1,0 +1,9 @@
+<map id="elf_loader_reader_info_stdio_" name="elf_loader_reader_info_stdio_">
+<area shape="rect" id="Node000001" title=" " alt="" coords="108,213,256,253"/>
+<area shape="rect" id="Node000002" href="$structelf__loader__reader__info__.html" title=" " alt="" coords="16,116,172,142"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,152,167,210,163,214,112,156"/>
+<area shape="rect" id="Node000003" href="$structelf__loader__reader__segment__info__.html" title=" " alt="" coords="5,5,183,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="97,61,97,116,91,116,91,61"/>
+<area shape="rect" id="Node000004" href="$structelf__loader__reader__info__stdio__resultbuf__.html" title=" " alt="" coords="196,109,344,150"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="255,165,236,190,211,214,207,210,232,187,250,162"/>
+</map>

@@ -1,0 +1,17 @@
+<map id="subdev_t" name="subdev_t">
+<area shape="rect" id="Node000001" title=" " alt="" coords="18,94,92,120"/>
+<area shape="rect" id="Node000004" href="$devfs_8c.html#struct__devfs__device" title=" " alt="" coords="45,304,150,329"/>
+<area shape="poly" id="edge8_Node000004_Node000001" title=" " alt="" coords="58,135,61,183,69,238,81,273,94,302,89,304,76,275,64,239,55,184,52,135"/>
+<area shape="rect" id="Node000002" href="$group__devfs.html#uniondevfs__loc__t" title=" " alt="" coords="136,5,224,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,42,74,96,71,91,149,38"/>
+<area shape="rect" id="Node000003" href="$devfs_8c.html#struct__ioman__data" title=" " alt="" coords="50,394,145,420"/>
+<area shape="poly" id="edge9_Node000003_Node000002" title=" " alt="" coords="226,36,245,48,262,64,275,83,280,105,280,318,276,339,266,356,251,371,233,382,189,397,146,405,145,400,188,392,230,377,248,367,262,353,271,337,275,317,275,106,270,85,258,68,242,53,223,41"/>
+<area shape="rect" id="Node000006" href="$group__devfs.html#structdevfs__info__t" title=" " alt="" coords="134,94,226,120"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="183,47,183,94,177,94,177,47"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="72,385,34,339,17,310,6,278,3,255,4,231,14,186,30,147,45,119,50,121,35,149,19,187,9,232,8,254,11,277,22,308,38,336,76,382"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="100,344,100,394,95,394,95,344"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="167,308,177,316,168,325,151,328,150,322,166,320,171,316,164,312"/>
+<area shape="rect" id="Node000005" href="$group__devfs.html#structdevfs__node__t" title=" " alt="" coords="130,213,230,238"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="161,251,110,305,106,301,157,248"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="183,135,183,212,177,212,177,135"/>
+</map>

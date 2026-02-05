@@ -1,0 +1,5 @@
+<map id="dmac1_mmio_hwport_" name="dmac1_mmio_hwport_">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,94,158,120"/>
+<area shape="rect" id="Node000002" href="$iop__mmio__hwport_8h.html#structdmac__channel__" title=" " alt="" coords="25,5,138,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,47,84,94,79,94,79,47"/>
+</map>

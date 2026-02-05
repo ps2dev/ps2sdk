@@ -1,0 +1,17 @@
+<map id="iop/arcade/accore" name="iop/arcade/accore">
+<area shape="rect" id="node2" href="dir_0bd4cecc065cbd19f484fdaa8dc65a58.html" title="include" alt="" coords="122,63,184,89"/>
+<area shape="rect" id="node4" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="162,137,219,162"/>
+<area shape="poly" id="edge1" href="dir_000148_000256.html" alt="" coords="162,88,180,122,175,124,157,90"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000148_000256.html" title="1" alt="" coords="180,109,187,124"/>
+<area shape="rect" id="node5" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html" title="common" alt="" coords="67,137,138,162"/>
+<area shape="poly" id="edge2" href="dir_000148_000046.html" alt="" coords="147,90,122,125,118,122,143,87"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000148_000046.html" title="1" alt="" coords="125,119,132,134"/>
+<area shape="rect" id="node3" href="dir_e59fb6a30210cb18518aef290b62855b.html" title="src" alt="" coords="208,63,248,89"/>
+<area shape="poly" id="edge4" href="dir_000408_000256.html" alt="" coords="224,90,206,124,202,122,219,88"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000408_000256.html" title="1" alt="" coords="209,117,216,132"/>
+<area shape="rect" id="node6" href="dir_40ac35421bc63b72c26b6c69b1517fd6.html" title="system" alt="" coords="243,137,306,162"/>
+<area shape="poly" id="edge3" href="dir_000408_000571.html" alt="" coords="238,87,261,122,256,125,233,90"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000408_000571.html" title="4" alt="" coords="260,109,267,124"/>
+<area shape="rect" id="clust2" href="dir_8c41b7aa740fda79cdc4490331cf7b7d.html" alt="" coords="27,52,259,99"/>
+<area shape="rect" id="clust1" href="dir_83706370b12deb47497ed91304cced4b.html" title="arcade" alt="" coords="16,16,269,110"/>
+</map>

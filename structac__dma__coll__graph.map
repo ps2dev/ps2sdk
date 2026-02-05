@@ -1,0 +1,8 @@
+<map id="ac_dma" name="ac_dma">
+<area shape="rect" id="Node000001" title=" " alt="" coords="98,98,166,124"/>
+<area shape="rect" id="Node000002" href="$structac__queue.html" title=" " alt="" coords="5,8,83,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,42,122,96,118,100,65,46"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="100,11,109,20,101,29,84,32,83,26,99,24,104,20,96,15"/>
+<area shape="rect" id="Node000003" href="$structac__dma__ops.html" title=" " alt="" coords="172,8,268,33"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="199,46,146,100,142,96,195,42"/>
+</map>

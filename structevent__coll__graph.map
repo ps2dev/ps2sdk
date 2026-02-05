@@ -1,0 +1,6 @@
+<map id="event" name="event">
+<area shape="rect" id="Node000001" title=" " alt="" coords="15,98,69,124"/>
+<area shape="rect" id="Node000002" href="$structlist__head.html" title=" " alt="" coords="5,8,79,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="45,48,45,98,39,98,39,48"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="96,11,105,20,97,29,80,32,79,26,95,25,100,20,92,15"/>
+</map>

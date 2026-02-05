@@ -1,0 +1,9 @@
+<map id="siorCommsData" name="siorCommsData">
+<area shape="rect" id="Node000001" title=" " alt="" coords="109,94,224,120"/>
+<area shape="rect" id="Node000002" href="$sior-common_8h.html#structsior_init_args" title=" " alt="" coords="5,5,93,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,38,151,91,148,96,76,43"/>
+<area shape="rect" id="Node000003" href="$sior-common_8h.html#structsior_read_args" title=" " alt="" coords="117,5,216,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,47,169,94,164,94,164,47"/>
+<area shape="rect" id="Node000004" href="$sior-common_8h.html#structsior_write_args" title=" " alt="" coords="241,5,340,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="262,42,185,96,182,91,259,38"/>
+</map>

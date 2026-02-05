@@ -1,0 +1,13 @@
+<map id="iop/system/boardinf/src" name="iop/system/boardinf/src">
+<area shape="rect" id="node1" href="dir_affa5bc1c2f19f5b87b45a614768f7a2.html" title="src" alt="" coords="109,52,148,78"/>
+<area shape="rect" id="node2" href="dir_1d64e5e9f20206636d72b5bbe3d2b274.html" title="loadcore" alt="" coords="5,126,76,152"/>
+<area shape="poly" id="edge1" href="dir_000506_000272.html" alt="" coords="115,81,69,118,65,114,112,76"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000506_000272.html" title="1" alt="" coords="71,113,78,128"/>
+<area shape="rect" id="node3" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="100,126,157,152"/>
+<area shape="poly" id="edge2" href="dir_000506_000256.html" alt="" coords="131,78,131,110,126,110,126,78"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000506_000256.html" title="1" alt="" coords="133,100,140,115"/>
+<area shape="rect" id="node4" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html" title="common" alt="" coords="181,126,252,152"/>
+<area shape="poly" id="edge3" href="dir_000506_000046.html" alt="" coords="145,76,192,114,188,118,142,81"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000506_000046.html" title="1" alt="" coords="189,100,196,115"/>
+<area shape="rect" id="clust1" href="dir_5ec8cbed913f77dce8be99aba816b4e2.html" title="boardinf" alt="" coords="95,16,162,89"/>
+</map>

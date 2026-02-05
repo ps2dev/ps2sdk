@@ -1,0 +1,9 @@
+<map id="meme_ram" name="meme_ram">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,187,92,213"/>
+<area shape="rect" id="Node000002" href="$structac__ram.html" title=" " alt="" coords="16,98,81,124"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="51,140,51,187,46,187,46,140"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="98,102,107,111,99,120,81,122,81,117,97,115,102,111,94,106"/>
+<area shape="rect" id="Node000003" href="$structac__queue.html" title=" " alt="" coords="10,8,87,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="51,48,51,98,46,98,46,48"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="104,11,114,20,105,29,88,32,87,26,103,24,109,20,101,15"/>
+</map>

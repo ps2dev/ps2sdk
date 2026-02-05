@@ -1,0 +1,22 @@
+<map id="cdc_softc" name="cdc_softc">
+<area shape="rect" id="Node000001" title=" " alt="" coords="152,364,231,390"/>
+<area shape="rect" id="Node000002" href="$structcdc__read__stru.html" title=" " alt="" coords="5,276,109,301"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,308,174,361,171,366,87,312"/>
+<area shape="rect" id="Node000003" href="$structcdc__stream__stru.html" title=" " alt="" coords="132,276,251,301"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="194,317,194,364,189,364,189,317"/>
+<area shape="rect" id="Node000004" href="$structacd.html" title=" " alt="" coords="274,276,317,301"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="271,313,208,366,204,362,268,309"/>
+<area shape="poly" id="edge11_Node000004_Node000004" title=" " alt="" coords="333,279,340,282,343,289,335,298,317,299,317,294,332,293,338,288,337,286,331,283"/>
+<area shape="rect" id="Node000005" href="$structac__atapi.html" title=" " alt="" coords="260,187,331,213"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="298,228,298,275,293,275,293,228"/>
+<area shape="poly" id="edge9_Node000005_Node000005" title=" " alt="" coords="348,191,357,200,349,209,332,211,331,205,347,204,352,200,345,195"/>
+<area shape="rect" id="Node000006" href="$structac__ata__h.html" title=" " alt="" coords="204,98,278,124"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="259,136,290,185,286,188,255,139"/>
+<area shape="rect" id="Node000007" href="$structac__queue.html" title=" " alt="" coords="117,8,194,33"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="180,43,232,96,228,100,176,46"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="212,11,221,20,213,29,195,32,194,26,210,24,216,20,208,15"/>
+<area shape="rect" id="Node000008" href="$structac__ata__ops.html" title=" " alt="" coords="284,8,372,33"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="307,46,254,100,251,96,303,42"/>
+<area shape="rect" id="Node000009" href="$unionac__atapi__pkt.html" title=" " alt="" coords="303,98,398,124"/>
+<area shape="poly" id="edge10_Node000005_Node000009" title=" " alt="" coords="337,139,305,188,301,185,332,136"/>
+</map>

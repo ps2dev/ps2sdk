@@ -1,0 +1,27 @@
+<map id="msif_msgbox_msg" name="msif_msgbox_msg">
+<area shape="rect" id="Node000001" title=" " alt="" coords="90,572,220,597"/>
+<area shape="rect" id="Node000002" href="$structmsif__msgbox__msg2.html" title=" " alt="" coords="86,483,223,509"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,524,157,571,152,571,152,524"/>
+<area shape="rect" id="Node000003" href="$struct__sifm__client__data.html" title=" " alt="" coords="88,94,211,120"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="76,128,50,139,29,154,14,173,8,197,8,408,15,434,33,454,59,469,88,480,86,485,56,474,30,458,10,437,3,409,3,196,9,170,25,150,48,134,74,123"/>
+<area shape="rect" id="Node000005" href="$struct__sifm__serve__data.html" title=" " alt="" coords="152,185,277,210"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="145,135,145,147,148,157,161,172,178,182,175,187,158,176,144,160,139,148,139,135"/>
+<area shape="rect" id="Node000004" href="$struct__sifm__rpc__data.html" title=" " alt="" coords="94,5,204,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="152,47,152,94,147,94,147,47"/>
+<area shape="poly" id="edge17_Node000002_Node000005" title=" " alt="" coords="190,223,177,238,156,270,145,306,140,357,142,407,154,482,149,483,136,408,134,357,140,305,152,268,173,235,186,219"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="200,173,183,145,161,122,165,118,187,142,205,170"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="294,189,303,198,295,206,278,209,277,203,293,201,298,198,291,194"/>
+<area shape="rect" id="Node000006" href="$struct__sifm__queue__data.html" title=" " alt="" coords="155,306,282,331"/>
+<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="194,224,187,238,182,259,187,281,205,304,200,307,182,283,177,259,182,236,190,221"/>
+<area shape="rect" id="Node000007" href="$struct__sifm__serve__entry.html" title=" " alt="" coords="358,306,485,331"/>
+<area shape="poly" id="edge11_Node000007_Node000005" title=" " alt="" coords="239,219,276,250,320,279,377,303,375,308,317,284,272,254,236,223"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="215,290,212,211,218,211,220,290"/>
+<area shape="poly" id="edge9_Node000006_Node000006" title=" " alt="" coords="300,310,309,318,301,326,283,329,282,324,299,321,304,319,297,315"/>
+<area shape="rect" id="Node000008" href="$structmsif__data.html" title=" " alt="" coords="154,394,232,420"/>
+<area shape="poly" id="edge14_Node000008_Node000006" title=" " alt="" coords="199,344,193,356,190,375,193,393,187,394,185,375,187,355,194,342"/>
+<area shape="poly" id="edge16_Node000002_Node000007" title=" " alt="" coords="436,346,437,359,433,372,414,397,391,419,337,452,279,475,224,488,223,483,277,470,335,448,388,415,410,394,428,369,432,358,430,347"/>
+<area shape="poly" id="edge10_Node000005_Node000007" title=" " alt="" coords="413,292,401,263,381,239,357,224,331,213,277,203,278,197,333,208,360,219,384,235,405,261,418,290"/>
+<area shape="poly" id="edge12_Node000007_Node000007" title=" " alt="" coords="502,310,512,318,503,326,486,329,485,324,501,321,506,319,499,315"/>
+<area shape="poly" id="edge15_Node000008_Node000007" title=" " alt="" coords="370,339,320,358,289,373,229,396,227,391,287,368,318,353,368,334"/>
+<area shape="poly" id="edge13_Node000002_Node000008" title=" " alt="" coords="184,435,162,484,158,482,179,433"/>
+</map>

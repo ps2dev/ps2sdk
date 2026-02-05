@@ -1,0 +1,7 @@
+<map id="gethostbyname_res_pkt" name="gethostbyname_res_pkt">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,183,165,208"/>
+<area shape="rect" id="Node000002" href="$ps2ip__rpc_8h.html#structhostent__res" title=" " alt="" coords="40,94,130,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,135,88,182,82,182,82,135"/>
+<area shape="rect" id="Node000003" href="$tcpip_8h.html#structip4__addr" title=" " alt="" coords="50,5,120,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="88,47,88,94,82,94,82,47"/>
+</map>

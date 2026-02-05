@@ -1,0 +1,10 @@
+<map id="_syment" name="_syment">
+<area shape="rect" id="Node000001" title=" " alt="" coords="58,187,128,213"/>
+<area shape="rect" id="Node000002" href="$struct___elf32___sym.html" title=" " alt="" coords="5,96,96,122"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="65,134,90,186,85,188,60,137"/>
+<area shape="rect" id="Node000003" href="$struct__elf__section.html" title=" " alt="" coords="120,96,211,122"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="148,136,105,188,101,185,144,132"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="228,100,237,109,229,118,212,120,211,115,227,113,232,109,225,104"/>
+<area shape="rect" id="Node000004" href="$struct___elf32___shdr.html" title=" " alt="" coords="120,5,211,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="168,46,168,96,162,96,162,46"/>
+</map>

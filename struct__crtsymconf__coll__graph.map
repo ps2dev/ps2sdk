@@ -1,0 +1,10 @@
+<map id="_crtsymconf" name="_crtsymconf">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,291,98,316"/>
+<area shape="rect" id="Node000002" href="$struct__segconf.html" title=" " alt="" coords="14,202,89,228"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="54,243,54,290,49,290,49,243"/>
+<area shape="rect" id="Node000003" href="$struct__elf__section.html" title=" " alt="" coords="6,96,97,122"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="54,137,54,202,49,202,49,137"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="114,100,124,109,116,118,98,120,97,115,113,113,119,109,111,104"/>
+<area shape="rect" id="Node000004" href="$struct___elf32___shdr.html" title=" " alt="" coords="6,5,97,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="54,46,54,96,49,96,49,46"/>
+</map>

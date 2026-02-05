@@ -1,0 +1,7 @@
+<map id="ac_timer" name="ac_timer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="8,98,80,124"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="97,102,106,111,98,120,80,122,80,117,96,115,101,111,93,106"/>
+<area shape="rect" id="Node000002" href="$structac__queue.html" title=" " alt="" coords="5,8,83,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="47,48,47,98,41,98,41,48"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="100,11,109,20,101,29,84,32,83,26,99,24,104,20,96,15"/>
+</map>

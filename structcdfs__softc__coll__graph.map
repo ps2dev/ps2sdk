@@ -1,0 +1,10 @@
+<map id="cdfs_softc" name="cdfs_softc">
+<area shape="rect" id="Node000001" title=" " alt="" coords="105,183,188,208"/>
+<area shape="rect" id="Node000002" href="$structcdfs__ptable.html" title=" " alt="" coords="102,94,191,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,135,149,182,144,182,144,135"/>
+<area shape="rect" id="Node000003" href="$structiso9660__path.html" title=" " alt="" coords="5,5,104,31"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="47,46,41,82,42,101,48,118,62,139,80,155,119,180,117,184,77,160,58,142,43,121,37,102,36,82,42,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="80,40,136,92,132,96,77,44"/>
+<area shape="rect" id="Node000004" href="$structiso9660__dirent.html" title=" " alt="" coords="215,94,320,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="241,131,165,184,162,180,237,126"/>
+</map>

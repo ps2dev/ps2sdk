@@ -1,0 +1,9 @@
+<map id="AHXInstrument" name="AHXInstrument">
+<area shape="rect" id="Node000001" title=" " alt="" coords="44,183,155,208"/>
+<area shape="rect" id="Node000002" href="$ahx_8h.html#struct_a_h_x_envelope" title=" " alt="" coords="5,94,108,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="66,134,75,157,91,181,86,184,70,160,61,136"/>
+<area shape="rect" id="Node000003" href="$ahx_8h.html#struct_a_h_x_p_list" title=" " alt="" coords="132,94,213,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="155,133,111,184,107,181,151,130"/>
+<area shape="rect" id="Node000004" href="$ahx_8h.html#struct_a_h_x_p_list_entry" title=" " alt="" coords="118,5,227,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="175,47,175,94,170,94,170,47"/>
+</map>

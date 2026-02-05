@@ -1,0 +1,32 @@
+<map id="iop/system/sbusintr/src/sbusintr.c" name="iop/system/sbusintr/src/sbusintr.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="195,5,330,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="135,168,198,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,38,88,60,43,77,26,86,15,96,9,109,11,121,20,132,35,142,76,158,121,169,119,174,74,163,32,147,16,136,6,123,3,109,11,92,23,81,40,72,87,55,195,33"/>
+<area shape="rect" id="Node000003" href="$defs_8h.html" title=" " alt="" coords="421,168,477,193"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="331,35,386,56,412,72,434,92,448,122,453,152,447,153,443,123,430,96,408,76,383,60,329,40"/>
+<area shape="rect" id="Node000007" href="$irx_8h.html" title=" " alt="" coords="278,168,322,193"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="331,38,376,58,396,73,413,93,418,106,416,119,399,141,370,158,338,171,336,166,367,153,395,137,411,117,413,107,408,95,393,77,373,63,329,43"/>
+<area shape="rect" id="Node000008" href="$loadcore_8h.html" title=" " alt="" coords="25,94,105,120"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="214,49,111,90,109,85,212,44"/>
+<area shape="rect" id="Node000009" href="$intrman_8h.html" title=" " alt="" coords="129,94,204,120"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="240,48,194,86,191,82,237,44"/>
+<area shape="rect" id="Node000010" href="$sifman_8h.html" title=" " alt="" coords="227,94,298,120"/>
+<area shape="poly" id="edge14_Node000001_Node000010" title=" " alt="" coords="265,46,265,78,260,78,260,46"/>
+<area shape="rect" id="Node000011" href="$sbusintr_8h.html" title=" " alt="" coords="321,94,398,120"/>
+<area shape="poly" id="edge17_Node000001_Node000011" title=" " alt="" coords="288,44,335,82,331,86,285,48"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="343,241,406,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="438,196,400,233,396,229,435,192"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="291,315,359,341"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="368,269,344,304,340,301,364,266"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="383,315,467,341"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="385,266,410,301,406,304,381,269"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="314,192,353,229,349,233,311,196"/>
+<area shape="poly" id="edge9_Node000008_Node000002" title=" " alt="" coords="84,118,138,156,135,160,81,122"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="106,118,264,165,262,171,104,123"/>
+<area shape="poly" id="edge12_Node000009_Node000002" title=" " alt="" coords="169,120,169,152,164,152,164,120"/>
+<area shape="poly" id="edge13_Node000009_Node000007" title=" " alt="" coords="190,118,265,158,262,162,188,123"/>
+<area shape="poly" id="edge15_Node000010_Node000002" title=" " alt="" coords="248,122,196,161,193,156,245,118"/>
+<area shape="poly" id="edge16_Node000010_Node000007" title=" " alt="" coords="271,119,289,153,284,155,266,121"/>
+<area shape="poly" id="edge18_Node000011_Node000002" title=" " alt="" coords="328,123,213,165,211,160,326,118"/>
+<area shape="poly" id="edge19_Node000011_Node000007" title=" " alt="" coords="352,122,322,157,318,154,348,118"/>
+</map>

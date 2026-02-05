@@ -1,0 +1,9 @@
+<map id="common/include/ee_cop0_defs.h" name="common/include/ee_cop0_defs.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="90,5,259,46"/>
+<area shape="rect" id="Node000002" href="$ee__debug_8h.html" title=" " alt="" coords="29,94,162,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,60,115,95,111,92,144,56"/>
+<area shape="rect" id="Node000004" href="$tlbsrc_8c_source.html" title=" " alt="" coords="187,94,319,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="204,56,237,92,233,95,200,60"/>
+<area shape="rect" id="Node000003" href="$ee__debug_8c_source.html" title=" " alt="" coords="5,183,186,208"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,150,98,182,93,182,93,150"/>
+</map>

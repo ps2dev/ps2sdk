@@ -1,0 +1,7 @@
+<map id="SetLoadfileCallbacks_struct_" name="SetLoadfileCallbacks_struct_">
+<area shape="rect" id="Node000001" title=" " alt="" coords="15,273,159,313"/>
+<area shape="rect" id="Node000002" href="$modload_8h.html#structloadfile__allocate__handler__struct__" title=" " alt="" coords="6,109,168,150"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,165,90,272,84,272,84,165"/>
+<area shape="rect" id="Node000003" href="$modload_8h.html#structloadfile__ee__elf__ringbuffer__content__" title=" " alt="" coords="5,5,169,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="90,62,90,109,84,109,84,62"/>
+</map>

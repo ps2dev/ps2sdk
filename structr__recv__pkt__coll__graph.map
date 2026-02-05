@@ -1,0 +1,5 @@
+<map id="r_recv_pkt" name="r_recv_pkt">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,94,88,120"/>
+<area shape="rect" id="Node000002" href="$tcpip_8h.html#structsockaddr" title=" " alt="" coords="9,5,84,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="49,47,49,94,44,94,44,47"/>
+</map>

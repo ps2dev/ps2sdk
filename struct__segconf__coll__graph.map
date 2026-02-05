@@ -1,0 +1,8 @@
+<map id="_segconf" name="_segconf">
+<area shape="rect" id="Node000001" title=" " alt="" coords="14,202,88,228"/>
+<area shape="rect" id="Node000002" href="$struct__elf__section.html" title=" " alt="" coords="5,96,97,122"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="54,137,54,202,48,202,48,137"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="114,100,123,109,115,118,98,120,97,115,113,113,118,109,111,104"/>
+<area shape="rect" id="Node000003" href="$struct___elf32___shdr.html" title=" " alt="" coords="5,5,97,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="54,46,54,96,48,96,48,46"/>
+</map>
