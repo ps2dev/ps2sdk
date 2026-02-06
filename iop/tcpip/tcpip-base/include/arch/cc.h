@@ -1,8 +1,8 @@
 #ifndef __CC_H__
 #define __CC_H__
 
-#include <errno.h>
 #include <stddef.h>
+#include <sys/time.h>
 
 #define BYTE_ORDER LITTLE_ENDIAN
 
@@ -46,8 +46,6 @@ typedef u32_t			mem_ptr_t;
 #define LWIP_PLATFORM_DIAG(args)
 #define LWIP_PLATFORM_ASSERT(args)
 #endif
-
-#define atoi(x) strtol(x, NULL, 10)
 
 #define LWIP_NO_STDINT_H	1	//stdint.h does not exist.
 #define LWIP_NO_INTTYPES_H	1	//inttypes.h does not exist.

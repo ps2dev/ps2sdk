@@ -244,6 +244,8 @@
  */
 #define LWIP_CHECKSUM_ON_COPY	1
 
+/* Define LWIP_ERRNO_STDINCLUDE if you want to include <errno.h> here */
+#define LWIP_ERRNO_STDINCLUDE	1
 /*
    ------------------------------------
    ---------- Socket options ----------

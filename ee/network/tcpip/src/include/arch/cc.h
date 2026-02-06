@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <sys/select.h>
 
 #define PACK_STRUCT_FIELD(x) x __attribute((packed))
 #define PACK_STRUCT_STRUCT __attribute((packed))

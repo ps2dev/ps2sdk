@@ -63,7 +63,7 @@ I_inet_addr
 I_tcpip_input
 I_netif_set_link_up
 I_netif_set_link_down
-I_tcpip_callback_with_block
+I_tcpip_callback
 ps2ip_IMPORTS_end
 #endif
 
