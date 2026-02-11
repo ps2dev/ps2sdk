@@ -14,4 +14,6 @@ APA_USE_DEV9 ?= 0
 APA_USE_ATAD ?= 0
 APA_USE_BDM ?= 1
 
+IOP_CFLAGS += -DAPA_POSIX_VER
+
 include $(PS2SDKSRC)/iop/hdd/apa/Makefile
