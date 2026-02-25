@@ -36,16 +36,16 @@ fatfs_fs_driver_mount_info fs_driver_mount_info[FF_VOLUMES];
 #define FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_DEFINITIONS(varname) \
     const char *modified_##varname;
 
-#define FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(varname, fd) \
+#define FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(varname, vol) \
     { \
-        if ((fd)->unit != 0) \
+        if ((vol) != 0) \
         { \
             int strlen_##varname; \
             char *modified_scope_##varname; \
             \
             strlen_##varname = strlen(varname); \
             modified_scope_##varname = __builtin_alloca(3 + strlen_##varname + 1); \
-            modified_scope_##varname[0] = '0' + (fd)->unit; \
+            modified_scope_##varname[0] = '0' + (vol); \
             modified_scope_##varname[1] = ':'; \
             modified_scope_##varname[2] = '/'; \
             memcpy((modified_scope_##varname) + 3, varname, strlen_##varname); \
@@ -192,11 +192,86 @@ static void fatfs_fs_driver_stop_all_bd(void)
     }
 }
 
+// Pool of dynamically-registered iop_device_t instances, one per unique bd->path value.
+// "mass" is always registered separately; this pool handles all other path values.
+#define FS_MAX_TYPED_DRIVERS 8
+static iop_device_t fs_typed_drivers[FS_MAX_TYPED_DRIVERS];
+static char         fs_typed_driver_names[FS_MAX_TYPED_DRIVERS][16];
+static int          fs_typed_driver_count = 0;
+
+// Forward declaration for the shared ops table used by all typed drivers.
+static iop_device_ops_t fs_functarray;
+
+// Ensures an iop_device_t named `path` is registered with iomanX.
+// No-op if already registered or if the pool is exhausted.
+static void fs_ensure_typed_driver(const char *path)
+{
+    int i;
+
+    if (path == NULL || strcmp(path, "mass") == 0)
+        return;
+
+    for (i = 0; i < fs_typed_driver_count; i++) {
+        if (strcmp(fs_typed_driver_names[i], path) == 0)
+            return; // already registered
+    }
+
+    if (fs_typed_driver_count >= FS_MAX_TYPED_DRIVERS) {
+        M_DEBUG("fs_ensure_typed_driver: pool exhausted, cannot register '%s'\n", path);
+        return;
+    }
+
+    i = fs_typed_driver_count;
+    strncpy(fs_typed_driver_names[i], path, sizeof(fs_typed_driver_names[i]) - 1);
+    fs_typed_driver_names[i][sizeof(fs_typed_driver_names[i]) - 1] = '\0';
+
+    fs_typed_drivers[i].name    = fs_typed_driver_names[i];
+    fs_typed_drivers[i].type    = IOP_DT_FS | IOP_DT_FSEXT;
+    fs_typed_drivers[i].version = 2;
+    fs_typed_drivers[i].desc    = "FATFS driver";
+    fs_typed_drivers[i].ops     = &fs_functarray;
+
+    DelDrv(fs_typed_driver_names[i]);
+    if (AddDrv(&fs_typed_drivers[i]) == 0) {
+        M_DEBUG("fs_ensure_typed_driver: registered '%s'\n", path);
+        fs_typed_driver_count++;
+    }
+}
+
+// Maps (iomanX driver name, unit) to a FatFs volume index (mount_info_index).
+// "mass" uses global connection order for full backward compatibility.
+// Any other name matches bd->path of mounted devices.
+// Returns -1 if no matching mounted volume is found.
+static int fs_driver_resolve_volume(const char *driver_name, int unit)
+{
+    int i, count;
+
+    if (strcmp(driver_name, "mass") == 0) {
+        if (unit >= 0 && unit < FATFS_FS_DRIVER_MOUNT_INFO_MAX)
+            return unit;
+        return -1;
+    }
+
+    count = 0;
+    for (i = 0; i < FATFS_FS_DRIVER_MOUNT_INFO_MAX; i++) {
+        struct block_device *bd = fs_driver_mount_info[i].mounted_bd;
+        if (bd != NULL && bd->path != NULL && strcmp(bd->path, driver_name) == 0) {
+            if (count == unit)
+                return i;
+            count++;
+        }
+    }
+    return -1;
+}
+
 int connect_bd(struct block_device *bd)
 {
     int mount_info_index;
 
     M_DEBUG("%s\n", __func__);
+
+    // Dynamically register a typed iop_device_t for this device's path prefix.
+    fs_ensure_typed_driver(bd->path);
 
     _fs_lock();
     mount_info_index = fatfs_fs_driver_find_mount_info_index_free();
@@ -266,12 +341,17 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
     M_DEBUG("%s: %s flags=%X mode=%X\n", __func__, name, flags, mode);
 
     int ret;
+    int vol;
     BYTE f_mode = FA_OPEN_EXISTING;
     FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_DEFINITIONS(name);
 
     (void)mode;
 
-    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(name, fd);
+    vol = fs_driver_resolve_volume(fd->device->name, fd->unit);
+    if (vol < 0)
+        return -ENXIO;
+
+    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(name, vol);
 
     _fs_lock();
 
@@ -406,9 +486,14 @@ static int fs_remove(iop_file_t *fd, const char *name)
     M_DEBUG("%s\n", __func__);
 
     int ret;
+    int vol;
     FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_DEFINITIONS(name);
 
-    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(name, fd);
+    vol = fs_driver_resolve_volume(fd->device->name, fd->unit);
+    if (vol < 0)
+        return -ENXIO;
+
+    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(name, vol);
 
     _fs_lock();
 
@@ -424,11 +509,16 @@ static int fs_mkdir(iop_file_t *fd, const char *name, int mode)
     M_DEBUG("%s\n", __func__);
 
     int ret;
+    int vol;
     FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_DEFINITIONS(name);
 
     (void)mode;
 
-    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(name, fd);
+    vol = fs_driver_resolve_volume(fd->device->name, fd->unit);
+    if (vol < 0)
+        return -ENXIO;
+
+    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(name, vol);
 
     _fs_lock();
 
@@ -444,9 +534,14 @@ static int fs_dopen(iop_file_t *fd, const char *name)
     M_DEBUG("%s: unit %d name %s\n", __func__, fd->unit, name);
 
     int ret;
+    int vol;
     FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_DEFINITIONS(name);
 
-    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(name, fd);
+    vol = fs_driver_resolve_volume(fd->device->name, fd->unit);
+    if (vol < 0)
+        return -ENXIO;
+
+    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(name, vol);
 
     _fs_lock();
 
@@ -565,8 +660,13 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
     M_DEBUG("%s: unit %d name %s\n", __func__, fd->unit, name);
 
     int ret;
+    int vol;
     FILINFO fno;
     FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_DEFINITIONS(name);
+
+    vol = fs_driver_resolve_volume(fd->device->name, fd->unit);
+    if (vol < 0)
+        return -ENXIO;
 
     // FatFs f_stat doesn't handle the root directory, so we'll handle this case ourselves.
     {
@@ -575,7 +675,7 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
             name_no_leading_slash += 1;
         }
         if ((strcmp(name_no_leading_slash, "") == 0) || (strcmp(name_no_leading_slash, ".") == 0)) {
-            if (fatfs_fs_driver_get_mounted_bd_from_index(fd->unit) == NULL) {
+            if (fatfs_fs_driver_get_mounted_bd_from_index(vol) == NULL) {
                 return -ENXIO;
             }
             // Return data indicating that it is a directory.
@@ -585,7 +685,7 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
         }
     }
 
-    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(name, fd);
+    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(name, vol);
 
     _fs_lock();
 
@@ -675,7 +775,7 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
             ret = 0;
             break;
         case USBMASS_IOCTL_GET_DRIVERNAME: {
-            struct block_device *mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(fd->unit);
+            struct block_device *mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
             ret = (mounted_bd == NULL) ? -ENXIO : *(int *)(mounted_bd->name);
 
             // Check for a return buffer and copy the whole name.
@@ -727,11 +827,16 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
     M_DEBUG("%s\n", __func__);
 
     int ret;
+    int vol;
     FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_DEFINITIONS(path);
     FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_DEFINITIONS(newpath);
 
-    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(path, fd);
-    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(newpath, fd);
+    vol = fs_driver_resolve_volume(fd->device->name, fd->unit);
+    if (vol < 0)
+        return -ENXIO;
+
+    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(path, vol);
+    FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(newpath, vol);
 
     // If old and new path are the same, no need to do anything
     if (strcmp(modified_path, modified_newpath) == 0) {
@@ -766,8 +871,10 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
             break;
         }
         case USBMASS_DEVCTL_STOP_ALL: {
-            fatfs_fs_driver_stop_single_bd(fd->unit);
-            ret        = FR_OK;
+            int vol = fs_driver_resolve_volume(fd->device->name, fd->unit);
+            if (vol >= 0)
+                fatfs_fs_driver_stop_single_bd(vol);
+            ret = FR_OK;
             break;
         }
         default: {
@@ -828,6 +935,7 @@ int InitFS(void)
 
     fs_reset();
     fatfs_fs_driver_initialize_all_mount_info();
+    fs_typed_driver_count = 0;
 
     DelDrv(fs_driver.name);
     return (AddDrv(&fs_driver) == 0 ? 0 : -1);
