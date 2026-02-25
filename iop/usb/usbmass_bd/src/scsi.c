@@ -300,6 +300,7 @@ void scsi_connect(struct scsi_interface *scsi)
 
             bd->priv = scsi;
             bd->name = scsi->name;
+            bd->path = "usb";
             bd->devNr = scsi->devNr;
             scsi_warmup(bd);
             bdm_connect_bd(bd);

@@ -61,7 +61,8 @@ struct block_device bd = {
     spisd_read,
     spisd_write,
     spisd_flush,
-    spisd_stop };
+    spisd_stop,
+    "mx4sio" /* path */ };
 
 /* NOTE: SIO2 does *NOT* allow for direct control of /CS line.
  * It's controlled by the SIO2 hardware and automatically asserted at the start

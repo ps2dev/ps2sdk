@@ -355,6 +355,7 @@ int _start(int argc, char *argv[])
         for (i = 0; i < NUM_DEVICES; ++i) {
             g_ata_bd[i].priv         = (void *)&atad_devinfo[i];
             g_ata_bd[i].name         = "ata";
+            g_ata_bd[i].path         = "hdd";
             g_ata_bd[i].devNr        = i;
             g_ata_bd[i].parNr        = 0;
             g_ata_bd[i].parId        = 0x00;
