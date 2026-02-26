@@ -40,8 +40,8 @@ struct block_device
     void (*flush)(struct block_device *bd);
     int (*stop)(struct block_device *bd);
 
-    // Desired iomanX path prefix for this device type (e.g. "usb", "hdd").
-    // When set, the fatfs driver exposes the device under this prefix (e.g. usb0:, hdd0:).
+    // Desired iomanX path prefix for this device type (e.g. "usb", "ata").
+    // When set, the fatfs driver exposes the device under this prefix (e.g. usb0:, ata0:).
     // Partition drivers should copy this from the parent block device.
     // NULL means the device is only accessible via the legacy "mass:" prefix.
     char *path;
