@@ -180,6 +180,7 @@ struct block_device *bd_cache_create(struct block_device *bd)
     // only difference is we are cached.
     cbd->priv         = c;
     cbd->name         = bd->name;
+    cbd->path         = bd->path;
     cbd->devNr        = bd->devNr;
     cbd->parNr        = bd->parNr;
     cbd->parId        = bd->parId;

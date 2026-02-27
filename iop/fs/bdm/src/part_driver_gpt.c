@@ -140,6 +140,7 @@ int part_connect_gpt(struct block_device *bd)
                 // Create the pseudo block device for the partition.
                 g_part[partIndex].bd              = bd;
                 g_part_bd[partIndex].name         = bd->name;
+                g_part_bd[partIndex].path         = bd->path;
                 g_part_bd[partIndex].devNr        = bd->devNr;
                 g_part_bd[partIndex].parNr        = i + 1;
                 g_part_bd[partIndex].parId        = 0;
