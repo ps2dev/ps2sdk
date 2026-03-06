@@ -30,10 +30,6 @@ typedef void (*print_callback_t)(void *context, int c);
 
 /* setjmp/longjmp are already defined in setjmp.h */
 
-/* These functions are non-standardized (char instead of int) */
-extern char _toupper(char c);
-extern char _tolower(char c);
-
 /* These functions are non-standardized (IOP-only functions operating on 32-bit integers instead of wchar_t) */
 extern void *_wmemcopy(u32 *dest, const u32 *src, size_t size);
 extern void *_wmemset(u32 *dest, u32 c, size_t size);
@@ -44,10 +40,6 @@ extern void *_wmemset(u32 *dest, u32 c, size_t size);
 
 /* This function is non-standard. */
 extern int prnt(print_callback_t, void *context, const char * format, va_list ap);
-
-/* These functions are used in the process of ctype.h and is non-standard. */
-extern unsigned char look_ctype_table(char character);
-extern void *get_ctype_table();
 
 /* This function is non-standard. */
 extern char *atob(char *s, int *i);

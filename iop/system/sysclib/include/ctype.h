@@ -20,6 +20,13 @@
 extern "C" {
 #endif
 
+extern unsigned char look_ctype_table(char character);
+extern void *get_ctype_table();
+
+/* These functions are non-standardized (char instead of int) */
+extern char _toupper(char c);
+extern char _tolower(char c);
+
 #define isascii(c)	((unsigned int)(c) <= 127)
 #define toascii(c)	((unsigned char)(c) & 127)
 
