@@ -22,7 +22,7 @@ IOP_IMPORT_INCS += \
 	system/sysclib \
 	system/threadman
 
-IOP_OBJS = mcserv.o imports.o exports.o
+IOP_OBJS = exports.o mcserv.o imports.o
 
 ifneq (x$(MCMAN_BUILDING_XMCSERV),x0)
 IOP_CFLAGS += -DBUILDING_XMCSERV

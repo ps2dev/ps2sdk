@@ -36,14 +36,14 @@ IOP_IMPORT_INCS += \
     system/timrman
 
 IOP_OBJS = \
+    exports.o \
     main.o \
     mcdev.o \
     mciomanx_backing.o \
     mcsio2.o \
     ps2mc_fio.o \
     ps1mc_fio.o \
-    imports.o \
-    exports.o
+    imports.o
 
 ifneq (x$(MCMAN_BUILDING_XMCMAN),x0)
 IOP_CFLAGS += -DBUILDING_XMCMAN

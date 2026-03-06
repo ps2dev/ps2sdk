@@ -16,7 +16,7 @@ IOP_IMPORT_INCS += \
 	system/sysmem \
 	system/threadman
 
-IOP_OBJS = dvrdrv.o exports.o imports.o
+IOP_OBJS = exports.o dvrdrv.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

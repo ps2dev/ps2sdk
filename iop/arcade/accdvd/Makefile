@@ -19,14 +19,14 @@ IOP_IMPORT_INCS += \
 	system/threadman
 
 IOP_OBJS = \
+	exports.o \
 	accdvdi-entry.o \
 	acd.o \
 	cdc.o \
 	cdi.o \
 	cddrv.o \
 	cdfs.o \
-	imports.o \
-	exports.o
+	imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

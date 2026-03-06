@@ -16,7 +16,7 @@ IOP_IMPORT_INCS += \
 	system/stdio \
 	system/threadman
 
-IOP_OBJS = freemtap.o rpcservers.o exports.o imports.o
+IOP_OBJS = exports.o freemtap.o rpcservers.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

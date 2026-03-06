@@ -15,7 +15,7 @@ IOP_IMPORT_INCS += \
 	system/intrman \
 	system/loadcore
 
-IOP_OBJS = timrman.o imports.o exports.o
+IOP_OBJS = exports.o timrman.o imports.o
 
 ifneq (x$(TIMRMAN_PS1),x0)
 IOP_CFLAGS += -DBUILDING_TIMRMANP

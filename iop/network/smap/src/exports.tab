@@ -1,6 +1,3 @@
-
-void _retonly(){};
-
 #ifdef BUILDING_SMAP_NETMAN
 DECLARE_EXPORT_TABLE(smap, 1, 1)
 	DECLARE_EXPORT(_retonly)
@@ -19,3 +16,5 @@ DECLARE_EXPORT_TABLE(smapmodu, 1, 1)
 	DECLARE_EXPORT(SmapModularGetExportTable)
 END_EXPORT_TABLE
 #endif
+
+void _retonly(){};

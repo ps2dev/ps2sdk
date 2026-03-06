@@ -13,7 +13,7 @@ IOP_IMPORT_INCS += \
 	system/loadcore \
 	system/sysclib
 
-IOP_OBJS = stdio.o exports.o imports.o
+IOP_OBJS = exports.o stdio.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

@@ -16,9 +16,9 @@ IOP_IMPORT_INCS += \
 	system/threadman
 
 IOP_OBJS = \
+	exports.o \
 	acatad.o \
-	imports.o \
-	exports.o
+	imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
