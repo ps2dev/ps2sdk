@@ -72,7 +72,23 @@ ifeq ($(IOP_LINKFILE),)
 IOP_LINKFILE := $(PS2SDK)/iop/startup/linkfile
 endif
 
+# Populate object paths
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+
+# If this build produces an exports.o, ensure it is linked first so the
+# export-table object occupies .text offset 0 (helps srxfixup detection).
+ifneq (,$(filter $(IOP_OBJS_DIR)exports.o,$(IOP_OBJS)))
+IOP_OBJS := $(IOP_OBJS_DIR)exports.o $(filter-out $(IOP_OBJS_DIR)exports.o,$(IOP_OBJS))
+endif
+
+# srxfixup flags: default to `--rb --irx1`. If this module does not build an
+# exports.o, add `--allow-zero-text` (modules without an export table may
+# legitimately lack an STT_OBJECT at .text offset 0).  Top-level Makefiles may
+# override `IOP_SRXFIXUP_FLAGS` if they need custom behaviour.
+IOP_SRXFIXUP_FLAGS := --rb --irx1
+ifeq (,$(filter $(IOP_OBJS_DIR)exports.o,$(IOP_OBJS)))
+IOP_SRXFIXUP_FLAGS += --allow-zero-text
+endif
 
 IOP_BIN_ELF := $(IOP_BIN:.irx=.notiopmod.elf)
 
@@ -133,7 +149,7 @@ $(IOP_BIN_STRIPPED_ELF): $(IOP_BIN_ELF)
 
 $(IOP_BIN): $(IOP_BIN_STRIPPED_ELF)
 	$(DIR_GUARD)
-	iopfixup --irx1 -o $@ $<
+	iopfixup $(IOP_SRXFIXUP_FLAGS) -o $@ $<
 
 $(IOP_LIB): $(IOP_OBJS)
 	$(DIR_GUARD)
