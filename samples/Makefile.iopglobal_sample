@@ -72,14 +72,12 @@ ifeq ($(IOP_LINKFILE),)
 IOP_LINKFILE := $(PS2SDK)/iop/startup/linkfile
 endif
 
-# Populate object paths
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
 # If this build produces an exports.o, ensure it is linked first so the
 # export-table object occupies .text offset 0 (helps srxfixup detection).
-ifneq (,$(filter $(IOP_OBJS_DIR)exports.o,$(IOP_OBJS)))
-IOP_OBJS := $(IOP_OBJS_DIR)exports.o $(filter-out $(IOP_OBJS_DIR)exports.o,$(IOP_OBJS))
-endif
+IOP_OBJS := $(filter exports.o,$(IOP_OBJS)) $(filter-out exports.o,$(IOP_OBJS))
+
+# Populate object paths
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 # srxfixup flags: default to `--rb --irx1`. If this module does not build an
 # exports.o, add `--allow-zero-text` (modules without an export table may
@@ -132,6 +130,7 @@ $(IOP_OBJS_DIR)imports.o: $(IOP_OBJS_DIR)build-imports.c
 
 # Rules to build exports.tab.
 $(IOP_OBJS_DIR)build-exports.c: $(IOP_SRC_DIR)exports.tab
+	$(DIR_GUARD)
 	$(PRINTF) '%s\n' "#include \"irx.h\"" > $@
 	cat $< >> $@
 
