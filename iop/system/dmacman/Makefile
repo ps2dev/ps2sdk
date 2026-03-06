@@ -13,7 +13,7 @@ IOP_IMPORT_INCS += \
 	system/loadcore \
 	system/sysmem
 
-IOP_OBJS = dmacman.o exports.o imports.o
+IOP_OBJS = exports.o dmacman.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

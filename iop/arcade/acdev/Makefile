@@ -14,9 +14,9 @@ IOP_IMPORT_INCS += \
 	system/sysmem
 
 IOP_OBJS = \
+	exports.o \
 	acdev.o \
-	imports.o \
-	exports.o
+	imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

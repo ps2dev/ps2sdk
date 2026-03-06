@@ -21,7 +21,7 @@ IOP_IMPORT_INCS += \
 	system/sysmem \
 	system/threadman
 
-IOP_OBJS = cdvdfsv.o imports.o exports.o
+IOP_OBJS = exports.o cdvdfsv.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

@@ -29,7 +29,7 @@ IOP_INCS += \
 
 IOP_OBJS_DIR = iop_obj/
 
-IOP_OBJS = ps2_sbus.o iop_sbus.o ps2_sif.o iop_sif2.o sif2cmd.o imports.o exports.o
+IOP_OBJS = exports.o iop_sbus.o iop_sif2.o ps2_sbus.o ps2_sif.o sif2cmd.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

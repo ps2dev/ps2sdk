@@ -13,7 +13,7 @@ IOP_IMPORT_INCS += \
 	system/sifman \
 	system/stdio
 
-IOP_OBJS = siftoo.o pipe.o exports.o imports.o
+IOP_OBJS = exports.o siftoo.o pipe.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

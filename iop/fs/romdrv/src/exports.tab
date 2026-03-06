@@ -1,5 +1,3 @@
-void _retonly(void) {}
-
 DECLARE_EXPORT_TABLE(romdrv, 2, 1)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
@@ -21,3 +19,5 @@ DECLARE_EXPORT_TABLE(romdrvX, 1, 1)
 	DECLARE_EXPORT(romGetDevice)
 END_EXPORT_TABLE
 #endif
+
+void _retonly(void) {}

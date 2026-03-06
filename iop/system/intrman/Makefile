@@ -15,7 +15,7 @@ IOP_IMPORT_INCS += \
 	system/excepman \
 	system/loadcore
 
-IOP_OBJS = intrman.o exports.o imports.o
+IOP_OBJS = exports.o intrman.o imports.o
 
 ifneq (x$(INTRMAN_PS1),x0)
 IOP_CFLAGS += -DBUILDING_INTRMANP

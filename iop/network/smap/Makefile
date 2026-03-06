@@ -35,7 +35,7 @@ IOP_IMPORT_INCS += \
 	system/sysclib \
 	system/threadman
 
-IOP_OBJS = ipstack.o main.o smap.o xfer.o imports.o exports.o
+IOP_OBJS ?= exports.o main.o smap.o xfer.o ipstack.o imports.o
 
 ifneq (x$(LWIP_DHCP),x0)
 IOP_CFLAGS += -DLWIP_DHCP=1

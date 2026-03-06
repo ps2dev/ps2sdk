@@ -57,7 +57,7 @@ ifdef PS2IP_DNS
 ps2ip_OBJECTS += dns.o netdb.o
 endif
 
-IOP_OBJS = ps2ip.o sys_arch.o exports.o imports.o $(ps2ip_OBJECTS)
+IOP_OBJS = exports.o ps2ip.o sys_arch.o imports.o $(ps2ip_OBJECTS)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

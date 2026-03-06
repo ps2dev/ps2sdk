@@ -14,4 +14,7 @@ IOP_INC_DIR = $(PS2SDKSRC)/iop/network/smap/include/
 SMAP_NETMAN ?= 0
 SMAP_PS2IP ?= 1
 
+# No export table for this variant, exclude exports.o
+IOP_OBJS = main.o smap.o xfer.o ipstack.o imports.o
+
 include $(PS2SDKSRC)/iop/network/smap/Makefile

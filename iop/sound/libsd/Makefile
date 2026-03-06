@@ -15,7 +15,7 @@ IOP_IMPORT_INCS += \
 	system/stdio \
 	system/sysclib
 
-IOP_OBJS = freesd.o batch.o block.o effect.o voice.o exports.o imports.o
+IOP_OBJS = exports.o freesd.o batch.o block.o effect.o voice.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
