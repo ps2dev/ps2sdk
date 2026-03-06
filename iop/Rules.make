@@ -146,7 +146,7 @@ $(IOP_BIN_STRIPPED_ELF): $(IOP_BIN_ELF)
 	$(IOP_STRIP) --strip-unneeded --remove-section=.pdr --remove-section=.comment --remove-section=.mdebug.abi32 --remove-section=.gnu.attributes -o $@ $<
 
 $(IOP_BIN): $(IOP_BIN_STRIPPED_ELF) $(PS2SDKSRC)/tools/srxfixup/bin/srxfixup
-	$(PS2SDKSRC)/tools/srxfixup/bin/srxfixup --irx1 -o $@ $<
+	$(PS2SDKSRC)/tools/srxfixup/bin/srxfixup --rb --irx1 -o $@ $<
 
 $(IOP_LIB)_tmp$(MAKE_CURPID): $(IOP_OBJS)
 	$(DIR_GUARD)

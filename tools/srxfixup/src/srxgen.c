@@ -412,6 +412,8 @@ static void fixlocation_an_rel(elf_section *relsect, unsigned int startaddr)
 		datal = &relsect->info->data[rp->rel.r_offset - relsect->info->shr.sh_addr];
 		switch ( rp->type )
 		{
+			case R_MIPS_NONE:
+				break;
 			case R_MIPS_16:
 				data_1 = startaddr + (int16_t)*(uint32_t *)datal;
 				if ( (uint16_t)(data_1 >> 16) )
