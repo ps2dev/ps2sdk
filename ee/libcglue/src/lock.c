@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <reent.h>
 #include <sys/lock.h>
 #include <kernel.h>
 
@@ -238,6 +239,13 @@ extern struct __lock __lock___arc4random_mutex;
 
 void __locks_init()
 {
+    /* Reset stdio initialization state so __sinit will reinitialize
+     * FILE structs and their locks on next use.
+     * _impure_data lives in .data (survives BSS clear on restart via
+     * ExecPS2), while FILE structs and locks live in .bss (zeroed).
+     * Without this, __sinit skips reinitialization and uses NULL locks. */
+    _REENT_CLEANUP(_REENT) = NULL;
+
     _LOCK_T lock_malloc = &__lock___malloc_recursive_mutex;
     _LOCK_T lock_atexit = &__lock___atexit_recursive_mutex;
     _LOCK_T lock_quick_exit = &__lock___at_quick_exit_mutex;
