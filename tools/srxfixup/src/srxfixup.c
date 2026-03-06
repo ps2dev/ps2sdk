@@ -26,6 +26,7 @@ static unsigned int dispmod_flag = 0;
 static int irx1_flag = 0;
 static int br_conv = 0;
 static int print_config = 0;
+static int allow_zero_text = 0;
 // clang-format off
 static const Opttable opttable[] =
 {
@@ -42,6 +43,7 @@ static const Opttable opttable[] =
 	{ "--rb", ARG_HAVEARG_NONE, 'f', &br_conv },
 	{ "--relative-branch", ARG_HAVEARG_NONE, 'f', &br_conv },
 	{ "--print-internal-config", ARG_HAVEARG_NONE, 'f', &print_config },
+	{ "--allow-zero-text", ARG_HAVEARG_NONE, 'f', &allow_zero_text },
 	{ NULL, 0, '\0', NULL },
 };
 static const Opttable stripopttable[] =
@@ -63,6 +65,7 @@ static const Opttable stripopttable[] =
 static void display_module_info(elf_file *elf);
 static void convert_relative_branch_an_section(elf_section *relsect);
 static void convert_relative_branch(elf_file *elf);
+static int check_zero_text_symbols(const char *source, const elf_file *elf);
 
 void usage(const char *myname)
 {
@@ -79,7 +82,8 @@ void usage(const char *myname)
 				 "    -o <elf_relocatable_nosymbol_output_file>\n"
 				 "    -r <elf_relocatable_output_file>\n"
 				 "    -e <entry_point_symbol>\n"
-				 "    --relative-branch  or  --rb\n");
+				 "    --relative-branch  or  --rb\n"
+				 "    --allow-zero-text  (skip check for .text symbols with value 0)\n");
 	if ( verbose )
 	{
 		printf("    -t <.text start address>\n"
@@ -251,6 +255,10 @@ int main(int argc, char **argv)
 	switch ( elf->ehp->e_type )
 	{
 		case ET_REL:
+			if ( !allow_zero_text && check_zero_text_symbols(source, elf) )
+			{
+				exit(1);
+			}
 			if ( convert_rel2srx(elf, entrysym, (rfile || ofile || ffile) ? 1 : 0, irx1_flag) )
 			{
 				exit(1);
@@ -486,4 +494,80 @@ static void convert_relative_branch(elf_file *elf)
 			convert_relative_branch_an_section(elf->scp[i]);
 		}
 	}
+}
+
+static int check_zero_text_symbols(const char *source, const elf_file *elf)
+{
+	int text_idx;
+	int i;
+	int found;
+
+	if ( elf->scp == NULL )
+	{
+		return 0;
+	}
+
+	/* Find the index of the .text section by name */
+	text_idx = -1;
+	for ( i = 1; i < elf->ehp->e_shnum; i += 1 )
+	{
+		if ( elf->scp[i]->name && strcmp(elf->scp[i]->name, ".text") == 0 )
+		{
+			text_idx = i;
+			break;
+		}
+	}
+	if ( text_idx < 0 )
+	{
+		return 0; /* No .text section — nothing to check */
+	}
+
+	found = 0;
+	for ( i = 1; i < elf->ehp->e_shnum; i += 1 )
+	{
+		elf_section *sect;
+		unsigned int nsyms;
+		unsigned int j;
+		elf_syment **syms;
+
+		sect = elf->scp[i];
+		if ( sect->shr.sh_type != SHT_SYMTAB || sect->data == NULL || sect->shr.sh_entsize == 0 )
+		{
+			continue;
+		}
+		nsyms = sect->shr.sh_size / sect->shr.sh_entsize;
+		syms = (elf_syment **)sect->data;
+		for ( j = 1; j < nsyms; j += 1 ) /* skip sym[0]: ELF null symbol */
+		{
+			elf_syment *sym;
+
+			sym = syms[j];
+			/* _start is the IOP module entry point called via the .iopmod
+			 * header, never via a jal from within the module.
+			 * _ftext is a linker label at the start of .text, also never
+			 * the target of an intra-module jal.  Both are safe at .text+0. */
+			if ( sym->name
+				&& (strcmp(sym->name, "_start") == 0 || strcmp(sym->name, "_ftext") == 0) )
+			{
+				continue;
+			}
+			if ( (unsigned int)sym->sym.st_shndx == (unsigned int)text_idx
+				&& (sym->type == STT_FUNC || sym->type == STT_NOTYPE)
+				&& sym->sym.st_value == 0 )
+			{
+				fprintf(
+					stderr,
+					"ERROR: %s: symbol '%s' (sym#%u) is in .text with value 0"
+					" -- if this module has an export table, put exports.o"
+					" first in IOP_OBJS and move _retonly after"
+					" DECLARE_EXPORT_TABLE in exports.tab;"
+					" otherwise use --allow-zero-text.\n",
+					source,
+					(sym->name && sym->name[0]) ? sym->name : "<unnamed>",
+					j);
+				found = 1;
+			}
+		}
+	}
+	return found;
 }
