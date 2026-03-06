@@ -78,6 +78,10 @@ ifeq ($(IOP_LINKFILE),)
 IOP_LINKFILE := $(PS2SDKSRC)/iop/startup/src/linkfile
 endif
 
+# If this build produces an exports.o, ensure it is linked first so the
+# export-table object occupies .text offset 0 (helps srxfixup detection).
+IOP_OBJS := $(filter exports.o,$(IOP_OBJS)) $(filter-out exports.o,$(IOP_OBJS))
+
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 IOP_BIN_ELF := $(IOP_BIN:.irx=.notiopmod.elf)
