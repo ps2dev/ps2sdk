@@ -1,0 +1,22 @@
+<map id="ee/kernel" name="ee/kernel">
+<area shape="rect" id="node1" href="dir_5b119dc963fa9b25ef41951231899460.html" title="rpc" alt="" coords="103,210,142,236"/>
+<area shape="rect" id="node2" href="dir_a0a8ac7efb6662b749c1285408048e6d.html" title="erl" alt="" coords="178,137,217,162"/>
+<area shape="rect" id="node4" href="dir_8a6a67431f985d69787ebf051412922f.html" title="include" alt="" coords="92,137,154,162"/>
+<area shape="poly" id="edge1" href="dir_000114_000324.html" alt="" coords="125,163,125,195,120,195,120,163"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000114_000324.html" title="1" alt="" coords="128,184,135,199"/>
+<area shape="rect" id="node6" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html" title="common" alt="" coords="238,210,309,236"/>
+<area shape="poly" id="edge2" href="dir_000114_000046.html" alt="" coords="142,161,160,171,229,202,227,207,157,175,140,165"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000114_000046.html" title="12" alt="" coords="221,188,235,203"/>
+<area shape="rect" id="node5" href="dir_a493926c6e9678712bca5b1e822bb94f.html" title="src" alt="" coords="118,63,157,89"/>
+<area shape="poly" id="edge5" href="dir_000370_000071.html" alt="" coords="149,87,180,123,175,126,145,91"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000370_000071.html" title="1" alt="" coords="178,109,185,124"/>
+<area shape="poly" id="edge4" href="dir_000370_000114.html" alt="" coords="138,89,131,122,126,121,132,88"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000370_000114.html" title="59" alt="" coords="130,113,144,128"/>
+<area shape="poly" id="edge6" href="dir_000370_000046.html" alt="" coords="159,83,196,104,234,135,254,165,268,195,263,197,249,167,230,138,193,108,156,88"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000370_000046.html" title="18" alt="" coords="265,183,279,198"/>
+<area shape="rect" id="node7" href="dir_0981ace215aa2029f526b70c145b9fbe.html" title="iop" alt="" coords="290,137,329,162"/>
+<area shape="poly" id="edge3" href="dir_000370_000249.html" alt="" coords="158,83,277,132,275,137,156,88"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000370_000249.html" title="5" alt="" coords="273,118,280,133"/>
+<area shape="rect" id="clust2" href="dir_694ec83a64f58cbdefbefce65cd1011c.html" alt="" coords="27,52,168,173"/>
+<area shape="rect" id="clust1" href="dir_049738f1909e8dc3e45fe1f6b3faa109.html" title="ee" alt="" coords="16,16,227,247"/>
+</map>

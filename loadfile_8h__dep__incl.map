@@ -1,0 +1,13 @@
+<map id="ee/kernel/include/loadfile.h" name="ee/kernel/include/loadfile.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="359,5,533,31"/>
+<area shape="rect" id="Node000002" href="$loader_8c_source.html" title=" " alt="" coords="5,79,159,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="376,37,160,84,159,79,375,32"/>
+<area shape="rect" id="Node000003" href="$elf__loader__compat_8c_source.html" title=" " alt="" coords="183,79,325,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="404,40,303,81,301,76,402,35"/>
+<area shape="rect" id="Node000004" href="$_sif_iop_reboot_buffer_8c.html" title=" " alt="" coords="349,79,543,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="449,46,449,79,443,79,443,46"/>
+<area shape="rect" id="Node000005" href="$ee_2kernel_2src_2loadfile_8c.html" title=" " alt="" coords="567,86,717,112"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="491,35,613,84,611,88,489,40"/>
+<area shape="rect" id="Node000006" href="$libhdd_8c_source.html" title=" " alt="" coords="742,86,894,112"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="519,32,729,76,762,83,761,89,728,82,518,37"/>
+</map>

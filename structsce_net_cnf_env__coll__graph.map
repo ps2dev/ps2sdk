@@ -1,0 +1,29 @@
+<map id="sceNetCnfEnv" name="sceNetCnfEnv">
+<area shape="rect" id="Node000001" title=" " alt="" coords="237,610,342,636"/>
+<area shape="rect" id="Node000002" href="$structsce_net_cnf_root.html" title=" " alt="" coords="372,522,482,547"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="397,558,311,612,308,607,394,554"/>
+<area shape="rect" id="Node000003" href="$structsce_net_cnf_pair.html" title=" " alt="" coords="374,416,480,442"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="430,457,430,521,424,521,424,457"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="498,420,507,429,499,437,481,440,480,435,497,432,502,429,494,424"/>
+<area shape="rect" id="Node000004" href="$structsce_net_cnf_interface.html" title=" " alt="" coords="208,232,342,258"/>
+<area shape="poly" id="edge17_Node000001_Node000004" title=" " alt="" coords="275,273,271,334,271,536,277,576,287,609,282,611,272,577,266,536,266,334,269,273"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="291,270,314,308,344,349,380,385,413,413,410,417,376,389,340,352,310,311,286,273"/>
+<area shape="rect" id="Node000009" href="$structsce_net_cnf_ctl.html" title=" " alt="" coords="378,323,477,348"/>
+<area shape="poly" id="edge15_Node000009_Node000004" title=" " alt="" coords="316,263,347,279,411,320,409,325,344,284,313,267"/>
+<area shape="rect" id="Node000005" href="$structsce_net_cnf_interface__want__allow.html" title=" " alt="" coords="5,113,140,154"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="109,161,140,184,175,206,233,229,231,234,173,210,137,189,106,166"/>
+<area shape="rect" id="Node000006" href="$structsce_net_cnf_command.html" title=" " alt="" coords="164,121,306,146"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="223,161,216,185,216,196,220,207,231,220,245,229,242,234,227,223,215,209,211,197,211,184,218,160"/>
+<area shape="poly" id="edge7_Node000006_Node000006" title=" " alt="" coords="324,124,333,134,325,143,308,147,306,142,322,138,328,134,320,128"/>
+<area shape="rect" id="Node000007" href="$structsce_net_cnf_unknown_list.html" title=" " alt="" coords="420,121,581,146"/>
+<area shape="poly" id="edge16_Node000002_Node000007" title=" " alt="" coords="545,152,570,167,594,188,612,213,619,243,619,430,616,452,606,471,591,487,572,500,528,518,484,529,482,524,527,513,569,495,587,483,601,468,611,451,614,430,614,244,607,216,590,192,567,172,542,156"/>
+<area shape="poly" id="edge11_Node000003_Node000007" title=" " alt="" coords="507,161,510,200,510,248,505,300,491,352,468,389,443,417,439,414,464,386,486,350,500,299,505,248,505,200,502,162"/>
+<area shape="poly" id="edge8_Node000004_Node000007" title=" " alt="" coords="406,150,367,162,331,180,303,206,284,233,280,230,299,202,328,176,365,157,404,145"/>
+<area shape="rect" id="Node000010" href="$structsce_net_cnf_dial.html" title=" " alt="" coords="369,232,474,258"/>
+<area shape="poly" id="edge14_Node000010_Node000007" title=" " alt="" coords="447,156,433,166,422,179,418,192,417,206,421,231,415,232,411,206,413,191,418,177,430,163,444,152"/>
+<area shape="rect" id="Node000008" href="$structsce_net_cnf_unknown.html" title=" " alt="" coords="431,8,570,33"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="503,49,503,120,498,120,498,49"/>
+<area shape="poly" id="edge10_Node000008_Node000008" title=" " alt="" coords="587,11,596,20,588,29,570,33,569,27,586,24,591,20,583,15"/>
+<area shape="poly" id="edge12_Node000003_Node000009" title=" " alt="" coords="430,364,430,415,424,415,424,364"/>
+<area shape="poly" id="edge13_Node000009_Node000010" title=" " alt="" coords="426,273,429,322,424,323,421,273"/>
+</map>

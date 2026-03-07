@@ -1,0 +1,17 @@
+<map id="iop/system/sifinit" name="iop/system/sifinit">
+<area shape="rect" id="node1" href="dir_1d64e5e9f20206636d72b5bbe3d2b274.html" title="loadcore" alt="" coords="26,137,96,162"/>
+<area shape="rect" id="node2" href="dir_a0d37aaf829787e8da99f7ff6597b371.html" title="sifman" alt="" coords="120,137,181,162"/>
+<area shape="rect" id="node3" href="dir_952a988346c879bc3b2834e2377036db.html" title="stdio" alt="" coords="205,137,254,162"/>
+<area shape="rect" id="node5" href="dir_fce568178081d3712212941b5708ede5.html" title="src" alt="" coords="167,63,206,89"/>
+<area shape="poly" id="edge1" href="dir_000528_000272.html" alt="" coords="171,92,156,102,101,132,99,127,153,97,169,87"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000528_000272.html" title="1" alt="" coords="103,128,110,143"/>
+<area shape="poly" id="edge4" href="dir_000528_000343.html" alt="" coords="183,90,166,124,161,122,178,88"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000528_000343.html" title="1" alt="" coords="169,116,176,131"/>
+<area shape="poly" id="edge2" href="dir_000528_000562.html" alt="" coords="196,88,217,122,212,125,191,90"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000528_000562.html" title="1" alt="" coords="217,109,224,124"/>
+<area shape="rect" id="node6" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="278,137,335,162"/>
+<area shape="poly" id="edge3" href="dir_000528_000256.html" alt="" coords="208,87,275,126,272,131,205,91"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000528_000256.html" title="1" alt="" coords="272,112,279,127"/>
+<area shape="rect" id="clust2" href="dir_d660f1d0a410b188ebc642aba8c19599.html" alt="" coords="81,52,217,99"/>
+<area shape="rect" id="clust1" href="dir_40ac35421bc63b72c26b6c69b1517fd6.html" title="system" alt="" coords="16,16,265,173"/>
+</map>

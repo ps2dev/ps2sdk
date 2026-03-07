@@ -1,0 +1,36 @@
+<map id="iop/debug/iopdebug/src/iop_debug.c" name="iop/debug/iopdebug/src/iop_debug.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="243,5,376,46"/>
+<area shape="rect" id="Node000002" href="$tamtypes_8h.html" title=" " alt="" coords="107,389,192,414"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="243,34,168,47,129,57,91,72,58,91,32,115,14,144,8,179,8,255,11,276,18,296,43,330,77,358,111,379,108,384,73,362,39,334,13,298,5,278,3,256,3,179,9,142,28,111,55,87,89,67,127,52,167,41,242,29"/>
+<area shape="rect" id="Node000003" href="$excepman_8h.html" title=" " alt="" coords="402,168,492,193"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="329,44,428,154,424,158,325,48"/>
+<area shape="rect" id="Node000008" href="$iop__cop0__defs_8h.html" title=" " alt="" coords="161,168,276,193"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="294,48,258,95,230,154,226,152,254,93,289,45"/>
+<area shape="rect" id="Node000009" href="$ps2__debug_8h.html" title=" " alt="" coords="42,168,136,193"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="283,49,121,161,118,156,280,44"/>
+<area shape="rect" id="Node000010" href="$iopdebug_8h.html" title=" " alt="" coords="268,94,351,120"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="312,46,312,78,307,78,307,46"/>
+<area shape="rect" id="Node000011" href="$iopdebug__priv_8h.html" title=" " alt="" coords="479,94,590,120"/>
+<area shape="poly" id="edge16_Node000001_Node000011" title=" " alt="" coords="366,44,487,86,485,91,365,49"/>
+<area shape="rect" id="Node000013" href="$iopdebug__defs_8h.html" title=" " alt="" coords="614,94,730,120"/>
+<area shape="poly" id="edge21_Node000001_Node000013" title=" " alt="" coords="377,39,602,88,601,93,376,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="416,241,478,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="449,194,449,226,444,226,444,194"/>
+<area shape="rect" id="Node000005" href="$irx_8h.html" title=" " alt="" coords="319,241,364,267"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="430,196,373,235,370,230,427,192"/>
+<area shape="rect" id="Node000006" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="280,315,342,341"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="339,268,324,302,319,300,334,266"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="284,344,192,384,190,380,282,339"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="277,389,344,414"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="313,341,313,373,308,373,308,341"/>
+<area shape="poly" id="edge10_Node000009_Node000002" title=" " alt="" coords="95,193,145,373,140,375,90,194"/>
+<area shape="poly" id="edge12_Node000010_Node000004" title=" " alt="" coords="322,118,391,191,427,228,423,232,387,195,318,122"/>
+<area shape="poly" id="edge13_Node000010_Node000005" title=" " alt="" coords="315,119,338,225,333,226,309,121"/>
+<area shape="poly" id="edge14_Node000010_Node000008" title=" " alt="" coords="296,122,247,160,244,156,292,118"/>
+<area shape="poly" id="edge15_Node000010_Node000009" title=" " alt="" coords="273,123,142,165,140,160,271,118"/>
+<area shape="poly" id="edge17_Node000011_Node000002" title=" " alt="" coords="558,118,578,132,597,150,608,171,609,183,605,195,569,245,524,286,471,320,415,346,358,366,302,381,207,398,207,392,301,376,356,361,413,341,469,315,521,282,565,241,600,192,604,182,603,173,593,153,575,136,555,122"/>
+<area shape="rect" id="Node000012" href="$intrman_8h.html" title=" " alt="" coords="516,168,590,193"/>
+<area shape="poly" id="edge18_Node000011_Node000012" title=" " alt="" coords="540,119,549,152,544,153,535,121"/>
+<area shape="poly" id="edge19_Node000012_Node000004" title=" " alt="" coords="537,196,479,235,476,230,534,192"/>
+<area shape="poly" id="edge20_Node000012_Node000005" title=" " alt="" coords="518,196,379,243,377,238,517,191"/>
+</map>

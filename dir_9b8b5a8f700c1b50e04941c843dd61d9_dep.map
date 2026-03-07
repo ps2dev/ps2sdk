@@ -1,0 +1,20 @@
+<map id="iop/system/eeconf" name="iop/system/eeconf">
+<area shape="rect" id="node1" href="dir_1d64e5e9f20206636d72b5bbe3d2b274.html" title="loadcore" alt="" coords="26,137,96,162"/>
+<area shape="rect" id="node2" href="dir_1bd32d4ef826aeeda00870843eb45c97.html" title="sysclib" alt="" coords="120,137,181,162"/>
+<area shape="rect" id="node3" href="dir_44719da65bb992f08c8ee8632a1136c7.html" title="sysmem" alt="" coords="205,137,275,162"/>
+<area shape="rect" id="node5" href="dir_3a8354039741e2cc6ac7389e05536610.html" title="src" alt="" coords="220,63,260,89"/>
+<area shape="poly" id="edge2" href="dir_000508_000272.html" alt="" coords="227,91,210,102,112,136,111,131,208,97,224,87"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000508_000272.html" title="1" alt="" coords="113,133,120,148"/>
+<area shape="poly" id="edge1" href="dir_000508_000569.html" alt="" coords="227,91,179,129,176,125,223,87"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000508_000569.html" title="1" alt="" coords="182,124,189,139"/>
+<area shape="poly" id="edge3" href="dir_000508_000570.html" alt="" coords="243,89,243,121,237,121,237,89"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000508_000570.html" title="1" alt="" coords="245,111,252,126"/>
+<area shape="rect" id="node6" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html" title="common" alt="" coords="299,137,370,162"/>
+<area shape="poly" id="edge5" href="dir_000508_000046.html" alt="" coords="258,87,308,125,305,129,254,91"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000508_000046.html" title="2" alt="" coords="306,111,313,126"/>
+<area shape="rect" id="node7" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="394,137,451,162"/>
+<area shape="poly" id="edge4" href="dir_000508_000256.html" alt="" coords="261,83,381,129,379,134,259,88"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000508_000256.html" title="1" alt="" coords="377,115,384,130"/>
+<area shape="rect" id="clust2" href="dir_9b8b5a8f700c1b50e04941c843dd61d9.html" alt="" coords="125,52,271,99"/>
+<area shape="rect" id="clust1" href="dir_40ac35421bc63b72c26b6c69b1517fd6.html" title="system" alt="" coords="16,16,285,173"/>
+</map>
