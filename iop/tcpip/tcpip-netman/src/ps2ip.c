@@ -35,9 +35,6 @@
 
 #include "ps2ip_internal.h"
 
-/* Define errno for IOP module */
-int errno __attribute__((section("data")));
-
 typedef struct pbuf	PBuf;
 typedef struct netif	NetIF;
 typedef struct ip4_addr	IPAddr;

@@ -15,7 +15,6 @@
 
 #include <types.h>
 #include <stdio.h>
-#include <errno.h>
 #include <intrman.h>
 #include <loadcore.h>
 #include <thbase.h>
@@ -34,9 +33,6 @@
 #include "netif/etharp.h"
 
 #include "ps2ip_internal.h"
-
-/* Define errno for IOP module */
-int errno __attribute__((section("data")));
 
 typedef struct pbuf	PBuf;
 typedef struct netif	NetIF;
