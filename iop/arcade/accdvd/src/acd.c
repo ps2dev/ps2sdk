@@ -8,6 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+#include <atahw.h>
 #include "accdvd_internal.h"
 
 static struct acd_softc Acdc;
@@ -739,7 +740,7 @@ int acd_getstatus()
 {
 	acAtaCommandData v1[4];
 
-	v1[1] = 2021;
+	v1[1] = ATA_C_CHECK_POWER_MODE | 0x700;
 	v1[0] = (Acdc.drive & 0xFF) | 0x2600;
 	return acd_ata_request(Acdc.drive | 2, v1, 2, acd_getstatus_done, "getstatus");
 }
@@ -833,7 +834,7 @@ static int acd_identify(int drive)
 
 	flag = 16 * (drive != 0);
 	cmd[0] = flag | 0x600;
-	cmd[1] = 1953;
+	cmd[1] = ATA_C_IDENTIFY_PACKET_DEVICE | 0x700;
 	acAtaSetup(&acdata.a_ata, acd_ata_done, 0, 0x4C4B40u);
 	// cppcheck-suppress unreadVariable
 	acdata.a_thid = GetThreadId();
