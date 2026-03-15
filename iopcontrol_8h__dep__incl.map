@@ -1,0 +1,11 @@
+<map id="ee/kernel/include/iopcontrol.h" name="ee/kernel/include/iopcontrol.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="255,5,445,31"/>
+<area shape="rect" id="Node000002" href="$loader_8c_source.html" title=" " alt="" coords="5,79,159,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="295,38,150,81,148,76,294,33"/>
+<area shape="rect" id="Node000003" href="$elf__loader__compat_8c_source.html" title=" " alt="" coords="183,79,325,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="325,43,279,81,276,77,322,39"/>
+<area shape="rect" id="Node000004" href="$_sif_iop_reboot_buffer_8c.html" title=" " alt="" coords="349,79,543,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="378,39,424,77,421,81,375,43"/>
+<area shape="rect" id="Node000005" href="$iopcontrol_8c.html" title=" " alt="" coords="567,86,733,112"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="411,33,604,83,603,88,410,38"/>
+</map>

@@ -1,0 +1,26 @@
+<map id="iop/system/reboot" name="iop/system/reboot">
+<area shape="rect" id="node1" href="dir_7422a0894415a12ccd1d562a8ad09f2d.html" title="intrman" alt="" coords="26,137,91,162"/>
+<area shape="rect" id="node2" href="dir_1d64e5e9f20206636d72b5bbe3d2b274.html" title="loadcore" alt="" coords="116,137,186,162"/>
+<area shape="rect" id="node3" href="dir_87c98c5970299b04095b64caaae46c44.html" title="modload" alt="" coords="210,137,280,162"/>
+<area shape="rect" id="node4" href="dir_a0d37aaf829787e8da99f7ff6597b371.html" title="sifman" alt="" coords="304,137,365,162"/>
+<area shape="rect" id="node5" href="dir_952a988346c879bc3b2834e2377036db.html" title="stdio" alt="" coords="389,137,438,162"/>
+<area shape="rect" id="node6" href="dir_d3b40e87d731c1e886b7a70e6daaf700.html" title="threadman" alt="" coords="462,137,544,162"/>
+<area shape="rect" id="node8" href="dir_6cc1d0983affcb72bbae6e53cb3c97f1.html" title="src" alt="" coords="315,63,354,89"/>
+<area shape="poly" id="edge2" href="dir_000523_000246.html" alt="" coords="322,91,305,102,253,120,209,127,164,131,107,139,106,134,163,125,209,121,252,114,303,97,320,87"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000523_000246.html" title="1" alt="" coords="107,137,114,152"/>
+<area shape="poly" id="edge1" href="dir_000523_000272.html" alt="" coords="322,91,305,102,260,119,202,137,200,131,259,114,303,97,319,87"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000523_000272.html" title="1" alt="" coords="202,134,209,149"/>
+<area shape="poly" id="edge3" href="dir_000523_000283.html" alt="" coords="321,91,274,129,271,125,318,87"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000523_000283.html" title="1" alt="" coords="276,124,283,139"/>
+<area shape="poly" id="edge6" href="dir_000523_000343.html" alt="" coords="337,89,337,121,332,121,332,89"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000523_000343.html" title="1" alt="" coords="340,111,347,126"/>
+<area shape="poly" id="edge4" href="dir_000523_000562.html" alt="" coords="350,87,391,124,387,128,346,91"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000523_000562.html" title="1" alt="" coords="389,110,396,125"/>
+<area shape="poly" id="edge7" href="dir_000523_000580.html" alt="" coords="356,83,461,128,459,133,354,88"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000523_000580.html" title="2" alt="" coords="457,114,464,129"/>
+<area shape="rect" id="node9" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="568,137,624,162"/>
+<area shape="poly" id="edge5" href="dir_000523_000256.html" alt="" coords="355,80,553,132,552,137,354,85"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000523_000256.html" title="1" alt="" coords="549,118,556,133"/>
+<area shape="rect" id="clust2" href="dir_6f170e5d4e2c7a590428c890b6770715.html" alt="" coords="223,52,365,99"/>
+<area shape="rect" id="clust1" href="dir_40ac35421bc63b72c26b6c69b1517fd6.html" title="system" alt="" coords="16,16,555,173"/>
+</map>

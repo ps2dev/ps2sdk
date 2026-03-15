@@ -1,0 +1,12 @@
+<map id="ee/kernel/include/osd_config.h" name="ee/kernel/include/osd_config.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,150,46"/>
+<area shape="rect" id="Node000002" href="$tamtypes_8h.html" title=" " alt="" coords="25,241,109,267"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="57,48,38,69,24,95,19,130,25,166,38,199,52,227,48,229,33,201,20,167,14,130,19,93,34,66,53,44"/>
+<area shape="rect" id="Node000003" href="$rom0__info_8h.html" title=" " alt="" coords="33,94,122,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="80,46,80,78,75,78,75,46"/>
+<area shape="rect" id="Node000004" href="$libcdvd_8h.html" title=" " alt="" coords="145,94,218,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="105,44,155,82,152,86,102,49"/>
+<area shape="rect" id="Node000005" href="$libcdvd-common_8h.html" title=" " alt="" coords="76,168,202,193"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="177,121,156,156,152,153,172,119"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="129,195,92,232,88,228,125,192"/>
+</map>

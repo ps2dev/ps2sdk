@@ -1,0 +1,20 @@
+<map id="msif_data" name="msif_data">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,306,84,331"/>
+<area shape="rect" id="Node000002" href="$struct__sifm__queue__data.html" title=" " alt="" coords="117,5,244,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,43,125,67,93,99,64,137,42,179,35,213,34,249,44,305,38,306,29,249,29,213,37,177,60,134,89,96,121,64,150,39"/>
+<area shape="poly" id="edge11_Node000002_Node000002" title=" " alt="" coords="261,8,271,18,263,28,245,32,244,26,260,23,266,18,258,12"/>
+<area shape="rect" id="Node000003" href="$struct__sifm__serve__data.html" title=" " alt="" coords="180,126,304,152"/>
+<area shape="poly" id="edge7_Node000003_Node000002" title=" " alt="" coords="175,46,172,73,179,99,191,113,208,123,205,128,188,117,174,101,167,73,169,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="233,112,223,84,210,56,191,33,195,29,215,54,228,82,238,110"/>
+<area shape="poly" id="edge6_Node000003_Node000003" title=" " alt="" coords="321,131,331,139,323,147,305,150,304,145,320,142,325,139,318,135"/>
+<area shape="rect" id="Node000004" href="$struct__sifm__client__data.html" title=" " alt="" coords="315,217,438,243"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="268,160,308,191,351,214,348,219,305,195,265,164"/>
+<area shape="rect" id="Node000006" href="$struct__sifm__serve__entry.html" title=" " alt="" coords="89,217,216,243"/>
+<area shape="poly" id="edge9_Node000006_Node000003" title=" " alt="" coords="171,161,150,179,146,197,150,216,145,217,141,197,146,177,167,157"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="364,204,345,180,323,165,297,155,299,150,325,161,349,176,368,201"/>
+<area shape="rect" id="Node000005" href="$struct__sifm__rpc__data.html" title=" " alt="" coords="387,126,497,152"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="432,167,415,195,392,218,388,215,410,191,428,164"/>
+<area shape="poly" id="edge12_Node000001_Node000006" title=" " alt="" coords="127,255,61,307,58,303,124,250"/>
+<area shape="poly" id="edge8_Node000003_Node000006" title=" " alt="" coords="191,207,211,191,225,171,235,151,240,154,230,174,214,195,194,211"/>
+<area shape="poly" id="edge10_Node000006_Node000006" title=" " alt="" coords="233,222,243,230,235,238,217,241,216,235,232,233,238,230,230,226"/>
+</map>

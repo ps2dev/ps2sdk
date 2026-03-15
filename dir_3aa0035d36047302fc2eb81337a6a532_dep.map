@@ -1,0 +1,12 @@
+<map id="iop/sound/sdrdrv" name="iop/sound/sdrdrv">
+<area shape="rect" id="node2" href="dir_752d63180ca3e6100001131e79733bcb.html" title="include" alt="" coords="120,63,182,89"/>
+<area shape="rect" id="node3" href="dir_5fac0142058176777a206f411a269586.html" title="src" alt="" coords="206,63,245,89"/>
+<area shape="rect" id="node4" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="154,137,211,162"/>
+<area shape="poly" id="edge2" href="dir_000502_000256.html" alt="" coords="221,90,200,125,195,122,216,88"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000502_000256.html" title="1" alt="" coords="203,118,210,133"/>
+<area shape="rect" id="node5" href="dir_40ac35421bc63b72c26b6c69b1517fd6.html" title="system" alt="" coords="235,137,298,162"/>
+<area shape="poly" id="edge1" href="dir_000502_000571.html" alt="" coords="234,88,254,122,250,125,230,90"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000502_000571.html" title="5" alt="" coords="254,109,261,124"/>
+<area shape="rect" id="clust2" href="dir_3aa0035d36047302fc2eb81337a6a532.html" alt="" coords="27,52,256,99"/>
+<area shape="rect" id="clust1" href="dir_838e88315325ec0d843359dcae22d639.html" title="sound" alt="" coords="16,16,267,110"/>
+</map>
