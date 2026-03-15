@@ -559,7 +559,8 @@ static int apaRename(s32 device, const char *oldId, const char *newId)
     }
 
     // do the renaming :) note: subs have no names!!
-    memcpy(clink->header->id, newId, APA_IDMAX);
+    memset(clink->header->id, 0, APA_IDMAX);
+    strncpy(clink->header->id, newId, APA_IDMAX - 1);
 
     // touch creation time
     apaGetTime(&clink->header->created);
