@@ -9,6 +9,7 @@
 */
 
 #include "acata_internal.h"
+#include "atahw.h"
 
 static struct ata_softc Atac;
 
@@ -187,7 +188,7 @@ int ata_probe(acAtaReg atareg)
 	int count;
 
 	(void)atareg;
-	while ( (*((volatile acUint16 *)0xB6070000) & 0x80) != 0 )
+	while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) != 0 )
 		;
 	*((volatile acUint16 *)0xB6020000) = 4660;
 	// cppcheck-suppress knownConditionTrueFalse
@@ -210,7 +211,7 @@ int ata_probe(acAtaReg atareg)
 		while ( count <= 1999999 )
 		{
 			// cppcheck-suppress knownConditionTrueFalse
-			if ( (*((volatile acUint16 *)0xB6070000) & 0x80) == 0 )
+			if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) == 0 )
 				break;
 			++count;
 		}
