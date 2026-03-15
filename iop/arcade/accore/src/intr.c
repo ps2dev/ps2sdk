@@ -11,7 +11,7 @@
 #include "accore_internal.h"
 
 static acUint8 masks_8[3] = {128u, 2u, 64u};
-static struct intr_softc Intrc;
+static struct intr_softc Intrc ={0,1};
 
 static int intr_intr(void *arg)
 {

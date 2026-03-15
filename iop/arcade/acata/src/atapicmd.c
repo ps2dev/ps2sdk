@@ -10,6 +10,8 @@
 
 #include "acata_internal.h"
 
+#include "atahw.h"
+
 static int atapi_dma_xfer(acDmaT dma, int intr, acDmaOp op);
 static void atapi_dma_done(acDmaT dma);
 static void atapi_dma_error(acDmaT dma, int intr, acDmaState state, int result);
@@ -84,11 +86,11 @@ static int atapi_packet_send(acAtaReg atareg, acAtapiPacketData *pkt, int flag)
 	*((volatile acUint16 *)0xB6060000) = flag & 0x10;
 	*((volatile acUint16 *)0xB6160000) = (flag & 2) ^ 2;
 	*((volatile acUint16 *)0xB6010000) = flag & 1;
-	*((volatile acUint16 *)0xB6070000) = 160;
+	*((volatile acUint16 *)0xB6070000) = 160; // ATA_STAT_BUSY|ATA_STAT_READY?
 	tmout = 999;
 	v6 = 1000;
 	// cppcheck-suppress knownConditionTrueFalse
-	while ( (*((volatile acUint16 *)0xB6070000) & 0x80) != 0 )
+	while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) != 0 )
 	{
 		if ( tmout < 0 )
 		{
@@ -105,7 +107,7 @@ static int atapi_packet_send(acAtaReg atareg, acAtapiPacketData *pkt, int flag)
 		return -116;
 	}
 	// cppcheck-suppress knownConditionTrueFalse
-	while ( (*((volatile acUint16 *)0xB6070000) & 8) != 0 )
+	while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_DRQ) != 0 )
 	{
 		--count;
 		if ( count < 0 )
@@ -139,7 +141,7 @@ static int atapi_pio_read(acAtaReg atareg, acUint16 *buf, int count, int flag)
 		if ( !sr )
 		{
 			sr_v5 = *((volatile acUint16 *)0xB6070000);
-			while ( (sr_v5 & 0x80) != 0 )
+			while ( (sr_v5 & ATA_STAT_BUSY) != 0 )
 			{
 				xlen = *((volatile acUint16 *)0xB6070000);
 				sr_v5 = xlen & 0xFF;
@@ -178,7 +180,7 @@ static int atapi_pio_read(acAtaReg atareg, acUint16 *buf, int count, int flag)
 		for ( drop_v10 = sr_v9 / 2 - 1; drop_v10 >= 0; --drop_v10 )
 			;
 		sr = v6 & 2;
-		if ( (*((volatile acUint16 *)0xB6070000) & 0x80) == 0 )
+		if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) == 0 )
 		{
 			break;
 		}
@@ -326,7 +328,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 						else
 						{
 							sr_v14 = *((volatile acUint16 *)0xB6070000);
-							while ( (sr_v14 & 0x80) != 0 )
+							while ( (sr_v14 & ATA_STAT_BUSY) != 0 )
 							{
 								xlen = *((volatile acUint16 *)0xB6070000);
 								sr_v14 = xlen & 0xFF;
@@ -357,7 +359,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 						for ( drop_v20 = sr_v18 / 2 - 1; drop_v20 >= 0; --drop_v20 )
 							*((volatile acUint16 *)0xB6000000) = 0;
 						sr = flag & 2;
-						if ( (*((volatile acUint16 *)0xB6070000) & 0x80) == 0 )
+						if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) == 0 )
 						{
 							ret_v5 = size - a_size;
 							break;
@@ -388,7 +390,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 		v32 = 0;
 		if ( (flag & 2) != 0 )
 		{
-			while ( (*((volatile acUint16 *)0xB6160000) & 0x81) == 128 )
+			while ( (*((volatile acUint16 *)0xB6160000) & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
 			{
 				if ( SleepThread() )
 				{
@@ -402,7 +404,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 			int tmout;
 
 			tmout = 99999;
-			while ( (*((volatile acUint16 *)0xB6070000) & 0x81) == 128 )
+			while ( (*((volatile acUint16 *)0xB6070000) & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
 			{
 				if ( tmout < 0 )
 				{
@@ -460,7 +462,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	}
 	if ( ret_v5 < 0 )
 		return ret_v5;
-	if ( (*((volatile acUint16 *)0xB6070000) & 1) != 0 )
+	if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_ERR) != 0 )
 		return -((*((volatile acUint16 *)0xB6070000) << 8) + *((volatile acUint16 *)0xB6010000));
 	if ( atah->a_state >= 0x1FFu )
 	{
@@ -503,7 +505,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 	acAtapiT atapi;
 
 	atapi = (acAtapiT)atah;
-	if ( (*((volatile acUint16 *)0xB6070000) & 1) == 0 )
+	if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_ERR) == 0 )
 		return ret;
 	memset(&sense, 0, sizeof(sense));
 	memset(&u, 0, sizeof(u));
@@ -532,7 +534,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 			v6 = 0;
 			if ( (flag & 2) != 0 )
 			{
-				while ( (*((volatile acUint16 *)0xB6160000) & 0x81) == 128 )
+				while ( (*((volatile acUint16 *)0xB6160000) & 0x81) == ATA_STAT_BUSY )
 				{
 					if ( SleepThread() )
 					{
@@ -546,7 +548,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 				int tmout;
 
 				tmout = 99999;
-				while ( (*((volatile acUint16 *)0xB6070000) & 0x81) == 128 )
+				while ( (*((volatile acUint16 *)0xB6070000) & 0x81) == ATA_STAT_BUSY )
 				{
 					if ( tmout < 0 )
 					{
