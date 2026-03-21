@@ -9,6 +9,7 @@
 */
 
 #include "acata_internal.h"
+#include "atahw.h"
 
 static int ata_dma_xfer(acDmaT dma, int intr, acDmaOp op);
 static void ata_dma_done(acDmaT dma);
@@ -182,7 +183,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 				int a_size;
 
 				a_size = atah->a_size;
-				while ( (*((volatile acUint16 *)0xB6070000) & 0x80) != 0 )
+				while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) != 0 )
 					;
 				while ( a_size > 0 )
 				{
@@ -198,7 +199,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					a_size -= xlen;
 					xlen_v15 = (unsigned int)xlen >> 1;
 					xlen_v16 = xlen_v15 - 1;
-					while ( (*((volatile acUint16 *)0xB6070000) & 8) != 0 )
+					while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_DRQ) != 0 )
 					{
 						int ret_v17;
 
@@ -226,7 +227,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					else
 					{
 						ret_v20 = *((volatile acUint16 *)0xB6070000);
-						while ( (ret_v20 & 0x80) != 0 )
+						while ( (ret_v20 & ATA_STAT_BUSY) != 0 )
 						{
 							sr = *((volatile acUint16 *)0xB6070000);
 							ret_v20 = sr & 0xFF;
@@ -268,7 +269,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					else
 					{
 						sr_v25 = *((volatile acUint16 *)0xB6070000);
-						while ( (sr_v25 & 0x80) != 0 )
+						while ( (sr_v25 & ATA_STAT_BUSY) != 0 )
 						{
 							sr_v25 = *((volatile acUint16 *)0xB6070000);
 							sr_v25 = sr_v25 & 0xFF;
@@ -283,9 +284,9 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					xlen_v28 = (unsigned int)xlen_v27 >> 1;
 					if ( (sr_v25 & 1) != 0 )
 						xlen_v28 = 0;
-					(void)(*((volatile acUint16 *)0xB6070000) & 0x80);
+					(void)(*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY);
 					xlen_v30 = xlen_v28 - 1;
-					while ( (*((volatile acUint16 *)0xB6070000) & 8) != 0 )
+					while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_DRQ) != 0 )
 					{
 						if ( xlen_v30 >= 0 )
 						{
@@ -294,7 +295,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 						}
 						--xlen_v30;
 					}
-					ret_v29 = *((volatile acUint16 *)0xB6070000) & 0x80;
+					ret_v29 = *((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY;
 					if ( !ret_v29 )
 						break;
 				}
@@ -346,7 +347,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 		ret = 0;
 		if ( v16 )
 		{
-			while ( (*((volatile acUint16 *)0xB6160000) & 0x81) == 128 )
+			while ( (*((volatile acUint16 *)0xB6160000) & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
 			{
 				if ( SleepThread() )
 				{
@@ -360,7 +361,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 			int tmout;
 
 			tmout = 99999;
-			while ( (*((volatile acUint16 *)0xB6070000) & 0x81) == 128 )
+			while ( (*((volatile acUint16 *)0xB6070000) & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
 			{
 				if ( tmout < 0 )
 				{
@@ -380,7 +381,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 		return ret;
 	}
 	sr_v34 = *((volatile acUint16 *)0xB6070000);
-	if ( (*((volatile acUint16 *)0xB6070000) & 1) != 0 )
+	if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_ERR) != 0 )
 		return -((sr_v34 << 8) + *((volatile acUint16 *)0xB6010000));
 	if ( atah->a_state < 0x1FFu )
 	{
