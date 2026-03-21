@@ -10,12 +10,55 @@
 #ifdef BUILDING_SMAP_PS2IP
 #include <ps2ip.h>
 #endif
+#ifdef BUILDING_SMAP_NETDEV
+#include <netdev.h>
+#endif
 #ifdef BUILDING_SMAP_MODULAR
 #include <smap_modular.h>
 #endif
 
-// In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
-#define DEBUG_PRINTF(args...) printf("SMAP: "args)
+#ifndef BUILDING_SMAP_NETDEV
+#define sceInetPrintf(...) printf(__VA_ARGS__)
+#endif
+
+#define DEBUG_PRINTF(args...) sceInetPrintf("SMAP: "args)
+
+#ifdef BUILDING_SMAP_NETDEV
+struct RuntimeStats_NetDev
+{
+    u32 m_RxErrorVarious[16];
+    u32 m_TxErrorVarious[16];
+    u32 m_Rx_Packets;
+    u32 m_Tx_Packets;
+    u32 m_Rx_Bytes;
+    u32 m_Tx_Bytes;
+    u32 m_Rx_Errors;
+    u32 m_Tx_Errors;
+    u32 m_Rx_Dropped;
+    u32 m_Tx_Dropped;
+    u32 m_Rx_Broadcast_Packets;
+    u32 m_Tx_Broadcast_Packets;
+    u32 m_Rx_Broadcast_Bytes;
+    u32 m_Tx_Broadcast_Bytes;
+    u32 m_Rx_Multicast_Packets;
+    u32 m_Tx_Multicast_Packets;
+    u32 m_Rx_Multicast_Bytes;
+    u32 m_Tx_Multicast_Bytes;
+    u32 m_Multicast;
+    u32 m_Collisions;
+    u32 m_Rx_Length_Er;
+    u32 m_Rx_Over_Er;
+    u32 m_Rx_Crc_Er;
+    u32 m_Rx_Frame_Er;
+    u32 m_Rx_Fifo_Er;
+    u32 m_Rx_Missed_Er;
+    u32 m_Tx_Aborted_Er;
+    u32 m_Tx_Carrier_Er;
+    u32 m_Tx_Fifo_Er;
+    u32 m_Tx_Heartbeat_Er;
+    u32 m_Tx_Window_Er;
+};
+#endif
 
 // This struct needs to be the exact same layout as struct NetManEthRuntimeStats!
 struct RuntimeStats
@@ -47,7 +90,7 @@ struct SmapDriverData
     void *packetToSend;
     int Dev9IntrEventFlag;
     int IntrHandlerThreadID;
-    unsigned char SmapDriverStarted; // SMAP driver is started.
+    unsigned char SmapDriverStarting; // SMAP driver is starting.
     unsigned char SmapIsInitialized; // SMAP driver is initialized (software)
     unsigned char NetDevStopFlag;
     unsigned char EnableLinkCheckTimer;
@@ -58,8 +101,14 @@ struct SmapDriverData
     iop_sys_clock_t RxIntrPollingTimer;
 #endif
     struct RuntimeStats RuntimeStats;
+#ifdef BUILDING_SMAP_NETDEV
+    struct RuntimeStats_NetDev RuntimeStats_NetDev;
+#endif
 #ifdef BUILDING_SMAP_NETMAN
     int NetIFID;
+#endif
+#ifdef BUILDING_SMAP_NETDEV
+    sceInetDevOps_t m_devops;
 #endif
 #ifdef BUILDING_SMAP_MODULAR
     const SmapModularHookTable_t *HookTable[1];
@@ -76,11 +125,12 @@ struct SmapDriverData
 /* Function prototypes */
 extern int DisplayBanner(void);
 extern int smap_init(int argc, char *argv[]);
+#ifdef BUILDING_SMAP_NETDEV
+extern int smap_deinit(void);
+#endif
 #ifdef BUILDING_SMAP_PS2IP
 extern int SMAPInitStart(void);
 #endif
-extern int SMAPStart(void);
-extern void SMAPStop(void);
 extern void SMAPXmit(void);
 extern int SMAPGetMACAddress(u8 *buffer);
 #ifdef BUILDING_SMAP_PS2IP

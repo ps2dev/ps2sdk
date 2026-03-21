@@ -9,6 +9,9 @@ I_SetAlarm
 I_CancelAlarm
 #endif
 I_USec2SysClock
+#ifdef BUILDING_SMAP_NETDEV
+I_ChangeThreadPriority
+#endif
 thbase_IMPORTS_end
 
 stdio_IMPORTS_start
@@ -65,6 +68,18 @@ I_netif_set_link_up
 I_netif_set_link_down
 I_tcpip_callback_with_block
 ps2ip_IMPORTS_end
+#endif
+
+#ifdef BUILDING_SMAP_NETDEV
+netdev_IMPORTS_start
+I_sceInetRegisterNetDevice
+I_sceInetUnregisterNetDevice
+I_sceInetPktEnQ
+I_sceInetPktDeQ
+I_sceInetPrintf
+I_sceInetAllocPkt
+I_sceInetFreePkt
+netdev_IMPORTS_end
 #endif
 
 thevent_IMPORTS_start

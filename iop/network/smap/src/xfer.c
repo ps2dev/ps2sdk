@@ -78,6 +78,7 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
     USE_SMAP_RX_BD;
     int NumPacketsReceived, i;
     volatile smap_bd_t *PktBdPtr;
+    // cppcheck-suppress constVariablePointer
     volatile u8 *smap_regbase;
     u16 ctrl_stat, length, pointer, LengthRounded;
 
@@ -97,19 +98,42 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
 
             if (ctrl_stat & (SMAP_BD_RX_INRANGE | SMAP_BD_RX_OUTRANGE | SMAP_BD_RX_FRMTOOLONG | SMAP_BD_RX_BADFCS | SMAP_BD_RX_ALIGNERR | SMAP_BD_RX_SHORTEVNT | SMAP_BD_RX_RUNTFRM | SMAP_BD_RX_OVERRUN)) {
                 for (i = 0; i < 16; i++)
-                    if ((ctrl_stat >> i) & 1)
+                    if ((ctrl_stat >> i) & 1) {
                         SmapDrivPrivData->RuntimeStats.RxErrorCount++;
+#ifdef BUILDING_SMAP_NETDEV
+                        SmapDrivPrivData->RuntimeStats_NetDev.m_RxErrorVarious[i] += 1;
+#endif
+                    }
 
                 SmapDrivPrivData->RuntimeStats.RxDroppedFrameCount++;
+#ifdef BUILDING_SMAP_NETDEV
+                SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Errors += 1;
+#endif
 
-                if (ctrl_stat & SMAP_BD_RX_OVERRUN)
+                if (ctrl_stat & SMAP_BD_RX_OVERRUN) {
                     SmapDrivPrivData->RuntimeStats.RxFrameOverrunCount++;
-                if (ctrl_stat & (SMAP_BD_RX_INRANGE | SMAP_BD_RX_OUTRANGE | SMAP_BD_RX_FRMTOOLONG | SMAP_BD_RX_SHORTEVNT | SMAP_BD_RX_RUNTFRM))
+#ifdef BUILDING_SMAP_NETDEV
+                    SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Over_Er += 1;
+#endif
+                }
+                if (ctrl_stat & (SMAP_BD_RX_INRANGE | SMAP_BD_RX_OUTRANGE | SMAP_BD_RX_FRMTOOLONG | SMAP_BD_RX_SHORTEVNT | SMAP_BD_RX_RUNTFRM)) {
                     SmapDrivPrivData->RuntimeStats.RxFrameBadLengthCount++;
-                if (ctrl_stat & SMAP_BD_RX_BADFCS)
+#ifdef BUILDING_SMAP_NETDEV
+                    SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Length_Er += 1;
+#endif
+                }
+                if (ctrl_stat & SMAP_BD_RX_BADFCS) {
                     SmapDrivPrivData->RuntimeStats.RxFrameBadFCSCount++;
-                if (ctrl_stat & SMAP_BD_RX_ALIGNERR)
+#ifdef BUILDING_SMAP_NETDEV
+                    SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Crc_Er += 1;
+#endif
+                }
+                if (ctrl_stat & SMAP_BD_RX_ALIGNERR) {
                     SmapDrivPrivData->RuntimeStats.RxFrameBadAlignmentCount++;
+#ifdef BUILDING_SMAP_NETDEV
+                    SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Frame_Er += 1;
+#endif
+                }
 
                 // Original did this whenever a frame is dropped.
                 SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = pointer + LengthRounded;
@@ -118,10 +142,27 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
 
                 if ((pbuf = SMapCommonStackAllocRxPacket(SmapDrivPrivData, LengthRounded, &payload)) != NULL) {
                     CopyFromFIFO(SmapDrivPrivData->smap_regbase, payload, length, pointer);
-                    SMapStackEnQRxPacket(SmapDrivPrivData, pbuf);
+#ifdef BUILDING_SMAP_NETDEV
+                    SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Packets += 1;
+                    SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Bytes += length;
+                    if ((*((u8 *)payload) & 1) != 0) {
+                        SmapDrivPrivData->RuntimeStats_NetDev.m_Multicast += 1;
+                        if (*(u32 *)payload == (u32)-1 && *((u16 *)payload + 2) == 0xFFFF) {
+                            SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Broadcast_Packets += 1;
+                            SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Broadcast_Bytes += length;
+                        } else {
+                            SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Multicast_Packets += 1;
+                            SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Multicast_Bytes += length;
+                        }
+                    }
+#endif
+                    SMapStackEnQRxPacket(SmapDrivPrivData, pbuf, length);
                     NumPacketsReceived++;
                 } else {
                     SmapDrivPrivData->RuntimeStats.RxAllocFail++;
+#ifdef BUILDING_SMAP_NETDEV
+                    SmapDrivPrivData->RuntimeStats_NetDev.m_Rx_Dropped += 1;
+#endif
                     // Original did this whenever a frame is dropped.
                     SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = pointer + LengthRounded;
                 }
@@ -134,6 +175,12 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
             break;
     }
 
+#ifdef BUILDING_SMAP_NETDEV
+    if (NumPacketsReceived) {
+        SetEventFlag(SmapDrivPrivData->m_devops.evfid, sceInetDevEFP_Recv);
+    }
+#endif
+
     return NumPacketsReceived;
 }
 
@@ -141,50 +188,65 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
 {
     int result;
     void *data;
+    void *pbuf;
     USE_SMAP_TX_BD;
     volatile smap_bd_t *BD_ptr;
     u16 BD_data_ptr;
     unsigned int SizeRounded;
+    volatile u8 *smap_regbase;
 
-    result = 0;
+    result       = 0;
+    smap_regbase = SmapDrivPrivData->smap_regbase;
     while (1) {
         int length;
 
         data = NULL;
-        if ((length = SMAPCommonTxPacketNext(SmapDrivPrivData, &data)) < 1) {
+        if ((length = SMAPCommonTxPacketNext(SmapDrivPrivData, &data, &pbuf)) < 1) {
             return result;
         }
-        SmapDrivPrivData->packetToSend = data;
+        SmapDrivPrivData->packetToSend = pbuf;
 
-        if (SmapDrivPrivData->NumPacketsInTx < SMAP_BD_MAX_ENTRY) {
-            {
-                SizeRounded = (length + 3) & ~3;
-
-                if (SmapDrivPrivData->TxBufferSpaceAvailable >= SizeRounded) {
-                    volatile u8 *smap_regbase;
-
-                    smap_regbase = SmapDrivPrivData->smap_regbase;
-
-                    BD_data_ptr = SMAP_REG16(SMAP_R_TXFIFO_WR_PTR) + SMAP_TX_BASE;
-                    BD_ptr      = &tx_bd[SmapDrivPrivData->TxBDIndex % SMAP_BD_MAX_ENTRY];
-
-                    CopyToFIFO(SmapDrivPrivData->smap_regbase, data, length);
-
-                    result++;
-                    BD_ptr->length                     = length;
-                    BD_ptr->pointer                    = BD_data_ptr;
-                    SMAP_REG8(SMAP_R_TXFIFO_FRAME_INC) = 0;
-                    BD_ptr->ctrl_stat                  = SMAP_BD_TX_READY | SMAP_BD_TX_GENFCS | SMAP_BD_TX_GENPAD;
-                    SmapDrivPrivData->TxBDIndex++;
-                    SmapDrivPrivData->NumPacketsInTx++;
-                    SmapDrivPrivData->TxBufferSpaceAvailable -= SizeRounded;
-                } else
-                    return result; // Out of FIFO space
-            }
-        } else
+        if (SmapDrivPrivData->NumPacketsInTx >= SMAP_BD_MAX_ENTRY) {
             return result; // Queue full
+        }
+        SizeRounded = (length + 3) & ~3;
+
+        if (SmapDrivPrivData->TxBufferSpaceAvailable < SizeRounded) {
+            return result; // Out of FIFO space
+        }
+
+#ifdef BUILDING_SMAP_NETDEV
+        if ((*((u8 *)data) & 1) != 0) {
+            if (*(u32 *)data == (u32)-1 && *((u16 *)data + 2) == 0xFFFF) {
+                SmapDrivPrivData->RuntimeStats_NetDev.m_Tx_Broadcast_Packets += 1;
+                SmapDrivPrivData->RuntimeStats_NetDev.m_Tx_Broadcast_Bytes += length;
+            } else {
+                SmapDrivPrivData->RuntimeStats_NetDev.m_Tx_Multicast_Packets += 1;
+                SmapDrivPrivData->RuntimeStats_NetDev.m_Tx_Multicast_Bytes += length;
+            }
+        }
+#endif
+
+        BD_data_ptr = SMAP_REG16(SMAP_R_TXFIFO_WR_PTR) + SMAP_TX_BASE;
+        BD_ptr      = &tx_bd[SmapDrivPrivData->TxBDIndex % SMAP_BD_MAX_ENTRY];
+
+        CopyToFIFO(smap_regbase, data, length);
+
+        result++;
+        BD_ptr->length                     = length;
+        BD_ptr->pointer                    = BD_data_ptr;
+        SMAP_REG8(SMAP_R_TXFIFO_FRAME_INC) = 0;
+        BD_ptr->ctrl_stat                  = SMAP_BD_TX_READY | SMAP_BD_TX_GENFCS | SMAP_BD_TX_GENPAD;
+        SmapDrivPrivData->TxBDIndex++;
+        SmapDrivPrivData->NumPacketsInTx++;
+        SmapDrivPrivData->TxBufferSpaceAvailable -= SizeRounded;
+
+#ifdef BUILDING_SMAP_NETDEV
+        SmapDrivPrivData->RuntimeStats_NetDev.m_Tx_Bytes += length;
+        SmapDrivPrivData->RuntimeStats_NetDev.m_Tx_Packets += 1;
+#endif
 
         SmapDrivPrivData->packetToSend = NULL;
-        SMAPCommonTxPacketDeQ(SmapDrivPrivData, &data);
+        SMAPCommonTxPacketDeQ(SmapDrivPrivData, &data, &pbuf);
     }
 }

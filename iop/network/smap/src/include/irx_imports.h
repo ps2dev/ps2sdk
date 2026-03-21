@@ -7,6 +7,9 @@
 #include <dev9.h>
 #include <intrman.h>
 #include <loadcore.h>
+#ifdef BUILDING_SMAP_NETDEV
+#include <netdev.h>
+#endif
 #ifdef BUILDING_SMAP_NETMAN
 #include <netman.h>
 #endif
