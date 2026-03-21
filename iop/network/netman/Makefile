@@ -18,7 +18,13 @@ IOP_IMPORT_INCS += \
 	system/sysmem \
 	system/threadman
 
-IOP_OBJS = netman.o rpc_server.o rpc_client.o imports.o exports.o
+IOP_OBJS = \
+	netman.o \
+	rpc_server.o \
+	rpc_client.o \
+	netdev.o \
+	imports.o \
+	exports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
