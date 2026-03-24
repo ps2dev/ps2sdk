@@ -15,6 +15,9 @@ SMAP_NETMAN ?= 1
 # Build against the ps2ip library.
 SMAP_PS2IP ?= 0
 
+# Build against the netdev interface.
+SMAP_NETDEV ?= 0
+
 # Enable the modular interface.
 SMAP_MODULAR ?= 0
 
@@ -48,6 +51,11 @@ endif
 ifneq (x$(SMAP_PS2IP),x0)
 IOP_CFLAGS += -DBUILDING_SMAP_PS2IP=1
 IOP_IMPORT_INCS += tcpip/tcpip
+endif
+
+ifneq (x$(SMAP_NETDEV),x0)
+IOP_CFLAGS += -DBUILDING_SMAP_NETDEV=1
+IOP_IMPORT_INCS += network/netman
 endif
 
 ifneq (x$(SMAP_MODULAR),x0)

@@ -25,6 +25,7 @@ static int NetManIOSemaID;
 IRX_ID("Network_Manager", 2, 1);
 
 extern struct irx_export_table _exp_netman;
+extern struct irx_export_table _exp_netdev;
 
 int _start(int argc, char *argv[]){
 	iop_sema_t sema;
@@ -32,19 +33,21 @@ int _start(int argc, char *argv[]){
 	(void)argc;
 	(void)argv;
 
-	if(RegisterLibraryEntries(&_exp_netman) == 0){
-		sema.attr = 0;
-		sema.option = 0;
-		sema.initial = 1;
-		sema.max = 1;
-		NetManIOSemaID = CreateSema(&sema);
-
-		NetmanInitRPCServer();
-
-		return MODULE_RESIDENT_END;
+	if(RegisterLibraryEntries(&_exp_netman) != 0){
+		return MODULE_NO_RESIDENT_END;
 	}
+	if(RegisterLibraryEntries(&_exp_netdev) != 0){
+		return MODULE_NO_RESIDENT_END;
+	}
+	sema.attr = 0;
+	sema.option = 0;
+	sema.initial = 1;
+	sema.max = 1;
+	NetManIOSemaID = CreateSema(&sema);
 
-	return MODULE_NO_RESIDENT_END;
+	NetmanInitRPCServer();
+
+	return MODULE_RESIDENT_END;
 }
 
 void *malloc(int size){
