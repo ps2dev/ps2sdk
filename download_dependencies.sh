@@ -14,9 +14,9 @@ if [ "x$1" != "xlocked" ]; then
 fi
 
 ## Download LWIP
-LWIP_REPO_URL="https://github.com/lwip-tcpip/lwip.git"
+LWIP_REPO_URL="https://github.com/ps2dev/lwip.git"
 LWIP_REPO_FOLDER="common/external_deps/lwip"
-LWIP_BRANCH_NAME="STABLE-2_2_1_RELEASE"
+LWIP_BRANCH_NAME="ps2-v2.2.1"
 if test ! -d "$LWIP_REPO_FOLDER"; then
   git clone --depth 1 -b $LWIP_BRANCH_NAME $LWIP_REPO_URL "$LWIP_REPO_FOLDER"_inprogress || exit 1
   mv "$LWIP_REPO_FOLDER"_inprogress "$LWIP_REPO_FOLDER"
