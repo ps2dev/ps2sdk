@@ -87,6 +87,16 @@
 #define MEM_ALIGNMENT		4
 
 /**
+ * LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT==1: make mem_free() callable from
+ * any context (ISR/disabled-interrupt) by using SYS_ARCH_PROTECT instead of
+ * a mutex for critical regions. Required on IOP because SMAP RX interrupts
+ * invoke pbuf_free() in interrupt-disabled context; taking a mutex there
+ * would violate the critical section (same effect as ps2dev/lwip's mem.c
+ * patch, but achieved via upstream lwipopts instead of patching lwIP).
+ */
+#define LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT	1
+
+/**
  * MEM_SIZE: the size of the heap memory. If the application will send
  * a lot of data that needs to be copied, this should be set high.
  */

@@ -4,6 +4,11 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stddef.h>
+/* Upstream lwIP's sockets.h references struct timeval without including
+   sys/time.h when LWIP_TIMEVAL_PRIVATE=0. Pull it in via this port header
+   so every lwIP translation unit (and every consumer that #includes
+   arch/cc.h transitively through lwip/opt.h) sees struct timeval. */
+#include <sys/time.h>
 
 #define PACK_STRUCT_FIELD(x) x __attribute((packed))
 #define PACK_STRUCT_STRUCT __attribute((packed))
