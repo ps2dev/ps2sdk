@@ -17,10 +17,6 @@ PS2IP_BASE = $(PS2SDKSRC)/iop/tcpip/tcpip-base
 IOP_BIN ?= ps2ip.irx
 
 IOP_CFLAGS += -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED
-# Upstream lwIP 2.0.3's sockets.h references struct timeval without
-# including <sys/time.h> when LWIP_TIMEVAL_PRIVATE=0. Pre-include it
-# for every compilation unit so we don't have to patch lwIP.
-IOP_CFLAGS += -include sys/time.h
 
 ifeq ($(DEBUG),1)
 IOP_CFLAGS += -DDEBUG -DLWIP_DEBUG

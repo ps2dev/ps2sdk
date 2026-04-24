@@ -18,10 +18,6 @@ EE_LIB_ALTNAMES ?= libsocket.a
 EE_LIB = libps2ip.a
 
 EE_CFLAGS += -Wall -fno-builtin -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED -mno-gpopt -O2 -G0 -mno-check-zero-division
-# Upstream lwIP 2.0.3's sockets.h references struct timeval without
-# including <sys/time.h> when LWIP_TIMEVAL_PRIVATE=0. Pre-include it
-# for every compilation unit so we don't have to patch lwIP.
-EE_CFLAGS += -include sys/time.h
 
 ifeq ($(DEBUG),1)
 EE_CFLAGS += -DDEBUG -DLWIP_DEBUG -Wno-error
