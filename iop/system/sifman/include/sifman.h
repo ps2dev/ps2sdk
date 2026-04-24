@@ -141,6 +141,7 @@ extern int sceSifCheckInit();
 extern void sceSifSetDmaIntrHandler(void (*handler)(void *userdata), void *arg);
 extern void sceSifResetDmaIntrHandler();
 
+// The following was implemented around SDK 2.2
 extern unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int count, void (*completioncb)(void *userdata), void *userdata);
 
 #define sifman_IMPORTS_start DECLARE_IMPORT_TABLE(sifman, 1, 1)

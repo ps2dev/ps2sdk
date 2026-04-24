@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+// The following was introduced in export version 1.2 (around SDK 2.5.0)
+
 #define TSS_THREAD      0
 #define TSS_DISABLEINTR 3
 #define TSS_NOTHREAD    4
@@ -45,7 +47,7 @@ extern int GetThreadStackFreeSize(int thid);
 
 extern int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount);
 
-#define xthbase_IMPORTS_start DECLARE_IMPORT_TABLE(thbase, 1, 1)
+#define xthbase_IMPORTS_start DECLARE_IMPORT_TABLE(thbase, 1, 2)
 #define xthbase_IMPORTS_end   END_IMPORT_TABLE
 
 #define I_GetThreadCurrentPriority DECLARE_IMPORT(42, GetThreadCurrentPriority)

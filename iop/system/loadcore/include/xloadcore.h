@@ -25,6 +25,7 @@ extern "C" {
 #define xloadcore_IMPORTS_start DECLARE_IMPORT_TABLE(loadcore, 1, 3)
 #define xloadcore_IMPORTS_end END_IMPORT_TABLE
 
+// The following was introduced in export version 1.3 (around SDK 2.3.4)
 extern void ApplyElfRelSection(void *buffer, const void *module, int element_count);
 extern void CopyModInfo(FileInfo_t *ModuleInfo, ModuleInfo_t *ModInfo);
 extern int SetRebootTimeLibraryHandlingMode(struct irx_export_table *exports, int mode);
