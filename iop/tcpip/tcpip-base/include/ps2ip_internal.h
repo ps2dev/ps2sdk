@@ -12,6 +12,10 @@
 #define	__PS2IP_INTERNAL_H__
 
 #include <types.h>
+/* Upstream lwIP 2.0.3's sockets.h uses struct timeval (from sys/time.h)
+   without including it when LWIP_TIMEVAL_PRIVATE=0. Pre-include here
+   instead of patching lwIP's header. */
+#include <sys/time.h>
 #include "lwip/sockets.h"
 
 #ifdef DEBUG
