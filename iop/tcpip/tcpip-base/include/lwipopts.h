@@ -105,6 +105,25 @@
 #define MEM_SIZE		(TCP_SND_BUF * 2)
 
 /*
+   -----------------------------------------------
+   ---------- IP options -------------------------
+   -----------------------------------------------
+*/
+/**
+ * IP_REASSEMBLY==1: Reassemble incoming fragmented IP packets.
+ * Disabled: PS2 networking targets a local LAN with MTU=1500, and
+ * TCP negotiates MSS=1460 so fragments never arise in the common
+ * case. Frees MEMP_NUM_REASSDATA / MEMP_NUM_FRAG_PBUF pool entries.
+ */
+#define IP_REASSEMBLY		0
+
+/**
+ * IP_FRAG==1: Fragment outgoing IP packets if their size exceeds MTU.
+ * Disabled: TCP_MSS=1460 ensures we never exceed Ethernet MTU=1500.
+ */
+#define IP_FRAG			0
+
+/*
    ------------------------------------------------
    ---------- Internal Memory Pool Sizes ----------
    ------------------------------------------------
