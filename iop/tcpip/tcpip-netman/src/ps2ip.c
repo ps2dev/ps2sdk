@@ -348,21 +348,6 @@ SMapLowLevelOutput(struct netif *pNetIF, struct pbuf* pOutput)
 	return result;
 }
 
-//SMapOutput():
-
-//This function is called by the TCP/IP stack when an IP packet should be sent. It'll be invoked in the context of the
-//tcpip-thread, hence no synchronization is required.
-// For LWIP versions before v1.3.0.
-#ifdef PRE_LWIP_130_COMPAT
-static err_t
-SMapOutput(struct netif *pNetIF, struct pbuf *pOutput, IPAddr* pIPAddr)
-{
-	struct pbuf *pBuf=etharp_output(pNetIF,pIPAddr,pOutput);
-
-	return	pBuf!=NULL ? SMapLowLevelOutput(pNetIF, pBuf):ERR_OK;
-}
-#endif
-
 //Should be called at the beginning of the program to set up the network interface.
 static err_t SMapIFInit(struct netif* pNetIF)
 {
@@ -371,18 +356,10 @@ static err_t SMapIFInit(struct netif* pNetIF)
 
 	pNetIF->name[0]='s';
 	pNetIF->name[1]='m';
-#ifdef PRE_LWIP_130_COMPAT
-	pNetIF->output=&SMapOutput;	// For LWIP versions before v1.3.0.
-#else
-	pNetIF->output=&etharp_output;	// For LWIP 1.3.0 and later.
-#endif
+	pNetIF->output=&etharp_output;
 	pNetIF->linkoutput=&SMapLowLevelOutput;
 	pNetIF->hwaddr_len=NETIF_MAX_HWADDR_LEN;
-#ifdef PRE_LWIP_130_COMPAT
-	pNetIF->flags|=(NETIF_FLAG_LINK_UP|NETIF_FLAG_BROADCAST);	// For LWIP versions before v1.3.0.
-#else
-	pNetIF->flags|=(NETIF_FLAG_ETHARP|NETIF_FLAG_BROADCAST);	// For LWIP v1.3.0 and later.
-#endif
+	pNetIF->flags|=(NETIF_FLAG_ETHARP|NETIF_FLAG_ETHERNET|NETIF_FLAG_BROADCAST);
 	pNetIF->mtu=1500;
 
 	//Get MAC address.
