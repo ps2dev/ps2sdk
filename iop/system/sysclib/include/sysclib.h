@@ -71,7 +71,11 @@ extern char *strstr(const char *haystack, const char *needle);
 extern char *strtok(char *s, const char *delim);
 extern long strtol(const char *s, char **endptr, int base);
 extern unsigned long strtoul(const char *s, char **endptr, int base);
+
+// The following was introduced in export version 1.2 (around SDK 2.3)
 extern int vsprintf(char *, const char *, va_list);
+
+// The following was introduced in export version 1.4 (around SDK 2.8)
 extern char *strtok_r(char *s, const char *delim, char **lasts);
 
 #ifndef SYSCLIB_DISABLE_BUILTINS

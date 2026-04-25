@@ -22,6 +22,7 @@
 extern "C" {
 #endif
 
+// The following was introduced in export version 1.3 (around SDK 2.3)
 extern int GetModuleIdList(int *readbuf, int readbufsize, int *modulecount);
 
 typedef struct {
@@ -70,8 +71,12 @@ extern int SearchModuleByName(const char *name);
 extern int SearchModuleByAddress(const void *addr);
 extern int SelfStopModule(int arglen, const char *args, int *result);
 extern void SelfUnloadModule(void);
+
+// The following was introduced in export version 1.5 (around SDK 2.3.4)
 extern void *AllocLoadMemory(int type, unsigned int size, void *addr);
 extern int FreeLoadMemory(void *area);
+
+// The following was introduced in export version 1.6 (around SDK 2.5)
 extern int SetModuleFlags(int modid, int flag);
 
 #define xmodload_IMPORTS_start DECLARE_IMPORT_TABLE(modload, 1, 7)

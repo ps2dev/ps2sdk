@@ -33,10 +33,15 @@ extern int fdgetc(int fd);
 extern int fdputc(int c, int fd);
 extern int fdputs(const char *s, int fd);
 extern char *fdgets(char *buf, int fd);
+
+// The following was introduced in export version 1.3 (around SDK 2.3)
 extern int vfdprintf(int fd, const char *format, va_list ap);
 
 #define stdio_IMPORTS_start DECLARE_IMPORT_TABLE(stdio, 1, 2)
 #define stdio_IMPORTS_end END_IMPORT_TABLE
+
+#define xstdio_IMPORTS_start DECLARE_IMPORT_TABLE(stdio, 1, 3)
+#define xstdio_IMPORTS_end END_IMPORT_TABLE
 
 #define I_printf DECLARE_IMPORT(4, printf)
 #define I_getchar DECLARE_IMPORT(5, getchar)

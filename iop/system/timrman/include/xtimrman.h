@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+// The following was introduced in export version 1.2 (around SDK 2.0.5)
+
 #define TC_SYSCLOCK 1
 #define TC_PIXEL    2
 #define TC_HLINE    4
@@ -32,7 +34,7 @@ extern int SetupHardTimer(int timid, int source, int mode, int prescale);
 extern int StartHardTimer(int timid);
 extern int StopHardTimer(int timid);
 
-#define xtimrman_IMPORTS_start DECLARE_IMPORT_TABLE(timrman, 1, 1)
+#define xtimrman_IMPORTS_start DECLARE_IMPORT_TABLE(timrman, 1, 2)
 #define xtimrman_IMPORTS_end   END_IMPORT_TABLE
 
 #define I_SetTimerHandler    DECLARE_IMPORT(20, SetTimerHandler)
