@@ -1,0 +1,10 @@
+<map id="route" name="route">
+<area shape="rect" id="Node000001" title=" " alt="" coords="165,217,215,243"/>
+<area shape="rect" id="Node000002" href="$structsce_net_cnf_command.html" title=" " alt="" coords="5,126,148,152"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,159,176,214,173,219,102,164"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="165,131,174,139,166,147,149,150,148,145,164,142,169,139,162,135"/>
+<area shape="rect" id="Node000003" href="$structsce_net_cnf_routing_entry.html" title=" " alt="" coords="226,126,383,152"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="279,164,207,219,204,214,275,159"/>
+<area shape="rect" id="Node000004" href="$structsce_net_cnf_address.html" title=" " alt="" coords="239,5,370,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="307,46,307,126,302,126,302,46"/>
+</map>

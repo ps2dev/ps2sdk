@@ -1,0 +1,12 @@
+<map id="romwrite_part_buf_" name="romwrite_part_buf_">
+<area shape="rect" id="Node000001" title=" " alt="" coords="166,213,298,238"/>
+<area shape="rect" id="Node000002" href="$s147nand_8h.html#structs147nand__header__" title=" " alt="" coords="37,124,168,150"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,157,175,186,213,210,210,215,173,191,130,161"/>
+<area shape="rect" id="Node000003" href="$s147nand_8h.html#structs147nand__header__part__" title=" " alt="" coords="5,5,165,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="85,46,85,72,89,99,98,122,93,124,83,101,80,73,80,46"/>
+<area shape="rect" id="Node000004" href="$s147nand_8h.html#structs147nand__dir__" title=" " alt="" coords="319,124,424,150"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="341,160,253,214,250,210,338,156"/>
+<area shape="rect" id="Node000005" href="$s147nand_8h.html#structs147nand__direntry__" title=" " alt="" coords="198,5,332,31"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="262,46,247,124,236,213,230,212,242,124,257,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="288,41,363,122,359,125,284,44"/>
+</map>

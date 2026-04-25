@@ -1,0 +1,40 @@
+<map id="iop/system/sio2man/src/sio2man.c" name="iop/system/sio2man/src/sio2man.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="262,5,399,46"/>
+<area shape="rect" id="Node000002" href="$iop_2system_2sio2man_2src_2irx__imports_8h_source.html" title=" " alt="" coords="178,168,273,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="316,48,278,96,242,155,237,152,274,92,312,45"/>
+<area shape="rect" id="Node000012" href="$iop__mmio__hwport_8h.html" title=" " alt="" coords="397,94,531,120"/>
+<area shape="poly" id="edge18_Node000001_Node000012" title=" " alt="" coords="365,44,432,83,429,88,363,49"/>
+<area shape="rect" id="Node000013" href="$rsio2man_8h.html" title=" " alt="" coords="289,94,373,120"/>
+<area shape="poly" id="edge19_Node000001_Node000013" title=" " alt="" coords="333,46,333,78,328,78,328,46"/>
+<area shape="rect" id="Node000003" href="$irx_8h.html" title=" " alt="" coords="165,315,209,341"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="178,191,83,211,41,226,16,243,8,259,12,273,25,285,45,295,97,311,150,320,149,325,96,316,43,300,22,289,8,275,3,259,11,240,38,221,81,206,177,186"/>
+<area shape="rect" id="Node000007" href="$dmacman_8h.html" title=" " alt="" coords="25,241,114,267"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="200,196,111,237,109,232,198,191"/>
+<area shape="rect" id="Node000009" href="$intrman_8h.html" title=" " alt="" coords="138,241,212,267"/>
+<area shape="poly" id="edge9_Node000002_Node000009" title=" " alt="" coords="219,195,194,230,190,227,215,192"/>
+<area shape="rect" id="Node000010" href="$loadcore_8h.html" title=" " alt="" coords="236,241,316,267"/>
+<area shape="poly" id="edge12_Node000002_Node000010" title=" " alt="" coords="236,192,261,227,257,230,232,195"/>
+<area shape="rect" id="Node000011" href="$thsemap_8h.html" title=" " alt="" coords="341,241,422,267"/>
+<area shape="poly" id="edge15_Node000002_Node000011" title=" " alt="" coords="253,191,342,232,340,237,251,196"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="156,389,218,414"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="189,341,189,373,184,373,184,341"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="104,462,171,488"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="181,416,156,451,152,448,176,413"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="195,462,280,488"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="197,413,222,448,218,451,193,416"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="91,265,155,304,153,309,88,270"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="245,315,307,341"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="105,265,231,308,229,313,104,270"/>
+<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="179,267,185,299,180,300,174,268"/>
+<area shape="poly" id="edge10_Node000009_Node000008" title=" " alt="" coords="194,265,248,303,245,308,190,270"/>
+<area shape="poly" id="edge14_Node000010_Node000003" title=" " alt="" coords="263,270,215,307,212,303,259,265"/>
+<area shape="poly" id="edge13_Node000010_Node000008" title=" " alt="" coords="279,267,279,299,273,299,273,267"/>
+<area shape="poly" id="edge17_Node000011_Node000003" title=" " alt="" coords="349,270,225,316,223,310,348,265"/>
+<area shape="poly" id="edge16_Node000011_Node000008" title=" " alt="" coords="365,270,308,308,305,304,362,265"/>
+<area shape="rect" id="Node000014" href="$xsio2man_8h.html" title=" " alt="" coords="370,168,457,193"/>
+<area shape="poly" id="edge20_Node000013_Node000014" title=" " alt="" coords="347,118,390,155,386,159,343,122"/>
+<area shape="rect" id="Node000015" href="$sio2man_8h.html" title=" " alt="" coords="447,241,527,267"/>
+<area shape="poly" id="edge21_Node000014_Node000015" title=" " alt="" coords="427,192,466,229,462,232,424,195"/>
+<area shape="poly" id="edge23_Node000015_Node000003" title=" " alt="" coords="447,267,234,318,225,320,223,315,233,312,446,262"/>
+<area shape="poly" id="edge22_Node000015_Node000008" title=" " alt="" coords="452,270,323,313,322,308,450,265"/>
+</map>
