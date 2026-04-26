@@ -270,12 +270,17 @@ void PS2IPLinkStateDown(void)
 #endif
 
 #if defined(BUILDING_SMAP_NETMAN) || defined(BUILDING_SMAP_NETDEV)
-// While the header of the export table is small, the large size of the export table (as a whole) places it in data instead of sdata.
-extern struct irx_export_table _exp_smap __attribute__((section("data")));
+/* DECLARE_EXPORT_TABLE in iop/kernel/include/irx.h places the export
+   table in .text via a section(".text\n\t#") asm trick, so the extern
+   declaration needs no section attribute. (The previous section("data")
+   was misleading: a bare "data" name produces an orphan ELF section the
+   IRX loader does not allocate; harmless here only because the actual
+   definition lives in .text.) */
+extern struct irx_export_table _exp_smap;
 #endif
 
 #ifdef BUILDING_SMAP_MODULAR
-extern struct irx_export_table _exp_smapmodu __attribute__((section("data")));
+extern struct irx_export_table _exp_smapmodu;
 #endif
 
 int _start(int argc, char *argv[])
