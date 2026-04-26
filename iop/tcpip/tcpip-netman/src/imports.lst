@@ -54,6 +54,7 @@ I_memset
 I_strcpy
 I_strncpy
 I_memcpy
+I_memmove
 I_strlen
 I_strncmp
 I_strtok
@@ -61,6 +62,8 @@ I_strtoul
 I_memcmp
 I_strtol
 I_strcmp
+I_tolower
+I_look_ctype_table
 sysclib_IMPORTS_end
 
 sysmem_IMPORTS_start

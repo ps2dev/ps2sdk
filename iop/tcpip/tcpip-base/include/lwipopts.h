@@ -8,9 +8,21 @@
 
 /* ---------- Thread options ---------- */
 /**
- * DEFAULT_THREAD_STACKSIZE: The stack size used by any other lwIP thread.
- * The stack size value itself is platform-dependent, but is passed to
- * sys_thread_new() when the thread is created.
+ * DEFAULT_THREAD_STACKSIZE: The stack size used by any other lwIP thread
+ * spawned via sys_thread_new(). In our build that's just the tcpip thread.
+ *
+ * With LWIP_TCPIP_CORE_LOCKING=1 the deep socket-API call chains run on
+ * the calling app thread, not on the tcpip thread; the tcpip thread itself
+ * only dispatches timer callbacks and the occasional tcpip_callback (e.g.
+ * link up/down). Worst-case chain on the tcpip thread is roughly
+ *
+ *   tcpip_thread (56) -> sys_check_timeouts (32) -> lwip_cyclic_timer (32)
+ *     -> tcp_slowtmr (72) or dhcp_fine_tmr -> ~150-200 of inner work
+ *   ~= 350-450 bytes + register-save overhead.
+ *
+ * 0x600 (1.5 KB) is the historical 2.0.3 value and matches the call-chain
+ * profile under LWIP_TCPIP_CORE_LOCKING=1. ~2x margin over the measured
+ * worst case.
  */
 #define DEFAULT_THREAD_STACKSIZE	0x600
 
@@ -108,12 +120,20 @@
 #define PBUF_POOL_SIZE		32	//SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to handle simultaneous connections.
 
 /**
- * LWIP_TCPIP_CORE_LOCKING_INPUT: when LWIP_TCPIP_CORE_LOCKING is enabled,
- * this lets tcpip_input() grab the mutex for input packets as well,
- * instead of allocating a message and passing it to tcpip_thread.
- *
- * ATTENTION: this does not work when tcpip_input() is called from
- * interrupt context!
+ * LWIP_TCPIP_CORE_LOCKING==1: matches lwIP 2.2.1's upstream default. Socket
+ * and netconn API calls take the core mutex on the calling app thread and
+ * run synchronously, instead of round-tripping through the tcpip thread's
+ * mailbox. Saves a context switch + sem wait per API call. lwIP releases
+ * the core lock before any blocking I/O wait (mbox_fetch on connection
+ * mboxes), so the tcpip thread and SMAP RX can still run to deliver data.
+ */
+#define LWIP_TCPIP_CORE_LOCKING		1
+
+/**
+ * LWIP_TCPIP_CORE_LOCKING_INPUT==1: tcpip_input() takes the core mutex
+ * directly instead of allocating a message. Safe here because the netif
+ * input callback runs in IntrHandlerThread (smap.c) — a normal thread,
+ * not interrupt context — so the lock acquire is allowed.
  */
 #define LWIP_TCPIP_CORE_LOCKING_INPUT	1
 
@@ -140,17 +160,14 @@
 #endif
 
 /**
- * DHCP_DOES_ARP_CHECK==1: Do an ARP check on the offered address.
+ * LWIP_DHCP_DOES_ACD_CHECK==0: skip RFC 5227 Address Conflict Detection on
+ * the DHCP-offered address (replaces the pre-2.2.0 DHCP_DOES_ARP_CHECK).
+ * PS2 networking targets a controlled LAN; the saved code+timer/RAM beats
+ * guarding against a vanishingly unlikely IP collision. Combined with
+ * LWIP_AUTOIP=0 (default) this lets LWIP_ACD default to 0 too.
  */
-#define DHCP_DOES_ARP_CHECK	0	//Don't do the ARP check because an IP address would be first required.
-
-/**
- * LWIP_DHCP_CHECK_LINK_UP==1: dhcp_start() only really starts if the netif has
- * NETIF_FLAG_LINK_UP set in its flags. As this is only an optimization and
- * netif drivers might not set this flag, the default is off. If enabled,
- * netif_set_link_up() must be called to continue dhcp starting.
- */
-#define LWIP_DHCP_CHECK_LINK_UP	1
+#define LWIP_DHCP_DOES_ACD_CHECK	0
+#define LWIP_ACD			0
 
 /*
    ----------------------------------
@@ -213,10 +230,6 @@
    ---------- Socket options ----------
    ------------------------------------
 */
-/* LWIP_SOCKET_SET_ERRNO==1: Set errno when socket functions cannot complete
- * successfully, as required by POSIX. Default is POSIX-compliant.
- */
-#define LWIP_SOCKET_SET_ERRNO	0
 /**
  * LWIP_POSIX_SOCKETS_IO_NAMES==1: Enable POSIX-style sockets functions names.
  * Disable this option if you use a POSIX operating system that uses the same
