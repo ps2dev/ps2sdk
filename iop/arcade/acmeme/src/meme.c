@@ -518,7 +518,7 @@ int acMemeModuleStart(int argc, char **argv)
 	int v14;
 	char *next;
 
-	if ( acMemeModuleStatus() == 0 )
+	if ( acMemeModuleStatus() != 0 )
 	{
 		return -16;
 	}
