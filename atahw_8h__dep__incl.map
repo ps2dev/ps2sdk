@@ -1,0 +1,17 @@
+<map id="common/include/atahw.h" name="common/include/atahw.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="487,5,652,31"/>
+<area shape="rect" id="Node000002" href="$ata_8c_source.html" title=" " alt="" coords="5,79,145,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="472,34,324,54,158,82,146,84,145,79,157,76,323,49,471,29"/>
+<area shape="rect" id="Node000003" href="$atacmd_8c_source.html" title=" " alt="" coords="169,79,309,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="504,38,310,84,308,79,503,33"/>
+<area shape="rect" id="Node000004" href="$atapicmd_8c_source.html" title=" " alt="" coords="333,79,473,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="531,41,446,81,443,76,529,36"/>
+<area shape="rect" id="Node000005" href="$acatad_8c_source.html" title=" " alt="" coords="496,79,643,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="572,46,572,79,567,79,567,46"/>
+<area shape="rect" id="Node000006" href="$acd_8c_source.html" title=" " alt="" coords="667,79,816,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="611,35,700,76,698,81,609,40"/>
+<area shape="rect" id="Node000007" href="$ps2atad_8c.html" title=" " alt="" coords="840,86,1022,112"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="641,32,876,83,875,88,640,37"/>
+<area shape="rect" id="Node000008" href="$hdproatad_8c_source.html" title=" " alt="" coords="1046,79,1184,120"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="668,27,839,47,1034,76,1046,79,1045,84,1033,82,839,52,668,32"/>
+</map>

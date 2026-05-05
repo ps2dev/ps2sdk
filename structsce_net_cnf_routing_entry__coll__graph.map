@@ -1,0 +1,5 @@
+<map id="sceNetCnfRoutingEntry" name="sceNetCnfRoutingEntry">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,124,162,150"/>
+<area shape="rect" id="Node000002" href="$structsce_net_cnf_address.html" title=" " alt="" coords="18,5,149,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,47,86,123,81,123,81,47"/>
+</map>

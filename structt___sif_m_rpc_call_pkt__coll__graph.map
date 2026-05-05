@@ -1,0 +1,22 @@
+<map id="t_SifMRpcCallPkt" name="t_SifMRpcCallPkt">
+<area shape="rect" id="Node000001" title=" " alt="" coords="56,306,181,331"/>
+<area shape="rect" id="Node000002" href="$sifcmd-common_8h.html#structt___sif_cmd_header" title=" " alt="" coords="5,185,123,210"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,223,116,304,111,306,73,226"/>
+<area shape="rect" id="Node000003" href="$struct__sifm__client__data.html" title=" " alt="" coords="173,94,296,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="226,135,195,203,150,283,132,307,128,304,146,280,190,201,222,133"/>
+<area shape="rect" id="Node000005" href="$struct__sifm__serve__data.html" title=" " alt="" coords="238,185,362,210"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="230,135,230,147,234,157,246,172,263,182,261,187,243,176,229,160,225,148,225,135"/>
+<area shape="rect" id="Node000004" href="$struct__sifm__rpc__data.html" title=" " alt="" coords="180,5,290,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="237,47,237,94,232,94,232,47"/>
+<area shape="poly" id="edge13_Node000001_Node000005" title=" " alt="" coords="263,221,234,239,211,261,187,284,146,308,144,303,184,280,207,257,231,235,260,216"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="286,173,269,145,247,122,251,118,273,142,290,170"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="380,189,389,198,381,206,363,209,362,203,378,201,384,198,376,194"/>
+<area shape="rect" id="Node000006" href="$struct__sifm__queue__data.html" title=" " alt="" coords="204,306,332,331"/>
+<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="272,223,262,238,258,255,258,273,266,305,260,306,253,274,252,254,257,236,268,220"/>
+<area shape="rect" id="Node000007" href="$struct__sifm__serve__entry.html" title=" " alt="" coords="407,306,534,331"/>
+<area shape="poly" id="edge11_Node000007_Node000005" title=" " alt="" coords="324,220,338,235,357,259,379,280,402,293,427,303,425,308,400,297,375,284,353,263,334,238,320,223"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="283,292,288,281,296,243,298,211,303,211,301,244,293,283,288,294"/>
+<area shape="poly" id="edge9_Node000006_Node000006" title=" " alt="" coords="349,308,358,318,350,328,333,332,332,327,348,323,353,319,345,312"/>
+<area shape="poly" id="edge10_Node000005_Node000007" title=" " alt="" coords="465,291,456,263,439,239,422,226,403,217,362,205,363,200,405,212,425,222,443,235,461,261,470,290"/>
+<area shape="poly" id="edge12_Node000007_Node000007" title=" " alt="" coords="551,308,561,318,553,328,535,332,534,327,550,323,556,319,548,312"/>
+</map>
