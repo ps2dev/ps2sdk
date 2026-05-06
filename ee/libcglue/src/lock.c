@@ -140,26 +140,26 @@ void __retarget_lock_acquire(_LOCK_T lock)
 #ifdef F___retarget_lock_acquire_recursive
 void __retarget_lock_acquire_recursive(_LOCK_T lock)
 {
-    bool starting = false;
     int32_t thread_id = GetThreadId();
-    starting = lock->count == 0;
-    if (starting) {
-        lock->thread_id = thread_id;
-    }
-    if (lock->thread_id == thread_id) {
+
+    /* Recursive case: this thread already owns the gate. We can read
+     * thread_id/count without the gate because only the owning thread
+     * mutates them while it holds the gate, and only the owning thread
+     * can take this branch. */
+    if (lock->count > 0 && lock->thread_id == thread_id) {
         lock->count++;
-        if (starting) {
-            WaitSema(lock->sem_id);
-        }
-    } else {
-        WaitSema(lock->sem_id);
-        // Reached here means that the lock was acquired by another thread
-        // so now we need to make it ours
-        // We can't put the lock->count++ before the WaitSema because it will
-        // cause a deadlock
-        lock->thread_id = thread_id;
-        lock->count++;
+        return;
     }
+
+    /* Otherwise acquire the gate for real. Only after WaitSema returns
+     * do we touch thread_id/count — putting count++ before WaitSema is
+     * what causes the classic recursive-mutex deadlock here, because a
+     * higher-priority thread preempting between count++ and WaitSema
+     * sees count>0, falls into the else branch, races past the sema, and
+     * then nobody signals it after release. */
+    WaitSema(lock->sem_id);
+    lock->thread_id = thread_id;
+    lock->count = 1;
 }
 #endif
 
@@ -173,28 +173,19 @@ int __retarget_lock_try_acquire(_LOCK_T lock)
 #ifdef F___retarget_lock_try_acquire_recursive
 int __retarget_lock_try_acquire_recursive(_LOCK_T lock)
 {
-    int res = 0;
-    bool starting = false;
     int32_t thread_id = GetThreadId();
-    starting = lock->count == 0;
-    if (starting) {
-        lock->thread_id = thread_id;
-    }
-    if (lock->thread_id == thread_id) {
+
+    if (lock->count > 0 && lock->thread_id == thread_id) {
         lock->count++;
-        if (starting) {
-            res = PollSema(lock->sem_id) > 0 ? 0 : 1;
-        }
-    } else {
-        res = PollSema(lock->sem_id) > 0 ? 0 : 1;
-        // Reached here means that the lock was acquired by another thread
-        // so now we need to make it ours
-        // We can't put the lock->count++ before the WaitSema because it will
-        // cause a deadlock
-        lock->thread_id = thread_id;
-        lock->count++;
+        return 0;
     }
-    return res;
+
+    if (PollSema(lock->sem_id) <= 0) {
+        return 1; /* gate not free */
+    }
+    lock->thread_id = thread_id;
+    lock->count = 1;
+    return 0;
 }
 #endif
 
