@@ -481,6 +481,38 @@ int ps2ipc_ps2ip_getconfig(char *netif_name, t_ip_info *ip_info)
 	return 1;
 }
 
+/* Marshal between the caller's struct fd_set (newlib, ~128 bytes on EE)
+ * and the on-the-wire ps2ip_rpc_fd_set (MEMP_NUM_NETCONN/8 bytes, fixed
+ * size on both sides). Bit-by-bit copy avoids any reliance on
+ * sizeof(struct fd_set) matching across the RPC boundary. */
+static void ps2ipc_pack_fdset(ps2ip_rpc_fd_set *dst, struct fd_set *src, int maxfdp1)
+{
+	int i;
+	memset(dst, 0, sizeof(*dst));
+	if (src == NULL) return;
+	if (maxfdp1 > (int)(sizeof(dst->fd_bits) * 8))
+		maxfdp1 = (int)(sizeof(dst->fd_bits) * 8);
+	for (i = 0; i < maxfdp1; i++) {
+		if (FD_ISSET(i, src)) {
+			dst->fd_bits[i >> 3] |= (unsigned char)(1U << (i & 7));
+		}
+	}
+}
+
+static void ps2ipc_unpack_fdset(struct fd_set *dst, const ps2ip_rpc_fd_set *src, int maxfdp1)
+{
+	int i;
+	if (dst == NULL) return;
+	FD_ZERO(dst);
+	if (maxfdp1 > (int)(sizeof(src->fd_bits) * 8))
+		maxfdp1 = (int)(sizeof(src->fd_bits) * 8);
+	for (i = 0; i < maxfdp1; i++) {
+		if (src->fd_bits[i >> 3] & (1U << (i & 7))) {
+			FD_SET(i, dst);
+		}
+	}
+}
+
 int ps2ipc_select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct fd_set *exceptset, struct timeval *timeout)
 {
 	int result;
@@ -491,21 +523,19 @@ int ps2ipc_select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, 
 	WaitSema(lock_sema);
 
 	pkt->maxfdp1 = maxfdp1;
-	pkt->readset_p = readset;
-	pkt->writeset_p = writeset;
-	pkt->exceptset_p = exceptset;
+	pkt->readset_p = (void *)readset;
+	pkt->writeset_p = (void *)writeset;
+	pkt->exceptset_p = (void *)exceptset;
 	pkt->timeout_p = timeout;
 	if( timeout )
-		pkt->timeout = *timeout;
+	{
+		pkt->timeout_sec  = (s32)timeout->tv_sec;
+		pkt->timeout_usec = (s32)timeout->tv_usec;
+	}
 
-	if( readset )
-		pkt->readset = *readset;
-
-	if( writeset )
-		pkt->writeset = *writeset;
-
-	if( exceptset )
-		pkt->exceptset = *exceptset;
+	ps2ipc_pack_fdset(&pkt->readset,   readset,   maxfdp1);
+	ps2ipc_pack_fdset(&pkt->writeset,  writeset,  maxfdp1);
+	ps2ipc_pack_fdset(&pkt->exceptset, exceptset, maxfdp1);
 
 	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_SELECT, 0, (void*)pkt, sizeof(select_pkt), (void*)pkt, sizeof(select_pkt), NULL, NULL) < 0)
 	{
@@ -514,16 +544,14 @@ int ps2ipc_select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, 
 	}
 
 	if( timeout )
-		*timeout = pkt->timeout;
+	{
+		timeout->tv_sec  = pkt->timeout_sec;
+		timeout->tv_usec = pkt->timeout_usec;
+	}
 
-	if( readset )
-		*readset = pkt->readset;
-
-	if( writeset )
-		*writeset = pkt->writeset;
-
-	if( exceptset )
-		*exceptset = pkt->exceptset;
+	ps2ipc_unpack_fdset(readset,   &pkt->readset,   maxfdp1);
+	ps2ipc_unpack_fdset(writeset,  &pkt->writeset,  maxfdp1);
+	ps2ipc_unpack_fdset(exceptset, &pkt->exceptset, maxfdp1);
 
 	result = pkt->result;
 

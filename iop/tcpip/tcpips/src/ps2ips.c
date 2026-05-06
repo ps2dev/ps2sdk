@@ -402,15 +402,34 @@ static void do_setconfig(void *rpcBuffer, int size)
 static void do_select( void * rpcBuffer, int size )
 {
 	select_pkt *pkt = (select_pkt*)_rpc_buffer;
+	struct timeval tv;
+	int result;
 
 	(void)rpcBuffer;
 	(void)size;
 
-	pkt->result = select(	pkt->maxfdp1,
-				pkt->readset_p != NULL ? &pkt->readset : NULL,
-				pkt->writeset_p != NULL ? &pkt->writeset : NULL,
-				pkt->exceptset_p != NULL ? &pkt->exceptset : NULL,
-				pkt->timeout_p != NULL ? &pkt->timeout : NULL );
+	/* Reconstruct an IOP-native struct timeval from the wire fields. */
+	if (pkt->timeout_p != NULL)
+	{
+		tv.tv_sec  = pkt->timeout_sec;
+		tv.tv_usec = pkt->timeout_usec;
+	}
+
+	/* ps2ip_rpc_fd_set is { unsigned char fd_bits[(MEMP_NUM_NETCONN+7)/8] },
+	 * which is byte-identical to lwIP's struct fd_set. The cast is safe and
+	 * keeps lwip_select free to mutate the bits in place. */
+	result = select(	pkt->maxfdp1,
+				pkt->readset_p   != NULL ? (struct fd_set *)&pkt->readset   : NULL,
+				pkt->writeset_p  != NULL ? (struct fd_set *)&pkt->writeset  : NULL,
+				pkt->exceptset_p != NULL ? (struct fd_set *)&pkt->exceptset : NULL,
+				pkt->timeout_p   != NULL ? &tv : NULL );
+
+	if (pkt->timeout_p != NULL)
+	{
+		pkt->timeout_sec  = (s32)tv.tv_sec;
+		pkt->timeout_usec = (s32)tv.tv_usec;
+	}
+	pkt->result = result;
 }
 
 static void do_ioctlsocket( void *rpcBuffer, int size )
