@@ -97,6 +97,17 @@
    ------------------------------------------------
 */
 /**
+ * MEMP_NUM_TCP_PCB: the number of simultaneously active TCP connections.
+ * The default of 5 is too small for an HTTP server: each completed request
+ * leaves the closing-side pcb in TIME_WAIT for 2*MSL (~60 s) holding a slot,
+ * so after a handful of fast back-to-back requests the pool fills up and
+ * accept() / connect() start failing with EHOSTUNREACH until slots free.
+ * 32 gives enough headroom for sustained traffic plus the in-flight SYN_RECV
+ * state for a 20-burst.
+ */
+#define MEMP_NUM_TCP_PCB       32
+
+/**
  * MEMP_NUM_NETCONN: the number of struct netconns.
  * (only needed if you use the sequential API, like api_lib.c)
  */
@@ -273,5 +284,18 @@
  * @todo: TCP and IP-frag do not work with this, yet:
  */
 #define LWIP_NETIF_TX_SINGLE_PBUF             1
+
+#define LWIP_NETIF_LOOPBACK                   1
+
+/**
+ * LWIP_HAVE_LOOPIF: lwIP defaults this to (LWIP_NETIF_LOOPBACK && !LWIP_SINGLE_NETIF)
+ * which is 1 once we enable LWIP_NETIF_LOOPBACK. That auto-creates a 127.0.0.1
+ * loopback netif and may make it the default route during init, which breaks
+ * DHCP because DHCP DISCOVER ends up routed through the loop netif and never
+ * hits the real SMAP wire (PCSX2 / a real router never sees it). Force it to 0
+ * so loopback traffic is handled in-place by the real netif via
+ * netif_loop_output, while DHCP / wire traffic still uses the SMAP path.
+ */
+#define LWIP_HAVE_LOOPIF                      0
 
 #endif /* __LWIPOPTS_H__ */
