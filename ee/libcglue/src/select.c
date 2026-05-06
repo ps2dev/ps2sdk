@@ -22,6 +22,7 @@ int	select(int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct t
 {
 	int fd;
 	int ret;
+	int iop_max_fd = -1;
 	fd_set ready_readfds, ready_writefds, ready_exceptfds;
 	fd_set iop_readfds, iop_writefds, iop_exceptfds;
 
@@ -41,42 +42,72 @@ int	select(int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct t
 
 	for (fd = 0; fd < n; fd += 1)
 	{
+		int in_read   = readfds   && FD_ISSET(fd, readfds);
+		int in_write  = writefds  && FD_ISSET(fd, writefds);
+		int in_except = exceptfds && FD_ISSET(fd, exceptfds);
 		int iop_fd;
+
+		if (!in_read && !in_write && !in_except)
+		{
+			continue;
+		}
+
 		iop_fd = ps2sdk_get_iop_fd(fd);
 		if (iop_fd < 0)
 		{
 			errno = EBADF;
 			return -1;
 		}
-		if (readfds && FD_ISSET(fd, readfds))
+		if (iop_fd > iop_max_fd)
+		{
+			iop_max_fd = iop_fd;
+		}
+		if (in_read)
 		{
 			FD_SET(iop_fd, &iop_readfds);
 		}
-		if (writefds && FD_ISSET(fd, writefds))
+		if (in_write)
 		{
 			FD_SET(iop_fd, &iop_writefds);
 		}
-		if (exceptfds && FD_ISSET(fd, exceptfds))
+		if (in_except)
 		{
 			FD_SET(iop_fd, &iop_exceptfds);
 		}
 	}
 
-	ret = _libcglue_fdman_socket_ops->select(n, &iop_readfds, &iop_writefds, &iop_exceptfds, timeout);
+	/* Pass max(iop_fd)+1 to the underlying select, not the EE-side n.
+	 * The bits in iop_*fds are at iop_fd positions; if iop_fd > n-1 the
+	 * underlying select would iterate an empty range and block forever
+	 * waiting for events on bits it isn't watching. */
+	ret = _libcglue_fdman_socket_ops->select(iop_max_fd + 1, &iop_readfds, &iop_writefds, &iop_exceptfds, timeout);
 
 	for (fd = 0; fd < n; fd += 1)
 	{
+		int in_read   = readfds   && FD_ISSET(fd, readfds);
+		int in_write  = writefds  && FD_ISSET(fd, writefds);
+		int in_except = exceptfds && FD_ISSET(fd, exceptfds);
 		int iop_fd;
+
+		if (!in_read && !in_write && !in_except)
+		{
+			continue;
+		}
+
 		iop_fd = ps2sdk_get_iop_fd(fd);
-		if (FD_ISSET(iop_fd, &iop_readfds))
+		if (iop_fd < 0)
+		{
+			continue;
+		}
+		if (in_read && FD_ISSET(iop_fd, &iop_readfds))
 		{
 			FD_SET(fd, &ready_readfds);
 		}
-		if (FD_ISSET(iop_fd, &iop_writefds))
+		if (in_write && FD_ISSET(iop_fd, &iop_writefds))
 		{
 			FD_SET(fd, &ready_writefds);
 		}
-		if (FD_ISSET(iop_fd, &iop_exceptfds))
+		if (in_except && FD_ISSET(iop_fd, &iop_exceptfds))
 		{
 			FD_SET(fd, &ready_exceptfds);
 		}
