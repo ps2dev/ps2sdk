@@ -457,14 +457,24 @@ void __ps2ipeeOpsInitializeImpl(void)
 
 /* Backup pointer functions to restore after exit ps2ipee */
 static _libcglue_fdman_socket_ops_t *_backup_libcglue_fdman_socket_ops;
+static _libcglue_fdman_inet_ops_t   *_backup_libcglue_fdman_inet_ops;
 
 void _ps2sdk_ps2ipee_init(void)
 {
     _backup_libcglue_fdman_socket_ops = _libcglue_fdman_socket_ops;
     _libcglue_fdman_socket_ops = &__ps2ipee_fdman_socket_ops;
+    /* Without this, libcglue's inet_addr/inet_ntoa/inet_aton fall into the
+     * ops==NULL branch and silently return 0/NULL — so inet_addr("1.2.3.4")
+     * gives 0.0.0.0, and any outbound packet using a string-resolved IP
+     * (UDP sendto, TCP connect by IP literal) ends up addressed to 0.0.0.0,
+     * which lwIP routes to the broadcast MAC. The IOP-side path doesn't hit
+     * this because its init wires libcglue ops via a different code path. */
+    _backup_libcglue_fdman_inet_ops = _libcglue_fdman_inet_ops;
+    _libcglue_fdman_inet_ops = &__ps2ipee_fdman_inet_ops;
 }
 
 void _ps2sdk_ps2ipee_deinit(void)
 {
     _libcglue_fdman_socket_ops = _backup_libcglue_fdman_socket_ops;
+    _libcglue_fdman_inet_ops = _backup_libcglue_fdman_inet_ops;
 }
