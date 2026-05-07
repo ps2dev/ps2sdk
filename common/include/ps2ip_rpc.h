@@ -132,6 +132,23 @@ typedef struct
     u8 buffer[128];
 } setsockopt_pkt;
 
+/* On-the-wire fd_set for the select RPC. The struct fd_set seen on EE
+ * (newlib, ~128 bytes) and IOP (lwIP, MEMP_NUM_NETCONN/8 bytes) compile
+ * units differs in size, which used to scramble select_pkt's layout
+ * across the SIF RPC boundary — IOP would only touch the first few
+ * bytes of EE's wider readset and never see writeset/exceptset at the
+ * right offsets. Using a fixed-size struct here keeps select_pkt
+ * byte-identical on both sides regardless of which struct fd_set is
+ * in scope at the include site. */
+typedef struct
+{
+    unsigned char fd_bits[(MEMP_NUM_NETCONN + 7) / 8];
+} ps2ip_rpc_fd_set;
+
+/* struct timeval differs across the boundary too — newlib's tv_sec/tv_usec
+ * are 64-bit on EE while the IOP defines them as 32-bit longs. Carry
+ * explicit 32-bit fields here so the layout is byte-identical on both
+ * sides; each end reconstructs its native struct timeval. */
 typedef struct
 {
     union
@@ -139,14 +156,15 @@ typedef struct
         s32 maxfdp1;
         s32 result;
     };
-    struct timeval *timeout_p;
-    struct timeval timeout;
-    struct fd_set *readset_p;
-    struct fd_set *writeset_p;
-    struct fd_set *exceptset_p;
-    struct fd_set readset;
-    struct fd_set writeset;
-    struct fd_set exceptset;
+    void *timeout_p;     /* opaque NULL/non-NULL flag */
+    s32 timeout_sec;
+    s32 timeout_usec;
+    void *readset_p;     /* opaque: only NULL/non-NULL is meaningful across RPC */
+    void *writeset_p;
+    void *exceptset_p;
+    ps2ip_rpc_fd_set readset;
+    ps2ip_rpc_fd_set writeset;
+    ps2ip_rpc_fd_set exceptset;
 } select_pkt;
 
 typedef struct
