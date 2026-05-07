@@ -22,3 +22,18 @@ The UART is easily accesible through the white JST 3 pin connector located on th
 From left to right, the pins are: RX, TX, GND.
 
 An USB to RS232 (usually with DB9 connector) is recommended
+
+## Parameters
+
+param | parameter | description
+----- | ----------- | ---------
+`-x`  | number | size of output buffer
+`-r`  | number | size of input buffer
+`-l`  | none   | enables loopback
+`-b`  | number | sets baud
+`-f`  | number | fifo
+
+example
+```c
+const char* args = "-x" "\0" "2048" "\0" "-b" "\0" "115200";
+```
