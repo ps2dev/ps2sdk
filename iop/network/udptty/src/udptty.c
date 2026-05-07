@@ -205,7 +205,7 @@ int _start(int argc, char *argv[])
 
     close(0);
     open(DEVNAME "00:", 0x1000 | O_RDWR);
-    
+
     close(1);
     open(DEVNAME "00:", O_WRONLY);
 
@@ -230,7 +230,9 @@ int _shutdown()
 }
 
 /* Copy the data into place, calculate the various checksums, and send the
-   final packet.  */
+   final packet.  Always reports `size` bytes consumed, even when the UDP
+   send fails (e.g. before SMAP has reported link-up): otherwise the IOP's
+   stdio layer retries on a short write and ends up in an infinite loop. */
 static int udp_send(void *buf, size_t size)
 {
     struct sockaddr_in peer;
@@ -241,7 +243,7 @@ static int udp_send(void *buf, size_t size)
 
     lwip_sendto(udp_socket, buf, size, 0, (struct sockaddr *)&peer, sizeof(peer));
 
-    return 0;
+    return (int)size;
 }
 
 /* TTY driver.  */
