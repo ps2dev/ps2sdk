@@ -51,10 +51,23 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 
     SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = RxBdPtr;
 
-    result = SmapDmaTransfer(smap_regbase, buffer, length, DMAC_TO_MEM);
+    /* SPD DMA requires a 4-byte aligned destination; fall back to PIO for unaligned buffers. */
+    if (((uiptr)buffer & 3) == 0) {
+        result = SmapDmaTransfer(smap_regbase, buffer, length, DMAC_TO_MEM);
 
-    for (i = result; (unsigned int)i < length; i += 4) {
-        ((u32 *)buffer)[i / 4] = SMAP_REG32(SMAP_R_RXFIFO_DATA);
+        for (i = result; (unsigned int)i < length; i += 4) {
+            ((u32 *)buffer)[i / 4] = SMAP_REG32(SMAP_R_RXFIFO_DATA);
+        }
+    } else {
+        u8 *p = (u8 *)buffer;
+        for (i = 0; (unsigned int)i < length; i += 4) {
+            u32 v = SMAP_REG32(SMAP_R_RXFIFO_DATA);
+            p[0] = (u8)v;
+            p[1] = (u8)(v >> 8);
+            p[2] = (u8)(v >> 16);
+            p[3] = (u8)(v >> 24);
+            p += 4;
+        }
     }
 }
 
@@ -66,10 +79,23 @@ static inline void CopyToFIFO(volatile u8 *smap_regbase, const void *buffer, uns
         return;
     }
 
-    result = SmapDmaTransfer(smap_regbase, (void *)buffer, length, DMAC_FROM_MEM);
+    /* SPD DMA requires a 4-byte aligned source, and the PIO loop below does
+       word-sized loads from the buffer. If the pbuf payload is only halfword-
+       aligned (which lwIP 2.2.1 can produce for some TX paths), a plain lw
+       raises an IOP Address Error. Detect that and take an unaligned path. */
+    if (((uiptr)buffer & 3) == 0) {
+        result = SmapDmaTransfer(smap_regbase, (void *)buffer, length, DMAC_FROM_MEM);
 
-    for (i = result; (unsigned int)i < length; i += 4) {
-        SMAP_REG32(SMAP_R_TXFIFO_DATA) = ((u32 *)buffer)[i / 4];
+        for (i = result; (unsigned int)i < length; i += 4) {
+            SMAP_REG32(SMAP_R_TXFIFO_DATA) = ((u32 *)buffer)[i / 4];
+        }
+    } else {
+        const u8 *p = (const u8 *)buffer;
+        for (i = 0; (unsigned int)i < length; i += 4) {
+            u32 v = (u32)p[0] | ((u32)p[1] << 8) | ((u32)p[2] << 16) | ((u32)p[3] << 24);
+            SMAP_REG32(SMAP_R_TXFIFO_DATA) = v;
+            p += 4;
+        }
     }
 }
 

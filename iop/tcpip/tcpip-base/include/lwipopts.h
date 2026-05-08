@@ -4,12 +4,6 @@
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
 
-/**
- * NO_SYS==1: Provides VERY minimal functionality. Otherwise,
- * use lwIP facilities.
- */
-#define NO_SYS		0
-
 #define LWIP_TIMEVAL_PRIVATE 0
 
 /* ---------- Thread options ---------- */
@@ -41,50 +35,25 @@
  */
 #define TCPIP_THREAD_PRIO		DEFAULT_THREAD_PRIO
 
-/**
- * SLIP_THREAD_STACKSIZE: The stack size used by the slipif_loop thread.
- * The stack size value itself is platform-dependent, but is passed to
- * sys_thread_new() when the thread is created.
- */
-#define SLIPIF_THREAD_STACKSIZE		DEFAULT_THREAD_STACKSIZE
-
-/**
- * SLIPIF_THREAD_PRIO: The priority assigned to the slipif_loop thread.
- * The priority value itself is platform-dependent, but is passed to
- * sys_thread_new() when the thread is created.
- */
-#define SLIPIF_THREAD_PRIO		DEFAULT_THREAD_PRIO
-
-/**
- * PPP_THREAD_STACKSIZE: The stack size used by the pppInputThread.
- * The stack size value itself is platform-dependent, but is passed to
- * sys_thread_new() when the thread is created.
- */
-#define PPP_THREAD_STACKSIZE		DEFAULT_THREAD_STACKSIZE
-
-/**
- * PPP_THREAD_PRIO: The priority assigned to the pppInputThread.
- * The priority value itself is platform-dependent, but is passed to
- * sys_thread_new() when the thread is created.
- */
-#define PPP_THREAD_PRIO			DEFAULT_THREAD_PRIO
-
 /*
    ------------------------------------
    ---------- Memory options ----------
    ------------------------------------
 */
-/**
- * MEM_LIBC_MALLOC==1: Use malloc/free/realloc provided by your C-library
- * instead of the lwip internal allocator. Can save code size if you
- * already use it.
- */
-#define MEM_LIBC_MALLOC		0 //FJTRUJY disable it for IOP
-
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
    lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2
    byte alignment -> define MEM_ALIGNMENT to 2. */
 #define MEM_ALIGNMENT		4
+
+/**
+ * LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT==1: make mem_free() callable from
+ * any context (ISR/disabled-interrupt) by using SYS_ARCH_PROTECT instead of
+ * a mutex for critical regions. Required on IOP because SMAP RX interrupts
+ * invoke pbuf_free() in interrupt-disabled context; taking a mutex there
+ * would violate the critical section (same effect as ps2dev/lwip's mem.c
+ * patch, but achieved via upstream lwipopts instead of patching lwIP).
+ */
+#define LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT	1
 
 /**
  * MEM_SIZE: the size of the heap memory. If the application will send
@@ -95,6 +64,25 @@
 #define MEM_SIZE		(TCP_SND_BUF * 2)
 
 /*
+   -----------------------------------------------
+   ---------- IP options -------------------------
+   -----------------------------------------------
+*/
+/**
+ * IP_REASSEMBLY==1: Reassemble incoming fragmented IP packets.
+ * Disabled: PS2 networking targets a local LAN with MTU=1500, and
+ * TCP negotiates MSS=1460 so fragments never arise in the common
+ * case. Frees MEMP_NUM_REASSDATA / MEMP_NUM_FRAG_PBUF pool entries.
+ */
+#define IP_REASSEMBLY		0
+
+/**
+ * IP_FRAG==1: Fragment outgoing IP packets if their size exceeds MTU.
+ * Disabled: TCP_MSS=1460 ensures we never exceed Ethernet MTU=1500.
+ */
+#define IP_FRAG			0
+
+/*
    ------------------------------------------------
    ---------- Internal Memory Pool Sizes ----------
    ------------------------------------------------
@@ -102,20 +90,11 @@
 /**
  * MEMP_NUM_TCPIP_MSG_INPKT: the number of struct tcpip_msg, which are used
  * for incoming packets.
- * (only needed if you use tcpip.c)
+ * SP193: this should be around the size of the TCP window because the
+ * TCPIP thread may take a while to execute (non-preemptive multitasking),
+ * otherwise incoming frames may get dropped.
  */
-//SP193: this should be around the size of the TCP window because the TCPIP thread may take a while to execute (non-preemptive multitasking), otherwise incoming frames may get dropped.
-#ifndef LWIP_TCPIP_CORE_LOCKING_INPUT
-#define MEMP_NUM_TCPIP_MSG_INPKT        24
-#endif
-
-/**
- * MEMP_NUM_TCPIP_MSG_API: the number of struct tcpip_msg, which are used
- * for callback/timeout API communication.
- * (only needed if you use tcpip.c)
- */
-//SP193: this should be around the size of MEM_SIZE (in PBUFs), to prevent transmissions from being potentially being dropped.
-#define MEMP_NUM_TCPIP_MSG_API		8
+#define MEMP_NUM_TCPIP_MSG_INPKT	24
 
 /**
  * MEMP_NUM_NETCONN: the number of struct netconns.
@@ -137,13 +116,6 @@
  * interrupt context!
  */
 #define LWIP_TCPIP_CORE_LOCKING_INPUT	1
-
-/** SYS_LIGHTWEIGHT_PROT
- * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
- * for certain critical regions during buffer allocation, deallocation and
- * memory allocation and deallocation.
- */
-#define SYS_LIGHTWEIGHT_PROT	1
 
 /*
    ---------------------------------
