@@ -41,17 +41,47 @@
    ------------------------------------
 */
 /**
- * MEM_LIBC_MALLOC==1: Use malloc/free/realloc provided by the C-library
- * instead of lwIP's internal allocator. Default is 0; enabled on EE
- * because newlib's malloc is already linked in and the heap pool is
- * cheaper than a duplicate lwIP heap.
+ * MEM_LIBC_MALLOC==1: use libc's malloc/free for lwIP's mem_malloc /
+ * mem_free (which serve PBUF_RAM allocations and a handful of other
+ * sites — DHCP options, ARP, DNS, slip/ppp/zepif which we don't build).
+ * Internally lwIP's pbuf_alloc(PBUF_RAM) computes the payload pointer
+ * with `LWIP_MEM_ALIGN(p + SIZEOF_STRUCT_PBUF + offset)`, which only
+ * stays inside the allocated chunk when 'p' is already MEM_ALIGNMENT-
+ * aligned. That is why MEM_ALIGNMENT must match the underlying
+ * allocator's alignment — see MEM_ALIGNMENT below.
  */
 #define MEM_LIBC_MALLOC		1
 
-/* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
-   lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2
-   byte alignment -> define MEM_ALIGNMENT to 2. */
-#define MEM_ALIGNMENT		64		//SP193: must be 64, to deal with the EE cache design.
+/* MEM_ALIGNMENT: must equal the alignment libc's malloc returns,
+   because pbuf_alloc(PBUF_RAM) computes
+     payload = LWIP_MEM_ALIGN(p + SIZEOF_STRUCT_PBUF + offset)
+   inside an allocation sized assuming p is already MEM_ALIGNMENT-
+   aligned. If MEM_ALIGNMENT > newlib's alignment the payload pointer
+   overruns the chunk and corrupts the next-chunk header on the
+   freelist (TLB misses inside _malloc_r / _free_r).
+
+   16 is the contract baked into the toolchain configuration. See
+   newlib/newlib/configure.host:
+
+       mips64r5900*)
+           machine_dir=r5900
+           newlib_cflags="${newlib_cflags} -DMALLOC_ALIGNMENT=16"
+           ;;
+
+   so for the mips64r5900el-ps2-elf target newlib is built with
+   -DMALLOC_ALIGNMENT=16, which sets _mallocr.c's MALLOC_ALIGNMENT
+   directly (overriding the SIZE_SZ-derived default of 8). 16 is also
+   what samples/malloc_stress observes empirically.
+
+   The historical value here was 64 with a comment about "the EE cache
+   design" (SP193). That was over-cautious: PBUF_POOL pbufs (the only
+   ones touched by IOP->EE DMA + cache invalidate) come from memp's
+   static pools and are always 64-byte aligned regardless of
+   MEM_ALIGNMENT; PBUF_RAM pbufs (TX, ARP, DNS, ...) only see DMA
+   writeback, where misalignment harmlessly over-flushes extra cache
+   lines. The IOP-side lwipopts has used MEM_ALIGNMENT=4 forever for
+   the same reason. */
+#define MEM_ALIGNMENT		16
 
 /**
  * MEM_SIZE: the size of the heap memory. If the application will send
@@ -103,12 +133,19 @@
 #define MEMP_NUM_TCP_SEG		TCP_SND_QUEUELEN
 
 /**
- * LWIP_TCPIP_CORE_LOCKING_INPUT: when LWIP_TCPIP_CORE_LOCKING is enabled,
- * this lets tcpip_input() grab the mutex for input packets as well,
- * instead of allocating a message and passing it to tcpip_thread.
- *
- * ATTENTION: this does not work when tcpip_input() is called from
- * interrupt context!
+ * LWIP_TCPIP_CORE_LOCKING==1: matches lwIP 2.2.1's upstream default. With
+ * LWIP_COMPAT_MUTEX in arch/cc.h the core lock is a binary semaphore taken
+ * directly on the calling app thread for socket/netconn API calls; lwIP
+ * releases it before any blocking I/O wait so the tcpip thread + netif
+ * input continue to make progress. Saves a context switch + sem wait per
+ * API call versus the message-passing alternative.
+ */
+#define LWIP_TCPIP_CORE_LOCKING		1
+
+/**
+ * LWIP_TCPIP_CORE_LOCKING_INPUT==1: tcpip_input() takes the core mutex
+ * directly instead of allocating a message. Safe here because the netif
+ * input callback runs in a regular thread, not interrupt context.
  */
 #define LWIP_TCPIP_CORE_LOCKING_INPUT	1
 
@@ -134,18 +171,13 @@
 #define LWIP_DHCP		1
 #endif
 
-/**
- * DHCP_DOES_ARP_CHECK==1: Do an ARP check on the offered address.
- */
-#define DHCP_DOES_ARP_CHECK	0	//Don't do the ARP check because an IP address would be first required.
-
-/**
- * LWIP_DHCP_CHECK_LINK_UP==1: dhcp_start() only really starts if the netif has
- * NETIF_FLAG_LINK_UP set in its flags. As this is only an optimization and
- * netif drivers might not set this flag, the default is off. If enabled,
- * netif_set_link_up() must be called to continue dhcp starting.
- */
-#define LWIP_DHCP_CHECK_LINK_UP	1
+/* LWIP_DHCP_DOES_ACD_CHECK / LWIP_ACD left at upstream defaults (=1 when
+ * LWIP_DHCP=1) so the RFC 5227 Address Conflict Detection probe runs on
+ * any DHCP-offered IP. EE applications run on user home networks where
+ * IP collisions are a real (if uncommon) failure mode; the few KB of
+ * code and ~1-2 s extra DHCP-bind delay are worth the robustness. The
+ * IOP lwIP build forces both off because ps2link runs in controlled
+ * bench environments where the IRX size + tick savings matter more. */
 
 /*
    ----------------------------------
@@ -208,10 +240,6 @@
    ---------- Socket options ----------
    ------------------------------------
 */
-/* LWIP_SOCKET_SET_ERRNO==1: Set errno when socket functions cannot complete
- * successfully, as required by POSIX. Default is POSIX-compliant.
- */
-#define LWIP_SOCKET_SET_ERRNO	0
 /**
  * LWIP_POSIX_SOCKETS_IO_NAMES==1: Enable POSIX-style sockets functions names.
  * Disable this option if you use a POSIX operating system that uses the same

@@ -35,6 +35,13 @@
 
 #include "ps2ip_internal.h"
 
+/* lwIP 2.2.1's sockets.c writes errno via set_errno(); the IOP IRX has no
+   libc-provided errno storage, so we define it here. The ".data" section
+   name (with leading dot) is critical: a bare "data" attribute creates a
+   separate section that the IRX loader never allocates into IOP RAM, so
+   every set_errno() write would corrupt random memory. */
+int errno __attribute__((section(".data")));
+
 typedef struct pbuf	PBuf;
 typedef struct netif	NetIF;
 typedef struct ip4_addr	IPAddr;

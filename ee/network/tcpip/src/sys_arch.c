@@ -338,6 +338,15 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *sys_msg)
 	return result;
 }
 
+/* lwIP 2.2.x distinguishes ISR-context posts from task-context posts.
+   The PS2 EE has preemptive scheduling, but our netif input does not run
+   in interrupt context (it goes through ps2ip / SIF callbacks on the EE
+   tcpip thread), so the two paths are equivalent here. */
+err_t sys_mbox_trypost_fromisr(sys_mbox_t *mbox, void *msg)
+{
+	return sys_mbox_trypost(mbox, msg);
+}
+
 void sys_mbox_post(sys_mbox_t *mbox, void *sys_msg)
 {
 	SendMbx(mbox, alloc_msg(), sys_msg);
@@ -415,6 +424,52 @@ void sys_sem_set_invalid(sys_sem_t *sem){
 	*sem=SYS_SEM_NULL;
 }
 
+/* Semaphore-based critical section for lwIP. Replaces the previous
+ * DIntr/EIntr approach, which was unsafe: any code path inside a
+ * SYS_ARCH_PROTECT region that ended up calling newlib's malloc/free
+ * would try to WaitSema on the heap recursive mutex with interrupts
+ * disabled, deadlocking the EE. The sema-based variant lets nested
+ * waits work normally and removes the EE-specific incompatibility
+ * between lwIP and any other library that uses newlib's locks.
+ *
+ * Recursive ownership: lwIP allows SYS_ARCH_PROTECT to nest, so we
+ * track the owning thread + a recursion counter and only Wait/Signal
+ * on the outermost transitions.
+ */
+static int s_protect_sem = -1;
+static int s_protect_count = 0;
+static int s_protect_owner = -1;
+
+sys_prot_t sys_arch_protect(void)
+{
+	int tid = GetThreadId();
+	if (s_protect_count > 0 && s_protect_owner == tid)
+	{
+		s_protect_count++;
+		return 0; /* nested re-entry; outer call will release */
+	}
+	WaitSema(s_protect_sem);
+	s_protect_owner = tid;
+	s_protect_count = 1;
+	return 1; /* outermost level; matching unprotect will release */
+}
+
+void sys_arch_unprotect(sys_prot_t level)
+{
+	if (level == 0)
+	{
+		/* nested unprotect; just decrement */
+		if (s_protect_count > 0)
+		{
+			s_protect_count--;
+		}
+		return;
+	}
+	s_protect_count = 0;
+	s_protect_owner = -1;
+	SignalSema(s_protect_sem);
+}
+
 void sys_init(void)
 {
 	arch_message *prev;
@@ -427,6 +482,15 @@ void sys_init(void)
 	sema.option = (u32)"PS2IP";
 	sema.init_count = sema.max_count = SYS_MAX_MESSAGES;
 	MsgCountSema=CreateSema(&sema);
+
+	/* Critical-section sema: binary mutex (init=1, max=1). */
+	sema.attr = 0;
+	sema.option = (u32)"PS2IP_PROTECT";
+	sema.init_count = 1;
+	sema.max_count = 1;
+	s_protect_sem = CreateSema(&sema);
+	s_protect_count = 0;
+	s_protect_owner = -1;
 
 	free_head = &msg_pool[0];
 	prev = &msg_pool[0];
@@ -444,17 +508,6 @@ void sys_init(void)
 u32_t sys_now(void)
 {
 	return(clock()/1000);
-}
-
-sys_prot_t sys_arch_protect(void)
-{
-	return DIntr();
-}
-
-void sys_arch_unprotect(sys_prot_t level)
-{
-	if(level)
-		EIntr();
 }
 
 void *ps2ip_calloc64(size_t n, size_t size)

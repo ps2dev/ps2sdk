@@ -44,6 +44,7 @@ ps2api_OBJECTS = \
 	tcpip.o
 
 ps2api_IPV4 = \
+	acd.o \
 	icmp.o \
 	ip.o \
 	ip4.o \
@@ -112,6 +113,9 @@ $(EE_OBJS_DIR)api_msg.o: $(LWIP)/src/api/api_msg.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 $(EE_OBJS_DIR)api_netbuf.o: $(LWIP)/src/api/netbuf.c
+	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+
+$(EE_OBJS_DIR)acd.o: $(LWIP)/src/core/ipv4/acd.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 $(EE_OBJS_DIR)icmp.o: $(LWIP)/src/core/ipv4/icmp.c
