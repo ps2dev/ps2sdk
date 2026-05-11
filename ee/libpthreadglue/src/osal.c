@@ -199,7 +199,6 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   static int threadNum = 1;
   void *pTls;
   s32 threadId;
-  pte_osResult result;
   ps2ThreadData *pThreadData;
 
   if (threadNum++ > MAX_PS2_UID) {
@@ -215,8 +214,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   pTls = pteTlsThreadInit();
   if (pTls == NULL) {
     PS2_DEBUG("pteTlsThreadInit: PTE_OS_NO_RESOURCES\n");
-    result = PTE_OS_NO_RESOURCES;
-    goto FAIL0;
+    return PTE_OS_NO_RESOURCES;
   }
 
   /* Allocate some memory for our per-thread control data.  We use this for:
@@ -227,10 +225,8 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
 
   if (pThreadData == NULL) {
     pteTlsThreadDestroy(pTls);
-
     PS2_DEBUG("malloc(ps2ThreadData): PTE_OS_NO_RESOURCES\n");
-    result = PTE_OS_NO_RESOURCES;
-    goto FAIL0;
+    return PTE_OS_NO_RESOURCES;
   }
 
   /* Save a pointer to our per-thread control data as a TLS value */
@@ -243,19 +239,47 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   sema.max_count  = 255;
   sema.option     = 0;
   pThreadData->cancelSem = CreateSema(&sema);
+  if (pThreadData->cancelSem < 0) {
+    free(pThreadData);
+    pteTlsThreadDestroy(pTls);
+    PS2_DEBUG("CreateSema(cancelSem): PTE_OS_NO_RESOURCES\n");
+    return PTE_OS_NO_RESOURCES;
+  }
 
-  /* Create EE Thread */
+  /* Allocate the thread stack before calling CreateThread — passing a
+   * NULL stack to the EE kernel is undefined behaviour and the original
+   * check below ran *after* the syscall.
+   */
   stack = malloc(stackSize);
+  if (!stack) {
+    DeleteSema(pThreadData->cancelSem);
+    free(pThreadData);
+    pteTlsThreadDestroy(pTls);
+    PS2_DEBUG("malloc(stack): PTE_OS_NO_RESOURCES\n");
+    return PTE_OS_NO_RESOURCES;
+  }
 
-	eethread.attr = 0;
-	eethread.option = 0;
-	eethread.func = &__ps2StubThreadEntry;
-	eethread.stack = stack;
-	eethread.stack_size = stackSize;
-	eethread.gp_reg = &_gp;
-	eethread.initial_priority = invert_priority(initialPriority);
-	threadId = CreateThread(&eethread);
-  
+  eethread.attr = 0;
+  eethread.option = 0;
+  eethread.func = &__ps2StubThreadEntry;
+  eethread.stack = stack;
+  eethread.stack_size = stackSize;
+  eethread.gp_reg = &_gp;
+  eethread.initial_priority = invert_priority(initialPriority);
+  threadId = CreateThread(&eethread);
+
+  if (threadId < 0) {
+    /* Must check threadId *before* indexing __threadInfo — a negative
+     * id is an OOB write.
+     */
+    free(stack);
+    DeleteSema(pThreadData->cancelSem);
+    free(pThreadData);
+    pteTlsThreadDestroy(pTls);
+    PS2_DEBUG("CreateThread: PTE_OS_GENERAL_FAILURE\n");
+    return PTE_OS_GENERAL_FAILURE;
+  }
+
   /* In order to emulate TLS functionality, we append the address of the TLS structure that we
    * allocated above to an additional struct. To set or get TLS values for this thread, the user
    * needs to get the threadId from the OS and then extract
@@ -265,25 +289,8 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   threadInfo->threadNumber = threadNum;
   threadInfo->tlsPtr = pTls;
 
-  if (!stack) {
-    free(pThreadData);
-    pteTlsThreadDestroy(pTls);
-
-    PS2_DEBUG("CreateThread: PTE_OS_NO_RESOURCES\n");
-    result =  PTE_OS_NO_RESOURCES;
-  } else if (threadId < 0) {
-    free(pThreadData);
-    pteTlsThreadDestroy(pTls);
-
-    PS2_DEBUG("CreateThread: PTE_OS_GENERAL_FAILURE\n");
-    result = PTE_OS_GENERAL_FAILURE;
-  } else {
-    *ppte_osThreadHandle = threadId;
-    result = PTE_OS_OK;
-  }
-
-FAIL0:
-  return result;
+  *ppte_osThreadHandle = threadId;
+  return PTE_OS_OK;
 }
 #endif
 
@@ -528,6 +535,10 @@ pte_osResult pte_osMutexCreate(pte_osMutexHandle *pHandle)
   sema.option     = 0;
   handle = CreateSema(&sema);
 
+  if (handle < 0) {
+    return PTE_OS_NO_RESOURCES;
+  }
+
   *pHandle = handle;
   return PTE_OS_OK;
 }
@@ -597,6 +608,10 @@ pte_osResult pte_osSemaphoreCreate(int initialValue, pte_osSemaphoreHandle *pHan
   sema.max_count  = 32767;
   sema.option     = 0;
   handle = CreateSema(&sema);
+
+  if (handle < 0) {
+    return PTE_OS_NO_RESOURCES;
+  }
 
   *pHandle = handle;
   return PTE_OS_OK;
