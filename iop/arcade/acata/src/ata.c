@@ -304,7 +304,7 @@ int acAtaModuleStart(int argc, char **argv)
 	Atac.requestq.q_next = 0;
 	DelayThread(delay);
 	ChangeThreadPriority(0, 123);
-	index_v12 = ata_probe((acAtaReg)0xB6000000);
+	index_v12 = ata_probe((acAtaReg)ACATA_A_DATA);
 	Atac.active = index_v12;
 	if ( index_v12 == 0 )
 	{

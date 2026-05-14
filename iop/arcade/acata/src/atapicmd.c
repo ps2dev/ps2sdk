@@ -31,7 +31,7 @@ static int atapi_dma_xfer(acDmaT dma, int intr, acDmaOp op)
 	if ( dmatmp->ad_state == 31 )
 	{
 		dmatmp->ad_result = dmatmp->ad_atapi->ap_h.a_size;
-		return op(dma, (void *)0xB6000000, dmatmp->ad_atapi->ap_h.a_buf, dmatmp->ad_atapi->ap_h.a_size);
+		return op(dma, (void *)ACATA_A_DATA, dmatmp->ad_atapi->ap_h.a_buf, dmatmp->ad_atapi->ap_h.a_size);
 	}
 	thid = dmatmp->ad_thid;
 	dmatmp->ad_state = 3;
@@ -112,7 +112,7 @@ static int atapi_packet_send(acAtaReg atareg, acAtapiPacketData *pkt, int flag)
 		--count;
 		if ( count < 0 )
 			break;
-		*((volatile acUint16 *)0xB6000000) = pkt->u_h[0];
+		ACATA_R_DATA = pkt->u_h[0];
 		pkt = (acAtapiPacketData *)((char *)pkt + 2);
 	}
 	return 0;
@@ -174,7 +174,7 @@ static int atapi_pio_read(acAtaReg atareg, acUint16 *buf, int count, int flag)
 		while ( xlen_v8 >= 0 )
 		{
 			--xlen_v8;
-			*buf++ = *((volatile acUint16 *)0xB6000000);
+			*buf++ = ACATA_R_DATA;
 		}
 		sr_v9 = drop + 1;
 		for ( drop_v10 = sr_v9 / 2 - 1; drop_v10 >= 0; --drop_v10 )
@@ -257,7 +257,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	if ( ret_v5 < 0 )
 		return ret_v5;
 	ChangeThreadPriority(0, cmdpri);
-	ret_v5 = atapi_packet_send((acAtaReg)0xB6000000, &atapi->ap_packet, flag);
+	ret_v5 = atapi_packet_send((acAtaReg)ACATA_A_DATA, &atapi->ap_packet, flag);
 	if ( ret_v5 >= 0 )
 	{
 		int v12;
@@ -294,7 +294,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 				v15 = (acUint16 *)atah->a_buf;
 				if ( (flag & 4) == 0 )
 				{
-					ret_v5 = atapi_pio_read((acAtaReg)0xB6000000, a_buf, atah->a_size, flag);
+					ret_v5 = atapi_pio_read((acAtaReg)ACATA_A_DATA, a_buf, atah->a_size, flag);
 				}
 				else
 				{
@@ -352,12 +352,12 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 						xlen_v17 = (xlen_v15 + 1) / 2 - 1;
 						for ( sr_v18 = drop + 1; xlen_v17 >= 0; sr_v18 = drop + 1 )
 						{
-							*((volatile acUint16 *)0xB6000000) = *v15;
+							ACATA_R_DATA = *v15;
 							v15++;
 							--xlen_v17;
 						}
 						for ( drop_v20 = sr_v18 / 2 - 1; drop_v20 >= 0; --drop_v20 )
-							*((volatile acUint16 *)0xB6000000) = 0;
+							ACATA_R_DATA = 0;
 						sr = flag & 2;
 						if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) == 0 )
 						{
@@ -515,7 +515,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 	u.lun = atapi->ap_packet.u_b[1];
 	*((volatile acUint16 *)0xB6160000) = (flag & 2) ^ 2;
 	*((volatile acUint16 *)0xB6010000) = 0;
-	v3 = atapi_packet_send((acAtaReg)0xB6000000, &u.pkt, flag);
+	v3 = atapi_packet_send((acAtaReg)ACATA_A_DATA, &u.pkt, flag);
 	if ( v3 < 0 )
 	{
 		ret = v3;
@@ -525,7 +525,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 		int v4;
 		int v5;
 
-		v4 = atapi_pio_read((acAtaReg)0xB6000000, (acUint16 *)&sense, sizeof(sense), flag);
+		v4 = atapi_pio_read((acAtaReg)ACATA_A_DATA, (acUint16 *)&sense, sizeof(sense), flag);
 		v5 = v4;
 		if ( v4 > 0 )
 		{

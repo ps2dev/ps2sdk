@@ -88,7 +88,7 @@ static int dma_xfer(acDmaT dma, void *ioptr, void *buf, int count)
 			attr = dma->d_attr;
 			v12 = GetAcIoDelayReg() & 0x80FFDFFF;
 			v13 = 0x62000000;
-			if ( ioptr == (void *)0xB6000000 )
+			if ( ioptr == (void *)ACATA_A_DATA )
 				v13 = 0x24000000;
 			SetAcIoDelayReg(v12 | v13);
 			dmac_ch_set_dpcr(8u, (unsigned int)attr >> 5);

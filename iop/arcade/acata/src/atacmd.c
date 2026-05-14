@@ -29,7 +29,7 @@ static int ata_dma_xfer(acDmaT dma, int intr, acDmaOp op)
 	if ( dmatmp->ad_state == 31 )
 	{
 		dmatmp->ad_result = dmatmp->ad_ata->ac_h.a_size;
-		return op(dma, (void *)0xB6000000, dmatmp->ad_ata->ac_h.a_buf, dmatmp->ad_ata->ac_h.a_size);
+		return op(dma, (void *)ACATA_A_DATA, dmatmp->ad_ata->ac_h.a_buf, dmatmp->ad_ata->ac_h.a_size);
 	}
 	thid = dmatmp->ad_thid;
 	dmatmp->ad_state = 3;
@@ -151,7 +151,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 		int data;
 
 		data = *cmd++;
-		*(acUint16 *)(((2 * ((data >> 8) & 8) + ((data >> 8) & 7)) << 16) + 0xB6000000) = data & 0xFF;
+		*(acUint16 *)(((2 * ((data >> 8) & 8) + ((data >> 8) & 7)) << 16) + ACATA_A_DATA) = data & 0xFF;
 		--count;
 		if ( ((data >> 8) & 0xF) == 7 )
 		{
@@ -209,7 +209,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 							ret_v17 = *a_buf;
 							a_buf++;
 						}
-						*((volatile acUint16 *)0xB6000000) = ret_v17;
+						ACATA_R_DATA = ret_v17;
 						--xlen_v16;
 					}
 					if ( (flag_v8 & 2) != 0 )
@@ -290,7 +290,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					{
 						if ( xlen_v30 >= 0 )
 						{
-							*buf_v23 = *((volatile acUint16 *)0xB6000000);
+							*buf_v23 = ACATA_R_DATA;
 							buf_v23++;
 						}
 						--xlen_v30;
@@ -403,7 +403,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 			break;
 		*cmd_v36 =
 			((((int)*cmd_v36 >> 12) & 0xF) << 12)
-			| ((*(acUint16 *)(((2 * (((int)*cmd_v36 >> 12) & 8) + (((int)*cmd_v36 >> 12) & 7)) << 16) + 0xB6000000)) & 0xFF);
+			| ((*(acUint16 *)(((2 * (((int)*cmd_v36 >> 12) & 8) + (((int)*cmd_v36 >> 12) & 7)) << 16) + ACATA_A_DATA)) & 0xFF);
 		++cmd_v36;
 	}
 	return 6 - rest_v37;
