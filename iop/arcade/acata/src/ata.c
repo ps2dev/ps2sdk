@@ -190,22 +190,22 @@ int ata_probe(acAtaReg atareg)
 	(void)atareg;
 	while ( (ACATA_R_STATUS & ATA_STAT_BUSY) != 0 )
 		;
-	ACATA_R_SECCNT = 4660;
+	ACATA_R_NSECTOR = 4660;
 	// cppcheck-suppress knownConditionTrueFalse
-	if ( ACATA_R_SECCNT != 52 )
+	if ( ACATA_R_NSECTOR != 52 )
 		return 0;
-	ACATA_R_SECNUM = 18;
+	ACATA_R_SECTOR = 18;
 	// cppcheck-suppress knownConditionTrueFalse
-	if ( ACATA_R_SECNUM != 18 )
+	if ( ACATA_R_SECTOR != 18 )
 		return 0;
 	active = 0;
 	unit = 0;
-	ACATA_R_DEVCONTROL = 2;
-	ACATA_R_FEATURES = 0;
+	ACATA_R_CONTROL = 2;
+	ACATA_R_FEATURE = 0;
 	count = 0;
 	while ( unit < 2 )
 	{
-		ACATA_R_DRIVE_HEAD = 16 * (unit != 0);
+		ACATA_R_SELECT = 16 * (unit != 0);
 		ACATA_R_COMMAND = 0;
 		ACATA_R_COMMAND = 0;
 		while ( count <= 1999999 )

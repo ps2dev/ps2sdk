@@ -143,9 +143,9 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	cmd = ata->ac_command;
 	count = 5;
 	flag_v8 = atah->a_flag;
-	ACATA_R_DRIVE_HEAD = flag_v8 & 0x10;
-	ACATA_R_DEVCONTROL = (flag_v8 & 2) ^ 2;
-	ACATA_R_FEATURES = 0;
+	ACATA_R_SELECT = flag_v8 & 0x10;
+	ACATA_R_CONTROL = (flag_v8 & 2) ^ 2;
+	ACATA_R_FEATURE = 0;
 	while ( count >= 0 )
 	{
 		int data;
@@ -214,14 +214,14 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					}
 					if ( (flag_v8 & 2) != 0 )
 					{
-						sr = ACATA_R_ALT_STATUS;
+						sr = ACATA_R_STATUS_ALT;
 						ret_v20 = sr & 0xFF;
 						while ( (ret_v20 & ATA_STAT_BUSY) != 0 )
 						{
 							ret_v20 = -116;
 							if ( SleepThread() != 0 )
 								break;
-							ret_v20 = ACATA_R_ALT_STATUS;
+							ret_v20 = ACATA_R_STATUS_ALT;
 						}
 					}
 					else
@@ -256,14 +256,14 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 
 					if ( (flag_v8 & 2) != 0 )
 					{
-						sr_v25 = ACATA_R_ALT_STATUS;
+						sr_v25 = ACATA_R_STATUS_ALT;
 						sr_v25 = sr_v25 & 0xFF;
 						while ( (sr_v25 & 0x80) != 0 )
 						{
 							sr_v25 = -116;
 							if ( SleepThread() )
 								break;
-							sr_v25 = ACATA_R_ALT_STATUS;
+							sr_v25 = ACATA_R_STATUS_ALT;
 						}
 					}
 					else
@@ -313,13 +313,13 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 		{
 			int v38;
 
-			v38 = ACATA_R_ALT_STATUS & ATA_STAT_ERR;
+			v38 = ACATA_R_STATUS_ALT & ATA_STAT_ERR;
 			if ( v38 || state >= 511 )
 			{
 				printf(
 					"acata:A:dma_iowait: TIMEDOUT %04x:%02x:%02x\n",
 					state,
-					ACATA_R_ALT_STATUS,
+					ACATA_R_STATUS_ALT,
 					ACATA_R_ERROR);
 				if ( state < 1023 )
 					acDmaCancel(&dma_data.ad_dma, -116);
@@ -329,7 +329,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 				break;
 			}
 			state = dma_data.ad_state;
-			if ( (ACATA_R_ALT_STATUS & ATA_STAT_BUSY) == 0 && (int)dma_data.ad_state >= 64 )
+			if ( (ACATA_R_STATUS_ALT & ATA_STAT_BUSY) == 0 && (int)dma_data.ad_state >= 64 )
 			{
 				ret = dma_data.ad_result;
 				break;
@@ -347,7 +347,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 		ret = 0;
 		if ( v16 )
 		{
-			while ( (ACATA_R_ALT_STATUS & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
+			while ( (ACATA_R_STATUS_ALT & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
 			{
 				if ( SleepThread() )
 				{
