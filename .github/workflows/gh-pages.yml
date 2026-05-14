@@ -1,26 +1,60 @@
 name: github pages
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - master
+  push: {}
+  pull_request: {}
+  workflow_dispatch: {}
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+  TZ: Japan
 
 jobs:
-  build:
+  build-docs:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: ubuntu:20.04
+      options: "--user 0"
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Set up base environment
+      run: apt-get -y update && apt-get -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' install build-essential git doxygen graphviz p7zip-full
 
-    - name: clone custom doxygen CSS
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Mark all git directories safe
+      run: git config --global --add safe.directory '*'
+
+    - name: Build documentation
       run: |
-         git clone https://github.com/jothepro/doxygen-awesome-css
+        export PS2DEV=$PWD/ps2dev
+        export PS2SDK=$PS2DEV/ps2sdk
+        make -j $(getconf _NPROCESSORS_ONLN) ONLY_HOST_TOOLS=1 docs
 
-    - name: Doxygen documentation generation
-      uses: mattnotmitt/doxygen-action@v1
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}-docs
+        path: ./*.tgz
+
+  publish-github-pages:
+    needs: [build-docs]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Extract artifact
+      run: |
+        mkdir -p docs/html
+        tar -xpzf */*.tgz -C docs/html
 
     - name: Deploy
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}

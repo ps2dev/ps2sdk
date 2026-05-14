@@ -124,7 +124,15 @@ clean_dependencies:
 	  $(MAKEREC) $(PS2SDKSRC)/common/external_deps clean ; \
 	fi
 
-docs:
+DOXYGEN_OUTPUT_ARCHIVE = doxygen-output.tgz
+
+docs/doxygen-awesome-css:
+	git clone https://github.com/jothepro/doxygen-awesome-css.git $@
+
+$(DOXYGEN_OUTPUT_ARCHIVE): Doxyfile docs/doxygen-awesome-css
 	doxygen
+	tar -cpzf $@ -C docs/html .
+
+docs: $(DOXYGEN_OUTPUT_ARCHIVE)
 
 include Defs.make

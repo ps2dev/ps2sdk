@@ -21,6 +21,7 @@
 *.swp
 *.tmp
 *.bin
+*.tgz
 
 #
 # files that we don't want to ignore
