@@ -81,8 +81,8 @@ static int atapi_packet_send(acAtaReg atareg, acAtapiPacketData *pkt, int flag)
 
 	(void)atareg;
 	count = 6;
-	*((volatile acUint16 *)0xB6050000) = 0;
-	*((volatile acUint16 *)0xB6040000) = 64;
+	ACATA_R_CYL_HIGH = 0;
+	ACATA_R_CYL_LOW = 64;
 	*((volatile acUint16 *)0xB6060000) = flag & 0x10;
 	*((volatile acUint16 *)0xB6160000) = (flag & 2) ^ 2;
 	ACATA_R_FEATURES = flag & 1;
@@ -163,7 +163,7 @@ static int atapi_pio_read(acAtaReg atareg, acUint16 *buf, int count, int flag)
 			return sr_v5;
 		if ( (sr_v5 & 8) == 0 )
 			break;
-		xlen_v6 = (*((volatile acUint16 *)0xB6050000) << 8) + *((volatile acUint16 *)0xB6040000);
+		xlen_v6 = (ACATA_R_CYL_HIGH << 8) + ACATA_R_CYL_LOW;
 		drop = xlen_v6 - rest;
 		if ( rest >= xlen_v6 )
 			drop = 0;
@@ -342,7 +342,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 							ret_v5 = size - a_size;
 							break;
 						}
-						xlen_v15 = (*((volatile acUint16 *)0xB6050000) << 8) + *((volatile acUint16 *)0xB6040000);
+						xlen_v15 = (ACATA_R_CYL_HIGH << 8) + ACATA_R_CYL_LOW;
 						drop = xlen_v15 - a_size;
 						if ( a_size >= xlen_v15 )
 							drop = 0;
