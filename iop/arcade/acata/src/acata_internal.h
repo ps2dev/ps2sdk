@@ -26,8 +26,8 @@
 #define ACATA_R_DRIVE_HEAD   	*((acAtaReg)0xB6060000) // Used to select a drive and/or head. Supports extra address/flag bits. [`ACATA_UNIT0`, `ACATA_UNIT1`]
 #define ACATA_R_STATUS       	*((acAtaReg)0xB6070000) // [R] Used to read the current status.
 #define ACATA_R_COMMAND      	ACATA_R_STATUS			// [W] Used to send ATA commands to the device.
-#define ACATA_R_ALT_STATUS   	*((acAtaReg)0xB6160000) // [R] Used to read the current status.
-#define ACATA_R_ALT_COMMAND  	ACATA_R_ALT_STATUS		// [W] Used to send ATA commands to the device.
+#define ACATA_R_ALT_STATUS   	*((acAtaReg)0xB6160000) // [R] A duplicate of the Status Register which does not affect interrupts.
+#define ACATA_R_DEVCONTROL  	ACATA_R_ALT_STATUS		// [W] Used to reset the bus or enable/disable interrupts.
 
 
 struct ata_softc

@@ -84,7 +84,7 @@ static int atapi_packet_send(acAtaReg atareg, acAtapiPacketData *pkt, int flag)
 	ACATA_R_CYL_HIGH = 0;
 	ACATA_R_CYL_LOW = 64;
 	ACATA_R_DRIVE_HEAD = flag & 0x10;
-	*((volatile acUint16 *)0xB6160000) = (flag & 2) ^ 2;
+	ACATA_R_DEVCONTROL = (flag & 2) ^ 2;
 	ACATA_R_FEATURES = flag & 1;
 	ACATA_R_COMMAND = ATA_C_PACKET; // ATA_STAT_BUSY|ATA_STAT_READY?
 	tmout = 999;
@@ -149,14 +149,14 @@ static int atapi_pio_read(acAtaReg atareg, acUint16 *buf, int count, int flag)
 		}
 		else
 		{
-			xlen = *((volatile acUint16 *)0xB6160000);
+			xlen = ACATA_R_ALT_STATUS;
 			sr_v5 = xlen & 0xFF;
 			while ( (sr_v5 & 0x80) != 0 )
 			{
 				sr_v5 = -116;
 				if ( SleepThread() != 0 )
 					break;
-				sr_v5 = *((volatile acUint16 *)0xB6160000);
+				sr_v5 = ACATA_R_ALT_STATUS;
 			}
 		}
 		if ( sr_v5 < 0 )
@@ -315,14 +315,14 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 
 						if ( sr )
 						{
-							xlen = *((volatile acUint16 *)0xB6160000);
+							xlen = ACATA_R_ALT_STATUS;
 							sr_v14 = xlen & 0xFF;
 							while ( (sr_v14 & 0x80) != 0 )
 							{
 								sr_v14 = -116;
 								if ( SleepThread() != 0 )
 									break;
-								sr_v14 = *((volatile acUint16 *)0xB6160000);
+								sr_v14 = ACATA_R_ALT_STATUS;
 							}
 						}
 						else
@@ -390,7 +390,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 		v32 = 0;
 		if ( (flag & 2) != 0 )
 		{
-			while ( (*((volatile acUint16 *)0xB6160000) & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
+			while ( (ACATA_R_ALT_STATUS & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
 			{
 				if ( SleepThread() )
 				{
@@ -430,13 +430,13 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 		{
 			int v30;
 
-			v30 = *((volatile acUint16 *)0xB6160000) & 1;
+			v30 = ACATA_R_ALT_STATUS & ATA_STAT_ERR;
 			if ( v30 || ret_v23 >= 511 )
 			{
 				printf(
 					"acata:P:dma_iowait: TIMEDOUT %04x:%02x:%02x\n",
 					ret_v23,
-					*((volatile acUint16 *)0xB6160000),
+					ACATA_R_ALT_STATUS,
 					ACATA_R_ERROR);
 				if ( ret_v23 < 1023 )
 					acDmaCancel(&dma_data.ad_dma, -116);
@@ -446,7 +446,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 				break;
 			}
 			ret_v23 = dma_data.ad_state;
-			if ( (*((volatile acUint16 *)0xB6160000) & 0x80) == 0 && (int)dma_data.ad_state >= 64 )
+			if ( (ACATA_R_ALT_STATUS & ATA_STAT_BUSY) == 0 && (int)dma_data.ad_state >= 64 )
 			{
 				ad_result = dma_data.ad_result;
 				break;
@@ -513,7 +513,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 	u.opcode = 0x03;
 	u.len = 0x12;
 	u.lun = atapi->ap_packet.u_b[1];
-	*((volatile acUint16 *)0xB6160000) = (flag & 2) ^ 2;
+	ACATA_R_DEVCONTROL = (flag & 2) ^ 2;
 	ACATA_R_FEATURES = 0;
 	v3 = atapi_packet_send((acAtaReg)ACATA_A_DATA, &u.pkt, flag);
 	if ( v3 < 0 )
@@ -534,7 +534,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 			v6 = 0;
 			if ( (flag & 2) != 0 )
 			{
-				while ( (*((volatile acUint16 *)0xB6160000) & (ATA_STAT_BUSY|ATA_STAT_ERR) == ATA_STAT_BUSY )
+				while ( (*(volatile acUint16 *)0xB6160000) & (ATA_STAT_BUSY|ATA_STAT_ERR) == ATA_STAT_BUSY )
 				{
 					if ( SleepThread() )
 					{
