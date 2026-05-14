@@ -194,9 +194,9 @@ int ata_probe(acAtaReg atareg)
 	// cppcheck-suppress knownConditionTrueFalse
 	if ( ACATA_R_SECCNT != 52 )
 		return 0;
-	*((volatile acUint16 *)0xB6030000) = 18;
+	ACATA_R_SECNUM = 18;
 	// cppcheck-suppress knownConditionTrueFalse
-	if ( *((volatile acUint16 *)0xB6030000) != 18 )
+	if ( ACATA_R_SECNUM != 18 )
 		return 0;
 	active = 0;
 	unit = 0;
