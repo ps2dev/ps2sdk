@@ -10,6 +10,7 @@ SUBDIRS = \
 	alloc \
 	boardinf \
 	dmacman \
+	dummymod \
 	eeconf \
 	eesync \
 	eesync-nano \
