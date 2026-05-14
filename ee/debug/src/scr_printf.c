@@ -20,6 +20,7 @@
 #include <rom0_info.h>
 #include <stdarg.h>
 #include <debug.h>
+#include <ee_regs.h>
 
 static short int X = 0, Y = 0;
 static short int MX = 80, MY = 40;
@@ -56,7 +57,7 @@ static int debug_detect_signal()
 static void Init_GS(int interlace, int omode, int ffmd)
 {
     // Reset GS
-    *(vu64 *)0x12001000 = 0x200;
+    *R_EE_GS_CSR = 0x200;
     // Mask interrupts
     GsPutIMR(0xff00);
     // Configure GS CRT
@@ -65,13 +66,6 @@ static void Init_GS(int interlace, int omode, int ffmd)
 
 static void SetVideoMode(void)
 {
-    unsigned dma_addr;
-    unsigned val1;
-    unsigned val2;
-    unsigned val3;
-    unsigned val4;
-    unsigned val4_lo;
-
     /*	DISPLAY1	0x0983227c001bf9ff
             DX = 0x27C (636)
             DY = 0x032 (50)
@@ -82,77 +76,33 @@ static void SetVideoMode(void)
             DW = 0x9FF (2560)
             DH = 0x1BF (447)	*/
 
-    asm volatile("        .set push               \n"
-                 "        .set noreorder          \n"
-                 "        lui     %4, 0x001b      \n"
-                 "        lui     %5, 0x0983      \n"
-                 "        lui     %0, 0x1200      \n"
-                 "        ori     %4, %4, 0xf9ff  \n"
-                 "        ori     %5, %5, 0x227c  \n"
-                 "        li      %1, 0xff62      \n"
-                 "        dsll32  %4, %4, 0       \n"
-                 "        li      %3, 0x1400      \n"
-                 "        sd      %1, 0(%0)       \n"
-                 "        or      %4, %4, %5      \n"
-                 "        sd      %3, 0x90(%0)    \n"
-                 "        sd      %4, 0xa0(%0)    \n"
-                 "        .set pop                \n"
-                 : "=&r"(dma_addr), "=&r"(val1), "=&r"(val2),
-                   "=&r"(val3), "=&r"(val4), "=&r"(val4_lo));
+    *R_EE_GS_PMODE = 0xff62;
+    *R_EE_GS_DISPFB2 = 0x1400;
+    *R_EE_GS_DISPLAY2 = 0x001bf9ff0983227c;
 }
 
 static inline void Dma02Wait(void)
 {
-    unsigned dma_addr;
-    unsigned status;
-
-    asm volatile("        .set push               \n"
-                 "        .set noreorder          \n"
-                 "        lui   %0, 0x1001        \n"
-                 "        lw    %1, -0x6000(%0)   \n"
-                 "1:      andi  %1, %1, 0x100     \n" // Wait until STR bit of D2_CHCR = 0
-                 "        nop                     \n"
-                 "        nop                     \n"
-                 "        nop                     \n"
-                 "        nop                     \n"
-                 "        bnel  %1, $0, 1b        \n"
-                 "        lw    %1, -0x6000(%0)   \n"
-                 "        .set pop                \n"
-                 : "=&r"(dma_addr), "=&r"(status));
+    while ((*R_EE_D2_CHCR & 0x100) != 0); // Wait until STR bit of D2_CHCR = 0
 }
 
 static void DmaReset(void)
 {
-    unsigned dma_addr;
-    unsigned temp, temp2;
-
     // This appears to have been based on code from Sony that initializes DMA channels 0-9, in bulk.
-    asm volatile("        .set push               \n"
-                 "        .set noreorder          \n"
-                 "        lui   %0, 0x1001        \n"
-                 "        sw    $0, -0x5f80(%0)   \n" // D2_SADR = 0. Documented to not exist, but is done.
-                 "        sw    $0, -0x6000(%0)   \n" // D2_CHCR = 0
-                 "        sw    $0, -0x5fd0(%0)   \n" // D2_TADR = 0
-                 "        sw    $0, -0x5ff0(%0)   \n" // D2_MADR = 0
-                 "        sw    $0, -0x5fb0(%0)   \n" // D2_ASR1 = 0
-                 "        sw    $0, -0x5fc0(%0)   \n" // D2_ASR0 = 0
-                 "        lui   %1, 0             \n"
-                 "        ori   %1, %1, 0xff1f    \n"
-                 "        sw    %1, -0x1ff0(%0)   \n" // Clear all interrupt status under D_STAT, other than SIF0, SIF1 & SIF2.
-                 "        lw    %1, -0x1ff0(%0)   \n"
-                 "        lui   %2, 0xff1f        \n"
-                 "        and   %1, %1, %2        \n" // Clear all interrupt masks under D_STAT, other SIF0, SIF1 & SIF2. Writing a 1 reverses the bit.
-                 "        sw    %1, -0x1ff0(%0)   \n"
-                 "        sw    $0, -0x2000(%0)   \n" // D_CTRL = 0
-                 "        sw    $0, -0x1fe0(%0)   \n" // D_PCR = 0
-                 "        sw    $0, -0x1fd0(%0)   \n" // D_SQWC = 0
-                 "        sw    $0, -0x1fb0(%0)   \n" // D_RBOR = 0
-                 "        sw    $0, -0x1fc0(%0)   \n" // D_RBSR = 0
-                 "        lw    %1, -0x2000(%0)   \n"
-                 "        ori   %1, %1, 1         \n" // D_CTRL (DMAE 1)
-                 "        sw    %1, -0x2000(%0)   \n"
-                 "        .set pop                \n"
-                 : "=&r"(dma_addr), "=&r"(temp), "=&r"(temp2));
+    *((vu32 *)0x1000a080) = 0; // D2_SADR = 0. Documented to not exist, but is done.
+    *R_EE_D2_CHCR = 0;
+    *R_EE_D2_TADR = 0;
+    *R_EE_D2_MADR = 0;
+    *R_EE_D2_ASR1 = 0;
+    *R_EE_D2_ASR0 = 0;
+    *R_EE_D_STAT = 0xff1f; // Clear all interrupt status under D_STAT, other than SIF0, SIF1 & SIF2.
+    *R_EE_D_STAT &= 0xff1f << 16; // Clear all interrupt masks under D_STAT, other SIF0, SIF1 & SIF2. Writing a 1 reverses the bit.
+    *R_EE_D_CTRL = 0;
+    *R_EE_D_PCR = 0;
+    *R_EE_D_SQWC = 0;
+    *R_EE_D_RBOR = 0;
+    *R_EE_D_RBSR = 0;
+    *R_EE_D_CTRL |= 1; // (DMAE 1)
 }
 
 /**
@@ -163,19 +113,9 @@ static void DmaReset(void)
 
 static inline void progdma(void *addr, int size)
 {
-    unsigned dma_addr;
-    unsigned temp;
-
-    asm volatile("        .set push               \n"
-                 "        .set noreorder          \n"
-                 "        lui   %0, 0x1001        \n"
-                 "        sw    %3, -0x5fe0(%0)   \n" // D2_QWC
-                 "        sw    %2, -0x5ff0(%0)   \n" // D2_MADR
-                 "        li    %1, 0x101         \n" // STR 1, DIR 1
-                 "        sw    %1, -0x6000(%0)   \n" // D2_CHCR
-                 "        .set pop                \n"
-                 : "=&r"(dma_addr), "=&r"(temp)
-                 : "r"(addr), "r"(size));
+    *R_EE_D2_QWC = (u32)size; // D2_QWC
+    *R_EE_D2_MADR = (u32)addr; // D2_MADR
+    *R_EE_D2_CHCR = 0x101; // D2_CHCR = STR 1, DIR 1
 }
 
 void scr_setbgcolor(u32 color)
