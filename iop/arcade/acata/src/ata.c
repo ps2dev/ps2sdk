@@ -190,9 +190,9 @@ int ata_probe(acAtaReg atareg)
 	(void)atareg;
 	while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) != 0 )
 		;
-	*((volatile acUint16 *)0xB6020000) = 4660;
+	ACATA_R_SECCNT = 4660;
 	// cppcheck-suppress knownConditionTrueFalse
-	if ( *((volatile acUint16 *)0xB6020000) != 52 )
+	if ( ACATA_R_SECCNT != 52 )
 		return 0;
 	*((volatile acUint16 *)0xB6030000) = 18;
 	// cppcheck-suppress knownConditionTrueFalse
