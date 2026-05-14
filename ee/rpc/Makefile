@@ -23,7 +23,6 @@ SUBDIRS += remote
 SUBDIRS += secr
 SUBDIRS += sior
 SUBDIRS += tcpips
-SUBDIRS += xcdvd
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

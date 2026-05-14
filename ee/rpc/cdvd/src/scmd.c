@@ -101,6 +101,7 @@ int sCmdNum = 0;
 int CdConfigRdWrNumBlocks;
 #endif
 
+extern int initVersionCdvdman;
 extern int bindSCmd;
 extern SifRpcClientData_t clientSCmd;
 extern int sCmdSemaId;
@@ -875,11 +876,7 @@ int sceCdMV(unsigned char *buffer, u32 *result)
 
     if (sceSifCallRpc(&clientSCmd, CD_SCMD_READ_MECHACON_VERSION, 0, NULL, 0, sCmdRecvBuff, 16, NULL, NULL) >= 0) {
 
-#ifdef _XCDVD
-        memcpy(buffer, UNCACHED_SEG(&sCmdRecvBuff[8]), 4);
-#else
-        memcpy(buffer, UNCACHED_SEG(&sCmdRecvBuff[8]), 3);
-#endif
+        memcpy(buffer, UNCACHED_SEG(&sCmdRecvBuff[8]), (initVersionCdvdman >= 0x200) ? 4 : 3);
         *result = *(u32 *)UNCACHED_SEG(&sCmdRecvBuff[4]);
         status  = *(int *)UNCACHED_SEG(sCmdRecvBuff);
     } else {

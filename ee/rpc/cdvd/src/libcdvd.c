@@ -43,6 +43,16 @@ extern void *_gp;
 // prototypes
 void _CdSemaExit(void);
 
+typedef struct
+{
+    int m_init_result;
+    /* The rest of the values in this struct are only set in SDK >= 2.0.0. */
+    /* Otherwise they are zero. */
+    int m_cdvdfsv_version;
+    int m_cdvdman_version;
+    int m_cdvdfsv_isverbose;
+} CdInitPkt;
+
 /** searchfile structure */
 typedef struct
 {
@@ -56,6 +66,9 @@ typedef struct
 int bindInit       = -1;
 int bindDiskReady  = -1;
 int bindSearchFile = -1;
+// version variables
+int initVersionCdvdfsv;
+int initVersionCdvdman;
 // rpc binded client data
 /** for sceCdInit() */
 SifRpcClientData_t clientInit __attribute__((aligned(64)));
@@ -89,6 +102,8 @@ s32 diskReadyMode __attribute__((aligned(64)));
 s32 trayReqData __attribute__((aligned(64)));
 u32 initMode __attribute__((aligned(64)));
 
+// init stuff
+CdInitPkt cdInitRecvBuff __attribute__((aligned(64)));
 // searchfile stuff
 SearchFilePkt searchFileSendBuff __attribute__((aligned(64)));
 u32 searchFileRecvBuff __attribute__((aligned(64)));
@@ -98,6 +113,8 @@ u32 searchFileRecvBuff __attribute__((aligned(64)));
 extern int bindInit;
 extern int bindDiskReady;
 extern int bindSearchFile;
+extern int initVersionCdvdfsv;
+extern int initVersionCdvdman;
 extern SifRpcClientData_t clientInit;
 extern SifRpcClientData_t clientDiskReady;
 extern SifRpcClientData_t clientSearchFile;
@@ -113,6 +130,7 @@ extern ee_thread_t callbackThreadParam;
 extern s32 diskReadyMode;
 extern s32 trayReqData;
 extern u32 initMode;
+extern CdInitPkt cdInitRecvBuff;
 extern SearchFilePkt searchFileSendBuff;
 extern u32 searchFileRecvBuff;
 
@@ -143,8 +161,10 @@ s32 sceCdInit(s32 mode)
 
     bindInit = 0;
     initMode = mode;
-    if (sceSifCallRpc(&clientInit, 0, 0, &initMode, 4, 0, 0, 0, 0) < 0)
+    if (sceSifCallRpc(&clientInit, 0, 0, &initMode, sizeof(initMode), &cdInitRecvBuff, sizeof(cdInitRecvBuff), 0, 0) < 0)
         return 0;
+    initVersionCdvdfsv = cdInitRecvBuff.m_cdvdfsv_version;
+    initVersionCdvdman = cdInitRecvBuff.m_cdvdman_version;
     if (mode == SCECdEXIT) {
         if (CdDebug > 0)
             printf("Libcdvd Exit\n");
