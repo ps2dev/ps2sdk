@@ -86,7 +86,7 @@ static int atapi_packet_send(acAtaReg atareg, acAtapiPacketData *pkt, int flag)
 	*((volatile acUint16 *)0xB6060000) = flag & 0x10;
 	*((volatile acUint16 *)0xB6160000) = (flag & 2) ^ 2;
 	*((volatile acUint16 *)0xB6010000) = flag & 1;
-	*((volatile acUint16 *)0xB6070000) = 160; // ATA_STAT_BUSY|ATA_STAT_READY?
+	*((volatile acUint16 *)0xB6070000) = ATA_C_PACKET; // ATA_STAT_BUSY|ATA_STAT_READY?
 	tmout = 999;
 	v6 = 1000;
 	// cppcheck-suppress knownConditionTrueFalse
@@ -534,7 +534,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 			v6 = 0;
 			if ( (flag & 2) != 0 )
 			{
-				while ( (*((volatile acUint16 *)0xB6160000) & 0x81) == ATA_STAT_BUSY )
+				while ( (*((volatile acUint16 *)0xB6160000) & (ATA_STAT_BUSY|ATA_STAT_ERR) == ATA_STAT_BUSY )
 				{
 					if ( SleepThread() )
 					{
@@ -548,7 +548,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 				int tmout;
 
 				tmout = 99999;
-				while ( (*((volatile acUint16 *)0xB6070000) & 0x81) == ATA_STAT_BUSY )
+				while ( (*((volatile acUint16 *)0xB6070000) & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
 				{
 					if ( tmout < 0 )
 					{
