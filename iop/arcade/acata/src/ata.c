@@ -188,7 +188,7 @@ int ata_probe(acAtaReg atareg)
 	int count;
 
 	(void)atareg;
-	while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) != 0 )
+	while ( (ACATA_R_STATUS & ATA_STAT_BUSY) != 0 )
 		;
 	ACATA_R_SECCNT = 4660;
 	// cppcheck-suppress knownConditionTrueFalse
@@ -205,13 +205,13 @@ int ata_probe(acAtaReg atareg)
 	count = 0;
 	while ( unit < 2 )
 	{
-		*((volatile acUint16 *)0xB6070000) = 0;
-		*((volatile acUint16 *)0xB6070000) = 0;
 		ACATA_R_DRIVE_HEAD = 16 * (unit != 0);
+		ACATA_R_COMMAND = 0;
+		ACATA_R_COMMAND = 0;
 		while ( count <= 1999999 )
 		{
 			// cppcheck-suppress knownConditionTrueFalse
-			if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) == 0 )
+			if ( (ACATA_R_STATUS & ATA_STAT_BUSY) == 0 )
 				break;
 			++count;
 		}

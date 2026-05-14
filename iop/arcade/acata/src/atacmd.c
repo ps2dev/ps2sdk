@@ -183,7 +183,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 				int a_size;
 
 				a_size = atah->a_size;
-				while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) != 0 )
+				while ( (ACATA_R_STATUS & ATA_STAT_BUSY) != 0 )
 					;
 				while ( a_size > 0 )
 				{
@@ -199,7 +199,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					a_size -= xlen;
 					xlen_v15 = (unsigned int)xlen >> 1;
 					xlen_v16 = xlen_v15 - 1;
-					while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_DRQ) != 0 )
+					while ( (ACATA_R_STATUS & ATA_STAT_DRQ) != 0 )
 					{
 						int ret_v17;
 
@@ -226,10 +226,10 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					}
 					else
 					{
-						ret_v20 = *((volatile acUint16 *)0xB6070000);
+						ret_v20 = ACATA_R_STATUS;
 						while ( (ret_v20 & ATA_STAT_BUSY) != 0 )
 						{
-							sr = *((volatile acUint16 *)0xB6070000);
+							sr = ACATA_R_STATUS;
 							ret_v20 = sr & 0xFF;
 						}
 					}
@@ -268,10 +268,10 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					}
 					else
 					{
-						sr_v25 = *((volatile acUint16 *)0xB6070000);
+						sr_v25 = ACATA_R_STATUS;
 						while ( (sr_v25 & ATA_STAT_BUSY) != 0 )
 						{
-							sr_v25 = *((volatile acUint16 *)0xB6070000);
+							sr_v25 = ACATA_R_STATUS;
 							sr_v25 = sr_v25 & 0xFF;
 						}
 					}
@@ -284,9 +284,9 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					xlen_v28 = (unsigned int)xlen_v27 >> 1;
 					if ( (sr_v25 & 1) != 0 )
 						xlen_v28 = 0;
-					(void)(*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY);
+					(void)(ACATA_R_STATUS & ATA_STAT_BUSY);
 					xlen_v30 = xlen_v28 - 1;
-					while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_DRQ) != 0 )
+					while ( (ACATA_R_STATUS & ATA_STAT_DRQ) != 0 )
 					{
 						if ( xlen_v30 >= 0 )
 						{
@@ -295,7 +295,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 						}
 						--xlen_v30;
 					}
-					ret_v29 = *((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY;
+					ret_v29 = ACATA_R_STATUS & ATA_STAT_BUSY;
 					if ( !ret_v29 )
 						break;
 				}
@@ -361,7 +361,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 			int tmout;
 
 			tmout = 99999;
-			while ( (*((volatile acUint16 *)0xB6070000) & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
+			while ( (ACATA_R_STATUS & (ATA_STAT_BUSY|ATA_STAT_ERR)) == ATA_STAT_BUSY )
 			{
 				if ( tmout < 0 )
 				{
@@ -380,8 +380,8 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	{
 		return ret;
 	}
-	sr_v34 = *((volatile acUint16 *)0xB6070000);
-	if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_ERR) != 0 )
+	sr_v34 = ACATA_R_STATUS;
+	if ( (ACATA_R_STATUS & ATA_STAT_ERR) != 0 )
 		return -((sr_v34 << 8) + ACATA_R_ERROR);
 	if ( atah->a_state < 0x1FFu )
 	{
