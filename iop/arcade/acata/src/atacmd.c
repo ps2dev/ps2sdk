@@ -145,7 +145,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	flag_v8 = atah->a_flag;
 	*((volatile acUint16 *)0xB6060000) = flag_v8 & 0x10;
 	*((volatile acUint16 *)0xB6160000) = (flag_v8 & 2) ^ 2;
-	*((volatile acUint16 *)0xB6010000) = 0;
+	ACATA_R_FEATURES = 0;
 	while ( count >= 0 )
 	{
 		int data;
@@ -320,7 +320,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					"acata:A:dma_iowait: TIMEDOUT %04x:%02x:%02x\n",
 					state,
 					*((volatile acUint16 *)0xB6160000),
-					*((volatile acUint16 *)0xB6010000));
+					ACATA_R_ERROR);
 				if ( state < 1023 )
 					acDmaCancel(&dma_data.ad_dma, -116);
 				ret = 0;
@@ -382,7 +382,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	}
 	sr_v34 = *((volatile acUint16 *)0xB6070000);
 	if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_ERR) != 0 )
-		return -((sr_v34 << 8) + *((volatile acUint16 *)0xB6010000));
+		return -((sr_v34 << 8) + ACATA_R_ERROR);
 	if ( atah->a_state < 0x1FFu )
 	{
 		atah->a_state = 127;
@@ -395,7 +395,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	cmd_v36 = ata->ac_command;
 	if ( ret_v35 < 0 )
 	{
-		return -((sr_v34 << 8) + *((volatile acUint16 *)0xB6010000));
+		return -((sr_v34 << 8) + ACATA_R_ERROR);
 	}
 	for ( rest_v37 = 6; rest_v37 > 0; --rest_v37 )
 	{

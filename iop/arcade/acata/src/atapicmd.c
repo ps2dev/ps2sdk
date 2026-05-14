@@ -85,7 +85,7 @@ static int atapi_packet_send(acAtaReg atareg, acAtapiPacketData *pkt, int flag)
 	*((volatile acUint16 *)0xB6040000) = 64;
 	*((volatile acUint16 *)0xB6060000) = flag & 0x10;
 	*((volatile acUint16 *)0xB6160000) = (flag & 2) ^ 2;
-	*((volatile acUint16 *)0xB6010000) = flag & 1;
+	ACATA_R_FEATURES = flag & 1;
 	*((volatile acUint16 *)0xB6070000) = ATA_C_PACKET; // ATA_STAT_BUSY|ATA_STAT_READY?
 	tmout = 999;
 	v6 = 1000;
@@ -437,7 +437,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					"acata:P:dma_iowait: TIMEDOUT %04x:%02x:%02x\n",
 					ret_v23,
 					*((volatile acUint16 *)0xB6160000),
-					*((volatile acUint16 *)0xB6010000));
+					ACATA_R_ERROR);
 				if ( ret_v23 < 1023 )
 					acDmaCancel(&dma_data.ad_dma, -116);
 				ad_result = 0;
@@ -463,7 +463,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	if ( ret_v5 < 0 )
 		return ret_v5;
 	if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_ERR) != 0 )
-		return -((*((volatile acUint16 *)0xB6070000) << 8) + *((volatile acUint16 *)0xB6010000));
+		return -((*((volatile acUint16 *)0xB6070000) << 8) + ACATA_R_ERROR);
 	if ( atah->a_state >= 0x1FFu )
 	{
 		return -116;
@@ -514,7 +514,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 	u.len = 0x12;
 	u.lun = atapi->ap_packet.u_b[1];
 	*((volatile acUint16 *)0xB6160000) = (flag & 2) ^ 2;
-	*((volatile acUint16 *)0xB6010000) = 0;
+	ACATA_R_FEATURES = 0;
 	v3 = atapi_packet_send((acAtaReg)ACATA_A_DATA, &u.pkt, flag);
 	if ( v3 < 0 )
 	{

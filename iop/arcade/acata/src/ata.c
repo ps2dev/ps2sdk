@@ -201,7 +201,7 @@ int ata_probe(acAtaReg atareg)
 	active = 0;
 	unit = 0;
 	*((volatile acUint16 *)0xB6160000) = 2;
-	*((volatile acUint16 *)0xB6010000) = 0;
+	ACATA_R_FEATURES = 0;
 	count = 0;
 	while ( unit < 2 )
 	{
