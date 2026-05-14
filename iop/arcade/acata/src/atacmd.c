@@ -143,7 +143,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	cmd = ata->ac_command;
 	count = 5;
 	flag_v8 = atah->a_flag;
-	*((volatile acUint16 *)0xB6060000) = flag_v8 & 0x10;
+	ACATA_R_DRIVE_HEAD = flag_v8 & 0x10;
 	*((volatile acUint16 *)0xB6160000) = (flag_v8 & 2) ^ 2;
 	ACATA_R_FEATURES = 0;
 	while ( count >= 0 )

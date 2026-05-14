@@ -205,9 +205,9 @@ int ata_probe(acAtaReg atareg)
 	count = 0;
 	while ( unit < 2 )
 	{
-		*((volatile acUint16 *)0xB6060000) = 16 * (unit != 0);
 		*((volatile acUint16 *)0xB6070000) = 0;
 		*((volatile acUint16 *)0xB6070000) = 0;
+		ACATA_R_DRIVE_HEAD = 16 * (unit != 0);
 		while ( count <= 1999999 )
 		{
 			// cppcheck-suppress knownConditionTrueFalse

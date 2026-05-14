@@ -83,7 +83,7 @@ static int atapi_packet_send(acAtaReg atareg, acAtapiPacketData *pkt, int flag)
 	count = 6;
 	ACATA_R_CYL_HIGH = 0;
 	ACATA_R_CYL_LOW = 64;
-	*((volatile acUint16 *)0xB6060000) = flag & 0x10;
+	ACATA_R_DRIVE_HEAD = flag & 0x10;
 	*((volatile acUint16 *)0xB6160000) = (flag & 2) ^ 2;
 	ACATA_R_FEATURES = flag & 1;
 	*((volatile acUint16 *)0xB6070000) = ATA_C_PACKET; // ATA_STAT_BUSY|ATA_STAT_READY?
