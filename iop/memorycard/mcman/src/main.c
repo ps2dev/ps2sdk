@@ -1365,7 +1365,7 @@ int mcman_setdevinfos(int port, int slot)
 	if (r != sceMcResSucceed)
 		return -48;
 
-	if (strncmp(SUPERBLOCK_MAGIC, mcman_pagebuf.magic, 28) != 0) {
+	if (memcmp(SUPERBLOCK_MAGIC, mcman_pagebuf.magic, 28) != 0) {
 		DPRINTF("mcman_setdevinfos No card format !!!\n");
 		return sceMcResNoFormat;
 	}
@@ -1921,7 +1921,7 @@ int mcman_getdirinfo(int port, int slot, McFsEntry *pfse, const char *filename, 
 		pos = strlen(filename);
 
 	ret = 0;
-	if ((pos == 2) && (!strncmp(filename, "..", 2))) {
+	if ((pos == 2) && (!memcmp(filename, "..", 2))) {
 
 		r = McReadDirEntry(port, slot, pfse->cluster, 0, &fse);
 		if (r != sceMcResSucceed)
@@ -1966,7 +1966,7 @@ int mcman_getdirinfo(int port, int slot, McFsEntry *pfse, const char *filename, 
 			return sceMcResSucceed;
 	}
 	else {
-		if ((pos == 1) && (!strncmp(filename, ".", 1))) {
+		if ((pos == 1) && (!memcmp(filename, ".", 1))) {
 
 			r = McReadDirEntry(port, slot, pfse->cluster, 0, &fse);
 			if (r != sceMcResSucceed)

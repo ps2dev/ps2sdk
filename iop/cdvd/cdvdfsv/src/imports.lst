@@ -67,7 +67,7 @@ sifman_IMPORTS_end
 
 sysclib_IMPORTS_start
 I_memcpy
-I_strncmp
+I_memcmp
 I_strtol
 sysclib_IMPORTS_end
 

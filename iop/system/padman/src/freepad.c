@@ -50,7 +50,7 @@ static int ParseParams(int argc, char *argv[])
 
 		for(i = 1; i < argc; i++,argv++)
 		{
-			if(strncmp("thpri=", *argv, 6) == 0)
+			if(memcmp("thpri=", *argv, 6) == 0)
 			{
 				const char *param;
 

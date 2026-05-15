@@ -22,7 +22,7 @@ sysclib_IMPORTS_start
 I_memcpy
 I_strcmp
 I_strtoul
-I_strncmp
+I_memcmp
 I_bzero
 I_look_ctype_table
 sysclib_IMPORTS_end

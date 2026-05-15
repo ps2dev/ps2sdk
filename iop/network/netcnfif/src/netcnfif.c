@@ -148,7 +148,7 @@ static int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *m
 		int xflg;
 
 		xflg = 1;
-		if ( !strncmp("thpri=", argv[i], 6) )
+		if ( !memcmp("thpri=", argv[i], 6) )
 		{
 			bp = 6;
 			if ( !isdigit(argv[i][bp]) )
@@ -169,7 +169,7 @@ static int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *m
 				xflg = 0;
 			}
 		}
-		else if ( !strncmp("thstack=", argv[i], 8) )
+		else if ( !memcmp("thstack=", argv[i], 8) )
 		{
 			bp = 8;
 			if ( !isdigit(argv[i][bp]) )

@@ -193,7 +193,7 @@ static void fill_stat(struct stat *stat, const iox_stat_t *fiostat)
 int __fileXioGetstatHelper(const char *path, struct stat *buf) {
     iox_stat_t fiostat;
 
-    if (strncmp(path, "tty", 3) == 0 && path[3] >= '0' && path[3] <= '9' && path[4] == ':')
+    if (memcmp(path, "tty", 3) == 0 && path[3] >= '0' && path[3] <= '9' && path[4] == ':')
     {
         memset(buf, 0, sizeof(*buf));
         buf->st_mode = S_IFCHR;

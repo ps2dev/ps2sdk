@@ -188,7 +188,7 @@ static Elf_file_slot *search_order_slots(const char *ordstr, const elf_file *elf
 		}
 		return 0;
 	}
-	if ( !strncmp(ordstr, "@Program_header_data ", 0x15) )
+	if ( !memcmp(ordstr, "@Program_header_data ", 0x15) )
 	{
 		long n;
 

@@ -923,7 +923,7 @@ static void ParseIOPBTCONF(const struct ImageData *ImageDataBuffer, unsigned int
                     ResetData->StartAddress = ParseStartAddress(&ptr);
                     break;
                 case '!': /* 0x00000690 */
-                    if (strncmp(ptr, "!addr ", 6) == 0) {
+                    if (memcmp(ptr, "!addr ", 6) == 0) {
                         ptr += 6;
                         ModList[NumModules] = (void *)(((unsigned int)ParseStartAddress(&ptr) << 2) + 1);
 
@@ -931,7 +931,7 @@ static void ParseIOPBTCONF(const struct ImageData *ImageDataBuffer, unsigned int
                         ResetData->NumModules++;
                         NumModules++;
                         ModList[NumModules] = NULL;
-                    } else if (strncmp(ptr, "!include ", 9) == 0) {
+                    } else if (memcmp(ptr, "!include ", 9) == 0) {
                         ptr += 9;
 
                         i = 0;

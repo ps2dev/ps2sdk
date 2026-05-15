@@ -423,7 +423,7 @@ int __fioGetstatHelper(const char *path, struct stat *buf)
 {
     io_stat_t fiostat;
 
-    if (strncmp(path, "tty", 3) == 0 && path[3] >= '0' && path[3] <= '9' && path[4] == ':')
+    if (memcmp(path, "tty", 3) == 0 && path[3] >= '0' && path[3] <= '9' && path[4] == ':')
     {
         memset(buf, 0, sizeof(*buf));
         buf->st_mode = S_IFCHR;
