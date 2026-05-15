@@ -264,7 +264,7 @@ int ps2kbd_connect(int devId)
     }
 
   devices[devLoop] = currDev;
-  memset(currDev, 0, sizeof(kbd_dev));
+  memset(currDev, 0, sizeof(*currDev));
   currDev->configEndp = sceUsbdOpenPipe(devId, NULL);
   currDev->dataEndp = sceUsbdOpenPipe(devId, endp);
   currDev->packetSize = endp->wMaxPacketSizeLB | ((int) endp->wMaxPacketSizeHB << 8);
@@ -342,7 +342,7 @@ void ps2kbd_getstring_set(int resultCode, int bytes, void *arg)
       char string[50];
       int strLoop;
 
-      memset(string, 0, 50);
+      memset(string, 0, sizeof(string));
       for(strLoop = 0; strLoop < ((bytes - 2) / 2); strLoop++)
 	{
 	  string[strLoop] = str->wData[strLoop] & 0xFF;
@@ -758,8 +758,8 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
       u8 uniqueKeys[PS2KBD_MAXKEYS];
       u8 missingKeys[PS2KBD_MAXKEYS];
 
-      memset(uniqueKeys, 0, PS2KBD_MAXKEYS);
-      memset(missingKeys, 0, PS2KBD_MAXKEYS);
+      memset(uniqueKeys, 0, sizeof(uniqueKeys));
+      memset(missingKeys, 0, sizeof(missingKeys));
       ps2kbd_build_uniquekeys(uniqueKeys, dev->data.keycodes, dev->oldData.keycodes);
       ps2kbd_build_uniquekeys(missingKeys, dev->oldData.keycodes, dev->data.keycodes);
       /* Build new and missing key lists */
@@ -882,9 +882,9 @@ void ps2kbd_ioctl_setkeymap(kbd_keymap *keymaps)
 {
   //printf("ioctl_setkeymap %p\n", keymaps);
   WaitSema(lineSema);   /* Lock the input so you dont end up with weird results */
-  memcpy(keymap, keymaps->keymap, PS2KBD_KEYMAP_SIZE);
-  memcpy(shiftkeymap, keymaps->shiftkeymap, PS2KBD_KEYMAP_SIZE);
-  memcpy(keycap, keymaps->keycap, PS2KBD_KEYMAP_SIZE);
+  memcpy(keymap, keymaps->keymap, sizeof(keymap));
+  memcpy(shiftkeymap, keymaps->shiftkeymap, sizeof(shiftkeymap));
+  memcpy(keycap, keymaps->keycap, sizeof(keycap));
   SignalSema(lineSema);
 }
 
@@ -893,7 +893,7 @@ void ps2kbd_ioctl_setctrlmap(u8 *ctrlmap)
 {
   //printf("ioctl_setctrlmap %p\n", ctrlmap);
   WaitSema(lineSema);
-  memcpy(control_map, ctrlmap, PS2KBD_KEYMAP_SIZE);
+  memcpy(control_map, ctrlmap, sizeof(control_map));
   SignalSema(lineSema);
 }
 
@@ -902,7 +902,7 @@ void ps2kbd_ioctl_setaltmap(u8 *altmap)
 {
   //printf("ioctl_setaltmap %p\n", altmap);
   WaitSema(lineSema);
-  memcpy(alt_map, altmap, PS2KBD_KEYMAP_SIZE);
+  memcpy(alt_map, altmap, sizeof(alt_map));
   SignalSema(lineSema);
 }
 
@@ -911,7 +911,7 @@ void ps2kbd_ioctl_setspecialmap(u8 *special)
 {
   //printf("ioctl_setspecialmap %p\n", special);
   WaitSema(lineSema);
-  memcpy(special_keys, special, PS2KBD_KEYMAP_SIZE);
+  memcpy(special_keys, special, sizeof(special_keys));
   SignalSema(lineSema);
 }
 
@@ -921,12 +921,12 @@ void ps2kbd_ioctl_resetkeymap()
 {
   //printf("ioctl_resetkeymap()\n");
   WaitSema(lineSema);
-  memcpy(keymap, us_keymap, PS2KBD_KEYMAP_SIZE);
-  memcpy(shiftkeymap, us_shiftkeymap, PS2KBD_KEYMAP_SIZE);
-  memcpy(keycap, us_keycap, PS2KBD_KEYMAP_SIZE);
-  memcpy(special_keys, us_special_keys, PS2KBD_KEYMAP_SIZE);
-  memcpy(control_map, us_control_map, PS2KBD_KEYMAP_SIZE);
-  memcpy(alt_map, us_alt_map, PS2KBD_KEYMAP_SIZE);
+  memcpy(keymap, us_keymap, sizeof(keymap));
+  memcpy(shiftkeymap, us_shiftkeymap, sizeof(shiftkeymap));
+  memcpy(keycap, us_keycap, sizeof(keycap));
+  memcpy(special_keys, us_special_keys, sizeof(special_keys));
+  memcpy(control_map, us_control_map, sizeof(control_map));
+  memcpy(alt_map, us_alt_map, sizeof(alt_map));
   SignalSema(lineSema);
 }
 
@@ -1274,17 +1274,17 @@ int ps2kbd_init()
   lineSize = PS2KBD_DEFLINELEN;
   memset(lineBuffer, 0, PS2KBD_DEFLINELEN);
 
-  memset(devices, 0, sizeof(kbd_dev *) * PS2KBD_MAXDEV);
+  memset(devices, 0, sizeof(devices));
   dev_count = 0;
   kbd_blocking = PS2KBD_NONBLOCKING;
   kbd_readmode = PS2KBD_READMODE_NORMAL;
   kbd_repeatrate = PS2KBD_DEFREPEATRATE;
-  memcpy(keymap, us_keymap, PS2KBD_KEYMAP_SIZE);
-  memcpy(shiftkeymap, us_shiftkeymap, PS2KBD_KEYMAP_SIZE);
-  memcpy(keycap, us_keycap, PS2KBD_KEYMAP_SIZE);
-  memcpy(special_keys, us_special_keys, PS2KBD_KEYMAP_SIZE);
-  memcpy(control_map, us_control_map, PS2KBD_KEYMAP_SIZE);
-  memcpy(alt_map, us_alt_map, PS2KBD_KEYMAP_SIZE);
+  memcpy(keymap, us_keymap, sizeof(keymap));
+  memcpy(shiftkeymap, us_shiftkeymap, sizeof(shiftkeymap));
+  memcpy(keycap, us_keycap, sizeof(keycap));
+  memcpy(special_keys, us_special_keys, sizeof(special_keys));
+  memcpy(control_map, us_control_map, sizeof(control_map));
+  memcpy(alt_map, us_alt_map, sizeof(alt_map));
 
   ret = init_fio();
   if(ret < 0)

@@ -491,7 +491,7 @@ static void do_getsockopt( void *rpcBuffer, int size )
 
 	((getsockopt_res_pkt*)rpcBuffer)->result = ret;
 	((getsockopt_res_pkt*)rpcBuffer)->optlen = optlen;
-	memcpy( ((getsockopt_res_pkt*)rpcBuffer)->buffer, optval, 128 );
+	memcpy( ((getsockopt_res_pkt*)rpcBuffer)->buffer, optval, sizeof(optval) );
 }
 
 static void do_setsockopt( void *rpcBuffer, int size )

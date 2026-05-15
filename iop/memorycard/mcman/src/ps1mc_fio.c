@@ -34,7 +34,7 @@ int mcman_format1(int port, int slot)
 			return -41;
 	}
 
-	memset(&mcman_PS1PDApagebuf, 0, 128);
+	memset(&mcman_PS1PDApagebuf, 0, sizeof(mcman_PS1PDApagebuf));
 
 	mcman_PS1PDApagebuf.word[0] = 0xa0;
 	mcman_PS1PDApagebuf.half[2] = 0xffff;
@@ -47,7 +47,7 @@ int mcman_format1(int port, int slot)
 			return -42;
 	}
 
-	memset(&mcman_PS1PDApagebuf, 0, 128);
+	memset(&mcman_PS1PDApagebuf, 0, sizeof(mcman_PS1PDApagebuf));
 
 	mcman_PS1PDApagebuf.word[0] = 0xffffffff;
 
@@ -214,7 +214,7 @@ int mcman_open1(int port, int slot, const char *filename, int flags)
 	fse->length = 0;
 	fse->linked_block = -1;
 
-	strncpy(fse->name, p, 20);
+	strncpy(fse->name, p, sizeof(fse->name));
 
 	if ((flags & sceMcFileAttrPDAExec) != 0)
 		fse->field_7e = 1;
@@ -407,8 +407,8 @@ int mcman_dread1(int fd, MC_IO_DRE_T *dirent)
 	fh->position++;
 	mcman_wmemset((void *)dirent, sizeof(MC_IO_DRE_T), 0);
 
-	strncpy(dirent->name, fse->name, 20);
-	dirent->name[20] = 0;
+	strncpy(dirent->name, fse->name, sizeof(fse->name) - 1);
+	dirent->name[sizeof(fse->name) - 1] = 0;
 
 	dirent->stat.mode = MC_IO_S_RD | MC_IO_S_WR | MC_IO_S_EX | MC_IO_S_FL;
 
@@ -571,7 +571,7 @@ int mcman_setinfo1(int port, int slot, const char *filename, sceMcTblGetDir *inf
 		fse2->modified = info->_Modify;
 
 	if ((flags & sceMcFileAttrFile) != 0)
-		strncpy(fse2->name, info->EntryName, 20);
+		strncpy(fse2->name, info->EntryName, sizeof(fse2->name));
 
 	fse2->field_1e = 0;
 
@@ -604,7 +604,7 @@ int mcman_getdir1(int port, int slot, const char *dirname, int flags, int maxent
 			p += mcman_chrpos(p, '/') + 1;
 		} while (1);
 
-		strncpy(mcman_PS1curdir, p, 63);
+		strncpy(mcman_PS1curdir, p, sizeof(mcman_PS1curdir) - 1);
 
 	}
 
@@ -625,7 +625,7 @@ int mcman_getdir1(int port, int slot, const char *dirname, int flags, int maxent
 			if (!mcman_checkdirpath(fse->name, mcman_PS1curdir))
 				continue;
 
-			memset((void *)info, 0, sizeof (sceMcTblGetDir));
+			memset((void *)info, 0, sizeof (*info));
 
 			info->AttrFile = 0x9417;
 
@@ -646,8 +646,8 @@ int mcman_getdir1(int port, int slot, const char *dirname, int flags, int maxent
 				info->FileSizeByte = fse->length;
 			}
 
-			strncpy(info->EntryName, fse->name, 20);
-			info->EntryName[20] = 0;
+			strncpy(info->EntryName, fse->name, sizeof(fse->name) - 1);
+			info->EntryName[sizeof(fse->name) - 1] = 0;
 
 			i++;
 			info++;
@@ -721,8 +721,8 @@ int mcman_close1(int fd)
 	fse->field_7d = 0; // <--- To preserve for XMCMAN
 	fse->field_2c = 0; //
 	fse->field_38 = 0; //
-	memset((void *)&fse->created, 0, 8);  //
-	memset((void *)&fse->modified, 0, 8); //
+	memset((void *)&fse->created, 0, sizeof(fse->created));  //
+	memset((void *)&fse->modified, 0, sizeof(fse->modified)); //
 #else
 	// MCMAN does as following
 	fse->field_7d = 1;

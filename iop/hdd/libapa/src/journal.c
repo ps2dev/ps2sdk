@@ -39,7 +39,7 @@ int apaJournalFlush(s32 device)
 
 int apaJournalReset(s32 device)
 {
-	memset(&journalBuf, 0, sizeof(apa_journal_t));
+	memset(&journalBuf, 0, sizeof(journalBuf));
 	journalBuf.magic=APAL_MAGIC;
 	return apaJournalFlush(device);
 }

@@ -173,7 +173,7 @@ void processDoneQueue_IsoTd(UsbdHcIsoTD_t *arg)
 		return;
 	}
 	if ( req_1->m_req.bNumPackets )
-		memcpy(req_1->m_req.Packets, arg->m_psw, 16);
+		memcpy(req_1->m_req.Packets, arg->m_psw, sizeof(arg->m_psw));
 	freeIsoTd(arg);
 	req_1->m_transferedBytes = 0;
 	if ( req_1->m_req.bNumPackets )

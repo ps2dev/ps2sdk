@@ -194,7 +194,7 @@ void RemovePowerOffHandler(pwoffcb func)
 		{
 			CallbackTable[i] = CallbackTable[i+1];
 		}
-		memset(&CallbackTable[i], 0, sizeof(struct CallbackEntry));
+		memset(&CallbackTable[i], 0, sizeof(CallbackTable[i]));
 	}
 }
 
@@ -269,7 +269,7 @@ int _start(int argc, char *argv[])
 	handlers[IOP_IRQ_CDVD].handler=(intrhandler)((int)myCdHandler | TYPE_C);
 #pragma GCC diagnostic pop
 
-	memset(CallbackTable, 0, sizeof(struct CallbackEntry) * MAX_CALLBACKS);
+	memset(CallbackTable, 0, sizeof(CallbackTable));
 
 	mythread.attr = TH_C;
 	mythread.option = PWROFF_IRX;

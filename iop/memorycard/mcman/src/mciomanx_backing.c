@@ -32,7 +32,7 @@ static void mcman_iomanx_backing_clear_slot(int slot)
 	if (cardinfo->fd >= 0) {
 		iomanX_close(cardinfo->fd);
 	}
-	memset(cardinfo, 0, sizeof(vmc_cardinfo_t));
+	memset(cardinfo, 0, sizeof(*cardinfo));
 	cardinfo->fd = -1;
 
 	// Just to clear any cached information

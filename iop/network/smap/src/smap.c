@@ -1595,7 +1595,7 @@ int smap_init(int argc, char *argv[])
     SMAP_REG16(SMAP_R_INTR_CLR) = DEV9_SMAP_ALL_INTR_MASK;
 
     /* Retrieve the MAC address and verify it's integrity. */
-    bzero(eeprom_data, 8);
+    bzero(eeprom_data, sizeof(eeprom_data));
     if ((result = SpdGetEthernetID(eeprom_data)) < 0) {
         return (result == -1 ? -7 : -4);
     }

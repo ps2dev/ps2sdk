@@ -1535,8 +1535,8 @@ int dvrioctl2_tevent_buf_recv_first(
     TELTEXT_ACTLEN = dvr_recv_dma(a1, TELTEXT_BUF, sizeof(TELTEXT_BUF));
     if ((TELTEXT_ACTLEN & 0x80000000) == 0) {
         if (buflen == 1024) {
-            memcpy(buf, (u8 *)TELTEXT_BUF + TELTEXT_BUFOFFSET, 1024);
-            TELTEXT_BUFOFFSET += 1024;
+            memcpy(buf, (u8 *)TELTEXT_BUF + TELTEXT_BUFOFFSET, buflen);
+            TELTEXT_BUFOFFSET += buflen;
             if (TELTEXT_ACTLEN <= 0x400) {
                 DPRINTF("tevent_buf_recv_first: actlen:%u request-buflen:%d return 0 < DMA EOT >\n", TELTEXT_ACTLEN, 1024);
                 return 0;
@@ -1569,9 +1569,9 @@ int dvrioctl2_tevent_buf_recv_next(
 
     DPRINTF("dvr_tevent_buf_recv_next(io=%p, cmd=%d buf=%p, nbyte=%u)\n", a1, cmd, buf, buflen);
     if (buflen == 1024) {
-        if (TELTEXT_BUFOFFSET + 1024 < sizeof(TELTEXT_BUF)) {
-            memcpy(buf, TELTEXT_BUF + TELTEXT_BUFOFFSET, 1024);
-            TELTEXT_BUFOFFSET += 1024;
+        if (TELTEXT_BUFOFFSET + buflen < sizeof(TELTEXT_BUF)) {
+            memcpy(buf, TELTEXT_BUF + TELTEXT_BUFOFFSET, buflen);
+            TELTEXT_BUFOFFSET += buflen;
             if ((int)TELTEXT_BUFOFFSET < (int)TELTEXT_ACTLEN) {
                 DPRINTF("tevent_buf_recv_next: return <DMA_REMAIND>\n");
                 return 65509;

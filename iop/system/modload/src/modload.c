@@ -293,7 +293,7 @@ void *AllocLoadMemory(int type, unsigned int size, void *addr)
 	newbuf = (modload_load_memory_t *)AllocSysMemory(type, size, addr);
 	if ( !newbuf )
 		return NULL;
-	memset(newbuf, -1, 32);
+	memset(newbuf, -1, sizeof(*newbuf));
 	linked_list_set_self(&newbuf->ll[2]);
 	newbuf->ll[3].next = (struct modload_ll_ *)0x10;
 	linked_list_add_after(&load_memory_ll, newbuf->ll);
@@ -718,8 +718,8 @@ int ReferModuleStatus(int modid, ModuleStatus *status)
 	status->name[0] = 0;
 	name = image_info->name;
 	if ( name )
-		strncpy(status->name, name, 56);
-	status->name[55] = 0;
+		strncpy(status->name, name, sizeof(status->name));
+	status->name[sizeof(status->name) - 1] = 0;
 	status->version = image_info->version;
 	status->id = image_info->id;
 	status->flags = image_info->newflags;

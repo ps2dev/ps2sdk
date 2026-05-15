@@ -187,7 +187,7 @@ static int fsckCheckExtendedAttribute(pfs_mount_t *mount)
                 break;
             }
 
-            memset(IOBuffer, 0, IO_BUFFER_SIZE_BYTES);
+            memset(IOBuffer, 0, sizeof(IOBuffer));
             iomanX_lseek(mount->fd, 0, SEEK_SET);
             for (remaining = 0x1FF8; remaining != 0; remaining -= size) {
                 size = (remaining > IO_BUFFER_SIZE) ? IO_BUFFER_SIZE : remaining;
@@ -598,7 +598,7 @@ static void fsckCheckFiles(pfs_cache_t *ParentInodeClink, pfs_cache_t *InodeClin
 static void fsckCheckFile(pfs_cache_t *FileInodeClink, pfs_cache_t *FileInodeDataClink, pfs_dentry_t *dentry)
 {
     if (fsckRuntimeData.status.PWDLevel < FSCK_MAX_PATH_LEVELS - 1) {
-        memset(fsckPathBuffer[fsckRuntimeData.status.PWDLevel], 0, FSCK_MAX_PATH_SEG_LENGTH);
+        memset(fsckPathBuffer[fsckRuntimeData.status.PWDLevel], 0, sizeof(fsckPathBuffer[fsckRuntimeData.status.PWDLevel]));
         strncpy(fsckPathBuffer[fsckRuntimeData.status.PWDLevel], dentry->path, dentry->pLen);
         fsckRuntimeData.status.PWDLevel++;
 

@@ -195,7 +195,7 @@ int __fileXioGetstatHelper(const char *path, struct stat *buf) {
 
     if (strncmp(path, "tty", 3) == 0 && path[3] >= '0' && path[3] <= '9' && path[4] == ':')
     {
-        memset(buf, 0, sizeof(struct stat));
+        memset(buf, 0, sizeof(*buf));
         buf->st_mode = S_IFCHR;
         return 0;
     }
@@ -372,9 +372,6 @@ int __fileXioDreadHelper(void *userdata, struct dirent *dir)
     int fd;
     iox_dirent_t ioxdir;
 
-    // Took from iox_dirent_t
-    #define __MAXNAMLEN 256
-
     fd = __fileXioGetFdHelper(userdata);
     if (fd < 0)
     {
@@ -387,8 +384,8 @@ int __fileXioDreadHelper(void *userdata, struct dirent *dir)
     }
 
     dir->d_fileno = rv; // TODO: This number should be in theory a unique number per file
-    strncpy(dir->d_name, ioxdir.name, __MAXNAMLEN);
-    dir->d_name[__MAXNAMLEN - 1] = 0;
+    strncpy(dir->d_name, ioxdir.name, sizeof(ioxdir.name));
+    dir->d_name[sizeof(ioxdir.name) - 1] = 0;
     dir->d_reclen = 0;
     switch (ioxdir.stat.mode & FIO_S_IFMT) {
         case FIO_S_IFLNK: dir->d_type = DT_LNK;     break;

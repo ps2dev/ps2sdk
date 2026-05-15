@@ -78,7 +78,7 @@ int pfsJournalReset(pfs_mount_t *pfsMount)
 		return 0;
 #endif
 
-	memset(&pfsJournalBuf, 0, sizeof(pfs_journal_t));
+	memset(&pfsJournalBuf, 0, sizeof(pfsJournalBuf));
 	pfsJournalBuf.magic=PFS_JOUNRNAL_MAGIC;
 
 	pfsMount->blockDev->flushCache(pfsMount->fd);
@@ -92,7 +92,7 @@ int pfsJournalReset(pfs_mount_t *pfsMount)
 
 int pfsJournalResetThis(pfs_block_device_t *blockDev, int fd, u32 sector)
 {
-	memset(&pfsJournalBuf, 0, sizeof(pfs_journal_t));
+	memset(&pfsJournalBuf, 0, sizeof(pfsJournalBuf));
 	pfsJournalBuf.magic=PFS_JOUNRNAL_MAGIC;
 	return blockDev->transfer(fd, &pfsJournalBuf, 0, sector, 2, 1);
 }

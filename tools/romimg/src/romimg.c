@@ -59,7 +59,7 @@ static int OpenRomDirFile(const struct ROMImgStat *ImageStat, const char *file, 
 	const struct RomDirEntry *RomDirEntry;
 	int result;
 
-	memset(fd, 0, sizeof(struct RomDirFileFd));
+	memset(fd, 0, sizeof(*fd));
 
 	RomDirEntry = (const struct RomDirEntry *)ImageStat->ROMFS_start;
 	result = ENOENT;
@@ -147,7 +147,7 @@ int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 	struct FileEntry *ResetFile;
 	struct ExtInfoFieldEntry *ExtInfoEntry;
 
-	memset(ROMImg, 0, sizeof(ROMIMG));
+	memset(ROMImg, 0, sizeof(*ROMImg));
 
 	ROMImg->date = GetSystemDate();
 #if defined(_WIN32) || defined(WIN32)
@@ -281,7 +281,7 @@ int LoadROMImg(ROMIMG *ROMImg, const char *path)
 	struct ROMImgStat ImageStat;
 	struct FileEntry *file;
 	void *ptr;
-	memset(ROMImg, 0, sizeof(ROMIMG));
+	memset(ROMImg, 0, sizeof(*ROMImg));
 
 	if ((InputFile = fopen(path, "rb")) != NULL) {
 		fseek(InputFile, 0, SEEK_END);
@@ -398,7 +398,7 @@ void UnloadROMImg(ROMIMG *ROMImg)
 		free(ROMImg->files);
 	}
 
-	memset(ROMImg, 0, sizeof(ROMIMG));
+	memset(ROMImg, 0, sizeof(*ROMImg));
 }
 
 static void *ReallocExtInfoArea(struct FileEntry *file, unsigned short int nbytes)
@@ -485,7 +485,7 @@ int AddFile(ROMIMG *ROMImg, const char *path, int upperconv)
 
 				if ((ROMImg->files = (ROMImg->files == NULL) ? (struct FileEntry *)malloc(sizeof(struct FileEntry)) : (struct FileEntry *)realloc(ROMImg->files, ROMImg->NumFiles * sizeof(struct FileEntry))) != NULL) {
 					file = &ROMImg->files[ROMImg->NumFiles - 1];
-					memset(&ROMImg->files[ROMImg->NumFiles - 1], 0, sizeof(struct FileEntry));
+					memset(file, 0, sizeof(*file));
 
 					strncpy(file->RomDir.name, fname, sizeof(file->RomDir.name));
                     file->RomDir.name[sizeof(file->RomDir.name) - 1] = '\0';

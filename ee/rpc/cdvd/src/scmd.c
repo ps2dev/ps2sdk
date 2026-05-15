@@ -287,7 +287,7 @@ int sceCdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff)
 
     sCmdSendBuff.scmd.cmdNum     = cmdNum;
     sCmdSendBuff.scmd.inBuffSize = inBuffSize;
-    memset(sCmdSendBuff.scmd.inBuff, 0, 16);
+    memset(sCmdSendBuff.scmd.inBuff, 0, sizeof(sCmdSendBuff.scmd.inBuff));
     if (inBuff)
         memcpy(sCmdSendBuff.scmd.inBuff, inBuff, inBuffSize);
 

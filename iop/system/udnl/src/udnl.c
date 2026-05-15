@@ -439,7 +439,7 @@ static int InitModuleInfo(const void *module, struct ModuleInfo *ModuleInfo)
      sizeof(struct scnhdr)       = 40 bytes
      */
 
-    memcpy(&Ident_10, &((struct coff_filehdr *)module)->f_opthdr, 4);
+    memcpy(&Ident_10, &((struct coff_filehdr *)module)->f_opthdr, sizeof(Ident_10));
     COFF_AoutHdr = (AOUTHDR *)((unsigned int)module + sizeof(struct coff_filehdr));
     COFF_ScnHdr = (struct scnhdr *)((unsigned int)module + sizeof(struct coff_filehdr) + sizeof(AOUTHDR));
     if (((struct coff_filehdr *)module)->f_magic == MIPSELMAGIC && COFF_AoutHdr->magic == OMAGIC && ((struct coff_filehdr *)module)->f_nscns < 0x20 && ((Ident_10 & 0x0002FFFF) == 0x20038) && COFF_ScnHdr->s_paddr == COFF_AoutHdr->text_start) {
@@ -1163,7 +1163,7 @@ int _start(int argc, char *argv[])
     }
 
     ResetData = buffer;
-    memset(ResetData, 0, sizeof(struct ResetData));
+    memset(ResetData, 0, sizeof(*ResetData));
     ResetData->ModData = (void *)((u8 *)buffer + sizeof(struct ResetData));
     IoprpBuffer = (void *)((unsigned int)buffer + MAX_MODULES * sizeof(void *) + sizeof(struct ResetData));
     ResetData->IOPRPBuffer = (void *)((unsigned int)IoprpBuffer & 0x1FFFFF00);

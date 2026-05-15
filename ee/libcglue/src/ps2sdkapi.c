@@ -264,9 +264,6 @@ int __fioDreadHelper(void *userdata, struct dirent *dir)
     int fd;
     io_dirent_t iodir;
 
-    // Took from io_dirent_t
-    #define __MAXNAMLEN 256
-
     fd = __fioGetFdHelper(userdata);
     if (fd < 0)
     {
@@ -280,8 +277,8 @@ int __fioDreadHelper(void *userdata, struct dirent *dir)
     }
 
     dir->d_fileno = rv; // TODO: This number should be in theory a unique number per file
-    strncpy(dir->d_name, iodir.name, __MAXNAMLEN);
-    dir->d_name[__MAXNAMLEN - 1] = 0;
+    strncpy(dir->d_name, iodir.name, sizeof(iodir.name));
+    dir->d_name[sizeof(iodir.name) - 1] = 0;
     dir->d_reclen = 0;
     switch (iodir.stat.mode & FIO_SO_IFMT) {
         case FIO_SO_IFLNK: dir->d_type = DT_LNK;     break;
@@ -428,7 +425,7 @@ int __fioGetstatHelper(const char *path, struct stat *buf)
 
     if (strncmp(path, "tty", 3) == 0 && path[3] >= '0' && path[3] <= '9' && path[4] == ':')
     {
-        memset(buf, 0, sizeof(struct stat));
+        memset(buf, 0, sizeof(*buf));
         buf->st_mode = S_IFCHR;
         return 0;
     }
