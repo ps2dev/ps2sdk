@@ -845,11 +845,11 @@ static int spduart_op_recv(void *userdata, void *ptr, int len)
 		size_t v10;
 
 		v7 = v9;
-		bcopy((char *)priv->recv_buf_struct.m_ptr + v8, ptr, v9);
+		memcpy(ptr, (char *)priv->recv_buf_struct.m_ptr + v8, v9);
 		v10 = m_cur_xfer_len - v9;
 		if ( v10 > 0 )
 		{
-			bcopy(priv->recv_buf_struct.m_ptr, (char *)ptr + v9, v10);
+			memcpy((char *)ptr + v9, priv->recv_buf_struct.m_ptr, v10);
 			v7 += v10;
 		}
 		CpuSuspendIntr(&state);
@@ -892,11 +892,11 @@ static int spduart_op_send(void *userdata, void *ptr, int len)
 		size_t v10;
 
 		v7 = v9;
-		bcopy(ptr, (char *)priv->send_buf_struct.m_ptr + v8, v9);
+		memcpy((char *)priv->send_buf_struct.m_ptr + v8, ptr, v9);
 		v10 = v4 - v9;
 		if ( v10 > 0 )
 		{
-			bcopy((char *)ptr + v9, priv->send_buf_struct.m_ptr, v10);
+			memcpy(priv->send_buf_struct.m_ptr, (char *)ptr + v9, v10);
 			v7 += v10;
 		}
 		CpuSuspendIntr(&state);
@@ -976,7 +976,7 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			{
 				return -512;
 			}
-			bcopy(priv->spduart_dial_, ptr, v13);
+			memcpy(ptr, priv->spduart_dial_, v13);
 			return 0;
 		}
 		case 0xC0010000:
