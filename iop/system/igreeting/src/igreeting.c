@@ -12,6 +12,7 @@
 
 #include <iop_mmio_hwport.h>
 #include <tamtypes.h>
+#include <mipscopaccess.h>
 
 struct RomImgData
 {
@@ -74,15 +75,6 @@ struct romflash_sigcheck_res
 	int m_device_id_res;
 };
 #endif
-
-#define _mfc0(reg)                                                                                                     \
-	({                                                                                                                   \
-		u32 val;                                                                                                           \
-		__asm__ __volatile__("mfc0 %0, " #reg : "=r"(val));                                                                    \
-		val;                                                                                                               \
-	})
-
-#define mfc0(reg) _mfc0(reg)
 
 #ifdef IGREETING_DTL_T
 static void do_get_dip_switch_values_chr(char *str, int val, int count);
@@ -243,7 +235,7 @@ int _start(int ac, char **av)
 	}
 	if ( !boot_mode_4 || !*(u16 *)boot_mode_4 )
 	{
-		cop0_processor_mode = mfc0($15);
+		cop0_processor_mode = get_mips_cop_reg(0, COP0_REG_PRId);
 #ifdef IGREETING_DTL_T
 		board_type_str = "";
 		boardtype_int = iop_mmio_hwport->exp2_r2[4612];

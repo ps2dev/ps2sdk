@@ -16,6 +16,7 @@
 #include <kernel.h>
 #include <timer.h>
 #include <string.h>
+#include <mipscopaccess.h>
 
 #define TIMER_MODE_START 0x00000001
 #define TIMER_MODE_HANDLER 0x00000002
@@ -956,8 +957,7 @@ u32 cpu_ticks(void)
 {
     u32 out;
 
-    __asm__ __volatile__("mfc0\t%0, $9\n"
-        : "=r"(out));
+    out = get_mips_cop_reg(0, COP0_REG_Count);
     return out;
 }
 #endif

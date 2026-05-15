@@ -14,14 +14,14 @@
  */
 
 #include "kernel.h"
+#include <mipscopaccess.h>
 
 #ifdef F_DIntr
 int DIntr()
 {
     int eie, res;
 
-    __asm__ __volatile__("mfc0\t%0, $12"
-                 : "=r"(eie));
+    eie = get_mips_cop_reg(0, COP0_REG_Status);
     eie &= 0x10000;
     res = eie != 0;
 
@@ -32,8 +32,7 @@ int DIntr()
     do {
         __asm__ __volatile__("di");
         EE_SYNCP();
-        __asm__ __volatile__("mfc0\t%0, $12"
-                     : "=r"(eie));
+        eie = get_mips_cop_reg(0, COP0_REG_Status);
         eie &= 0x10000;
     } while (eie);
 
@@ -46,8 +45,7 @@ int EIntr()
 {
     int eie;
 
-    __asm__ __volatile__("mfc0\t%0, $12"
-                 : "=r"(eie));
+    eie = get_mips_cop_reg(0, COP0_REG_Status);
     eie &= 0x10000;
     __asm__ __volatile__("ei");
 
@@ -60,8 +58,7 @@ int EnableIntc(int intc)
 {
     int eie, res;
 
-    __asm__ __volatile__("mfc0\t%0, $12"
-                 : "=r"(eie));
+    eie = get_mips_cop_reg(0, COP0_REG_Status);
     eie &= 0x10000;
 
     if (eie)
@@ -82,8 +79,7 @@ int DisableIntc(int intc)
 {
     int eie, res;
 
-    __asm__ __volatile__("mfc0\t%0, $12"
-                 : "=r"(eie));
+    eie = get_mips_cop_reg(0, COP0_REG_Status);
     eie &= 0x10000;
 
     if (eie)
@@ -104,8 +100,7 @@ int EnableDmac(int dmac)
 {
     int eie, res;
 
-    __asm__ __volatile__("mfc0\t%0, $12"
-                 : "=r"(eie));
+    eie = get_mips_cop_reg(0, COP0_REG_Status);
     eie &= 0x10000;
 
     if (eie)
@@ -126,8 +121,7 @@ int DisableDmac(int dmac)
 {
     int eie, res;
 
-    __asm__ __volatile__("mfc0\t%0, $12"
-                 : "=r"(eie));
+    eie = get_mips_cop_reg(0, COP0_REG_Status);
     eie &= 0x10000;
 
     if (eie)
@@ -148,8 +142,7 @@ int SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), v
 {
     int eie, res;
 
-    __asm__ __volatile__("mfc0\t%0, $12"
-                 : "=r"(eie));
+    eie = get_mips_cop_reg(0, COP0_REG_Status);
     eie &= 0x10000;
 
     if (eie)
@@ -170,8 +163,7 @@ int ReleaseAlarm(int alarm_id)
 {
     int eie, res;
 
-    __asm__ __volatile__("mfc0\t%0, $12"
-                 : "=r"(eie));
+    eie = get_mips_cop_reg(0, COP0_REG_Status);
     eie &= 0x10000;
 
     if (eie)
@@ -252,8 +244,7 @@ void SyncDCache(void *start, void *end)
 {
     int eie;
 
-    __asm__ __volatile__("mfc0\t%0, $12"
-                 : "=r"(eie));
+    eie = get_mips_cop_reg(0, COP0_REG_Status);
     eie &= 0x10000;
 
     if (eie)
@@ -278,8 +269,7 @@ void InvalidDCache(void *start, void *end)
 {
     int eie;
 
-    __asm__ __volatile__("mfc0\t%0, $12"
-                 : "=r"(eie));
+    eie = get_mips_cop_reg(0, COP0_REG_Status);
     eie &= 0x10000;
 
     if (eie)

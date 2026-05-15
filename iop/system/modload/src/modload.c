@@ -12,6 +12,7 @@
 #include <kerr.h>
 #include <modload.h>
 #include <xmodload.h>
+#include <mipscopaccess.h>
 
 #ifdef _IOP
 IRX_ID("Moldule_File_loader", 2, 9);
@@ -2035,7 +2036,7 @@ static void TerminateResidentEntriesDI(const char *command, unsigned int options
 
 	TerminateResidentLibraries(" ReBootStart:di: Terminate resident Libraries\n", options, 0);
 
-	__asm__ __volatile__("mfc0 %0, $15" : "=r"(prid) :);
+	prid = get_mips_cop_reg(0, COP0_REG_PRId);
 
 	if ( !(options & 1) )
 	{

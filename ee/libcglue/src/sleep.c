@@ -40,7 +40,7 @@ int nanosleep(const struct timespec *req, struct timespec *rem)
 	s32 timer_alarm_id;
 	ee_sema_t sema;
 
-	__asm__ __volatile__ ("mfc0\t%0, $12" : "=r" (eie));
+	eie = get_mips_cop_reg(0, COP0_REG_Status);
 	if ((eie & 0x10000) == 0)
 	{
 		errno = ENOSYS;  // Functionality not available

@@ -149,7 +149,7 @@ static int InitTLB32MB(void)
 
     kprintf("# TLB spad=0 kernel=1:%d default=%d:%d extended=%d:%d\n", TLBInfo.NumKernelTLBEntries - 1, TLBInfo.NumKernelTLBEntries, TLBInfo.NumKernelTLBEntries + TLBInfo.NumDefaultTLBEntries - 1, TLBInfo.NumKernelTLBEntries + TLBInfo.NumDefaultTLBEntries, TLBInfo.NumKernelTLBEntries + TLBInfo.NumDefaultTLBEntries + TLBInfo.NumExtendedTLBEntries - 1);
 
-    __asm__ __volatile__("mtc0 $zero, $6\n");
+    set_mips_cop_reg(0, COP0_REG_Wired, 0);
     EE_SYNCP();
 
     if (TLBInfo.NumKernelTLBEntries >= 0x31) {
@@ -171,8 +171,7 @@ static int InitTLB32MB(void)
     }
 
     TLBInfo.NumWiredEntries = NumTlbEntries = i;
-    __asm__ __volatile__("mtc0 %0, $6\n"
-                    ::"r"(NumTlbEntries));
+    set_mips_cop_reg(0, COP0_REG_Wired, NumTlbEntries);
     EE_SYNCP();
 
     if (TLBInfo.NumExtendedTLBEntries > 0) {
