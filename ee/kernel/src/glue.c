@@ -31,7 +31,7 @@ int DIntr()
     __asm__ (".p2align 3");
     do {
         __asm__ __volatile__("di");
-        __asm__ __volatile__("sync.p");
+        EE_SYNCP();
         __asm__ __volatile__("mfc0\t%0, $12"
                      : "=r"(eie));
         eie &= 0x10000;
