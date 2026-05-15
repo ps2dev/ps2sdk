@@ -103,6 +103,7 @@ u32 seekSector __attribute__((aligned(64)));
 u32 cdda_st_buf[64 / sizeof(u32)] ALIGNED(64);
 #endif
 
+extern int initVersionCdvdfsv;
 extern int bindNcmd;
 extern SifRpcClientData_t clientNCmd;
 extern int nCmdSemaId;
@@ -125,8 +126,7 @@ int sceCdNCmdDiskReady(void);
 
 /* N-Command Functions */
 
-#ifdef _XCDVD
-struct _cdvd_read_data
+struct _cdvd_read_data_1400
 {
     u32 size1;
     u32 size2;
@@ -135,8 +135,7 @@ struct _cdvd_read_data
     u8 src1[64];
     u8 src2[64];
 };
-#else
-struct _cdvd_read_data
+struct _cdvd_read_data_1300
 {
     u32 size1;
     u32 size2;
@@ -145,27 +144,42 @@ struct _cdvd_read_data
     u8 src1[16];
     u8 src2[16];
 };
-#endif
 
-void _CdAlignReadBuffer(void *data);
+extern void _CdAlignReadBuffer(void *data);
 /** this gets called when the sceCdRead function finishes
  * to copy the data read in to unaligned buffers
  */
 #ifdef F__CdAlignReadBuffer
 void _CdAlignReadBuffer(void *data)
 {
-    struct _cdvd_read_data *uncached = UNCACHED_SEG(data);
+    if (initVersionCdvdfsv > 0x104)
+    {
+        struct _cdvd_read_data_1400 *uncached = UNCACHED_SEG(data);
 
-    if (uncached->size1 && uncached->dest1) {
-        memcpy(uncached->dest1, &uncached->src1, uncached->size1);
+        if (uncached->size1 && uncached->dest1) {
+            memcpy(uncached->dest1, &uncached->src1, uncached->size1);
+        }
+
+        if (uncached->size2 && uncached->dest2) {
+            memcpy(uncached->dest2, &uncached->src2, uncached->size2);
+        }
     }
+    else
+    {
+        struct _cdvd_read_data_1300 *uncached = UNCACHED_SEG(data);
 
-    if (uncached->size2 && uncached->dest2) {
-        memcpy(uncached->dest2, &uncached->src2, uncached->size2);
+        if (uncached->size1 && uncached->dest1) {
+            memcpy(uncached->dest1, &uncached->src1, uncached->size1);
+        }
+
+        if (uncached->size2 && uncached->dest2) {
+            memcpy(uncached->dest2, &uncached->src2, uncached->size2);
+        }
     }
 
     _CdGenericCallbackFunction((void *)&CdCallbackNum);
 }
+
 #endif
 
 #ifdef F_sceCdRead
@@ -814,6 +828,42 @@ int _CdCheckNCmd(int cmd)
             break;
 
         nopdelay();
+    }
+    if (!initVersionCdvdfsv)
+    {
+        struct _cdvd_read_data_1400 tmpbuf;
+        int i;
+        int eq_count;
+        struct _cdvd_read_data_1400 *uncached;
+
+        uncached = UNCACHED_SEG(_rd_intr_data);
+        // Attempt to determine the size of the CDVD read unaligned buffer
+        readData[0] = 0;
+        readData[1] = 0;
+        readData[2] = (u32)NULL;
+        readData[3] = 0;
+        readData[4] = (u32)_rd_intr_data;
+
+        if (sceSifCallRpc(&clientNCmd, CD_NCMD_CDDAREAD, 0, readData, sizeof(readData), NULL, 0, 0, 0) < 0)
+            return 0;
+
+        // Nothing is read, so ensure that is the case
+        if (uncached->size1 || uncached->dest1 || uncached->size2 || uncached->dest2)
+            return 0;
+        tmpbuf = *uncached;
+        for (i = 0; i < sizeof(*uncached); i += 1)
+            ((u8 *)uncached)[i] ^= 0xFF;
+
+        if (sceSifCallRpc(&clientNCmd, CD_NCMD_CDDAREAD, 0, readData, sizeof(readData), NULL, 0, 0, 0) < 0)
+            return 0;
+        // Nothing is read, so ensure that is the case
+        if (uncached->size1 || uncached->dest1 || uncached->size2 || uncached->dest2)
+            return 0;
+
+        eq_count = 0;
+        for (i = 0; i < sizeof(*uncached); i += 1)
+            eq_count += (((u8 *)uncached)[i] == ((u8 *)&tmpbuf)[i]) ? 1 : 0;
+        initVersionCdvdfsv = (eq_count > sizeof(struct _cdvd_read_data_1300)) ? 0x200 : 0x104;
     }
 
     bindNCmd = 0;
