@@ -42,7 +42,7 @@ MEMORY {
 static void wipe_bramMem(void) {
 	int i;
 	for (i = 0x00084000; i < 0x100000; i += 64) {
-		asm volatile(
+		__asm__ __volatile__(
 			"\tsq $0, 0(%0) \n"
 			"\tsq $0, 16(%0) \n"
 			"\tsq $0, 32(%0) \n"

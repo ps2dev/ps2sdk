@@ -32,7 +32,7 @@ extern struct irx_export_table _exp_cdvdman;
 #define _mfc0(reg)                                                                                                     \
 	({                                                                                                                   \
 		u32 val;                                                                                                           \
-		__asm__ volatile("mfc0 %0, " #reg : "=r"(val));                                                                    \
+		__asm__ __volatile__("mfc0 %0, " #reg : "=r"(val));                                                                    \
 		val;                                                                                                               \
 	})
 

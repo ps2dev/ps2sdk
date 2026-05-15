@@ -168,7 +168,7 @@ int thread_leave(int ret1, int ret2, int intr_state, int release)
         thctx.current_thread->reason_counter = &thctx.current_thread->release_count;
     }
 
-    asm __volatile__("li $v0, 0x20\n"
+    __asm__ __volatile__("li $v0, 0x20\n"
                      "syscall\n"
                      : "=r"(result)
                      : "r"(a0), "r"(a1), "r"(a2)
@@ -651,7 +651,7 @@ int _start(int argc, char **argv)
     idle->saved_regs    = idle->stack_top + (((idle->stack_size << 2) >> 2) - RESERVED_REGCTX_SIZE);
     memset(idle->saved_regs, 0, RESERVED_REGCTX_SIZE);
 
-    asm __volatile__("sw $gp, %0\n"
+    __asm__ __volatile__("sw $gp, %0\n"
                      : "=m"(idle->gp)::);
 
     idle->saved_regs->unk = -2;
@@ -680,7 +680,7 @@ int _start(int argc, char **argv)
     current->attr          = TH_C;
     current->status        = THS_RUN;
 
-    asm __volatile__("sw $gp, %0\n"
+    __asm__ __volatile__("sw $gp, %0\n"
                      : "=m"(current->gp)::);
 
     list_insert(&thctx.thread_list, &current->thread_list);

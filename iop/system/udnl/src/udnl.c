@@ -376,7 +376,7 @@ static void TerminateResidentEntriesDI(unsigned int options)
 
     TerminateResidentLibraries(" kupdate:di: Terminate resident Libraries\n", options, 0);
 
-    asm volatile("mfc0 %0, $15"
+    __asm__ __volatile__("mfc0 %0, $15"
                  : "=r"(prid)
                  :);
 

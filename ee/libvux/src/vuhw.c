@@ -17,7 +17,7 @@ void Vu0IdMatrix(VU_MATRIX *m)
 
 void Vu0ResetMatrix(VU_MATRIX *m)
 {
-	asm __volatile__(
+	__asm__ __volatile__(
 #if __GNUC__ > 3
 	"vmr32.xyzw  $vf18, $vf0    \n"
 	"sqc2        $vf0, 0x30(%0)   \n"
@@ -61,7 +61,7 @@ void VuxRotMatrix(VU_MATRIX *m, VU_VECTOR *r)
 void Vu0TransMatrix(VU_MATRIX *m, VU_VECTOR *t)
 {
 
-	asm __volatile__ (
+	__asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2    $vf1,  0(%1)  \n"      // load 1 qword from 't' to vu's vf1
    "sqc2    $vf1, 48(%0)  \n"      // store vf1 data in 'm' with 48 bytes offset which is m[3][0]
@@ -93,7 +93,7 @@ void Vu0TransMatrixXYZ(VU_MATRIX *m,float x, float y, float z)
 void Vu0ScaleMatrix(VU_MATRIX *m, VU_VECTOR *s)
 {
 
-	asm __volatile__ (
+	__asm__ __volatile__ (
 #if __GNUC__ > 3
 	"lqc2    $vf1,   0(%1) \n"      // load 1 qword from 't' to vu's vf1
 	"lqc2    $vf10,  0(%0) \n"      // load m[0][0]
@@ -148,7 +148,7 @@ void Vu0ScaleMatrixXYZ(VU_MATRIX *m, float x, float y, float z)
 void Vu0MulMatrix(VU_MATRIX *m0, VU_MATRIX *m1, VU_MATRIX *out)
 {
 
-	asm __volatile__ (
+	__asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2   $vf1, 0x00(%0)  \n"
    "lqc2   $vf2, 0x10(%0)  \n"
@@ -227,7 +227,7 @@ void Vu0ApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 	out->w = m->m[0][3]*v0->x + m->m[1][3]*v0->y + m->m[2][3]*v0->z + m->m[3][3]*v0->w;
 	*/
 
-	asm __volatile__(
+	__asm__ __volatile__(
 #if __GNUC__ > 3
         "lqc2            $vf20,  0x00(%1)  \n"
         "lqc2            $vf16,  0x00(%0)  \n"
@@ -264,7 +264,7 @@ void Vu0ApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z;
 	*/
 
-	asm __volatile__(
+	__asm__ __volatile__(
 #if __GNUC__ > 3
         "lqc2            $vf20,  0x00(%1)  \n"
         "lqc2            $vf16,  0x00(%0)  \n"
@@ -294,7 +294,7 @@ void Vu0ApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 void Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
 {
 
-	asm __volatile__ (
+	__asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2   $vf1,   0(%1) \n"   // load 1 qword from ee
    "lqc2   $vf2,  16(%1) \n"   // load 1 qword from ee
@@ -327,7 +327,7 @@ float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 
 	/*	ret = (v0.x*v1.x + v0.y*v1.y + v0.z*v1.z);*/
 
-	asm __volatile__ (
+	__asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2 $vf1, 0(%1) \n"   // load 1 qword from ee
    "lqc2 $vf2, 0(%2) \n"   // load 1 qword from ee

@@ -74,7 +74,7 @@ int CreateThread(iop_thread_t *thparam)
     thread->option        = thparam->option;
     thread->status        = THS_DORMANT;
 
-    asm __volatile__("sw $gp, %0\n"
+    __asm__ __volatile__("sw $gp, %0\n"
                      : "=m"(thread->gp)::);
 
     list_insert(&thctx.thread_list, &thread->thread_list);

@@ -42,7 +42,7 @@ static struct sargs_start *args_start;
  */
 void __start(struct sargs_start *pargs)
 {
-    asm volatile(
+    __asm__ __volatile__(
         "# Clear bss area       \n"
         ".set noat              \n"
         "la   $2, _fbss         \n"

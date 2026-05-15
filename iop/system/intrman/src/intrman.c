@@ -27,7 +27,7 @@ IRX_ID("Interrupt_Manager", 1, 1);
 #define _mfc0(reg)                                                                                                     \
 	({                                                                                                                   \
 		u32 val;                                                                                                           \
-		__asm__ volatile("mfc0 %0, " #reg : "=r"(val));                                                                    \
+		__asm__ __volatile__("mfc0 %0, " #reg : "=r"(val));                                                                    \
 		val;                                                                                                               \
 	})
 

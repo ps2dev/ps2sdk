@@ -115,7 +115,7 @@ void dma_channel_fast_waits(int channel)
 void dma_wait_fast(void)
 {
 
-	asm volatile (
+	__asm__ __volatile__ (
 		"sync.l; sync.p;" \
 		"0:" \
 		"bc0t 0f; nop;" \

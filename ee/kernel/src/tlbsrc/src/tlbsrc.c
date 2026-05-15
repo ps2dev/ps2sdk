@@ -69,7 +69,7 @@ int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryL
         case 0x30:
         case 0x20:
         case 0x00:
-            __asm volatile("mtc0 %1, $5\n"
+            __asm__ __volatile__("mtc0 %1, $5\n"
                            "mtc0 %2, $10\n"
                            "mtc0 %3, $2\n"
                            "mtc0 %4, $3\n"
@@ -97,7 +97,7 @@ int SetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi,
     int result;
 
     if (index < 0x30) {
-        __asm volatile("mtc0 %0, $0\n"
+        __asm__ __volatile__("mtc0 %0, $0\n"
                        "mtc0 %1, $5\n"
                        "mtc0 %2, $10\n"
                        "mtc0 %3, $2\n"
@@ -120,7 +120,7 @@ int GetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryH
     int result;
 
     if (index < 0x30) {
-        __asm volatile("mtc0 %0, $0\n"
+        __asm__ __volatile__("mtc0 %0, $0\n"
                        "sync.p\n"
                        "tlbr\n"
                        "sync.p\n"
@@ -146,7 +146,7 @@ int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *En
 {
     int result, index;
 
-    __asm volatile("mtc0 %1, $10\n"
+    __asm__ __volatile__("mtc0 %1, $10\n"
                    "sync.p\n"
                    "tlbp\n"
                    "sync.p\n"
@@ -155,7 +155,7 @@ int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *En
                    : "r"(EntryHi));
 
     if (index >= 0) {
-        __asm volatile("tlbr\n"
+        __asm__ __volatile__("tlbr\n"
                        "sync.p\n"
                        "mfc0 $v0, $5\n"
                        "sw $v0, (%0)\n"
@@ -187,7 +187,7 @@ int ExpandScratchPad(unsigned int page)
                 if (page == 0) {
                     EntryHi = 0xE0010000 + ((index - 1) << 13);
 
-                    __asm volatile("mfc0 $v0, $6\n"
+                    __asm__ __volatile__("mfc0 $v0, $6\n"
                                    "addiu $v0, $v0, 0xFFFF\n"
                                    "mtc0 $v0, $6\n"
                                    "mtc0 %0, $0\n"
@@ -202,7 +202,7 @@ int ExpandScratchPad(unsigned int page)
                 } else
 #endif
                 {
-                    __asm volatile("mfc0 %0, $6\n"
+                    __asm__ __volatile__("mfc0 %0, $6\n"
                                    "addiu $v0, %0, 1\n"
                                    "mtc0 $v0, $6\n" ::"r"(index));
                 }
@@ -219,7 +219,7 @@ int ExpandScratchPad(unsigned int page)
                 EntryLo0 = ((page + 0x1000) & 0xFFFFF000) >> 6 | 0x1F;
                 EntryLo1 = (page & 0xFFFFF000) >> 6 | 0x1F;
 
-                __asm volatile("mtc0 %0, $0\n"
+                __asm__ __volatile__("mtc0 %0, $0\n"
                                "daddu $v1, $zero, $zero\n"
                                "mtc0 $v1, $5\n"
                                "mtc0 %1, $10\n"

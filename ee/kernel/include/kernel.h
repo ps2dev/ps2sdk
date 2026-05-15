@@ -25,12 +25,12 @@
 #define EI EIntr
 
 // Workaround for EE kernel bug: call this immediately before returning from any interrupt handler.
-#define ExitHandler() asm volatile("sync\nei\n")
+#define ExitHandler() __asm__ __volatile__("sync\nei\n")
 
 // note: 'sync' is the same as 'sync.l'
-#define EE_SYNC()  __asm__ volatile("sync")
-#define EE_SYNCL() __asm__ volatile("sync.l")
-#define EE_SYNCP() __asm__ volatile("sync.p")
+#define EE_SYNC()  __asm__ __volatile__("sync")
+#define EE_SYNCL() __asm__ __volatile__("sync.l")
+#define EE_SYNCP() __asm__ __volatile__("sync.p")
 
 #define UNCACHED_SEG(x) \
     ((void *)(((u32)(x)) | 0x20000000))
@@ -143,7 +143,7 @@ static inline void nopdelay(void)
     int i = 0xfffff;
 
     do {
-        __asm__("nop\nnop\nnop\nnop\nnop\n");
+        __asm__ __volatile__("nop\nnop\nnop\nnop\nnop\n");
     } while (i-- != -1);
 }
 
@@ -151,7 +151,7 @@ static inline int ee_get_opmode(void)
 {
     u32 status;
 
-    __asm__ volatile(
+    __asm__ __volatile__(
         ".set\tpush\n\t"
         ".set\tnoreorder\n\t"
         "mfc0\t%0, $12\n\t"
@@ -165,7 +165,7 @@ static inline int ee_set_opmode(u32 opmode)
 {
     u32 status, mask;
 
-    __asm__ volatile(
+    __asm__ __volatile__(
         ".set\tpush\n\t"
         ".set\tnoreorder\n\t"
         "mfc0\t%0, $12\n\t"
@@ -185,7 +185,7 @@ static inline int ee_kmode_enter()
 {
     u32 status, mask;
 
-    __asm__ volatile(
+    __asm__ __volatile__(
         ".set\tpush\n\t"
         ".set\tnoreorder\n\t"
         "mfc0\t%0, $12\n\t"
@@ -203,7 +203,7 @@ static inline int ee_kmode_exit()
 {
     int status;
 
-    __asm__ volatile(
+    __asm__ __volatile__(
         ".set\tpush\n\t"
         ".set\tnoreorder\n\t"
         "mfc0\t%0, $12\n\t"

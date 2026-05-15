@@ -2035,7 +2035,7 @@ static void TerminateResidentEntriesDI(const char *command, unsigned int options
 
 	TerminateResidentLibraries(" ReBootStart:di: Terminate resident Libraries\n", options, 0);
 
-	asm volatile("mfc0 %0, $15" : "=r"(prid) :);
+	__asm__ __volatile__("mfc0 %0, $15" : "=r"(prid) :);
 
 	if ( !(options & 1) )
 	{
