@@ -1184,7 +1184,7 @@ int _start(int argc, char *argv[])
 #ifdef UDNL_T300
     if (BootMode3 & 0x00000100) {
         if (GetFileStatFromImage(&ImageDataBuffer[0].stat, "OLDROM", &ROMStat) != 0 && GetIOPRPStat(ROMStat.data, (const void *)((const u8 *)(ROMStat.data) + 0x40000), &ImageDataBuffer[1].stat)) {
-            memcpy(&ImageDataBuffer[0].stat, &ImageDataBuffer[1].stat, sizeof(ImageDataBuffer[0].stat));
+            ImageDataBuffer[0].stat = ImageDataBuffer[1].stat;
             printf("  use alternate ROM image\n");
         }
     }

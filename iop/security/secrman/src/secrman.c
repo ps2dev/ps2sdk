@@ -357,7 +357,7 @@ static int func_00002eb0(struct ModloadBitTableDescriptor *ModloadBitTableDescri
         return -201;
     }
 
-    memcpy(&ModloadBitTableDescriptor->header, &BitTableData->header, sizeof(ModloadBitTableDescriptor->header));
+    ModloadBitTableDescriptor->header = BitTableData->header;
     ModloadBitTableDescriptor->blocks = BitTableData->blocks;
 
     return 0;

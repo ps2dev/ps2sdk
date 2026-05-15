@@ -344,7 +344,7 @@ int LoadROMImg(ROMIMG *ROMImg, const char *path)
 							ROMImg->files = (ROMImg->files == NULL) ? (struct FileEntry *)malloc(sizeof(struct FileEntry)) : (struct FileEntry *)realloc(ROMImg->files, ROMImg->NumFiles * sizeof(struct FileEntry));
 							file = &ROMImg->files[ROMImg->NumFiles - 1];
 
-							memcpy(&file->RomDir, RomDir, sizeof(struct RomDirEntry));
+							file->RomDir = *RomDir;
 							file->ExtInfoData = (unsigned char *)malloc(RomDir->ExtInfoEntrySize);
 							memcpy(file->ExtInfoData, (void *)((RMIMG_PTRCAST)ImageStat.image + RomDirFileFd.ExtInfoOffset + ExtInfoOffset), RomDir->ExtInfoEntrySize);
 							file->FileData = malloc(RomDir->size);
@@ -552,7 +552,7 @@ int DeleteFile(ROMIMG *ROMImg, const char *filename)
 				if (file->ExtInfoData != NULL)
 					free(file->ExtInfoData);
 				for (; i < ROMImg->NumFiles; i++)
-					memcpy(&ROMImg->files[i], &ROMImg->files[i + 1], sizeof(struct FileEntry));
+					ROMImg->files[i] = ROMImg->files[i + 1];
 				ROMImg->files = (struct FileEntry *)realloc(ROMImg->files, (--ROMImg->NumFiles) * sizeof(struct FileEntry));
 				result = 0;
 				break;

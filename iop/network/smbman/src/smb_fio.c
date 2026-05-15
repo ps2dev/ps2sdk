@@ -921,7 +921,7 @@ static int smb_LogOn(smbLogOn_in_t *logon)
 
     UID = r;
 
-    memcpy((void *)&glogon_info, (void *)logon, sizeof(smbLogOn_in_t));
+    glogon_info = *logon;
 
     keepalive_unlock();
 
@@ -1034,7 +1034,7 @@ static int smb_OpenShare(smbOpenShare_in_t *openshare)
 
     TID = r;
 
-    memcpy((void *)&gopenshare_info, (void *)openshare, sizeof(smbOpenShare_in_t));
+    gopenshare_info = *openshare;
 
     return 0;
 }

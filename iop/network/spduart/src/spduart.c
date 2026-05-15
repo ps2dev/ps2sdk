@@ -910,6 +910,8 @@ static int spduart_op_send(void *userdata, void *ptr, int len)
 	return v7;
 }
 
+typedef int int_unaligned_t __attribute__((aligned(1)));
+
 static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 {
 	int v22;
@@ -936,13 +938,13 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 	{
 		case 0xC0000000:
 		{
-			bcopy(&priv->spduart_thpri_, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_thpri_;
 			return 0;
 		}
 		case 0xC0000100:
 		{
 			v22 = 1;
-			bcopy(&v22, ptr, 4);
+			*(int_unaligned_t *)ptr = v22;
 			return 0;
 		}
 		case 0xC0000110:
@@ -979,32 +981,32 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 		}
 		case 0xC0010000:
 		{
-			bcopy(&priv->spduart_rx_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_rx_count;
 			return 0;
 		}
 		case 0xC0010001:
 		{
-			bcopy(&priv->spduart_tx_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_tx_count;
 			return 0;
 		}
 		case 0xC0010002:
 		{
-			bcopy(&priv->spduart_overrun_error_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_overrun_error_count;
 			return 0;
 		}
 		case 0xC0010003:
 		{
-			bcopy(&priv->spduart_parity_error_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_parity_error_count;
 			return 0;
 		}
 		case 0xC0010004:
 		{
-			bcopy(&priv->spduart_framing_error_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_framing_error_count;
 			return 0;
 		}
 		case 0xC0010005:
 		{
-			bcopy(&priv->spduart_buffer_overflow_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_buffer_overflow_count;
 			return 0;
 		}
 		case 0xC0020000:
@@ -1015,20 +1017,20 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 				v25 |= 0xC000000;
 			else
 				v25 |= 0x4000000;
-			bcopy((int *)&v25, ptr, 4);
+			*(int_unaligned_t *)ptr = v25;
 			return 0;
 		}
 		case 0xC0030000:
 		{
 			v26 = (16 * (priv->spduart_signal_pin & 3)) | ((u8)priv->spduart_msr_cached >> 4);
-			bcopy(&v26, ptr, 4);
+			*(int_unaligned_t *)ptr = v26;
 			return 0;
 		}
 		case 0xC1000000:
 		{
 			int v6;
 
-			bcopy(ptr, &priority, 4);
+			priority = *(int_unaligned_t *)ptr;
 			v6 = 0;
 			if ( priv->spduart_thread > 0 )
 			{
@@ -1048,7 +1050,7 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			int v17;
 			unsigned int v18;
 
-			bcopy(ptr, &v25, 4);
+			v25 = *(int_unaligned_t *)ptr;
 			v17 = spduart_set_baud(v25 & 0x3FFFFF);
 			if ( !v17 )
 			{
@@ -1073,7 +1075,7 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 		}
 		case 0xC1030000:
 		{
-			bcopy(ptr, &v26, 4);
+			v26 = *(int_unaligned_t *)ptr;
 			if ( (v26 & 0xFFFFFFCF) != 0 )
 			{
 				return -512;

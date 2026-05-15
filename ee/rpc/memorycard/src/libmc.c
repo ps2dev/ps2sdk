@@ -640,7 +640,7 @@ int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* in
 	g_nameParam.slot	= slot;
 	g_nameParam.flags	= flags;	// NOTE: this was ANDed with 7 so that u cant turn off copy protect! :)
 	g_nameParam.mcT		= &g_fileInfoBuff;
-	memcpy(&g_fileInfoBuff, info, sizeof(sceMcTblGetDir));
+	g_fileInfoBuff = *info;
 
 	strncpy(g_nameParam.name, name, 1023);
 	g_nameParam.name[1023] = 0;

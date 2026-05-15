@@ -423,7 +423,7 @@ static void sys_clock_subtract(
 
     diff.lo = pEnd->lo - pStart->lo;
     diff.hi = pEnd->hi - pStart->hi - (pStart->lo > pEnd->lo);
-    memcpy(pRet, &diff, sizeof(diff));
+    *pRet = diff;
 }
 
 static void do_rtlist_handle_priority(int is_flag_v_or_c, int int_value)

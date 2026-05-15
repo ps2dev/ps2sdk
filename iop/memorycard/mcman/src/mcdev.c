@@ -560,12 +560,12 @@ int mc_chstat(MC_IO_FIL_T *f, const char *filename, MC_IO_STA_T *stat, unsigned 
 
 		if (statmask & MC_IO_CST_CT) {
 			flags |= 0x001;
-			memcpy(&mctbl._Create, stat->ctime, sizeof(sceMcStDateTime));
+			mctbl._Create = *(sceMcStDateTime *)stat->ctime;
 		}
 
 		if (statmask & MC_IO_CST_MT) {
 			flags |= 0x002;
-			memcpy(&mctbl._Modify, stat->mtime, sizeof(sceMcStDateTime));
+			mctbl._Modify = *(sceMcStDateTime *)stat->mtime;
 		}
 
 		r = McSetFileInfo(mcman_mc_port, mcman_mc_slot, filename, &mctbl, flags);

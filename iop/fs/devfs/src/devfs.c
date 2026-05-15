@@ -213,7 +213,7 @@ devfs_device_t *devfs_create_device(const devfs_node_t *node)
    }
 
    memset(dev, 0, sizeof(devfs_device_t));
-   memcpy(&dev->node, node, sizeof(devfs_node_t));
+   dev->node = *node;
    if(dev->node.name != NULL)
    {
       dev->node.name = AllocSysMemory(ALLOC_FIRST, strlen(node->name) + 1, NULL);

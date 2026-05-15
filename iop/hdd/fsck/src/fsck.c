@@ -996,9 +996,9 @@ static int CheckSuperBlock(pfs_mount_t *pMainPFSMount)
     pMainPFSMount->sector_scale = pfsGetScale(super->zone_size, 512);
     pMainPFSMount->inode_scale  = pfsGetScale(super->zone_size, 1024);
 
-    memcpy(&pMainPFSMount->root_dir, &super->root, sizeof(pMainPFSMount->root_dir));
-    memcpy(&pMainPFSMount->log, &super->log, sizeof(pMainPFSMount->log));
-    memcpy(&pMainPFSMount->current_dir, &super->root, sizeof(pMainPFSMount->current_dir));
+    pMainPFSMount->root_dir = super->root;
+    pMainPFSMount->log = super->log;
+    pMainPFSMount->current_dir = super->root;
     pMainPFSMount->total_zones = 0;
 
     if (fsckVerbosityLevel) {
@@ -1196,7 +1196,7 @@ static int FsckIoctl2(iomanX_iop_file_t *fd, int cmd, void *arg, unsigned int ar
             }
             break;
         case FSCK_IOCTL2_CMD_GET_STATUS: // 0x000025a8
-            memcpy(buf, &fsckRuntimeData.status, sizeof(struct fsckStatus));
+            *(struct fsckStatus *)buf = fsckRuntimeData.status;
             result = 0;
             break;
         case FSCK_IOCTL2_CMD_STOP: // 0x0000262c

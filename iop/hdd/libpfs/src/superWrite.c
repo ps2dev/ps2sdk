@@ -241,9 +241,9 @@ int pfsMountSuperBlock(pfs_mount_t *pfsMount)
 	pfsMount->sector_scale = pfsGetScale(pfsMount->zsize, 512);
 	pfsMount->inode_scale = pfsGetScale(pfsMount->zsize, pfsMetaSize);
 	pfsMount->num_subs = superblock->num_subs;
-	memcpy(&pfsMount->root_dir, &superblock->root, sizeof(pfs_blockinfo_t));
-	memcpy(&pfsMount->log, &superblock->log, sizeof(pfs_blockinfo_t));
-	memcpy(&pfsMount->current_dir, &superblock->root, sizeof(pfs_blockinfo_t));
+	pfsMount->root_dir = superblock->root;
+	pfsMount->log = superblock->log;
+	pfsMount->current_dir = superblock->root;
 	pfsMount->total_zones = 0;
 
 	// Do a journal restore (in case of un-clean unmount)

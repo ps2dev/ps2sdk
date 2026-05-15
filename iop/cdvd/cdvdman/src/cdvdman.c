@@ -2744,8 +2744,8 @@ static int CdSearchFileInner(cdvdman_filetbl_entry_t *fp, const char *name, int 
 		if ( cdvdman_cmpname(g_cdvdman_filetbl[j].m_file_struct.name, name_buf) )
 		{
 			VERBOSE_PRINTF(2, "%s:\t found\n", name_buf);
-			// The following memcpy was inlined
-			memcpy(fp, &g_cdvdman_filetbl[j], sizeof(cdvdman_filetbl_entry_t));
+			// The following structure copy was inlined
+			*(cdvdman_filetbl_entry_t *)fp = g_cdvdman_filetbl[j];
 			fp->m_file_struct.lsn += layer ? g_cdvdman_fs_base2 : 0;
 			return 1;
 		}
@@ -2783,8 +2783,8 @@ static int sceCdReadDir(sceCdlFILE *fp, int dsec, int index, int layer)
 	if ( g_cdvdman_filetbl[index].m_file_struct.name[0] )
 	{
 		VERBOSE_PRINTF(1, "%s:\t found dir_point %d\n", g_cdvdman_filetbl[index].m_file_struct.name, index);
-		// The following memcpy was inlined
-		memcpy(fp, &g_cdvdman_filetbl[index], sizeof(cdvdman_filetbl_entry_t));
+		// The following structure copy was inlined
+		*(cdvdman_filetbl_entry_t *)fp = g_cdvdman_filetbl[index];
 		return 1;
 	}
 	return 0;
@@ -7952,12 +7952,12 @@ int sceCdReadClock(sceCdCLOCK *clock)
 	clock->month &= 0x7F;
 	if ( retval && !clock->stat )
 	{
-		memcpy(&g_cdvdman_clock, clock, sizeof(g_cdvdman_clock));
+		g_cdvdman_clock = *clock;
 		g_cdvdman_clk_flg = 1;
 	}
 	else if ( g_cdvdman_clk_flg )
 	{
-		memcpy(clock, &g_cdvdman_clock, sizeof(g_cdvdman_clock));
+		*clock = g_cdvdman_clock;
 	}
 	else
 	{

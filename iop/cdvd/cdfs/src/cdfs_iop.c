@@ -389,7 +389,7 @@ static int cdfs_getVolumeDescriptor(void) {
         if (memcmp(localVolDesc.volID, "CD001", 5) == 0) {
             if ((localVolDesc.filesystemType == 1) ||
                 (localVolDesc.filesystemType == 2)) {
-                memcpy(&cdVolDesc, &localVolDesc, sizeof(struct CDVolDesc));
+                cdVolDesc = localVolDesc;
             }
         } else
             break;
