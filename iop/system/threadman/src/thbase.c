@@ -7,6 +7,7 @@
 #include "thsemap.h"
 #include "xthbase.h"
 #include "xtimrman.h"
+#include <defs.h>
 
 #include "thcommon.h"
 
@@ -73,9 +74,7 @@ int CreateThread(iop_thread_t *thparam)
     thread->attr          = thparam->attr;
     thread->option        = thparam->option;
     thread->status        = THS_DORMANT;
-
-    __asm__ __volatile__("sw $gp, %0\n"
-                     : "=m"(thread->gp)::);
+    thread->gp            = GetGP();
 
     list_insert(&thctx.thread_list, &thread->thread_list);
 
