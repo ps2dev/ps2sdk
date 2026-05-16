@@ -1,0 +1,13 @@
+<map id="ee/libgs/include/libgs.h" name="ee/libgs/include/libgs.h">
+<area shape="rect" id="node1" title=" " alt="" coords="801,5,971,32"/>
+<area shape="rect" id="node2" href="$ee_2libgs_2src_2dma_8c_source.html" title=" " alt="" coords="5,80,145,107"/>
+<area shape="rect" id="node3" href="$_double_buff_8c_source.html" title=" " alt="" coords="169,80,352,107"/>
+<area shape="rect" id="node4" href="$libgs_2src_2draw_8c_source.html" title=" " alt="" coords="376,80,519,107"/>
+<area shape="rect" id="node5" href="$libgs_8c_source.html" title=" " alt="" coords="543,80,685,107"/>
+<area shape="rect" id="node6" href="$lowlevel_8c_source.html" title=" " alt="" coords="709,80,876,107"/>
+<area shape="rect" id="node7" href="$packets_8c_source.html" title=" " alt="" coords="900,80,1061,107"/>
+<area shape="rect" id="node8" href="$primitives_8c_source.html" title=" " alt="" coords="1085,80,1263,107"/>
+<area shape="rect" id="node9" href="$sync_8c_source.html" title=" " alt="" coords="1287,80,1429,107"/>
+<area shape="rect" id="node10" href="$texture_8c_source.html" title=" " alt="" coords="1453,80,1612,107"/>
+<area shape="rect" id="node11" href="$_zbuffer_8c_source.html" title=" " alt="" coords="1637,80,1794,107"/>
+</map>

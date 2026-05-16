@@ -1,0 +1,48 @@
+var scr__printf_8c =
+[
+    [ "t_setupscr", "scr__printf_8c.html#structt__setupscr", [
+      [ "dd0", "scr__printf_8c.html#a958069a97c1b895534bc05d38c593723", null ],
+      [ "dw0", "scr__printf_8c.html#a5529db16484c14f954d594c368818d6e", null ],
+      [ "dd1", "scr__printf_8c.html#a86033955f4ac93c24e78818047bd7a96", null ],
+      [ "dh", "scr__printf_8c.html#a97b4f7ed5e2642119949d55a7c479f25", null ],
+      [ "dd2", "scr__printf_8c.html#ab3f79585503ffef949830ea4b4737855", null ]
+    ] ],
+    [ "t_setupchar", "scr__printf_8c.html#structt__setupchar", [
+      [ "dd0", "scr__printf_8c.html#a4f4e2b03e644af5c92f3ce46cce283be", null ],
+      [ "dw0", "scr__printf_8c.html#a569983099b5a406c8458d9694d18c017", null ],
+      [ "x", "scr__printf_8c.html#ac8ae417e30dec94287cc37264f36a554", null ],
+      [ "y", "scr__printf_8c.html#a5112b8b1367d2eb59897192f9668a9f0", null ],
+      [ "dd1", "scr__printf_8c.html#a1f4eaaec8693112d776187267dfc5d56", null ],
+      [ "dw1", "scr__printf_8c.html#af2667e4c73fae1691000467488bb90c4", null ],
+      [ "dd2", "scr__printf_8c.html#aa1a4aa7277e7e7f663d9c14f7d243af8", null ]
+    ] ],
+    [ "debug_detect_signal", "scr__printf_8c.html#adce4af04d171b5c316a30d57975d4c08", null ],
+    [ "Init_GS", "scr__printf_8c.html#a2e1e5fafdcade8719854cdf0d2cc193d", null ],
+    [ "SetVideoMode", "scr__printf_8c.html#a921e672b9268fb7548b149bdc3d173bd", null ],
+    [ "Dma02Wait", "scr__printf_8c.html#ae257fb2cef67a9c58d13f7af68a478cf", null ],
+    [ "DmaReset", "scr__printf_8c.html#ae19437030e58696ec3d18ec1ee05d787", null ],
+    [ "progdma", "scr__printf_8c.html#aa6d5ee0ca73c121598045b77971968ec", null ],
+    [ "scr_setbgcolor", "scr__printf_8c.html#aaa7c1e4e47ad54b0bd5c97f1d6e57de5", null ],
+    [ "scr_setfontcolor", "scr__printf_8c.html#acaf40a4bb811cb3265f31650aaf37f68", null ],
+    [ "scr_setcursorcolor", "scr__printf_8c.html#a77e13a06a0cd8fe72b1d7ac29f09b9c2", null ],
+    [ "init_scr", "scr__printf_8c.html#a40a3b739851b172d3b73066687bf6422", null ],
+    [ "scr_putchar", "scr__printf_8c.html#ad107569374b350be017113786686966a", null ],
+    [ "scr_clearchar", "scr__printf_8c.html#ab9d261edf64b49ffab82a9ed52b890ee", null ],
+    [ "scr_clearline", "scr__printf_8c.html#a57cdc644c2f27769caa153622bbb84a0", null ],
+    [ "scr_printf", "scr__printf_8c.html#abd37cd417d896ae149b1b38fbd7543af", null ],
+    [ "scr_vprintf", "scr__printf_8c.html#a738e95ee06062ae60c963f8339437362", null ],
+    [ "scr_setXY", "scr__printf_8c.html#a6f58365b391e19111b66566423c2b8bc", null ],
+    [ "scr_getX", "scr__printf_8c.html#a527b036024c17ab908f30fab1cb0d018", null ],
+    [ "scr_getY", "scr__printf_8c.html#aa0944710d21989ad2d18953f5dcb2cec", null ],
+    [ "scr_clear", "scr__printf_8c.html#acc68657f973d40f09f46c931db55a350", null ],
+    [ "scr_setCursor", "scr__printf_8c.html#a7a36e649c60f2ebad64c6ecd509ca9f3", null ],
+    [ "X", "scr__printf_8c.html#a53aa967ed94949b83f8c440378aabfc2", null ],
+    [ "Y", "scr__printf_8c.html#a7f06464c4142dfb5b1a52561fe08d23f", null ],
+    [ "MX", "scr__printf_8c.html#ad5d44d915ce47ec485d1e60c737db0af", null ],
+    [ "MY", "scr__printf_8c.html#a7e098c2d6ea1365ef72b3cd6b9f469ef", null ],
+    [ "bgcolor", "scr__printf_8c.html#af049fa9ef673d32b6b65d6ba1ae12e87", null ],
+    [ "fontcolor", "scr__printf_8c.html#ab899490ba1406b5b69f3c9abc0219078", null ],
+    [ "cursorcolor", "scr__printf_8c.html#ac7dba8ee5600eabc2204fdc0e0ce5c4b", null ],
+    [ "cursor", "scr__printf_8c.html#a92cb272af3c5ba595e428362816e1c37", null ],
+    [ "msx", "scr__printf_8c.html#afd6d8db70c0aefa39fc4dea1108e309b", null ]
+];

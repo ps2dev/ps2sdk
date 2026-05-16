@@ -1,0 +1,28 @@
+<map id="iop/system/sifcmd/src" name="iop/system/sifcmd/src">
+<area shape="rect" id="node1" href="dir_457a51f410f9bf085893b4d5cb4aa8ef.html" title="src" alt="" coords="148,52,220,100"/>
+<area shape="rect" id="node2" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="136,436,208,484"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000261_000525.html" title="1" alt="" coords="121,413,130,428"/>
+<area shape="rect" id="node3" href="dir_1d64e5e9f20206636d72b5bbe3d2b274.html" title="loadcore" alt="" coords="172,340,250,388"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000261_000240.html" title="1" alt="" coords="211,314,220,328"/>
+<area shape="rect" id="node4" href="dir_d3b40e87d731c1e886b7a70e6daaf700.html" title="threadman" alt="" coords="247,148,340,196"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000261_000276.html" title="2" alt="" coords="254,122,263,137"/>
+<area shape="rect" id="node5" href="dir_a0d37aaf829787e8da99f7ff6597b371.html" title="sifman" alt="" coords="38,148,110,196"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000261_000264.html" title="1" alt="" coords="115,135,125,150"/>
+<area shape="rect" id="node6" href="dir_7422a0894415a12ccd1d562a8ad09f2d.html" title="intrman" alt="" coords="98,244,172,292"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000261_000232.html" title="1" alt="" coords="149,221,158,236"/>
+<area shape="rect" id="node7" href="dir_952a988346c879bc3b2834e2377036db.html" title="stdio" alt="" coords="348,244,420,292"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000261_000272.html" title="1" alt="" coords="386,218,395,232"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000240_000525.html" title="4" alt="" coords="192,415,201,430"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000276_000525.html" title="16" alt="" coords="219,429,237,443"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000276_000240.html" title="3" alt="" coords="231,319,241,334"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000276_000232.html" title="8" alt="" coords="187,236,196,250"/>
+<area shape="rect" id="edge11-headlabel" href="dir_000276_000272.html" title="2" alt="" coords="351,218,360,232"/>
+<area shape="rect" id="edge12-headlabel" href="dir_000264_000525.html" title="2" alt="" coords="142,409,151,424"/>
+<area shape="rect" id="edge13-headlabel" href="dir_000264_000240.html" title="1" alt="" coords="153,329,162,344"/>
+<area shape="rect" id="edge14-headlabel" href="dir_000264_000232.html" title="1" alt="" coords="112,217,122,231"/>
+<area shape="rect" id="edge15-headlabel" href="dir_000232_000525.html" title="3" alt="" coords="168,409,177,424"/>
+<area shape="rect" id="edge16-headlabel" href="dir_000232_000240.html" title="1" alt="" coords="183,313,192,328"/>
+<area shape="rect" id="edge17-headlabel" href="dir_000272_000525.html" title="2" alt="" coords="223,446,233,461"/>
+<area shape="rect" id="edge18-headlabel" href="dir_000272_000240.html" title="1" alt="" coords="266,333,275,347"/>
+<area shape="rect" id="clust1" href="dir_9b72dc07a1836a88bbfd185895c8f3de.html" title="sifcmd" alt="" coords="138,16,231,111"/>
+</map>

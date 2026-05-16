@@ -1,0 +1,76 @@
+var ncmd_8c =
+[
+    [ "nCmdSendParams_t", "ncmd_8c.html#unionn_cmd_send_params__t", [
+      [ "ncmd", "ncmd_8c.html#a594d7e1b19672c6aabd87e3e1c8c6c5a", null ],
+      [ "readKey", "ncmd_8c.html#af734074bea83fa6a1f36cfc88d5e4541", null ],
+      [ "data", "ncmd_8c.html#a28b9698cd5c9c3194d14f6b5d355f774", null ]
+    ] ],
+    [ "_cdvd_read_data_1400", "ncmd_8c.html#struct__cdvd__read__data__1400", [
+      [ "size1", "ncmd_8c.html#a298d3252dd368a79fb57dc5428b344e6", null ],
+      [ "size2", "ncmd_8c.html#a52b16bd13c0448184ebde0c7373766cc", null ],
+      [ "dest1", "ncmd_8c.html#a468b6646ee1ad526921812075017d23a", null ],
+      [ "dest2", "ncmd_8c.html#a0ed25745b31224c750646b052322470c", null ],
+      [ "src1", "ncmd_8c.html#a4bad66cff2f3a450821b948f88a952f9", null ],
+      [ "src2", "ncmd_8c.html#ae120e8a90c0df1e8b9ca8fa02d4af7e8", null ]
+    ] ],
+    [ "_cdvd_read_data_1300", "ncmd_8c.html#struct__cdvd__read__data__1300", [
+      [ "size1", "ncmd_8c.html#a9183689164aea03d66cfdabea277aa4e", null ],
+      [ "size2", "ncmd_8c.html#acffb4c422e4d56647080518a5b93084f", null ],
+      [ "dest1", "ncmd_8c.html#aae302ebfe4fab2f915abb319bf8cf4fc", null ],
+      [ "dest2", "ncmd_8c.html#a0330cfcb10783a2fd869ad994bdd29d9", null ],
+      [ "src1", "ncmd_8c.html#a186a2119cc6e3e4f401b60a4995e5c4d", null ],
+      [ "src2", "ncmd_8c.html#adcb5e3f62ebbe72af6a36a58c0bd2b12", null ]
+    ] ],
+    [ "CD_SERVER_NCMD", "ncmd_8c.html#a38a4a0cba9a4104a598bdf8178052413", null ],
+    [ "CdvdStCmd_t", "ncmd_8c.html#a64674d8db70979e561dc15f8088efc12", [
+      [ "CDVD_ST_CMD_START", "ncmd_8c.html#a64674d8db70979e561dc15f8088efc12a5e40785c5b3b815d20d33149d00ab612", null ],
+      [ "CDVD_ST_CMD_READ", "ncmd_8c.html#a64674d8db70979e561dc15f8088efc12a6f17710f0e3d673049d2ee5d8ef90fea", null ],
+      [ "CDVD_ST_CMD_STOP", "ncmd_8c.html#a64674d8db70979e561dc15f8088efc12a8c895b19758e409bf45d315c224a1284", null ],
+      [ "CDVD_ST_CMD_SEEK", "ncmd_8c.html#a64674d8db70979e561dc15f8088efc12a76ba714a53b73077085e9ce15ca93d01", null ],
+      [ "CDVD_ST_CMD_INIT", "ncmd_8c.html#a64674d8db70979e561dc15f8088efc12a9ea07105e3de26a12e8347ede1e6c2b2", null ],
+      [ "CDVD_ST_CMD_STAT", "ncmd_8c.html#a64674d8db70979e561dc15f8088efc12a4b13394a534593d598232aa1fd137406", null ],
+      [ "CDVD_ST_CMD_PAUSE", "ncmd_8c.html#a64674d8db70979e561dc15f8088efc12ab579ff728d27fc470928fa6001116910", null ],
+      [ "CDVD_ST_CMD_RESUME", "ncmd_8c.html#a64674d8db70979e561dc15f8088efc12aae0a20acac8f56b85812e6fd495062fe", null ],
+      [ "CDVD_ST_CMD_SEEKF", "ncmd_8c.html#a64674d8db70979e561dc15f8088efc12a5c01dd2c161bac71d1e524d105d57a25", null ]
+    ] ],
+    [ "CD_NCMD_CMDS", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535", [
+      [ "CD_NCMD_READ", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535af221bf4d6b2c0c5a45ba7bdd9d418423", null ],
+      [ "CD_NCMD_CDDAREAD", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a9284817bee87564241b94137aca02109", null ],
+      [ "CD_NCMD_DVDREAD", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a079bd841f673c7fb38a2a3b984654752", null ],
+      [ "CD_NCMD_GETTOC", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a1f36ccacea7ac2991f9f17d870c6c542", null ],
+      [ "CD_NCMD_SEEK", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a24dd139bc842f4804c71454ad1f9f70b", null ],
+      [ "CD_NCMD_STANDBY", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a50378098a7c227624f3517e3854222e7", null ],
+      [ "CD_NCMD_STOP", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a7e03d2f0e821d356eec2bb1bf07a3ba7", null ],
+      [ "CD_NCMD_PAUSE", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a5ff5eb77bd7d00b75069e492d6b6c0c7", null ],
+      [ "CD_NCMD_STREAM", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535ae61d4b250b3a4243744a081c4dd73be4", null ],
+      [ "CD_NCMD_CDDASTREAM", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a96921b1d6598d19f6809e53d893c3bb4", null ],
+      [ "CD_NCMD_READ_KEY", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a60eb0a9c01726060ca0586f3ef678675", null ],
+      [ "CD_NCMD_NCMD", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535afa8625a6da61f04b38dfa9f0d0fd4b46", null ],
+      [ "CD_NCMD_READIOPMEM", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a63a384d9559a9e65477ab1ef661c5dbf", null ],
+      [ "CD_NCMD_DISKREADY", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535ac15fbff1db2d6ff675e0b8e7f355aecb", null ],
+      [ "CD_NCMD_READCHAIN", "ncmd_8c.html#ae46b0cd6e4abfced3319883bc3c56535a773e2d829f47f64256781b806c3d66e8", null ]
+    ] ],
+    [ "sceCdStream", "ncmd_8c.html#afb3132c77e61377688caddc45dbce308", null ],
+    [ "sceCdCddaStream", "ncmd_8c.html#afbdc8131e17f3bbaafc389470471a72f", null ],
+    [ "_CdCheckNCmd", "ncmd_8c.html#a82d95a6ce8281d4700dd277da8d4a72b", null ],
+    [ "sceCdNCmdDiskReady", "ncmd_8c.html#ab0b7d5db14747703f5ad62c6a21cfa54", null ],
+    [ "_CdAlignReadBuffer", "ncmd_8c.html#aac6f663a695a747296bbabb7ab9daf84", null ],
+    [ "initVersionCdvdfsv", "ncmd_8c.html#a0815e454ba0bb8afe8dd7efd1ef356c8", null ],
+    [ "bindNcmd", "ncmd_8c.html#a612fee0314ce460fab10fbc5b7bc3169", null ],
+    [ "clientNCmd", "ncmd_8c.html#ab5e070f2f6b8e6e70b395ec1cb252007", null ],
+    [ "nCmdSemaId", "ncmd_8c.html#ab3f5a3b48bed586e1ef19399b9f3af51", null ],
+    [ "nCmdNum", "ncmd_8c.html#ab199e54797d118b15f28dfc349267cbe", null ],
+    [ "readStreamData", "ncmd_8c.html#a0814e4cb259cffe89b11537c1c0ed7f2", null ],
+    [ "readData", "ncmd_8c.html#ab8b70969310d21107e40f406a76715f1", null ],
+    [ "readChainData", "ncmd_8c.html#a50f40126a1c3a2ad4da14767868edebf", null ],
+    [ "getTocSendBuff", "ncmd_8c.html#a924f5b2f995de193c988b3cb3712c654", null ],
+    [ "_rd_intr_data", "ncmd_8c.html#a46cf8abeb7ba11c0250feccec215dc60", null ],
+    [ "curReadPos", "ncmd_8c.html#a6262f7e91ebd5d5711b78ac5570ff943", null ],
+    [ "tocBuff", "ncmd_8c.html#a5e3567f17a271d3463efaccad45e1adb", null ],
+    [ "nCmdRecvBuff", "ncmd_8c.html#acfef97bb2aea9f2048c7a0ecccd1cf46", null ],
+    [ "nCmdSendBuff", "ncmd_8c.html#adadc57e8bd8c8b3f3ba7945d7c59b042", null ],
+    [ "streamStatus", "ncmd_8c.html#a4925ed5a34238223e36f97b49b475c50", null ],
+    [ "dummyMode", "ncmd_8c.html#a1451832faf321bc96624662888cefd3a", null ],
+    [ "seekSector", "ncmd_8c.html#a6c333ca1468d3fec6dc4c2c826d5b878", null ],
+    [ "cdda_st_buf", "ncmd_8c.html#a5432bbdf572a1b0733cfeb81b1b11c56", null ]
+];

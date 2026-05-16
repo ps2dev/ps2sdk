@@ -1,0 +1,10 @@
+<map id="iop/system/padman/src/freepad.h" name="iop/system/padman/src/freepad.h">
+<area shape="rect" id="node1" title=" " alt="" coords="601,5,776,47"/>
+<area shape="rect" id="node2" href="$freepad_8c.html" title=" " alt="" coords="5,95,180,136"/>
+<area shape="rect" id="node3" href="$pad_cmds_8c.html" title=" " alt="" coords="204,95,379,136"/>
+<area shape="rect" id="node4" href="$pad_data_8c.html" title=" " alt="" coords="403,95,577,136"/>
+<area shape="rect" id="node5" href="$pad_init_8c.html" title=" " alt="" coords="601,95,776,136"/>
+<area shape="rect" id="node6" href="$pad_misc_funcs_8c.html" title=" " alt="" coords="800,95,975,136"/>
+<area shape="rect" id="node7" href="$pad_port_open_8c.html" title=" " alt="" coords="999,95,1173,136"/>
+<area shape="rect" id="node8" href="$rpcserver_8c.html" title=" " alt="" coords="1197,95,1372,136"/>
+</map>

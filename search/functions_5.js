@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['fd_5fclose_6016',['fd_close',['../group__fakehost.html#ga6c09627051cd9b619a5c189f7f1fa245',1,'fakehost.c']]],
+  ['fd_5flseek_6017',['fd_lseek',['../group__fakehost.html#gadee47e28292e763a79c35cc0dfd57735',1,'fakehost.c']]],
+  ['fd_5fname_6018',['fd_name',['../group__fakehost.html#gad5d353ba444c51c8ded34a4703257e22',1,'fakehost.c']]],
+  ['fd_5fopen_6019',['fd_open',['../group__fakehost.html#ga35bb267e9f565905cf60bab62eb62901',1,'fakehost.c']]],
+  ['fd_5fread_6020',['fd_read',['../group__fakehost.html#gab5cad58e82d308ecfe32f3bbe7a9b7b0',1,'fakehost.c']]],
+  ['fd_5fsave_6021',['fd_save',['../group__fakehost.html#ga39de8b12b1bf797dd636728eeb6f57f4',1,'fakehost.c']]],
+  ['fd_5fwrite_6022',['fd_write',['../group__fakehost.html#gaea0f60624ba02b56ef0a31141842f66a',1,'fakehost.c']]],
+  ['fdh_5ffreefd_6023',['fdh_freefd',['../group__ps2netfs.html#gae1e1ea005506d234e880a1823459a801',1,'ps2_fio.c']]],
+  ['fdh_5fgetfd_6024',['fdh_getfd',['../group__ps2netfs.html#ga7c731259358e34d250aa5e93c40140e1',1,'ps2_fio.c']]],
+  ['fdh_5fsetup_6025',['fdh_setup',['../group__ps2netfs.html#ga911c3385d1c12cb8ba92e6b8925945c4',1,'ps2_fio.c']]],
+  ['find_5fupsampler_6026',['find_upsampler',['../upsamplers_8c.html#a080f1c6b8e59ac4baf325245d6607ee7',1,'find_upsampler(int freq, int bits, int channels):&#160;upsamplers.c'],['../upsamplers_8h.html#a080f1c6b8e59ac4baf325245d6607ee7',1,'find_upsampler(int freq, int bits, int channels):&#160;upsamplers.c']]],
+  ['fontstudio_5finit_6027',['fontstudio_init',['../font_8h.html#a950d0c01a84f7e90d067f6fe5e20a209',1,'fsfont.c']]],
+  ['fontstudio_5fload_5fini_6028',['fontstudio_load_ini',['../font_8h.html#ae0e177152366c1e55d604fb38d23cdd7',1,'fsfont.c']]],
+  ['fontstudio_5fparse_5fini_6029',['fontstudio_parse_ini',['../font_8h.html#a0724540f2153a6c178e7f5e47f76d99f',1,'fsfont.c']]],
+  ['fontstudio_5fprint_5fstring_6030',['fontstudio_print_string',['../font_8h.html#a4779966fddb61568fedc4e1fd8518bdd',1,'fsfont.c']]],
+  ['fontstudio_5funload_5fini_6031',['fontstudio_unload_ini',['../font_8h.html#a666df8b0da32cf11395c3a51ae726947',1,'fsfont.c']]],
+  ['fontx_5fload_6032',['fontx_load',['../font_8h.html#a3fe8f33adb6bef3ae4964365fb708135',1,'fontx.c']]],
+  ['fontx_5fprint_5fascii_6033',['fontx_print_ascii',['../font_8h.html#aa2856f492ad615992bdfcf7b94f13a56',1,'fontx.c']]],
+  ['fontx_5fprint_5fsjis_6034',['fontx_print_sjis',['../font_8h.html#a1b7569e76304884da82e6e25fb7813e0',1,'fontx.c']]],
+  ['fontx_5funload_6035',['fontx_unload',['../font_8h.html#a11a458a0704a121917bec0b532d3c135',1,'fontx.c']]],
+  ['free_5fall_5fsamples_6036',['free_all_samples',['../iop_2sound_2audsrv_2src_2adpcm_8c.html#a8cc017a23f399e323f5dff12ed00a325',1,'adpcm.c']]],
+  ['free_5fsample_6037',['free_sample',['../iop_2sound_2audsrv_2include_2audsrv_8h.html#af24e242e40bfc2d34d88e7c4106883f6',1,'free_sample(u32 id):&#160;adpcm.c'],['../iop_2sound_2audsrv_2src_2adpcm_8c.html#af24e242e40bfc2d34d88e7c4106883f6',1,'free_sample(u32 id):&#160;adpcm.c']]]
+];
