@@ -20,24 +20,12 @@
 #include <hdd-ioctl.h>
 #include <iop_mmio_hwport.h>
 #include <kerr.h>
+#include <mipscopaccess.h>
 
 IRX_ID("cdvd_driver", 2, 38);
 // Based on the module from SCE SDK 3.1.0.
 
 extern struct irx_export_table _exp_cdvdman;
-
-#ifdef CDVD_VARIANT_OSD
-#define PRID $15
-
-#define _mfc0(reg)                                                                                                     \
-	({                                                                                                                   \
-		u32 val;                                                                                                           \
-		__asm__ volatile("mfc0 %0, " #reg : "=r"(val));                                                                    \
-		val;                                                                                                               \
-	})
-
-#define mfc0(reg) _mfc0(reg)
-#endif
 
 typedef struct cdvdman_dirtbl_entry_
 {
@@ -1732,9 +1720,9 @@ static int cdrom_ioctl(iop_file_t *f, int arg, void *param)
 	{
 #ifdef CDVD_VARIANT_OSD
 		case 0x6310:
-			return mfc0(PRID);
+			return get_mips_cop_reg(0, COP0_REG_PRId);
 		case 0x6311:
-			if ( mfc0(PRID) < 35 )
+			if ( get_mips_cop_reg(0, COP0_REG_PRId) < 35 )
 			{
 				return -22;
 			}
@@ -1748,7 +1736,7 @@ static int cdrom_ioctl(iop_file_t *f, int arg, void *param)
 			}
 			return 0;
 		case 0x6312:
-			return mfc0(PRID) >= 35 ? (int)(/* 0xBF808284 */ *(u32 *)&iop_mmio_hwport->sio2.unused[0] & 1) : -22;
+			return get_mips_cop_reg(0, COP0_REG_PRId) >= 35 ? (int)(/* 0xBF808284 */ *(u32 *)&iop_mmio_hwport->sio2.unused[0] & 1) : -22;
 #endif
 		case 0x10000:
 			g_cdvdman_spinnom = -1;
@@ -7863,7 +7851,7 @@ int sceCdRcBypassCtl(int mode, u32 *status)
 	char wdata[1];
 	USE_IOP_MMIO_HWPORT();
 
-	if ( mfc0(PRID) >= 0x23 )
+	if ( get_mips_cop_reg(0, COP0_REG_PRId) >= 0x23 )
 	{
 		if ( mode & 0xFF )
 		{

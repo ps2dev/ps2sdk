@@ -94,7 +94,7 @@ static inline int __udelay(unsigned int usecs)
 
 	}
 
-	asm volatile (
+	__asm__ __volatile__ (
 				  ".set push\n\t"
 				  ".set noreorder\n\t"
 				  "0:\n\t"
@@ -141,8 +141,8 @@ int graph_set_mode(int interlace, int mode, int ffmd, int flicker_filter)
 	GsPutIMR(0x00007700);
 
 	// Ensure registers are written prior to setting another mode.
-	asm volatile ("sync.p\n\t"
-				  "nop\n\t");
+	EE_SYNCP();
+	__asm__ __volatile__ ("nop\n\t");
 
 	// If 576P is requested, check if bios supports it.
 	if (mode == GRAPH_MODE_HDTV_576P)
@@ -376,7 +376,8 @@ void graph_set_smode1(char cmod, char gcont)
 	// Disable PRST for TV modes and enable for all other modes.
 	*GS_REG_SMODE1 = smode1_val | (u64)1 << 16;
 
-	asm volatile ("sync.l; sync.p;");
+	EE_SYNCL();
+	EE_SYNCP();
 
 	// If VESA, 1080I, or 720P, disable bit PRST now and delay 2.5ms.
 	if ((graph_crtmode >= 0x1A) && (graph_crtmode != 0x50) && (graph_crtmode != 0x53))
@@ -393,7 +394,8 @@ void graph_set_smode1(char cmod, char gcont)
 	// Now enable read circuits.
 	*GS_REG_PMODE  = pmode_val;
 
-	asm volatile ("sync.l; sync.p;");
+	EE_SYNCL();
+	EE_SYNCP();
 
 }
 

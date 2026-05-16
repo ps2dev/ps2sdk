@@ -9,48 +9,40 @@
 */
 
 #include "ioptrap.h"
+#include <mipscopaccess.h>
 
 void set_dba(u32 v)
 {
-    __asm__ __volatile__("mtc0 %0, $5"
-                         :
-                         : "r"(v));
+    set_mips_cop_reg(0, 5, v);
 }
 
 void set_dbam(u32 v)
 {
-    __asm__ __volatile__("mtc0 %0, $9"
-                         :
-                         : "r"(v));
+    set_mips_cop_reg(0, 9, v);
 }
 
 void set_dcic(u32 v)
 {
-    __asm__ __volatile__("mtc0 %0, $7"
-                         :
-                         : "r"(v));
+    set_mips_cop_reg(0, 7, v);
 }
 
 u32 get_dba()
 {
     u32 v;
-    __asm__ __volatile__("mfc0 %0, $5"
-                         : "=&r"(v));
+    v = get_mips_cop_reg(0, 5);
     return v;
 }
 
 u32 get_dbam()
 {
     u32 v;
-    __asm__ __volatile__("mfc0 %0, $9"
-                         : "=&r"(v));
+    v = get_mips_cop_reg(0, 9);
     return v;
 }
 
 u32 get_dcic()
 {
     u32 v;
-    __asm__ __volatile__("mfc0 %0, $7"
-                         : "=&r"(v));
+    v = get_mips_cop_reg(0, 7);
     return v;
 }

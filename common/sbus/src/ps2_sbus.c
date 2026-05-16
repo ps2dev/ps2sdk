@@ -26,7 +26,7 @@ static u32 _get_reg(u32 *reg)
 
 #ifdef _EE
         // EE needs 20 NOPs!
-        __asm__ volatile("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n");
+        __asm__ __volatile__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n");
 #endif
 
         v2 = *(vu32 *)reg;

@@ -12,6 +12,7 @@
 #include "irx_imports.h"
 #include "kerr.h"
 #include "xloadcore.h"
+#include <defs.h>
 
 extern struct irx_export_table _exp_loadcore;
 
@@ -432,7 +433,7 @@ void loadcore_init(boot_params *in_params)
 						next.callback = (void *)*stack_reboot_handlers;
 						if ( i == 3 )
 							next.callback = (void *)*reboot_handler_ptr;
-						__asm__ __volatile__("\tmove $gp, %0\n" : : "r"(reboot_handler_ptr[1]));
+						SetGP((void *)reboot_handler_ptr[1]);
 						((BootupCallback_t)(*reboot_handler_ptr & (~3)))(&next, 1);
 					}
 					reboot_handler_ptr += 2;
@@ -565,12 +566,11 @@ int *QueryBootMode(int mode)
 
 int AddRebootNotifyHandler(BootupCallback_t func, int priority, int *stat)
 {
-	u32 gp_val;
+	void *gp_val;
 	iop_init_entry_t next;
 
 	next.callback = (void *)1;
-	gp_val = 0;
-	__asm__ __volatile__("\tmove %0, $gp\n" : "=r"(gp_val) :);
+	gp_val = GetGP();
 
 	if ( !reboot_handlers )
 	{
@@ -583,7 +583,7 @@ int AddRebootNotifyHandler(BootupCallback_t func, int priority, int *stat)
 	}
 
 	reboot_handlers[0] = (u32)func + (priority & 3);
-	reboot_handlers[1] = gp_val;
+	reboot_handlers[1] = (u32)gp_val;
 	reboot_handlers += 2;
 	reboot_handlers[0] = 0;
 	return 1;

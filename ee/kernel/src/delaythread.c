@@ -17,6 +17,7 @@
 #include <timer.h>
 #include <timer_alarm.h>
 #include <delaythread.h>
+#include <mipscopaccess.h>
 
 #ifdef F_DelayThread
 static u64 DelayThreadWakeup_callback(s32 alarm_id, u64 scheduled_time, u64 actual_time, void *arg, void *pc_value)
@@ -38,7 +39,7 @@ s32 DelayThread(s32 microseconds)
 	s32 timer_alarm_id;
 	ee_sema_t sema;
 
-	__asm__ __volatile__ ("mfc0\t%0, $12" : "=r" (eie));
+	eie = get_mips_cop_reg(0, COP0_REG_Status);
 	if ((eie & 0x10000) == 0)
 	{
 		return 0x80008008; // ECPUDI

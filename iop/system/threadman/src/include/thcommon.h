@@ -24,6 +24,9 @@
 #define HANDLE_VERIFY(handle, t) (((struct heaptag *)(HANDLE_PTR(handle)))->tag == (t) && \
                                   HANDLE_ID(handle) == ((struct heaptag *)(HANDLE_PTR(handle)))->id)
 
+#ifdef ALIGN
+#undef ALIGN
+#endif
 #define ALIGN(i)     (((i) + 3) & (~3))
 #define ALIGN_256(i) (((i) + 0xff) & (~0xff))
 
@@ -164,7 +167,7 @@ struct thread
     void *entry;
     void *stack_top;
     u32 stack_size;
-    u32 gp;
+    void *gp;
     u32 attr;
     u32 option;
     // nothing seems to use wait_return, would be $ra

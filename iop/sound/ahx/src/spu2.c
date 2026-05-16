@@ -155,7 +155,7 @@ void nopdelay()
     s32 i;
 
     for (i = 0; i < 0x10000; i++)
-        asm volatile("nop\nnop\nnop\nnop\nnop");
+        __asm__ __volatile__("nop\nnop\nnop\nnop\nnop");
 }
 
 void InitSpu2()

@@ -250,7 +250,7 @@ int ps2_screenshot( void *pDest, unsigned int VramAdress, unsigned int x,
   *PS2SS_D1_MADR = (u32)p_dma32;
   *PS2SS_D1_CHCR = 0x101;
 
-  asm __volatile__("sync.l\n");
+  EE_SYNCL();
 
   // check if DMA is complete (STR=0)
 
@@ -272,13 +272,13 @@ int ps2_screenshot( void *pDest, unsigned int VramAdress, unsigned int x,
   *PS2SS_D1_MADR = (u32)pDest;
   *PS2SS_D1_CHCR = 0x100;
 
-  asm __volatile__(" sync.l\n");
+  EE_SYNCL();
 
   // check if DMA is complete (STR=0)
 
   while ( *PS2SS_D1_CHCR & 0x0100 );
   *PS2SS_D1_CHCR = prev_chcr;
-  asm __volatile__(" sync.l\n");
+  EE_SYNCL();
   *PS2SS_VIF1_STAT = 0;
   *PS2SS_GS_BUSDIR = (u64)0;
 

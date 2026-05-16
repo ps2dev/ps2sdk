@@ -18,7 +18,7 @@
  /* VECTOR FUNCTIONS */
 
  void vector_apply(VECTOR output, VECTOR input0, MATRIX input1) {
-  asm __volatile__ (
+  __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%2)	\n"
    "lqc2		$vf2, 0x10(%2)	\n"
@@ -71,7 +71,7 @@
  }
 
  void vector_copy(VECTOR output, VECTOR input0) {
-  asm __volatile__ (
+  __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%1)	\n"
    "sqc2		$vf1, 0x00(%0)	\n"
@@ -119,7 +119,7 @@
  }
 
  void vector_normalize(VECTOR output, VECTOR input0) {
-  asm __volatile__ (
+  __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%1)	\n"
    "vmul.xyz		$vf2, $vf1, $vf1\n"
@@ -149,7 +149,7 @@
  }
 
  void vector_outerproduct(VECTOR output, VECTOR input0, VECTOR input1) {
-  asm __volatile__ (
+  __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%1)	\n"
    "lqc2		$vf2, 0x00(%2)	\n"
@@ -205,7 +205,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
  /* MATRIX FUNCTIONS */
 
  void matrix_copy(MATRIX output, MATRIX input0) {
-  asm __volatile__ (
+  __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%1)  \n"
    "lqc2		$vf2, 0x10(%1)  \n"
@@ -249,7 +249,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
  }
 
  void matrix_multiply(MATRIX output, MATRIX input0, MATRIX input1) {
-  asm __volatile__ (
+  __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%1)	\n"
    "lqc2		$vf2, 0x10(%1)	\n"
@@ -476,7 +476,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
  /* CALCULATE FUNCTIONS */
 
  void calculate_normals(VECTOR *output, int count, VECTOR *normals, MATRIX local_light) {
-  asm __volatile__ (
+  __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%3)	\n"
    "lqc2		$vf2, 0x10(%3)	\n"
@@ -587,7 +587,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
  }
 
  void calculate_vertices(VECTOR *output, int count, VECTOR *vertices, MATRIX local_screen) {
-  asm __volatile__ (
+  __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%3)	\n"
    "lqc2		$vf2, 0x10(%3)	\n"

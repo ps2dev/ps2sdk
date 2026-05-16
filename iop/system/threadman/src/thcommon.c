@@ -8,6 +8,7 @@
 #include "loadcore.h"
 #include "sysclib.h"
 #include "stdio.h"
+#include <defs.h>
 
 #include <limits.h>
 
@@ -168,7 +169,7 @@ int thread_leave(int ret1, int ret2, int intr_state, int release)
         thctx.current_thread->reason_counter = &thctx.current_thread->release_count;
     }
 
-    asm __volatile__("li $v0, 0x20\n"
+    __asm__ __volatile__("li $v0, 0x20\n"
                      "syscall\n"
                      : "=r"(result)
                      : "r"(a0), "r"(a1), "r"(a2)
@@ -205,7 +206,7 @@ int thread_init_and_start(struct thread *thread, int intr_state)
     thread->saved_regs->sp  = (u32)&thread->saved_regs[1];
     thread->saved_regs->fp  = thread->saved_regs->sp;
     thread->saved_regs->ra  = (u32)ExitThread;
-    thread->saved_regs->gp  = thread->gp;
+    thread->saved_regs->gp  = (u32)thread->gp;
     thread->saved_regs->sr  = 0x404;
     thread->saved_regs->sr |= thread->attr & 8;
     thread->saved_regs->pc     = (u32)thread->entry;
@@ -650,13 +651,11 @@ int _start(int argc, char **argv)
     idle->entry         = idle_thread;
     idle->saved_regs    = idle->stack_top + (((idle->stack_size << 2) >> 2) - RESERVED_REGCTX_SIZE);
     memset(idle->saved_regs, 0, RESERVED_REGCTX_SIZE);
-
-    asm __volatile__("sw $gp, %0\n"
-                     : "=m"(idle->gp)::);
+    idle->gp = GetGP();
 
     idle->saved_regs->unk = -2;
     idle->saved_regs->sp  = (u32)&idle->saved_regs[1];
-    idle->saved_regs->gp  = idle->gp;
+    idle->saved_regs->gp  = (u32)idle->gp;
     idle->saved_regs->fp  = idle->saved_regs->sp;
     idle->saved_regs->ra  = (u32)ExitThread;
     idle->saved_regs->sr  = (idle->attr & 0xF0000000) | 0x404;
@@ -679,9 +678,7 @@ int _start(int argc, char **argv)
     current->priority      = 1;
     current->attr          = TH_C;
     current->status        = THS_RUN;
-
-    asm __volatile__("sw $gp, %0\n"
-                     : "=m"(current->gp)::);
+    current->gp            = GetGP();
 
     list_insert(&thctx.thread_list, &current->thread_list);
     thctx.current_thread = current;

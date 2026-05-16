@@ -472,7 +472,7 @@ void _MPEG_SetDefQM(int arg0)
 
     q = (qword_t *)s_QmIntra;
     for (i = 0; i < 4; i++) {
-        __asm__ volatile(
+        __asm__ __volatile__(
             "lq $2, 0(%0)    \n"
             "sq $2, 0(%1)    \n"
             :
@@ -486,7 +486,7 @@ void _MPEG_SetDefQM(int arg0)
 
     q = (qword_t *)s_QmNonIntra;
     for (i = 0; i < 4; i++) {
-        __asm__ volatile(
+        __asm__ __volatile__(
             "lq $2, 0(%0)    \n"
             "sq $2, 0(%1)    \n"
             :

@@ -228,7 +228,7 @@ static void allocate_list(void)
 }
 
 // clang-format off
-__asm__(
+__asm__ (
 	"\t" ".set push" "\n"
 	"\t" ".set noat" "\n"
 	"\t" ".set noreorder" "\n"
@@ -289,7 +289,7 @@ __asm__(
 	"\t" ".set pop" "\n"
 );
 
-__asm__(
+__asm__ (
 	"\t" ".set push" "\n"
 	"\t" ".set noat" "\n"
 	"\t" ".set noreorder" "\n"

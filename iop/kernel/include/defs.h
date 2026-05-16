@@ -26,7 +26,9 @@ extern "C" {
 #define NULL	((void *)0)
 #endif
 
+#ifndef ALIGN
 #define ALIGN(x, align)	(((x)+((align)-1))&~((align)-1))
+#endif
 
 #define PHYSADDR(a)	(((u32)(a)) & 0x1fffffff)
 

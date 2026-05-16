@@ -23,7 +23,7 @@ static s8 twh(s16 val)
 {
 	s8 res;
 
-	asm volatile ("plzcw   %0, %1\n": "=r" (res) : "r" (val));
+	__asm__ __volatile__ ("plzcw   %0, %1\n": "=r" (res) : "r" (val));
 	res = 31 - (res + 1);
 	if(val > res)
 		res++;

@@ -1,6 +1,7 @@
 #include "timrman.h"
 #include "kerr.h"
 #include "xtimrman.h"
+#include <mipscopaccess.h>
 
 #include "irx_imports.h"
 
@@ -8,18 +9,6 @@
 
 IRX_ID("Timer_Manager", 2, 2);
 extern struct irx_export_table _exp_timrman;
-
-#define PRID $15
-
-#define _mfc0(reg)                        \
-    ({                                    \
-        u32 val;                          \
-        __asm__ volatile("mfc0 %0, " #reg \
-                         : "=r"(val));    \
-        val;                              \
-    })
-
-#define mfc0(reg) _mfc0(reg)
 
 #ifdef BUILDING_TIMRMANP
 #define NUM_TIMERS 3
@@ -162,7 +151,7 @@ static u32 (*sTimerCountFun[NUM_TIMERS])() = {
 int _start(int argc, char **argv)
 {
     int prid, ret;
-    prid = mfc0(PRID);
+    prid = get_mips_cop_reg(0, COP0_REG_PRId);
 
 #ifdef BUILDING_TIMRMANP
     if (prid >= 16) {
