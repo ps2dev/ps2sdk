@@ -131,7 +131,7 @@ int sceCdReadClock(sceCdCLOCK *clock)
         return 0;
     }
 
-    memcpy(clock, UNCACHED_SEG(sCmdRecvBuff + 4), 8);
+    *clock = *(sceCdCLOCK *)(UNCACHED_SEG(sCmdRecvBuff + 4));
 
     if (CdDebug > 0)
         printf("Libcdvd call Clock read 2\n");
@@ -201,14 +201,14 @@ int sceCdWriteClock(sceCdCLOCK *clock)
     if (_CdCheckSCmd(CD_SCMD_WRITECLOCK) == 0)
         return 0;
 
-    memcpy(&sCmdSendBuff.clock, clock, 8);
+    sCmdSendBuff.clock = *clock;
 
     if (sceSifCallRpc(&clientSCmd, CD_SCMD_WRITECLOCK, 0, &sCmdSendBuff, 8, sCmdRecvBuff, 16, NULL, NULL) < 0) {
         SignalSema(sCmdSemaId);
         return 0;
     }
 
-    memcpy(clock, UNCACHED_SEG(sCmdRecvBuff + 4), 8);
+    *clock = *(sceCdCLOCK *)(UNCACHED_SEG(sCmdRecvBuff + 4));
     result = *(int *)UNCACHED_SEG(sCmdRecvBuff);
 
     SignalSema(sCmdSemaId);
@@ -288,7 +288,7 @@ int sceCdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff)
 
     sCmdSendBuff.scmd.cmdNum     = cmdNum;
     sCmdSendBuff.scmd.inBuffSize = inBuffSize;
-    memset(sCmdSendBuff.scmd.inBuff, 0, 16);
+    memset(sCmdSendBuff.scmd.inBuff, 0, sizeof(sCmdSendBuff.scmd.inBuff));
     if (inBuff)
         memcpy(sCmdSendBuff.scmd.inBuff, inBuff, inBuffSize);
 

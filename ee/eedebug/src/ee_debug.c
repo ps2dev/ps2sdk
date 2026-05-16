@@ -195,7 +195,7 @@ int ee_dbg_install(int levels)
         ee_dbg_clr_bps();
 
         // save the original level 2 debug exception vector.
-        memcpy(&__saved_dbg_ex_vector, (void *) (0x80000100), 0x80);
+        memcpy(&__saved_dbg_ex_vector, (void *) (0x80000100), sizeof(__saved_dbg_ex_vector));
 
         // replace the level 2 debug exception vector with our own
         memcpy((void *) (0x80000100), &__ee_level2_ex_vector, 32);

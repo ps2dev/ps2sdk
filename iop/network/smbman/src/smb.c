@@ -423,22 +423,22 @@ static int AddPassword(char *Password, int PasswordType, int AuthType, void *Ans
             switch (PasswordType) {
                 case HASHED_PASSWORD:
                     if (AuthType == LM_AUTH) {
-                        memcpy(passwordhash, Password, 16);
-                        memcpy(AnsiPassLen, &passwordlen, 2);
+                        memcpy(passwordhash, Password, sizeof(passwordhash));
+                        memcpy(AnsiPassLen, &passwordlen, sizeof(passwordlen));
                     }
                     if (AuthType == NTLM_AUTH) {
-                        memcpy(passwordhash, &Password[16], 16);
-                        memcpy(UnicodePassLen, &passwordlen, 2);
+                        memcpy(passwordhash, &Password[16], sizeof(passwordhash));
+                        memcpy(UnicodePassLen, &passwordlen, sizeof(passwordlen));
                     }
                     break;
 
                 default:
                     if (AuthType == LM_AUTH) {
                         LM_Password_Hash((const unsigned char *)Password, passwordhash);
-                        memcpy(AnsiPassLen, &passwordlen, 2);
+                        memcpy(AnsiPassLen, &passwordlen, sizeof(passwordlen));
                     } else if (AuthType == NTLM_AUTH) {
                         NTLM_Password_Hash((const unsigned char *)Password, passwordhash);
-                        memcpy(UnicodePassLen, &passwordlen, 2);
+                        memcpy(UnicodePassLen, &passwordlen, sizeof(passwordlen));
                     }
             }
             LM_Response(passwordhash, server_specs.EncryptionKey, LMresponse);
@@ -450,13 +450,13 @@ static int AddPassword(char *Password, int PasswordType, int AuthType, void *Ans
                 passwordlen = 14;
             else if (passwordlen == 0)
                 passwordlen = 1;
-            memcpy(AnsiPassLen, &passwordlen, 2);
+            memcpy(AnsiPassLen, &passwordlen, sizeof(passwordlen));
             memcpy(Buffer, Password, passwordlen);
         }
     } else {
         if (server_specs.SecurityMode == SERVER_SHARE_SECURITY_LEVEL) {
             passwordlen = 1;
-            memcpy(AnsiPassLen, &passwordlen, 2);
+            memcpy(AnsiPassLen, &passwordlen, sizeof(passwordlen));
             Buffer[0] = 0;
         }
     }
@@ -704,8 +704,8 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
             if (maxEntries > 0) {
                 if ((count < maxEntries) && (i >= index)) {
                     count++;
-                    strncpy(shareEntries->ShareName, p, 256);
-                    strncpy(shareEntries->ShareComment, &data[*((u16 *)&p[strlen(p) + 1 + padding])], 256);
+                    strncpy(shareEntries->ShareName, p, sizeof(shareEntries->ShareName));
+                    strncpy(shareEntries->ShareComment, &data[*((u16 *)&p[strlen(p) + 1 + padding])], sizeof(shareEntries->ShareComment));
                     shareEntries++;
                 }
             } else // if maxEntries is 0 then we're just counting shares
@@ -1564,7 +1564,7 @@ int smb_Connect(char *SMBServerIP, int SMBServerPort)
     }
 
     // We keep the server IP for SMB logon
-    strncpy(server_specs.ServerIP, SMBServerIP, 16);
+    strncpy(server_specs.ServerIP, SMBServerIP, sizeof(server_specs.ServerIP));
 
     return 0;
 }

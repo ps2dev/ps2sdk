@@ -422,8 +422,8 @@ int mcOpen(int port, int slot, const char *name, int mode)
 	g_nameParam.port		= port;
 	g_nameParam.slot		= slot;
 	g_nameParam.flags		= mode;
-	strncpy(g_nameParam.name, name, 1023);
-	g_nameParam.name[1023] = 0;
+	strncpy(g_nameParam.name, name, sizeof(g_nameParam.name) - 1);
+	g_nameParam.name[sizeof(g_nameParam.name) - 1] = 0;
 
 	// send sif command
 	if((ret = sceSifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_OPEN], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, NULL, NULL)) != 0)
@@ -585,8 +585,8 @@ int mcChdir(int port, int slot, const char* newDir, char* currentDir)
 	g_nameParam.port		= port;
 	g_nameParam.slot		= slot;
 	g_nameParam.curdir		= curDir;
-	strncpy(g_nameParam.name, newDir, 1023);
-	g_nameParam.name[1023] = 0;
+	strncpy(g_nameParam.name, newDir, sizeof(g_nameParam.name) - 1);
+	g_nameParam.name[sizeof(g_nameParam.name) - 1] = 0;
 	sceSifWriteBackDCache(curDir, 1024);
 
 	// send sif command
@@ -613,8 +613,8 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sc
 	g_nameParam.flags	= mode;
 	g_nameParam.maxent	= maxent;
 	g_nameParam.mcT		= table;
-	strncpy(g_nameParam.name, name, 1023);
-	g_nameParam.name[1023] = 0;
+	strncpy(g_nameParam.name, name, sizeof(g_nameParam.name) - 1);
+	g_nameParam.name[sizeof(g_nameParam.name) - 1] = 0;
 	sceSifWriteBackDCache(table, maxent * sizeof(sceMcTblGetDir));
 
 	// send sif command
@@ -640,10 +640,10 @@ int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* in
 	g_nameParam.slot	= slot;
 	g_nameParam.flags	= flags;	// NOTE: this was ANDed with 7 so that u cant turn off copy protect! :)
 	g_nameParam.mcT		= &g_fileInfoBuff;
-	memcpy(&g_fileInfoBuff, info, sizeof(sceMcTblGetDir));
+	g_fileInfoBuff = *info;
 
-	strncpy(g_nameParam.name, name, 1023);
-	g_nameParam.name[1023] = 0;
+	strncpy(g_nameParam.name, name, sizeof(g_nameParam.name) - 1);
+	g_nameParam.name[sizeof(g_nameParam.name) - 1] = 0;
 	FlushCache(0);
 
 	// send sif command
@@ -668,8 +668,8 @@ int mcDelete(int port, int slot, const char *name)
 	g_nameParam.port = port;
 	g_nameParam.slot = slot;
 	g_nameParam.flags = 0;
-	strncpy(g_nameParam.name, name, 1023);
-	g_nameParam.name[1023] = 0;
+	strncpy(g_nameParam.name, name, sizeof(g_nameParam.name) - 1);
+	g_nameParam.name[sizeof(g_nameParam.name) - 1] = 0;
 
 	// call delete function
 	if((ret = sceSifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_DELETE], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, NULL, NULL)) != 0)
@@ -736,8 +736,8 @@ int mcGetEntSpace(int port, int slot, const char* path)
 	// set global variables
 	g_nameParam.port = port;
 	g_nameParam.slot = slot;
-	strncpy(g_nameParam.name, path, 1023);
-	g_nameParam.name[1023] = 0;
+	strncpy(g_nameParam.name, path, sizeof(g_nameParam.name) - 1);
+	g_nameParam.name[sizeof(g_nameParam.name) - 1] = 0;
 
 	// call sif function
 	if((ret = sceSifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_ENT], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, NULL, NULL)) != 0)
@@ -762,10 +762,10 @@ int mcRename(int port, int slot, const char* oldName, const char* newName)
 	g_nameParam.slot = slot;
 	g_nameParam.flags = 0x10;
 	g_nameParam.mcT = &g_fileInfoBuff;
-	strncpy(g_nameParam.name, oldName, 1023);
-	g_nameParam.name[1023] = 0;
-	strncpy((char*)g_fileInfoBuff.EntryName, newName, 31);
-	g_fileInfoBuff.EntryName[31] = 0;
+	strncpy(g_nameParam.name, oldName, sizeof(g_nameParam.name) - 1);
+	g_nameParam.name[sizeof(g_nameParam.name) - 1] = 0;
+	strncpy((char*)g_fileInfoBuff.EntryName, newName, sizeof(g_fileInfoBuff.EntryName) - 1);
+	g_fileInfoBuff.EntryName[sizeof(g_fileInfoBuff.EntryName) - 1] = 0;
 	FlushCache(0);
 
 	// call sif function

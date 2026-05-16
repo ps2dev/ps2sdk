@@ -77,7 +77,7 @@ int sbv_patch_enable_lmb(void)
 	u32 result, *data;
 	SifDmaTransfer_t dmat;
 
-	memset(&_slib_cur_exp_lib_list, 0, sizeof(slib_exp_lib_list_t));
+	memset(&_slib_cur_exp_lib_list, 0, sizeof(_slib_cur_exp_lib_list));
 
 	/* Locate the modload export library - it must have at least 16 exports.  */
 	if (slib_get_exp_lib("modload", modload_lib) < 16)

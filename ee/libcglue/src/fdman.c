@@ -57,9 +57,9 @@ void __fdman_init()
 	}
 
 	/* Initialize descriptor data*/
-	memset(__descriptor_data_pool, 0, sizeof(__descriptormap_type) *__FILENO_MAX);
+	memset(__descriptor_data_pool, 0, sizeof(__descriptor_data_pool));
 	/* Initialize descriptor map*/
-	memset(__descriptormap, 0, sizeof(__descriptormap_type*)*__FILENO_MAX);
+	memset(__descriptormap, 0, sizeof(__descriptormap));
 
 	// We assume STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO are initialized
 	__descriptormap[STDIN_FILENO] = &__descriptor_data_pool[STDIN_FILENO];
@@ -159,7 +159,7 @@ void __fdman_release_descriptor(int fd)
 	__descriptormap[fd]->ref_count--;
 	
 	if (__descriptormap[fd]->ref_count == 0) {
-		memset(__descriptormap[fd], 0, sizeof(__descriptormap_type));
+		memset(__descriptormap[fd], 0, sizeof(*(__descriptormap[fd])));
 	}
 	__descriptormap[fd] = NULL;
 }

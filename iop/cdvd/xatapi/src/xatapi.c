@@ -260,7 +260,7 @@ static int do_atapi_cmd_inquiry_12h(s16 dev_nr)
 	if ( retres )
 		return retres;
 	do_hex_dump(outbuf, sizeof(outbuf));
-	return strncmp(&outbuf[32], "BOOT", 4) ? 1 : 0;
+	return memcmp(&outbuf[32], "BOOT", 4) ? 1 : 0;
 }
 
 static int do_atapi_request_test_unit_ready(s16 dev_nr, int *errptr, int *ctrlptr)

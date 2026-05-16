@@ -199,7 +199,7 @@ static void copyToTocEntry(struct TocEntry *tocEntry, struct DirTocEntry *intern
         filenamelen = internalTocEntry->filenameLength;
 
         // use normal string copy
-        strncpy(tocEntry->filename, internalTocEntry->filename, 128);
+        strncpy(tocEntry->filename, internalTocEntry->filename, sizeof(tocEntry->filename));
     }
 
     tocEntry->filename[filenamelen] = 0;
@@ -389,7 +389,7 @@ static int cdfs_getVolumeDescriptor(void) {
         if (memcmp(localVolDesc.volID, "CD001", 5) == 0) {
             if ((localVolDesc.filesystemType == 1) ||
                 (localVolDesc.filesystemType == 2)) {
-                memcpy(&cdVolDesc, &localVolDesc, sizeof(struct CDVolDesc));
+                cdVolDesc = localVolDesc;
             }
         } else
             break;
@@ -616,7 +616,7 @@ static void splitPath(const char *constpath, char *dir, char *fname) {
     static char pathcopy[1024 + 1];
     char *slash;
 
-    strncpy(pathcopy, constpath, 1024);
+    strncpy(pathcopy, constpath, sizeof(pathcopy) - 1);
     slash = strrchr(pathcopy, '/');
 
     // if the path doesn't contain a '/' then look for a '\'
@@ -628,8 +628,8 @@ static void splitPath(const char *constpath, char *dir, char *fname) {
         // null terminate the path
         slash[0] = 0;
         // and copy the path into 'dir'
-        strncpy(dir, pathcopy, 1024);
-        dir[255] = 0;
+        strncpy(dir, pathcopy, sizeof(pathcopy) - 1);
+        dir[sizeof(pathcopy) - 1] = 0;
 
         // copy the filename into 'fname'
         strncpy(fname, slash + 1, 128);

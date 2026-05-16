@@ -148,7 +148,7 @@ static int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *m
 		int xflg;
 
 		xflg = 1;
-		if ( !strncmp("thpri=", argv[i], 6) )
+		if ( !memcmp("thpri=", argv[i], 6) )
 		{
 			bp = 6;
 			if ( !isdigit(argv[i][bp]) )
@@ -169,7 +169,7 @@ static int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *m
 				xflg = 0;
 			}
 		}
-		else if ( !strncmp("thstack=", argv[i], 8) )
+		else if ( !memcmp("thstack=", argv[i], 8) )
 		{
 			bp = 8;
 			if ( !isdigit(argv[i][bp]) )
@@ -294,8 +294,8 @@ static void *sceNetcnfifInterfaceServer(int fno, sceNetcnfifArg_t *buf, int size
 
 					for ( i = 0; i < buf->data && i < retres1; i += 1 )
 					{
-						// The following memcpy was inlined
-						memcpy(&list_ee[i], &list_iop[i], sizeof(sceNetCnfList_t));
+						// The following structure copy was inlined
+						*(sceNetCnfList_t *)&list_ee[i] = list_iop[i];
 					}
 					dmatid1 = sceNetcnfifSendEE((unsigned int)list_ee, buf->addr, sizeof(sceNetcnfifList_t) * buf->data);
 					while ( sceNetcnfifDmaCheck(dmatid1) )
@@ -444,7 +444,7 @@ static void sceNetcnfifInterfaceStop(void)
 
 static void sceNetcnfifDataInit(sceNetcnfifData_t *data)
 {
-	memset(data, 0, sizeof(sceNetcnfifData_t));
+	memset(data, 0, sizeof(*data));
 	data->ifc_type = -1;
 	data->mtu = -1;
 	data->ifc_idle_timeout = -1;
@@ -465,7 +465,7 @@ static void sceNetcnfifDataInit(sceNetcnfifData_t *data)
 
 static void sceNetcnfifEnvInit(sceNetCnfEnv_t *env, void *mem_area, int size, int f_no_decode)
 {
-	memset(env, 0, sizeof(sceNetCnfEnv_t));
+	memset(env, 0, sizeof(*env));
 	env->mem_ptr = mem_area;
 	env->mem_base = mem_area;
 	env->mem_last = (char *)mem_area + size;
@@ -747,7 +747,7 @@ static int put_ns(sceNetCnfEnv_t *e, const char *ns, int ns_count)
 			// Unofficial: return error instead of writing 1 to 0x00000008
 			return -1;
 	}
-	memset(ns2, 0, sizeof(nameserver_t));
+	memset(ns2, 0, sizeof(*ns2));
 	ns1->cmd.code = 1;
 	ns1->cmd.back = e->ifc->cmd_tail;
 	if ( e->ifc->cmd_tail )

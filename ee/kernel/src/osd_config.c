@@ -93,7 +93,7 @@ static void adddate(sceCdCLOCK *time)
 {
     // get the days in each month and fix up feb depending on leap year
     unsigned char days_in_months[12];
-    memcpy(days_in_months, gDaysInMonths, 12);
+    memcpy(days_in_months, gDaysInMonths, sizeof(days_in_months));
     if ((time->year & 3) == 0)
         days_in_months[1] = 29;
 
@@ -120,7 +120,7 @@ static void subdate(sceCdCLOCK *time)
 {
     // get the days in each month and fix up feb depending on leap year
     unsigned char days_in_months[12];
-    memcpy(days_in_months, gDaysInMonths, 12);
+    memcpy(days_in_months, gDaysInMonths, sizeof(days_in_months));
     if ((time->year & 3) == 0)
         days_in_months[1] = 29;
 

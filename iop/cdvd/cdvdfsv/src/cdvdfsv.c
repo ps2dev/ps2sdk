@@ -298,7 +298,7 @@ static void cdvdfsv_parseargs(int ac, char **av)
 	g_cdvdfsv_def_pri = 81;
 	for ( i = 1; i < ac; i += 1 )
 	{
-		if ( !strncmp(av[i], "thpri=", 6) )
+		if ( !memcmp(av[i], "thpri=", 6) )
 		{
 			g_cdvdfsv_def_pri = strtol(av[i] + 6, 0, 10);
 			if ( (unsigned int)(g_cdvdfsv_def_pri - 9) >= 0x73 )
@@ -2247,7 +2247,7 @@ cdvdfsv_rpc3_28_writewakeuptime(const cdvdfsv_rpc3_inpacket_t *inbuf, int buflen
 	for ( i = 0; i < 3 && !outbuf->m_retres; i += 1 )
 	{
 		// Unofficial: copy to output buffer then use it
-		memcpy(&outbuf->m_pkt_28.m_clock, &inbuf->m_pkt_28.m_clock, sizeof(sceCdCLOCK));
+		outbuf->m_pkt_28.m_clock = inbuf->m_pkt_28.m_clock;
 		WaitEventFlag(g_scmd_evfid, 1, WEF_AND, &efbits);
 		outbuf->m_retres =
 			sceCdWriteWakeUpTime(&outbuf->m_pkt_28.m_clock, inbuf->m_pkt_28.m_userdata, inbuf->m_pkt_28.m_flags);
@@ -2478,7 +2478,7 @@ cdvdfsv_rpc3_02_writeclock(const cdvdfsv_rpc3_inpacket_t *inbuf, int buflen, cdv
 	for ( i = 0; i < 3 && !outbuf->m_retres; i += 1 )
 	{
 		// Unofficial: copy to output buffer then use it
-		memcpy(&outbuf->m_pkt_02.m_clock, &inbuf->m_pkt_02.m_clock, sizeof(sceCdCLOCK));
+		outbuf->m_pkt_02.m_clock = inbuf->m_pkt_02.m_clock;
 		WaitEventFlag(g_scmd_evfid, 1, WEF_AND, &efbits);
 		outbuf->m_retres = sceCdWriteClock(&outbuf->m_pkt_02.m_clock);
 	}

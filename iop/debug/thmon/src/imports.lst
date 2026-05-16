@@ -28,6 +28,7 @@ I_strlen
 I_strncmp
 I_strncpy
 I_strtol
+I_memcmp
 sysclib_IMPORTS_end
 
 thbase_IMPORTS_start

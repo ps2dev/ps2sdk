@@ -743,7 +743,7 @@ static int fs_dread(iop_file_t *fd, iox_dirent_t *buffer)
 
     ret = rec->status;
     if (rec->status >= 0) {
-        memset(buffer, 0, sizeof(iox_dirent_t));
+        memset(buffer, 0, sizeof(*buffer));
         fillStat(&buffer->stat, &rec->current_fatdir);
         strcpy(buffer->name, (const char *)rec->current_fatdir.name);
     }
@@ -782,7 +782,7 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
         return ret;
     }
 
-    memset(stat, 0, sizeof(iox_stat_t));
+    memset(stat, 0, sizeof(*stat));
     fillStat(stat, &fatdir);
 
     _fs_unlock();
