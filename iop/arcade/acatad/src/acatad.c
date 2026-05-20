@@ -203,7 +203,7 @@ ata_devinfo_t *sceAtaInit(int device)
 	int ident_err;
 	u32 total_sectors[2];
 
-	probe_res = ata_probe((acAtaReg)0xB6000000);
+	probe_res = ata_probe((acAtaReg)ACATA_A_DATA);
 	g_devinfo.has_packet = 0;
 	g_devinfo.exists = device == probe_res - 1;
 	if ( device != probe_res - 1 )

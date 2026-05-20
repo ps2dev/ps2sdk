@@ -528,11 +528,11 @@ int acMemeModuleStart(int argc, char **argv)
 	while ( index < argc )
 	{
 		opt = *v8;
-		if ( **v8 == 45 )
+		if ( **v8 == '-' )
 		{
 			v10 = opt[1];
 			opt_v7 = opt + 2;
-			if ( v10 == 112 )
+			if ( v10 == 'p' )
 			{
 				value = strtol(opt_v7, &next, 0);
 				if ( next != opt_v7 )
