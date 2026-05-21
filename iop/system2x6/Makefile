@@ -6,28 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	arcade \
-	cdvd \
-	debug \
-	deckard \
-	dev9 \
-	dvrp \
-	fs \
-	hdd \
-	iLink \
-	kernel \
-	memorycard \
-	network \
-	security \
-	sio \
-	sound \
-	startup \
-	system \
-	system2x6 \
-	tcpip \
-	usb
+SUBDIRS = dogbait
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
-include $(PS2SDKSRC)/iop/Rules.release
