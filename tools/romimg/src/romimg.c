@@ -467,9 +467,9 @@ int AddFile(ROMIMG *ROMImg, const char *path, int upperconv)
             tbuf[sizeof(tbuf) - 1] = '\0';
             if (tbuf[0] != '\0') {
                 upperbuff(tbuf);
-                fname = tbuf;
-                char* T = strrchr(fname, '.');
+                char* T = strrchr(tbuf, '.');
                 if (T != NULL) *T = '\0'; //null terminate extension
+                fname = tbuf;
             }
         }
 		int size;
