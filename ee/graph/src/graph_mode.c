@@ -94,6 +94,7 @@ static inline int __udelay(unsigned int usecs)
 
 	}
 
+#ifdef _EE
 	__asm__ __volatile__ (
 				  ".set push\n\t"
 				  ".set noreorder\n\t"
@@ -106,6 +107,9 @@ static inline int __udelay(unsigned int usecs)
 				  ".set pop\n\t"
 				  :"=r" (loops_total)
 				  :"0" (loops_total), "r" (loops_end));
+#else
+	for (; loops_total < loops_end; loops_total += 1);
+#endif
 
 	return 0;
 

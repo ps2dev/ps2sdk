@@ -9,6 +9,9 @@
 */
 
 #include <libvux.h>
+#ifndef _EE
+#include <string.h>
+#endif
 
 void Vu0IdMatrix(VU_MATRIX *m)
 {
@@ -17,6 +20,7 @@ void Vu0IdMatrix(VU_MATRIX *m)
 
 void Vu0ResetMatrix(VU_MATRIX *m)
 {
+#ifdef _EE
 	__asm__ __volatile__(
 #if __GNUC__ > 3
 	"vmr32.xyzw  $vf18, $vf0    \n"
@@ -38,6 +42,13 @@ void Vu0ResetMatrix(VU_MATRIX *m)
 
 	: : "r"(m)
     );
+#else
+  memset(m, 0, sizeof(*m));
+  m->m[3][3] = 1.0f;
+  m->m[2][2] = 1.0f;
+  m->m[1][1] = 1.0f;
+  m->m[0][0] = 1.0f;
+#endif
 }
 
 #if 0
@@ -61,6 +72,7 @@ void VuxRotMatrix(VU_MATRIX *m, VU_VECTOR *r)
 void Vu0TransMatrix(VU_MATRIX *m, VU_VECTOR *t)
 {
 
+#ifdef _EE
 	__asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2    $vf1,  0(%1)  \n"      // load 1 qword from 't' to vu's vf1
@@ -72,6 +84,9 @@ void Vu0TransMatrix(VU_MATRIX *m, VU_VECTOR *t)
 
    : : "r" (m), "r" (t)
    );
+#else
+   *(VU_VECTOR *)(&m->m[3][0]) = *t;
+#endif
 }
 
 void Vu0TransMatrixXYZ(VU_MATRIX *m,float x, float y, float z)
@@ -93,6 +108,7 @@ void Vu0TransMatrixXYZ(VU_MATRIX *m,float x, float y, float z)
 void Vu0ScaleMatrix(VU_MATRIX *m, VU_VECTOR *s)
 {
 
+#ifdef _EE
 	__asm__ __volatile__ (
 #if __GNUC__ > 3
 	"lqc2    $vf1,   0(%1) \n"      // load 1 qword from 't' to vu's vf1
@@ -130,6 +146,11 @@ void Vu0ScaleMatrix(VU_MATRIX *m, VU_VECTOR *s)
 
    : : "r" (m), "r" (s)
    );
+#else
+  m->m[0][0] *= s->x;
+  m->m[1][1] *= s->y;
+  m->m[2][2] *= s->z;
+#endif
 
 }
 
@@ -148,6 +169,7 @@ void Vu0ScaleMatrixXYZ(VU_MATRIX *m, float x, float y, float z)
 void Vu0MulMatrix(VU_MATRIX *m0, VU_MATRIX *m1, VU_MATRIX *out)
 {
 
+#ifdef _EE
 	__asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2   $vf1, 0x00(%0)  \n"
@@ -210,6 +232,22 @@ void Vu0MulMatrix(VU_MATRIX *m0, VU_MATRIX *m1, VU_MATRIX *out)
 #endif
    : :  "r" (m0), "r" (m1), "r" (out)
   );
+#else
+  memset(out, 0, sizeof(*out));
+  int i;
+  for (i = 0; i < 4; i += 1)
+  {
+    int j;
+    for (j = 0; j < 4; j += 1)
+    {
+      int k;
+      for (k = 0; k < 4; k += 1)
+      {
+        out->m[i][k] += m1->m[j][k] * m0->m[i][j];
+      }
+    }
+  }
+#endif
 }
 
 void Vu0InverseMatrix(VU_MATRIX *in, VU_MATRIX *out)
@@ -220,13 +258,7 @@ void Vu0InverseMatrix(VU_MATRIX *in, VU_MATRIX *out)
 
 void Vu0ApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 {
-	/*
-	out->x = m->m[0][0]*v0->x + m->m[1][0]*v0->y + m->m[2][0]*v0->z + m->m[3][0]*v0->w;
-	out->y = m->m[0][1]*v0->x + m->m[1][1]*v0->y + m->m[2][1]*v0->z + m->m[3][1]*v0->w;
-	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z + m->m[3][2]*v0->w;
-	out->w = m->m[0][3]*v0->x + m->m[1][3]*v0->y + m->m[2][3]*v0->z + m->m[3][3]*v0->w;
-	*/
-
+#ifdef _EE
 	__asm__ __volatile__(
 #if __GNUC__ > 3
         "lqc2            $vf20,  0x00(%1)  \n"
@@ -253,17 +285,18 @@ void Vu0ApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 #endif
         : : "r"(m), "r"(v0), "r"(out)
     );
+#else
+  out->x = m->m[0][0] * v0->x + m->m[1][0] * v0->y + m->m[2][0] * v0->z + m->m[3][0] * v0->w;
+  out->y = m->m[0][1] * v0->x + m->m[1][1] * v0->y + m->m[2][1] * v0->z + m->m[3][1] * v0->w;
+  out->z = m->m[0][2] * v0->x + m->m[1][2] * v0->y + m->m[2][2] * v0->z + m->m[3][2] * v0->w;
+  out->w = m->m[0][3] * v0->x + m->m[1][3] * v0->y + m->m[2][3] * v0->z + m->m[3][3] * v0->w;
+#endif
 
 }
 
 void Vu0ApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 {
-	/*
-	out->x = m->m[0][0]*v0->x + m->m[1][0]*v0->y + m->m[2][0]*v0->z;
-	out->y = m->m[0][1]*v0->x + m->m[1][1]*v0->y + m->m[2][1]*v0->z;
-	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z;
-	*/
-
+#ifdef _EE
 	__asm__ __volatile__(
 #if __GNUC__ > 3
         "lqc2            $vf20,  0x00(%1)  \n"
@@ -288,12 +321,19 @@ void Vu0ApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 #endif
         : : "r"(m), "r"(v0), "r"(out)
     );
+#else
+  out->x = m->m[0][0] * v0->x + m->m[1][0] * v0->y + m->m[2][0] * v0->z;
+  out->y = m->m[0][1] * v0->x + m->m[1][1] * v0->y + m->m[2][1] * v0->z;
+  out->z = m->m[0][2] * v0->x + m->m[1][2] * v0->y + m->m[2][2] * v0->z;
+  out->w = 1.0f;
+#endif
 
 }
 
 void Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
 {
 
+#ifdef _EE
 	__asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2   $vf1,   0(%1) \n"   // load 1 qword from ee
@@ -319,14 +359,16 @@ void Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
 
    : : "r" (dest), "r" (src)
    );
+#else
+  *dest = *src;
+#endif
 }
 
 float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 {
 	float ret=0;
 
-	/*	ret = (v0.x*v1.x + v0.y*v1.y + v0.z*v1.z);*/
-
+#ifdef _EE
 	__asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2 $vf1, 0(%1) \n"   // load 1 qword from ee
@@ -351,6 +393,9 @@ float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 #endif
    : "=r" (ret) : "r" (v0), "r" (v1)
    );
+#else
+  ret = (v0->x * v1->x + v0->y * v1->y + v0->z * v1->z);
+#endif
 
 	return ret;
 }

@@ -472,12 +472,16 @@ void _MPEG_SetDefQM(int arg0)
 
     q = (qword_t *)s_QmIntra;
     for (i = 0; i < 4; i++) {
+#ifdef _EE
         __asm__ __volatile__(
             "lq $2, 0(%0)    \n"
             "sq $2, 0(%1)    \n"
             :
             : "d"(&q[i]), "d"(A_EE_IPU_in_FIFO)
             : "2");
+#else
+        *(qword_t *)A_EE_IPU_in_FIFO = q[i];
+#endif
     }
 
     *R_EE_IPU_CMD = IPU_COMMAND_SETIQ;
@@ -486,12 +490,16 @@ void _MPEG_SetDefQM(int arg0)
 
     q = (qword_t *)s_QmNonIntra;
     for (i = 0; i < 4; i++) {
+#ifdef _EE
         __asm__ __volatile__(
             "lq $2, 0(%0)    \n"
             "sq $2, 0(%1)    \n"
             :
             : "d"(&q[i]), "d"(A_EE_IPU_in_FIFO)
             : "2");
+#else
+        *(qword_t *)A_EE_IPU_in_FIFO = q[i];
+#endif
     }
 
     *R_EE_IPU_CMD = IPU_COMMAND_SETIQ | 0x08000000;

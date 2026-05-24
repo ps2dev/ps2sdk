@@ -18,6 +18,7 @@
  /* VECTOR FUNCTIONS */
 
  void vector_apply(VECTOR output, VECTOR input0, MATRIX input1) {
+#ifdef _EE
   __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%2)	\n"
@@ -45,6 +46,18 @@
    : : "r" (output), "r" (input0), "r" (input1)
    : "memory"
   );
+#else
+  int i;
+  memset(output, 0, sizeof(VECTOR));
+  for (i = 0; i < 4; i += 1)
+  {
+    int j;
+    for (j = 0; j < 4; j += 1)
+    {
+      output[j] += input1[(4 * i) + j] * (i != 3 ? input0[i] : 1.0f);
+    }
+  }
+#endif
  }
 
  void vector_clamp(VECTOR output, VECTOR input0, float min, float max) {
@@ -71,6 +84,7 @@
  }
 
  void vector_copy(VECTOR output, VECTOR input0) {
+#ifdef _EE
   __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%1)	\n"
@@ -82,6 +96,9 @@
    : : "r" (output), "r" (input0)
    : "memory"
   );
+#else
+  memcpy(output, input0, sizeof(VECTOR));
+#endif
  }
 
  float vector_innerproduct(VECTOR input0, VECTOR input1) {
@@ -119,6 +136,7 @@
  }
 
  void vector_normalize(VECTOR output, VECTOR input0) {
+#ifdef _EE
   __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%1)	\n"
@@ -146,9 +164,18 @@
    : : "r" (output), "r" (input0)
    : "memory"
   );
+#else
+  float q;
+  q = 1.0f / sqrtf((input0[0] * input0[0]) + (input0[1] * input0[1]) + (input0[2] * input0[2]));
+  output[0] = input0[0] * q;
+  output[1] = input0[1] * q;
+  output[2] = input0[2] * q;
+  output[3] = 0.0f;
+#endif
  }
 
  void vector_outerproduct(VECTOR output, VECTOR input0, VECTOR input1) {
+#ifdef _EE
   __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%1)	\n"
@@ -168,6 +195,12 @@
    : : "r" (output), "r" (input0), "r" (input1)
    : "memory"
   );
+#else
+  output[0] = input0[1] * input1[2] - input1[1] * input0[2];
+  output[1] = input0[2] * input1[0] - input1[2] * input0[0];
+  output[2] = input0[0] * input1[1] - input1[0] * input0[1];
+  output[3] = 0.0f;
+#endif
  }
  
  void vector_add(VECTOR sum, VECTOR addend, VECTOR summand) {
@@ -205,6 +238,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
  /* MATRIX FUNCTIONS */
 
  void matrix_copy(MATRIX output, MATRIX input0) {
+#ifdef _EE
   __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%1)  \n"
@@ -228,6 +262,9 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
    : : "r" (output), "r" (input0)
    : "memory"
   );
+#else
+  memcpy(output, input0, sizeof(MATRIX));
+#endif
  }
 
  void matrix_inverse(MATRIX output, MATRIX input0) {
@@ -249,6 +286,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
  }
 
  void matrix_multiply(MATRIX output, MATRIX input0, MATRIX input1) {
+#ifdef _EE
   __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%1)	\n"
@@ -312,6 +350,22 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
    : : "r" (output), "r" (input0), "r" (input1)
    : "memory"
   );
+#else
+  int i;
+  memset(output, 0, sizeof(MATRIX));
+  for (i = 0; i < 4; i += 1)
+  {
+    int j;
+    for (j = 0; j < 4; j += 1)
+    {
+      int k;
+      for (k = 0; k < 4; k += 1)
+      {
+        output[(4 * i) + k] = input1[(4 * j) + k] * input0[(4 * i) + j];
+      }
+    }
+  }
+#endif
  }
 
  void matrix_rotate(MATRIX output, MATRIX input0, VECTOR input1) {
@@ -476,6 +530,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
  /* CALCULATE FUNCTIONS */
 
  void calculate_normals(VECTOR *output, int count, VECTOR *normals, MATRIX local_light) {
+#ifdef _EE
   __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%3)	\n"
@@ -519,6 +574,26 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
    : "+r" (output), "+r" (count), "+r" (normals) : "r" (local_light)
    : "memory"
   );
+#else
+  int i;
+  for (i = 0; i < count; i += 1)
+  {
+    int j;
+    memset(output[i], 0, sizeof(output[i]));
+    for (j = 0; j < 4; j += 1)
+    {
+      int k;
+      for (k = 0; k < 4; k += 1)
+      {
+        output[i][k] += local_light[(4 * j) + k] * (j != 3 ? normals[i][j] : 1.0f);
+      }
+    }
+    for (j = 0; j < 4; j += 1)
+    {
+      output[i][j] *= 1.0f / output[i][3];
+    }
+  }
+#endif
  }
 
  void calculate_lights(VECTOR *output, int count, VECTOR *normals, VECTOR *light_direction, VECTOR *light_colour, const int *light_type, int light_count) {
@@ -587,6 +662,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
  }
 
  void calculate_vertices(VECTOR *output, int count, VECTOR *vertices, MATRIX local_screen) {
+#ifdef _EE
   __asm__ __volatile__ (
 #if __GNUC__ > 3
    "lqc2		$vf1, 0x00(%3)	\n"
@@ -649,4 +725,47 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
    : "+r" (output), "+r" (count), "+r" (vertices) : "r" (local_screen)
    : "$10", "memory"
   );
+#else
+  int i;
+  for (i = 0; i < count; i += 1)
+  {
+    int j;
+    int clipped;
+    memset(output[i], 0, sizeof(output[i]));
+    for (j = 0; j < 4; j += 1)
+    {
+      int k;
+      for (k = 0; k < 4; k += 1)
+      {
+        output[i][k] += local_screen[(4 * j) + k] * (j != 3 ? vertices[i][j] : 1.0f);
+      }
+    }
+    clipped = 0;
+    for (j = 0; j < 3; j += 1)
+    {
+      // Note on differing behavior: vclipw will shift clip flag to the left 6 bits
+      // However, in this implementation, the leftover high bits are not saved or checked
+      if ((output[i][j] > fabsf(output[i][3])) || (output[i][j] < -fabsf(output[i][3])))
+      {
+        clipped = 1;
+        break;
+      }
+    }
+    if (clipped)
+    {
+      for (j = 0; j < 3; j += 1)
+      {
+        output[i][j] *= 0.0f;
+      }
+      output[i][3] = 1.0f;
+    }
+    else
+    {
+      for (j = 0; j < 3; j += 1)
+      {
+        output[i][j] *= 1.0f / output[i][3];
+      }
+    }
+  }
+#endif
  }

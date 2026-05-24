@@ -40,6 +40,7 @@ MEMORY {
 */
 
 static void wipe_bramMem(void) {
+#ifdef _EE
 	int i;
 	for (i = 0x00084000; i < 0x100000; i += 64) {
 		__asm__ __volatile__(
@@ -48,6 +49,9 @@ static void wipe_bramMem(void) {
 			"\tsq $0, 32(%0) \n"
 			"\tsq $0, 48(%0) \n" ::"r"(i));
 	}
+#else
+	memset((void *)0x00084000, 0, 0x100000 - 0x00084000);
+#endif
 }
 
 int LoadELFFromFileWithPartition(const char *filename, const char *partition, int argc, char *argv[]) {
