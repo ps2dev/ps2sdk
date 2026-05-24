@@ -17,7 +17,7 @@
 int analize_arguments(const Opttable *dopttable, int argc, char **argv)
 {
 	Opt_strings *optstr;
-	const char *opt;
+	char *opt;
 	Opttable *otp;
 	Opttable *igadd;
 	Opttable *opttable;
@@ -128,7 +128,7 @@ int analize_arguments(const Opttable *dopttable, int argc, char **argv)
 							opttable->option = opt;
 							opttable->vartype = 'n';
 							opttable->havearg = ARG_HAVEARG_UNK3;
-							cp = strchr(opttable->option, ':');
+							cp = strchr(opt, ':');
 							if ( cp )
 							{
 								*cp = 0;
