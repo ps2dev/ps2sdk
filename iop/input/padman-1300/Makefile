@@ -6,19 +6,12 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_IMPORT_INCS += \
-	security/secrman \
-	sio/sio2man \
-	system/loadcore \
-	system/sifcmd \
-	system/sifman \
-	system/stdio \
-	system/sysclib \
-	system/threadman
+IOP_BIN_ALTNAMES = padman-old.irx
 
-IOP_OBJS = secrsif.o imports.o exports.o
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/input/padman/src/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/iop/Rules.bin.make
-include $(PS2SDKSRC)/iop/Rules.make
-include $(PS2SDKSRC)/iop/Rules.release
+IOP_BIN ?= padman-1300.irx
+
+PADMAN_BUILDING_XPADMAN ?= 0
+
+include $(PS2SDKSRC)/iop/input/padman/Makefile

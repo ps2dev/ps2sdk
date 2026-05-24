@@ -8,10 +8,11 @@
 
 IOP_BIN_ALTNAMES =
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/padman/src/
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/sio/sio2man/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/sio/sio2man/include/
 
-IOP_BIN ?= padman-old.irx
+IOP_BIN ?= sio2log.irx
 
-PADMAN_BUILDING_XPADMAN ?= 0
+SIO2MAN_ENABLE_LOGGING ?= 1
 
-include $(PS2SDKSRC)/iop/system/padman/Makefile
+include $(PS2SDKSRC)/iop/sio/sio2man/Makefile

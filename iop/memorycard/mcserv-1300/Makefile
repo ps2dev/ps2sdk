@@ -6,13 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN_ALTNAMES =
+IOP_BIN_ALTNAMES = mcserv-old.irx
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/sio2man/src/
-IOP_INC_DIR = $(PS2SDKSRC)/iop/system/sio2man/include/
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/memorycard/mcserv/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/memorycard/mcserv/include/
 
-IOP_BIN ?= sio2log.irx
+IOP_BIN ?= mcserv-1300.irx
 
-SIO2MAN_ENABLE_LOGGING ?= 1
+MCMAN_BUILDING_XMCSERV ?= 0
 
-include $(PS2SDKSRC)/iop/system/sio2man/Makefile
+include $(PS2SDKSRC)/iop/memorycard/mcserv/Makefile
