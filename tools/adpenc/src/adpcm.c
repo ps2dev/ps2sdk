@@ -204,8 +204,8 @@ static void find_predict( short *samples, double *d_samples, int *predict_nr, in
             if ( fabs( ds ) > max[i] )
                 max[i] = fabs( ds );
 //                printf( "%+5.2f\n", s2 );
-                s_2 = s_1;                                  // new s[t-2]
-                s_1 = s_0;                                  // new s[t-1]
+            s_2 = s_1;                                  // new s[t-2]
+            s_1 = s_0;                                  // new s[t-1]
         }
 
         if ( max[i] < min ) {
