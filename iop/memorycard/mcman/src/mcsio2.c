@@ -15,6 +15,10 @@
 static flash_info_t dev9_flash_info;
 #endif
 
+#ifdef BUILDING_DONGLEMAN
+int sema_hakama_id = 0;
+#endif
+
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 static sio2_transfer_data_t mcman_sio2packet;	// buffer for mcman sio2 packet
 static u8 mcman_wdmabufs[0x0b * 0x90];		// buffer array for SIO2 DMA I/O (write)
@@ -493,8 +497,10 @@ int mcman_eraseblock(int port, int slot, int block, void **pagebuf, void *eccbuf
 #endif
 	} while (++retries < 5);
 
-	if (retries >= 5)
+	if (retries >= 5) {
+        HAKAMA_SIGNALSEMA();
 		return sceMcResChangedCard;
+    }
 
 	if (pagebuf && eccbuf) { // This part leave the first ecc byte of each block page in eccbuf
 		mcman_wmemset(eccbuf, 32, 0);
@@ -536,13 +542,12 @@ int mcman_eraseblock(int port, int slot, int block, void **pagebuf, void *eccbuf
         }
 	} while (++retries < 100);
 
-    HAKAMA_SIGNALSEMA(); //El_isra: Original impl has two semas (still commented there) replaced with one for simplicity
 	if (p[3] == 0x66) {
-        //HAKAMA_SIGNALSEMA();
+        HAKAMA_SIGNALSEMA();
 		return sceMcResFailReplace;
     }
 #endif
-    //HAKAMA_SIGNALSEMA();
+    HAKAMA_SIGNALSEMA();
 	return sceMcResNoFormat;
 }
 
@@ -635,15 +640,15 @@ int McWritePage(int port, int slot, int page, void *pagebuf, void *eccbuf) // Ex
 	} while (++retries < 5);
 
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
-    HAKAMA_SIGNALSEMA(); // El_isra: simplify original impl
 	if (p[3] == 0x66) {
-        //HAKAMA_SIGNALSEMA();
+        HAKAMA_SIGNALSEMA();
 		return sceMcResFailReplace;
     }
 
-    //HAKAMA_SIGNALSEMA();
+    HAKAMA_SIGNALSEMA();
 	return sceMcResNoFormat;
 #else
+    HAKAMA_SIGNALSEMA();
 	return sceMcResFailReplace;
 #endif
 }
@@ -653,6 +658,9 @@ int mcman_readpage(int port, int slot, int page, void *buf, void *eccbuf)
 {
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	register int index, count, retries, r, i;
+
+    HAKAMA_WAITSEMA();
+
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 	u8 *pbuf = (u8 *)buf;
 	u8 *pecc = (u8 *)eccbuf;
@@ -716,8 +724,10 @@ int mcman_readpage(int port, int slot, int page, void *buf, void *eccbuf)
 
 	} while (++retries < 5);
 
-	if (retries < 5)
+	if (retries < 5) {
+        HAKAMA_SIGNALSEMA();
 		return sceMcResSucceed;
+    }
 #elif defined(BUILDING_VMCMAN)
 	if (!mcman_iomanx_backing_read(port, slot, page, buf, eccbuf)) {
 		return sceMcResSucceed;
@@ -740,6 +750,7 @@ int mcman_readpage(int port, int slot, int page, void *buf, void *eccbuf)
 		return sceMcResSucceed;
 	}
 #endif
+    HAKAMA_SIGNALSEMA();
 	return sceMcResChangedCard;
 }
 
@@ -795,8 +806,8 @@ int McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsi
 		*flags |= CF_USE_ECC;
 #endif
 	DPRINTF("McGetCardSpec sio2cmd pagesize=%d blocksize=%u cardsize=%d flags%x\n", *pagesize, *blocksize, *cardsize, *flags);
-    HAKAMA_SIGNALSEMA();
 
+    HAKAMA_SIGNALSEMA();
 	return sceMcResSucceed;
 }
 
@@ -936,19 +947,19 @@ int mcman_probePS2Card(int port, int slot) //2
         DPRINTF("mcman_probePS2Card: SecrAuthDongle(2, %d, %d)\n", slot, mcman_getcnum(port, slot));
         if (SecrAuthDongle(2, slot, mcman_getcnum(port, slot)) == 0) {
             DPRINTF("mcman_probePS2Card SecrAuthDongle Failed\n");
-
+            HAKAMA_SIGNALSEMA();
             return sceMcResFailAuth;
         }
     }
 	else if (SecrAuthCard(port + 2, slot, mcman_getcnum(port, slot)) == 0) {
 	    	DPRINTF("mcman_probePS2Card sio2cmd failed (auth failed)\n");
-
+            HAKAMA_SIGNALSEMA();
 	    	return sceMcResFailAuth;
 	    }
 #else
 	    if (SecrAuthCard(port + 2, slot, mcman_getcnum(port, slot)) == 0) {
 	    	DPRINTF("mcman_probePS2Card sio2cmd failed (auth failed)\n");
-
+            HAKAMA_SIGNALSEMA();
 	    	return sceMcResFailAuth;
 	    }
 #endif
@@ -967,6 +978,7 @@ int mcman_probePS2Card(int port, int slot) //2
 
 	if (retries >= 5) {
 		DPRINTF("mcman_probePS2Card sio2cmd failed (mc detection failed)\n");
+        HAKAMA_SIGNALSEMA();
 		return sceMcResFailDetect;
 	}
 #endif
@@ -991,11 +1003,12 @@ int mcman_probePS2Card(int port, int slot) //2
 
 	if (retries >= 5) {
 		DPRINTF("mcman_probePS2Card sio2cmd failed (mc detection failed)\n");
-
+        HAKAMA_SIGNALSEMA();
 		return sceMcResFailDetect2;
 	}
 #endif
 
+    HAKAMA_SIGNALSEMA(); //Here we signal before returning bc devinfo will internally read a page, wich also waits for hakama
 	r = mcman_setdevinfos(port, slot);
 	if (r == 0) {
 		DPRINTF("mcman_probePS2Card sio2cmd card changed!\n");
@@ -1007,7 +1020,7 @@ int mcman_probePS2Card(int port, int slot) //2
 	}
 
 	DPRINTF("mcman_probePS2Card sio2cmd succeeded\n");
-
+    HAKAMA_SIGNALSEMA();
 	return r;
 }
 
