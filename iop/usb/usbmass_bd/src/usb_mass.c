@@ -47,7 +47,6 @@ typedef struct _mass_dev
     unsigned char status;
     unsigned char interfaceNumber; // interface number
     unsigned char interfaceAlt;    // interface alternate setting
-    int ioSema;
     struct scsi_interface scsi;
 } mass_dev;
 
@@ -74,7 +73,7 @@ static sceUsbdLddOps driver;
 
 typedef struct _usb_callback_data
 {
-    int sema;
+    int thid;
     int returnCode;
     int returnSize;
 } usb_callback_data;
@@ -83,7 +82,7 @@ typedef struct _usb_callback_data
 
 typedef struct _usb_transfer_callback_data
 {
-    int sema;
+    int thid;
     int pipe;
     u8 *buffer;
     int returnCode;
@@ -107,7 +106,7 @@ static void usb_callback(int resultCode, int bytes, void *arg)
     data->returnCode        = resultCode;
     data->returnSize        = bytes;
     M_DEBUG("callback: res %d, bytes %d, arg %p \n", resultCode, bytes, arg);
-    SignalSema(data->sema);
+    WakeupThread(data->thid);
 }
 
 #ifndef ASYNC
@@ -141,10 +140,10 @@ static void usb_transfer_callback(int resultCode, int bytes, void *arg)
         ret = perform_bulk_transfer(data);
         if (ret != USB_RC_OK) {
             data->returnCode = ret;
-            SignalSema(data->sema);
+            WakeupThread(data->thid);
         }
     } else {
-        SignalSema(data->sema);
+        WakeupThread(data->thid);
     }
 }
 #endif
@@ -154,15 +153,16 @@ static int usb_set_configuration(mass_dev *dev, int configNumber)
     int ret;
     usb_callback_data cb_data;
 
-    cb_data.sema = dev->ioSema;
+    cb_data.thid = GetThreadId();
 
     M_DEBUG("setting configuration controlEp=%i, confNum=%i \n", dev->controlEp, configNumber);
     ret = sceUsbdSetConfiguration(dev->controlEp, configNumber, usb_callback, (void *)&cb_data);
 
     if (ret == USB_RC_OK) {
-        WaitSema(cb_data.sema);
+        SleepThread();
         ret = cb_data.returnCode;
     }
+    cb_data.thid = -1;
 
     return ret;
 }
@@ -172,15 +172,16 @@ static int usb_set_interface(mass_dev *dev, int interface, int altSetting)
     int ret;
     usb_callback_data cb_data;
 
-    cb_data.sema = dev->ioSema;
+    cb_data.thid = GetThreadId();
 
     M_DEBUG("setting interface controlEp=%i, interface=%i altSetting=%i\n", dev->controlEp, interface, altSetting);
     ret = sceUsbdSetInterface(dev->controlEp, interface, altSetting, usb_callback, (void *)&cb_data);
 
     if (ret == USB_RC_OK) {
-        WaitSema(cb_data.sema);
+        SleepThread();
         ret = cb_data.returnCode;
     }
+    cb_data.thid = -1;
 
     return ret;
 }
@@ -190,7 +191,7 @@ static int usb_bulk_clear_halt(mass_dev *dev, int endpoint)
     int ret;
     usb_callback_data cb_data;
 
-    cb_data.sema = dev->ioSema;
+    cb_data.thid = GetThreadId();
 
     ret = sceUsbdClearEndpointFeature(
         dev->controlEp, // Config pipe
@@ -200,9 +201,10 @@ static int usb_bulk_clear_halt(mass_dev *dev, int endpoint)
         (void *)&cb_data);
 
     if (ret == USB_RC_OK) {
-        WaitSema(cb_data.sema);
+        SleepThread();
         ret = cb_data.returnCode;
     }
+    cb_data.thid = -1;
     if (ret != USB_RC_OK) {
         M_DEBUG("ERROR: sending clear halt %d\n", ret);
     }
@@ -216,7 +218,7 @@ static void usb_bulk_reset(mass_dev *dev, int mode)
     int ret;
     usb_callback_data cb_data;
 
-    cb_data.sema = dev->ioSema;
+    cb_data.thid = GetThreadId();
 
     // Call Bulk only mass storage reset
     ret = sceUsbdControlTransfer(
@@ -231,9 +233,10 @@ static void usb_bulk_reset(mass_dev *dev, int mode)
         (void *)&cb_data);
 
     if (ret == USB_RC_OK) {
-        WaitSema(cb_data.sema);
+        SleepThread();
         ret = cb_data.returnCode;
     }
+    cb_data.thid = -1;
     if (ret == USB_RC_OK) {
         // clear bulk-in endpoint
         if (mode & 0x01)
@@ -255,7 +258,7 @@ static int usb_bulk_status(mass_dev *dev, csw_packet *csw, unsigned int tag)
     int ret;
     usb_callback_data cb_data;
 
-    cb_data.sema = dev->ioSema;
+    cb_data.thid = GetThreadId();
 
     csw->signature   = CSW_TAG;
     csw->tag         = tag;
@@ -270,7 +273,7 @@ static int usb_bulk_status(mass_dev *dev, csw_packet *csw, unsigned int tag)
         (void *)&cb_data);
 
     if (ret == USB_RC_OK) {
-        WaitSema(cb_data.sema);
+        SleepThread();
         ret = cb_data.returnCode;
 
 #ifdef DEBUG
@@ -281,6 +284,7 @@ static int usb_bulk_status(mass_dev *dev, csw_packet *csw, unsigned int tag)
         M_DEBUG("bulk csw result: %d, csw.status: %i\n", ret, csw->status);
 #endif
     }
+    cb_data.thid = -1;
 
     return ret;
 }
@@ -324,7 +328,7 @@ static int usb_bulk_get_max_lun(struct scsi_interface *scsi)
     usb_callback_data cb_data;
     char max_lun;
 
-    cb_data.sema = dev->ioSema;
+    cb_data.thid = GetThreadId();
 
     // Call Bulk only mass storage reset
     ret = sceUsbdControlTransfer(
@@ -339,9 +343,10 @@ static int usb_bulk_get_max_lun(struct scsi_interface *scsi)
         (void *)&cb_data);
 
     if (ret == USB_RC_OK) {
-        WaitSema(cb_data.sema);
+        SleepThread();
         ret = cb_data.returnCode;
     }
+    cb_data.thid = -1;
     if (ret == USB_RC_OK) {
         ret = max_lun;
     } else {
@@ -363,6 +368,7 @@ struct usbmass_cmd
     csw_packet csw;
     int cmd_count;
 
+    int thid;
     int returnCode;
 };
 
@@ -377,7 +383,7 @@ static int usb_bulk_command(mass_dev *dev, cbw_packet *packet)
         return -1;
     }
 
-    cb_data.sema = dev->ioSema;
+    cb_data.thid = GetThreadId();
 
     ret = sceUsbdBulkTransfer(
         dev->bulkEpO, // bulk output pipe
@@ -387,9 +393,10 @@ static int usb_bulk_command(mass_dev *dev, cbw_packet *packet)
         (void *)&cb_data);
 
     if (ret == USB_RC_OK) {
-        WaitSema(cb_data.sema);
+        SleepThread();
         ret = cb_data.returnCode;
     }
+    cb_data.thid = -1;
     if (ret != USB_RC_OK) {
         M_DEBUG("ERROR: sending bulk command %d. Calling reset recovery.\n", ret);
         usb_bulk_reset(dev, 3);
@@ -403,7 +410,7 @@ static int usb_bulk_transfer(mass_dev *dev, int direction, void *buffer, unsigne
     int ret;
     usb_transfer_callback_data cb_data;
 
-    cb_data.sema       = dev->ioSema;
+    cb_data.thid       = GetThreadId();
     cb_data.pipe       = (direction == USB_BLK_EP_IN) ? dev->bulkEpI : dev->bulkEpO;
     cb_data.buffer     = buffer;
     cb_data.returnCode = 0;
@@ -411,9 +418,10 @@ static int usb_bulk_transfer(mass_dev *dev, int direction, void *buffer, unsigne
 
     ret = perform_bulk_transfer(&cb_data);
     if (ret == USB_RC_OK) {
-        WaitSema(cb_data.sema);
+        SleepThread();
         ret = cb_data.returnCode;
     }
+    cb_data.thid = -1;
 
     if (ret != USB_RC_OK) {
         M_DEBUG("ERROR: bulk data transfer %d. Clearing HALT state.\n", ret);
@@ -436,7 +444,7 @@ static void scsi_cmd_callback(int resultCode, int bytes, void *arg)
     if ((resultCode != USB_RC_OK) || (ucmd->cmd_count == 0)) {
         // TODO: handle error in an async way (cannot block in usb callback)
         ucmd->returnCode = resultCode;
-        SignalSema(dev->ioSema);
+        WakeupThread(ucmd->thid);
     }
 }
 #endif
@@ -490,19 +498,24 @@ int usb_queue_cmd(struct scsi_interface *scsi, const unsigned char *cmd, unsigne
 
     return result;
 #else
+    ucmd.thid = GetThreadId();
     // Send the CBW (command)
     ucmd.cmd_count++;
     result = sceUsbdBulkTransfer(dev->bulkEpO, &ucmd.cbw, 31, scsi_cmd_callback, (void *)&ucmd);
-    if (result != USB_RC_OK)
+    if (result != USB_RC_OK) {
+        ucmd.thid = -1;
         return -EIO;
+    }
 
     // Send/Receive data
     while (data_len > 0) {
         unsigned int tr_len = (data_len < USB_BLOCK_SIZE) ? data_len : USB_BLOCK_SIZE;
         ucmd.cmd_count++;
         result = sceUsbdBulkTransfer(data_wr ? dev->bulkEpO : dev->bulkEpI, data, tr_len, scsi_cmd_callback, (void *)&ucmd);
-        if (result != USB_RC_OK)
+        if (result != USB_RC_OK) {
+            ucmd.thid = -1;
             return -EIO;
+        }
         data_len -= tr_len;
         data += tr_len;
     }
@@ -510,11 +523,14 @@ int usb_queue_cmd(struct scsi_interface *scsi, const unsigned char *cmd, unsigne
     // Receive CSW (status)
     ucmd.cmd_count++;
     result = sceUsbdBulkTransfer(dev->bulkEpI, &ucmd.csw, 13, scsi_cmd_callback, (void *)&ucmd);
-    if (result != USB_RC_OK)
+    if (result != USB_RC_OK) {
+        ucmd.thid = -1;
         return -EIO;
+    }
 
     // Wait for SCSI command to finish
-    WaitSema(dev->ioSema);
+    SleepThread();
+    ucmd.thid = -1;
     if (ucmd.returnCode != USB_RC_OK)
         return -EIO;
 
@@ -621,7 +637,6 @@ static int usb_mass_connect(int devId)
     UsbConfigDescriptor *config;
     UsbInterfaceDescriptor *interface;
     UsbEndpointDescriptor *endpoint;
-    iop_sema_t SemaData;
     mass_dev *dev;
 
     M_PRINTF("connect: devId=%i\n", devId);
@@ -671,15 +686,6 @@ static int usb_mass_connect(int devId)
         return -1;
     }
 
-    SemaData.initial = 0;
-    SemaData.max     = 1;
-    SemaData.option  = 0;
-    SemaData.attr    = 0;
-    if ((dev->ioSema = CreateSema(&SemaData)) < 0) {
-        M_PRINTF("ERROR: Failed to allocate I/O semaphore\n");
-        return -1;
-    }
-
     /*store current configuration id - can't call set_configuration here */
     dev->configId = config->bConfigurationValue;
     dev->status   = USBMASS_DEV_STAT_CONN;
@@ -722,8 +728,6 @@ static int usb_mass_disconnect(int devId)
     if (dev->status & USBMASS_DEV_STAT_CONN) {
         usb_mass_release(dev);
         dev->devId = -1;
-
-        DeleteSema(dev->ioSema);
 
         // Should this move to the thread
         // just like the scsi_connect?
