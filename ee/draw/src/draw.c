@@ -351,7 +351,11 @@ unsigned char draw_log2(unsigned int x)
 
 	unsigned char res;
 
+#ifdef _EE
 	__asm__ __volatile__ ("plzcw %0, %1\n\t" : "=r" (res) : "r" (x));
+#else
+	res = __builtin_clrsb(x);
+#endif
 
 	res = 31 - (res + 1);
 	res += (x > (unsigned int)(1<<res) ? 1 : 0);

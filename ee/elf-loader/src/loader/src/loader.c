@@ -60,6 +60,7 @@
 //--------------------------------------------------------------
 static void wipeUserMem(void)
 {
+#ifdef _EE
 	int i;
 	for (i = 0x100000; i < GetMemorySize(); i += 64) {
 		__asm__ __volatile__(
@@ -68,6 +69,9 @@ static void wipeUserMem(void)
 			"\tsq $0, 32(%0) \n"
 			"\tsq $0, 48(%0) \n" ::"r"(i));
 	}
+#else
+	memset((void *)0x100000, 0, GetMemorySize() - 0x100000);
+#endif
 }
 
 //--------------------------------------------------------------

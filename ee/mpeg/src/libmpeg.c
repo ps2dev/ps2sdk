@@ -13,6 +13,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <kernel.h>
+#ifndef _EE
+// for MIN / MAX macros
+#include <sys/param.h>
+#endif
 
 #include "libmpeg.h"
 #include "ee_regs.h"
@@ -882,6 +886,7 @@ static void _mpeg12_get_ref(_MPEGMacroBlock8 *apMBSrc, int aX, int anY,
 
     afAvg <<= 2;
 
+#ifdef _EE
     __asm__ __volatile__(
         "pnor     $v1, $zero, $zero \n"
         "ld       $v0, %4           \n"
@@ -893,6 +898,10 @@ static void _mpeg12_get_ref(_MPEGMacroBlock8 *apMBSrc, int aX, int anY,
         "sll      %0, %0, 0         \n"
         : "=r"(lMBX), "=r"(lMBY) : "r"(lMBX), "r"(lMBY), "m"(s_MPEG12Ctx.m_MBWidth)
         : "v0", "v1");
+#else
+    lMBX = MIN(MAX(lMBX, 0), s_MPEG12Ctx.m_MBWidth - 1);
+    lMBY = MIN(MAX(lMBY, 0), s_MPEG12Ctx.m_MBWidth - 1);
+#endif
 
     lpMotion->m_pSrc     = (unsigned char *)(apMBSrc + lMBX + lMBY * s_MPEG12Ctx.m_MBWidth);
     lpMotion->m_pDstY    = (short *)(s_MPEG12Ctx.m_pCurMotions->m_pSPRRes + (aFDst << 5));
