@@ -163,6 +163,7 @@ struct libmc_interface_data_stru
 enum MC_INTERFACE
 {
 	MC_INTERFACE_SIO2 = 0,
+	MC_INTERFACE_DEV9,
 	MC_INTERFACE_MAX,
 };
 
@@ -356,6 +357,9 @@ static int libmc_rpc_init(const libmc_target_desc_t *target)
 	case MC_INTERFACE_SIO2:
 	default:
 		rpc_id = 0x80000400;
+		break;
+	case MC_INTERFACE_DEV9:
+		rpc_id = 0x80000480;
 		break;
 	}
 
@@ -1036,5 +1040,190 @@ int mcReset(void)
 	libmc_target_desc_t target;
 
 	libmc_setup_target(&target, MC_INTERFACE_SIO2, 0, 0, 0);
+	return libmc_rpc_reset(&target);
+}
+
+int xfromInit(int type)
+{
+	libmc_target_desc_t target;
+
+	(void)type;
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, 0, 0, 0);
+	return libmc_rpc_init(&target);
+}
+
+int xfromGetInfo(int port, int slot, int* type, int* free, int* format)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_get_info(&target, type, free, format);
+}
+
+int xfromOpen(int port, int slot, const char *name, int mode)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_open(&target, name, mode);
+}
+
+int xfromClose(int fd)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, 0, 0, fd);
+	return libmc_rpc_close(&target);
+}
+
+int xfromSeek(int fd, int offset, int origin)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, 0, 0, fd);
+	return libmc_rpc_seek(&target, offset, origin);
+}
+
+int xfromRead(int fd, void *buffer, int size)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, 0, 0, fd);
+	return libmc_rpc_read(&target, buffer, size);
+}
+
+int xfromWrite(int fd, const void *buffer, int size)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, 0, 0, fd);
+	return libmc_rpc_write(&target, buffer, size);
+}
+
+int xfromFlush(int fd)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, 0, 0, fd);
+	return libmc_rpc_flush(&target);
+}
+
+int xfromMkDir(int port, int slot, const char* name)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_mkdir(&target, name);
+}
+
+int xfromChdir(int port, int slot, const char* newDir, char* currentDir)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_chdir(&target, newDir, currentDir);
+}
+
+int xfromGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sceMcTblGetDir* table)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_getdir(&target, name, mode, maxent, table);
+}
+
+int xfromSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* info, unsigned flags)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_setfileinfo(&target, name, info, flags);
+}
+
+int xfromDelete(int port, int slot, const char *name)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_delete(&target, name);
+}
+
+int xfromFormat(int port, int slot)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_format(&target);
+}
+
+int xfromUnformat(int port, int slot)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_unformat(&target);
+}
+
+int xfromGetEntSpace(int port, int slot, const char* path)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_get_ent_space(&target, path);
+}
+
+int xfromRename(int port, int slot, const char* oldName, const char* newName)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_rename(&target, oldName, newName);
+}
+
+int xfromEraseBlock(int port, int slot, int block, int mode)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_erase_block(&target, block, mode);
+}
+
+int xfromReadPage(int port, int slot, unsigned int page, void *buffer)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_read_page(&target, page, buffer);
+}
+
+int xfromWritePage(int port, int slot, int page, const void *buffer)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, port, slot, 0);
+	return libmc_rpc_write_page(&target, page, buffer);
+}
+
+int xfromChangeThreadPriority(int level)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, 0, 0, 0);
+	return libmc_rpc_change_thread_priority(&target, level);
+}
+
+int xfromSync(int mode, int *cmd, int *result)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, 0, 0, 0);
+	return libmc_rpc_sync(&target, mode, cmd, result);
+}
+
+int xfromReset(void)
+{
+	libmc_target_desc_t target;
+
+	libmc_setup_target(&target, MC_INTERFACE_DEV9, 0, 0, 0);
 	return libmc_rpc_reset(&target);
 }
