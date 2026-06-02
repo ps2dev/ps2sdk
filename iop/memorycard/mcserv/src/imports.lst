@@ -23,7 +23,11 @@ I_CpuResumeIntr
 intrman_IMPORTS_end
 
 #ifdef BUILDING_XMCSERV
+#ifdef BUILDING_XFROMSERV
+xfromman_IMPORTS_start
+#else
 xmcman_IMPORTS_start
+#endif
 I_McDetectCard
 I_McOpen
 I_McClose
@@ -53,7 +57,11 @@ I_McGetFormat
 I_McGetEntSpace
 I_McGetModuleInfo
 I_McCheckBlock
+#ifdef BUILDING_XFROMSERV
+xfromman_IMPORTS_end
+#else
 xmcman_IMPORTS_end
+#endif
 #else
 mcman_IMPORTS_start
 I_McDetectCard

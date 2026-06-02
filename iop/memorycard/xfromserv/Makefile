@@ -6,16 +6,14 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	dongleman \
-	mcman \
-	mcman-1300 \
-	mcman-1400 \
-	mcserv \
-	mcserv-1300 \
-	vmcman \
-	xfromman \
-	xfromserv
+IOP_BIN_ALTNAMES = xfromsrv.irx xfrmserv.irx
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/memorycard/mcserv/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/memorycard/mcserv/include/
+
+IOP_BIN ?= xfromserv.irx
+
+MCMAN_BUILDING_XMCSERV ?= 1
+MCMAN_BUILDING_XFROMSERV ?= 1
+
+include $(PS2SDKSRC)/iop/memorycard/mcserv/Makefile
