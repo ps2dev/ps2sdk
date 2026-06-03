@@ -11,7 +11,7 @@ EE_LIB = libfileXio.a
 CORE_OBJS = erl-support.o
 
 FILEXIO_RPC_OBJS = \
-	__cd0.o __sbuff.o __intr_data.o __fileXioInited.o __fileXioBlockMode.o __fileXioCompletionSema.o __lock_sema_id.o \
+	__cd0.o __sbuff.o __intr_data.o __fileXioBlockMode.o __fileXioCompletionSema.o __lock_sema_id.o \
 	fileXioInit.o fileXioExit.o fileXioStop.o fileXioGetDeviceList.o fileXioGetdir.o fileXioMount.o fileXioUmount.o \
 	fileXioCopyfile.o fileXioMkdir.o fileXioRmdir.o fileXioRemove.o fileXioRename.o fileXioSymlink.o fileXioReadlink.o \
 	fileXioChdir.o fileXioOpen.o fileXioClose.o fileXioRead.o fileXioWrite.o fileXioLseek.o fileXioLseek64.o fileXioChStat.o \

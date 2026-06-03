@@ -14,12 +14,15 @@
 #include <iopheap.h>
 #include <stdio.h>
 #include <ps2snd.h>
+#include <iopcontrol.h>
 
 static SifRpcClientData_t sd_client ALIGNED(64);
 
 int sceSdInit(int flag)
 {
 	s32 buf[1] ALIGNED(64);
+	if (HasIopRebootedSinceLastCall())
+		memset(&sd_client, 0, sizeof(sd_client));
 
 	{
 

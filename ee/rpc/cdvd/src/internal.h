@@ -29,9 +29,6 @@ extern volatile int cbSema;
 extern int CdThreadId;
 extern ee_thread_status_t CdThreadParam;
 
-extern int bindNCmd;
-extern int bindSCmd;
-
 extern int nCmdSemaId;
 extern int sCmdSemaId;
 

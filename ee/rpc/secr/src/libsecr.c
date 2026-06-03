@@ -2,6 +2,7 @@
 #include <string.h>
 #include <kernel.h>
 #include <sifrpc.h>
+#include <iopcontrol.h>
 
 #include "libsecr.h"
 #include "secrsif.h"
@@ -20,6 +21,9 @@ static unsigned char RpcBuffer[0x1000] ALIGNED(64);
 
 int SecrInit(void)
 {
+    if (HasIopRebootedSinceLastCall())
+        SecrDeinit();
+
     sceSifInitRpc(0);
 
     nopdelay();

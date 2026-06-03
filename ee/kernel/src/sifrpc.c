@@ -21,6 +21,7 @@
 #include <kernel.h>
 #include <sifcmd.h>
 #include <sifrpc.h>
+#include <iopcontrol.h>
 
 #define RPC_PACKET_SIZE 64
 
@@ -50,7 +51,6 @@ struct rpc_data
     void *active_queue;
 } __attribute__((aligned(64)));
 
-extern int _iop_reboot_count;
 extern struct rpc_data _sif_rpc_data;
 
 void *_rpc_get_packet(struct rpc_data *rpc_data);
@@ -415,13 +415,10 @@ void sceSifInitRpc(int mode)
 
     (void)mode;
 
-    static int _rb_count = 0;
-    if (_rb_count != _iop_reboot_count) {
-        _rb_count = _iop_reboot_count;
+    if (HasIopRebootedSinceLastCall()) {
         sceSifExitCmd();
         init = 0;
     }
-
     if (init)
         return;
     init = 1;

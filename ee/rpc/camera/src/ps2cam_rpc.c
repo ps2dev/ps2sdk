@@ -14,6 +14,7 @@
 #include <sifrpc.h>
 #include <stdio.h>
 #include <string.h>
+#include <iopcontrol.h>
 #include "../include/ps2cam_rpc.h"
 
 
@@ -22,7 +23,6 @@
 
 
 
-static int					CamInited = 0;
 static SifRpcClientData_t	cdata			__attribute__((aligned(64)));
 static char					data[1024]		__attribute__((aligned(64)));
 static char					campacket[896]	__attribute__((aligned(64)));
@@ -41,7 +41,10 @@ int PS2CamInit(int mode)
 	// unsigned int i;
 	// int timeout = 100000;
 
-	if(CamInited)return 0;
+	if (HasIopRebootedSinceLastCall())
+		memset(&cdata, 0, sizeof(cdata));
+	if (cdata.server)
+		return 0;
 
 	sceSifInitRpc(0);
 
@@ -63,8 +66,6 @@ int PS2CamInit(int mode)
 
 	sceSifCallRpc(&cdata, PS2CAM_RPC_INITIALIZE, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
 	nopdelay();
-
-	CamInited = 1;
 
 printf("init done\n");
 

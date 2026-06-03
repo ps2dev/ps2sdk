@@ -20,34 +20,29 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <string.h>
+#include <iopcontrol.h>
 
 #include <loadfile.h>
 #include <iopheap.h>
 #include <fcntl.h>
 #include <unistd.h>
 
-extern int _iop_reboot_count;
 extern SifRpcClientData_t _lf_cd;
-extern int _lf_init;
 
 int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int fno);
 int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres);
 
 #if defined(F_SifLoadFileInit)
 SifRpcClientData_t _lf_cd;
-int _lf_init = 0;
 
 int SifLoadFileInit()
 {
     int res;
-    static int _rb_count = 0;
-    if (_rb_count != _iop_reboot_count) {
-        _rb_count = _iop_reboot_count;
-        memset(&_lf_cd, 0, sizeof _lf_cd);
-        _lf_init = 0;
-    }
 
-    if (_lf_init)
+    if (HasIopRebootedSinceLastCall())
+        SifLoadFileExit();
+
+    if (_lf_cd.server)
         return 0;
 
     sceSifInitRpc(0);
@@ -58,7 +53,6 @@ int SifLoadFileInit()
     if (res < 0)
         return -E_SIF_RPC_BIND;
 
-    _lf_init = 1;
     return 0;
 }
 #endif
@@ -66,7 +60,6 @@ int SifLoadFileInit()
 #if defined(F_SifLoadFileExit)
 void SifLoadFileExit()
 {
-    _lf_init = 0;
     memset(&_lf_cd, 0, sizeof _lf_cd);
 }
 #endif

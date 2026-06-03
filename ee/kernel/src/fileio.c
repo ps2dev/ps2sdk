@@ -21,13 +21,12 @@
 #define NEWLIB_PORT_AWARE
 #include <fileio.h>
 #include <string.h>
+#include <iopcontrol.h>
 #include <fileio-common.h>
 
 #define D(fmt, args...) printf("(%s:%s:%i):" #fmt, __FILE__, __FUNCTION__, __LINE__, ##args)
 
-extern int _iop_reboot_count;
 extern SifRpcClientData_t _fio_cd;
-extern int _fio_init;
 extern int _fio_block_mode;
 extern int _fio_io_sema;
 extern int _fio_completion_sema;
@@ -41,7 +40,6 @@ void _fio_intr();
 SifRpcClientData_t _fio_cd;
 int _fio_recv_data[512] __attribute__((aligned(64)));
 int _fio_intr_data[32] __attribute__((aligned(64)));
-int _fio_init = 0;
 int _fio_block_mode;
 int _fio_io_sema         = -1;
 int _fio_completion_sema = -1;
@@ -52,15 +50,10 @@ int fioInit(void)
 {
     int res;
     ee_sema_t sema;
-    static int _rb_count = 0;
-
-    if (_rb_count != _iop_reboot_count) {
-        _rb_count = _iop_reboot_count;
-
+    if (HasIopRebootedSinceLastCall())
         fioExit();
-    }
 
-    if (_fio_init)
+    if (_fio_cd.server)
         return 0;
 
     sceSifInitRpc(0);
@@ -87,7 +80,6 @@ int fioInit(void)
     if (_fio_io_sema < 0)
         return -E_LIB_SEMA_CREATE;
 
-    _fio_init       = 1;
     _fio_block_mode = FIO_WAIT;
 
     return 0;
@@ -151,8 +143,7 @@ void fioSetBlockMode(int blocking)
 #ifdef F_fio_exit
 void fioExit(void)
 {
-    if (_fio_init) {
-        _fio_init = 0;
+    if (_fio_cd.server) {
         memset(&_fio_cd, 0, sizeof _fio_cd);
         if (_fio_completion_sema >= 0) {
             DeleteSema(_fio_completion_sema);

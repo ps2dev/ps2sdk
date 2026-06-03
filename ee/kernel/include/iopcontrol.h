@@ -41,6 +41,20 @@ extern int SifIopIsAlive(void);
  */
 extern int SifIopSync(void);
 
+/**
+ * @return 1 if IOP reboot count has changed since last call or 0 if not
+ */
+static inline int HasIopRebootedSinceLastCall(void)
+{
+    static int _rb_count;
+    extern int _iop_reboot_count;
+    if (_rb_count != _iop_reboot_count) {
+        _rb_count = _iop_reboot_count;
+        return 1;
+    }
+    return 0;
+}
+
 #ifdef __cplusplus
 }
 #endif

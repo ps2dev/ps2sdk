@@ -18,11 +18,12 @@
 #include <sifrpc.h>
 #include <kernel.h>
 #include <string.h>
+#include <iopcontrol.h>
 #include "librm.h"
 
 static SifRpcClientData_t rmmanif __attribute__((aligned(64)));
 static struct rmRpcPacket buffer __attribute__((aligned(64)));
-static int rmman_type = 0;
+static int rmman_type;
 
 struct port_state
 {
@@ -51,11 +52,19 @@ static struct rmEEData *rmGetDmaStr(int port, int slot)
     }
 }
 
+static void RMMan_Cleanup(void)
+{
+    memset(&rmmanif, 0, sizeof(rmmanif));
+    rmman_type = 0;
+}
+
 int RMMan_Init(void)
 {
     int i;
+    if (HasIopRebootedSinceLastCall())
+        RMMan_Cleanup();
 
-    if (rmman_type)
+    if (rmmanif.server)
     {
         printf("RMMan Library already initialised\n");
         return 0;

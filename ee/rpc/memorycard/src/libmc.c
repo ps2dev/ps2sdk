@@ -17,6 +17,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <string.h>
+#include <iopcontrol.h>
 #include "libmc.h"
 
 //#define MC_DEBUG
@@ -344,14 +345,8 @@ static int libmc_rpc_init(const libmc_target_desc_t *target)
 	int ret, err, rpc_id;
 	const mcRpcStat_t *rpcStat = (const mcRpcStat_t*)UNCACHED_SEG(&target->m_interface_data->m_rpc_rdata.m_rpcStat);
 
-	{
-		static int _rb_count;
-		extern int _iop_reboot_count;
-		if (_rb_count != _iop_reboot_count) {
-			_rb_count = _iop_reboot_count;
-			libmc_rpc_reset(NULL);
-		}
-	}
+	if (HasIopRebootedSinceLastCall())
+		libmc_rpc_reset(NULL);
 	switch (target->m_interface)
 	{
 	case MC_INTERFACE_SIO2:

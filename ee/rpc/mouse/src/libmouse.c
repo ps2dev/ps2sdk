@@ -18,6 +18,7 @@
 #include <sifrpc.h>
 #include <kernel.h>
 #include <string.h>
+#include <iopcontrol.h>
 #include "libmouse.h"
 
 static SifRpcClientData_t mouseif __attribute__((aligned(64)));
@@ -36,18 +37,18 @@ static union {
 	u32 data;
 	u32 time;
 } buffer __attribute__((aligned(64)));
-static int mouse_init = 0;
 
 int PS2MouseInit(void)
 
 {
-  if(mouse_init)
+  if (HasIopRebootedSinceLastCall())
+    memset(&mouseif, 0, sizeof(mouseif));
+
+  if(mouseif.server)
     {
       printf("PS2Mouse Library already initialised\n");
       return 0;
     }
-
-  mouseif.server = NULL;
 
   do {
     if (sceSifBindRpc(&mouseif, PS2MOUSE_BIND_RPC_ID, 0) < 0) {
@@ -55,8 +56,6 @@ int PS2MouseInit(void)
     }
     nopdelay();
   } while(!mouseif.server);
-
-  mouse_init = 1;
 
   return 1;
 }
