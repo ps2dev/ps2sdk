@@ -541,9 +541,12 @@ int mcman_eraseblock(int port, int slot, int block, void **pagebuf, void *eccbuf
         //HAKAMA_SIGNALSEMA();
 		return sceMcResFailReplace;
     }
-#endif
     //HAKAMA_SIGNALSEMA();
 	return sceMcResNoFormat;
+#else
+    //HAKAMA_SIGNALSEMA();
+	return sceMcResSucceed;
+#endif
 }
 
 //--------------------------------------------------------------
