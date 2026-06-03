@@ -22,8 +22,14 @@
 
 //#define DEBUG
 
+#ifdef BUILDING_XFROMSERV
+#define MODNAME "xfrmserv"
+// NOTE: feature level is at mcserv 0x208
+#define MODVER  0x301
+#else
 #define MODNAME "mcserv"
 #define MODVER  0x208
+#endif
 
 #ifdef SIO_DEBUG
 	#include <sior.h>

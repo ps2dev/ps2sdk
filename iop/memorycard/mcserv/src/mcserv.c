@@ -28,7 +28,15 @@ static mcRpcStat_t rpc_stat __attribute__((aligned(16)));
 #define MCSERV_BUFSIZE 8192
 static u8 mcserv_buf[MCSERV_BUFSIZE] __attribute__((aligned(16)));
 
+#ifdef BUILDING_XFROMSERV
+#define MCSERV_RPC_ID 0x80000480
+extern struct irx_export_table _exp_xfromsrv;
+#define MCSERV_EXPORT_TABLE (&_exp_xfromsrv)
+#else
+#define MCSERV_RPC_ID 0x80000400
 extern struct irx_export_table _exp_mcserv;
+#define MCSERV_EXPORT_TABLE (&_exp_mcserv)
+#endif
 
 //--------------------------------------------------------------
 int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
@@ -56,7 +64,7 @@ int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 		}
 
 		CpuSuspendIntr(&state);
-		release_res = ReleaseLibraryEntries(&_exp_mcserv);
+		release_res = ReleaseLibraryEntries(MCSERV_EXPORT_TABLE);
 		CpuResumeIntr(state);
 		if (release_res == 0 || release_res == -213)
 		{
@@ -71,7 +79,7 @@ int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 
 	// Register mcserv dummy export table
 	DPRINTF("registering exports...\n");
-	if (RegisterLibraryEntries(&_exp_mcserv) != 0)
+	if (RegisterLibraryEntries(MCSERV_EXPORT_TABLE) != 0)
 		goto err_out;
 
 	CpuEnableIntr();
@@ -111,7 +119,7 @@ void thread_rpc_S_0400(void* arg)
 
 	sceSifInitRpc(0);
 	sceSifSetRpcQueue(&mcserv_qdS_0400, GetThreadId());
-	sceSifRegisterRpc(&mcserv_sdS_0400, 0x80000400, (void *)cb_rpc_S_0400, &mcserv_rpc_buf, NULL, NULL, &mcserv_qdS_0400);
+	sceSifRegisterRpc(&mcserv_sdS_0400, MCSERV_RPC_ID, (void *)cb_rpc_S_0400, &mcserv_rpc_buf, NULL, NULL, &mcserv_qdS_0400);
 	sceSifRpcLoop(&mcserv_qdS_0400);
 }
 

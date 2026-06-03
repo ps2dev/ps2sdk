@@ -1,4 +1,16 @@
 
+#ifdef BUILDING_XFROMSERV
+DECLARE_EXPORT_TABLE(xfromsrv, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_dummy)
+	DECLARE_EXPORT(_dummy)
+	DECLARE_EXPORT(_dummy)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_dummy)
+	DECLARE_EXPORT(_dummy)
+	DECLARE_EXPORT(_dummy)
+END_EXPORT_TABLE
+#else
 DECLARE_EXPORT_TABLE(mcserv, 1, 1)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_dummy)
@@ -9,5 +21,6 @@ DECLARE_EXPORT_TABLE(mcserv, 1, 1)
 	DECLARE_EXPORT(_dummy)
 	DECLARE_EXPORT(_dummy)
 END_EXPORT_TABLE
+#endif
 
 void _dummy() {}

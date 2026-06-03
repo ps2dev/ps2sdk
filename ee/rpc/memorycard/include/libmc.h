@@ -459,6 +459,261 @@ extern int mcSync(int mode, int *cmd, int *result);
  */
 extern int mcReset(void);
 
+/** init external flash ROM lib
+ *
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromInit(int type);
+
+/** get external flash ROM state
+ * xfromSync result:    0 = same external flash ROM as last getInfo call
+ *                  -1 = formatted external flash ROM inserted since last getInfo call
+ *                  -2 = unformatted external flash ROM inserted since last getInfo call
+ *                  < -2 = external flash ROM access error (could be due to accessing psx external flash ROM)
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param type pointer to get external flash ROM type
+ * @param free pointer to get number of free clusters
+ * @param format pointer to get whether or not the external flash ROM is formatted
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromGetInfo(int port, int slot, int* type, int* free, int* format);
+
+/** open a file on external flash ROM
+ * xfromSync returns:  0 or more = file descriptor (success)
+ *                  < 0 = error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param name filename to open
+ * @param mode open file mode (O_RDWR, O_CREAT, etc)
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromOpen(int port, int slot, const char *name, int mode);
+
+/** close an open file on external flash ROM
+ * xfromSync returns:  0 if closed successfully
+ *                  < 0 = error
+ *
+ * @param fd file descriptor of open file
+ * @return 0 successful; < 0 = error
+ */
+extern int xfromClose(int fd);
+
+/** move external flash ROM file pointer
+ * xfromSync returns:  0 or more = offset of file pointer from start of file
+ *                  < 0 = error
+ *
+ * @param fd file descriptor
+ * @param offset number of bytes from origin
+ * @param origin initial position for offset
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromSeek(int fd, int offset, int origin);
+
+
+/** read from file on external flash ROM
+ * xfromSync returns:  0 or more = number of bytes read from external flash ROM
+ *                  < 0 = error
+ *
+ * @param fd file descriptor
+ * @param buffer buffer to read to
+ * @param size number of bytes to read
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromRead(int fd, void *buffer, int size);
+
+/** write to file on external flash ROM
+ * xfromSync returns:  0 or more = number of bytes written to external flash ROM
+ *                  < 0 = error
+ *
+ * @param fd file descriptor
+ * @param buffer to write from write
+ * @param size number of bytes to read
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromWrite(int fd, const void *buffer, int size);
+
+/** flush file cache to external flash ROM
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param fd file descriptor
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromFlush(int fd);
+
+/** create a dir
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param name directory name
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromMkDir(int port, int slot, const char* name);
+
+/** change current dir
+ * (can also get current dir)
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param newDir new dir to change to
+ * @param currentDir buffer to get current dir (use 0 if not needed)
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromChdir(int port, int slot, const char* newDir, char* currentDir);
+
+/** get external flash ROM filelist
+ * xfromSync result:    0 or more = number of file entries obtained (success)
+ *                  -2 = unformatted external flash ROM
+ *                  -4 = dirname error
+ *
+ * @param port port number of external flash ROM
+ * @param slot slot number of external flash ROM
+ * @param name filename to search for (can use wildcard and relative dirs)
+ * @param mode mode: 0 = first call, otherwise = followup call
+ * @param maxext maximum number of entries to be written to filetable in 1 call
+ * @param table external flash ROM table array
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sceMcTblGetDir* table);
+
+/** change file information
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param name filename to access
+ * @param info data to be changed
+ * @param flags flags to show which data is valid
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* info, unsigned flags);
+
+/** delete file
+ * xfromSync returns:  0 if deleted successfully
+ *                  < 0 if error
+ *
+ * @param port port number to delete from
+ * @param slot slot number to delete from
+ * @param name filename to delete
+ * @return 0 = successful; < 0 = error
+ */
+extern int xfromDelete(int port, int slot, const char *name);
+
+/** format external flash ROM
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @return 0 = success; -1 = error
+ */
+extern int xfromFormat(int port, int slot);
+
+/** unformat external flash ROM
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @return 0 = success; -1 = error
+ */
+extern int xfromUnformat(int port, int slot);
+
+/** get free space info
+ * xfromSync returns:  0 or more = number of free entries (success)
+ *                  < 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param path path to be checked
+ * @return 0 or more = number of empty entries; -1 = error
+ */
+extern int xfromGetEntSpace(int port, int slot, const char* path);
+
+/** rename file or dir on external flash ROM
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param oldName name of file/dir to rename
+ * @param newName new name to give to file/dir
+ * @return 1 = success; < 0 = error
+ */
+extern int xfromRename(int port, int slot, const char* oldName, const char* newName);
+
+/** Erases a block on the external flash ROM.
+ * Note: The current implementation of xfromserv does not support this.
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param block Block number of the block to be erased.
+ * @param mode Mode: -1 to inhibit ECC recalculation of the erased block's pages (useful if xfromWritePage is used to fill in its contents later on), 0 for normal operation.
+ * @return 0 = success; -1 = error
+ */
+extern int xfromEraseBlock(int port, int slot, int block, int mode);
+
+/** Reads a page from the external flash ROM.
+ * Note: The current implementation of xfromserv does not support this.
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param page Page number of the page to be read.
+ * @param buffer Pointer to buffer that will contain the read data.
+ * @return 0 = success; -1 = error
+ */
+extern int xfromReadPage(int port, int slot, unsigned int page, void *buffer);
+
+/** Writes a page to the external flash ROM. (The block which the page resides on must be erased first!)
+ * Note: The current implementation of xfromserv does not support this.
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param page Page number of the page to be written.
+ * @param buffer Pointer to buffer containing data to be written.
+ * @return 0 = success; -1 = error
+ */
+extern int xfromWritePage(int port, int slot, int page, const void *buffer);
+
+/** change xfromserv thread priority
+ * (I don't think this is implemented properly)
+ * xfromSync returns:  0 if ok
+ *                  < 0 if error
+ *
+ * @param level thread priority
+ * @return 0 = success; -1 = error
+ */
+extern int xfromChangeThreadPriority(int level);
+
+/** wait for external flash ROM functions to finish or check if they have finished yet
+ *
+ * @param mode mode 0=wait till function finishes, 1=check function status
+ * @param cmd pointer for storing the number of the currenlty processing function
+ * @param result pointer for storing result of function if it finishes
+ * @return 0 = function is still executing (mode=1); 1 = function has finished executing; -1 = no function registered
+ */
+extern int xfromSync(int mode, int *cmd, int *result);
+
+/** Reset (force deinit) of library
+ *
+ * @return 0 = success
+ */
+extern int xfromReset(void);
+
 #ifdef __cplusplus
 }
 #endif

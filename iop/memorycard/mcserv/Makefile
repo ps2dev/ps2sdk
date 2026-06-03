@@ -11,6 +11,9 @@ IOP_BIN_ALTNAMES ?= mcserv-1400.irx mcserv-2000.irx
 # Build the newer version of the memory card server module?
 MCMAN_BUILDING_XMCSERV ?= 1
 
+# Build the external flash ROM server module?
+MCMAN_BUILDING_XFROMSERV ?= 0
+
 # IOP_CFLAGS += -DSIO_DEBUG -DDEBUG
 
 IOP_IMPORT_INCS += \
@@ -28,6 +31,10 @@ IOP_OBJS = exports.o mcserv.o imports.o
 
 ifneq (x$(MCMAN_BUILDING_XMCSERV),x0)
 IOP_CFLAGS += -DBUILDING_XMCSERV
+endif
+
+ifneq (x$(MCMAN_BUILDING_XFROMSERV),x0)
+IOP_CFLAGS += -DBUILDING_XFROMSERV
 endif
 
 include $(PS2SDKSRC)/Defs.make

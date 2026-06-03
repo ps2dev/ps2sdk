@@ -1,21 +1,16 @@
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Copyright (c) 2009 jimmikaelkael
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
+*/
 
-SUBDIRS = \
-	dongleman \
-	mcman \
-	mcman-1300 \
-	mcman-1400 \
-	mcserv \
-	mcserv-1300 \
-	vmcman \
-	xfromman \
-	xfromserv
+#ifndef __XFROMMAN_H__
+#define __XFROMMAN_H__
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+#include <mcman.h>
+
+#endif /* __XFROMMAN_H__ */
