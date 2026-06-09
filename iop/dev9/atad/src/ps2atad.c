@@ -1222,21 +1222,38 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
     u32 total_sectors_nonlba48, total_sectors_lba48;
 
     /* Probe devices */
-    for (i = 0; i < 2; i++) {
+    if (!ata_dvrp_workaround) {
+        for (i = 0; i < 2; i++) {
+            if ((res = sceAtaSoftReset()) != 0)
+                return res;
+
+            ata_device_select(i);
+            if (ata_hwport->r_control & 0xff)
+                ata_device_probe(&devinfo[i]);
+            else
+                devinfo[i].exists = 0;
+        }
+    } else {
         if ((res = sceAtaSoftReset()) != 0)
             return res;
 
-        ata_device_select(i);
-        if (ata_hwport->r_control & 0xff)
-            ata_device_probe(&devinfo[i]);
-        else
-            devinfo[i].exists = 0;
+        ata_device_probe(&devinfo[0]);
     }
 
     if (!devinfo[0].exists) {
         M_PRINTF("Error: Unable to detect HDD 0.\n");
         devinfo[1].exists = 0;
         return ATA_RES_ERR_NODEV; // Returns 0 in v1.04.
+    }
+
+    if (ata_dvrp_workaround) {
+        /* If there is a device 1, grab it's info too.  */
+        if ((res = ata_device_select(1)) != 0)
+            return res;
+        if (ata_hwport->r_control & 0xff)
+            ata_device_probe(&devinfo[1]);
+        else
+            devinfo[1].exists = 0;
     }
 
 #ifdef ATA_USE_DEV9
