@@ -9,7 +9,6 @@
 
 #include "mx4sio.h"
 #include "crc16.h"
-#include "ioplib.h"
 #include "sio2man_hook.h"
 #include "sio2regs.h"
 #include "spi_sdcard_driver.h"
@@ -723,9 +722,8 @@ const uint8_t reverse_byte_LUT8[256] = {
     0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff};
 
 /* module */
-int module_start(int argc, char *argv[])
+static int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-    iop_library_t *lib_modload;
     iop_event_t event;
     iop_thread_t thread;
     int rv;
@@ -740,6 +738,7 @@ int module_start(int argc, char *argv[])
     (void)argc;
     (void)argv;
 #endif
+    (void)startaddr;
 
     /* create default transfer descriptor */
     mx_sio2_init_td(&global_td);
@@ -793,17 +792,10 @@ int module_start(int argc, char *argv[])
         goto error4;
     }
 
-    lib_modload = ioplib_getByName("modload");
-    if (lib_modload != NULL) {
-        M_DEBUG("modload 0x%x detected\n", lib_modload->version);
-        // Newer modload versions allow modules to be unloaded
-        // Let modload know we support unloading
-        if (lib_modload->version > 0x102)
-            return MODULE_REMOVABLE_END;
-    } else {
-        M_DEBUG("modload not detected!\n");
-    }
-
+    // If modload has certain flags set indicating new version,
+    // set the unloadable flag
+    if (mi && ((mi->newflags & 2) != 0))
+        mi->newflags |= 0x10;
     return MODULE_RESIDENT_END;
 
 error4:
@@ -816,7 +808,7 @@ error1:
     return MODULE_NO_RESIDENT_END;
 }
 
-int module_stop(int argc, char *argv[])
+static int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
 #ifndef MINI_DRIVER
     int i;
@@ -828,6 +820,8 @@ int module_stop(int argc, char *argv[])
     (void)argc;
     (void)argv;
 #endif
+    (void)startaddr;
+    (void)mi;
 
     DeleteThread(sd_detect_thread_id);
     sio2man_hook_deinit();
@@ -836,12 +830,12 @@ int module_stop(int argc, char *argv[])
     return MODULE_NO_RESIDENT_END;
 }
 
-int _start(int argc, char *argv[])
+int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
     M_PRINTF("MX4SIO v1.2\n");
 
     if (argc >= 0)
-        return module_start(argc, argv);
+        return module_start(argc, argv, startaddr, mi);
     else
-        return module_stop(-argc, argv);
+        return module_stop(-argc, argv, startaddr, mi);
 }

@@ -1,6 +1,20 @@
+/*
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# taken from MX4SIO driver for simplicity.
+# all credits go to maximus32
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <thsemap.h>
+#include <intrman.h>
 
 #include "ioplib.h"
 #include "sio2man.h"
@@ -10,204 +24,237 @@
 #include "module_debug.h"
 
 #define PORT_NR 3
-
-static int lock_sema      = -1;
-static int lock_sema2     = -1;
-static u16 hooked_version = 0;
-
+#ifndef M_DEBUG
+#define M_DEBUG DPRINTF
+#endif
 
 // sio2man function typedefs
 typedef void (*psio2_transfer_init)(void);
 typedef int (*psio2_transfer)(sio2_transfer_data_t *td);
 typedef void (*psio2_transfer_reset)(void);
 
-// Original sio2man function pointers
-psio2_transfer_init _23_psio2_pad_transfer_init;
-psio2_transfer_init _24_psio2_mc_transfer_init;
-psio2_transfer_init _46_psio2_pad_transfer_init;
-psio2_transfer_init _47_psio2_mc_transfer_init;
-psio2_transfer_init _48_psio2_mtap_transfer_init;
-psio2_transfer_init _49_psio2_rm_transfer_init;
-psio2_transfer_init _50_psio2_unk_transfer_init;
-psio2_transfer _25_psio2_transfer;
-psio2_transfer _51_psio2_transfer;
-psio2_transfer_reset _26_psio2_transfer_reset;
-psio2_transfer_reset _52_psio2_transfer_reset;
-
-// Generic sio2man init function
-static void _sio2_transfer_init(psio2_transfer_init init_func)
+struct sio2man_hook_data
 {
-    //M_DEBUG("%s\n", __FUNCTION__);
+    iop_library_t *m_lib;
+    // Original sio2man function pointers
+    psio2_transfer_init m_23_psio2_pad_transfer_init;
+#ifdef PORT_NR
+    psio2_transfer m_25_psio2_transfer;
+#endif
+    psio2_transfer_reset m_26_psio2_transfer_reset;
+};
 
-    WaitSema(lock_sema);
-    init_func();
-}
+static struct sio2man_hook_data g_hook_data[2];
+static iop_library_t *g_loadcore_lib;
+#if SIO2MAN_HOOK_SUPPORT_SET_INTR_HANDLER
+static iop_library_t *g_intrman_lib;
+static int (*g_sio2man_intr_handler_ptr)(void *arg);
+static void *g_sio2man_intr_arg_ptr;
+#endif
 
+#ifdef PORT_NR
+static sio2_transfer_data_t g_null_td;
 // Generic sio2man transfer function
 static int _sio2_transfer(psio2_transfer transfer_func, sio2_transfer_data_t *td)
 {
-    int rv, i;
+    unsigned int i;
 
     //M_DEBUG("%s\n", __FUNCTION__);
 
     // Do not allow transfers to/from our used port
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < (sizeof(td->regdata)/sizeof(td->regdata[0])); i++) {
         // Last transfer, we're ok.
         if (td->regdata[i] == 0)
             break;
 
-        // Wrong port, abort.
+        // Wrong port; behave as a no-op.
+        // This will allow the transfer reset behavior for old library to work.
         if ((td->regdata[i] & 3) == PORT_NR)
-            return 1;
+            return transfer_func(&g_null_td);
     }
 
-    WaitSema(lock_sema2);
-    rv = transfer_func(td);
-    SignalSema(lock_sema2);
-
-    return rv;
-}
-
-// Generic sio2man transfer_reset function
-static void _sio2_transfer_reset(psio2_transfer_reset reset_func)
-{
-    //M_DEBUG("%s\n", __FUNCTION__);
-
-    reset_func();
-    SignalSema(lock_sema);
+    return transfer_func(td);
 }
 
 // Hooked sio2man functions
-static void _23_sio2_pad_transfer_init() { _sio2_transfer_init(_23_psio2_pad_transfer_init); }
-static void _24_sio2_mc_transfer_init() { _sio2_transfer_init(_24_psio2_mc_transfer_init); }
-static void _46_sio2_pad_transfer_init() { _sio2_transfer_init(_46_psio2_pad_transfer_init); }
-static void _47_sio2_mc_transfer_init() { _sio2_transfer_init(_47_psio2_mc_transfer_init); }
-static void _48_sio2_mtap_transfer_init() { _sio2_transfer_init(_48_psio2_mtap_transfer_init); }
-static void _49_sio2_rm_transfer_init() { _sio2_transfer_init(_49_psio2_rm_transfer_init); }
-static void _50_sio2_unk_transfer_init() { _sio2_transfer_init(_50_psio2_unk_transfer_init); }
-static void _26_sio2_transfer_reset() { _sio2_transfer_reset(_26_psio2_transfer_reset); }
-static void _52_sio2_transfer_reset() { _sio2_transfer_reset(_52_psio2_transfer_reset); }
-static int  _25_sio2_transfer(sio2_transfer_data_t *td) { return _sio2_transfer(_25_psio2_transfer, td); }
-static int  _51_sio2_transfer(sio2_transfer_data_t *td) { return _sio2_transfer(_51_psio2_transfer, td); }
+static int _1_25_sio2_transfer(sio2_transfer_data_t *td) { return _sio2_transfer(g_hook_data[0].m_25_psio2_transfer, td); }
+static int _2_25_sio2_transfer(sio2_transfer_data_t *td) { return _sio2_transfer(g_hook_data[1].m_25_psio2_transfer, td); }
+#endif
 
-static void _sio2man_unhook(iop_library_t *lib)
-{
-    if (hooked_version == 0) {
-        M_DEBUG("Warning: trying to unhook sio2man while not hooked\n");
-        return;
-    }
-
-    ioplib_hookExportEntry(lib, 23, _23_psio2_pad_transfer_init);
-    ioplib_hookExportEntry(lib, 24, _24_psio2_mc_transfer_init);
-    ioplib_hookExportEntry(lib, 25, _25_psio2_transfer);
-    ioplib_hookExportEntry(lib, 26, _26_psio2_transfer_reset);
-    ioplib_hookExportEntry(lib, 46, _46_psio2_pad_transfer_init);
-    ioplib_hookExportEntry(lib, 47, _47_psio2_mc_transfer_init);
-    ioplib_hookExportEntry(lib, 48, _48_psio2_mtap_transfer_init);
-
-    if ((hooked_version >= IRX_VER(1, 2)) && (hooked_version < IRX_VER(2, 0))) {
-        // Only for the newer rom0:XSIO2MAN
-        // Assume all v1.x libraries to use this interface (reset at 50)
-        ioplib_hookExportEntry(lib, 49, _51_psio2_transfer);
-        ioplib_hookExportEntry(lib, 50, _52_psio2_transfer_reset);
-    } else /*if (hooked_version >= IRX_VER(2, 3))*/ {
-        // Only for the newer rom1:SIO2MAN
-        // Assume all v2.x libraries to use this interface (reset at 52)
-        ioplib_hookExportEntry(lib, 49, _49_psio2_rm_transfer_init);
-        ioplib_hookExportEntry(lib, 50, _50_psio2_unk_transfer_init);
-        ioplib_hookExportEntry(lib, 51, _51_psio2_transfer);
-        ioplib_hookExportEntry(lib, 52, _52_psio2_transfer_reset);
-    }
-
-    hooked_version = 0;
-}
+static void unhook_loadcore(void);
+#if SIO2MAN_HOOK_SUPPORT_SET_INTR_HANDLER
+static void unhook_intrman(void);
+#endif
 
 static void _sio2man_hook(iop_library_t *lib)
 {
-    if (hooked_version != 0) {
-        M_DEBUG("Warning: trying to hook sio2man version 0x%x\n", lib->version);
-        M_DEBUG("         while version 0x%x already hooked\n", hooked_version);
-        return;
-    }
+    int state;
 
-    // Only the newer sio2man libraries (with reset functions) are supported
-    if (lib->version > IRX_VER(1, 1)) {
-        M_DEBUG("Installing sio2man hooks for version 0x%x\n", lib->version);
+    // Disable interrupts to prevent race conditions with MC/PAD libraries
+    CpuSuspendIntr(&state);
+    // Only the newest sio2man libraries (using one semaphore for locks for all devices) are supported
+    switch (lib->version)
+    {
+        case IRX_VER(1, 2):
+        case IRX_VER(2, 7):
+        {
+            int major_version;
 
-        _23_psio2_pad_transfer_init  = ioplib_hookExportEntry(lib, 23, _23_sio2_pad_transfer_init);
-        // Lock sio2 to prevent race conditions with MC/PAD libraries
-        _23_psio2_pad_transfer_init();
+            M_DEBUG("Installing sio2man hooks for version 0x%x\n", lib->version);
 
-        _24_psio2_mc_transfer_init   = ioplib_hookExportEntry(lib, 24, _24_sio2_mc_transfer_init);
-        _25_psio2_transfer           = ioplib_hookExportEntry(lib, 25, _25_sio2_transfer);
-        _26_psio2_transfer_reset     = ioplib_hookExportEntry(lib, 26, _26_sio2_transfer_reset);
-        _46_psio2_pad_transfer_init  = ioplib_hookExportEntry(lib, 46, _46_sio2_pad_transfer_init);
-        _47_psio2_mc_transfer_init   = ioplib_hookExportEntry(lib, 47, _47_sio2_mc_transfer_init);
-        _48_psio2_mtap_transfer_init = ioplib_hookExportEntry(lib, 48, _48_sio2_mtap_transfer_init);
-
-        if ((lib->version >= IRX_VER(1, 2)) && (lib->version < IRX_VER(2, 0))) {
-            // Only for the newer rom0:XSIO2MAN
-            // Assume all v1.x libraries to use this interface (reset at 50)
-            _51_psio2_transfer       = ioplib_hookExportEntry(lib, 49, _51_sio2_transfer);
-            _52_psio2_transfer_reset = ioplib_hookExportEntry(lib, 50, _52_sio2_transfer_reset);
-        } else /*if (lib->version >= IRX_VER(2, 3))*/ {
-            // Only for the newer rom1:SIO2MAN
-            // Assume all v2.x libraries to use this interface (reset at 52)
-            _49_psio2_rm_transfer_init  = ioplib_hookExportEntry(lib, 49, _49_sio2_rm_transfer_init);
-            _50_psio2_unk_transfer_init = ioplib_hookExportEntry(lib, 50, _50_sio2_unk_transfer_init);
-            _51_psio2_transfer          = ioplib_hookExportEntry(lib, 51, _51_sio2_transfer);
-            _52_psio2_transfer_reset    = ioplib_hookExportEntry(lib, 52, _52_sio2_transfer_reset);
+            major_version = ((lib->version >> 8) & 0xFF);
+            if (g_hook_data[major_version - 1].m_lib) {
+                M_DEBUG("Warning: trying to hook sio2man version 0x%x\n", lib->version);
+                M_DEBUG("         while version 0x%x already hooked\n", g_hook_data[major_version - 1].m_lib->version);
+            }
+            g_hook_data[major_version - 1].m_lib = lib;
+            g_hook_data[major_version - 1].m_23_psio2_pad_transfer_init  = lib->exports[23];
+#ifdef PORT_NR
+            g_hook_data[major_version - 1].m_25_psio2_transfer           = ioplib_hookSameExportEntries(lib, 25, (major_version == 1) ? &_1_25_sio2_transfer : &_2_25_sio2_transfer);
+#endif
+            g_hook_data[major_version - 1].m_26_psio2_transfer_reset     = lib->exports[26];
+#ifdef PORT_NR
+            ioplib_relinkExports(lib);
+#endif
+            break;
         }
-
-        // Unlock sio2
-        _26_psio2_transfer_reset();
-
-        hooked_version = lib->version;
-    } else {
-        M_DEBUG("ERROR: sio2man version 0x%x not supported\n", lib->version);
+        default:
+        {
+            M_DEBUG("ERROR: sio2man version 0x%x not supported\n", lib->version);
+            break;
+        }
     }
+    if (g_hook_data[0].m_lib && g_hook_data[1].m_lib)
+        unhook_loadcore();
+    CpuResumeIntr(state);
 }
 
-int (*pRegisterLibraryEntries)(iop_library_t *lib);
+#if SIO2MAN_HOOK_SUPPORT_SET_INTR_HANDLER
+// intrman hook
+static int (*pRegisterIntrHandler)(int irq, int mode, int (*handler)(void *), void *arg);
+static int hookRegisterIntrHandler(int irq, int mode, int (*handler)(void *), void *arg)
+{
+    int ret;
+    M_DEBUG("RegisterIntrHandler irq: %i, handler @ 0x%p\n", irq, handler);
+
+    ret = pRegisterIntrHandler(irq, mode, handler, arg);
+    // If handler already exists or other error, then do not save handler
+    if (ret)
+        return ret;
+    // SIO2 interrupt
+    if (irq == IOP_IRQ_SIO2 && !g_sio2man_intr_handler_ptr) {
+        g_sio2man_intr_handler_ptr = handler;
+        g_sio2man_intr_arg_ptr = arg;
+        M_DEBUG("Got SIO2MAN intr handler @ 0x%p, arg @ 0x%p\n", handler, arg);
+        unhook_intrman();
+    }
+    return ret;
+}
+#endif
+
+// loadcore hook
+static int (*pRegisterLibraryEntries)(iop_library_t *lib);
 static int hookRegisterLibraryEntries(iop_library_t *lib)
 {
+    int ret;
     M_DEBUG("RegisterLibraryEntries: %s 0x%x\n", lib->name, lib->version);
 
+    ret = pRegisterLibraryEntries(lib);
+    // If library already exists or other error, then do not hook
+    if (ret)
+        return ret;
     if (!strcmp(lib->name, "sio2man"))
         _sio2man_hook(lib);
+    return ret;
+}
 
-    return pRegisterLibraryEntries(lib);
+static void unhook_loadcore(void)
+{
+    int state;
+
+    CpuSuspendIntr(&state);
+    if (g_loadcore_lib) {
+        if (pRegisterLibraryEntries)
+            ioplib_hookSameExportEntries(g_loadcore_lib, 6, pRegisterLibraryEntries);
+        g_loadcore_lib = NULL;
+    }
+    CpuResumeIntr(state);
+}
+
+#if SIO2MAN_HOOK_SUPPORT_SET_INTR_HANDLER
+static void unhook_intrman(void)
+{
+    int state;
+
+    CpuSuspendIntr(&state);
+    if (g_intrman_lib) {
+        if (pRegisterIntrHandler)
+            ioplib_hookSameExportEntries(g_intrman_lib, 4, pRegisterIntrHandler);
+        g_intrman_lib = NULL;
+    }
+    CpuResumeIntr(state);
+}
+#endif
+
+static int generic_hook_iterate_cb(iop_library_t *lib, void *userdata)
+{
+    (void)userdata;
+    if (userdata && !*(iop_library_t **)userdata)
+        *(iop_library_t **)userdata = lib;
+    return 1;
+}
+
+static int sio2man_hook_iterate_cb(iop_library_t *lib, void *userdata)
+{
+    (void)userdata;
+    switch ((lib->version >> 8) & 0xFF)
+    {
+        case 1:
+        case 2:
+        {
+            _sio2man_hook(lib);
+            return (g_hook_data[0].m_lib && g_hook_data[1].m_lib) ? 1 : 0;
+        }
+        default:
+            return 1;
+    }
 }
 
 int sio2man_hook_init()
 {
-    iop_sema_t sema;
-    iop_library_t *lib;
-
     M_DEBUG("%s\n", __FUNCTION__);
 
-    // Create semaphore for locking sio2man exclusively
-    sema.attr    = 1;
-    sema.initial = 1;
-    sema.max     = 1;
-    sema.option  = 0;
-    lock_sema    = CreateSema(&sema);
-    lock_sema2   = CreateSema(&sema);
+#if SIO2MAN_HOOK_SUPPORT_SET_INTR_HANDLER
+    {
+        intrman_internals_t *intrman_internals;
 
-    // Hook into 'loadcore' so we know when sio2man is loaded in the future
-    lib = ioplib_getByName("loadcore");
-    if (lib == NULL) {
-        DeleteSema(lock_sema);
-        DeleteSema(lock_sema2);
-        return -1;
+        intrman_internals = GetIntrmanInternalData();
+        // Get sio2man intr handler
+        g_sio2man_intr_handler_ptr = intrman_internals->interrupt_handler_table[IOP_IRQ_SIO2].handler;
+        g_sio2man_intr_arg_ptr = intrman_internals->interrupt_handler_table[IOP_IRQ_SIO2].userdata;
     }
-    pRegisterLibraryEntries = ioplib_hookExportEntry(lib, 6, hookRegisterLibraryEntries);
+#endif
 
     // Hook into 'sio2man' now if it's already loaded
-    lib = ioplib_getByName("sio2man");
-    if (lib != NULL) {
-        _sio2man_hook(lib);
-        ioplib_relinkExports(lib);
+    if (!ioplib_iterateByName("sio2man", &sio2man_hook_iterate_cb, NULL)) {
+        // Hook into 'loadcore' so we know when sio2man is loaded in the future
+        ioplib_iterateByName("loadcore", &generic_hook_iterate_cb, &g_loadcore_lib);
+#if SIO2MAN_HOOK_SUPPORT_SET_INTR_HANDLER
+        // Hook into 'intrman' so we can get its handlers when they are registered
+        ioplib_iterateByName("intrman", &generic_hook_iterate_cb, &g_intrman_lib);
+#endif
+        if (!g_loadcore_lib)
+            return -1;
+#if SIO2MAN_HOOK_SUPPORT_SET_INTR_HANDLER
+        if (!g_intrman_lib)
+            return -1;
+#endif
+        pRegisterLibraryEntries = ioplib_hookSameExportEntries(g_loadcore_lib, 6, hookRegisterLibraryEntries);
+        ioplib_relinkExports(g_loadcore_lib);
+#if SIO2MAN_HOOK_SUPPORT_SET_INTR_HANDLER
+        pRegisterIntrHandler = ioplib_hookSameExportEntries(g_intrman_lib, 4, hookRegisterIntrHandler);
+        ioplib_relinkExports(g_intrman_lib);
+#endif
     }
 
     return 0;
@@ -215,35 +262,54 @@ int sio2man_hook_init()
 
 void sio2man_hook_deinit()
 {
-    iop_library_t *lib;
+    unsigned int i;
 
     M_DEBUG("%s\n", __FUNCTION__);
 
     // Unhook 'sio2man'
-    lib = ioplib_getByName("sio2man");
-    if (lib != NULL) {
-        _sio2man_unhook(lib);
-        ioplib_relinkExports(lib);
+    for (i = 0; i < (sizeof(g_hook_data)/sizeof(g_hook_data[0])); i += 1) {
+        if (g_hook_data[i].m_lib) {
+#ifdef PORT_NR
+            if (g_hook_data[i].m_25_psio2_transfer) {
+                ioplib_hookSameExportEntries(g_hook_data[i].m_lib, 25, g_hook_data[i].m_25_psio2_transfer);
+                g_hook_data[i].m_25_psio2_transfer = NULL;
+            }
+            ioplib_relinkExports(g_hook_data[i].m_lib);
+#endif
+            g_hook_data[i].m_lib = NULL;
+        }
     }
 
-    // Unhook 'loadcore'
-    ioplib_hookExportEntry(lib, 6, pRegisterLibraryEntries);
-
-    // Delete locking semaphore
-    DeleteSema(lock_sema);
-    DeleteSema(lock_sema2);
+    unhook_loadcore();
+#if SIO2MAN_HOOK_SUPPORT_SET_INTR_HANDLER
+    unhook_intrman();
+#endif
 }
 
 void sio2man_hook_sio2_lock()
 {
     // Lock sio2man driver so we can use it exclusively
-    WaitSema(lock_sema);
-    WaitSema(lock_sema2);
+    if (g_hook_data[1].m_23_psio2_pad_transfer_init)
+        g_hook_data[1].m_23_psio2_pad_transfer_init();
 }
 
 void sio2man_hook_sio2_unlock()
 {
     // Unlock sio2man driver
-    SignalSema(lock_sema2);
-    SignalSema(lock_sema);
+    if (g_hook_data[1].m_26_psio2_transfer_reset)
+        g_hook_data[1].m_26_psio2_transfer_reset();
 }
+
+#if SIO2MAN_HOOK_SUPPORT_SET_INTR_HANDLER
+void sio2man_hook_sio2_set_intr_handler(int (*handler)(void *userdata), void *userdata)
+{
+    intrman_internals_t *intrman_internals;
+    int state;
+
+    intrman_internals = GetIntrmanInternalData();
+    CpuSuspendIntr(&state);
+    intrman_internals->interrupt_handler_table[IOP_IRQ_SIO2].handler = handler ? handler : g_sio2man_intr_handler_ptr;
+    intrman_internals->interrupt_handler_table[IOP_IRQ_SIO2].userdata = handler ? userdata : g_sio2man_intr_arg_ptr;
+    CpuResumeIntr(state);    
+}
+#endif
