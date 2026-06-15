@@ -19,6 +19,7 @@
 #include <tamtypes.h>
 #include <string.h>
 #include <iopheap.h>
+#include <iopcontrol.h>
 
 #include <audsrv.h>
 #include "audsrv_rpc.h"
@@ -34,7 +35,6 @@ static unsigned char rpc_server_stack[0x1800] __attribute__((aligned (16)));
 
 extern void *_gp;
 
-static int initialized = 0;
 static int rpc_server_thread_id;
 static int audsrv_error = AUDSRV_ERR_NOERROR;
 static int completion_sema;
@@ -331,13 +331,14 @@ int audsrv_init()
 	ee_thread_t rpcThread;
 	int ret;
 
-	if (initialized)
+	if (HasIopRebootedSinceLastCall())
+		memset(&cd0, 0, sizeof(cd0));
+
+	if (cd0.server)
 	{
 		/* already done */
 		return 0;
 	}
-
-	memset(&cd0, '\0', sizeof(cd0));
 
 	while (1)
 	{

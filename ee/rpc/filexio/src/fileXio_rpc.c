@@ -23,12 +23,11 @@
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <ps2sdkapi.h>
+#include <iopcontrol.h>
 
 #define NEWLIB_PORT_AWARE
 #include <fileXio_rpc.h>
 #include <errno.h>
-
-extern int _iop_reboot_count;
 
 void _ps2sdk_fileXio_init();
 void _ps2sdk_fileXio_deinit();
@@ -49,12 +48,6 @@ extern unsigned int __sbuff[0x1300] __attribute__((aligned (64)));
 int __intr_data[0xC00] __attribute__((aligned(64)));
 #else
 extern int __intr_data[0xC00] __attribute__((aligned(64)));
-#endif
-
-#ifdef F___fileXioInited
-int __fileXioInited = 0;
-#else
-extern int __fileXioInited;
 #endif
 
 #ifdef F___fileXioBlockMode
@@ -95,16 +88,11 @@ int fileXioInit(void)
 {
 	int res;
 	ee_sema_t sp;
-	static int _rb_count = 0;
 
-	if(_rb_count != _iop_reboot_count)
-	{
-		_rb_count = _iop_reboot_count;
-
+	if (HasIopRebootedSinceLastCall())
 		fileXioExit();
-	}
 
-	if(__fileXioInited)
+	if(__cd0.server)
 	{
 		return 0;
 	}
@@ -127,7 +115,6 @@ int fileXioInit(void)
 	if (__fileXioCompletionSema < 0)
 		return -1;
 
-	__fileXioInited = 1;
 	__fileXioBlockMode = FXIO_WAIT;
 
 	_ps2sdk_fileXio_init();
@@ -139,7 +126,7 @@ int fileXioInit(void)
 #ifdef F_fileXioExit
 void fileXioExit(void)
 {
-	if(__fileXioInited)
+	if(__cd0.server)
 	{
 		if(__lock_sema_id >= 0) DeleteSema(__lock_sema_id);
 		if(__fileXioCompletionSema >= 0) DeleteSema(__fileXioCompletionSema);
@@ -147,7 +134,6 @@ void fileXioExit(void)
 		memset(&__cd0, 0, sizeof(__cd0));
 
 		_ps2sdk_fileXio_deinit();
-		__fileXioInited = 0;
 	}
 }
 #endif

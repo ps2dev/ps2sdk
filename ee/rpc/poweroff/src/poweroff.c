@@ -16,6 +16,7 @@
 #include <kernel.h>
 #include <string.h>
 #include <sifrpc.h>
+#include <iopcontrol.h>
 #include <pwroff_rpc.h>
 
 extern void *_gp;
@@ -25,7 +26,6 @@ static void *poweroff_data           = NULL;
 
 static u8 poffThreadStack[512 * 16] __attribute__((aligned(16)));
 
-extern int _iop_reboot_count;
 static SifRpcClientData_t cd0;
 static struct t_SifRpcDataQueue cb_queue;
 static struct t_SifRpcServerData cb_srv;
@@ -65,11 +65,12 @@ int poweroffInit(void)
 {
     ee_thread_t thread;
     int res;
-    static int _init_count = -1;
 
-    if (_init_count == _iop_reboot_count)
+    if (HasIopRebootedSinceLastCall())
+        memset(&cd0, 0, sizeof(cd0));
+
+    if (cd0.server)
         return 0;
-    _init_count = _iop_reboot_count;
 
     while (((res = sceSifBindRpc(&cd0, PWROFF_IRX, 0)) < 0) || (cd0.server == NULL))
         nopdelay();

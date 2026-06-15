@@ -15,33 +15,23 @@
 #include "sifrpc.h"
 #include "sifcmd.h"
 #include "string.h"
+#include <iopcontrol.h>
 #include "iopheap-common.h"
 
 #include "iopheap.h"
 
-#define IH_C_BOUND 0x0001
-
-extern int _iop_reboot_count;
 extern SifRpcClientData_t _ih_cd;
-extern int _ih_caps;
 
 #ifdef F_SifInitIopHeap
 SifRpcClientData_t _ih_cd;
-int _ih_caps = 0;
 
 int SifInitIopHeap()
 {
     int res;
+    if (HasIopRebootedSinceLastCall())
+        SifExitIopHeap();
 
-    static int _rb_count = 0;
-    if (_rb_count != _iop_reboot_count) {
-        _rb_count = _iop_reboot_count;
-        memset(&_ih_cd, 0, sizeof _ih_cd);
-        _ih_caps = 0;
-        memset(&_ih_caps, 0, sizeof _ih_caps);
-    }
-
-    if (_ih_caps)
+    if (_ih_cd.server)
         return 0;
 
     sceSifInitRpc(0);
@@ -52,8 +42,6 @@ int SifInitIopHeap()
     if (res < 0)
         return -E_SIF_RPC_BIND;
 
-    _ih_caps |= IH_C_BOUND;
-
     return 0;
 }
 #endif
@@ -61,7 +49,7 @@ int SifInitIopHeap()
 #ifdef F_SifExitIopHeap
 void SifExitIopHeap()
 {
-    _ih_caps = 0;
+    memset(&_ih_cd, 0, sizeof _ih_cd);
 }
 #endif
 

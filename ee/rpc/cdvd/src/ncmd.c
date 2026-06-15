@@ -25,6 +25,7 @@
 #include <libcdvd.h>
 #include <libcdvd-rpc.h>
 #include <string.h>
+#include <iopcontrol.h>
 
 #include "internal.h"
 
@@ -76,8 +77,6 @@ typedef union
 } nCmdSendParams_t;
 
 #ifdef F__ncmd_internals
-int bindNCmd = -1;
-
 /** for n-cmds */
 SifRpcClientData_t clientNCmd __attribute__((aligned(64)));
 
@@ -815,8 +814,10 @@ int _CdCheckNCmd(int cmd)
     }
 
     sceSifInitRpc(0);
+    if (HasIopRebootedSinceLastCall())
+        memset(&clientNCmd, 0, sizeof(clientNCmd));
     // if already bound, return ok
-    if (bindNCmd >= 0)
+    if (clientNCmd.server)
         return 1;
     // bind rpc for n-commands
     while (1) {
@@ -865,8 +866,6 @@ int _CdCheckNCmd(int cmd)
             eq_count += (((u8 *)uncached)[i] == ((u8 *)&tmpbuf)[i]) ? 1 : 0;
         initVersionCdvdfsv = (eq_count > sizeof(struct _cdvd_read_data_1300)) ? 0x200 : 0x104;
     }
-
-    bindNCmd = 0;
     return 1;
 }
 #endif
