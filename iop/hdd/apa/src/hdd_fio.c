@@ -81,7 +81,7 @@ static const char *sizeList[APA_NUMBER_OF_SIZES] = {
 static int fioPartitionSizeLookUp(char *str);
 static int fioInputBreaker(char const **arg, char *outBuf, int maxout);
 static int fioDataTransfer(iomanX_iop_file_t *f, void *buf, int size, int mode);
-static int getFileSlot(apa_params_t *params, hdd_file_slot_t **fileSlot);
+static int getFileSlot(apa_params_t *params, hdd_file_slot_t **fileSlot, iomanX_iop_file_t *file);
 static int ioctl2Transfer(s32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *arg);
 static void fioGetStatFiller(apa_cache_t *clink1, iox_stat_t *stat);
 static int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp);
@@ -213,13 +213,13 @@ static int fioGetInput(const char *arg, apa_params_t *params)
     return rv;
 }
 
-static int getFileSlot(apa_params_t *params, hdd_file_slot_t **fileSlot)
+static int getFileSlot(apa_params_t *params, hdd_file_slot_t **fileSlot, iomanX_iop_file_t *file)
 {
     int i;
 
     for (i = 0; i < apaMaxOpen; i++) {
         if (hddFileSlots[i].f)
-            if (memcmp(hddFileSlots[i].id, &params->id, APA_IDMAX) == 0)
+            if ((hddFileSlots[i].f->unit == file->unit) && (memcmp(hddFileSlots[i].id, &params->id, APA_IDMAX) == 0))
                 return -EBUSY; // file is open
     }
     for (i = 0; i < apaMaxOpen; i++) {
@@ -614,7 +614,7 @@ int hddOpen(iomanX_iop_file_t *f, const char *name, int flags, int mode)
             return rv;
 
     WaitSema(fioSema);
-    if ((rv = getFileSlot(&params, &fileSlot)) == 0) {
+    if ((rv = getFileSlot(&params, &fileSlot, f)) == 0) {
         if (!(f->mode & FIO_O_DIROPEN)) {
             if ((rv = apaOpen(f->unit, fileSlot, &params, flags)) == 0) {
                 fileSlot->f = f;
