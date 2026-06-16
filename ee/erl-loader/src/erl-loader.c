@@ -21,10 +21,12 @@ extern struct export_list_t {
 static void parse_boot_path(int argc, char *argv[]) {
     char * p;
 
-    if (argc == 0) // Are people still using naplink ? :P
-	strcpy(_init_erl_prefix, "host:");
+    if (argc == 0) { // Are people still using naplink ? :P
+	snprintf(_init_erl_prefix, 256, "host:");
+	return;
+    }
 
-    strcpy(_init_erl_prefix, argv[0]);
+    snprintf(_init_erl_prefix, 256, "%s", argv[0]);
 
     p = strrchr(_init_erl_prefix, '/');
 
