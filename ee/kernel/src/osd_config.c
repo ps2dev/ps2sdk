@@ -43,7 +43,16 @@ typedef struct
 extern ConfigParamT10K g_t10KConfig;
 
 #ifdef F__config_internals
-ConfigParamT10K g_t10KConfig = {540, TV_SCREEN_43, DATE_YYYYMMDD, LANGUAGE_JAPANESE, 0, 0, 0};
+ConfigParamT10K g_t10KConfig;
+
+__attribute__((constructor))
+static void __t10KConfigInitialize(void)
+{
+    g_t10KConfig.timezoneOffset = 540;
+    g_t10KConfig.screenType = TV_SCREEN_43;
+    g_t10KConfig.dateFormat = DATE_YYYYMMDD;
+    g_t10KConfig.language = LANGUAGE_JAPANESE;
+}
 #endif
 
 #ifdef F_converttobcd

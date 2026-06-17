@@ -11,7 +11,7 @@
 #include "internal.h"
 #include "rpc_server.h"
 
-static int NETMAN_RpcSvr_threadID=-1, NETMAN_Rx_threadID=-1, SifHandlerID=-1;
+static int NETMAN_RpcSvr_threadID, NETMAN_Rx_threadID, SifHandlerID;
 static unsigned char NETMAN_RpcSvr_ThreadStack[0x1000] ALIGNED(16);
 static unsigned char NETMAN_Rx_ThreadStack[0x1000] ALIGNED(16);
 static unsigned char IsInitialized=0, IsProcessingRx;
@@ -114,7 +114,7 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 				thread.initial_priority=0x59;	/* Should be given a lower priority than the protocol stack, so that the protocol stack can process incoming frames. */
 				thread.attr=thread.option=0;
 
-				if((NETMAN_Rx_threadID=CreateThread(&thread)) >= 0)
+				if((NETMAN_Rx_threadID=CreateThread(&thread)) > 0)
 				{
 					StartThread(NETMAN_Rx_threadID, NULL);
 
@@ -230,7 +230,7 @@ int NetManInitRPCServer(void)
 		ThreadData.initial_priority=0x57;	/* The RPC server thread should be given a higher priority than the protocol stack, so that it can issue commants to the EE and return. */
 		ThreadData.attr=ThreadData.option=0;
 
-		if((NETMAN_RpcSvr_threadID=CreateThread(&ThreadData))>=0)
+		if((NETMAN_RpcSvr_threadID=CreateThread(&ThreadData))>0)
 		{
 			StartThread(NETMAN_RpcSvr_threadID, NULL);
 			IsInitialized=1;
@@ -251,18 +251,18 @@ void NetManDeinitRPCServer(void)
 		sceSifRemoveRpcQueue(&cb_queue);
 		RemoveDmacHandler(DMAC_SIF0, SifHandlerID);
 
-		if(NETMAN_RpcSvr_threadID>=0)
+		if(NETMAN_RpcSvr_threadID>0)
 		{
 			TerminateThread(NETMAN_RpcSvr_threadID);
 			DeleteThread(NETMAN_RpcSvr_threadID);
-			NETMAN_RpcSvr_threadID = -1;
+			NETMAN_RpcSvr_threadID = 0;
 		}
 
-		if(NETMAN_Rx_threadID>=0)
+		if(NETMAN_Rx_threadID>0)
 		{
 			TerminateThread(NETMAN_Rx_threadID);
 			DeleteThread(NETMAN_Rx_threadID);
-			NETMAN_Rx_threadID = -1;
+			NETMAN_Rx_threadID = 0;
 		}
 
 		IsInitialized=0;

@@ -22,7 +22,7 @@ struct charmap_t {
 };
 
 #if defined(F_isSpecialSJIS) || defined(F_isSpecialASCII)
-static struct charmap_t sjis_conversion[] = {
+static const struct charmap_t sjis_conversion[] = {
     { 0x4081, ' ' },
     { 0x6d81, '[' },
     { 0x6e81, ']' },
@@ -62,7 +62,7 @@ static struct charmap_t sjis_conversion[] = {
 #ifdef F_isSpecialSJIS
 unsigned char isSpecialSJIS(short sjis)
 {
-    struct charmap_t *s = &sjis_conversion[0];
+    const struct charmap_t *s = &sjis_conversion[0];
     do {
 	if (s->sjis == sjis) return s->ascii;
  	s++;
@@ -76,7 +76,7 @@ unsigned char isSpecialSJIS(short sjis);
 #ifdef F_isSpecialASCII
 short isSpecialASCII(unsigned char ascii)
 {
-    struct charmap_t *s = &sjis_conversion[0];
+    const struct charmap_t *s = &sjis_conversion[0];
     do {
 	if (s->ascii == ascii) return s->sjis;
  	s++;

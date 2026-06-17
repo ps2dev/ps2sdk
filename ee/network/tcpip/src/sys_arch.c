@@ -436,9 +436,9 @@ void sys_sem_set_invalid(sys_sem_t *sem){
  * track the owning thread + a recursion counter and only Wait/Signal
  * on the outermost transitions.
  */
-static int s_protect_sem = -1;
+static int s_protect_sem;
 static int s_protect_count = 0;
-static int s_protect_owner = -1;
+static int s_protect_owner;
 
 sys_prot_t sys_arch_protect(void)
 {
@@ -466,7 +466,7 @@ void sys_arch_unprotect(sys_prot_t level)
 		return;
 	}
 	s_protect_count = 0;
-	s_protect_owner = -1;
+	s_protect_owner = 0;
 	SignalSema(s_protect_sem);
 }
 
@@ -490,7 +490,7 @@ void sys_init(void)
 	sema.max_count = 1;
 	s_protect_sem = CreateSema(&sema);
 	s_protect_count = 0;
-	s_protect_owner = -1;
+	s_protect_owner = 0;
 
 	free_head = &msg_pool[0];
 	prev = &msg_pool[0];

@@ -36,8 +36,6 @@ typedef struct ip4_addr	IPAddr;
 static struct netif NIF;
 static struct pbuf *TxHead, *TxTail;
 
-unsigned short int hsyncTicksPerMSec	= 16;
-
 int ps2ip_getconfig(char* pszName, t_ip_info* pInfo)
 {
 	NetIF*	pNetIF=netif_find(pszName);
@@ -321,7 +319,7 @@ extern void _ps2sdk_ps2ipee_init(void);
 extern void _ps2sdk_ps2ipee_deinit(void);
 
 int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct ip4_addr *gateway){
-	static struct NetManNetProtStack stack={
+	static const struct NetManNetProtStack stack={
 		&LinkStateUp,
 		&LinkStateDown,
 		&AllocRxPacket,

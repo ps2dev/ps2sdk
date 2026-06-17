@@ -56,7 +56,7 @@ static u8 s_CSCFlag;
 static u32 s_BitsBuffered;
 static u32 s_LocalBits;
 
-static u32 s_QmIntra[16] __attribute__((aligned(16))) = {
+static const u32 s_QmIntra[16] __attribute__((aligned(16))) = {
     0x13101008,
     0x16161310,
     0x16161616,
@@ -75,7 +75,7 @@ static u32 s_QmIntra[16] __attribute__((aligned(16))) = {
     0x5345453A,
 };
 
-static u32 s_QmNonIntra[16] __attribute__((aligned(16))) = {
+static const u32 s_QmNonIntra[16] __attribute__((aligned(16))) = {
     0x10101010,
     0x10101010,
     0x10101010,
@@ -462,7 +462,7 @@ unsigned int _MPEG_NextStartCode(void)
 void _MPEG_SetDefQM(int arg0)
 {
     (void)arg0;
-    qword_t *q;
+    const qword_t *q;
     int i;
 
     _ipu_suspend();
@@ -470,7 +470,7 @@ void _MPEG_SetDefQM(int arg0)
     while (*R_EE_IPU_CTRL & IPU_CTRL_BUSY)
         ;
 
-    q = (qword_t *)s_QmIntra;
+    q = (const qword_t *)s_QmIntra;
     for (i = 0; i < 4; i++) {
 #ifdef _EE
         __asm__ __volatile__(
@@ -488,7 +488,7 @@ void _MPEG_SetDefQM(int arg0)
     while (*R_EE_IPU_CTRL & IPU_CTRL_BUSY)
         ;
 
-    q = (qword_t *)s_QmNonIntra;
+    q = (const qword_t *)s_QmNonIntra;
     for (i = 0; i < 4; i++) {
 #ifdef _EE
         __asm__ __volatile__(

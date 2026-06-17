@@ -28,7 +28,7 @@ static union {
 	u8 buffer[128];
 }ReceiveBuffer ALIGNED(64);
 
-static int NetManIOSemaID = -1, NETMAN_Tx_threadID = -1;
+static int NetManIOSemaID, NETMAN_Tx_threadID;
 static unsigned char NETMAN_Tx_ThreadStack[0x1000] ALIGNED(16);
 
 static unsigned short int IOPFrameBufferWrPtr;
@@ -40,16 +40,16 @@ static unsigned char IsProcessingTx;
 
 static void deinitCleanup(void)
 {
-	if(NetManIOSemaID >= 0)
+	if(NetManIOSemaID > 0)
 	{
 		DeleteSema(NetManIOSemaID);
-		NetManIOSemaID = -1;
+		NetManIOSemaID = 0;
 	}
-	if(NETMAN_Tx_threadID >= 0)
+	if(NETMAN_Tx_threadID > 0)
 	{
 		TerminateThread(NETMAN_Tx_threadID);
 		DeleteThread(NETMAN_Tx_threadID);
-		NETMAN_Tx_threadID = -1;
+		NETMAN_Tx_threadID = 0;
 	}
 	memset(&NETMAN_rpc_cd, 0, sizeof(NETMAN_rpc_cd));
 }
@@ -70,10 +70,11 @@ int NetManInitRPCClient(void){
 	SemaData.init_count=1;
 	SemaData.option=(u32)NetManID;
 	SemaData.attr=0;
-	if((NetManIOSemaID=CreateSema(&SemaData)) < 0)
+	if((NetManIOSemaID=CreateSema(&SemaData)) <= 0)
 	{
+		NetManIOSemaID = 0;
 		deinitCleanup();
-		return NetManIOSemaID;
+		return -1;
 	}
 
 	thread.func=&NETMAN_TxThread;
@@ -83,8 +84,9 @@ int NetManInitRPCClient(void){
 	thread.initial_priority=0x56;	/* Should be given a higher priority than the protocol stack, so that it can dump frames in the EE and return. */
 	thread.attr=thread.option=0;
 
-	if((NETMAN_Tx_threadID=CreateThread(&thread)) < 0)
+	if((NETMAN_Tx_threadID=CreateThread(&thread)) <= 0)
 	{
+		NETMAN_Tx_threadID = 0;
 		deinitCleanup();
 		return NETMAN_Tx_threadID;
 	}

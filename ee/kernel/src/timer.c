@@ -65,15 +65,7 @@ extern s32 TimerHandler_callback(s32 cause, void *arg, void *addr);
 #define COUNTER_COUNT 128
 
 #ifdef F_timer_data
-timer_ee_global_struct g_Timer = {
-    .timer_handled_count = 0,
-    .intc_handler = -1,
-    .timer_counter_total = 1,
-    .timer_counter_used = 0,
-    .timer_counter_buf_free = NULL,
-    .timer_counter_buf_alarm = NULL,
-    .current_handling_timer_id = -1,
-};
+timer_ee_global_struct g_Timer;
 counter_struct_t g_CounterBuf[COUNTER_COUNT] __attribute__((aligned(64)));
 #else
 extern timer_ee_global_struct g_Timer;
@@ -141,12 +133,14 @@ __attribute__((weak)) s32 InitTimer(s32 in_mode)
     u32 oldintr;
     u32 mode;
 
-    if (g_Timer.intc_handler >= 0)
+    if (g_Timer.intc_handler > 0)
     {
         return 0x80008001; // EINIT
     }
     g_Timer.timer_handled_count = 0;
     g_Timer.timer_counter_used = 0;
+    g_Timer.timer_counter_total = 1;
+    g_Timer.current_handling_timer_id = -1;
     memset(g_CounterBuf, 0, sizeof(g_CounterBuf));
     g_Timer.timer_counter_buf_free = &g_CounterBuf[0];
     for (u32 i = 0; i < ((sizeof(g_CounterBuf) / sizeof(g_CounterBuf[0])) - 1); i += 1)
@@ -154,6 +148,7 @@ __attribute__((weak)) s32 InitTimer(s32 in_mode)
         g_CounterBuf[i].timer_next = &g_CounterBuf[i + 1];
     }
     g_CounterBuf[(sizeof(g_CounterBuf) / sizeof(g_CounterBuf[0])) - 1].timer_next = NULL;
+    g_Timer.timer_counter_buf_alarm = NULL;
     ForTimer_InitAlarm();
     handler = AddIntcHandler2(INTC_TIM2, TimerHandler_callback, 0, NULL);
     if (handler < 0)

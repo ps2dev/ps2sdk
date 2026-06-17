@@ -35,40 +35,42 @@ extern slib_exp_lib_list_t _slib_cur_exp_lib_list;
 #define HI16(addr)	(0x3c110000 | (((addr) >> 16) & 0xffff))	/* lui $s1, HI(addr) */
 #define LO16(addr)	(0x36310000 | ((addr) & 0xffff))		/* ori $s1, LO(addr) */
 
+static const u32 g_lmb_patch[32] = {
+	0x27bdffd8,	/*	addiu	$sp, -40	*/
+	0xafb00018,	/*	sw	$s0, 0x18($sp)	*/
+	0xafbf0020,	/*	sw	$ra, 0x20($sp)	*/
+	0x00808021,	/*	move	$s0, $a0	*/
+	0x8c840000,	/*	lw	$a0, 0($a0)	*/
+	0x0c000000,	/*	jal	[LoadModuleBuffer] */
+	0xafb1001c,	/*	 sw	$s1, 0x1c($sp)	*/
+	0x3c110000,	/*	lui	$s1, [HI16(result)] */
+	0x04400008,	/*	bltz	$v0, 1f		*/
+	0x36310000,	/*	 ori	$s1, [LO16(result)] */
+	0x00402021,	/*	move	$a0, $v0	*/
+	0x26250008,	/*	addiu	$a1, $s1, 8	*/
+	0x8e060004,	/*	lw	$a2, 4($s0)	*/
+	0x26070104,	/*	addiu	$a3, $s0, 0x104 */
+	0x26280004,	/*	addiu	$t0, $s1, 4	*/
+	0x0c000000,	/*	jal	[StartModule]	*/
+	0xafa80010,	/*	 sw	$t0, 0x10($sp)	*/
+	0xae220000,	/* 1:	sw	$v0, 0($s1)	*/
+	0x02201021,	/*	move	$v0, $s1	*/
+	0x8fbf0020,	/*	lw	$ra, 0x20($sp)	*/
+	0x8fb1001c,	/*	lw	$s1, 0x1c($sp)	*/
+	0x8fb00018,	/*	lw	$s0, 0x18($sp)	*/
+	0x03e00008,	/*	jr	$ra		*/
+	0x27bd0028,	/*	 addiu	$sp, 40		*/
+	0x00000000, 0x00000000,
+	0x7962424c, 0x00004545,	/* "LBbyEE" */
+	0x00000000, 0x00000000, 0x00000000, 0x00000000
+};
+
 int sbv_patch_enable_lmb(void)
 {
 	/* This is the routine called by the loadfile RPC dispatcher for LoadModuleBuffer
 	   over RPC (call #6).  The bracketed operands are the ones patched by the real
 	   locations in IOP memory before being installed onto the IOP.  */
-	static u32 lmb_patch[32] ALIGNED(64) = {
-		0x27bdffd8,	/*	addiu	$sp, -40	*/
-		0xafb00018,	/*	sw	$s0, 0x18($sp)	*/
-		0xafbf0020,	/*	sw	$ra, 0x20($sp)	*/
-		0x00808021,	/*	move	$s0, $a0	*/
-		0x8c840000,	/*	lw	$a0, 0($a0)	*/
-		0x0c000000,	/*	jal	[LoadModuleBuffer] */
-		0xafb1001c,	/*	 sw	$s1, 0x1c($sp)	*/
-		0x3c110000,	/*	lui	$s1, [HI16(result)] */
-		0x04400008,	/*	bltz	$v0, 1f		*/
-		0x36310000,	/*	 ori	$s1, [LO16(result)] */
-		0x00402021,	/*	move	$a0, $v0	*/
-		0x26250008,	/*	addiu	$a1, $s1, 8	*/
-		0x8e060004,	/*	lw	$a2, 4($s0)	*/
-		0x26070104,	/*	addiu	$a3, $s0, 0x104 */
-		0x26280004,	/*	addiu	$t0, $s1, 4	*/
-		0x0c000000,	/*	jal	[StartModule]	*/
-		0xafa80010,	/*	 sw	$t0, 0x10($sp)	*/
-		0xae220000,	/* 1:	sw	$v0, 0($s1)	*/
-		0x02201021,	/*	move	$v0, $s1	*/
-		0x8fbf0020,	/*	lw	$ra, 0x20($sp)	*/
-		0x8fb1001c,	/*	lw	$s1, 0x1c($sp)	*/
-		0x8fb00018,	/*	lw	$s0, 0x18($sp)	*/
-		0x03e00008,	/*	jr	$ra		*/
-		0x27bd0028,	/*	 addiu	$sp, 40		*/
-		0x00000000, 0x00000000,
-		0x7962424c, 0x00004545,	/* "LBbyEE" */
-		0x00000000, 0x00000000, 0x00000000, 0x00000000
-	};
+	static u32 lmb_patch[sizeof(g_lmb_patch)] ALIGNED(16);
 	u8 buf[256];
 	SifRpcReceiveData_t RData;
 	slib_exp_lib_t *modload_lib = (slib_exp_lib_t *)buf;
@@ -77,6 +79,7 @@ int sbv_patch_enable_lmb(void)
 	u32 result, *data;
 	SifDmaTransfer_t dmat;
 
+	memcpy(UNCACHED_SEG(lmb_patch), g_lmb_patch, sizeof(g_lmb_patch));
 	memset(&_slib_cur_exp_lib_list, 0, sizeof(slib_exp_lib_list_t));
 
 	/* Locate the modload export library - it must have at least 16 exports.  */
@@ -132,12 +135,10 @@ int sbv_patch_enable_lmb(void)
 
 			/* result is where the RPC return structure is stored.  */
 			result = (u32)patch_addr + 96;
-			lmb_patch[5] = JAL((u32)pLoadModuleBuffer);
-			lmb_patch[7] = HI16(result);
-			lmb_patch[9] = LO16(result);
-			lmb_patch[15] = JAL((u32)pStartModule);
-
-			SyncDCache(lmb_patch, (void *)(lmb_patch + 24));
+			((u32 *)(UNCACHED_SEG(lmb_patch)))[5] = JAL((u32)pLoadModuleBuffer);
+			((u32 *)(UNCACHED_SEG(lmb_patch)))[7] = HI16(result);
+			((u32 *)(UNCACHED_SEG(lmb_patch)))[9] = LO16(result);
+			((u32 *)(UNCACHED_SEG(lmb_patch)))[15] = JAL((u32)pStartModule);
 
 			dmat.src=lmb_patch;
 			dmat.size=sizeof(lmb_patch);

@@ -277,21 +277,12 @@ int sceSifGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest, int size,
 #ifdef F_SifRpcMain
 
 /* The packets sent on EE RPC requests are allocated from this table.  */
-static u8 pkt_table[2048] __attribute__((aligned(64)));
+static u8 pkt_table[32][RPC_PACKET_SIZE] __attribute__((aligned(64)));
 /* A ring buffer used to allocate packets sent on IOP requests.  */
-static u8 rdata_table[2048] __attribute__((aligned(64)));
-static u8 client_table[2048] __attribute__((aligned(64)));
+static u8 rdata_table[32][RPC_PACKET_SIZE] __attribute__((aligned(64)));
+static u8 client_table[32][RPC_PACKET_SIZE] __attribute__((aligned(64)));
 
-struct rpc_data _sif_rpc_data = {
-    pid : 1,
-    pkt_table : pkt_table,
-    pkt_table_len : sizeof(pkt_table) / RPC_PACKET_SIZE,
-    rdata_table : rdata_table,
-    rdata_table_len : sizeof(rdata_table) / RPC_PACKET_SIZE,
-    client_table : client_table,
-    client_table_len : sizeof(client_table) / RPC_PACKET_SIZE,
-    rdata_table_idx : 0
-};
+struct rpc_data _sif_rpc_data;
 
 static int init = 0;
 
@@ -426,9 +417,14 @@ void sceSifInitRpc(int mode)
     sceSifInitCmd();
 
     DI();
-    _sif_rpc_data.pkt_table    = UNCACHED_SEG(_sif_rpc_data.pkt_table);
-    _sif_rpc_data.rdata_table  = UNCACHED_SEG(_sif_rpc_data.rdata_table);
-    _sif_rpc_data.client_table = UNCACHED_SEG(_sif_rpc_data.client_table);
+    _sif_rpc_data.pid = 1;
+
+    _sif_rpc_data.pkt_table         = UNCACHED_SEG(pkt_table);
+    _sif_rpc_data.pkt_table_len     = sizeof(pkt_table) / sizeof(pkt_table[0]);
+    _sif_rpc_data.rdata_table       = UNCACHED_SEG(rdata_table);
+    _sif_rpc_data.rdata_table_len   = sizeof(rdata_table) / sizeof(rdata_table[0]);
+    _sif_rpc_data.client_table      = UNCACHED_SEG(client_table);
+    _sif_rpc_data.client_table_len  = sizeof(client_table) / sizeof(client_table[0]);
 
     _sif_rpc_data.rdata_table_idx = 0;
     struct rpc_data *rpc_data     = (struct rpc_data *)(&_sif_rpc_data);
@@ -452,7 +448,7 @@ void sceSifInitRpc(int mode)
     if (sceSifGetReg(SIF_SYSREG_RPCINIT))
         return;
 
-    cmdp    = (u32 *)&pkt_table[64];
+    cmdp    = (u32 *)&((u8 *)_sif_rpc_data.pkt_table)[64];
     cmdp[3] = 1;
     sceSifSendCmd(SIF_CMD_INIT_CMD, cmdp, 16, NULL, NULL, 0);
 

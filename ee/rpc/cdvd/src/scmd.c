@@ -90,7 +90,7 @@ typedef union
 #ifdef F__scmd_internals
 SifRpcClientData_t clientSCmd __attribute__((aligned(64)));
 
-int sCmdSemaId = -1;
+int sCmdSemaId;
 
 u8 sCmdRecvBuff[0x440] __attribute__((aligned(64)));
 sCmdSendParams_t sCmdSendBuff __attribute__((aligned(64)));

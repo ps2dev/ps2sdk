@@ -35,9 +35,9 @@
 #define PFS_FRAGMENT		0x00000000
 
 #if (PFS_FRAGMENT != 0)
-int pfsFormatArg[3] = { PFS_ZONE_SIZE, PFS_FRAGMENT_OPT, PFS_FRAGMENT };
+static const int pfsFormatArg[3] = { PFS_ZONE_SIZE, PFS_FRAGMENT_OPT, PFS_FRAGMENT };
 #else
-static int pfsFormatArg[1] = { PFS_ZONE_SIZE };
+static const int pfsFormatArg[1] = { PFS_ZONE_SIZE };
 #endif
 
 #define _OMIT_SYSTEM_PARTITION

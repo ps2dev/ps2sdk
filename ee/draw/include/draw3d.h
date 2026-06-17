@@ -62,7 +62,7 @@ extern "C" {
 #endif
 
 /** Begins a primitive, allowing for vertex data to be filled in the packet directly */
-extern qword_t *draw_prim_start(qword_t *q, int context, prim_t *prim, color_t *color);
+extern qword_t *draw_prim_start(qword_t *q, int context, const prim_t *prim, const color_t *color);
 
 /** Ends a primitive by calculating the number of qwords used, the number of registers, the register list */
 extern qword_t *draw_prim_end(qword_t *q,int nreg, u64 reglist);

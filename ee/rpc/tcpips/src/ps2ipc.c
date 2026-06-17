@@ -22,7 +22,7 @@
 #include <ps2ips.h>
 #include <ps2ip_rpc.h>
 
-static int lock_sema = -1;
+static int lock_sema;
 static SifRpcClientData_t _ps2ip;
 static struct {
 	union {
@@ -96,9 +96,9 @@ void ps2ip_deinit(void)
 {
 	_ps2sdk_ps2ipc_deinit();
 
-	if (lock_sema >= 0)
+	if (lock_sema > 0)
 		DeleteSema(lock_sema);
-	lock_sema = -1;
+	lock_sema = 0;
 
 	memset(&_ps2ip, 0, sizeof(_ps2ip));
 }

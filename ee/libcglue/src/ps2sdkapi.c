@@ -474,6 +474,7 @@ void __fioOpsInitializeImpl(void)
     if (&rmdir) __fio_fdman_path_ops.rmdir = fioRmdir;
     // cppcheck-suppress knownConditionTrueFalse
     if ((&_stat) || (&_fstat)) __fio_fdman_path_ops.stat = __fioGetstatHelper;
+    if (!_libcglue_fdman_path_ops) _libcglue_fdman_path_ops = &__fio_fdman_path_ops;
 
     memset(&__fio_fdman_ops_file, 0, sizeof(__fio_fdman_ops_file));
     __fio_fdman_ops_file.getfd = __fioGetFdHelper;
@@ -502,7 +503,7 @@ void __fioOpsInitializeImpl(void)
 #endif
 
 #ifdef F__libcglue_fdman_path_ops
-_libcglue_fdman_path_ops_t *_libcglue_fdman_path_ops = &__fio_fdman_path_ops;
+_libcglue_fdman_path_ops_t *_libcglue_fdman_path_ops = NULL;
 #endif
 
 #ifdef F__libcglue_fdman_socket_ops

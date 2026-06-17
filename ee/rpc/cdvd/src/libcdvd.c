@@ -79,7 +79,7 @@ int CdDebug = 0;
 
 // semaphore ids
 /** callback semaphore id */
-int callbackSemaId = -1;
+int callbackSemaId;
 /** callback semaphore variable (not a real semaphore) */
 volatile int cbSema = 0;
 
@@ -158,9 +158,9 @@ s32 sceCdInit(s32 mode)
         if (CdDebug > 0)
             printf("Libcdvd Exit\n");
         _CdSemaExit();
-        nCmdSemaId     = -1;
-        sCmdSemaId     = -1;
-        callbackSemaId = -1;
+        nCmdSemaId     = 0;
+        sCmdSemaId     = 0;
+        callbackSemaId = 0;
     } else {
         _CdSemaInit();
     }
@@ -293,17 +293,23 @@ void _CdSemaInit(void)
     struct t_ee_sema semaParam;
 
     // return if both semaphores are already inited
-    if (nCmdSemaId != -1 && sCmdSemaId != -1)
+    if (nCmdSemaId != 0 && sCmdSemaId != 0)
         return;
 
     semaParam.init_count = 1;
     semaParam.max_count  = 1;
     semaParam.option     = 0;
     nCmdSemaId           = CreateSema(&semaParam);
+    if (nCmdSemaId < 0)
+        nCmdSemaId = 0;
     sCmdSemaId           = CreateSema(&semaParam);
+    if (sCmdSemaId < 0)
+        sCmdSemaId = 0;
 
     semaParam.init_count = 0;
     callbackSemaId       = CreateSema(&semaParam);
+    if (callbackSemaId < 0)
+        callbackSemaId = 0;
 
     cbSema = 0;
 }

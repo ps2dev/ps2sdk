@@ -20,16 +20,16 @@
 #include <iopcontrol.h>
 #include "libkbd.h"
 
-static int kbd_fd = -1;
-static int curr_blockmode = PS2KBD_NONBLOCKING;
-static int curr_readmode = PS2KBD_READMODE_NORMAL;
+static int kbd_fd;
+static int curr_blockmode;
+static int curr_readmode;
 
 int PS2KbdInit(void)
 {
   if (HasIopRebootedSinceLastCall())
     kbd_fd = -1;
 
-  if(kbd_fd >= 0) /* Already initialised */
+  if(kbd_fd > 0) /* Already initialised */
     {
       return 2;
     }
@@ -39,6 +39,8 @@ int PS2KbdInit(void)
     {
       return 0;
     }
+  curr_blockmode = PS2KBD_NONBLOCKING;
+  curr_readmode = PS2KBD_READMODE_NORMAL;
 
   return 1;
 }

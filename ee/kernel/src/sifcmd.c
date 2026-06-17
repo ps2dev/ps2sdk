@@ -182,7 +182,7 @@ static SifCmdSysHandlerData_t sys_cmd_handlers[SYS_CMD_HANDLER_MAX];
 static int sregs[32];
 
 struct cmd_data _sif_cmd_data;
-static int sif0_id = -1;
+static int sif0_id;
 
 struct ca_pkt
 {
@@ -220,7 +220,7 @@ void sceSifInitCmd(void)
     if (HasIopRebootedSinceLastCall())
         sceSifExitCmd();
 
-    if (sif0_id >= 0)
+    if (sif0_id > 0)
         return;
 
     DI();
@@ -284,10 +284,10 @@ void sceSifInitCmd(void)
 
 void sceSifExitCmd(void)
 {
-    if (sif0_id >= 0) {
+    if (sif0_id > 0) {
         DisableDmac(DMAC_SIF0);
         RemoveDmacHandler(DMAC_SIF0, sif0_id);
-        sif0_id = -1;
+        sif0_id = 0;
     }
 }
 #endif

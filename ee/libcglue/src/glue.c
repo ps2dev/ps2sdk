@@ -55,17 +55,41 @@ int __path_absolute(const char *in, char *out, int len);
 extern void * _end;
 
 #ifdef F___dummy_passwd
-char __dummy_passwd_loginbuf[16] = "ps2user";
+char __dummy_passwd_loginbuf[16];
 /* the present working directory variable. */
-struct passwd __dummy_passwd = { &__dummy_passwd_loginbuf[0], "xxx", 1000, 1000, "", "", "/", "" };
+struct passwd __dummy_passwd;
+__attribute__((constructor))
+static void __dummy_passwd_init(void)
+{
+	strncpy(__dummy_passwd_loginbuf, "ps2user", sizeof(__dummy_passwd_loginbuf));
+	__dummy_passwd.pw_name = &__dummy_passwd_loginbuf[0];
+	__dummy_passwd.pw_passwd = "xxx";
+	__dummy_passwd.pw_uid = 1000;
+	__dummy_passwd.pw_gid = 1000;
+	__dummy_passwd.pw_comment = "";
+	__dummy_passwd.pw_gecos = "";
+	__dummy_passwd.pw_dir = "/";
+	__dummy_passwd.pw_shell = "";
+}
 #else
 extern char __dummy_passwd_loginbuf[16];
 extern struct passwd __dummy_passwd;
 #endif
 
 #ifdef F___dummy_group
-static char *__dummy_group_members[2] = {&__dummy_passwd_loginbuf[0], NULL};
-struct group __dummy_group = { "ps2group", "xxx", 1000, &__dummy_group_members[0]};
+static char *__dummy_group_members[2];
+struct group __dummy_group;
+
+__attribute__((constructor))
+static void __dummy_group_init(void)
+{
+    __dummy_group.gr_name = "ps2group";
+    __dummy_group.gr_passwd = "xxx";
+    __dummy_group.gr_gid = 1000;
+    __dummy_group.gr_mem = &__dummy_group_members[0];
+    __dummy_group_members[0] = &__dummy_passwd_loginbuf[0];
+    __dummy_group_members[1] = NULL;
+}
 #else
 extern struct group __dummy_group;
 #endif

@@ -12,6 +12,31 @@
 #define JMP(addr)	(0x08000000|(0x3ffffff&((addr)>>2)))
 #define JAL(addr)	(0x0c000000 | (0x3ffffff & ((addr) >> 2)))
 
+static const u32 g_new_fileio[20] = {
+	//sceFioRemove fix
+	0x0c0001ce,	// jal		+0x738 <- jal fio_remove
+	0x00000000,	// nop
+	0x0800033a,	// j		+0xce8 <- j rpc_handler_exit
+	0x00000000,	// nop
+	//sceFioGetstat()/sceFioDread() fix
+	0x27bdfff0,	// addiu	sp,sp,-16
+	0xafbf0000,	// sw		ra,0(sp)
+	0xafa40004,	// sw		a0,4(sp)
+	0xafa50008,	// sw		a1,8(sp)
+	0x0c000423,	// jal		+0x108c <- jal CpuSuspendIntr
+	0x27a4000c,	// addiu	a0,sp,12
+	0x8fa40004,	// lw		a0,4(sp)
+	0x0c000430,	// jal		+0x10c0 <- jal sceSifSetDma
+	0x8fa50008,	// lw		a1,8(sp)
+	0x8fa4000c,	// lw		a0,12(sp)
+	0x0c000425,	// jal		+0x1094 <- jal CpuResumeIntr
+	0xafa20004,	// sw		v0,4(sp)
+	0x8fbf0000,	// lw		ra,0(sp)
+	0x8fa20004,	// lw		v0,4(sp)
+	0x03e00008,	// jr		ra
+	0x27bd0010,	// addiu	sp,sp,16
+};
+
 int sbv_patch_fileio(void)
 {
 	/* This patch is a fix for FILEIO on the IOP:
@@ -28,34 +53,12 @@ int sbv_patch_fileio(void)
 
 	smod_mod_info_t mod_info;
 	SifDmaTransfer_t dmat;
-	static u32 new_fileio[20] ALIGNED(16)={
-		//sceFioRemove fix
-		0x0c0001ce,	// jal		+0x738 <- jal fio_remove
-		0x00000000,	// nop
-		0x0800033a,	// j		+0xce8 <- j rpc_handler_exit
-		0x00000000,	// nop
-		//sceFioGetstat()/sceFioDread() fix
-		0x27bdfff0,	// addiu	sp,sp,-16
-		0xafbf0000,	// sw		ra,0(sp)
-		0xafa40004,	// sw		a0,4(sp)
-		0xafa50008,	// sw		a1,8(sp)
-		0x0c000423,	// jal		+0x108c <- jal CpuSuspendIntr
-		0x27a4000c,	// addiu	a0,sp,12
-		0x8fa40004,	// lw		a0,4(sp)
-		0x0c000430,	// jal		+0x10c0 <- jal sceSifSetDma
-		0x8fa50008,	// lw		a1,8(sp)
-		0x8fa4000c,	// lw		a0,12(sp)
-		0x0c000425,	// jal		+0x1094 <- jal CpuResumeIntr
-		0xafa20004,	// sw		v0,4(sp)
-		0x8fbf0000,	// lw		ra,0(sp)
-		0x8fa20004,	// lw		v0,4(sp)
-		0x03e00008,	// jr		ra
-		0x27bd0010,	// addiu	sp,sp,16
-	};
+	static u32 new_fileio[sizeof(g_new_fileio)/sizeof(g_new_fileio[0])] ALIGNED(16);
 	u32 *p_new_fileio;
 	u32 new_jump_op;
 	void *patch_addr;
 
+	memcpy(UNCACHED_SEG(new_fileio), g_new_fileio, sizeof(g_new_fileio));
 	memset(&mod_info, 0, sizeof(mod_info));
 	int ret = smod_get_mod_by_name("FILEIO_service", &mod_info);
 	if ((!ret) || (mod_info.version != 0x101))

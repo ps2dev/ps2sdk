@@ -9,6 +9,7 @@
 */
 
 #include <libvux.h>
+#include <stdlib.h>
 
 #include "vux.h"
 
@@ -17,60 +18,45 @@
 
 
 
+static const VU_MATRIX VuInitMatrix = {{
+											{1.0f, 0.0f, 0.0f, 0.0f},
+											{0.0f, 1.0f, 0.0f, 0.0f},
+											{0.0f, 0.0f, 1.0f, 0.0f},
+											{0.0f, 0.0f, 0.0f, 1.0f}
+										}};
+VU_MATRIX	VuWorldMatrix;
+VU_MATRIX	VuViewMatrix;
+VU_MATRIX	VuPrjectionMatrix;
+VU_MATRIX	VuLocalScreenMatrix;
 
-VU_MATRIX	VuWorldMatrix		  =	{{
-										{1.0f, 0.0f, 0.0f, 0.0f},
-										{0.0f, 1.0f, 0.0f, 0.0f},
-										{0.0f, 0.0f, 1.0f, 0.0f},
-										{0.0f, 0.0f, 0.0f, 1.0f}
-									}};
+float			vu_projection;
+int				vu_projection_type;			//0=vu_projection  ,   1=VuPrjectionMatrix
+unsigned short	vu_offset_x;
+unsigned short	vu_offset_y;
+VU_FCVECTOR		vu_light_ambient;
+float			vu_fog_near;
+float			vu_fog_far;
+float			vu_near_plane_w;
+float			vu_near_plane_h;
 
-VU_MATRIX	VuViewMatrix		  =	{{
-										{1.0f, 0.0f, 0.0f, 0.0f},
-										{0.0f, 1.0f, 0.0f, 0.0f},
-										{0.0f, 0.0f, 1.0f, 0.0f},
-										{0.0f, 0.0f, 0.0f, 1.0f}
-									}};
-
-VU_MATRIX	VuPrjectionMatrix =		{{
-										{1.0f, 0.0f, 0.0f, 0.0f},
-										{0.0f, 1.0f, 0.0f, 0.0f},
-										{0.0f, 0.0f, 1.0f, 0.0f},
-										{0.0f, 0.0f, 0.0f, 1.0f}
-									}};
-
-VU_MATRIX	VuLocalScreenMatrix =	{{
-										{1.0f, 0.0f, 0.0f, 0.0f},
-										{0.0f, 1.0f, 0.0f, 0.0f},
-										{0.0f, 0.0f, 1.0f, 0.0f},
-										{0.0f, 0.0f, 0.0f, 1.0f}
-									}};
-
-
-
-
-
-float			vu_projection		= 500.0f;
-int				vu_projection_type	= 0;			//0=vu_projection  ,   1=VuPrjectionMatrix
-unsigned short	vu_offset_x			= 2048;
-unsigned short	vu_offset_y			= 2048;
-VU_FCVECTOR		vu_light_ambient	= {0.2f, 0.2f, 0.2f, 1.0f};
-float			vu_fog_near			= 25000.0f;
-float			vu_fog_far			= 45000.0f;
-float			vu_near_plane_w		= 300.0f;
-float			vu_near_plane_h		= 300.0f;
-
-
-
-
-
-
-
+__attribute__((constructor))
+static void __VuInit_ctor(void)
+{
+	VuInit();
+}
 
 void VuInit(void)
 {
-
-
+	VuSetWorldMatrix(NULL);
+	VuSetViewMatrix(NULL);
+	VuSetProjectionMatrix(NULL);
+	VuSetLocalScreenMatrix(NULL);
+	VuSetGeometryXYOffset(2048, 2048);
+	VuSetProjection(500.0f);
+	VuSetAmbientLight(0.2f, 0.2f, 0.2f);
+	vu_fog_near = 25000.0f;
+	vu_fog_far = 45000.0f;
+	VuSetProjectionNearPlaneWH(300.0f, 300.0f);
 }
 
 
@@ -97,7 +83,14 @@ void VuSetProjection(float z)
 
 void VuSetProjectionMatrix(const VU_MATRIX *projection)
 {
-	VuPrjectionMatrix	= *projection;
+	if (!projection)
+	{
+		VuPrjectionMatrix = VuInitMatrix;
+	}
+	else
+	{
+		VuPrjectionMatrix	= *projection;
+	}
 
 	vu_projection_type	= 1; // use projection matrix
 }
@@ -115,7 +108,11 @@ void VuSetProjectionType(unsigned int type)
 
 void VuSetWorldMatrix(const VU_MATRIX *world)
 {
-
+	if (!world)
+	{
+		VuWorldMatrix		  = VuInitMatrix;
+		return;
+	}
 	VuWorldMatrix =		*world;
 }
 
@@ -124,7 +121,11 @@ void VuSetWorldMatrix(const VU_MATRIX *world)
 
 void VuSetViewMatrix(const VU_MATRIX *view)
 {
-
+	if (!view)
+	{
+		VuViewMatrix		  = VuInitMatrix;
+		return;
+	}
 	VuViewMatrix =		*view;
 }
 
@@ -134,7 +135,11 @@ void VuSetViewMatrix(const VU_MATRIX *view)
 
 void VuSetLocalScreenMatrix(const VU_MATRIX *m)
 {
-
+	if (!m)
+	{
+		VuLocalScreenMatrix = VuInitMatrix;
+		return;
+	}
 	VuLocalScreenMatrix = *m;
 }
 

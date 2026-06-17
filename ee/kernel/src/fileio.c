@@ -41,8 +41,8 @@ SifRpcClientData_t _fio_cd;
 int _fio_recv_data[512] __attribute__((aligned(64)));
 int _fio_intr_data[32] __attribute__((aligned(64)));
 int _fio_block_mode;
-int _fio_io_sema         = -1;
-int _fio_completion_sema = -1;
+int _fio_io_sema;
+int _fio_completion_sema;
 #endif
 
 #ifdef F_fio_init
@@ -70,7 +70,10 @@ int fioInit(void)
     sema.option          = 0;
     _fio_completion_sema = CreateSema(&sema);
     if (_fio_completion_sema < 0)
+    {
+        _fio_completion_sema = 0;
         return -E_LIB_SEMA_CREATE;
+    }
 
     // Unofficial: create a locking semaphore to prevent a thread from overwriting another thread's return status.
     sema.init_count = 1;
@@ -78,7 +81,10 @@ int fioInit(void)
     sema.option     = 0;
     _fio_io_sema    = CreateSema(&sema);
     if (_fio_io_sema < 0)
+    {
+        _fio_io_sema = 0;
         return -E_LIB_SEMA_CREATE;
+    }
 
     _fio_block_mode = FIO_WAIT;
 
@@ -145,11 +151,13 @@ void fioExit(void)
 {
     if (_fio_cd.server) {
         memset(&_fio_cd, 0, sizeof _fio_cd);
-        if (_fio_completion_sema >= 0) {
+        if (_fio_completion_sema > 0) {
             DeleteSema(_fio_completion_sema);
+            _fio_completion_sema = 0;
         }
-        if (_fio_io_sema >= 0) {
+        if (_fio_io_sema > 0) {
             DeleteSema(_fio_io_sema);
+            _fio_io_sema = 0;
         }
     }
 }
