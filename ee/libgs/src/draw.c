@@ -15,6 +15,7 @@
 #include <sys/unistd.h>
 #include <kernel.h>
 #include <libgs.h>
+#include <syscallnr.h>
 
 #include "internal.h"
 
@@ -49,30 +50,6 @@ void GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, u16 vram_addr)
 	drawenv->vram_addr=vram_addr;
 }
 
-int checkModelVersion(void)
-{
-	int fd, result;
-	char data[256];
-
-	if((fd=open("rom0:ROMVER", O_RDONLY))>=0)
-	{
-		int i;
-		char *pData;
-		for(pData=data,i=0; (unsigned int)i<sizeof(data); i++)
-		{
-			read(fd, pData, 1);
-			if(*pData++=='\0') break;
-		}
-		close(fd);
-
-		//ROMVER string format: VVVVRTYYYYMMDD\n
-		result=(20010608<atoi(data+i-9));
-	}
-	else result=-1;
-
-	return result;
-}
-
 void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, u16 psm, u16 w, u16 h, u16 dx, u16 dy)
 {
 	GsGParam_t *pGParams;
@@ -88,7 +65,7 @@ void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, u16 psm, u16 w, u16 h, u16 dx, 
 		gs_DY=0;
 		gs_DX=0;
 	} else {
-		if(checkModelVersion())
+		if(GetSyscallHandler(__NR__GetGsDxDyOffset))
 			_GetGsDxDyOffset(pGParams->omode, &gs_DX, &gs_DY, &gs_DW, &gs_DH);
 		else{
 			gs_DH=0;
