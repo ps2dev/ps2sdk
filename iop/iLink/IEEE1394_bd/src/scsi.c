@@ -39,12 +39,22 @@ typedef struct _sense_data
     u8 res4[4];
 } sense_data;
 
-typedef struct _read_capacity_data
+typedef struct _read_capacity10_data
 {
     u8 last_lba[4];
     u8 block_length[4];
-} read_capacity_data;
-static_assert(sizeof(read_capacity_data) == 8);
+} read_capacity10_data;
+static_assert(sizeof(read_capacity10_data) == 8);
+
+typedef struct _read_capacity16_data
+{
+    u8 last_lba_msb[4];
+    u8 last_lba_lsb[4];
+    u8 block_length[4];
+    u8 args[4];
+    u8 reserved[16];
+} read_capacity16_data;
+static_assert(sizeof(read_capacity16_data) == 32);
 
 #define NUM_DEVICES 2
 static struct block_device g_scsi_bd[NUM_DEVICES];
@@ -93,11 +103,25 @@ static int scsi_cmd_start_stop_unit(struct block_device *bd, u8 param)
     return scsi_cmd(bd, 0x1b, NULL, 0, param);
 }
 
-static inline int scsi_cmd_read_capacity(struct block_device *bd, void *buffer, int size)
+static inline int scsi_cmd_read_capacity10(struct block_device *bd, void *buffer, int buf_size)
 {
     M_DEBUG("%s\n", __func__);
 
-    return scsi_cmd(bd, 0x25, buffer, size, 0);
+    return scsi_cmd(bd, 0x25, buffer, buf_size, 0);
+}
+
+static inline int scsi_cmd_read_capacity16(struct block_device *bd, void *buffer, int buf_size)
+{
+    unsigned char comData[16]   = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
+
+    M_DEBUG("%s\n", __func__);
+
+    comData[0] = 0x9e;
+    comData[1] = 0x10;
+    comData[13] = buf_size;
+
+    return scsi->queue_cmd(scsi, comData, 16, buffer, buf_size, 0);
 }
 
 static int scsi_cmd_rw_sector(struct block_device *bd, u64 lba, const void *buffer, unsigned short int sectorCount, unsigned int write)
@@ -129,7 +153,6 @@ static int scsi_warmup(struct block_device *bd)
     struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
     inquiry_data id;
     sense_data sd;
-    read_capacity_data rcd;
     int stat;
 
     M_DEBUG("%s\n", __func__);
@@ -169,16 +192,32 @@ static int scsi_warmup(struct block_device *bd)
         }
     }
 
-    memset(&rcd, 0, sizeof(read_capacity_data));
-    if ((stat = scsi_cmd_read_capacity(bd, &rcd, sizeof(read_capacity_data))) != 0) {
-        M_PRINTF("ERROR: scsi_cmd_read_capacity %d\n", stat);
+    //*
+    read_capacity10_data rc10d;
+    memset(&rc10d, 0, sizeof(read_capacity10_data));
+    if ((stat = scsi_cmd_read_capacity10(bd, &rc10d, sizeof(read_capacity10_data))) != 0) {
+        M_PRINTF("ERROR: scsi_cmd_read_capacity10 %d\n", stat);
         return -1;
     }
-
-    bd->sectorSize   = getBI32(&rcd.block_length);
+    bd->sectorCount  = getBI32(&rc10d.last_lba);
+    bd->sectorSize   = getBI32(&rc10d.block_length);
     bd->sectorOffset = 0;
-    bd->sectorCount  = getBI32(&rcd.last_lba);
-    M_PRINTF("%lu %u-byte logical blocks: (%luMB / %luMiB)\n", (u32)bd->sectorCount, bd->sectorSize, (u32)bd->sectorCount / ((1000 * 1000) / bd->sectorSize), (u32)bd->sectorCount / ((1024 * 1024) / bd->sectorSize));
+    /*/
+    read_capacity16_data rc16d;
+    memset(&rc16d, 0, sizeof(read_capacity16_data));
+    if ((stat = scsi_cmd_read_capacity16(bd, &rc16d, sizeof(read_capacity16_data))) != 0) {
+        M_PRINTF("ERROR: scsi_cmd_read_capacity16 %d\n", stat);
+        return -1;
+    }
+    bd->sectorCount  = ((u64)getBI32(&rc16d.last_lba_msb) << 32) | (getBI32(&rc16d.last_lba_lsb));
+    bd->sectorSize   = getBI32(&rc16d.block_length);
+    bd->sectorOffset = 0;
+    //*/
+
+    u64 sectorCount = bd->sectorCount;
+    U64_2XU32(sectorCount);
+    M_PRINTF("0x%08x%08x %u-byte logical blocks: (%lu MB / %lu MiB)\n", sectorCount_u32[1], sectorCount_u32[0], bd->sectorSize,
+        (u32)(bd->sectorCount / ((1000 * 1000) / bd->sectorSize)), (u32)(bd->sectorCount / ((1024 * 1024) / bd->sectorSize)));
 
     return 0;
 }
