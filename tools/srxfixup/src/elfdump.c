@@ -452,21 +452,13 @@ void print_elf_disasm(const elf_file *elf, const elf_section *scp, unsigned int 
 				pb[k] = 32;
 			}
 			pb[48] = 0;
-			sprintf(&pb[strlen(pb)], "%3d:", rel[i].rid);
-			if ( rel[i].rp )
-			{
-				rp = rel[i].rp;
-				strcat(pb, " ");
-			}
-			else
-			{
-				rp = rel[i].mhrp;
-				strcat(pb, ">");
-			}
+			snprintf(&pb[strlen(pb)], sizeof(pb) - strlen(pb), "%3d:%c", rel[i].rid, rel[i].rp ? ' ' : '>');
+			rp = rel[i].rp ? rel[i].rp : rel[i].mhrp;
 			if ( rp->symptr && rp->symptr->type == STT_SECTION )
 			{
-				sprintf(
+				snprintf(
 					&pb[strlen(pb)],
+					sizeof(pb) - strlen(pb),
 					"  %s %d '%s'",
 					num2name(R_MIPS_Type, rp->type),
 					(int)(rp->rel.r_info >> 8),
@@ -492,8 +484,9 @@ void print_elf_disasm(const elf_file *elf, const elf_section *scp, unsigned int 
 							break;
 					}
 				}
-				sprintf(
+				snprintf(
 					&pb[strlen(pb)],
+					sizeof(pb) - strlen(pb),
 					"%c %s %d %s",
 					v7,
 					num2name(R_MIPS_Type, rp->type),
@@ -923,7 +916,7 @@ static const char *num2name(const struct name2num *table, unsigned int num)
 			return table->name;
 		}
 	}
-	sprintf(buf_28, "? 0x%x", num);
+	snprintf(buf_28, sizeof(buf_28), "? 0x%x", num);
 	return buf_28;
 }
 

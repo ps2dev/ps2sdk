@@ -143,8 +143,8 @@ int main(int argc, char **argv)
     } else if ((argc == 3 || argc == 4) && strcmp(argv[1], "-x") == 0) {
         if ((result = LoadROMImg(&ROMImg, argv[2])) == 0) {
             if (argc == 3) {
-                char FOLDER[256] = "ext_";
-                strcat(FOLDER, argv[2]);
+                char FOLDER[256];
+                snprintf(FOLDER, sizeof(FOLDER), "ext_%s", argv[2]);
 #if defined(_WIN32) || defined(WIN32)
                 mkdir(FOLDER);
 #else

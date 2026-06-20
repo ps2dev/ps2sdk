@@ -96,10 +96,12 @@ int main(int argc, char *argv[])
 	}
 
 	char *new_argv[argc - 1];
-	int fullPath_length = 1 + strlen(argv[0]) + strlen(argv[1]);
-	char fullPath[fullPath_length];
-	strcpy(fullPath, argv[0]);
-	strcat(fullPath, argv[1]);
+	int argv0_len = strlen(argv[0]);
+	int argv1_len = strlen(argv[1]);
+	char fullPath[argv0_len + argv1_len + 1];
+	memcpy(&fullPath[0], argv[0], argv0_len);
+	memcpy(&fullPath[argv0_len], argv[1], argv1_len);
+	fullPath[argv0_len + argv1_len] = 0;
 	// final new_argv[0] is partition + path to elf
 	new_argv[0] = fullPath;
 	for (i = 2; i < argc; i++) {

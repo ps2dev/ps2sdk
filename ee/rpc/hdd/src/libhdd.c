@@ -164,7 +164,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 		}
 
 		memset(&hddFs[count], 0, sizeof(t_hddFilesystem));
-		snprintf(hddFs[count].filename, 40, "hdd0:%.34s", dirEnt.name);
+		snprintf(hddFs[count].filename, sizeof(hddFs[count].filename), "hdd0:%.34s", dirEnt.name);
 
 		// Work out filesystem type
 		if((dirEnt.name[0] == '_') && (dirEnt.name[1] == '_'))
@@ -299,7 +299,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 	int partSize;
 	int fsSizeLeft = fsSizeMB;
 	int partFd;
-	char openString[256];
+	char openString[268];
 	char fsName[256];
 	int retVal;
 
@@ -312,18 +312,18 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 	switch(type)
 	{
 		case FS_GROUP_SYSTEM:
-			sprintf(fsName, "__%s", name);
+			snprintf(fsName, sizeof(fsName), "__%s", name);
 			break;
 		case FS_GROUP_COMMON:
-			sprintf(fsName, "+%s", name);
+			snprintf(fsName, sizeof(fsName), "+%s", name);
 			break;
 		default:
-			strcpy(fsName, name);
+			snprintf(fsName, sizeof(fsName), "%s", name);
 			break;
 	}
 
 	// Check if filesystem already exists
-	sprintf(openString, "hdd0:%s", fsName);
+	snprintf(openString, sizeof(openString), "hdd0:%s", fsName);
 	partFd = fileXioOpen(openString, FIO_O_RDONLY);
 	if(partFd > 0 || partFd == -EACCES)	// Filesystem already exists
 	{
@@ -345,7 +345,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 		printf(">>> Attempting to create main partition, size %d MB\n", partSize);
 #endif
 
-		sprintf(openString, "hdd0:%s,,,%s,PFS", fsName, sizesString[useIndex]);
+		snprintf(openString, sizeof(openString), "hdd0:%s,,,%s,PFS", fsName, sizesString[useIndex]);
 #ifdef DEBUG
 		printf(">>> openString = %s\n", openString);
 #endif
@@ -441,7 +441,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 
 	fileXioClose(partFd);
 
-	sprintf(openString, "hdd0:%s", fsName);
+	snprintf(openString, sizeof(openString), "hdd0:%s", fsName);
 	retVal = fileXioFormat("pfs:", openString, (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
 	if(retVal < 0)
 	{
