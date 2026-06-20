@@ -24,6 +24,7 @@ typedef struct _inquiry_data
     u8 product[16];
     u8 revision[4];
 } inquiry_data;
+static_assert(sizeof(inquiry_data) == 36);
 
 typedef struct _sense_data
 {
@@ -43,6 +44,7 @@ typedef struct _read_capacity_data
     u8 last_lba[4];
     u8 block_length[4];
 } read_capacity_data;
+static_assert(sizeof(read_capacity_data) == 8);
 
 #define NUM_DEVICES 2
 static struct block_device g_scsi_bd[NUM_DEVICES];
@@ -148,6 +150,7 @@ static int scsi_warmup(struct block_device *bd)
     while ((stat = scsi_cmd_test_unit_ready(bd)) != 0) {
         M_PRINTF("ERROR: scsi_cmd_test_unit_ready %d\n", stat);
 
+        memset(&sd, 0, sizeof(sense_data));
         stat = scsi_cmd_request_sense(bd, &sd, sizeof(sense_data));
         if (stat != 0) {
             M_PRINTF("ERROR: scsi_cmd_request_sense %d\n", stat);
@@ -166,6 +169,7 @@ static int scsi_warmup(struct block_device *bd)
         }
     }
 
+    memset(&rcd, 0, sizeof(read_capacity_data));
     if ((stat = scsi_cmd_read_capacity(bd, &rcd, sizeof(read_capacity_data))) != 0) {
         M_PRINTF("ERROR: scsi_cmd_read_capacity %d\n", stat);
         return -1;

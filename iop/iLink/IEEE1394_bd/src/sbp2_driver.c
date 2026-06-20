@@ -536,6 +536,7 @@ static int sbp2_queue_cmd(struct scsi_interface *scsi, const unsigned char *cmd,
     int i;
     int ret;
     struct CommandDescriptorBlock cdb;
+    memset(&cdb, 0, sizeof(cdb));
 
     M_DEBUG("sbp2_queue_cmd(0x%02x)\n", cmd[0]);
 

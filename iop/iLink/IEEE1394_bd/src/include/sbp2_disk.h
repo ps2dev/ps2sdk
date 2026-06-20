@@ -19,7 +19,7 @@
 #define CDB_MAX_PAYLOAD(v)        ((v) << 20)
 #define CDB_SPEED(v)              ((v) << 24)
 #define CDB_DIRECTION(v)          ((v) << 27)
-#define CDB_DATA_SIZE(v)          ((v))
+#define CDB_DATA_SIZE(v)          ((v & 0xffff))
 
 /* Event flag bits. */
 #define WRITE_REQ_INCOMING 1
