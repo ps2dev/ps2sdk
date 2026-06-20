@@ -92,24 +92,10 @@ void fix_imports(iop_library_t *lib)
 
 static u32 *ioman_exports;
 
-static u32 Addr_IOMAN_open = 0;
-static u32 Addr_IOMAN_close = 0;
-static u32 Addr_IOMAN_read = 0;
-static u32 Addr_IOMAN_write = 0;
-static u32 Addr_IOMAN_lseek = 0;
-static u32 Addr_IOMAN_ioctl = 0;
-static u32 Addr_IOMAN_remove = 0;
-static u32 Addr_IOMAN_mkdir = 0;
-static u32 Addr_IOMAN_rmdir = 0;
-static u32 Addr_IOMAN_dopen = 0;
-static u32 Addr_IOMAN_dclose = 0;
-static u32 Addr_IOMAN_dread = 0;
-static u32 Addr_IOMAN_getstat = 0;
-static u32 Addr_IOMAN_chstat = 0;
-static u32 Addr_IOMAN_format = 0;
-
+#ifndef FULL_IOMAN
 static u32 Addr_IOMAN_AddDrv = 0;
 static u32 Addr_IOMAN_DelDrv = 0;
+#endif
 
 #ifndef FULL_IOMAN
 
@@ -236,112 +222,97 @@ int ioman_chstat(const char *name, io_stat_t *stat, unsigned int mask)
 
 #endif
 
+extern struct irx_export_table _exp_ioman;
+
 int hook_ioman(void)
 {
 	iop_library_t ioman_library = { NULL, NULL, 0x102, 0, "ioman\0\0" };
 	ModuleInfo_t info;
 
-    dev_list = iomanX_GetDeviceList();
+    /* If we already hooked, don't hook again */
+    if (ioman_exports)
+        return -1;
 
-	if (smod_get_mod_by_name(ioman_modname, &info))
-	{
-        // steal the original IOMAN's 16 registered device entries
-        memcpy(dev_list, (void *) (info.text_start + info.text_size + info.data_size + 0x10), sizeof(iomanX_iop_device_t *) * 16);
+    /* Query if ioman libary exists, otherwise register our own */
+    /* By having a higher version, libraries will relink to the new entry table in RegisterLibraryEntries. */
+    if (!smod_get_mod_by_name(ioman_modname, &info) || !(ioman_exports = (u32 *)QueryLibraryEntryTable(&ioman_library)))
+    {
+        int ret;
+        u16 old_version;
 
-        // steal the original IOMAN's 16 file descriptors
-        memcpy(file_table, (void *) (info.text_start + info.text_size + info.data_size + 0x50), sizeof(iomanX_iop_file_t) * 16);
-	}
-	else { return(-1); }
+        old_version = _exp_ioman.version;
+        _exp_ioman.version |= 0xFF;
+        ret = RegisterLibraryEntries(&_exp_ioman);
+        _exp_ioman.version = old_version;
+        return ret;
+    }
 
     // patch the IOMAN export library table to call iomanX functions
-	if ((ioman_exports = (u32 *)QueryLibraryEntryTable(&ioman_library)) != NULL)
-	{
-    	/* Preserve ioman's library exports.  */
-        Addr_IOMAN_open = ioman_exports[4];
-        Addr_IOMAN_close = ioman_exports[5];
-        Addr_IOMAN_read = ioman_exports[6];
-        Addr_IOMAN_write = ioman_exports[7];
-        Addr_IOMAN_lseek = ioman_exports[8];
-        Addr_IOMAN_ioctl = ioman_exports[9];
-        Addr_IOMAN_remove = ioman_exports[10];
-        Addr_IOMAN_mkdir = ioman_exports[11];
-        Addr_IOMAN_rmdir = ioman_exports[12];
-        Addr_IOMAN_dopen = ioman_exports[13];
-        Addr_IOMAN_dclose = ioman_exports[14];
-        Addr_IOMAN_dread = ioman_exports[15];
-        Addr_IOMAN_getstat = ioman_exports[16];
-        Addr_IOMAN_chstat = ioman_exports[17];
-        Addr_IOMAN_format = ioman_exports[18];
-        Addr_IOMAN_AddDrv = ioman_exports[20];
-        Addr_IOMAN_DelDrv = ioman_exports[21];
-
 #ifdef FULL_IOMAN
-		ioman_exports[4] = (u32) ioman_open;
-		ioman_exports[5] = (u32) iomanX_close;
-		ioman_exports[6] = (u32) iomanX_read;
-		ioman_exports[7] = (u32) iomanX_write;
-		ioman_exports[8] = (u32) iomanX_lseek;
-		ioman_exports[9] = (u32) iomanX_ioctl;
-		ioman_exports[10] = (u32) iomanX_remove;
-		ioman_exports[11] = (u32) ioman_mkdir;
-		ioman_exports[12] = (u32) iomanX_rmdir;
-		ioman_exports[13] = (u32) iomanX_dopen;
-		ioman_exports[14] = (u32) iomanX_close;
-		ioman_exports[15] = (u32) ioman_dread;
-		ioman_exports[16] = (u32) ioman_getstat;
-		ioman_exports[17] = (u32) ioman_chstat;
-		ioman_exports[18] = (u32) ioman_format;
-		ioman_exports[20] = (u32) iomanX_AddDrv;
-		ioman_exports[21] = (u32) iomanX_DelDrv;
+    /* Replace ioman library entries with our updated ones. */
+    /* By having a higher version, libraries will relink to the new entry table in RegisterLibraryEntries. */
+    {
+        int ret;
+        u16 old_version;
+
+        old_version = _exp_ioman.version;
+        _exp_ioman.version |= 0xFF;
+        ret = RegisterLibraryEntries(&_exp_ioman);
+        _exp_ioman.version = old_version;
+        if ( ret )
+            return ret;
+    }
+    /* Prepare the old table for restoration inside unhook_ioman. */
+    ReleaseLibraryEntries((struct irx_export_table *) (((uiptr) ioman_exports) - 0x14));
 #else
-		ioman_exports[20] = (u32) sbv_AddDrv;
-		ioman_exports[21] = (u32) sbv_DelDrv;
+    /* Preserve ioman's library exports.  */
+    Addr_IOMAN_AddDrv = ioman_exports[20];
+    Addr_IOMAN_DelDrv = ioman_exports[21];
+
+    ioman_exports[20] = (u32) sbv_AddDrv;
+    ioman_exports[21] = (u32) sbv_DelDrv;
+
+    /* repair all the tables that import the ioman library */
+    fix_imports((iop_library_t *)(((uiptr) ioman_exports) - 0x14));
 #endif
 
-        // repair all the tables that import the ioman library
-        fix_imports((iop_library_t *) (((u32) ioman_exports) - 0x14));
-	}
-	else { return(-2); }
+    dev_list = iomanX_GetDeviceList();
+    /* steal the original IOMAN's 16 registered device entries */
+    memcpy(dev_list, (void *) (info.text_start + info.text_size + info.data_size + 0x10), sizeof(iomanX_iop_device_t *) * 16);
+#ifdef FULL_IOMAN
+    /* ... and clear the original so they don't get double-deinitialized */
+    memset((void *) (info.text_start + info.text_size + info.data_size + 0x10), 0, sizeof(iomanX_iop_device_t *) * 16);
+#endif
 
-	return(0);
+    /* steal the original IOMAN's 16 file descriptors */
+    memcpy(file_table, (void *) (info.text_start + info.text_size + info.data_size + 0x50), sizeof(iomanX_iop_file_t) * 16);
+#ifdef FULL_IOMAN
+    /* ... and clear the original so they don't get double-deinitialized */
+    memset((void *) (info.text_start + info.text_size + info.data_size + 0x50), 0, sizeof(iomanX_iop_file_t) * 16);
+#endif
+
+	return 0;
 }
 
-int unhook_ioman()
+int unhook_ioman(void)
 {
-	int i;
-
-    dev_list = iomanX_GetDeviceList();
-
-	/* Remove all registered devices.  */
-	for (i = 0; i < MAX_DEVICES; i++) {
-		if (dev_list[i] != NULL) {
-			dev_list[i]->ops->deinit(dev_list[i]);
-			dev_list[i] = NULL;
-		}
-	}
-
+#ifdef FULL_IOMAN
+    if (ioman_exports)
+    {
+        ReleaseLibraryEntries(&_exp_ioman);
+        RegisterLibraryEntries((struct irx_export_table *) (((uiptr) ioman_exports) - 0x14));
+    }
+#else
+    if (!ioman_exports)
+        return -2;
 	/* Restore ioman's library exports.  */
-    ioman_exports[4] = Addr_IOMAN_open;
-    ioman_exports[5] = Addr_IOMAN_close;
-    ioman_exports[6] = Addr_IOMAN_read;
-    ioman_exports[7] = Addr_IOMAN_write;
-    ioman_exports[8] = Addr_IOMAN_lseek;
-    ioman_exports[9] = Addr_IOMAN_ioctl;
-    ioman_exports[10] = Addr_IOMAN_remove;
-    ioman_exports[11] = Addr_IOMAN_mkdir;
-    ioman_exports[12] = Addr_IOMAN_rmdir;
-    ioman_exports[13] = Addr_IOMAN_dopen;
-    ioman_exports[14] = Addr_IOMAN_dclose;
-    ioman_exports[15] = Addr_IOMAN_dread;
-    ioman_exports[16] = Addr_IOMAN_getstat;
-    ioman_exports[17] = Addr_IOMAN_chstat;
-    ioman_exports[18] = Addr_IOMAN_format;
-
     ioman_exports[20] = Addr_IOMAN_AddDrv;
     ioman_exports[21] = Addr_IOMAN_DelDrv;
 
     // repair all the tables that import the ioman library
-    fix_imports((iop_library_t *) (((u32) ioman_exports) - 0x14));
+    fix_imports((iop_library_t *) (((uiptr) ioman_exports) - 0x14));
+#endif
+    ioman_exports = NULL;
 
 	return 0;
 }
