@@ -294,16 +294,24 @@ static void BuildConfigurationROM(void)
     if ((CROM_Buffer = malloc(CROMSize)) == NULL)
         return;
 
+    memset(CROM_Buffer, 0, CROMSize);
+
     CurrentOffset = sizeof(struct BusInformationBlockHeader) + sizeof(struct BusInformationBlock);
     /* Fill in the fields in the Root Directory (Exists immediately after the Bus Information block). */
     DirectoryHeader                                          = (struct DirectoryHeader *)&CROM_Buffer[CurrentOffset];
     RootDirectory                                            = (struct Root_Directory *)((unsigned char *)DirectoryHeader + sizeof(struct DirectoryHeader));
-    RootDirectory->Module_Vendor_ID_Texual_Descriptor_Offset = (IEEE1394_CROM_VENDOR << 24) | (sizeof(struct DirectoryHeader) * 2 / 4 + TotalRootDirectorySizeInQuads - 2 + sizeof(struct Module_Vendor_Id) / 4); /* Calculate the relative offset (In quadlets!!). */
+    RootDirectory->VendorID                                  = (IEEE1394_CROM_VENDOR << 24) | 0x80046;
+    RootDirectory->Module_Vendor_ID_Texual_Descriptor_Offset = (IEEE1394_CROM_MODEL_ID << 24)
+                              | (sizeof(struct DirectoryHeader) * 2 / 4
+                              + TotalRootDirectorySizeInQuads - 2 // offset of Module_Vendor_ID_Texual_Descriptor_Offset+1
+                              + sizeof(struct Module_Vendor_Id) / 4); /* Calculate the relative offset (In quadlets!!). */
     RootDirectory->Node_Capabilities                         = (IEEE1394_CROM_NODE_CAPS << 24) | 0x0C0083C0;
-    RootDirectory->Node_Unique_ID_Offset                     = (IEEE1394_CROM_NODE_UID << 24) | (sizeof(struct DirectoryHeader) * 3 / 4 + TotalRootDirectorySizeInQuads - 2 + sizeof(struct Module_Vendor_Id) / 4 + sizeof(struct Module_Vendor_ID_Texual_Descriptor) / 4);
+    RootDirectory->Node_Unique_ID_Offset                     = (IEEE1394_CROM_NODE_UID << 24)
+                              | (sizeof(struct DirectoryHeader) * 3 / 4
+                              + TotalRootDirectorySizeInQuads - 4 // offset of Node_Unique_ID_Offset+1
+                              + sizeof(struct Module_Vendor_Id) / 4
+                              + sizeof(struct Module_Vendor_ID_Texual_Descriptor) / 4);
     RootDirectory->Module_Vendor_ID_Offset                   = (IEEE1394_CROM_MODULE_VENDOR_ID << 24) | (nExtraCROMUnits + 1);
-
-    ieee1394Swab32(RootDirectory, RootDirectory, sizeof(struct Root_Directory) / 4); /* Convert this block of data to Big-endian data. */
 
     CurrentOffset = CurrentOffset + sizeof(struct DirectoryHeader) + sizeof(struct Root_Directory);
 
@@ -315,19 +323,15 @@ static void BuildConfigurationROM(void)
     }
 
     DirectoryHeader->Directory_length = TotalRootDirectorySizeInQuads;
-    DirectoryHeader->CRC16            = BSWAP16(iLinkCalculateCRC16(RootDirectory, DirectoryHeader->Directory_length));
-    DirectoryHeader->Directory_length = BSWAP16(DirectoryHeader->Directory_length);
+    DirectoryHeader->CRC16            = iLinkCalculateCRC16(RootDirectory, DirectoryHeader->Directory_length);
 
     /* Fill in the fields of the Module Vendor ID record. */
     ModuleVendorID                     = (struct Module_Vendor_Id *)&CROM_Buffer[CurrentOffset + sizeof(struct DirectoryHeader)];
     ModuleVendorID->Textual_Descriptor = (IEEE1394_CROM_MODEL_ID << 24) | ((sizeof(struct DirectoryHeader) * 2 / 4 + sizeof(struct Module_Vendor_ID_Texual_Descriptor) + sizeof(struct Node_Unique_Id)) / 4);
 
-    ieee1394Swab32(ModuleVendorID, ModuleVendorID, sizeof(struct Module_Vendor_Id) / 4); /* Convert this block of data to Big-endian data. */
-
     DirectoryHeader                   = (struct DirectoryHeader *)&CROM_Buffer[CurrentOffset];
     DirectoryHeader->Directory_length = 1;
-    DirectoryHeader->CRC16            = BSWAP16(iLinkCalculateCRC16(ModuleVendorID, DirectoryHeader->Directory_length));
-    DirectoryHeader->Directory_length = BSWAP16(DirectoryHeader->Directory_length);
+    DirectoryHeader->CRC16            = iLinkCalculateCRC16(ModuleVendorID, DirectoryHeader->Directory_length);
 
     CurrentOffset = CurrentOffset + sizeof(struct Module_Vendor_Id) + sizeof(struct DirectoryHeader);
 
@@ -336,14 +340,10 @@ static void BuildConfigurationROM(void)
     ModuleTexualDescriptor               = (struct Module_Vendor_ID_Texual_Descriptor *)((unsigned char *)DirectoryHeader + sizeof(struct DirectoryHeader));
     ModuleTexualDescriptor->Specifier_ID = 0x00000000;
     ModuleTexualDescriptor->Language_ID  = 0x00000000;
-
-    ieee1394Swab32(ModuleTexualDescriptor, ModuleTexualDescriptor, sizeof(struct Module_Vendor_ID_Texual_Descriptor) / 4); /* Convert this block of data to Big-endian data. */
-
-    memcpy(ModuleTexualDescriptor->Vendor_Name, "Sony", 4); /* Don't flop the "Sony" text. */
+    ModuleTexualDescriptor->Vendor_Name  = ('S' << 24) | ('o' << 16) | ('n' << 8) | ('y' << 0);
 
     DirectoryHeader->Directory_length = 3;
-    DirectoryHeader->CRC16            = BSWAP16(iLinkCalculateCRC16(ModuleTexualDescriptor, DirectoryHeader->Directory_length));
-    DirectoryHeader->Directory_length = BSWAP16(DirectoryHeader->Directory_length);
+    DirectoryHeader->CRC16            = iLinkCalculateCRC16(ModuleTexualDescriptor, DirectoryHeader->Directory_length);
 
     CurrentOffset = CurrentOffset + sizeof(struct Module_Vendor_ID_Texual_Descriptor) + sizeof(struct DirectoryHeader);
 
@@ -351,12 +351,11 @@ static void BuildConfigurationROM(void)
     DirectoryHeader = (struct DirectoryHeader *)&CROM_Buffer[CurrentOffset];
     NodeUniqueID    = (struct Node_Unique_Id *)((unsigned char *)DirectoryHeader + sizeof(struct DirectoryHeader));
 
-    NodeUniqueID->HardwareID  = BSWAP32((ConsoleGUID >> 32));
-    NodeUniqueID->Chip_ID_Low = BSWAP32((ConsoleGUID & 0xFFFFFFFF));
+    NodeUniqueID->HardwareID  = ConsoleGUID >> 32;
+    NodeUniqueID->Chip_ID_Low = ConsoleGUID & 0xFFFFFFFF;
 
     DirectoryHeader->Directory_length = sizeof(struct Node_Unique_Id) / 4;
-    DirectoryHeader->CRC16            = BSWAP16(iLinkCalculateCRC16(NodeUniqueID, DirectoryHeader->Directory_length));
-    DirectoryHeader->Directory_length = BSWAP16(DirectoryHeader->Directory_length);
+    DirectoryHeader->CRC16            = iLinkCalculateCRC16(NodeUniqueID, DirectoryHeader->Directory_length);
 
     CurrentOffset = CurrentOffset + sizeof(struct DirectoryHeader) + sizeof(struct Node_Unique_Id);
 
@@ -370,25 +369,24 @@ static void BuildConfigurationROM(void)
     memcpy(ModelName->Model_Name, ConsoleModelName, sizeof(ModelName->Model_Name));
 
     DirectoryHeader->Directory_length = sizeof(struct ModelID_Textual_Descriptor) / 4;
-    DirectoryHeader->CRC16            = BSWAP16(iLinkCalculateCRC16(ModelName, DirectoryHeader->Directory_length));
-    DirectoryHeader->Directory_length = BSWAP16(DirectoryHeader->Directory_length);
+    DirectoryHeader->CRC16            = iLinkCalculateCRC16(ModelName, DirectoryHeader->Directory_length);
 
     CurrentOffset = sizeof(struct BusInformationBlockHeader);
 
     /* Fill in the fields in the Bus Information Block. */
     BusInfoBlk = (struct BusInformationBlock *)&CROM_Buffer[CurrentOffset];
-    memcpy(BusInfoBlk->BusName, "1394", 4);
-    BusInfoBlk->capabilities = NodeCapabilities << 3;
-    BusInfoBlk->Cyc_Clk_Acc  = CycleClkAcc;
-    BusInfoBlk->Max_Rec      = Max_Rec << 4;
+    BusInfoBlk->BusName      = ('1' << 24) | ('3' << 16) | ('9' << 8) | ('4' << 0);
     BusInfoBlk->misc         = LinkSpeed;
+    BusInfoBlk->Max_Rec      = Max_Rec << 4;
+    BusInfoBlk->Cyc_Clk_Acc  = CycleClkAcc;
+    BusInfoBlk->capabilities = NodeCapabilities << 3;
     BusInfoBlk->HardwareID   = NodeUniqueID->HardwareID;
     BusInfoBlk->Chip_ID_Low  = NodeUniqueID->Chip_ID_Low;
 
     /* Fill in the fields in the Bus Information Block Header. */
-    ((struct BusInformationBlockHeader *)CROM_Buffer)->Bus_info_length = 4; /* According to the standard. */
-    ((struct BusInformationBlockHeader *)CROM_Buffer)->CRC_length      = sizeof(struct BusInformationBlock) / 4;
     ((struct BusInformationBlockHeader *)CROM_Buffer)->ROM_CRC_value   = BSWAP16(iLinkCalculateCRC16(BusInfoBlk, sizeof(struct BusInformationBlock) / 4));
+    ((struct BusInformationBlockHeader *)CROM_Buffer)->CRC_length      = sizeof(struct BusInformationBlock) / 4;
+    ((struct BusInformationBlockHeader *)CROM_Buffer)->Bus_info_length = 4; /* According to the standard. */
 
     if (ConfigurationROM != NULL)
         free(ConfigurationROM);

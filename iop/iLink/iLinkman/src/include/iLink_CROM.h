@@ -14,59 +14,59 @@
 
 struct BusInformationBlockHeader
 {
-    unsigned char Bus_info_length;
-    unsigned char CRC_length;
-    unsigned short int ROM_CRC_value;
+    u16 ROM_CRC_value;
+    u8  CRC_length;
+    u8  Bus_info_length;
 };
 
 struct BusInformationBlock
 {
-    unsigned char BusName[4];
-    unsigned char capabilities;
-    unsigned char Cyc_Clk_Acc;
-    unsigned char Max_Rec;
-    unsigned char misc; /* g, resv. and link_spd fields. */
+    u32 BusName;
+    u8  misc; /* g, resv. and link_spd fields. */
+    u8  Max_Rec;
+    u8  Cyc_Clk_Acc;
+    u8  capabilities;
 
-    unsigned int HardwareID; /* NodeVendorID | Chip_ID_High */
-    unsigned int Chip_ID_Low;
+    u32 HardwareID; /* NodeVendorID | Chip_ID_High */
+    u32 Chip_ID_Low;
 };
 
 struct DirectoryHeader
 {
-    unsigned short int Directory_length;
-    unsigned short int CRC16;
+    u16 CRC16;
+    u16 Directory_length;
 };
 
 struct Root_Directory
 {
-    unsigned int VendorID;
-    unsigned int Module_Vendor_ID_Texual_Descriptor_Offset;
-    unsigned int Node_Capabilities;
-    unsigned int Node_Unique_ID_Offset;
-    unsigned int Module_Vendor_ID_Offset;
+    u32 VendorID;
+    u32 Module_Vendor_ID_Texual_Descriptor_Offset;
+    u32 Node_Capabilities;
+    u32 Node_Unique_ID_Offset;
+    u32 Module_Vendor_ID_Offset;
 };
 
 struct Module_Vendor_ID_Texual_Descriptor
 {
-    unsigned int Specifier_ID;
-    unsigned int Language_ID;
-    unsigned char Vendor_Name[4]; /* "Sony" */
+    u32 Specifier_ID;
+    u32 Language_ID;
+    u32 Vendor_Name;
 };
 
 struct Module_Vendor_Id
 { /* For Playstation 2 consoles only? */
-    unsigned int Textual_Descriptor;
+    u32 Textual_Descriptor;
 };
 
 struct ModelID_Textual_Descriptor
 {
-    unsigned int Specifier_ID;
-    unsigned int Language_ID;
-    unsigned char Model_Name[12]; /* E.g. "SCPH-10000" + 2x00-bytes at the end. */
+    u32 Specifier_ID;
+    u32 Language_ID;
+    u8  Model_Name[12]; /* E.g. "SCPH-10000" + 2x00-bytes at the end. */
 };
 
 struct Node_Unique_Id
 {
-    unsigned int HardwareID; /* Node_Vendor_ID | Chip_ID_High */
-    unsigned int Chip_ID_Low;
+    u32 HardwareID; /* Node_Vendor_ID | Chip_ID_High */
+    u32 Chip_ID_Low;
 };
