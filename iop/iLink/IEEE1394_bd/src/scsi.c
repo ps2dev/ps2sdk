@@ -72,42 +72,42 @@ static int scsi_cmd(struct block_device *bd, unsigned char cmd, void *buffer, in
     comData[0] = cmd;
     comData[4] = cmd_size;
 
-    return scsi->queue_cmd(scsi, comData, 12, buffer, buf_size, 0);
+    return scsi->queue_cmd(scsi, comData, sizeof(comData), buffer, buf_size, 0);
 }
 
 static inline int scsi_cmd_test_unit_ready(struct block_device *bd)
 {
     M_DEBUG("%s\n", __func__);
 
-    return scsi_cmd(bd, 0x00, NULL, 0, 0);
+    return scsi_cmd(bd, TEST_UNIT_READY, NULL, 0, 0);
 }
 
 static inline int scsi_cmd_request_sense(struct block_device *bd, void *buffer, int size)
 {
     M_DEBUG("%s\n", __func__);
 
-    return scsi_cmd(bd, 0x03, buffer, size, size);
+    return scsi_cmd(bd, REQUEST_SENSE, buffer, size, size);
 }
 
 static inline int scsi_cmd_inquiry(struct block_device *bd, void *buffer, int size)
 {
     M_DEBUG("%s\n", __func__);
 
-    return scsi_cmd(bd, 0x12, buffer, size, size);
+    return scsi_cmd(bd, INQUIRY, buffer, size, size);
 }
 
 static int scsi_cmd_start_stop_unit(struct block_device *bd, u8 param)
 {
     M_DEBUG("%s\n", __func__);
 
-    return scsi_cmd(bd, 0x1b, NULL, 0, param);
+    return scsi_cmd(bd, START_STOP_UNIT, NULL, 0, param);
 }
 
 static inline int scsi_cmd_read_capacity10(struct block_device *bd, void *buffer, int buf_size)
 {
     M_DEBUG("%s\n", __func__);
 
-    return scsi_cmd(bd, 0x25, buffer, buf_size, 0);
+    return scsi_cmd(bd, READ_CAPACITY_10, buffer, buf_size, 0);
 }
 
 static inline int scsi_cmd_read_capacity16(struct block_device *bd, void *buffer, int buf_size)
@@ -117,32 +117,50 @@ static inline int scsi_cmd_read_capacity16(struct block_device *bd, void *buffer
 
     M_DEBUG("%s\n", __func__);
 
-    comData[0] = 0x9e;
+    comData[0] = SERVICE_ACTION_IN;
     comData[1] = 0x10;
     comData[13] = buf_size;
 
-    return scsi->queue_cmd(scsi, comData, 16, buffer, buf_size, 0);
+    return scsi->queue_cmd(scsi, comData, sizeof(comData), buffer, buf_size, 0);
 }
 
 static int scsi_cmd_rw_sector(struct block_device *bd, u64 lba, const void *buffer, unsigned short int sectorCount, unsigned int write)
 {
-    unsigned char comData[12]   = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
 
     DEBUG_U64_2XU32(lba);
     M_DEBUG("scsi_cmd_rw_sector - 0x%08x%08x %p 0x%04x\n", lba_u32[1], lba_u32[0], buffer, sectorCount);
 
-    // Note: LBA from bdm is 64bit but SCSI commands being used are 32bit. These need to be updated to 64bit LBA SCSI
-    // commands to work with large capacity drives. For now the 32bit LBA will only support up to 2TB drives.
-
-    comData[0] = write ? 0x2a : 0x28;
-    comData[2] = (lba & 0xFF000000) >> 24;    // lba 1 (MSB)
-    comData[3] = (lba & 0xFF0000) >> 16;      // lba 2
-    comData[4] = (lba & 0xFF00) >> 8;         // lba 3
-    comData[5] = (lba & 0xFF);                // lba 4 (LSB)
-    comData[7] = (sectorCount & 0xFF00) >> 8; // Transfer length MSB
-    comData[8] = (sectorCount & 0xFF);        // Transfer length LSB
-    return scsi->queue_cmd(scsi, comData, 12, (void *)buffer, bd->sectorSize * sectorCount, write);
+    if (lba <= 0xffffffffull)
+    {
+        unsigned char comData[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        comData[0] = write ? WRITE_10 : READ_10;
+        comData[2] = (lba >> 24) & 0xff;        // lba 1 (MSB)
+        comData[3] = (lba >> 16) & 0xff;        // lba 2
+        comData[4] = (lba >>  8) & 0xff;        // lba 3
+        comData[5] = (lba >>  0) & 0xff;        // lba 4 (LSB)
+        comData[7] = (sectorCount >> 8) & 0xff; // Transfer length MSB
+        comData[8] = (sectorCount >> 0) & 0xff; // Transfer length LSB
+        return scsi->queue_cmd(scsi, comData, sizeof(comData), (void *)buffer, bd->sectorSize * sectorCount, write);
+    }
+    else
+    {
+        unsigned char comData[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        comData[0] = write ? WRITE_16 : READ_16;
+        comData[2] = (lba >> 56) & 0xff;          // lba (MSB)
+        comData[3] = (lba >> 48) & 0xff;          // lba
+        comData[4] = (lba >> 40) & 0xff;          // lba
+        comData[5] = (lba >> 32) & 0xff;          // lba
+        comData[6] = (lba >> 24) & 0xff;          // lba
+        comData[7] = (lba >> 16) & 0xff;          // lba
+        comData[8] = (lba >>  8) & 0xff;          // lba
+        comData[9] = (lba >>  0) & 0xff;          // lba (LSB)
+        comData[10] = (sectorCount >> 24) & 0xff; // Transfer length MSB
+        comData[11] = (sectorCount >> 16) & 0xff; // Transfer length
+        comData[12] = (sectorCount >>  8) & 0xff; // Transfer length
+        comData[13] = (sectorCount >>  0) & 0xff; // Transfer length LSB
+        return scsi->queue_cmd(scsi, comData, sizeof(comData), (void *)buffer, bd->sectorSize * sectorCount, write);
+    }
 }
 
 //
@@ -153,6 +171,8 @@ static int scsi_warmup(struct block_device *bd)
     struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
     inquiry_data id;
     sense_data sd;
+    read_capacity10_data rc10d;
+    read_capacity16_data rc16d;
     int stat;
 
     M_DEBUG("%s\n", __func__);
@@ -192,32 +212,35 @@ static int scsi_warmup(struct block_device *bd)
         }
     }
 
-    //*
-    read_capacity10_data rc10d;
     memset(&rc10d, 0, sizeof(read_capacity10_data));
     if ((stat = scsi_cmd_read_capacity10(bd, &rc10d, sizeof(read_capacity10_data))) != 0) {
         M_PRINTF("ERROR: scsi_cmd_read_capacity10 %d\n", stat);
         return -1;
     }
-    bd->sectorCount  = getBI32(&rc10d.last_lba);
+
+    bd->sectorCount  = getBI32(&rc10d.last_lba) & 0xffffffff;
     bd->sectorSize   = getBI32(&rc10d.block_length);
     bd->sectorOffset = 0;
-    /*/
-    read_capacity16_data rc16d;
-    memset(&rc16d, 0, sizeof(read_capacity16_data));
-    if ((stat = scsi_cmd_read_capacity16(bd, &rc16d, sizeof(read_capacity16_data))) != 0) {
-        M_PRINTF("ERROR: scsi_cmd_read_capacity16 %d\n", stat);
-        return -1;
-    }
-    bd->sectorCount  = ((u64)getBI32(&rc16d.last_lba_msb) << 32) | (getBI32(&rc16d.last_lba_lsb));
-    bd->sectorSize   = getBI32(&rc16d.block_length);
-    bd->sectorOffset = 0;
-    //*/
 
     u64 sectorCount = bd->sectorCount;
     U64_2XU32(sectorCount);
-    M_PRINTF("0x%08x%08x %u-byte logical blocks: (%lu MB / %lu MiB)\n", sectorCount_u32[1], sectorCount_u32[0], bd->sectorSize,
+    M_PRINTF("rc10 = 0x%08x%08x %u-byte logical blocks: (%lu MB / %lu MiB)\n", sectorCount_u32[1], sectorCount_u32[0], bd->sectorSize,
         (u32)(bd->sectorCount / ((1000 * 1000) / bd->sectorSize)), (u32)(bd->sectorCount / ((1024 * 1024) / bd->sectorSize)));
+
+    if (bd->sectorCount == 0xffffffffull)
+    {
+        memset(&rc16d, 0, sizeof(read_capacity16_data));
+        if (scsi_cmd_read_capacity16(bd, &rc16d, sizeof(read_capacity16_data)) == 0) {
+            bd->sectorCount  = ((u64)getBI32(&rc16d.last_lba_msb) << 32) | (getBI32(&rc16d.last_lba_lsb) & 0xffffffff);
+            bd->sectorSize   = getBI32(&rc16d.block_length);
+            bd->sectorOffset = 0;
+
+            sectorCount = bd->sectorCount;
+            U64_2XU32(sectorCount);
+            M_PRINTF("rc16 = 0x%08x%08x %u-byte logical blocks: (%lu MB / %lu MiB)\n", sectorCount_u32[1], sectorCount_u32[0], bd->sectorSize,
+                (u32)(bd->sectorCount / ((1000 * 1000) / bd->sectorSize)), (u32)(bd->sectorCount / ((1024 * 1024) / bd->sectorSize)));
+        }
+    }
 
     return 0;
 }

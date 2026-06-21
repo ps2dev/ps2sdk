@@ -16,6 +16,7 @@ IOP_IMPORT_INCS += \
 	system/sysmem \
 	system/threadman
 
+IOP_LIBS += -lgcc # __udivdi3
 IOP_OBJS = main.o bdm.o part_driver.o part_driver_mbr.o part_driver_gpt.o imports.o exports.o
 IOP_LIB_ARCHIVES = $(PS2SDKSRC)/iop/fs/libbdm/lib/libbdm.a
 

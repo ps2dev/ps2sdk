@@ -121,7 +121,7 @@ struct CommandDescriptorBlock
     struct sbp2_pointer DataDescriptor;
 
     u32 misc;
-    unsigned char CDBs[12];
+    unsigned char CDBs[16];
 } __attribute__((packed));
 
 struct SBP2Device
