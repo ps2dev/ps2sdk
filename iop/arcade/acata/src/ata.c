@@ -188,30 +188,30 @@ int ata_probe(acAtaReg atareg)
 	int count;
 
 	(void)atareg;
-	while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) != 0 )
+	while ( (ACATA_R_STATUS & ATA_STAT_BUSY) != 0 )
 		;
-	*((volatile acUint16 *)0xB6020000) = 4660;
+	ACATA_R_NSECTOR = 4660;
 	// cppcheck-suppress knownConditionTrueFalse
-	if ( *((volatile acUint16 *)0xB6020000) != 52 )
+	if ( ACATA_R_NSECTOR != 52 )
 		return 0;
-	*((volatile acUint16 *)0xB6030000) = 18;
+	ACATA_R_SECTOR = 18;
 	// cppcheck-suppress knownConditionTrueFalse
-	if ( *((volatile acUint16 *)0xB6030000) != 18 )
+	if ( ACATA_R_SECTOR != 18 )
 		return 0;
 	active = 0;
 	unit = 0;
-	*((volatile acUint16 *)0xB6160000) = 2;
-	*((volatile acUint16 *)0xB6010000) = 0;
+	ACATA_R_CONTROL = 2;
+	ACATA_R_FEATURE = 0;
 	count = 0;
 	while ( unit < 2 )
 	{
-		*((volatile acUint16 *)0xB6060000) = 16 * (unit != 0);
-		*((volatile acUint16 *)0xB6070000) = 0;
-		*((volatile acUint16 *)0xB6070000) = 0;
+		ACATA_R_SELECT = 16 * (unit != 0);
+		ACATA_R_COMMAND = 0;
+		ACATA_R_COMMAND = 0;
 		while ( count <= 1999999 )
 		{
 			// cppcheck-suppress knownConditionTrueFalse
-			if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY) == 0 )
+			if ( (ACATA_R_STATUS & ATA_STAT_BUSY) == 0 )
 				break;
 			++count;
 		}
@@ -304,7 +304,7 @@ int acAtaModuleStart(int argc, char **argv)
 	Atac.requestq.q_next = 0;
 	DelayThread(delay);
 	ChangeThreadPriority(0, 123);
-	index_v12 = ata_probe((acAtaReg)0xB6000000);
+	index_v12 = ata_probe((acAtaReg)ACATA_A_DATA);
 	Atac.active = index_v12;
 	if ( index_v12 == 0 )
 	{

@@ -48,14 +48,14 @@ typedef struct _ata_hwport
                              (ata_hwport_t *)ATA_AIF_HDD_BASE
 
 /* r_error bits.  */
-#define ATA_ERR_MARK   0x01
-#define ATA_ERR_TRACK0 0x02
-#define ATA_ERR_ABORT  0x04
-#define ATA_ERR_MCR    0x08
-#define ATA_ERR_ID     0x10
-#define ATA_ERR_MC     0x20
-#define ATA_ERR_ECC    0x40
-#define ATA_ERR_ICRC   0x80
+#define ATA_ERR_MARK   0x01 // bit 0    [AMNF]  Address mark not found.
+#define ATA_ERR_TRACK0 0x02 // bit 1    [TKZNF] Track zero not found.
+#define ATA_ERR_ABORT  0x04 // bit 2    [ABRT]  Aborted command.
+#define ATA_ERR_MCR    0x08 // bit 3    [MCR]   Media change request.
+#define ATA_ERR_ID     0x10 // bit 4    [IDNF]  ID not found.
+#define ATA_ERR_MC     0x20 // bit 5    [MC]    Media changed.
+#define ATA_ERR_ECC    0x40 // bit 6    [UNC]   Uncorrectable data error.
+#define ATA_ERR_ICRC   0x80 // bit 7    [BBK]   Bad Block detected.
 
 /* r_status bits.  */
 #define ATA_STAT_ERR   0x01
@@ -68,7 +68,10 @@ typedef struct _ata_hwport
 #define ATA_STAT_BUSY  0x80
 
 /* r_select bits.  */
-#define ATA_SEL_LBA 0x40
+/// In CHS addressing, bits 0 to 3 of the head. In LBA addressing, bits 24 to 27 of the block number.
+/// bits 5 and 7 are supposed to be always set
+#define ATA_SEL_DRV 0x10 // bit 4   [DRV]   Selects the drive number.
+#define ATA_SEL_LBA 0x40 // bit 6   [LBA]   Uses CHS addressing if clear or LBA addressing if set.
 
 /** ATA command codes.  */
 enum ATA_C_CODES {
