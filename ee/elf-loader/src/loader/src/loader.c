@@ -122,6 +122,7 @@ int main(int argc, char *argv[])
 	if (ret == 0 && elfdata.epc != 0) {
 		SET_GS_BGCOLOUR(YELLOW_BG);
 
+#ifndef LOADER_SKIP_IOP_RESET
 		// Let's reset IOP because ELF was already loaded in memory
 		while(!SifIopReset(NULL, 0)){};
 		while (!SifIopSync()) {};
@@ -136,6 +137,7 @@ int main(int argc, char *argv[])
         SifLoadModule("rom0:MCSERV", 0, NULL);
         SifLoadFileExit();
         sceSifExitRpc();
+#endif
 
 		SET_GS_BGCOLOUR(BROWN_BG);
 

@@ -50,6 +50,13 @@ extern int LoadELFFromFile(const char *filename, int argc, char *argv[]);
  */
 extern int LoadELFFromFileWithPartition(const char *filename, const char *partition, int argc, char *argv[]);
 
+/** As LoadELFFromFileWithPartition, but the loader does NOT reset the IOP
+ *  before handing off. Storage modules stay resident, so the launched ELF's
+ *  own loader can read from the device it was booted from. The launched ELF
+ *  is responsible for any IOP reset it needs.
+ */
+extern int LoadELFFromFileWithPartitionNoReset(const char *filename, const char *partition, int argc, char *argv[]);
+
 #ifdef __cplusplus
 }
 #endif

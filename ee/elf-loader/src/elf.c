@@ -21,6 +21,9 @@
 extern u8 loader_elf[];
 extern int size_loader_elf;
 
+extern u8 loader_noreset_elf[];
+extern int size_loader_noreset_elf;
+
 // ELF-loading stuff
 #define ELF_MAGIC 0x464c457f
 #define ELF_PT_LOAD 1
@@ -54,8 +57,7 @@ static void wipe_bramMem(void) {
 #endif
 }
 
-int LoadELFFromFileWithPartition(const char *filename, const char *partition, int argc, char *argv[]) {
-	u8 *boot_elf;
+static int LoadELFFromFileCommon(u8 *boot_elf, const char *filename, const char *partition, int argc, char *argv[]) {
 	elf_header_t *eh;
 	elf_pheader_t *eph;
 	void *pdata;
@@ -76,9 +78,8 @@ int LoadELFFromFileWithPartition(const char *filename, const char *partition, in
 	for (i = 0; i < argc; i++) {
 		new_argv[i + 2] = argv[i];
 	}
-	
-	/* NB: LOADER.ELF is embedded  */
-	boot_elf = (u8 *)loader_elf;
+
+	/* NB: the selected loader stub is embedded */
 	eh = (elf_header_t *)boot_elf;
 	if (_lw((u32)&eh->ident) != ELF_MAGIC)
 		__builtin_trap();
@@ -103,6 +104,16 @@ int LoadELFFromFileWithPartition(const char *filename, const char *partition, in
 	FlushCache(2);
 	
 	return ExecPS2((void *)eh->entry, NULL, new_argc, new_argv);
+}
+
+int LoadELFFromFileWithPartition(const char *filename, const char *partition, int argc, char *argv[])
+{
+	return LoadELFFromFileCommon(loader_elf, filename, partition, argc, argv);
+}
+
+int LoadELFFromFileWithPartitionNoReset(const char *filename, const char *partition, int argc, char *argv[])
+{
+	return LoadELFFromFileCommon(loader_noreset_elf, filename, partition, argc, argv);
 }
 
 int LoadELFFromFile(const char *filename, int argc, char *argv[])

@@ -21,6 +21,11 @@ ifneq (x$(LOADER_ENABLE_DEBUG_COLORS), x0)
 EE_CFLAGS += -DLOADER_ENABLE_DEBUG_COLORS
 endif
 
+# Skip the IOP reset before handing off (keeps storage modules resident so the launched ELF's own loader can still read from the boot device)
+ifeq ($(LOADER_SKIP_IOP_RESET), 1)
+EE_CFLAGS += -DLOADER_SKIP_IOP_RESET
+endif
+
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.bin.make
 include $(PS2SDKSRC)/ee/Rules.make
