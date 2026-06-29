@@ -138,7 +138,7 @@ void flip_buffers(packet_t *flip,framebuffer_t *frame)
 
 }
 
-qword_t *render_teapot(qword_t *q,MATRIX view_screen, VECTOR object_position, VECTOR object_rotation, prim_t *prim, color_t *color, framebuffer_t *frame, zbuffer_t *z)
+qword_t *render_teapot(qword_t *q,MATRIX view_screen, VECTOR object_position, VECTOR object_rotation, const prim_t *prim, const color_t *color, framebuffer_t *frame, zbuffer_t *z)
 {
 
 	int i;

@@ -203,7 +203,7 @@ static char * reloc_types[] = {
 
 /* These global names will not be 'exported' to the global space. */
 
-static const char * local_names[] = {
+static const char * const local_names[] = {
     "_init",
     "_fini",
     "erl_id",
@@ -538,7 +538,7 @@ static int fix_loosy(struct erl_record_t * provider, const char * symbol, u32 ad
 }
 
 static int is_local(const char * symbol) {
-    const char ** p;
+    const char * const * p;
 
     for (p = local_names; *p; p++)
 	if (!strcmp(*p, symbol))
@@ -961,7 +961,7 @@ static struct erl_record_t * _init_load_erl_wrapper_from_file(char * erl_id) {
     return _init_load_erl_from_file(tmpnam, erl_id);
 }
 
-erl_loader_t _init_load_erl = _init_load_erl_wrapper_from_file;
+erl_loader_t _init_load_erl;
 
 static struct erl_record_t * load_erl(const char * fname, u8 * elf_mem, u32 addr, int argc, char ** argv) {
     struct erl_record_t * r;
@@ -1006,6 +1006,8 @@ static struct erl_record_t * load_erl(const char * fname, u8 * elf_mem, u32 addr
     dprintf("erl_dependancies = %08X.\n", r->dependancies);
 
     if (r->dependancies) {
+        if (!_init_load_erl)
+            _init_load_erl = _init_load_erl_wrapper_from_file;
 	char ** d;
 	for (d = r->dependancies; *d; d++) {
 	    dprintf("Loading dependancy: %s.\n", *d);

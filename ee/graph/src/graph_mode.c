@@ -8,8 +8,14 @@
 #include <graph.h>
 #include <graph_config.h>
 
+typedef struct {
+	int x,y;
+	int width, height;
+	int mode;
+} GRAPH_MODE;
+
 /* y offset is non-interlaced */
-GRAPH_MODE graph_mode[22] =
+static const GRAPH_MODE graph_mode[22] =
 {
 
 	{   0,   0,    0,    0,    0 }, // AUTO
@@ -39,7 +45,6 @@ GRAPH_MODE graph_mode[22] =
 
 static float graph_width = 0.0f;
 static float graph_height = 0.0f;
-static float graph_aspect = 1.0f;
 
 static int graph_filter = 0;
 static int graph_crtmode = 0;
@@ -53,7 +58,7 @@ static int graph_magv = 0;
 static u64 graph_pmode = 0;
 
 // old bios has GCONT enabled
-u64 smode1_values[22] =
+static const u64 smode1_values[22] =
 {
 
 	0,
@@ -405,6 +410,7 @@ void graph_set_smode1(char cmod, char gcont)
 
 float graph_aspect_ratio(void)
 {
+	float graph_aspect;
 
 	// Get the tv screen type as defined in the osd configuration.
 	if (configGetTvScreenType() == TV_SCREEN_169)
@@ -421,10 +427,7 @@ float graph_aspect_ratio(void)
 	}
 
 	// Return the current aspect ratio
-	graph_aspect = graph_aspect * (graph_height / graph_width);
-
-	return graph_aspect;
-
+	return graph_aspect * (graph_height / graph_width);
 }
 
 int graph_get_config(char *config)
@@ -446,7 +449,6 @@ int graph_shutdown(void)
 	*GS_REG_CSR = GS_SET_CSR(0,0,0,0,0,0,0,0,0,0,0,0);
 
 	// Reset the static variables.
-	graph_aspect = 1.0f;
 	graph_width = 0.0f;
 	graph_height = 0.0f;
 	graph_filter = 0;

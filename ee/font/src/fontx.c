@@ -37,7 +37,7 @@ typedef struct {
 	} block[];
 } fontx_hdr;
 
-static prim_t charprim =
+static const prim_t charprim =
 {
 	PRIM_POINT, PRIM_SHADE_FLAT, DRAW_DISABLE,
 	DRAW_DISABLE, DRAW_ENABLE, DRAW_DISABLE,
@@ -45,7 +45,7 @@ static prim_t charprim =
 };
 
 // These are the SJIS table ranges for character lookup
-unsigned short sjis_table[] = {
+static const unsigned short sjis_table[] = {
 0x8140,0x817e,
 0x8180,0x81ac,
 0x81b8,0x81bf,
@@ -556,7 +556,7 @@ qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, fontx_t *fo
 
 }
 
-qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, color_t *c0, fontx_t *fontx)
+qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, const color_t *c0, fontx_t *fontx)
 {
 
 	int i,j;
@@ -732,7 +732,7 @@ qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, in
 
 }
 
-qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, color_t *c0, fontx_t *ascii, fontx_t *kanji)
+qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, const color_t *c0, fontx_t *ascii, fontx_t *kanji)
 {
 
 	int i,j;

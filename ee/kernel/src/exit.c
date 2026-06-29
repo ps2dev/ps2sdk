@@ -29,7 +29,7 @@ struct SyscallData
     void *function;
 };
 
-struct SyscallData SysEntry = {
+static const struct SyscallData SysEntry = {
     0x5A,
     &kCopyBytes};
 

@@ -19,10 +19,17 @@ extern QWORD GsPrimWorkArea[];
 
 /* Initialization functions. */
 
-static GsGParam_t gp_15={GS_INTERLACED, GS_MODE_NTSC, GS_FFMD_FRAME, 3};
+static GsGParam_t gp_15;
 
 GsGParam_t *GsGetGParam(void)
 {
+	if (!gp_15.version)
+	{
+		gp_15.interlace = GS_INTERLACED;
+		gp_15.omode = GS_MODE_NTSC;
+		gp_15.ffmode = GS_FFMD_FRAME;
+		gp_15.version = 3;
+	}
 	return &gp_15;
 }
 

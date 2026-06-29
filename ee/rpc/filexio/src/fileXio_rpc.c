@@ -57,13 +57,13 @@ extern int __fileXioBlockMode;
 #endif
 
 #ifdef F___fileXioCompletionSema
-int __fileXioCompletionSema = -1;
+int __fileXioCompletionSema;
 #else
 extern int __fileXioCompletionSema;
 #endif
 
 #ifdef F___lock_sema_id
-int __lock_sema_id = -1;
+int __lock_sema_id;
 #else
 extern int __lock_sema_id;
 #endif
@@ -101,6 +101,11 @@ int fileXioInit(void)
 	sp.max_count = 1;
 	sp.option = 0;
 	__lock_sema_id = CreateSema(&sp);
+	if (__lock_sema_id < 0)
+	{
+		__lock_sema_id = 0;
+		return -1;
+	}
 
 	while(((res = sceSifBindRpc(&__cd0, FILEXIO_IRX, 0)) >= 0) && (__cd0.server == NULL))
 		nopdelay();
@@ -113,7 +118,10 @@ int fileXioInit(void)
 	sp.option = 0;
 	__fileXioCompletionSema = CreateSema(&sp);
 	if (__fileXioCompletionSema < 0)
+	{
+		__fileXioCompletionSema = 0;
 		return -1;
+	}
 
 	__fileXioBlockMode = FXIO_WAIT;
 
@@ -128,8 +136,16 @@ void fileXioExit(void)
 {
 	if(__cd0.server)
 	{
-		if(__lock_sema_id >= 0) DeleteSema(__lock_sema_id);
-		if(__fileXioCompletionSema >= 0) DeleteSema(__fileXioCompletionSema);
+		if (__lock_sema_id > 0)
+		{
+			DeleteSema(__lock_sema_id);
+			__lock_sema_id = 0;
+		}
+		if (__fileXioCompletionSema > 0)
+		{
+			DeleteSema(__fileXioCompletionSema);
+			__fileXioCompletionSema = 0;
+		}
 
 		memset(&__cd0, 0, sizeof(__cd0));
 

@@ -29,7 +29,7 @@ static u8 poffThreadStack[512 * 16] __attribute__((aligned(16)));
 static SifRpcClientData_t cd0;
 static struct t_SifRpcDataQueue cb_queue;
 static struct t_SifRpcServerData cb_srv;
-static int powerOffThreadId = -1;
+static int powerOffThreadId;
 
 static void *PowerOff_ee_rpc_handler(int fnum, void *buffer, int len)
 {
@@ -76,13 +76,13 @@ int poweroffInit(void)
         nopdelay();
 
     // Terminate and delete any previously created threads
-    if (powerOffThreadId >= 0)
+    if (powerOffThreadId > 0)
     {
         TerminateThread(powerOffThreadId);
         DeleteThread(powerOffThreadId);
         sceSifRemoveRpc(&cb_srv, &cb_queue);
         sceSifRemoveRpcQueue(&cb_queue);
-        powerOffThreadId = -1;
+        powerOffThreadId = 0;
     }
 
     thread.initial_priority = POWEROFF_THREAD_PRIORITY;

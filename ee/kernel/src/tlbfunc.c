@@ -140,7 +140,7 @@ static const struct TLBEntry extendTLB[TLB_NUM_EXTENDED_ENTRIES] = {
     {0x007FE000, 0x31000000, 0x0004003F, 0x0005003F},
     {0x007FE000, 0x31800000, 0x0006003F, 0x0007003F}};
 
-static struct TLBInfo TLBInfo = {TLB_NUM_KERNEL_ENTRIES, TLB_NUM_DEFAULT_ENTRIES, TLB_NUM_EXTENDED_ENTRIES, 0, kernelTLB, defaultTLB, extendTLB};
+static const struct TLBInfo TLBInfo = {TLB_NUM_KERNEL_ENTRIES, TLB_NUM_DEFAULT_ENTRIES, TLB_NUM_EXTENDED_ENTRIES, 0, kernelTLB, defaultTLB, extendTLB};
 
 static int InitTLB32MB(void)
 {
@@ -170,7 +170,8 @@ static int InitTLB32MB(void)
         _SetTLBEntry(i, TLBEntry->PageMask, TLBEntry->EntryHi, TLBEntry->EntryLo0, TLBEntry->EntryLo1);
     }
 
-    TLBInfo.NumWiredEntries = NumTlbEntries = i;
+    // Unofficial: do not set TLBInfo.NumWiredEntries
+    NumTlbEntries = i;
     set_mips_cop_reg(0, COP0_REG_Wired, NumTlbEntries);
     EE_SYNCP();
 

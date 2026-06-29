@@ -22,10 +22,10 @@
 #include <debug.h>
 #include <ee_regs.h>
 
-static short int X = 0, Y = 0;
-static short int MX = 80, MY = 40;
-static u32 bgcolor = 0, fontcolor = 0xffffff, cursorcolor = 0xffffff;
-static short int cursor = 1;
+static short int X, Y;
+static const short int MX = 80, MY = 40;
+static u32 bgcolor, fontcolor, cursorcolor;
+static short int cursor;
 
 struct t_setupscr
 {
@@ -111,7 +111,7 @@ static void DmaReset(void)
  * @param size The size (in 16 byte quads) of the data to be transfered.
  */
 
-static inline void progdma(void *addr, int size)
+static inline void progdma(const void *addr, int size)
 {
     *R_EE_D2_QWC = (u32)size; // D2_QWC
     *R_EE_D2_MADR = (u32)addr; // D2_MADR
@@ -133,19 +133,26 @@ void scr_setcursorcolor(u32 color)
 	cursorcolor = color;
 }
 
+static const struct t_setupscr g_setupscr_template = {
+    {0x100000000000800E, 0xE, 0xA0000, 0x4C, 0x8C, 0x4E}, // GIFtag (REGS: A+D, NREG 1, FLG PACKED, EOP, NLOOP 14), FRAME_1 (PSM PSMCT32, FBW 10, FBP 0), ZBUF_1 (PSM PSMZ32, ZBP 140)
+    {27648, 30976},
+    {0x18},                                                           // XYOFFSET_1 (OFX 1728.0, OFY 1936.0)
+    {0, 639, 0, 223},                                                 // SCISSOR_1 (SCAX0 0, SCAX1 639, SCAY0 0, SCAY1 223)
+    {0x40, 1, 0x1a, 1, 0x46, 0, 0x45, 0x70000,                        // PRMODECONT (AC PRIM), COLCLAMP (CLAMP 1), DTHE (DTHE 0)
+     0x47, 0x30000, 0x47, 6, 0, 0x3F80000000000000, 1, 0x79006C00, 5, // TEST_1 (ZTST GREATER, ZTE 1), TEST_1 (ZTST ALWAYS, ZTE 1), PMODE (CRTMD 1, EN2 1), RGBAQ (Q 1.0, A 0, B 0, G 0, R 0), XYZ2 (Z 0.0, Y 1728.0, X 1936.0)
+     0x87009400, 5, 0x70000, 0x47}                                    // XYZ2 (Z 0, Y 2160.0, X 2368.0), TEST_1 (ZTST GREATER, ZTE 1)
+};
+
 void init_scr(void)
 {
-    static struct t_setupscr setupscr __attribute__((aligned(16))) = {
-        {0x100000000000800E, 0xE, 0xA0000, 0x4C, 0x8C, 0x4E}, // GIFtag (REGS: A+D, NREG 1, FLG PACKED, EOP, NLOOP 14), FRAME_1 (PSM PSMCT32, FBW 10, FBP 0), ZBUF_1 (PSM PSMZ32, ZBP 140)
-        {27648, 30976},
-        {0x18},                                                           // XYOFFSET_1 (OFX 1728.0, OFY 1936.0)
-        {0, 639, 0, 223},                                                 // SCISSOR_1 (SCAX0 0, SCAX1 639, SCAY0 0, SCAY1 223)
-        {0x40, 1, 0x1a, 1, 0x46, 0, 0x45, 0x70000,                        // PRMODECONT (AC PRIM), COLCLAMP (CLAMP 1), DTHE (DTHE 0)
-         0x47, 0x30000, 0x47, 6, 0, 0x3F80000000000000, 1, 0x79006C00, 5, // TEST_1 (ZTST GREATER, ZTE 1), TEST_1 (ZTST ALWAYS, ZTE 1), PMODE (CRTMD 1, EN2 1), RGBAQ (Q 1.0, A 0, B 0, G 0, R 0), XYZ2 (Z 0.0, Y 1728.0, X 1936.0)
-         0x87009400, 5, 0x70000, 0x47}                                    // XYZ2 (Z 0, Y 2160.0, X 2368.0), TEST_1 (ZTST GREATER, ZTE 1)
-    };
+    static struct t_setupscr setupscr __attribute__((aligned(16)));
 
+    *((struct t_setupscr *)UNCACHED_SEG(&setupscr)) = g_setupscr_template;
     X = Y = 0;
+    scr_setbgcolor(0);
+    scr_setfontcolor(0xffffff);
+    scr_setcursorcolor(0xffffff);
+    scr_setCursor(1);
     DmaReset();
 
     Init_GS(1, debug_detect_signal() == 1 ? 3 : 2, 0); // Interlaced, NTSC/PAL and FIELD mode
@@ -156,25 +163,28 @@ void init_scr(void)
     Dma02Wait();
 }
 
-extern u8 msx[];
+extern const u8 msx[];
+
+static const struct t_setupchar g_setupchar_template = {
+    {0x1000000000000004, 0xE, 0xA000000000000, 0x50}, // GIFtag (REGS: A+D, NREG 1, FLG PACKED, NLOOP 4), BITBLTBUF (DPSM PSMCT32, DBW 10, DBP 0)
+    {0},
+    100,
+    100,
+    {0x51},                               // TRXPOS (DSAX 100, DSAY 100)
+    {8, 8},                               // TRXREG (RRW 8, RRH 8)
+    {0x52, 0, 0x53, 0x800000000008010, 0} // TRXDIR (XDIR Host -> Local), GIFtag (FLG IMAGE, EOP, NLOOP 16)
+};
 
 void scr_putchar(int x, int y, u32 color, int ch)
 {
-    static struct t_setupchar setupchar __attribute__((aligned(16))) = {
-        {0x1000000000000004, 0xE, 0xA000000000000, 0x50}, // GIFtag (REGS: A+D, NREG 1, FLG PACKED, NLOOP 4), BITBLTBUF (DPSM PSMCT32, DBW 10, DBP 0)
-        {0},
-        100,
-        100,
-        {0x51},                               // TRXPOS (DSAX 100, DSAY 100)
-        {8, 8},                               // TRXREG (RRW 8, RRH 8)
-        {0x52, 0, 0x53, 0x800000000008010, 0} // TRXDIR (XDIR Host -> Local), GIFtag (FLG IMAGE, EOP, NLOOP 16)
-    };
-    /* charmap must be aligned to a 16-bye boundary.  */
+    static struct t_setupchar setupchar __attribute__((aligned(16)));
+    /* charmap must be aligned to a 16-byte boundary.  */
     static u32 charmap[64] __attribute__((aligned(16)));
     int i, j, l;
-    u8 *font;
+    const u8 *font;
     u32 pixel;
 
+    *((struct t_setupchar *)UNCACHED_SEG(&setupchar)) = g_setupchar_template;
     ((struct t_setupchar *)UNCACHED_SEG(&setupchar))->x = x;
     ((struct t_setupchar *)UNCACHED_SEG(&setupchar))->y = y;
 

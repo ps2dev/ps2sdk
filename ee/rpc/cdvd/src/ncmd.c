@@ -81,7 +81,7 @@ typedef union
 SifRpcClientData_t clientNCmd __attribute__((aligned(64)));
 
 /** n-cmd semaphore id */
-int nCmdSemaId = -1;
+int nCmdSemaId;
 
 int nCmdNum = 0;
 

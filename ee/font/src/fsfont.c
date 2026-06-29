@@ -8,7 +8,7 @@
 
 #include <font.h>
 
-static prim_t charprim =
+static const prim_t charprim =
 {
 	PRIM_SPRITE, PRIM_SHADE_FLAT, DRAW_ENABLE,
 	DRAW_DISABLE, DRAW_ENABLE, DRAW_DISABLE,
@@ -453,7 +453,7 @@ qword_t *draw_fontstudio_char(qword_t *q, unsigned int c, vertex_t *v0, fsfont_t
 
 }
 
-qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, color_t *c0, fsfont_t *font)
+qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, const color_t *c0, fsfont_t *font)
 {
 
 	int i = 0,j;

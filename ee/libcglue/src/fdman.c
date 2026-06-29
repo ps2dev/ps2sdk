@@ -24,7 +24,7 @@
 #include "fdman.h"
 
 #ifdef F___fdman_sema
-int __fdman_sema = -1;
+int __fdman_sema;
 #else
 extern int __fdman_sema;
 #endif
@@ -52,7 +52,8 @@ void __fdman_init()
     sema.max_count       = 1;
     sema.option          = 0;
 	__fdman_sema = CreateSema(&sema);
-	if (__fdman_sema < 0) {
+	if (__fdman_sema <= 0) {
+		__fdman_sema = 0;
 		abort();
 	}
 

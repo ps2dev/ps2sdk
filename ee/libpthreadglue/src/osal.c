@@ -196,12 +196,12 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   ee_sema_t sema;
   struct OsalThreadInfo *threadInfo;
   void *stack;
-  static int threadNum = 1;
+  static int threadNum;
   void *pTls;
   s32 threadId;
   ps2ThreadData *pThreadData;
 
-  if (threadNum++ > MAX_PS2_UID) {
+  if (++threadNum > MAX_PS2_UID) {
     threadNum = 0;
   }
 

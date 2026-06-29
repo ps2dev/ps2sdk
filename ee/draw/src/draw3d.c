@@ -8,7 +8,7 @@
 // Starting position of primitive
 static qword_t *__prim_start = NULL;
 
-qword_t *draw_prim_start(qword_t *q, int context, prim_t *prim, color_t *color)
+qword_t *draw_prim_start(qword_t *q, int context, const prim_t *prim, const color_t *color)
 {
 
 	// Set the primitive register in packed mode, but don't end the packet
