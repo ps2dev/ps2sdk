@@ -1,4 +1,3 @@
-extern int checkModelVersion(void);
 
 //DMA management
 extern void GsDmaInit(void);
