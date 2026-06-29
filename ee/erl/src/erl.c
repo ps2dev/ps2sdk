@@ -957,8 +957,7 @@ typedef int (*start_t)(int argc, char ** argv);
 
 static struct erl_record_t * _init_load_erl_wrapper_from_file(char * erl_id) {
     char tmpnam[256];
-    strcpy(tmpnam, erl_id);
-    strcat(tmpnam, ".erl");
+    snprintf(tmpnam, sizeof(tmpnam), "%s.erl", erl_id);
     return _init_load_erl_from_file(tmpnam, erl_id);
 }
 
@@ -1049,8 +1048,7 @@ struct erl_record_t * _init_load_erl_from_file(const char * fname, char * erl_id
     argv[0] = erl_id;
     argv[1] = 0;
 
-    strcpy(tfname, _init_erl_prefix);
-    strcat(tfname, fname);
+    snprintf(tfname, sizeof(tfname), "%s%s", _init_erl_prefix, fname);
 
     return load_erl_from_file(tfname, 1, argv);
 }
@@ -1093,8 +1091,7 @@ struct erl_record_t * _init_load_erl_from_file_to_addr(const char * fname, u32 a
     argv[0] = erl_id;
     argv[1] = 0;
 
-    strcpy(tfname, _init_erl_prefix);
-    strcat(tfname, fname);
+    snprintf(tfname, sizeof(tfname), "%s%s", _init_erl_prefix, fname);
 
     return load_erl_from_file_to_addr(tfname, addr, 1, argv);
 }

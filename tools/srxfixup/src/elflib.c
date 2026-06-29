@@ -1612,14 +1612,14 @@ void dump_file_order_list(const elf_file *elf, const Elf_file_slot *efs)
 				name = "[Proram Header Table]";
 				break;
 			case EFS_TYPE_PROGRAM_HEADER_ENTRY:
-				sprintf(tmp, "[Proram Header entry %d]", (int)(0xCCCCCCCD * ((char *)slot->d.php - (char *)elf->php)) >> 3);
+				snprintf(tmp, sizeof(tmp), "[Proram Header entry %d]", (int)(0xCCCCCCCD * ((char *)slot->d.php - (char *)elf->php)) >> 3);
 				name = tmp;
 				break;
 			case EFS_TYPE_SECTION_HEADER_TABLE:
 				name = "[Section Header Table]";
 				break;
 			case EFS_TYPE_SECTION_DATA:
-				sprintf(tmp, "%s data", slot->d.scp->name);
+				snprintf(tmp, sizeof(tmp), "%s data", slot->d.scp->name);
 				name = tmp;
 				break;
 			default:
@@ -1653,7 +1653,7 @@ void dump_file_order_list(const elf_file *elf, const Elf_file_slot *efs)
 				}
 				startpos_2 = scp[i]->shr.sh_offset;
 				size_2 = (oldend_2 == 0) ? (scp[i]->shr.sh_offset) : (Elf32_Off)(oldend_2 + startpos_2 - 1);
-				sprintf(tmp, "(%s)", scp[i]->name);
+				snprintf(tmp, sizeof(tmp), "(%s)", scp[i]->name);
 				name = tmp;
 				if ( startpos_2 > size_tmp + 1 )
 				{

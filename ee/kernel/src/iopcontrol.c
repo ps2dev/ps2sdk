@@ -88,8 +88,7 @@ int SifIopReboot(const char *arg)
     sceSifInitRpc(0);
     sceSifExitRpc();
 
-    strcpy(param_str, "rom0:UDNL ");
-    strcat(param_str, arg);
+    snprintf(param_str, sizeof(param_str), "rom0:UDNL %s", arg);
 
     return SifIopReset(param_str, 0);
 }

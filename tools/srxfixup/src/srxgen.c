@@ -742,6 +742,7 @@ const char *eos_str = "_end_of_section_";
 static void define_special_section_symbols(elf_file *elf)
 {
 	char *sectname;
+	int sectname_len;
 	const elf_syment *sym;
 	elf_syment **syp;
 	elf_section *scp;
@@ -755,7 +756,8 @@ static void define_special_section_symbols(elf_file *elf)
 	{
 		return;
 	}
-	sectname = (char *)__builtin_alloca(((elf->shstrptr->shr.sh_size + 22) >> 2) << 2);
+	sectname_len = ((elf->shstrptr->shr.sh_size + 22) >> 2) << 2;
+	sectname = (char *)__builtin_alloca(sectname_len);
 	entrise = scp->shr.sh_size / scp->shr.sh_entsize;
 	syp = (elf_syment **)(scp->data);
 	for ( i = 1; i < entrise; i += 1 )
@@ -765,14 +767,12 @@ static void define_special_section_symbols(elf_file *elf)
 		{
 			if ( !strncmp(bos_str, sym->name, strlen(bos_str)) )
 			{
-				strcpy(sectname, ".");
-				strcat(sectname, &sym->name[strlen(bos_str)]);
+				snprintf(sectname, sectname_len, ".%s", &sym->name[strlen(bos_str)]);
 				add_reserved_symbol_table(tp, sym->name, 2, 1, 0, sectname, 0, 0);
 			}
 			if ( !strncmp(eos_str, sym->name, strlen(eos_str)) )
 			{
-				strcpy(sectname, ".");
-				strcat(sectname, &sym->name[strlen(eos_str)]);
+				snprintf(sectname, sectname_len, ".%s", &sym->name[strlen(eos_str)]);
 				add_reserved_symbol_table(tp, sym->name, 2, 1, 0, sectname, 65311, 1);
 			}
 		}

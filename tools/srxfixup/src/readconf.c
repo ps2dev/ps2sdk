@@ -687,6 +687,7 @@ static Srx_gen_table *make_srx_gen_table(TokenTree *tokentree)
 	int nsect;
 	const char **strp;
 	const char *str;
+	int str2_len;
 	char *str2;
 
 	result = (Srx_gen_table *)calloc(1, sizeof(Srx_gen_table));
@@ -863,8 +864,9 @@ static Srx_gen_table *make_srx_gen_table(TokenTree *tokentree)
 					free(result);
 					return 0;
 				}
-				str2 = (char *)malloc(0x32);
-				sprintf(str2, "@Program_header_data %s", ttp1->value.lowtoken->str);
+				str2_len = 0x32;
+				str2 = (char *)malloc(str2_len);
+				snprintf(str2, str2_len, "@Program_header_data %s", ttp1->value.lowtoken->str);
 				result->file_layout_order = add_stringvector(result->file_layout_order, str2);
 				ttp = nttp;
 				break;

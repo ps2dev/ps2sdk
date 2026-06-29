@@ -12,28 +12,28 @@ int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flick
 	switch (mode)
 	{
 
-		case GRAPH_MODE_NTSC:			sprintf(config, "GRAPH_MODE_NTSC:");		break;
-		case GRAPH_MODE_PAL:			sprintf(config, "GRAPH_MODE_PAL:");			break;
-		case GRAPH_MODE_HDTV_480P:		sprintf(config, "GRAPH_MODE_HDTV_480P:");	break;
-		case GRAPH_MODE_HDTV_576P:		sprintf(config, "GRAPH_MODE_HDTV_576P:");	break;
-		case GRAPH_MODE_HDTV_720P:		sprintf(config, "GRAPH_MODE_HDTV_720P:");	break;
-		case GRAPH_MODE_HDTV_1080I:		sprintf(config, "GRAPH_MODE_HDTV_1080I:");	break;
-		case GRAPH_MODE_VGA_640_60:		sprintf(config, "GRAPH_MODE_VGA_640_60:");	break;
-		case GRAPH_MODE_VGA_640_72:		sprintf(config, "GRAPH_MODE_VGA_640_72:");	break;
-		case GRAPH_MODE_VGA_640_75:		sprintf(config, "GRAPH_MODE_VGA_640_75:");	break;
-		case GRAPH_MODE_VGA_640_85:		sprintf(config, "GRAPH_MODE_VGA_640_85:");	break;
-		case GRAPH_MODE_VGA_800_56:		sprintf(config, "GRAPH_MODE_VGA_800_56:");	break;
-		case GRAPH_MODE_VGA_800_60:		sprintf(config, "GRAPH_MODE_VGA_800_60:");	break;
-		case GRAPH_MODE_VGA_800_72:		sprintf(config, "GRAPH_MODE_VGA_800_72:");	break;
-		case GRAPH_MODE_VGA_800_75:		sprintf(config, "GRAPH_MODE_VGA_800_75:");	break;
-		case GRAPH_MODE_VGA_800_85:		sprintf(config, "GRAPH_MODE_VGA_800_85:");	break;
-		case GRAPH_MODE_VGA_1024_60:	sprintf(config, "GRAPH_MODE_VGA_1024_60:");	break;
-		case GRAPH_MODE_VGA_1024_70:	sprintf(config, "GRAPH_MODE_VGA_1024_70:");	break;
-		case GRAPH_MODE_VGA_1024_75:	sprintf(config, "GRAPH_MODE_VGA_1024_75:");	break;
-		case GRAPH_MODE_VGA_1024_85:	sprintf(config, "GRAPH_MODE_VGA_1024_85:");	break;
-		case GRAPH_MODE_VGA_1280_60:	sprintf(config, "GRAPH_MODE_VGA_1280_60:");	break;
-		case GRAPH_MODE_VGA_1280_75:	sprintf(config, "GRAPH_MODE_VGA_1280_75:");	break;
-		default:						sprintf(config, "GRAPH_MODE_AUTO:");		break;
+		case GRAPH_MODE_NTSC:			strcpy(config, "GRAPH_MODE_NTSC:");		break;
+		case GRAPH_MODE_PAL:			strcpy(config, "GRAPH_MODE_PAL:");			break;
+		case GRAPH_MODE_HDTV_480P:		strcpy(config, "GRAPH_MODE_HDTV_480P:");	break;
+		case GRAPH_MODE_HDTV_576P:		strcpy(config, "GRAPH_MODE_HDTV_576P:");	break;
+		case GRAPH_MODE_HDTV_720P:		strcpy(config, "GRAPH_MODE_HDTV_720P:");	break;
+		case GRAPH_MODE_HDTV_1080I:		strcpy(config, "GRAPH_MODE_HDTV_1080I:");	break;
+		case GRAPH_MODE_VGA_640_60:		strcpy(config, "GRAPH_MODE_VGA_640_60:");	break;
+		case GRAPH_MODE_VGA_640_72:		strcpy(config, "GRAPH_MODE_VGA_640_72:");	break;
+		case GRAPH_MODE_VGA_640_75:		strcpy(config, "GRAPH_MODE_VGA_640_75:");	break;
+		case GRAPH_MODE_VGA_640_85:		strcpy(config, "GRAPH_MODE_VGA_640_85:");	break;
+		case GRAPH_MODE_VGA_800_56:		strcpy(config, "GRAPH_MODE_VGA_800_56:");	break;
+		case GRAPH_MODE_VGA_800_60:		strcpy(config, "GRAPH_MODE_VGA_800_60:");	break;
+		case GRAPH_MODE_VGA_800_72:		strcpy(config, "GRAPH_MODE_VGA_800_72:");	break;
+		case GRAPH_MODE_VGA_800_75:		strcpy(config, "GRAPH_MODE_VGA_800_75:");	break;
+		case GRAPH_MODE_VGA_800_85:		strcpy(config, "GRAPH_MODE_VGA_800_85:");	break;
+		case GRAPH_MODE_VGA_1024_60:	strcpy(config, "GRAPH_MODE_VGA_1024_60:");	break;
+		case GRAPH_MODE_VGA_1024_70:	strcpy(config, "GRAPH_MODE_VGA_1024_70:");	break;
+		case GRAPH_MODE_VGA_1024_75:	strcpy(config, "GRAPH_MODE_VGA_1024_75:");	break;
+		case GRAPH_MODE_VGA_1024_85:	strcpy(config, "GRAPH_MODE_VGA_1024_85:");	break;
+		case GRAPH_MODE_VGA_1280_60:	strcpy(config, "GRAPH_MODE_VGA_1280_60:");	break;
+		case GRAPH_MODE_VGA_1280_75:	strcpy(config, "GRAPH_MODE_VGA_1280_75:");	break;
+		default:						strcpy(config, "GRAPH_MODE_AUTO:");		break;
 
 	}
 
@@ -41,9 +41,9 @@ int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flick
 	switch (interlace)
 	{
 
-		case GRAPH_MODE_NONINTERLACED:	sprintf(config, "GRAPH_MODE_NONINTERLACED:");		break;
+		case GRAPH_MODE_NONINTERLACED:	strcpy(config, "GRAPH_MODE_NONINTERLACED:");		break;
 		case GRAPH_MODE_INTERLACED:	//Fall through
-		default:			sprintf(config, "GRAPH_MODE_INTERLACED:");		break;
+		default:			strcpy(config, "GRAPH_MODE_INTERLACED:");		break;
 
 	}
 
@@ -51,9 +51,9 @@ int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flick
 	switch (ffmd)
 	{
 
-		case GRAPH_MODE_FRAME:	sprintf(config, "GRAPH_MODE_FRAME:");		break;
+		case GRAPH_MODE_FRAME:	strcpy(config, "GRAPH_MODE_FRAME:");		break;
 		case GRAPH_MODE_FIELD:	//Fall through
-		default:		sprintf(config, "GRAPH_MODE_FIELD:");	break;
+		default:		strcpy(config, "GRAPH_MODE_FIELD:");	break;
 
 	}
 
@@ -61,9 +61,9 @@ int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flick
 	switch (flicker_filter)
 	{
 
-		case GRAPH_ENABLE:	sprintf(config, "GRAPH_ENABLE:");		break;
+		case GRAPH_ENABLE:	strcpy(config, "GRAPH_ENABLE:");		break;
 		case GRAPH_DISABLE:	//Fall through
-		default:		sprintf(config, "GRAPH_DISABLE:");	break;
+		default:		strcpy(config, "GRAPH_DISABLE:");	break;
 
 	}
 
