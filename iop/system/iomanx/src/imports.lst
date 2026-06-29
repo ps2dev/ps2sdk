@@ -15,6 +15,7 @@ stdio_IMPORTS_end
 loadcore_IMPORTS_start
 I_GetLoadcoreInternalData
 I_RegisterLibraryEntries
+I_ReleaseLibraryEntries
 I_QueryLibraryEntryTable
 I_FlushDcache
 I_FlushIcache

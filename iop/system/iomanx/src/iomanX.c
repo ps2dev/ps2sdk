@@ -37,11 +37,10 @@ IRX_ID("IO/File_Manager", 2, 3);
 #endif
 #endif
 #ifdef _IOP
-#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
-extern struct irx_export_table _exp_iomanx;
-#else
+#ifndef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 extern struct irx_export_table _exp_ioman;
 #endif
+extern struct irx_export_table _exp_iomanx;
 #endif
 
 #ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
@@ -217,8 +216,8 @@ static inline s64 handle_result64(s64 in_result, iomanX_iop_file_t *f, int op)
 }
 
 #ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
-extern int hook_ioman();
-extern int unhook_ioman();
+extern int hook_ioman(void);
+extern int unhook_ioman(void);
 #endif
 
 #ifndef IOMANX_ENTRYPOINT
@@ -238,26 +237,14 @@ int IOMANX_ENTRYPOINT(int ac, char **av)
 #ifdef IOMANX_USE_DEVICE_LINKED_LIST
 	unsigned int i;
 #endif
+#ifdef _IOP
+	int ioman_already_registered;
+	int state;
+#endif
 
 	(void)ac;
 	(void)av;
 
-#ifdef _IOP
-#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
-	if ( RegisterLibraryEntries(&_exp_iomanx) )
-		return MODULE_NO_RESIDENT_END;
-#else
-	if ( RegisterLibraryEntries(&_exp_ioman) )
-		return MODULE_NO_RESIDENT_END;
-#if 0
-	SetRebootTimeLibraryHandlingMode(&_exp_ioman, 2);
-#else
-	// Call termination before disabling interrupts
-	_exp_ioman.mode &= ~6;
-	_exp_ioman.mode |= 2;
-#endif
-#endif
-#endif
 	adddeldrv_in_process = 0;
 #ifdef IOMANX_USE_DEVICE_LINKED_LIST
 	// Unofficial: memset instead of bzero
@@ -272,25 +259,41 @@ int IOMANX_ENTRYPOINT(int ac, char **av)
 #endif
 	// Unofficial: memset instead of bzero
 	memset(file_table, 0, sizeof(file_table));
-#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
-	if ( hook_ioman() )
-		return MODULE_NO_RESIDENT_END;
-#else
 	iomanX_StdioInit(0);
+	// Unofficial: register libraries and hooks after initialization
+#ifdef _IOP
+	CpuSuspendIntr(&state);
+	if ( RegisterLibraryEntries(&_exp_iomanx) )
+		return MODULE_NO_RESIDENT_END;
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
+	ioman_already_registered = hook_ioman();
+#else
+	ioman_already_registered = RegisterLibraryEntries(&_exp_ioman);
+#endif
+	if ( ioman_already_registered )
+		return MODULE_NO_RESIDENT_END;
+#if 0
+	SetRebootTimeLibraryHandlingMode(&_exp_ioman, 2);
+#else
+	// Call termination before disabling interrupts
+	_exp_iomanx.mode &= ~6;
+	_exp_iomanx.mode |= 2;
+	CpuResumeIntr(state);
+#endif
 #endif
 	return MODULE_RESIDENT_END;
 }
 
 int IOMANX_CLEANUP(int arg)
 {
-#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
-	unhook_ioman();
-	return MODULE_NO_RESIDENT_END;
-#else
 #ifdef IOMANX_USE_DEVICE_LINKED_LIST
 	struct ioman_dev_listentry *i;
 #else
 	unsigned int i;
+#endif
+
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
+	unhook_ioman();
 #endif
 
 	if ( !arg )
@@ -313,7 +316,6 @@ int IOMANX_CLEANUP(int arg)
 #endif
 	}
 	return MODULE_RESIDENT_END;
-#endif
 }
 
 #ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
