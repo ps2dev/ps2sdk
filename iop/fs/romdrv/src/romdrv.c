@@ -36,9 +36,16 @@ struct RomFileSlot
     int offset;
 };
 
-static struct RomImg images[ROMDRV_MAX_IMAGES];
-static struct RomdirFileStat fileStats[ROMDRV_MAX_FILES];
-static struct RomFileSlot fileSlots[ROMDRV_MAX_FILES];
+// For compatibility with sbv_patch_romdrv_set_rom1_info, the bss section needs
+// to be laid out in exactly this manner.
+struct RomdrvInternalData
+{
+    struct RomFileSlot fileSlots[ROMDRV_MAX_FILES];
+    struct RomImg images[ROMDRV_MAX_IMAGES];
+    struct RomdirFileStat fileStats[ROMDRV_MAX_FILES];
+};
+
+static struct RomdrvInternalData romdrvData;
 
 /* Function prototypes */
 static int init(void);
@@ -103,11 +110,11 @@ int _start(int argc, char **argv)
 
 static int init(void)
 {
-    memset(images, 0, sizeof(images));
-    memset(fileStats, 0, sizeof(fileStats));
-    memset(fileSlots, 0, sizeof(fileSlots));
+    memset(romdrvData.images, 0, sizeof(romdrvData.images));
+    memset(romdrvData.fileStats, 0, sizeof(romdrvData.fileStats));
+    memset(romdrvData.fileSlots, 0, sizeof(romdrvData.fileSlots));
     // Add DEV2 (Boot ROM) as rom0. Unlike ROMDRV v1.1, the code for DEV1 is in the ADDDRV module.
-    romGetImageStat((const void *)0xbfc00000, (const void *)0xbfc40000, &images[0]);
+    romGetImageStat((const void *)0xbfc00000, (const void *)0xbfc40000, &romdrvData.images[0]);
     return 0;
 }
 
@@ -119,8 +126,8 @@ int romAddDevice(int unit, const void *image)
     if (unit < ROMDRV_MAX_IMAGES) {
         CpuSuspendIntr(&OldState);
 
-        if (images[unit].ImageStart == NULL) {
-            stat = romGetImageStat(image, (const void *)((const u8 *)image + 0x8000), &images[unit]);
+        if (romdrvData.images[unit].ImageStart == NULL) {
+            stat = romGetImageStat(image, (const void *)((const u8 *)image + 0x8000), &romdrvData.images[unit]);
             CpuResumeIntr(OldState);
 
             result = stat != NULL ? 0 : ROMDRV_ADD_BAD_IMAGE;
@@ -142,8 +149,8 @@ int romDelDevice(int unit)
     if (unit < ROMDRV_MAX_IMAGES) {
         CpuSuspendIntr(&OldState);
 
-        if (images[unit].ImageStart != NULL) {
-            images[unit].ImageStart = 0;
+        if (romdrvData.images[unit].ImageStart != NULL) {
+            romdrvData.images[unit].ImageStart = 0;
             CpuResumeIntr(OldState);
             result = 0;
         } else {
@@ -164,7 +171,7 @@ static int romOpen(iop_file_t *fd, const char *path, int mode)
     if (fd->unit < ROMDRV_MAX_IMAGES) {
         struct RomImg *image;
 
-        image = &images[fd->unit];
+        image = &romdrvData.images[fd->unit];
 
         if (image->ImageStart != NULL) {
             int slotNum, result;
@@ -178,7 +185,7 @@ static int romOpen(iop_file_t *fd, const char *path, int mode)
 
             // Locate a free file slot.
             for (slotNum = 0; slotNum < ROMDRV_MAX_FILES; slotNum++) {
-                if (fileStats[slotNum].data == NULL) {
+                if (romdrvData.fileStats[slotNum].data == NULL) {
                     break;
                 }
             }
@@ -187,14 +194,14 @@ static int romOpen(iop_file_t *fd, const char *path, int mode)
                 return -ENOMEM;
             }
 
-            stat = GetFileStatFromImage(image, path, &fileStats[slotNum]);
+            stat = GetFileStatFromImage(image, path, &romdrvData.fileStats[slotNum]);
             CpuResumeIntr(OldState);
 
             if (stat != NULL) {
                 result                     = 0;
-                fileSlots[slotNum].slotNum = slotNum;
-                fileSlots[slotNum].offset  = 0;
-                fd->privdata               = &fileSlots[slotNum];
+                romdrvData.fileSlots[slotNum].slotNum = slotNum;
+                romdrvData.fileSlots[slotNum].offset  = 0;
+                fd->privdata               = &romdrvData.fileSlots[slotNum];
             } else {
                 result = -ENOENT;
             }
@@ -216,7 +223,7 @@ static int romClose(iop_file_t *fd)
     if (slot->slotNum < ROMDRV_MAX_FILES) {
         struct RomdirFileStat *stat;
 
-        stat = &fileStats[slot->slotNum];
+        stat = &romdrvData.fileStats[slot->slotNum];
 
         if (stat->data != NULL) {
             stat->data = NULL;
@@ -236,7 +243,7 @@ static int romRead(iop_file_t *fd, void *buffer, int size)
     struct RomFileSlot *slot = (struct RomFileSlot *)fd->privdata;
     struct RomdirFileStat *stat;
 
-    stat = &fileStats[slot->slotNum];
+    stat = &romdrvData.fileStats[slot->slotNum];
 
     // Bounds check.
     if (stat->romdirent->size < (u32)(slot->offset + size)) {
@@ -261,7 +268,7 @@ static int romLseek(iop_file_t *fd, int offset, int whence)
     u32 size;
     int newOffset;
 
-    stat = &fileStats[slot->slotNum];
+    stat = &romdrvData.fileStats[slot->slotNum];
     size = stat->romdirent->size;
 
     switch (whence) {
@@ -368,8 +375,8 @@ const struct RomImg *romGetDevice(int unit)
     if (unit < ROMDRV_MAX_IMAGES) {
         CpuSuspendIntr(&OldState);
 
-        if (images[unit].ImageStart != NULL) {
-            result = &images[unit];
+        if (romdrvData.images[unit].ImageStart != NULL) {
+            result = &romdrvData.images[unit];
             CpuResumeIntr(OldState);
         } else {
             CpuResumeIntr(OldState);
