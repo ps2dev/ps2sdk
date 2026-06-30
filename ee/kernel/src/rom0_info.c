@@ -20,13 +20,12 @@
 #include <string.h>
 #include <sifrpc.h>
 #include <kernel.h>
+#include <syscallnr.h>
 
 struct rom0_info_data
 {
     /** stores romname of ps2 */
-    char m_romver[17];
-    /** Can be either PSX180 or PSX210 */
-    char m_psxver[8];
+    char m_romver[14];
 };
 
 extern struct rom0_info_data g_rom0_info_data;
@@ -49,40 +48,21 @@ void SetupRomInfo(void)
 
     /* SYSMEM allocates in units of 256. */
     if (!(iop_addr = SifAllocIopHeap(256)))
-    {
-        memset(&g_rom0_info_data, 0, sizeof(g_rom0_info_data));
         return;
-    }
 
     /* ROMVER is known to be 16 bytes. */
-    if (SifLoadIopHeap("rom:ROMVER", iop_addr) >= 0)
+    if (SifLoadIopHeap("rom:ROMVER", iop_addr) < 0)
     {
-        SyncDCache(buf, buf + sizeof(buf));
-        if (sceSifGetOtherData(&rdata, iop_addr, buf, sizeof(buf), 0) < 0)
-        {
-            SifFreeIopHeap(iop_addr);
-            memset(&g_rom0_info_data, 0, sizeof(g_rom0_info_data));
-            return;
-        }
-
-        memcpy(g_rom0_info_data.m_romver, UNCACHED_SEG(buf), sizeof(g_rom0_info_data.m_romver) - 1);
-        g_rom0_info_data.m_romver[sizeof(g_rom0_info_data.m_romver) - 1] = 0;
+        SifFreeIopHeap(iop_addr);
+        return;
     }
-
-    /* PSXVER is known to be 7 bytes. */
-    if (SifLoadIopHeap("rom:PSXVER", iop_addr) >= 0)
+    SyncDCache(buf, buf + sizeof(buf));
+    if (sceSifGetOtherData(&rdata, iop_addr, buf, sizeof(buf), 0) < 0)
     {
-        SyncDCache(buf, buf + sizeof(buf));
-        if (sceSifGetOtherData(&rdata, iop_addr, buf, sizeof(buf), 0) < 0)
-        {
-            SifFreeIopHeap(iop_addr);
-            memset(&g_rom0_info_data, 0, sizeof(g_rom0_info_data));
-            return;
-        }
-
-        memcpy(g_rom0_info_data.m_psxver, UNCACHED_SEG(buf), sizeof(g_rom0_info_data.m_psxver) - 1);
-        g_rom0_info_data.m_psxver[sizeof(g_rom0_info_data.m_psxver) - 1] = 0;
+        SifFreeIopHeap(iop_addr);
+        return;
     }
+    memcpy(g_rom0_info_data.m_romver, UNCACHED_SEG(buf), sizeof(g_rom0_info_data.m_romver));
 
     SifFreeIopHeap(iop_addr);
 }
@@ -92,8 +72,8 @@ void SetupRomInfo(void)
 char *GetRomName(char *romname)
 {
     SetupRomInfo();
-    /* Explicitly copy 14 bytes to the buffer */
-    memcpy(romname, g_rom0_info_data.m_romver, 14);
+    /* Explicitly copy 14 bytes to the buffer, without NULL terminator */
+    memcpy(romname, g_rom0_info_data.m_romver, sizeof(g_rom0_info_data.m_romver));
     return romname;
 }
 #endif
@@ -101,8 +81,8 @@ char *GetRomName(char *romname)
 #ifdef F_IsDESRMachine
 int IsDESRMachine(void)
 {
-    SetupRomInfo();
-    return (!memcmp(g_rom0_info_data.m_psxver, "PSX", 3)) ? 1 : 0;
+    /* Use the existence of ExecPSX syscall as the determination. */
+    return GetSyscallHandler(__NR_ExecPSX) ? 1 : 0;
 }
 #endif
 
