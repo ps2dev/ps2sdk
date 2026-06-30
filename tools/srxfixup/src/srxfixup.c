@@ -145,7 +145,7 @@ int main(int argc, char **argv)
 	{
 		myname_2 = *argv;
 	}
-	if ( (strncmp(myname_2, "ee", 2) != 0) && (strncmp(myname_2, "EE", 2) != 0) )
+	if ( (memcmp(myname_2, "ee", 2) != 0) && (memcmp(myname_2, "EE", 2) != 0) )
 	{
 		defaultconf = iop_defaultconf;
 	}

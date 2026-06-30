@@ -356,7 +356,7 @@ int s147nand_4_dumpprintinfo(int part)
 				const s147nand_dir_t *hdrbuf;
 
 				hdrbuf = (const s147nand_dir_t *)g_nand_sector_buffer;
-				if ( strncmp(hdrbuf->m_sig, "S147ROM", 8) )
+				if ( memcmp(hdrbuf->m_sig, "S147ROM", 8) )
 				{
 					// Unofficial: use g_drv.name
 					Kprintf(" \"%s%d:\" ... No data\n", g_drv.name, part);
@@ -454,7 +454,7 @@ static u32 do_get_nand_direntry(s147nand_mdev_privdata_t *privdat, const char *n
 				const s147nand_dir_t *hdrbuf;
 
 				hdrbuf = (const s147nand_dir_t *)g_nand_sector_buffer;
-				if ( strncmp(hdrbuf->m_sig, "S147ROM", 8) )
+				if ( memcmp(hdrbuf->m_sig, "S147ROM", 8) )
 				{
 					Kprintf("s147nand.irx: No directory entries\n");
 					return -ENODEV;
@@ -531,7 +531,7 @@ void s147nand_6_checkformat(void)
 
 	nandinf = s147nand_16_getnandinfo();
 	s147nand_20_nand_read_dma(&g_nand_header, 0, 0, sizeof(g_nand_header));
-	if ( strncmp(g_nand_header.m_sig, "S147NAND", 9) )
+	if ( memcmp(g_nand_header.m_sig, "S147NAND", 9) )
 	{
 		Kprintf("s147nand.irx: Unformatted device\n");
 		Kprintf("\n");
@@ -890,7 +890,7 @@ int s147nand_12_load_logaddrtable(void)
 	int state;
 
 	s147nand_20_nand_read_dma(&hdr, 0, 0, sizeof(hdr));
-	if ( strncmp(hdr.m_sig, "S147NAND", 9) )
+	if ( memcmp(hdr.m_sig, "S147NAND", 9) )
 	{
 		Kprintf("s147nand.irx: Unformatted device error.\n");
 		return -19;

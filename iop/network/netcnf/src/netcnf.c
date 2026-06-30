@@ -323,11 +323,11 @@ static int do_module_load(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 	g_iconsys_value[0] = 0;
 	for ( i = 1; i < ac; i += 1 )
 	{
-		if ( !strncmp("icon=", av[i], 5) )
+		if ( !memcmp("icon=", av[i], 5) )
 		{
 			strcpy(g_icon_value, av[i] + 5);
 		}
-		else if ( !strncmp("iconsys=", av[i], 8) )
+		else if ( !memcmp("iconsys=", av[i], 8) )
 		{
 			strcpy(g_iconsys_value, av[i] + 8);
 		}
@@ -987,9 +987,9 @@ static int do_check_capacity_inner(const char *fpath)
 {
 	int minsize;
 
-	if ( !strncmp(fpath, "mc", 2) )
+	if ( !memcmp(fpath, "mc", 2) )
 		minsize = 0x5E;
-	else if ( !strncmp(fpath, "pfs", 3) )
+	else if ( !memcmp(fpath, "pfs", 3) )
 		minsize = 0xF4;
 	else
 		return -9;
@@ -1019,8 +1019,8 @@ static int do_handle_combination_path(int type, const char *fpath, char *dst, si
 	devnum[j] = 0;
 	devnr = (int)strtol(devnum, 0, 10);
 	if (
-		!strncmp(fpath, "mc", 2) ? ((unsigned int)(devnr - 1) >= 6) :
-															 (!strncmp(fpath, "pfs", 3) ? (unsigned int)(devnr - 1) >= 0xA :
+		!memcmp(fpath, "mc", 2) ? ((unsigned int)(devnr - 1) >= 6) :
+															 (!memcmp(fpath, "pfs", 3) ? (unsigned int)(devnr - 1) >= 0xA :
 																														(unsigned int)(devnr - 1) >= sizeof(g_ifc_buffer)) )
 		return -11;
 	do_safe_make_name(dst, maxlen, "Combination", devnum);
@@ -1107,13 +1107,13 @@ static int do_handle_fname(char *fpath, size_t maxlen, const char *fname)
 	index_res = index(fpath, ':');
 	if ( !index_res )
 		return -9;
-	if ( !strncmp(fpath, "mc", 2) )
+	if ( !memcmp(fpath, "mc", 2) )
 	{
 		index_res[1] = 0;
 		pathname = "/BWNETCNF/BWNETCNF";
 		maxbuf = 275;
 	}
-	else if ( !strncmp(fpath, "pfs", 3) )
+	else if ( !memcmp(fpath, "pfs", 3) )
 	{
 		index_res[1] = 0;
 		pathname = "/etc/network/net.db";
@@ -1187,7 +1187,7 @@ do_remove_old_config(const char *fpath, const char *netcnf_heap_buf, const char 
 		sizeflag = 1;
 		if ( strlen(statname.name) == 10 )
 		{
-			if ( !strncmp(&statname.name[6], ".cnf", 4) || !strncmp(&statname.name[6], ".dat", 4) )
+			if ( !memcmp(&statname.name[6], ".cnf", 4) || !memcmp(&statname.name[6], ".dat", 4) )
 			{
 				for ( curheapbuf1 = netcnf_heap_buf; curheapbuf1 && *curheapbuf1; curheapbuf1 = do_get_str_line(curheapbuf1) )
 				{
@@ -1201,7 +1201,7 @@ do_remove_old_config(const char *fpath, const char *netcnf_heap_buf, const char 
 				}
 			}
 		}
-		else if ( !strncmp(fpath, "mc", 2) )
+		else if ( !memcmp(fpath, "mc", 2) )
 		{
 			if ( !strcmp(statname.name, "SYS_NET.ICO") )
 			{
@@ -1235,7 +1235,7 @@ do_remove_old_config(const char *fpath, const char *netcnf_heap_buf, const char 
 				sizeflag = 0;
 			}
 		}
-		else if ( !strncmp(fpath, "pfs", 3) && strcmp(statname.name, "net.db") )
+		else if ( !memcmp(fpath, "pfs", 3) && strcmp(statname.name, "net.db") )
 		{
 			do_safe_make_pathname(cur_combpath, sizeof(cur_combpath), cur_basepath, statname.name);
 			sizeflag = 0;
@@ -1253,7 +1253,7 @@ do_remove_old_config(const char *fpath, const char *netcnf_heap_buf, const char 
 		return -18;
 	}
 	do_dclose_wrap(dfd);
-	if ( !strncmp(fpath, "mc", 2) )
+	if ( !memcmp(fpath, "mc", 2) )
 	{
 		if ( sysneticoflag || iconsysflag )
 			fileop_res = do_write_memcard_files(fpath, icon_value, iconsys_value);
@@ -1491,7 +1491,7 @@ static int do_add_entry_inner(
 		memset(g_ifc_buffer, 0, sizeof(g_ifc_buffer));
 		if ( retres1 )
 		{
-			if ( !strncmp(g_dir_name, "mc", 2) )
+			if ( !memcmp(g_dir_name, "mc", 2) )
 			{
 				i = 0;
 				for ( curentry1 = g_add_entry_heapptr; *curentry1; curentry1 = do_get_str_line(curentry1) )
@@ -1516,7 +1516,7 @@ static int do_add_entry_inner(
 						break;
 				}
 			}
-			else if ( !strncmp(g_dir_name, "pfs", 3) )
+			else if ( !memcmp(g_dir_name, "pfs", 3) )
 			{
 				i = 0;
 				for ( curentry2 = g_add_entry_heapptr; *curentry2; curentry2 = do_get_str_line(curentry2) )
@@ -1626,7 +1626,7 @@ static int do_add_entry_inner(
 				{
 					*cur_entry_buffer = 0;
 					retres2 = mkdir(g_entry_buffer, 511);
-					if ( !retres2 && !strncmp(g_dir_name, "mc", 2) )
+					if ( !retres2 && !memcmp(g_dir_name, "mc", 2) )
 					{
 						do_chstat_mode_copyprotect_wrap(g_entry_buffer);
 						retres2 = do_write_memcard_files(g_dir_name, icon_value, iconsys_value);
@@ -1686,7 +1686,7 @@ static int do_add_entry_inner(
 	// Unofficial: dead code removed
 	return (atomicrenamepath[0] && iomanX_rename(atomicrenamepath, g_dir_name) == -EIO) ?
 				 -18 :
-				 ((strncmp(g_dir_name, "pfs", 3) || iomanX_sync(g_dir_name, 0) != -EIO) ? retres2 : -18);
+				 ((memcmp(g_dir_name, "pfs", 3) || iomanX_sync(g_dir_name, 0) != -EIO) ? retres2 : -18);
 }
 
 static int do_handle_set_usrname(const char *fpath, int type, const char *usrname_buf2, const char *usrname_bufnew)
@@ -1866,7 +1866,7 @@ static int do_edit_entry_inner(
 		if ( new_usr_name )
 			rmoldcfgres = do_handle_set_usrname(g_dir_name, type, g_combination_buf2, new_usr_name);
 	}
-	return (!strncmp(g_dir_name, "pfs", 3) && iomanX_sync(g_dir_name, 0) == -EIO) ? -18 : rmoldcfgres;
+	return (!memcmp(g_dir_name, "pfs", 3) && iomanX_sync(g_dir_name, 0) == -EIO) ? -18 : rmoldcfgres;
 }
 
 static int do_delete_entry_inner(
@@ -1945,7 +1945,7 @@ static int do_delete_entry_inner(
 	}
 	do_free_heapmem(g_delete_entry_heapptr);
 	do_free_heapmem(heapmem);
-	return (!strncmp(g_dir_name, "pfs", 3) && iomanX_sync(g_dir_name, 0) == -EIO) ? -18 : result;
+	return (!memcmp(g_dir_name, "pfs", 3) && iomanX_sync(g_dir_name, 0) == -EIO) ? -18 : result;
 }
 
 static int do_set_latest_entry_inner(const char *fname, int type, const char *usr_name)
@@ -2037,7 +2037,7 @@ static int do_set_latest_entry_inner(const char *fname, int type, const char *us
 	do_free_heapmem(g_set_latest_entry_heapptr);
 	do_free_heapmem(heapmem1);
 	do_free_heapmem(heapmem2);
-	return (!strncmp(g_dir_name, "pfs", 3) && iomanX_sync(g_dir_name, 0) == -EIO) ? -18 : result;
+	return (!memcmp(g_dir_name, "pfs", 3) && iomanX_sync(g_dir_name, 0) == -EIO) ? -18 : result;
 }
 
 static int do_delete_all_inner(const char *dev)
@@ -2046,7 +2046,7 @@ static int do_delete_all_inner(const char *dev)
 	int dread_res;
 	iox_dirent_t statname;
 
-	if ( !strncmp(dev, "mc", 2) )
+	if ( !memcmp(dev, "mc", 2) )
 	{
 		int dfd1;
 
@@ -2080,7 +2080,7 @@ static int do_delete_all_inner(const char *dev)
 		do_dclose_wrap(dfd1);
 		return (rmdir(g_netcnf_file_path) < 0) ? -7 : 0;
 	}
-	else if ( !strncmp(dev, "pfs", 3) )
+	else if ( !memcmp(dev, "pfs", 3) )
 	{
 		int dfd2;
 		int remove_res2;
@@ -2934,7 +2934,7 @@ static int do_handle_attach_cnf(sceNetCnfEnv_t *e, void *userdata)
 
 	ifc = (struct sceNetCnfInterface *)userdata;
 	wasprefixed = (e->av[0][0] == '-') ? 1 : 0;
-	if ( !strncmp("phone_number", &(e->av[0])[wasprefixed], 12) )
+	if ( !memcmp("phone_number", &(e->av[0])[wasprefixed], 12) )
 	{
 		int keyasnum;
 
@@ -3130,7 +3130,7 @@ static int do_netcnf_read_related(
 		return -1;
 	}
 	e->lno = 0;
-	if ( !e->f_no_check_magic && (read_res1 < 36 || strncmp(ptr, "# <Sony Computer Entertainment Inc.>", 36)) )
+	if ( !e->f_no_check_magic && (read_res1 < 36 || memcmp(ptr, "# <Sony Computer Entertainment Inc.>", 36)) )
 	{
 		printf("netcnf: decoding error (magic=\"");
 		for ( i = 0; i < read_res1 && i < 36; i += 1 )
@@ -4430,7 +4430,7 @@ static int do_check_aolnet(const char *auth_name)
 	int i;
 	const char *periodpos;
 
-	if ( strncmp(auth_name, "aolnet/", 7) )
+	if ( memcmp(auth_name, "aolnet/", 7) )
 		return 0;
 	periodpos = auth_name;
 	for ( i = 0; periodpos; i += 1 )
@@ -4452,7 +4452,7 @@ static int do_check_authnet(char *argst, char *arged)
 	*i = 0;
 	for ( j = argst; *j && isspace(*j); j += 1 )
 		;
-	if ( !strncmp(j, "auth_name", 9) )
+	if ( !memcmp(j, "auth_name", 9) )
 	{
 		int result;
 
@@ -4502,7 +4502,7 @@ static int do_read_check_netcnf(const char *netcnf_path, int type, int no_check_
 	heapmem_2 = heapmem;
 	if (
 		no_check_magic
-		&& (read_res2 < 36 || strncmp(g_read_check_netcnf_heapptr, "# <Sony Computer Entertainment Inc.>", 36)) )
+		&& (read_res2 < 36 || memcmp(g_read_check_netcnf_heapptr, "# <Sony Computer Entertainment Inc.>", 36)) )
 	{
 		int i;
 
@@ -4650,9 +4650,9 @@ static int is_special_file_path(const char *netcnf_path)
 	switch ( g_callbacks.type )
 	{
 		case 1:
-			return !strncmp(netcnf_path, "mc", 2) ? 1 : 0;
+			return !memcmp(netcnf_path, "mc", 2) ? 1 : 0;
 		case 2:
-			return !strncmp(netcnf_path, "ext", 3) ? 1 : 0;
+			return !memcmp(netcnf_path, "ext", 3) ? 1 : 0;
 		default:
 			return 1;
 	}

@@ -33,7 +33,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 	result=0;
 	if ( (fp = fopen(InputFile, "rb" )) != NULL )
 	{
-		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "RIFF", 4 ) )
+		if (fread( s, 1, 4, fp )!=4 || memcmp( s, "RIFF", 4 ) )
 		{
 			printf( "Error: Not a WAVE-file (\"RIFF\" identifier not found)\n" );
 			result=-3;
@@ -42,7 +42,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 
 		fseek( fp, 8, SEEK_SET );
 
-		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "WAVE", 4 ) )
+		if (fread( s, 1, 4, fp )!=4 || memcmp( s, "WAVE", 4 ) )
 		{
 			printf( "Error: Not a WAVE-file (\"WAVE\" identifier not found)\n" );
 			result=-3;
@@ -51,7 +51,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 
 		fseek( fp, 8 + 4, SEEK_SET );
 
-		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "fmt", 3 ) )
+		if (fread( s, 1, 4, fp )!=4 || memcmp( s, "fmt", 3 ) )
 		{
 			printf( "Error: Not a WAVE-file (\"fmt\" chunk not found)\n" );
 			result=-3;
@@ -102,7 +102,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 		fseek( fp, chunk_data, SEEK_SET );
 		if(fread( s, 1, 4, fp )==4){
 			// Skip 'fact' and possibly other chunks
-			while(strncmp( s, "data", 4 ))
+			while(memcmp( s, "data", 4 ))
 			{
 				if(fread( &chunk_data, 4, 1, fp )==1){
 					chunk_data += ftell( fp );
@@ -191,7 +191,7 @@ int main( int argc, char *argv[] )
 
 	if( argc == 4)
 	{
-		if( strncmp( argv[1], "-L", 2 ) )
+		if( memcmp( argv[1], "-L", 2 ) )
 		{
 			printf("Error: Option '%s' not recognized\n", argv[1]);
 			result=EINVAL;

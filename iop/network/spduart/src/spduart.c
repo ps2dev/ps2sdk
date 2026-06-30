@@ -647,7 +647,7 @@ static void spduart_init_hw(struct spduart_internals_ *priv)
 				{
 					buf1data += 1;
 				}
-				if ( (*buf1data == '+') && (strncmp("+GCI=", buf1data, 5) == 0) )
+				if ( (*buf1data == '+') && (memcmp("+GCI=", buf1data, 5) == 0) )
 				{
 					buf1data += 5;
 					if ( ((isxdigit(buf1data[0])) != 0) && ((isxdigit(buf1data[1])) != 0) )
@@ -1160,12 +1160,12 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 			spduart_internals.spduart_nogci_ = 1;
 			continue;
 		}
-		else if ( !strncmp("dial=", av[v5], 5) )
+		else if ( !memcmp("dial=", av[v5], 5) )
 		{
 			strcpy(spduart_internals.spduart_dial_, av[v5] + 5);
 			continue;
 		}
-		else if ( !strncmp("gci=", av[v5], 4) )
+		else if ( !memcmp("gci=", av[v5], 4) )
 		{
 			v7 = (char *)(av[v5] + 4);
 			if ( (isxdigit(*v7)) == 0 || (isxdigit(v7[1])) == 0 )
@@ -1174,7 +1174,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 			spduart_internals.spduart_gci_[1] = v7[1];
 			continue;
 		}
-		else if ( !strncmp("thpri=", av[v5], 6) )
+		else if ( !memcmp("thpri=", av[v5], 6) )
 		{
 			v7 = (char *)(av[v5] + 6);
 			if ( (isdigit(*v7)) == 0 )
@@ -1184,7 +1184,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 				return print_usage();
 			spduart_internals.spduart_thpri_ = v11;
 		}
-		else if ( !strncmp("thstack=", av[v5], 8) )
+		else if ( !memcmp("thstack=", av[v5], 8) )
 		{
 			v7 = (char *)(av[v5] + 8);
 			if ( (isdigit(*v7)) == 0 )
@@ -1202,7 +1202,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 				continue;
 			}
 		}
-		else if ( !strncmp("baud=", av[v5], 5) )
+		else if ( !memcmp("baud=", av[v5], 5) )
 		{
 			v7 = (char *)(av[v5] + 5);
 			if ( (isdigit(*v7)) == 0 )
@@ -1211,7 +1211,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 			if ( !spduart_set_baud(spduart_internals.spduart_baud_) )
 				return print_usage();
 		}
-		else if ( !strncmp("trig=", av[v5], 5) )
+		else if ( !memcmp("trig=", av[v5], 5) )
 		{
 			v7 = (char *)(av[v5] + 5);
 			if ( (isdigit(*v7)) == 0 )

@@ -331,7 +331,7 @@ int fontx_load(const char *path, fontx_t* fontx, int type, int wmargin, int hmar
 
 	fontx_header = (fontx_hdr*)fontx->font;
 
-	if (strncmp(fontx_header->id, "FONTX2", 6) != 0)
+	if (memcmp(fontx_header->id, "FONTX2", 6) != 0)
 	{
 
 		printf("Not FONTX2 type font!\n");

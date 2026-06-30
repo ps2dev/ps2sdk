@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
     scr_printf("Loading modules...\n");
 
     /* Load modules */
-    if ((argc == 2) && (strncmp(argv[1], "free", 4) == 0))
+    if ((argc == 2) && (memcmp(argv[1], "free", 4) == 0))
     {
         scr_printf(" - Using PS2SDK sio2man.irx, rmman.irx modules.\n");
         loadmodules(1);
