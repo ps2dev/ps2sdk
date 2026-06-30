@@ -71,7 +71,7 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 
 		clink2=pfsCacheGetData(pfsMount, bi.subpart, bi.number << pfsMount->inode_scale,
 								PFS_CACHE_FLAG_SEGI | PFS_CACHE_FLAG_NOLOAD, &result);
-		memset(clink2->u.inode, 0, sizeof(pfs_inode_t));
+		memset(clink2->u.inode, 0, sizeof(*(clink2->u.inode)));
 		clink2->u.inode->magic=PFS_SEGI_MAGIC;
 
 		clink2->u.inode->inode_block = clink->u.inode->inode_block;

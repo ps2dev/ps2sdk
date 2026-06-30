@@ -24,7 +24,7 @@ unsigned char *LM_Password_Hash(const unsigned char *password, unsigned char *ci
     int i;
 
     /* keep only 14 bytes of the password (padded with nul bytes) */
-    strncpy((char *)tmp_pass, (const char *)password, 14);
+    strncpy((char *)tmp_pass, (const char *)password, sizeof(tmp_pass));
 
     /* turn the password to uppercase */
     for (i = 0; i < 14; i++) {
@@ -32,8 +32,8 @@ unsigned char *LM_Password_Hash(const unsigned char *password, unsigned char *ci
     }
 
     /* get 2 7bytes keys from password */
-    memcpy(K1, &tmp_pass[0], 7);
-    memcpy(K2, &tmp_pass[7], 7);
+    memcpy(K1, &tmp_pass[0], sizeof(K1));
+    memcpy(K2, &tmp_pass[7], sizeof(K2));
 
     /* encrypt the magic string with the keys */
     DES(K1, (const unsigned char *)"KGS!@#$%", &cipher[0]);
@@ -78,7 +78,7 @@ unsigned char *LM_Response(const unsigned char *LMpasswordhash, unsigned char *c
     for (i = 0; i < 3; i++) {
 
         /* get the 7bytes key */
-        memcpy(K, &P21[i * 7], 7);
+        memcpy(K, &P21[i * 7], sizeof(K));
 
         /* encrypt each the challenge with the keys */
         DES(K, chal, &cipher[i * 8]);

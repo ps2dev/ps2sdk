@@ -956,8 +956,8 @@ int fileXioDevctl(const char *name, int cmd, void *arg, unsigned int arglen, voi
 
 	if(arglen > CTL_BUF_SIZE) arglen = CTL_BUF_SIZE;
 	if(buflen > CTL_BUF_SIZE) buflen = CTL_BUF_SIZE;
-	strncpy(packet->name, name, CTL_BUF_SIZE);
-	packet->name[CTL_BUF_SIZE-1] = '\0';
+	strncpy(packet->name, name, sizeof(packet->name));
+	packet->name[sizeof(packet->name) - 1] = '\0';
 	memcpy(packet->arg, arg, arglen);
 
 	packet->cmd = cmd;
@@ -997,7 +997,7 @@ int fileXioIoctl(int fd, int cmd, void *arg){
 	_lock();
 	WaitSema(__fileXioCompletionSema);
 
-	memcpy(packet->arg, arg, IOCTL_BUF_SIZE);
+	memcpy(packet->arg, arg, sizeof(packet->arg));
 
 	packet->fd = fd;
 	packet->cmd = cmd;

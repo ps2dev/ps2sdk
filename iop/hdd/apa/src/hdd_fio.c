@@ -151,7 +151,7 @@ static int fioGetInput(const char *arg, apa_params_t *params)
 
     if (params == NULL)
         return -EINVAL;
-    memset(params, 0, sizeof(apa_params_t));
+    memset(params, 0, sizeof(*params));
 
     while (arg[0] == ' ')
         arg++;
@@ -219,7 +219,7 @@ static int getFileSlot(apa_params_t *params, hdd_file_slot_t **fileSlot, iomanX_
 
     for (i = 0; i < apaMaxOpen; i++) {
         if (hddFileSlots[i].f)
-            if ((hddFileSlots[i].f->unit == file->unit) && (memcmp(hddFileSlots[i].id, &params->id, APA_IDMAX) == 0))
+            if ((hddFileSlots[i].f->unit == file->unit) && (memcmp(hddFileSlots[i].id, &params->id, sizeof(hddFileSlots[i].id)) == 0))
                 return -EBUSY; // file is open
     }
     for (i = 0; i < apaMaxOpen; i++) {
@@ -328,7 +328,7 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
 
     // clear all errors on hdd
     clink = apaCacheAlloc();
-    memset(clink->header, 0, sizeof(apa_header_t));
+    memset(clink->header, 0, sizeof(*(clink->header)));
     if (blkIoDmaTransfer(f->unit, clink->header, APA_SECTOR_SECTOR_ERROR, 1, BLKIO_DIR_WRITE)) {
         apaCacheFree(clink);
         return -EIO;
@@ -351,7 +351,7 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
     // set up mbr :)
     if ((clink = apaCacheGetHeader(f->unit, APA_SECTOR_MBR, APA_IO_MODE_WRITE, &rv))) {
         apa_header_t *header = clink->header;
-        memset(header, 0, sizeof(apa_header_t));
+        memset(header, 0, sizeof(*header));
         header->magic = APA_MAGIC;
         // TODO: DVRP firmware sets this to 0x400 bytes
         header->length = (1024 * 256); // 128MB
@@ -396,7 +396,7 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
     // TODO: DVRP firmware 48-bit creates __extend partition at offset_24_bit, with same params as __mbr except content is empty
 #ifdef APA_FORMAT_MAKE_PARTITIONS
     memset(&emptyBlocks, 0, sizeof(emptyBlocks));
-    memset(&params, 0, sizeof(apa_params_t));
+    memset(&params, 0, sizeof(sizeof(params)));
     params.size = (1024 * 256);
     params.type = APA_TYPE_PFS;
 
@@ -404,7 +404,7 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
     // TODO: For DVRP firmware 48-bit, __xcontents is created with size (offset_48_bit - offset_24_bit) - 0x240000 & 0xfffff7ff
     // add __net, __system....
     for (i = 0; formatPartList[i]; i++) {
-        memset(params.id, 0, APA_IDMAX);
+        memset(params.id, 0, sizeof(params.id));
         strcpy(params.id, formatPartList[i]);
         if (!(clink = hddAddPartitionHere(f->unit, &params, emptyBlocks, i ? clink->sector : 0, &rv)))
             return rv;
@@ -438,7 +438,7 @@ static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
     while (clink) {
         sector = clink->sector;
         if (!(clink->header->flags & APA_FLAG_SUB)) {
-            if (memcmp(clink->header->id, params->id, APA_IDMAX) == 0)
+            if (memcmp(clink->header->id, params->id, sizeof(clink->header->id)) == 0)
                 break; // found :)
         }
         apaAddEmptyBlock(clink->header, emptyBlocks);
@@ -454,7 +454,7 @@ static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
             if ((clink = hddAddPartitionHere(device, params, emptyBlocks, sector, &rv)) != NULL) {
                 sector = clink->header->start;
                 clink2 = apaCacheAlloc();
-                memset(clink2->header, 0, sizeof(apa_header_t));
+                memset(clink2->header, 0, sizeof(*(clink2->header)));
                 blkIoDmaTransfer(device, clink2->header, sector + 8, 2, BLKIO_DIR_WRITE);
                 blkIoDmaTransfer(device, clink2->header, sector + 0x2000, 2, BLKIO_DIR_WRITE);
                 apaCacheFree(clink2);
@@ -468,7 +468,7 @@ static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
     memcpy(&fileSlot->parts[1], &clink->header->subs, APA_MAXSUB * sizeof(apa_sub_t));
     fileSlot->type = clink->header->type;
     fileSlot->nsub = clink->header->nsub;
-    memcpy(&fileSlot->id, &clink->header->id, APA_IDMAX);
+    memcpy(&fileSlot->id, &clink->header->id, sizeof(fileSlot->id));
     apaCacheFree(clink);
     if (apaPassCmp(clink->header->fpwd, params->fpwd) != 0) {
         rv = (!(mode & FIO_O_WRONLY)) ? apaPassCmp(clink->header->rpwd, params->rpwd) : -EACCES;
@@ -487,7 +487,7 @@ static int apaRemove(s32 device, const char *id, const char *fpwd)
     for (i = 0; i < apaMaxOpen; i++) // look to see if open
     {
         if (hddFileSlots[i].f != 0) {
-            if (memcmp(hddFileSlots[i].id, id, APA_IDMAX) == 0)
+            if (memcmp(hddFileSlots[i].id, id, sizeof(hddFileSlots[i].id)) == 0)
                 return -EBUSY;
         }
     }
@@ -539,7 +539,7 @@ static int apaRename(s32 device, const char *oldId, const char *newId)
     // look to see if open(oldname)
     for (i = 0; i < apaMaxOpen; i++) {
         if (hddFileSlots[i].f != NULL) {
-            if (memcmp(hddFileSlots[i].id, oldId, APA_IDMAX) == 0) {
+            if (memcmp(hddFileSlots[i].id, oldId, sizeof(hddFileSlots[i].id)) == 0) {
                 SignalSema(fioSema);
                 return -EBUSY;
             }
@@ -559,8 +559,8 @@ static int apaRename(s32 device, const char *oldId, const char *newId)
     }
 
     // do the renaming :) note: subs have no names!!
-    memset(clink->header->id, 0, APA_IDMAX);
-    strncpy(clink->header->id, newId, APA_IDMAX - 1);
+    memset(clink->header->id, 0, sizeof(clink->header->id));
+    strncpy(clink->header->id, newId, sizeof(clink->header->id) - 1);
 
     // touch creation time
     apaGetTime(&clink->header->created);
@@ -772,8 +772,8 @@ int hddDread(iomanX_iop_file_t *f, iox_dirent_t *dirent)
                 /*  This was the SONY original, which didn't do bounds-checking:
                     rv=strlen(cmain->header->id);
                     strcpy(dirent->name, cmain->header->id); */
-                strncpy(dirent->name, cmain->header->id, APA_IDMAX);
-                dirent->name[APA_IDMAX] = '\0';
+                strncpy(dirent->name, cmain->header->id, sizeof(dirent->name) - 1);
+                dirent->name[sizeof(dirent->name) - 1] = '\0';
                 rv = strlen(dirent->name);
 
                 apaCacheFree(cmain);
@@ -782,8 +782,8 @@ int hddDread(iomanX_iop_file_t *f, iox_dirent_t *dirent)
             /*  This was the SONY original, which didn't do bounds-checking:
                 rv=strlen(clink->header->id);
                 strcpy(dirent->name, clink->header->id); */
-            strncpy(dirent->name, clink->header->id, APA_IDMAX);
-            dirent->name[APA_IDMAX] = '\0';
+            strncpy(dirent->name, clink->header->id, sizeof(dirent->name) - 1);
+            dirent->name[sizeof(dirent->name) - 1] = '\0';
             rv = strlen(dirent->name);
         }
         fioGetStatFiller(clink, &dirent->stat);
@@ -826,7 +826,7 @@ static int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp)
     if (!(fileSlot->nsub < APA_MAXSUB))
         return -EFBIG;
 
-    memset(&params, 0, sizeof(apa_params_t));
+    memset(&params, 0, sizeof(params));
 
     if ((rv = fioPartitionSizeLookUp(argp)) < 0)
         return rv;
@@ -995,21 +995,21 @@ static int devctlSwapTemp(s32 device, char *argp)
     if (params.id[0] == '_' && params.id[1] == '_') // test for '__' system partition
         return -EINVAL;
 
-    memset(szBuf, 0, APA_IDMAX);
+    memset(szBuf, 0, sizeof(szBuf));
     strcpy(szBuf, "_tmp");
     if (!(partTemp = apaFindPartition(device, szBuf, &rv)))
         return rv;
 
     if ((partNew = apaFindPartition(device, params.id, &rv))) {
         if ((rv = apaPassCmp(partNew->header->fpwd, params.fpwd)) == 0) {
-            memcpy(partTemp->header->id, partNew->header->id, APA_IDMAX);
-            memcpy(partTemp->header->rpwd, partNew->header->rpwd, APA_PASSMAX);
-            memcpy(partTemp->header->fpwd, partNew->header->fpwd, APA_PASSMAX);
+            memcpy(partTemp->header->id, partNew->header->id, sizeof(partTemp->header->id));
+            memcpy(partTemp->header->rpwd, partNew->header->rpwd, sizeof(partTemp->header->rpwd));
+            memcpy(partTemp->header->fpwd, partNew->header->fpwd, sizeof(partTemp->header->fpwd));
             // memset(partNew->header->id, 0, 8);// BUG! can make it so can not open!!
-            memset(partNew->header->id, 0, APA_IDMAX);
+            memset(partNew->header->id, 0, sizeof(partNew->header->id));
             strcpy(partNew->header->id, "_tmp");
-            memset(partNew->header->rpwd, 0, APA_PASSMAX);
-            memset(partNew->header->fpwd, 0, APA_PASSMAX);
+            memset(partNew->header->rpwd, 0, sizeof(partNew->header->rpwd));
+            memset(partNew->header->fpwd, 0, sizeof(partNew->header->fpwd));
             partTemp->flags |= APA_CACHE_FLAG_DIRTY;
             partNew->flags |= APA_CACHE_FLAG_DIRTY;
             apaCacheFlushAllDirty(device);

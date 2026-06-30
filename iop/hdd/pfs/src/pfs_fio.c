@@ -93,7 +93,7 @@ void pfsFioCloseFileSlot(pfs_file_slot_t *fileSlot)
 	}
 	pfsCacheFree(fileSlot->block_pos.inode);
 	pfsCacheFree(fileSlot->clink);
-	memset(fileSlot, 0, sizeof(pfs_file_slot_t));
+	memset(fileSlot, 0, sizeof(*fileSlot));
 }
 
 pfs_mount_t *pfsFioGetMountedUnit(int unit)

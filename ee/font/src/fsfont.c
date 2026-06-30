@@ -466,7 +466,7 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 
 	unsigned short utf8[2048];
 
-	memset(utf8,0,sizeof(short)*2048);
+	memset(utf8,0,sizeof(utf8));
 
 	// Decodes the encoded string into unicode numbers U+xxxx
 	// length is the number of characters in the string

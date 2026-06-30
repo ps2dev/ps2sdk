@@ -2519,7 +2519,7 @@ int mcman_setPS1devinfos(int port, int slot)
 	DPRINTF("mcman_setPS1devinfos port%d slot%d\n", port, slot);
 
 	memset((void *)mcdi, 0, sizeof (MCDevInfo));
-	memset((void *)&mcdi->bad_block_list[0], -1, 128);
+	memset((void *)&mcdi->bad_block_list[0], -1, sizeof(mcdi->bad_block_list));
 
 	mcdi->pagesize = 128;
 	mcdi->blocksize = 128;
@@ -3090,7 +3090,7 @@ int mcman_cachePS1dirs(int port, int slot)
 			if (cluster_t[j] != i)
 				continue;
 
-			memset((void *)fs_t[j], 0, sizeof (McFsEntryPS1));
+			memset((void *)fs_t[j], 0, sizeof (fs_t[j]));
 
 			fs_t[j]->mode = 0xa0;
 			fs_t[j]->linked_block = -1;
@@ -3124,7 +3124,7 @@ int mcman_cachePS1dirs(int port, int slot)
 		if ((cluster_t[i] != -1) || (fs_t[i]->mode == 0xa0))
 			continue;
 
-		memset((void *)fs_t[i], 0, sizeof (McFsEntryPS1));
+		memset((void *)fs_t[i], 0, sizeof (fs_t[i]));
 
 		fs_t[i]->mode = 0xa0;
 		fs_t[i]->linked_block = cluster_t[i];
@@ -3160,7 +3160,7 @@ int mcman_fillPS1backuparea(int port, int slot, int block)
 	register int r, i, curpage;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 
-	memset(&mcman_PS1PDApagebuf, 0, 128);
+	memset(&mcman_PS1PDApagebuf, 0, sizeof(mcman_PS1PDApagebuf));
 
 	curpage = 16;
 	i = 0;
@@ -3275,7 +3275,7 @@ int mcman_clearcache(int port, int slot)
 		}
 	}
 
-	memset((void *)&mcman_fatcache[port][slot], -1, sizeof (McFatCache));
+	memset((void *)&mcman_fatcache[port][slot], -1, sizeof (mcman_fatcache[port][slot]));
 
 	mcman_fatcache[port][slot].entry[0] = 0;
 
@@ -3495,7 +3495,7 @@ lbl0:
 	sparesize = mcman_sparesize(mce->mc_port, mce->mc_slot); //sp84
 	flag = 0; //sp88
 
-	memset((void *)pmce, 0, 64);
+	memset((void *)pmce, 0, sizeof(pmce));
 
 	i = 0; //s1
 	if (MAX_CACHEENTRY > 0) {

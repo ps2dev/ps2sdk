@@ -39,7 +39,7 @@ static void DESEncryptPassword(u32 id_lo, u32 id_hi, char *password_out, const c
 void apaEncryptPassword(const char *id, char *password_out, const char *password_in)
 {
 	char password[APA_PASSMAX];
-	memcpy(password, password_in, APA_PASSMAX);
+	memcpy(password, password_in, sizeof(password));
 	DESEncryptPassword(*(u32*)(id), *(u32*)(id + 4), password_out, password);
 }
 

@@ -347,7 +347,7 @@ void ps2mouse_getstring_set(int resultCode, int bytes, void *arg)
       char string[50];
       int strLoop;
 
-      memset(string, 0, 50);
+      memset(string, 0, sizeof(string));
       for(strLoop = 0; strLoop < ((bytes - 2) / 2); strLoop++)
 	{
 	  string[strLoop] = str->wData[strLoop] & 0xFF;
@@ -518,7 +518,7 @@ int ps2mouse_init()
   if(sceUsbdRegisterLdd(&mouse_driver) >= 0)
     {
       memset(&mouse, 0, sizeof(mouse_data));
-      memset(devices, 0, sizeof(mouse_dev *) * PS2MOUSE_MAXDEV);
+      memset(devices, 0, sizeof(devices));
       dev_count = 0;
       mouse_readmode = PS2MOUSE_READMODE_DIFF;
       mousex_min = -1000000;

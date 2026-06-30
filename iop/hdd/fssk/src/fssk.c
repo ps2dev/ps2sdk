@@ -173,7 +173,7 @@ static pfs_cache_t *fsskCreateIndirectSeg(pfs_cache_t *clink, pfs_cache_t *clink
         if ((*result = pfsBitmapSearchFreeZone(clink->pfsMount, &block, clink->u.inode->number_blocks)) >= 0) {
             clinkfree = pfsCacheGetData(clink->pfsMount, block.subpart, block.number << clink->pfsMount->inode_scale, PFS_CACHE_FLAG_SEGI | PFS_CACHE_FLAG_NOLOAD, result);
 
-            memset(clinkfree->u.inode, 0, sizeof(pfs_inode_t));
+            memset(clinkfree->u.inode, 0, sizeof(*(clinkfree->u.inode)));
             clinkfree->u.inode->magic = PFS_SEGI_MAGIC;
             clinkfree->u.inode->inode_block = clink->u.inode->inode_block;
             clinkfree->u.inode->last_segment = clink2->u.inode->data[0];
@@ -370,7 +370,7 @@ static int fsskCheckFile(pfs_cache_t *InodeClink, pfs_cache_t *DEntryClink, pfs_
 
     if ((FileInodeDataClink = pfsInodeGetData(InodeClink->pfsMount, dentry->sub, dentry->inode, &result)) != NULL) {
         if (fsskRuntimeData.status.PWDLevel < FSSK_MAX_PATH_LEVELS - 1) {
-            memset(fsskPathBuffer[fsskRuntimeData.status.PWDLevel], 0, FSSK_MAX_PATH_SEG_LENGTH);
+            memset(fsskPathBuffer[fsskRuntimeData.status.PWDLevel], 0, sizeof(fsskPathBuffer[fsskRuntimeData.status.PWDLevel]));
             strncpy(fsskPathBuffer[fsskRuntimeData.status.PWDLevel], dentry->path, dentry->pLen);
             fsskRuntimeData.status.PWDLevel++;
 

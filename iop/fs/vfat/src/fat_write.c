@@ -1055,7 +1055,7 @@ static int setShortNameSequence(fat_driver *fatd, char *sname)
         }                                         // ends "if mask byte has any bit free"
     }                                             // ends "for each mask byte"
 
-    memset(number, 0, 8);
+    memset(number, 0, sizeof(number));
     sprintf(number, "%d", seq);
     j = strlen(number);
 
@@ -1185,8 +1185,8 @@ static int fat_fillDirentryInfo(fat_driver *fatd, const char *lname, const char 
 #endif /* BUILDING_IEEE1394_DISK */
 #endif
 
-    memset(fatd->dir_used_mask, 0, DIR_MASK_SIZE / 8);
-    memset(fatd->seq_mask, 0, SEQ_MASK_SIZE / 8);
+    memset(fatd->dir_used_mask, 0, sizeof(fatd->dir_used_mask));
+    memset(fatd->seq_mask, 0, sizeof(fatd->seq_mask));
 
     cont = 1;
     // clear name strings
