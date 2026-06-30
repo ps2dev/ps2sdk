@@ -129,95 +129,99 @@ extern "C" {
  * @return Language value (See OSD_LANGUAGES above)
  */
 extern int configGetLanguage(void);
-extern int configGetLanguageWithIODriver(_io_driver *driver);
+static inline int configGetLanguageWithIODriver(const _io_driver *driver) { return configGetLanguage(); }
 
 /** sets the default language of the ps2
  * @param language Language value (See OSD_LANGUAGES above)
  */
 extern void configSetLanguage(int language);
-extern void configSetLanguageWithIODriver(int language, _io_driver *driver);
-
+static inline void configSetLanguageWithIODriver(int language, const _io_driver *driver) { configSetLanguage(language); }
 
 /** get the tv screen type the ps2 is setup for
  * @return 0 = 4:3; 1 = fullscreen; 2 = 16:9
  */
 extern int configGetTvScreenType(void);
-extern int configGetTvScreenTypeWithIODriver(_io_driver *driver);
+static inline int configGetTvScreenTypeWithIODriver(const _io_driver *driver) { return configGetTvScreenType(); }
 
 /** set the tv screen type
  * @param screenType 0 = 4:3; 1 = fullscreen; 2 = 16:9
  */
 extern void configSetTvScreenType(int screenType);
-extern void configSetTvScreenTypeWithIODriver(int screenType, _io_driver *driver);
+static inline void configSetTvScreenTypeWithIODriver(int screenType, const _io_driver *driver) { configSetTvScreenType(screenType); }
 
 /** gets the date display format
  * @return 0 = yyyy/mm/dd; 1 = mm/dd/yyyy; 2 = dd/mm/yyyy
  */
 extern int configGetDateFormat(void);
-extern int configGetDateFormatWithIODriver(_io_driver *driver);
+static inline int configGetDateFormatWithIODriver(const _io_driver *driver) { return configGetDateFormat(); }
 
 /** sets the date display format
  * @param dateFormat 0 = yyyy/mm/dd; 1 = mm/dd/yyyy; 2 = dd/mm/yyyy
  */
 extern void configSetDateFormat(int dateFormat);
-extern void configSetDateFormatWithIODriver(int dateFormat, _io_driver *driver);
+static inline void configSetDateFormatWithIODriver(int dateFormat, const _io_driver *driver) { configSetDateFormat(dateFormat); }
 
 /** gets the time display format
  * (whether 24hour time or not)
  * @return 0 = 24hour; 1 = 12hour
  */
 extern int configGetTimeFormat(void);
-extern int configGetTimeFormatWithIODriver(_io_driver *driver);
+static inline int configGetTimeFormatWithIODriver(const _io_driver *driver) { return configGetTimeFormat(); }
 
 /** sets the time display format
  * (whether 24hour time or not)
  * @param timeFormat 0 = 24hour; 1 = 12hour
  */
 extern void configSetTimeFormat(int timeFormat);
-extern void configSetTimeFormatWithIODriver(int timeFormat, _io_driver *driver);
+static inline void configSetTimeFormatWithIODriver(int timeFormat, const _io_driver *driver) { configSetTimeFormat(timeFormat); }
 
 /** get timezone
  * @return offset in minutes from GMT
  */
 extern int configGetTimezone(void);
-extern int configGetTimezoneWithIODriver(_io_driver *driver);
+static inline int configGetTimezoneWithIODriver(const _io_driver *driver) { return configGetTimezone(); }
 
 /** set timezone
  * @param offset offset in minutes from GMT
  */
 extern void configSetTimezone(int offset);
-extern void configSetTimezoneWithIODriver(int timezoneOffset, _io_driver *driver, void (*finishedCallback)(void));
+static inline void configSetTimezoneWithIODriver(int offset, const _io_driver *driver, void *finishedCallback) { configSetTimezone(offset); }
 
 /** checks whether the spdif is enabled or not
  * @return 1 = on; 0 = off
  */
 extern int configIsSpdifEnabled(void);
-extern int configIsSpdifEnabledWithIODriver(_io_driver *driver);
+static inline int configIsSpdifEnabledWithIODriver(const _io_driver *driver) { return configIsSpdifEnabled(); }
 
 /** sets whether the spdif is enabled or not
  * @param enabled 1 = on; 0 = off
  */
 extern void configSetSpdifEnabled(int enabled);
-extern void configSetSpdifEnabledWithIODriver(int enabled, _io_driver *driver);
+static inline void configSetSpdifEnabledWithIODriver(int enabled, const _io_driver *driver) { configSetSpdifEnabled(enabled); }
 
 /** checks whether daylight saving is currently set
  * @return 1 = on; 0 = off
  */
 extern int configIsDaylightSavingEnabled(void);
-extern int configIsDaylightSavingEnabledWithIODriver(_io_driver *driver);
+static inline int configIsDaylightSavingEnabledWithIODriver(const _io_driver *driver) { return configIsDaylightSavingEnabled(); }
 
 /** sets daylight saving
  * @param enabled 1 = on; 0 = off
  */
 extern void configSetDaylightSavingEnabled(int enabled);
-extern void configSetDaylightSavingEnabledWithIODriver(int daylightSaving, _io_driver *driver, void (*finishedCallback)(void));
+static inline void configSetDaylightSavingEnabledWithIODriver(int enabled, const _io_driver *driver, void *finishedCallback) { configSetDaylightSavingEnabled(enabled); }
 
 #ifndef OSD_CONFIG_NO_LIBCDVD
 /** converts the time returned from the ps2's clock into GMT time
  * (ps2 clock is in JST time)
  */
 extern void configConvertToGmtTime(sceCdCLOCK *time);
-extern void configConvertToLocalTimeWithIODriver(sceCdCLOCK *time, _io_driver *driver);
+
+/** converts the time returned from the ps2's clock into local time
+ * (ps2 clock is in JST time)
+ */
+extern void configConvertToLocalTime(sceCdCLOCK *time);
+static inline void configConvertToLocalTimeWithIODriver(sceCdCLOCK *time, const _io_driver *driver) { configConvertToLocalTime(time); }
 #endif
 
 // Internal functions.

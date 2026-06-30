@@ -21,12 +21,6 @@
 #include <sifrpc.h>
 #include <kernel.h>
 
-// We don't want kernel to depend newlib
-#define NEWLIB_PORT_AWARE
-#include "fileio.h"
-
-#define defaultIODriver { (void *)fioOpen, fioClose, fioRead, FIO_O_RDONLY }
-
 struct rom0_info_data
 {
     /** stores romname of ps2 */
@@ -94,8 +88,8 @@ void SetupRomInfo(void)
 }
 #endif
 
-#ifdef F_GetRomNameWithIODriver
-char *GetRomNameWithIODriver(char *romname, _io_driver *driver)
+#ifdef F_GetRomName
+char *GetRomName(char *romname)
 {
     SetupRomInfo();
     /* Explicitly copy 14 bytes to the buffer */
@@ -104,42 +98,18 @@ char *GetRomNameWithIODriver(char *romname, _io_driver *driver)
 }
 #endif
 
-#ifdef F_GetRomName
-char *GetRomName(char *romname)
-{
-    _io_driver driver = defaultIODriver;
-    return GetRomNameWithIODriver(romname, &driver);
-}
-#endif
-
-#ifdef F_IsDESRMachineWithIODriver
-int IsDESRMachineWithIODriver(_io_driver *driver)
+#ifdef F_IsDESRMachine
+int IsDESRMachine(void)
 {
     SetupRomInfo();
     return (!memcmp(g_rom0_info_data.m_psxver, "PSX", 3)) ? 1 : 0;
 }
 #endif
 
-#ifdef F_IsDESRMachine
-int IsDESRMachine(void)
-{
-    _io_driver driver = defaultIODriver;
-    return IsDESRMachineWithIODriver(&driver);
-}
-#endif
-
-#ifdef F_IsT10KWithIODriver
-int IsT10KWithIODriver(_io_driver *driver)
-{
-    SetupRomInfo();
-    return (g_rom0_info_data.m_romver[4] == 'T' && g_rom0_info_data.m_romver[5] != 'Z') ? 1 : 0;
-}
-#endif
-
 #ifdef F_IsT10K
 int IsT10K(void)
 {
-    _io_driver driver = defaultIODriver;
-    return IsT10KWithIODriver(&driver);
+    SetupRomInfo();
+    return (g_rom0_info_data.m_romver[4] == 'T' && g_rom0_info_data.m_romver[5] != 'Z') ? 1 : 0;
 }
 #endif
