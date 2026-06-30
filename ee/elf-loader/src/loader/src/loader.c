@@ -90,22 +90,26 @@ int main(int argc, char *argv[])
 	SET_GS_BGCOLOUR(WHITE_BG);
 	// arg[0] partition if exists, otherwise is ""
 	// arg[1]=path to ELF
-	if (argc < 2) {  
+	// arg[2]=reset flag ("0" = keep IOP, otherwise reset)
+	if (argc < 3) {  
 		SET_GS_BGCOLOUR(RED_BG);
 		return -EINVAL;
 	}
 
-	char *new_argv[argc - 1];
+	int reset = (argv[2][0] != '0');
+
+	char *new_argv[argc - 2];
 	int argv0_len = strlen(argv[0]);
 	int argv1_len = strlen(argv[1]);
 	char fullPath[argv0_len + argv1_len + 1];
+
 	memcpy(&fullPath[0], argv[0], argv0_len);
 	memcpy(&fullPath[argv0_len], argv[1], argv1_len);
 	fullPath[argv0_len + argv1_len] = 0;
 	// final new_argv[0] is partition + path to elf
 	new_argv[0] = fullPath;
-	for (i = 2; i < argc; i++) {
-		new_argv[i - 1] = argv[i];
+	for (i = 3; i < argc; i++) {
+		new_argv[i - 2] = argv[i];
 	}
 
 	SET_GS_BGCOLOUR(CYAN_BG);
@@ -124,20 +128,22 @@ int main(int argc, char *argv[])
 	if (ret == 0 && elfdata.epc != 0) {
 		SET_GS_BGCOLOUR(YELLOW_BG);
 
-		// Let's reset IOP because ELF was already loaded in memory
-		while(!SifIopReset(NULL, 0)){};
-		while (!SifIopSync()) {};
+		if (reset) {
+			// Let's reset IOP because ELF was already loaded in memory
+			while(!SifIopReset(NULL, 0)){};
+			while (!SifIopSync()) {};
 
-		SET_GS_BGCOLOUR(ORANGE_BG);
+			SET_GS_BGCOLOUR(ORANGE_BG);
 
-        sceSifInitRpc(0);
-        // Load modules.
-        SifLoadFileInit();
-        SifLoadModule("rom0:SIO2MAN", 0, NULL);
-        SifLoadModule("rom0:MCMAN", 0, NULL);
-        SifLoadModule("rom0:MCSERV", 0, NULL);
-        SifLoadFileExit();
-        sceSifExitRpc();
+        	sceSifInitRpc(0);
+        	// Load modules.
+        	SifLoadFileInit();
+        	SifLoadModule("rom0:SIO2MAN", 0, NULL);
+        	SifLoadModule("rom0:MCMAN", 0, NULL);
+        	SifLoadModule("rom0:MCSERV", 0, NULL);
+        	SifLoadFileExit();
+        	sceSifExitRpc();
+		}
 
 		SET_GS_BGCOLOUR(BROWN_BG);
 
@@ -145,8 +151,8 @@ int main(int argc, char *argv[])
 		FlushCache(2);
 
 		SET_GS_BGCOLOUR(PURPBLE_BG);
-		
-		return ExecPS2((void *)elfdata.epc, (void *)elfdata.gp, argc-1, new_argv);
+
+		return ExecPS2((void *)elfdata.epc, (void *)elfdata.gp, argc - 2, new_argv);
 	} else {
 		SET_GS_BGCOLOUR(MAGENTA_BG);
 		sceSifExitRpc();

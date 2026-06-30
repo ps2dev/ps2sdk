@@ -54,13 +54,13 @@ static void wipe_bramMem(void) {
 #endif
 }
 
-int LoadELFFromFileWithPartition(const char *filename, const char *partition, int argc, char *argv[]) {
+static int LoadELFFromFileResetCommon(const char *filename, const char *partition, int reset, int argc, char *argv[]) {
 	u8 *boot_elf;
 	elf_header_t *eh;
 	elf_pheader_t *eph;
 	void *pdata;
 	int i;
-	int new_argc = argc + 2;
+	int new_argc = argc + 3;
 	
 	// We need to check that the ELF file before continue
 	if (!file_exists(filename)) {
@@ -70,11 +70,12 @@ int LoadELFFromFileWithPartition(const char *filename, const char *partition, in
 	wipe_bramMem();
 
 	// Preparing filename and partition to be sent in the argv
-	char *new_argv[argc + 2];
+	char *new_argv[argc + 3];
 	new_argv[0] = partition != NULL ? (char *)partition : "";
 	new_argv[1] = (char *)filename;
+	new_argv[2] = reset ? "1" : "0";
 	for (i = 0; i < argc; i++) {
-		new_argv[i + 2] = argv[i];
+		new_argv[i + 3] = argv[i];
 	}
 	
 	/* NB: LOADER.ELF is embedded  */
@@ -103,6 +104,14 @@ int LoadELFFromFileWithPartition(const char *filename, const char *partition, in
 	FlushCache(2);
 	
 	return ExecPS2((void *)eh->entry, NULL, new_argc, new_argv);
+}
+
+int LoadELFFromFileWithPartition(const char *filename, const char *partition, int argc, char *argv[]) {
+	return LoadELFFromFileResetCommon(filename, partition, 1, argc, argv);
+}
+
+int LoadELFFromFileWithPartitionNoReset(const char *filename, const char *partition, int argc, char *argv[]) {
+	return LoadELFFromFileResetCommon(filename, partition, 0, argc, argv);
 }
 
 int LoadELFFromFile(const char *filename, int argc, char *argv[])

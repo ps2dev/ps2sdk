@@ -50,6 +50,8 @@ extern int LoadELFFromFile(const char *filename, int argc, char *argv[]);
  */
 extern int LoadELFFromFileWithPartition(const char *filename, const char *partition, int argc, char *argv[]);
 
+extern int LoadELFFromFileWithPartitionNoReset(const char *filename, const char *partition, int argc, char *argv[]);
+
 #ifdef __cplusplus
 }
 #endif
