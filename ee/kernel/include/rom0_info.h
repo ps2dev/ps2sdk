@@ -28,6 +28,8 @@ typedef struct {
     int openFlags;
 } _io_driver;
 
+extern void SetupRomInfo(void);
+
 /** check whether the PlayStation 2 is actually a DESR-XXXX machine
  *
  * @return 1 if DESR-XXXX machine; 0 if not

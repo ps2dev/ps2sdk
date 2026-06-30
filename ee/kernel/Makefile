@@ -86,7 +86,7 @@ GLUE_OBJS += SyncDCache.o iSyncDCache.o InvalidDCache.o iInvalidDCache.o
 SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
 	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o
 
-ROM0_OBJS = _info_internals.o GetRomNameWithIODriver.o GetRomName.o IsDESRMachineWithIODriver.o IsDESRMachine.o IsT10KWithIODriver.o IsT10K.o
+ROM0_OBJS = _info_internals.o SetupRomInfo.o GetRomNameWithIODriver.o GetRomName.o IsDESRMachineWithIODriver.o IsDESRMachine.o IsT10KWithIODriver.o IsT10K.o
 
 ### Config objects
 
