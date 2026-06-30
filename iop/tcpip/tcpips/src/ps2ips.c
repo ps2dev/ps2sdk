@@ -61,7 +61,7 @@ static void do_accept( void * rpcBuffer, int size )
 	ret = accept(pkt->socket, &addr, &addrlen);
 
 	pkt->socket = ret;
-	memcpy(&pkt->sockaddr, &addr, sizeof(struct sockaddr));
+	pkt->sockaddr = addr;
 	pkt->len = sizeof(struct sockaddr);
 }
 
@@ -247,7 +247,7 @@ static void do_recvfrom( void * rpcBuffer, int size )
 	if(rlen <= 64) srest = rlen;
 
 	// copy sockaddr struct to return packet
-	memcpy((void *)&ret_pkt->sockaddr, (void *)&sockaddr, sizeof(struct sockaddr));
+	ret_pkt->sockaddr = sockaddr;
 
 	// fill sbuffer, calculate align buffer & erest valules, fill ebuffer
 	if(srest)
@@ -455,7 +455,7 @@ static void do_getsockname( void *rpcBuffer, int size )
 	ret = getsockname(pkt->socket, &addr, &addrlen);
 
 	pkt->socket = ret;
-	memcpy(&pkt->sockaddr, &addr, sizeof(struct sockaddr));
+	pkt->sockaddr = addr;
 	pkt->len = sizeof(struct sockaddr);
 }
 
@@ -471,7 +471,7 @@ static void do_getpeername( void *rpcBuffer, int size )
 	ret = getpeername(pkt->socket, &addr, &addrlen);
 
 	pkt->socket = ret;
-	memcpy(&pkt->sockaddr, &addr, sizeof(struct sockaddr));
+	pkt->sockaddr = addr;
 	pkt->len = sizeof(struct sockaddr);
 }
 

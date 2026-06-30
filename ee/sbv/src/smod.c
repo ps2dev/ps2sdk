@@ -44,7 +44,7 @@ int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
 
 	SyncDCache(&smem_buf, smem_buf.bytes+sizeof(smod_mod_info_t));
 	if(sceSifGetOtherData(&RData, addr, &smem_buf, sizeof(smod_mod_info_t), 0)>=0){
-		memcpy(next_mod, &smem_buf.mod_info, sizeof(smod_mod_info_t));
+		*next_mod = smem_buf.mod_info;
 		return next_mod->id;
 	}
 

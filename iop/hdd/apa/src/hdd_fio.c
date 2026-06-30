@@ -700,9 +700,9 @@ static void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
     stat->attr   = clink->header->flags;
     stat->hisize = 0;
     stat->size   = clink->header->length;
-    memcpy(&stat->ctime, &clink->header->created, sizeof(apa_ps2time_t));
-    memcpy(&stat->atime, &clink->header->created, sizeof(apa_ps2time_t));
-    memcpy(&stat->mtime, &clink->header->created, sizeof(apa_ps2time_t));
+    *(apa_ps2time_t *)(stat->ctime) = clink->header->created;
+    *(apa_ps2time_t *)(stat->atime) = clink->header->created;
+    *(apa_ps2time_t *)(stat->mtime) = clink->header->created;
     stat->private_1 = 0;
     stat->private_2 = 0;
     if (clink->header->flags & APA_FLAG_SUB)

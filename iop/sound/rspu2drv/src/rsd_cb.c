@@ -22,7 +22,7 @@ void sceSifCmdLoop2(void)
 		{
 			sceSifCallRpc(&cd, 0, 0, &eeCBData, 16, 0, 0, 0, 0);
 			if ( eeCBData.mode < 4 )
-				memcpy(gStPtr, &gStBuff, sizeof(SpuStEnv));
+				*gStPtr = gStBuff;
 			eeCBData.mode = 0;
 		}
 		SleepThread();

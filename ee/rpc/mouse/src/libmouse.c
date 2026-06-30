@@ -63,8 +63,6 @@ int PS2MouseInit(void)
 int PS2MouseRead(PS2MouseData *data)
 
 {
-  u8* uncached = UNCACHED_SEG(buffer.buffer);
-
   if(!data)
     {
       return -1;
@@ -74,7 +72,7 @@ int PS2MouseRead(PS2MouseData *data)
     return -1;
 
 
-  memcpy(data, uncached, sizeof(PS2MouseData));
+  *data = *(PS2MouseData *)(UNCACHED_SEG(buffer.buffer));
   //  printf("MouseRead %d %d %d %d\n", data->x, data->y, data->wheel, data->buttons);
 
   return 1;

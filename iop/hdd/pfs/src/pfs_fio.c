@@ -941,9 +941,9 @@ static void fioStatFiller(pfs_cache_t *clink, iox_stat_t *stat)
 	stat->attr = clink->u.inode->attr;
 	stat->size = (u32)clink->u.inode->size;
 	stat->hisize = (u32)(clink->u.inode->size >> 32);
-	memcpy(&stat->ctime, &clink->u.inode->ctime, sizeof(pfs_datetime_t));
-	memcpy(&stat->atime, &clink->u.inode->atime, sizeof(pfs_datetime_t));
-	memcpy(&stat->mtime, &clink->u.inode->mtime, sizeof(pfs_datetime_t));
+	*(pfs_datetime_t *)(stat->ctime) = clink->u.inode->ctime;
+	*(pfs_datetime_t *)(stat->atime) = clink->u.inode->atime;
+	*(pfs_datetime_t *)(stat->mtime) = clink->u.inode->mtime;
 	stat->private_0 = clink->u.inode->uid;
 	stat->private_1 = clink->u.inode->gid;
 	stat->private_2 = clink->u.inode->number_blocks;
@@ -1007,11 +1007,11 @@ int	pfsFioChstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat, unsig
 			if(statmask & FIO_CST_SIZE)
 				rv = -EACCES;
 			if(statmask & FIO_CST_CT)
-				memcpy(&clink->u.inode->ctime, stat->ctime, sizeof(pfs_datetime_t));
+				clink->u.inode->ctime = *(pfs_datetime_t *)(stat->ctime);
 			if(statmask & FIO_CST_AT)
-				memcpy(&clink->u.inode->atime, stat->atime, sizeof(pfs_datetime_t));
+				clink->u.inode->atime = *(pfs_datetime_t *)(stat->atime);
 			if(statmask & FIO_CST_MT)
-				memcpy(&clink->u.inode->mtime, stat->mtime, sizeof(pfs_datetime_t));
+				clink->u.inode->mtime = *(pfs_datetime_t *)(stat->mtime);
 /*			//By PFS v2.2, changing UID and GID was no longer allowed.
 			if(statmask & FIO_CST_PRVT) {
 				clink->u.inode->uid = stat->private_0;
@@ -1208,7 +1208,7 @@ int pfsFioChdir(iomanX_iop_file_t *f, const char *name)
 			result = pfsCheckAccess(clink, 0x01);
 
 			if(result == 0)
-				memcpy(&pfsMount->current_dir, &clink->u.inode->inode_block, sizeof(pfs_blockinfo_t));
+				pfsMount->current_dir = clink->u.inode->inode_block;
 		}
 
 		pfsCacheFree(clink);

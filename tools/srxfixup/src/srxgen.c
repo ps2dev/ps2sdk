@@ -265,12 +265,12 @@ int layout_srx_file(elf_file *elf)
 		;
 	}
 	neworder = (Elf_file_slot *)calloc(maxslot + 1, sizeof(Elf_file_slot));
-	memcpy(neworder, order, sizeof(Elf_file_slot));
+	*neworder = *order;
 	nslotp = neworder + 1;
 	order->type = EFS_TYPE_NONE;
 	if ( elf->ehp->e_phnum )
 	{
-		memcpy(nslotp, &order[1], sizeof(Elf_file_slot));
+		*nslotp = order[1];
 		nslotp = neworder + 2;
 		order[1].type = EFS_TYPE_NONE;
 	}
@@ -283,7 +283,7 @@ int layout_srx_file(elf_file *elf)
 			{
 				break;
 			}
-			memcpy(nslotp, slotp_1, sizeof(Elf_file_slot));
+			*nslotp = *slotp_1;
 			nslotp += 1;
 			slotp_1->type = EFS_TYPE_NONE;
 		}
@@ -1970,7 +1970,7 @@ static void rebuild_an_relocation(elf_section *relsect, unsigned int gpvalue, in
 		{
 			if ( s->type )
 			{
-				memcpy(d, s, sizeof(elf_rel));
+				*d = *s;
 				d += 1;
 				newentrise += 1;
 			}

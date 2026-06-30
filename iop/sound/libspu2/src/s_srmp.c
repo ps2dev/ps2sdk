@@ -46,7 +46,7 @@ int SpuSetReverbModeParam(SpuReverbAttr *attr)
 		_spu_rev_attr.mode = mode;
 		_spu_rev_offsetaddr = SpuGetReverbEndAddr() - (8 * _spu_rev_workareasize[mode] - 2);
 		printf("_spu_rev_offsetaddr %x\n", _spu_rev_offsetaddr);
-		memcpy(&entry, &_spu_rev_param[_spu_rev_attr.mode], sizeof(entry));
+		entry = _spu_rev_param[_spu_rev_attr.mode];
 		switch ( _spu_rev_attr.mode )
 		{
 			case SPU_REV_MODE_ECHO:
@@ -72,7 +72,7 @@ int SpuSetReverbModeParam(SpuReverbAttr *attr)
 		b_mode_is_7_to_9_bit0x8 = 1;
 		if ( !b_r_mode_in_bounds )
 		{
-			memcpy(&entry, &_spu_rev_param[_spu_rev_attr.mode], sizeof(entry));
+			entry = _spu_rev_param[_spu_rev_attr.mode];
 			entry.flags = 0xc011c00;
 		}
 		_spu_rev_attr.delay = attr->delay;
@@ -97,7 +97,7 @@ int SpuSetReverbModeParam(SpuReverbAttr *attr)
 			}
 			else
 			{
-				memcpy(&entry, &_spu_rev_param[_spu_rev_attr.mode], sizeof(entry));
+				entry = _spu_rev_param[_spu_rev_attr.mode];
 				flagstmp = 128;
 			}
 			entry.flags = flagstmp;

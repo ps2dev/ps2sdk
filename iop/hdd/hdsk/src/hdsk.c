@@ -341,7 +341,7 @@ static int SwapPartition(int device, apa_cache_t *dest, apa_cache_t *start)
 
     APA_PRINTF("swap %s partition start...", (start->header->flags & APA_FLAG_SUB) ? "sub" : "main");
 
-    memcpy(dest->header, start->header, sizeof(apa_header_t));
+    dest->header = start->header;
     dest->header->start = StartSector;
     dest->header->next  = next;
     dest->header->prev  = prev;

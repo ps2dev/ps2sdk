@@ -294,8 +294,8 @@ static void *sceNetcnfifInterfaceServer(int fno, sceNetcnfifArg_t *buf, int size
 
 					for ( i = 0; i < buf->data && i < retres1; i += 1 )
 					{
-						// The following memcpy was inlined
-						memcpy(&list_ee[i], &list_iop[i], sizeof(sceNetCnfList_t));
+						// The following structure copy was inlined
+						*(sceNetCnfList_t *)&list_ee[i] = list_iop[i];
 					}
 					dmatid1 = sceNetcnfifSendEE((unsigned int)list_ee, buf->addr, sizeof(sceNetcnfifList_t) * buf->data);
 					while ( sceNetcnfifDmaCheck(dmatid1) )

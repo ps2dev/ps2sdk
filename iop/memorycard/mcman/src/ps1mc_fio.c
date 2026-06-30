@@ -420,8 +420,8 @@ int mcman_dread1(int fd, MC_IO_DRE_T *dirent)
 #endif
 
 	if (fse->field_7d == 1) {
-		memcpy(dirent->stat.ctime, &fse->created, sizeof(sceMcStDateTime));
-		memcpy(dirent->stat.mtime, &fse->modified, sizeof(sceMcStDateTime));
+		*(sceMcStDateTime *)(dirent->stat.ctime) = fse->created;
+		*(sceMcStDateTime *)(dirent->stat.mtime) = fse->modified;
 		dirent->stat.size = fse->field_38;
 		dirent->stat.attr = fse->field_28;
 	}
@@ -463,8 +463,8 @@ int mcman_getstat1(int port, int slot, const char *filename, MC_IO_STA_T *stat)
 			stat->mode |= sceMcFileAttrClosed;
 #endif
 
-		memcpy(stat->ctime, &fse->created, sizeof(sceMcStDateTime));
-		memcpy(stat->mtime, &fse->modified, sizeof(sceMcStDateTime));
+		*(sceMcStDateTime *)(stat->ctime) = fse->created;
+		*(sceMcStDateTime *)(stat->mtime) = fse->modified;
 
 		stat->size = fse->field_38;
 		stat->attr = fse->field_28;

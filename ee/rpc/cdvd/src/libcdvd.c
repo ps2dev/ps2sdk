@@ -225,7 +225,7 @@ s32 sceCdSearchFile(sceCdlFILE *file, const char *name)
         return 0;
     }
 
-    memcpy(file, UNCACHED_SEG(&searchFileSendBuff), 32);
+    *file = *(sceCdlFILE *)(UNCACHED_SEG(&searchFileSendBuff));
 
     if (CdDebug > 0) {
         printf("search name %s\n", file->name);
