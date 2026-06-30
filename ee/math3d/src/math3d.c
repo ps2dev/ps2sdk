@@ -450,7 +450,7 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
  void matrix_unit(MATRIX output) {
 
   // Create a unit matrix.
-  memset(output, 0, sizeof(MATRIX));
+  memset(output, 0, sizeof(*output));
   output[0x00] = 1.00f;
   output[0x05] = 1.00f;
   output[0x0A] = 1.00f;

@@ -83,8 +83,8 @@ int apaGetPartErrorName(s32 device, char *name)
             !(clink->header->flags & APA_CACHE_FLAG_DIRTY) &&
             clink->header->start == lba) {
             if (name) {
-                strncpy(name, clink->header->id, APA_IDMAX - 1);
-                name[APA_IDMAX - 1] = '\0';
+                strncpy(name, clink->header->id, sizeof(clink->header->id) - 1);
+                name[sizeof(clink->header->id) - 1] = '\0';
             }
             apaCacheFree(clink);
             return 1;
@@ -105,7 +105,7 @@ apa_cache_t *apaFillHeader(s32 device, const apa_params_t *params, u32 start, u3
 
     if (!(clink = apaCacheGetHeader(device, start, APA_IO_MODE_WRITE, err)))
         return NULL;
-    memset(clink->header, 0, sizeof(apa_header_t));
+    memset(clink->header, 0, sizeof(*(clink->header)));
     clink->header->magic = APA_MAGIC;
     clink->header->start = start;
     clink->header->next = next;
@@ -114,14 +114,14 @@ apa_cache_t *apaFillHeader(s32 device, const apa_params_t *params, u32 start, u3
     clink->header->type = params->type;
     clink->header->flags = params->flags;
     clink->header->modver = APA_MODVER;
-    memcpy(clink->header->id, params->id, APA_IDMAX);
+    memcpy(clink->header->id, params->id, sizeof(clink->header->id));
     if (params->flags & APA_FLAG_SUB) {
         clink->header->main = params->main;
         clink->header->number = params->number;
     } else {
-        if (strncmp(clink->header->id, "_tmp", APA_IDMAX) != 0) {
-            memcpy(clink->header->rpwd, params->rpwd, APA_PASSMAX);
-            memcpy(clink->header->fpwd, params->fpwd, APA_PASSMAX);
+        if (strncmp(clink->header->id, "_tmp", sizeof(clink->header->id)) != 0) {
+            memcpy(clink->header->rpwd, params->rpwd, sizeof(clink->header->rpwd));
+            memcpy(clink->header->fpwd, params->fpwd, sizeof(clink->header->fpwd));
         }
     }
     apaGetTime(&clink->header->created);
@@ -176,7 +176,7 @@ apa_cache_t *apaFindPartition(s32 device, const char *id, int *err)
     clink = apaCacheGetHeader(device, sector, APA_IO_MODE_READ, err);
     while (clink) {
         if (!(clink->header->flags & APA_FLAG_SUB)) {
-            if (memcmp(clink->header->id, id, APA_IDMAX) == 0)
+            if (memcmp(clink->header->id, id, sizeof(clink->header->id)) == 0)
                 return clink; // found
         }
         clink = apaGetNextHeader(clink, (int *)err);
@@ -214,7 +214,7 @@ apa_cache_t *apaRemovePartition(s32 device, u32 start, u32 next, u32 prev,
 
     if ((clink = apaCacheGetHeader(device, start, APA_IO_MODE_WRITE, &err)) == NULL)
         return NULL;
-    memset(clink->header, 0, sizeof(apa_header_t));
+    memset(clink->header, 0, sizeof(*(clink->header)));
     clink->header->magic = APA_MAGIC;
     clink->header->start = start;
     clink->header->next = next;
@@ -237,7 +237,7 @@ void apaMakeEmpty(apa_cache_t *clink)
     saved_next = clink->header->next;
     saved_prev = clink->header->prev;
     saved_length = clink->header->length;
-    memset(clink->header, 0, sizeof(apa_header_t));
+    memset(clink->header, 0, sizeof(*(clink->header)));
     clink->header->magic = APA_MAGIC;
     clink->header->start = saved_start;
     clink->header->next = saved_next;

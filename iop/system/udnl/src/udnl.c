@@ -438,7 +438,7 @@ static int InitModuleInfo(const void *module, struct ModuleInfo *ModuleInfo)
      sizeof(struct scnhdr)       = 40 bytes
      */
 
-    memcpy(&Ident_10, &((struct coff_filehdr *)module)->f_opthdr, 4);
+    memcpy(&Ident_10, &((struct coff_filehdr *)module)->f_opthdr, sizeof(Ident_10));
     COFF_AoutHdr = (AOUTHDR *)((unsigned int)module + sizeof(struct coff_filehdr));
     COFF_ScnHdr = (struct scnhdr *)((unsigned int)module + sizeof(struct coff_filehdr) + sizeof(AOUTHDR));
     if (((struct coff_filehdr *)module)->f_magic == MIPSELMAGIC && COFF_AoutHdr->magic == OMAGIC && ((struct coff_filehdr *)module)->f_nscns < 0x20 && ((Ident_10 & 0x0002FFFF) == 0x20038) && COFF_ScnHdr->s_paddr == COFF_AoutHdr->text_start) {
@@ -922,7 +922,7 @@ static void ParseIOPBTCONF(const struct ImageData *ImageDataBuffer, unsigned int
                     ResetData->StartAddress = ParseStartAddress(&ptr);
                     break;
                 case '!': /* 0x00000690 */
-                    if (strncmp(ptr, "!addr ", 6) == 0) {
+                    if (memcmp(ptr, "!addr ", 6) == 0) {
                         ptr += 6;
                         ModList[NumModules] = (void *)(((unsigned int)ParseStartAddress(&ptr) << 2) + 1);
 
@@ -930,7 +930,7 @@ static void ParseIOPBTCONF(const struct ImageData *ImageDataBuffer, unsigned int
                         ResetData->NumModules++;
                         NumModules++;
                         ModList[NumModules] = NULL;
-                    } else if (strncmp(ptr, "!include ", 9) == 0) {
+                    } else if (memcmp(ptr, "!include ", 9) == 0) {
                         ptr += 9;
 
                         i = 0;
@@ -1162,7 +1162,7 @@ int _start(int argc, char *argv[])
     }
 
     ResetData = buffer;
-    memset(ResetData, 0, sizeof(struct ResetData));
+    memset(ResetData, 0, sizeof(*ResetData));
     ResetData->ModData = (void *)((u8 *)buffer + sizeof(struct ResetData));
     IoprpBuffer = (void *)((unsigned int)buffer + MAX_MODULES * sizeof(void *) + sizeof(struct ResetData));
     ResetData->IOPRPBuffer = (void *)((unsigned int)IoprpBuffer & 0x1FFFFF00);
@@ -1183,7 +1183,7 @@ int _start(int argc, char *argv[])
 #ifdef UDNL_T300
     if (BootMode3 & 0x00000100) {
         if (GetFileStatFromImage(&ImageDataBuffer[0].stat, "OLDROM", &ROMStat) != 0 && GetIOPRPStat(ROMStat.data, (const void *)((const u8 *)(ROMStat.data) + 0x40000), &ImageDataBuffer[1].stat)) {
-            memcpy(&ImageDataBuffer[0].stat, &ImageDataBuffer[1].stat, sizeof(ImageDataBuffer[0].stat));
+            ImageDataBuffer[0].stat = ImageDataBuffer[1].stat;
             printf("  use alternate ROM image\n");
         }
     }

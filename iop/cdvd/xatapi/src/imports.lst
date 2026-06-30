@@ -55,7 +55,7 @@ sysclib_IMPORTS_start
 I_look_ctype_table
 I_memcpy
 I_memset
-I_strncmp
+I_memcmp
 sysclib_IMPORTS_end
 
 iomanX_IMPORTS_start

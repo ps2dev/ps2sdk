@@ -479,7 +479,7 @@ static int usbdTransferPipeImpl(
 				if ( request )
 				{
 					req->m_waitFrames = request->bRelStartFrame;
-					memcpy(&(req->m_req), request, sizeof(sceUsbdMultiIsochronousRequest));
+					req->m_req = *request;
 				}
 				else
 				{

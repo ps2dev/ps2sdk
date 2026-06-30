@@ -32,7 +32,7 @@ static void mcman_iomanx_backing_clear_slot(int slot)
 	if (cardinfo->fd >= 0) {
 		iomanX_close(cardinfo->fd);
 	}
-	memset(cardinfo, 0, sizeof(vmc_cardinfo_t));
+	memset(cardinfo, 0, sizeof(*cardinfo));
 	cardinfo->fd = -1;
 
 	// Just to clear any cached information
@@ -104,7 +104,7 @@ int mcman_iomanx_backing_mount(int port, int slot, const char *filename)
 			goto cleanup;
 		}
 		// Check magic
-		if (strncmp(superblock.magic, SUPERBLOCK_MAGIC, 28) != 0) {
+		if (memcmp(superblock.magic, SUPERBLOCK_MAGIC, 28) != 0) {
 			r = -EINVAL;
 			goto cleanup;
 		}

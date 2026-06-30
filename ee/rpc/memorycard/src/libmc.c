@@ -656,7 +656,7 @@ static int libmc_rpc_setfileinfo(const libmc_target_desc_t *target, const char* 
 	target->m_interface_data->m_name_desc_param.m_name_param.m_slot	= target->m_slot;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_flags	= flags;	// NOTE: this was ANDed with 7 so that u cant turn off copy protect! :)
 	target->m_interface_data->m_name_desc_param.m_name_param.m_mcT		= &(target->m_interface_data->m_extra_send_recv_param.m_file_info_buff);
-	memcpy(&(target->m_interface_data->m_extra_send_recv_param.m_file_info_buff), info, sizeof(sceMcTblGetDir));
+	target->m_interface_data->m_extra_send_recv_param.m_file_info_buff  = *info;
 
 	strncpy(target->m_interface_data->m_name_desc_param.m_name_param.m_name, name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1);
 	target->m_interface_data->m_name_desc_param.m_name_param.m_name[sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1] = 0;

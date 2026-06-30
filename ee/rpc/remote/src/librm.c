@@ -112,7 +112,7 @@ int RMMan_Init(void)
                             break;
                         }
                     }
-                    memcpy(&rmmanif, &rpciftmp[i], sizeof(rmmanif));
+                    rmmanif = rpciftmp[i];
                     break;
                 }
             }
@@ -335,6 +335,6 @@ void RMMan_Read(int port, int slot, struct remote_data *data)
     }
     else
     {
-        memcpy(data, pdata->data, 8);
+        *data = *(struct remote_data *)(pdata->data);
     }
 }

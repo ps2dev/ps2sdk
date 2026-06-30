@@ -174,8 +174,8 @@ void GenerateWhiteNoise(char *Buffer, int Len)
 
 void AHXVoice_Init(struct AHXVoice *pVoice)
 {
-    memset(pVoice, 0, sizeof(struct AHXVoice));
-    memset(pVoice->VoiceBuffer, 0, 0x281);
+    memset(pVoice, 0, sizeof(*pVoice));
+    memset(pVoice->VoiceBuffer, 0, sizeof(pVoice->VoiceBuffer));
     pVoice->TrackOn           = 1;
     pVoice->TrackMasterVolume = 0x40;
 }
@@ -1077,7 +1077,7 @@ void AHXPlayer_SetAudio(int v)
     }
     if (Voices[v].NewWaveform) {
         if (Voices[v].Waveform == 4 - 1) {
-            memcpy(Voices[v].VoiceBuffer, Voices[v].AudioSource, 0x280);
+            memcpy(Voices[v].VoiceBuffer, Voices[v].AudioSource, sizeof(Voices[v].VoiceBuffer) - 1);
         } else {
             int i, WaveLoops;
 

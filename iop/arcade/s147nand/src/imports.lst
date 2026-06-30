@@ -28,7 +28,7 @@ I_memset
 I_strcat
 I_strcmp
 I_strcpy
-I_strncmp
+I_memcmp
 I_strncpy
 I_vsprintf
 sysclib_IMPORTS_end

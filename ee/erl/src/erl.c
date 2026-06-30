@@ -393,6 +393,9 @@ static void destroy_erl_record(struct erl_record_t * erl) {
     free(erl);
 }
 
+typedef u32 u32_unaligned_t __attribute__((aligned(1)));
+typedef s32 s32_unaligned_t __attribute__((aligned(1)));
+
 static int apply_reloc(u8 * reloc, int type, u32 addr) {
     u32 u_current_data;
     s32 s_current_data;
@@ -402,8 +405,8 @@ static int apply_reloc(u8 * reloc, int type, u32 addr) {
 	{
 		printf("Unaligned reloc (%p) type=%d!\n", reloc, type);
 	}
-	memcpy(&u_current_data, reloc, 4);
-	memcpy(&s_current_data, reloc, 4);
+	u_current_data = *(u32_unaligned_t *)reloc;
+    s_current_data = *(s32_unaligned_t *)reloc;
 
     switch (type) {
 	case R_MIPS_32:
@@ -422,7 +425,7 @@ static int apply_reloc(u8 * reloc, int type, u32 addr) {
 		return -1;
     }
 
-	memcpy(reloc, &newstate, 4);
+    *(u32_unaligned_t *)reloc = newstate;
 
     dprintf("Changed data at %08X from %08X to %08X.\n", reloc, u_current_data, newstate);
     return 0;
@@ -614,7 +617,7 @@ return code
 
    // Reading the main ELF header.
     if (elf_mem) {
-	memcpy(&head, elf_mem, sizeof(head));
+	   head = *(struct elf_header_t *)elf_mem;
     } else {
         lseek(elf_handle, 0, SEEK_SET);
         read(elf_handle, &head, sizeof(head));

@@ -21,7 +21,7 @@ void SpuSetReverbModeDelayTime(int delay)
 		{
 			int v2;
 
-			memcpy(&v3, &_spu_rev_param[_spu_rev_attr.mode], 0x44u);
+			v3 = _spu_rev_param[_spu_rev_attr.mode];
 			v3.flags = 0xc011c00;
 			_spu_rev_attr.delay = delay;
 			v3.mLSAME = (s16)((u16)delay << 13) / 127 - v3.dAPF1;

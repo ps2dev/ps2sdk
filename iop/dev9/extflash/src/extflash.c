@@ -145,13 +145,13 @@ int flash_get_info(flash_info_t *info)
 	id = SPD_REG16(0x4814);
 	SPD_REG16(0x480c) = 0;
 
-	memset(info, 0, sizeof(flash_info_t));
+	memset(info, 0, sizeof(*info));
 
 	for (i = 0; (u32)i < NUM_DEVICES; i++) {
 		if (id != devices[i].id)
 			continue;
 
-		memcpy(info, &devices[i], sizeof(flash_info_t));
+		*info = devices[i];
 		M_PRINTF("Device: ID 0x%02x, %ld Mbit, %ld bytes/page, %ld pages/block, %ld blocks total.\n",
 				id, info->mbits, info->page_bytes, info->block_pages, info->blocks);
 		return 0;

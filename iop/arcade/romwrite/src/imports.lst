@@ -43,7 +43,7 @@ I_sprintf
 I_strcat
 I_strcmp
 I_strcpy
-I_strncmp
+I_memcmp
 I_strncpy
 I_strtol
 I_vsprintf

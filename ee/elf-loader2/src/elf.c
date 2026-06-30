@@ -324,7 +324,7 @@ static void elf_loader_ldr_entrypoint_stack()
 
 	memcpy((void *)LDR_ENTRYPOINT_ADDR, ldrsrc, size_ldrsrc);
 	// Use VU0 data memory as storage for loader information
-	memcpy((void *)0x11004000, &sg_loaderinfo, sizeof(elf_loader_loaderinfo_t));
+	*((elf_loader_loaderinfo_t *)(void *)0x11004000) = sg_loaderinfo;
 
 	FlushCache(0);
 	FlushCache(2);
@@ -342,10 +342,10 @@ int elf_loader_exec_elf(elf_loader_execinfo_t *execinfo)
 
 	if ( execinfo->arginfo.argc == 0 )
 		return -1;
-	memcpy(&sg_loaderinfo, &(execinfo->loaderinfo), sizeof(elf_loader_loaderinfo_t));
+	sg_loaderinfo = execinfo->loaderinfo;
 	// Copy argument info to low EE memory (because EE wipes VU0, VU1, or SPR memory before reading it)
 	low_arginfo = (void *)0x00088000;
-	memcpy((void *)low_arginfo, &(execinfo->arginfo), sizeof(elf_loader_execinfo_t));
+	*low_arginfo = execinfo->arginfo;
 	// Relocate the arguments to the new address
 	for ( i = 0; i < low_arginfo->argc; i += 1 )
 	{

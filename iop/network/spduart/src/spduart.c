@@ -647,7 +647,7 @@ static void spduart_init_hw(struct spduart_internals_ *priv)
 				{
 					buf1data += 1;
 				}
-				if ( (*buf1data == '+') && (strncmp("+GCI=", buf1data, 5) == 0) )
+				if ( (*buf1data == '+') && (memcmp("+GCI=", buf1data, 5) == 0) )
 				{
 					buf1data += 5;
 					if ( ((isxdigit(buf1data[0])) != 0) && ((isxdigit(buf1data[1])) != 0) )
@@ -845,11 +845,11 @@ static int spduart_op_recv(void *userdata, void *ptr, int len)
 		size_t v10;
 
 		v7 = v9;
-		bcopy((char *)priv->recv_buf_struct.m_ptr + v8, ptr, v9);
+		memcpy(ptr, (char *)priv->recv_buf_struct.m_ptr + v8, v9);
 		v10 = m_cur_xfer_len - v9;
 		if ( v10 > 0 )
 		{
-			bcopy(priv->recv_buf_struct.m_ptr, (char *)ptr + v9, v10);
+			memcpy((char *)ptr + v9, priv->recv_buf_struct.m_ptr, v10);
 			v7 += v10;
 		}
 		CpuSuspendIntr(&state);
@@ -892,11 +892,11 @@ static int spduart_op_send(void *userdata, void *ptr, int len)
 		size_t v10;
 
 		v7 = v9;
-		bcopy(ptr, (char *)priv->send_buf_struct.m_ptr + v8, v9);
+		memcpy((char *)priv->send_buf_struct.m_ptr + v8, ptr, v9);
 		v10 = v4 - v9;
 		if ( v10 > 0 )
 		{
-			bcopy((char *)ptr + v9, priv->send_buf_struct.m_ptr, v10);
+			memcpy(priv->send_buf_struct.m_ptr, (char *)ptr + v9, v10);
 			v7 += v10;
 		}
 		CpuSuspendIntr(&state);
@@ -909,6 +909,8 @@ static int spduart_op_send(void *userdata, void *ptr, int len)
 		SetEventFlag(priv->spduart_ef, 4u);
 	return v7;
 }
+
+typedef int int_unaligned_t __attribute__((aligned(1)));
 
 static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 {
@@ -936,13 +938,13 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 	{
 		case 0xC0000000:
 		{
-			bcopy(&priv->spduart_thpri_, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_thpri_;
 			return 0;
 		}
 		case 0xC0000100:
 		{
 			v22 = 1;
-			bcopy(&v22, ptr, 4);
+			*(int_unaligned_t *)ptr = v22;
 			return 0;
 		}
 		case 0xC0000110:
@@ -974,37 +976,37 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			{
 				return -512;
 			}
-			bcopy(priv->spduart_dial_, ptr, v13);
+			memcpy(ptr, priv->spduart_dial_, v13);
 			return 0;
 		}
 		case 0xC0010000:
 		{
-			bcopy(&priv->spduart_rx_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_rx_count;
 			return 0;
 		}
 		case 0xC0010001:
 		{
-			bcopy(&priv->spduart_tx_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_tx_count;
 			return 0;
 		}
 		case 0xC0010002:
 		{
-			bcopy(&priv->spduart_overrun_error_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_overrun_error_count;
 			return 0;
 		}
 		case 0xC0010003:
 		{
-			bcopy(&priv->spduart_parity_error_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_parity_error_count;
 			return 0;
 		}
 		case 0xC0010004:
 		{
-			bcopy(&priv->spduart_framing_error_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_framing_error_count;
 			return 0;
 		}
 		case 0xC0010005:
 		{
-			bcopy(&priv->spduart_buffer_overflow_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_buffer_overflow_count;
 			return 0;
 		}
 		case 0xC0020000:
@@ -1015,20 +1017,20 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 				v25 |= 0xC000000;
 			else
 				v25 |= 0x4000000;
-			bcopy((int *)&v25, ptr, 4);
+			*(int_unaligned_t *)ptr = v25;
 			return 0;
 		}
 		case 0xC0030000:
 		{
 			v26 = (16 * (priv->spduart_signal_pin & 3)) | ((u8)priv->spduart_msr_cached >> 4);
-			bcopy(&v26, ptr, 4);
+			*(int_unaligned_t *)ptr = v26;
 			return 0;
 		}
 		case 0xC1000000:
 		{
 			int v6;
 
-			bcopy(ptr, &priority, 4);
+			priority = *(int_unaligned_t *)ptr;
 			v6 = 0;
 			if ( priv->spduart_thread > 0 )
 			{
@@ -1048,7 +1050,7 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			int v17;
 			unsigned int v18;
 
-			bcopy(ptr, &v25, 4);
+			v25 = *(int_unaligned_t *)ptr;
 			v17 = spduart_set_baud(v25 & 0x3FFFFF);
 			if ( !v17 )
 			{
@@ -1073,7 +1075,7 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 		}
 		case 0xC1030000:
 		{
-			bcopy(ptr, &v26, 4);
+			v26 = *(int_unaligned_t *)ptr;
 			if ( (v26 & 0xFFFFFFCF) != 0 )
 			{
 				return -512;
@@ -1158,12 +1160,12 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 			spduart_internals.spduart_nogci_ = 1;
 			continue;
 		}
-		else if ( !strncmp("dial=", av[v5], 5) )
+		else if ( !memcmp("dial=", av[v5], 5) )
 		{
 			strcpy(spduart_internals.spduart_dial_, av[v5] + 5);
 			continue;
 		}
-		else if ( !strncmp("gci=", av[v5], 4) )
+		else if ( !memcmp("gci=", av[v5], 4) )
 		{
 			v7 = (char *)(av[v5] + 4);
 			if ( (isxdigit(*v7)) == 0 || (isxdigit(v7[1])) == 0 )
@@ -1172,7 +1174,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 			spduart_internals.spduart_gci_[1] = v7[1];
 			continue;
 		}
-		else if ( !strncmp("thpri=", av[v5], 6) )
+		else if ( !memcmp("thpri=", av[v5], 6) )
 		{
 			v7 = (char *)(av[v5] + 6);
 			if ( (isdigit(*v7)) == 0 )
@@ -1182,7 +1184,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 				return print_usage();
 			spduart_internals.spduart_thpri_ = v11;
 		}
-		else if ( !strncmp("thstack=", av[v5], 8) )
+		else if ( !memcmp("thstack=", av[v5], 8) )
 		{
 			v7 = (char *)(av[v5] + 8);
 			if ( (isdigit(*v7)) == 0 )
@@ -1200,7 +1202,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 				continue;
 			}
 		}
-		else if ( !strncmp("baud=", av[v5], 5) )
+		else if ( !memcmp("baud=", av[v5], 5) )
 		{
 			v7 = (char *)(av[v5] + 5);
 			if ( (isdigit(*v7)) == 0 )
@@ -1209,7 +1211,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 			if ( !spduart_set_baud(spduart_internals.spduart_baud_) )
 				return print_usage();
 		}
-		else if ( !strncmp("trig=", av[v5], 5) )
+		else if ( !memcmp("trig=", av[v5], 5) )
 		{
 			v7 = (char *)(av[v5] + 5);
 			if ( (isdigit(*v7)) == 0 )

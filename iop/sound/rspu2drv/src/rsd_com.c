@@ -198,7 +198,7 @@ void *spuFunc(unsigned int command, void *data, int size)
 			break;
 		case 0x0202:
 		{
-			memcpy(gStPtr, &gStBuff, sizeof(SpuStEnv));
+			*gStPtr = gStBuff;
 			ret = SpuStTransfer(*((u32 *)data + 1), *((u32 *)data + 2));
 			break;
 		}

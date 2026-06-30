@@ -144,7 +144,7 @@ int ps2ipc_bind(int s, const struct sockaddr *name, int namelen)
 
 	pkt->socket = s;
 	pkt->len = namelen;
-	memcpy((void *)&pkt->sockaddr, (void *)name, sizeof(struct sockaddr));
+	pkt->sockaddr = *name;
 
 	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_BIND, 0, (void*)pkt, sizeof(cmd_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
@@ -193,7 +193,7 @@ int ps2ipc_connect(int s, const struct sockaddr *name, int namelen)
 
 	pkt->socket = s;
 	pkt->len = namelen;
-	memcpy((void *)&pkt->sockaddr, (void *)name, sizeof(struct sockaddr));
+	pkt->sockaddr = *name;
 
 	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_CONNECT, 0, (void*)pkt, sizeof(cmd_pkt), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
@@ -308,7 +308,7 @@ int ps2ipc_recvfrom(int s, void *mem, int len, unsigned int flags,
 		return -1;
 	}
 
-	memcpy((void *)from, (void *)&recv_pkt->sockaddr, sizeof(struct sockaddr));
+	*from = recv_pkt->sockaddr;
 	*fromlen = sizeof(struct sockaddr);
 
 	result = recv_pkt->ret;
@@ -377,7 +377,7 @@ int ps2ipc_sendto(int s, const void *dataptr, int size, unsigned int flags,
 	pkt->length = size;
 	pkt->flags = flags;
 	pkt->ee_addr = (void *)dataptr;
-	memcpy((void *)&pkt->sockaddr, (void *)to, sizeof(struct sockaddr));
+	pkt->sockaddr = *to;
 
 	if((u32)dataptr & 0x3f)
 	{
@@ -445,7 +445,7 @@ int ps2ipc_ps2ip_setconfig(const t_ip_info *ip_info)
 	WaitSema(lock_sema);
 
 	// return config
-	memcpy(&_rpc_buffer.ip_info, ip_info, sizeof(t_ip_info));
+	_rpc_buffer.ip_info = *ip_info;
 
 	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_SETCONFIG, 0, (void*)&_rpc_buffer.ip_info, sizeof(t_ip_info), (void*)&_rpc_buffer.result, sizeof(s32), NULL, NULL) < 0)
 	{
@@ -477,7 +477,7 @@ int ps2ipc_ps2ip_getconfig(char *netif_name, t_ip_info *ip_info)
 	}
 
 	// return config
-	memcpy(ip_info, &_rpc_buffer.ip_info, sizeof(t_ip_info));
+	*ip_info = _rpc_buffer.ip_info;
 
 	SignalSema(lock_sema);
 
@@ -731,7 +731,7 @@ struct hostent *ps2ipc_gethostbyname(const char *name)
 			hostent.h_length = res_pkt->hostent.h_length;
 			hostent.h_name = (char*)name;
 			hostent.h_aliases = NULL;
-			memcpy(&addr, &res_pkt->hostent.h_addr, sizeof(addr));
+			addr = res_pkt->hostent.h_addr;
 			addr_list[0] = &addr;
 			addr_list[1] = NULL;
 			hostent.h_addr_list = (char**)&addr_list;

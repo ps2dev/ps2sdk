@@ -348,9 +348,9 @@ void * memalign(size_t align, size_t size)
 
 	/* Copy the heap_mem_header_t locally, before repositioning (to make
 	   sure we don't overwrite ourselves.  */
-	memcpy(&new_mem, cur_mem, sizeof(heap_mem_header_t));
+	new_mem = *cur_mem;
 	cur_mem = (heap_mem_header_t *)((u32)ptr - sizeof(heap_mem_header_t));
-	memcpy(cur_mem, &new_mem, sizeof(heap_mem_header_t));
+	*cur_mem = new_mem;
 
 	if (cur_mem->prev)
 		cur_mem->prev->next = cur_mem;

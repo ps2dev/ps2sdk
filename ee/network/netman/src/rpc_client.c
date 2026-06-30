@@ -293,8 +293,8 @@ int NetManSetMainIF(const char *name)
 
 	WaitSema(NetManIOSemaID);
 
-	strncpy(TransmitBuffer.netifName, name, NETMAN_NETIF_NAME_MAX_LEN);
-	TransmitBuffer.netifName[NETMAN_NETIF_NAME_MAX_LEN-1] = '\0';
+	strncpy(TransmitBuffer.netifName, name, sizeof(TransmitBuffer.netifName));
+	TransmitBuffer.netifName[sizeof(TransmitBuffer.netifName)-1] = '\0';
 	if((result=sceSifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SET_MAIN_NETIF, 0, &TransmitBuffer, NETMAN_NETIF_NAME_MAX_LEN, &ReceiveBuffer, sizeof(s32), NULL, NULL))>=0)
 		result=ReceiveBuffer.result;
 
@@ -316,8 +316,8 @@ int NetManQueryMainIF(char *name)
 	{
 		if((result=ReceiveBuffer.QueryMainNetIFResult.result) == 0)
 		{
-			strncpy(name, ReceiveBuffer.QueryMainNetIFResult.name, NETMAN_NETIF_NAME_MAX_LEN);
-			name[NETMAN_NETIF_NAME_MAX_LEN-1] = '\0';
+			strncpy(name, ReceiveBuffer.QueryMainNetIFResult.name, sizeof(ReceiveBuffer.QueryMainNetIFResult.name));
+			name[sizeof(ReceiveBuffer.QueryMainNetIFResult.name)-1] = '\0';
 		}
 	}
 
