@@ -46,6 +46,24 @@ void _iop_ex_handler(IOP_RegFrame *frame)
 int tid;
 
 extern void soft_break(void);
+__asm__
+(
+    "\t" ".set push" "\n"
+    "\t" ".set noreorder" "\n"
+    "\t" ".set noat" "\n"
+
+    "\t" ".global soft_break" "\n"
+    "\t" ".ent soft_break" "\n"
+    "\t" "soft_break:" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "break" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" "\t" "jr      $ra" "\n"
+    "\t" "\t" "nop" "\n"
+    "\t" ".end soft_break" "\n"
+
+    "\t" ".set pop" "\n"
+);
 
 void _controller_thread(void *arg)
 {
