@@ -16,7 +16,7 @@ IOP_IMPORT_INCS += \
 	system/sysmem \
 	system/threadman
 
-IOP_OBJS = udnl.o udnl_asm.o imports.o
+IOP_OBJS = udnl.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
