@@ -16,76 +16,80 @@
 
 #include <rom0_info.h>
 
-// We don't want kernel to depend newlib
-#define NEWLIB_PORT_AWARE
-#include "fileio.h"
+#include <iopheap.h>
+#include <string.h>
+#include <sifrpc.h>
+#include <kernel.h>
+#include <syscallnr.h>
 
-#define defaultIODriver { (void *)fioOpen, fioClose, fioRead, FIO_O_RDONLY }
+struct rom0_info_data
+{
+    /** stores romname of ps2 */
+    char m_romver[14];
+};
 
-extern char g_RomName[];
+extern struct rom0_info_data g_rom0_info_data;
 
 #ifdef F__info_internals
-/** stores romname of ps2 */
-char g_RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+struct rom0_info_data g_rom0_info_data;
 #endif
 
-#ifdef F_GetRomNameWithIODriver
-char *GetRomNameWithIODriver(char *romname, _io_driver *driver)
+#ifdef F_SetupRomInfo
+void SetupRomInfo(void)
 {
-    int fd;
+    void *iop_addr;
+    SifRpcReceiveData_t rdata;
+    u8 buf[64] __attribute__((__aligned__(64)));
 
-    fd = driver->open("rom0:ROMVER", driver->openFlags);
-    driver->read(fd, romname, 14);
-    driver->close(fd);
-    return romname;
+    /* ROMVER needs to be read from the IOP due to PPCIOP region patching. */
+    /* only read in the romname the first time */
+    if (g_rom0_info_data.m_romver[0])
+        return;
+
+    /* SYSMEM allocates in units of 256. */
+    if (!(iop_addr = SifAllocIopHeap(256)))
+        return;
+
+    /* ROMVER is known to be 16 bytes. */
+    if (SifLoadIopHeap("rom:ROMVER", iop_addr) < 0)
+    {
+        SifFreeIopHeap(iop_addr);
+        return;
+    }
+    SyncDCache(buf, buf + sizeof(buf));
+    if (sceSifGetOtherData(&rdata, iop_addr, buf, sizeof(buf), 0) < 0)
+    {
+        SifFreeIopHeap(iop_addr);
+        return;
+    }
+    memcpy(g_rom0_info_data.m_romver, UNCACHED_SEG(buf), sizeof(g_rom0_info_data.m_romver));
+
+    SifFreeIopHeap(iop_addr);
 }
 #endif
 
 #ifdef F_GetRomName
 char *GetRomName(char *romname)
 {
-    _io_driver driver = defaultIODriver;
-    return GetRomNameWithIODriver(romname, &driver);
-}
-#endif
-
-#ifdef F_IsDESRMachineWithIODriver
-int IsDESRMachineWithIODriver(_io_driver *driver)
-{
-    int fd;
-
-    fd = driver->open("rom0:PSXVER", driver->openFlags);
-    if (fd > 0) {
-        driver->close(fd);
-        return 1;
-    }
-
-    return 0;
+    SetupRomInfo();
+    /* Explicitly copy 14 bytes to the buffer, without NULL terminator */
+    memcpy(romname, g_rom0_info_data.m_romver, sizeof(g_rom0_info_data.m_romver));
+    return romname;
 }
 #endif
 
 #ifdef F_IsDESRMachine
 int IsDESRMachine(void)
 {
-    _io_driver driver = defaultIODriver;
-    return IsDESRMachineWithIODriver(&driver);
-}
-#endif
-
-#ifdef F_IsT10KWithIODriver
-int IsT10KWithIODriver(_io_driver *driver)
-{
-    // only read in the romname the first time
-    if (g_RomName[0] == 0)
-        GetRomNameWithIODriver(g_RomName, driver);
-    return (g_RomName[4] == 'T' && g_RomName[5] != 'Z') ? 1 : 0;
+    /* Use the existence of ExecPSX syscall as the determination. */
+    return GetSyscallHandler(__NR_ExecPSX) ? 1 : 0;
 }
 #endif
 
 #ifdef F_IsT10K
 int IsT10K(void)
 {
-    _io_driver driver = defaultIODriver;
-    return IsT10KWithIODriver(&driver);
+    SetupRomInfo();
+    return (g_rom0_info_data.m_romver[4] == 'T' && g_rom0_info_data.m_romver[5] != 'Z') ? 1 : 0;
 }
 #endif

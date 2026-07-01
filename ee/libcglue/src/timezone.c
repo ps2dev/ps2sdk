@@ -24,18 +24,15 @@
 #define OSD_CONFIG_NO_LIBCDVD
 #include "osd_config.h"
 
-#define posixIODriver { open, close, (int (*)(int fd, void *buf, int nbyte))read, O_RDONLY }
-
 #ifdef F__libcglue_timezone_update_impl
 void _libcglue_timezone_update_impl()
 {
     /* Initialize timezone from PS2 OSD configuration */
-	_io_driver driver = posixIODriver;
-	int tzOffset = configGetTimezoneWithIODriver(&driver);
+	int tzOffset = configGetTimezone();
     int tzOffsetAbs = tzOffset < 0 ? -tzOffset : tzOffset;
     int hours = tzOffsetAbs / 60;
     int minutes = tzOffsetAbs - hours * 60;
-    int daylight = configIsDaylightSavingEnabledWithIODriver(&driver);
+    int daylight = configIsDaylightSavingEnabled();
     static char tz[28];
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wformat-overflow"
@@ -61,14 +58,14 @@ void _libcglue_timezone_update()
 
 #ifdef F_ps2sdk_setTimezone
 void ps2sdk_setTimezone(int timezone) {
-	_io_driver driver = posixIODriver;
-	configSetTimezoneWithIODriver(timezone, &driver, _libcglue_timezone_update);
+	configSetTimezone(timezone);
+	_libcglue_timezone_update();
 }
 #endif
 
 #ifdef F_ps2sdk_setDaylightSaving
 void ps2sdk_setDaylightSaving(int daylightSaving) {
-	_io_driver driver = posixIODriver;
-	configSetDaylightSavingEnabledWithIODriver(daylightSaving, &driver, _libcglue_timezone_update);
+	configSetDaylightSavingEnabled(daylightSaving);
+	_libcglue_timezone_update();
 }
 #endif

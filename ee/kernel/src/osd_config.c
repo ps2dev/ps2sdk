@@ -23,8 +23,6 @@
 #include <string.h>
 #include <osd_config.h>
 #include <rom0_info.h>
-#define NEWLIB_PORT_AWARE
-#include <fileio.h>
 
 /** config param data as stored on a DTL-T10000(H) TOOL */
 typedef struct
@@ -37,8 +35,6 @@ typedef struct
     u8 daylightSaving;
     u8 timeFormat;
 } ConfigParamT10K;
-
-#define defaultIODriver { (void *)fioOpen, fioClose, fioRead, FIO_O_RDONLY }
 
 extern ConfigParamT10K g_t10KConfig;
 
@@ -202,12 +198,12 @@ int IsEarlyJap(ConfigParam config)
 }
 #endif
 
-#ifdef F_configGetLanguageWithIODriver
-int configGetLanguageWithIODriver(_io_driver *driver)
+#ifdef F_configGetLanguage
+int configGetLanguage(void)
 {
     ConfigParam config;
 
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         return g_t10KConfig.language;
 
     GetOsdConfigParam(&config);
@@ -217,23 +213,15 @@ int configGetLanguageWithIODriver(_io_driver *driver)
 }
 #endif
 
-#ifdef F_configGetLanguage
-int configGetLanguage(void)
-{
-    _io_driver driver = defaultIODriver;
-    return configGetLanguageWithIODriver(&driver);
-}
-#endif
-
-#ifdef F_configSetLanguageWithIODriver
-void configSetLanguageWithIODriver(int language, _io_driver *driver)
+#ifdef F_configSetLanguage
+void configSetLanguage(int language)
 {
     ConfigParam config;
 
     // make sure language is valid
     if (language < LANGUAGE_JAPANESE || language > LANGUAGE_PORTUGUESE)
         return;
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         g_t10KConfig.language = language;
 
     // set language
@@ -246,20 +234,12 @@ void configSetLanguageWithIODriver(int language, _io_driver *driver)
 }
 #endif
 
-#ifdef F_configSetLanguage
-void configSetLanguage(int language)
-{
-    _io_driver driver = defaultIODriver;
-    configSetLanguageWithIODriver(language, &driver);
-}
-#endif
-
-#ifdef F_configGetTvScreenTypeWithIODriver
-int configGetTvScreenTypeWithIODriver(_io_driver *driver)
+#ifdef F_configGetTvScreenType
+int configGetTvScreenType(void)
 {
     ConfigParam config;
 
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         return g_t10KConfig.screenType;
 
     GetOsdConfigParam(&config);
@@ -267,23 +247,15 @@ int configGetTvScreenTypeWithIODriver(_io_driver *driver)
 }
 #endif
 
-#ifdef F_configGetTvScreenType
-int configGetTvScreenType(void)
-{
-    _io_driver driver = defaultIODriver;
-    return configGetTvScreenTypeWithIODriver(&driver);
-}
-#endif
-
-#ifdef F_configSetTvScreenTypeWithIODriver
-void configSetTvScreenTypeWithIODriver(int screenType, _io_driver *driver)
+#ifdef F_configSetTvScreenType
+void configSetTvScreenType(int screenType)
 {
     ConfigParam config;
 
     // make sure screen type is valid
     if (screenType < TV_SCREEN_43 || screenType > TV_SCREEN_169)
         return;
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         g_t10KConfig.screenType = screenType;
 
     // set screen type
@@ -293,21 +265,13 @@ void configSetTvScreenTypeWithIODriver(int screenType, _io_driver *driver)
 }
 #endif
 
-#ifdef F_configSetTvScreenType
-void configSetTvScreenType(int screenType)
-{
-    _io_driver driver = defaultIODriver;
-    configSetTvScreenTypeWithIODriver(screenType, &driver);
-}
-#endif
-
-#ifdef F_configGetDateFormatWithIODriver
-int configGetDateFormatWithIODriver(_io_driver *driver)
+#ifdef F_configGetDateFormat
+int configGetDateFormat(void)
 {
     ConfigParam config;
     Config2Param config2;
 
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         return g_t10KConfig.dateFormat;
 
     GetOsdConfigParam(&config);
@@ -318,16 +282,8 @@ int configGetDateFormatWithIODriver(_io_driver *driver)
 }
 #endif
 
-#ifdef F_configGetDateFormat
-int configGetDateFormat(void)
-{
-    _io_driver driver = defaultIODriver;
-    return configGetDateFormatWithIODriver(&driver);
-}
-#endif
-
-#ifdef F_configSetDateFormatWithIODriver
-void configSetDateFormatWithIODriver(int dateFormat, _io_driver *driver)
+#ifdef F_configSetDateFormat
+void configSetDateFormat(int dateFormat)
 {
     ConfigParam config;
     Config2Param config2;
@@ -335,7 +291,7 @@ void configSetDateFormatWithIODriver(int dateFormat, _io_driver *driver)
     // make sure date format is valid
     if (dateFormat < DATE_YYYYMMDD || dateFormat > DATE_DDMMYYYY)
         return;
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         g_t10KConfig.dateFormat = dateFormat;
 
     // set date format
@@ -348,21 +304,13 @@ void configSetDateFormatWithIODriver(int dateFormat, _io_driver *driver)
 }
 #endif
 
-#ifdef F_configSetDateFormat
-void configSetDateFormat(int dateFormat)
-{
-    _io_driver driver = defaultIODriver;
-    configSetDateFormatWithIODriver(dateFormat, &driver);
-}
-#endif
-
-#ifdef F_configGetTimeFormatWithIODriver
-int configGetTimeFormatWithIODriver(_io_driver *driver)
+#ifdef F_configGetTimeFormat
+int configGetTimeFormat(void)
 {
     ConfigParam config;
     Config2Param config2;
 
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         return g_t10KConfig.timeFormat;
 
     GetOsdConfigParam(&config);
@@ -373,16 +321,8 @@ int configGetTimeFormatWithIODriver(_io_driver *driver)
 }
 #endif
 
-#ifdef F_configGetTimeFormat
-int configGetTimeFormat(void)
-{
-    _io_driver driver = defaultIODriver;
-    return configGetTimeFormatWithIODriver(&driver);
-}
-#endif
-
-#ifdef F_configSetTimeFormatWithIODriver
-void configSetTimeFormatWithIODriver(int timeFormat, _io_driver *driver)
+#ifdef F_configSetTimeFormat
+void configSetTimeFormat(int timeFormat)
 {
     ConfigParam config;
     Config2Param config2;
@@ -390,7 +330,7 @@ void configSetTimeFormatWithIODriver(int timeFormat, _io_driver *driver)
     // make sure time format is valid
     if (timeFormat < TIME_24H || timeFormat > TIME_12H)
         return;
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         g_t10KConfig.timeFormat = timeFormat;
 
     // set time format
@@ -403,21 +343,13 @@ void configSetTimeFormatWithIODriver(int timeFormat, _io_driver *driver)
 }
 #endif
 
-#ifdef F_configSetTimeFormat
-void configSetTimeFormat(int timeFormat)
-{
-    _io_driver driver = defaultIODriver;
-    configSetTimeFormatWithIODriver(timeFormat, &driver);
-}
-#endif
-
-#ifdef F_configGetTimezoneWithIODriver
-int configGetTimezoneWithIODriver(_io_driver *driver)
+#ifdef F_configGetTimezone
+int configGetTimezone(void)
 {
     ConfigParam config;
     int timezoneOffset;
 
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
     {
         timezoneOffset = g_t10KConfig.timezoneOffset;
     }
@@ -447,21 +379,13 @@ int configGetTimezoneWithIODriver(_io_driver *driver)
 }
 #endif
 
-#ifdef F_configGetTimezone
-int configGetTimezone(void)
-{
-    _io_driver driver = defaultIODriver;
-    return configGetTimezoneWithIODriver(&driver);
-}
-#endif
-
-#ifdef F_configSetTimezoneWithIODriver
-void configSetTimezoneWithIODriver(int timezoneOffset, _io_driver *driver, void (*finishedCallback)(void))
+#ifdef F_configSetTimezone
+void configSetTimezone(int timezoneOffset)
 {
     ConfigParam config;
 
     // set offset from GMT
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         g_t10KConfig.timezoneOffset = timezoneOffset;
 
     GetOsdConfigParam(&config);
@@ -490,25 +414,15 @@ void configSetTimezoneWithIODriver(int timezoneOffset, _io_driver *driver, void 
     }
 
     SetOsdConfigParam(&config);
-    if (finishedCallback)
-        finishedCallback();
 }
 #endif
 
-#ifdef F_configSetTimezone
-void configSetTimezone(int timezoneOffset)
-{
-    _io_driver driver = defaultIODriver;
-    configSetTimezoneWithIODriver(timezoneOffset, &driver, NULL);
-}
-#endif
-
-#ifdef F_configIsSpdifEnabledWithIODriver
-int configIsSpdifEnabledWithIODriver(_io_driver *driver)
+#ifdef F_configIsSpdifEnabled
+int configIsSpdifEnabled(void)
 {
     ConfigParam config;
 
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         return g_t10KConfig.spdifMode ^ 1;
 
     GetOsdConfigParam(&config);
@@ -516,20 +430,12 @@ int configIsSpdifEnabledWithIODriver(_io_driver *driver)
 }
 #endif
 
-#ifdef F_configIsSpdifEnabled
-int configIsSpdifEnabled(void)
-{
-    _io_driver driver = defaultIODriver;
-    return configIsSpdifEnabledWithIODriver(&driver);
-}
-#endif
-
-#ifdef F_configSetSpdifEnabledWithIODriver
-void configSetSpdifEnabledWithIODriver(int enabled, _io_driver *driver)
+#ifdef F_configSetSpdifEnabled
+void configSetSpdifEnabled(int enabled)
 {
     ConfigParam config;
 
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         g_t10KConfig.spdifMode = enabled ^ 1;
 
     GetOsdConfigParam(&config);
@@ -538,21 +444,13 @@ void configSetSpdifEnabledWithIODriver(int enabled, _io_driver *driver)
 }
 #endif
 
-#ifdef F_configSetSpdifEnabled
-void configSetSpdifEnabled(int enabled)
-{
-    _io_driver driver = defaultIODriver;
-    configSetSpdifEnabledWithIODriver(enabled, &driver);
-}
-#endif
-
-#ifdef F_configIsDaylightSavingEnabledWithIODriver
-int configIsDaylightSavingEnabledWithIODriver(_io_driver *driver)
+#ifdef F_configIsDaylightSavingEnabled
+int configIsDaylightSavingEnabled(void)
 {
     ConfigParam config;
     Config2Param config2;
 
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         return g_t10KConfig.daylightSaving;
 
     GetOsdConfigParam(&config);
@@ -564,21 +462,13 @@ int configIsDaylightSavingEnabledWithIODriver(_io_driver *driver)
 }
 #endif
 
-#ifdef F_configIsDaylightSavingEnabled
-int configIsDaylightSavingEnabled(void)
-{
-    _io_driver driver = defaultIODriver;
-    return configIsDaylightSavingEnabledWithIODriver(&driver);
-}
-#endif
-
-#ifdef F_configSetDaylightSavingEnabledWithIODriver
-void configSetDaylightSavingEnabledWithIODriver(int daylightSaving, _io_driver *driver, void (*finishedCallback)(void))
+#ifdef F_configSetDaylightSavingEnabled
+void configSetDaylightSavingEnabled(int daylightSaving)
 {
     ConfigParam config;
     Config2Param config2;
 
-    if (IsT10KWithIODriver(driver))
+    if (IsT10K())
         g_t10KConfig.daylightSaving = daylightSaving;
 
     GetOsdConfigParam(&config);
@@ -587,16 +477,6 @@ void configSetDaylightSavingEnabledWithIODriver(int daylightSaving, _io_driver *
     GetOsdConfigParam2(&config2, sizeof(config2), 0);
     config2.daylightSaving = daylightSaving;
     SetOsdConfigParam2(&config2, sizeof(config2), 0);
-    if (finishedCallback)
-        finishedCallback();
-}
-#endif
-
-#ifdef F_configSetDaylightSavingEnabled
-void configSetDaylightSavingEnabled(int daylightSaving)
-{
-    _io_driver driver = defaultIODriver;
-    configSetDaylightSavingEnabledWithIODriver(daylightSaving, &driver, NULL);
 }
 #endif
 
@@ -607,19 +487,11 @@ void configConvertToGmtTime(sceCdCLOCK *time)
 }
 #endif
 
-#ifdef F_configConvertToLocalTimeWithIODriver
-void configConvertToLocalTimeWithIODriver(sceCdCLOCK *time, _io_driver *driver)
-{
-    int timezone_offset = configGetTimezoneWithIODriver(driver);
-    int daylight_saving = configIsDaylightSavingEnabledWithIODriver(driver);
-    __adjustTime(time, timezone_offset - 540 + (daylight_saving * 60));
-}
-#endif
-
 #ifdef F_configConvertToLocalTime
 void configConvertToLocalTime(sceCdCLOCK *time)
 {
-    _io_driver driver = defaultIODriver;
-    configConvertToLocalTimeWithIODriver(time, &driver);
+    int timezone_offset = configGetTimezone();
+    int daylight_saving = configIsDaylightSavingEnabled();
+    __adjustTime(time, timezone_offset - 540 + (daylight_saving * 60));
 }
 #endif

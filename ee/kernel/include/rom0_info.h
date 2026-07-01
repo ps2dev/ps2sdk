@@ -28,19 +28,21 @@ typedef struct {
     int openFlags;
 } _io_driver;
 
+extern void SetupRomInfo(void);
+
 /** check whether the PlayStation 2 is actually a DESR-XXXX machine
  *
  * @return 1 if DESR-XXXX machine; 0 if not
  */
 extern int IsDESRMachine(void);
-extern int IsDESRMachineWithIODriver(_io_driver *driver);
+static inline int IsDESRMachineWithIODriver(const _io_driver *driver) { return IsDESRMachine(); }
 
 /** check whether the PlayStation 2 is actually a TOOL DTL-T10000(H)
  *
  * @return 1 if DTL-T10000(H); 0 if not
  */
 extern int IsT10K(void);
-extern int IsT10KWithIODriver(_io_driver *driver);
+static inline int IsT10KWithIODriver(const _io_driver *driver) { return IsT10K(); }
 
 /** gets the romname from the current ps2
  * 14 chars - doesnt set a null terminator
@@ -49,7 +51,7 @@ extern int IsT10KWithIODriver(_io_driver *driver);
  * @return pointer to buffer containing romname
  */
 extern char *GetRomName(char *romname);
-extern char *GetRomNameWithIODriver(char *romname, _io_driver *driver);
+static inline char *GetRomNameWithIODriver(char *romname, const _io_driver *driver) { return GetRomName(romname); }
 
 #ifdef __cplusplus
 }
