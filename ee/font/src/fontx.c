@@ -159,9 +159,9 @@ int fontx_load_single_krom(fontx_t *fontx)
 	fontx_header = (fontx_hdr*)fontx->font;
 
 	// define header as single-byte font
-	strncpy(fontx_header->id, "FONTX2", 6);
+	strcpy(fontx_header->id, "FONTX2");
 	fontx_header->id[6] = '\0';
-	strncpy(fontx_header->name, "KROM", 8);
+	strcpy(fontx_header->name, "KROM");
 	fontx_header->name[8] = '\0';
 
 	fontx_header->width = 8;
@@ -237,9 +237,9 @@ int fontx_load_double_krom(fontx_t *fontx)
 	fontx_header = (fontx_hdr*)fontx->font;
 
 	// define the header as double-byte font
-	strncpy(fontx_header->id, "FONTX2", 6);
+	strcpy(fontx_header->id, "FONTX2");
 	fontx_header->id[6] = '\0';
-	strncpy(fontx_header->name, "KROM", 8);
+	strcpy(fontx_header->name, "KROM");
 	fontx_header->name[8] = '\0';
 
 	fontx_header->width = 16;
