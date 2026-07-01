@@ -110,10 +110,7 @@ void GenerateTriangle(char *Buffer, int Len)
     esi = edi + d4;
     for (ecx = 0; ecx < d5 * 2; ecx++) {
         *edi++ = *esi++;
-        if (edi[-1] == 0x7f)
-            edi[-1] = 0x80;
-        else
-            edi[-1] = -edi[-1];
+        edi[-1] = (edi[-1] == 0x7f) ? 0x80 : -edi[-1];
     }
 }
 
@@ -145,12 +142,7 @@ void GenerateWhiteNoise(char *Buffer, int Len)
     unsigned int Seed = 0x41595321;
 
     while (Len--) {
-        if (Seed & 0x100)
-            *Buffer = (char)(Seed & 0xff);
-        else if (!(Seed & 0xffff))
-            *Buffer = 0x80;
-        else
-            *Buffer = 0x7f;
+        *Buffer = (Seed & 0x100) ? ((char)(Seed & 0xff)) : ((!(Seed & 0xffff)) ? 0x80 : 0x7f);
 
         Buffer++;
         unsigned int tmp = Seed; // ror 5
@@ -493,10 +485,7 @@ int AHXPlayer_InitSubsong(int Nr)
     if (Nr > Song.SubsongNr)
         return 0;
 
-    if (Nr == 0)
-        PosNr = 0;
-    else
-        PosNr = Song.Subsongs[Nr - 1];
+    PosNr = (Nr == 0) ? 0 : Song.Subsongs[Nr - 1];
 
     PosJump      = 0;
     PatternBreak = 0;
@@ -564,8 +553,7 @@ void AHXPlayer_ProcessStep(int v)
         case 0xd: // Patternbreak
             PosJump     = PosNr + 1;
             PosJumpNote = (FXParam & 0x0f) + (FXParam >> 4) * 10;
-            if (PosJumpNote > Song.TrackLength)
-                PosJumpNote = 0;
+            PosJumpNote = (PosJumpNote > Song.TrackLength) ? 0 : PosJumpNote;
             PatternBreak = 1;
             break;
         case 0xe: // Enhanced commands
@@ -634,10 +622,8 @@ void AHXPlayer_ProcessStep(int v)
         d6                                                                 = Voices[v].Instrument->FilterSpeed;
         d3                                                                 = Voices[v].Instrument->FilterLowerLimit;
         d4                                                                 = Voices[v].Instrument->FilterUpperLimit;
-        if (d3 & 0x80)
-            d6 |= 0x20;
-        if (d4 & 0x80)
-            d6 |= 0x40;
+        d6 |= (d3 & 0x80) ? 0x20 : 0;
+        d6 |= (d4 & 0x80) ? 0x40 : 0;
         Voices[v].FilterSpeed = d6;
         d3 &= ~0x80;
         d4 &= ~0x80;
@@ -747,11 +733,8 @@ void AHXPlayer_PListCommandParse(int v, int FX, int FXParam)
     switch (FX) {
         case 0:
             if (Song.Revision > 0 && FXParam != 0) {
-                if (Voices[v].IgnoreFilter) {
-                    Voices[v].FilterPos    = Voices[v].IgnoreFilter;
-                    Voices[v].IgnoreFilter = 0;
-                } else
-                    Voices[v].FilterPos = FXParam;
+                Voices[v].FilterPos    = Voices[v].IgnoreFilter ? Voices[v].IgnoreFilter : FXParam;
+                Voices[v].IgnoreFilter = 0;
                 Voices[v].NewWaveform = 1;
             }
             break;
@@ -825,10 +808,7 @@ void AHXPlayer_ProcessFrame(int v)
     }
     if (Voices[v].HardCut) {
         int NextInstrument;
-        if (NoteNr + 1 < Song.TrackLength)
-            NextInstrument = Tracks[Voices[v].Track][NoteNr + 1].Instrument;
-        else
-            NextInstrument = Tracks[Voices[v].NextTrack][0].Instrument;
+        NextInstrument = (NoteNr + 1 < Song.TrackLength) ? Tracks[Voices[v].Track][NoteNr + 1].Instrument : Tracks[Voices[v].NextTrack][0].Instrument;
         if (NextInstrument) {
             int d1 = Tempo - Voices[v].HardCut;
             if (d1 < 0)
@@ -884,10 +864,7 @@ void AHXPlayer_ProcessFrame(int v)
                 d2 = -d2;
             if (d0) {
                 int d3 = (d0 + d2) ^ d0;
-                if (d3 >= 0)
-                    d0 = Voices[v].PeriodSlidePeriod + d2;
-                else
-                    d0 = Voices[v].PeriodSlideLimit;
+                d0 = (d3 >= 0) ? (Voices[v].PeriodSlidePeriod + d2) : Voices[v].PeriodSlideLimit;
                 Voices[v].PeriodSlidePeriod = d0;
                 Voices[v].PlantPeriod       = 1;
             }
@@ -1010,8 +987,7 @@ void AHXPlayer_ProcessFrame(int v)
             Voices[v].SquareReverse = 1;
         }
         // OkDownSquare
-        if (--X)
-            SquarePtr += X << 7;
+        SquarePtr += (--X) ? (X << 7) : 0;
         int Delta      = 32 >> Voices[v].WaveLength;
         WaveformTab[2] = Voices[v].SquareTempBuffer;
         for (i = 0; i < (1 << Voices[v].WaveLength) * 4; i++) {
@@ -1027,12 +1003,8 @@ void AHXPlayer_ProcessFrame(int v)
 
     if (Voices[v].NewWaveform) {
         AudioSource = WaveformTab[Voices[v].Waveform];
-        if (Voices[v].Waveform != 3 - 1) {
-            AudioSource += (Voices[v].FilterPos - 0x20) * (0xfc + 0xfc + 0x80 * 0x1f + 0x80 + 0x280 * 3);
-        }
-        if (Voices[v].Waveform < 3 - 1) {
-            AudioSource += Offsets[Voices[v].WaveLength];
-        }
+        AudioSource += (Voices[v].Waveform != 3 - 1) ? ((Voices[v].FilterPos - 0x20) * (0xfc + 0xfc + 0x80 * 0x1f + 0x80 + 0x280 * 3)) : 0;
+        AudioSource += (Voices[v].Waveform < 3 - 1) ? Offsets[Voices[v].WaveLength] : 0;
         if (Voices[v].Waveform == 4 - 1) {
             // AddRandomMoving
             AudioSource += (WNRandom & (2 * 0x280 - 1)) & ~1;
@@ -1045,15 +1017,13 @@ void AHXPlayer_ProcessFrame(int v)
     // StillHoldWaveform
     // AudioInitPeriod
     Voices[v].AudioPeriod = Voices[v].InstrPeriod;
-    if (!Voices[v].FixedNote)
-        Voices[v].AudioPeriod += Voices[v].Transpose + Voices[v].TrackPeriod - 1;
+    Voices[v].AudioPeriod += (!Voices[v].FixedNote) ? (Voices[v].Transpose + Voices[v].TrackPeriod - 1) : 0;
     if (Voices[v].AudioPeriod > 5 * 12)
         Voices[v].AudioPeriod = 5 * 12;
     if (Voices[v].AudioPeriod < 0)
         Voices[v].AudioPeriod = 0;
     Voices[v].AudioPeriod = PeriodTable[Voices[v].AudioPeriod];
-    if (!Voices[v].FixedNote)
-        Voices[v].AudioPeriod += Voices[v].PeriodSlidePeriod;
+        Voices[v].AudioPeriod += (!Voices[v].FixedNote) ? Voices[v].PeriodSlidePeriod : 0;
     Voices[v].AudioPeriod += Voices[v].PeriodPerfSlidePeriod + Voices[v].VibratoPeriod;
     if (Voices[v].AudioPeriod > 0x0d60)
         Voices[v].AudioPeriod = 0x0d60;
@@ -1174,8 +1144,7 @@ void AHXOutput_MixChunk(int NrSamples, int **mb)
         samples_to_mix = NrSamples;
         mixpos         = 0;
         while (samples_to_mix) {
-            if (pos[v] > (0x280 << 16))
-                pos[v] -= 0x280 << 16;
+            pos[v] -= (pos[v] > (0x280 << 16)) ? (0x280 << 16) : 0;
             thiscount = min(samples_to_mix, ((0x280 << 16) - pos[v] - 1) / delta + 1);
             samples_to_mix -= thiscount;
             VolTab = &VolumeTable[Voices[v].VoiceVolume][128];

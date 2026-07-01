@@ -60,11 +60,7 @@ void InitTLBFunctions(void)
 __attribute__((weak))
 void InitTLB(void)
 {
-    if (GetMemorySize() == 0x2000000) {
-        InitTLB32MB();
-    } else {
-        _InitTLB();
-    }
+    ((GetMemorySize() == 0x2000000) ? InitTLB32MB : _InitTLB)();
 }
 
 struct TLBEntry

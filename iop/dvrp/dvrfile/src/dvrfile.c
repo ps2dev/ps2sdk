@@ -257,10 +257,7 @@ IRX_ID(MODNAME, 1, 1);
 
 int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-    if (argc >= 0)
-        return module_start(argc, argv, startaddr, mi);
-    else
-        return module_stop(argc, argv, startaddr, mi);
+    return ((argc >= 0) ? module_start : module_stop)(argc, argv, startaddr, mi);
 }
 
 int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
@@ -504,13 +501,9 @@ int dvrf_df_devctl(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, u
     retval = 0;
     WaitSema(sema_id);
     if (cmd == 0x5065) {
-        if ((*(u32 *)arg & 0x7F) != 0) {
-            retval = -EINVAL;
-        } else if (*(int *)arg <= 0x20000) {
+        retval = ((*(u32 *)arg & 0x7F) != 0) ? -EINVAL : ((*(int *)arg > 0x20000) ? -EDOM : 0);
+        if (!retval)
             current_chunk_size = *(u32 *)arg;
-        } else {
-            retval = -EDOM;
-        }
         goto finish;
     }
     argoffset = arglen + 16;
@@ -877,10 +870,7 @@ int dvrf_df_read(iomanX_iop_file_t *f, void *ptr, int size)
     drvdrv_exec_cmd_ack cmdack;
 
     total_read = 0;
-    unaligned_size = 0;
-    if (((u32)ptr & 3) != 0) {
-        unaligned_size = 4 - ((u32)ptr & 3);
-    }
+    unaligned_size = (((u32)ptr & 3) != 0) ? (4 - ((u32)ptr & 3)) : 0;
     WaitSema(sema_id);
     out_buf = (char *)ptr;
     dvrp_fd = (int)f->privdata;
@@ -895,20 +885,10 @@ int dvrf_df_read(iomanX_iop_file_t *f, void *ptr, int size)
         if (remain_size <= 0) {
             break;
         }
-        chunk_size = current_chunk_size;
-        if (remain_size < current_chunk_size) {
-            chunk_size = remain_size;
-        }
-        if (unaligned_size != 0) {
-            chunk_size = unaligned_size;
-        }
+        chunk_size = (unaligned_size != 0) ? unaligned_size : ((remain_size < current_chunk_size) ? remain_size : current_chunk_size);
         cmdack.input_word[2] = (chunk_size >> 16) & 0xFFFF;
         cmdack.input_word[3] = chunk_size;
-        if ((chunk_size & 0x7F) != 0 || unaligned_size != 0) {
-            cmdack.output_buffer = (char *)RBUF;
-        } else {
-            cmdack.output_buffer = out_buf;
-        }
+        cmdack.output_buffer = ((chunk_size & 0x7F) != 0 || unaligned_size != 0) ? (char *)RBUF : out_buf;
         if (check_cmdack_err(&DvrdrvExecCmdAckDmaRecvComp, &cmdack, &read_size, __func__)) {
             retval = read_size;
             goto finish;
@@ -1116,11 +1096,8 @@ int dvrf_df_write(iomanX_iop_file_t *f, void *ptr, int size)
 
     total_write = 0;
     in_buffer = (char *)ptr;
-    unaligned_size = 0;
-    if (((u32)ptr & 3) != 0) {
-        unaligned_size = 4 - ((u32)ptr & 3);
-        memcpy(RBUF, ptr, unaligned_size);
-    }
+    unaligned_size = (((u32)ptr & 3) != 0) ? (4 - ((u32)ptr & 3)) : 0;
+    memcpy(RBUF, ptr, unaligned_size);
     WaitSema(sema_id);
     dvrp_fd = (int)f->privdata;
     remain_size = size;
@@ -1131,21 +1108,11 @@ int dvrf_df_write(iomanX_iop_file_t *f, void *ptr, int size)
     cmdack.timeout = 10000000;
     while (remain_size > 0) {
         u32 chunk_size;
-        chunk_size = current_chunk_size;
-        if (remain_size < current_chunk_size) {
-            chunk_size = remain_size;
-        }
-        if (unaligned_size != 0) {
-            chunk_size = unaligned_size;
-        }
+        chunk_size = (unaligned_size != 0) ? unaligned_size : ((remain_size < current_chunk_size) ? remain_size : current_chunk_size);
         cmdack.input_word[2] = (chunk_size >> 16) & 0xFFFF;
         cmdack.input_word[3] = chunk_size;
-        if (unaligned_size != 0) {
-            cmdack.input_buffer = (char *)RBUF;
-            unaligned_size = 0;
-        } else {
-            cmdack.input_buffer = in_buffer;
-        }
+        cmdack.input_buffer = (unaligned_size != 0) ? (char *)RBUF : in_buffer;
+        unaligned_size = 0;
         cmdack.input_buffer_length = chunk_size;
         if (check_cmdack_err(&DvrdrvExecCmdAckDmaSendComp, &cmdack, &retval, __func__)) {
             goto finish;

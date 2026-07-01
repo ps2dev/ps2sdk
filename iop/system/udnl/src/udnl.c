@@ -772,13 +772,7 @@ static void *ParseStartAddress(const char **line)
 
         character = *ptr;
         ptr++;
-        if (character < ':') {
-            character -= 0x30;
-        } else if (character < 'a') {
-            character -= 0x4B;
-        } else {
-            character -= 0x6B;
-        }
+        character -= (character < ':') ? 0x30 : ((character < 'a') ? 0x4B : 0x6B);
 
         address = (void *)(((unsigned int)address << 4) + character);
     }
@@ -825,7 +819,6 @@ static struct RomdirFileStat *SelectModuleFromImages(const struct ImageData *Ima
 {
     char filename[32];
     int count, NumFilesRemaining, ImageFileIndexNumber;
-    struct RomdirFileStat *result;
     const struct ImageData *ImageDataPtr;
     struct RomdirFileStat stat;
     const struct ExtInfoField *ExtInfofield;
@@ -874,12 +867,7 @@ static struct RomdirFileStat *SelectModuleFromImages(const struct ImageData *Ima
         } while (--NumFilesRemaining >= 0);
     }
 
-    if (ImageFileIndexNumber >= 0) {
-        result = GetFileStatFromImage(&ImageDataBuffer[ImageFileIndexNumber].stat, filename, stat_out);
-    } else
-        result = NULL;
-
-    return result;
+    return (ImageFileIndexNumber >= 0) ? GetFileStatFromImage(&ImageDataBuffer[ImageFileIndexNumber].stat, filename, stat_out) : NULL;
 }
 
 // Code for debugging only - not originally present.

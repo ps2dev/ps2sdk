@@ -81,16 +81,8 @@ ps2ip_getconfig(char* pszName,t_ip_info* pInfo)
 #if		LWIP_DHCP
 	struct dhcp *dhcp = netif_dhcp_data(pNetIF);
 
-	if ((dhcp != NULL) && (dhcp->state != DHCP_STATE_OFF))
-	{
-		pInfo->dhcp_enabled=1;
-		pInfo->dhcp_status=dhcp->state;
-	}
-	else
-	{
-		pInfo->dhcp_enabled=0;
-		pInfo->dhcp_status=DHCP_STATE_OFF;
-	}
+	pInfo->dhcp_enabled = ((dhcp != NULL) && (dhcp->state != DHCP_STATE_OFF)) ? 1 : 0;
+	pInfo->dhcp_status = (dhcp != NULL) ? dhcp->state : DHCP_STATE_OFF;
 
 #else
 

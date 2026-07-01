@@ -208,10 +208,7 @@ static int WaitSemaTimeout(int sema, unsigned int msec)
 	u64 *timeoutPtr;
 
 	if (msec == 0) {
-		if (PollSema(sema) < 0) {
-			return -1;
-		}
-		return sema;
+		return (PollSema(sema) < 0) ? -1 : sema;
 	}
 
 	timeoutPtr = NULL;
@@ -223,20 +220,14 @@ static int WaitSemaTimeout(int sema, unsigned int msec)
 
 	ret = WaitSemaEx(sema, 1, timeoutPtr);
 
-	if (ret < 0)
-		return -1; //Timed out.
-	return sema; //Wait condition satisfied.
+	return (ret < 0) ? -1 /* Timed out. */ : sema /* Wait condition satisfied. */;
 }
 
 static int ReceiveMbx(arch_message **message, sys_mbox_t mBox, u32_t timeout)
 {
 	int result;
 
-	if(timeout > 0) {
-		result = WaitSemaTimeout(mBox->MessageCountSema, timeout);
-	} else {
-		result = WaitSema(mBox->MessageCountSema);
-	}
+	result = (timeout > 0) ? WaitSemaTimeout(mBox->MessageCountSema, timeout) : WaitSema(mBox->MessageCountSema);
 
 	if(result == mBox->MessageCountSema)
 	{

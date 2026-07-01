@@ -107,13 +107,7 @@ int acIntrDisable(acIntrNum inum)
 	if ( Intrc.enable )
 		return 0;
 	enable = DisableIntr(13, &old_status);
-	if ( enable != (acUint32)-103 )
-	{
-		if ( !enable )
-			return 0;
-		return -22;
-	}
-	return 1;
+	return ( enable != (acUint32)-103 ) ? (( !enable ) ? 0 : -22) : 1;
 }
 
 int acIntrRegister(acIntrNum inum, acIntrHandler func, void *arg)
@@ -248,10 +242,7 @@ int acIntrModuleStatus()
 	int state;
 
 	CpuSuspendIntr(&state);
-	if ( Intrc.enable )
-		ret = 2;
-	else
-		ret = Intrc.active != 0;
+	ret = Intrc.enable ? 2 : (Intrc.active != 0);
 	CpuResumeIntr(state);
 	return ret;
 }

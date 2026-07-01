@@ -121,10 +121,7 @@ static int getIndexRead(cache_set *cache, unsigned int sector)
             cache->rec[i].tax--; // apply tax penalty
         }
     }
-    if (index < 0)
-        return index;
-    else
-        return ((index * cache->indexLimit) + (sector - cache->rec[index].sector));
+    return (index < 0) ? index : ((index * cache->indexLimit) + (sector - cache->rec[index].sector));
 }
 
 //---------------------------------------------------------------------------

@@ -63,9 +63,7 @@ void _SsSndSetAccele(s16 sep_no, s16 seq_no, int tempo, int v_time)
 
 				v14 = score_struct->m_unk94;
 				v15 = score_struct->m_unkA8;
-				v16 = tempo - v14;
-				if ( tempo - v14 < 0 )
-					v16 = v14 - tempo;
+				v16 = ( tempo - v14 < 0 ) ? (v14 - tempo) : (tempo - v14);
 				if ( v15 == -1 && (unsigned int)v16 == 0x80000000 )
 					__builtin_trap();
 				score_struct->m_unk4E = ~(u16)(v16 / v15);

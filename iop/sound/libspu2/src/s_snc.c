@@ -14,13 +14,7 @@ int SpuSetNoiseClock(int n_clock)
 {
 	int n_clock_fixed;
 
-	n_clock_fixed = 0;
-	if ( n_clock >= 0 )
-	{
-		n_clock_fixed = n_clock;
-		if ( n_clock >= 64 )
-			n_clock_fixed = 63;
-	}
+	n_clock_fixed = ( n_clock >= 0 ) ? (( n_clock >= 64 ) ? 63 : n_clock) : 0;
 	_spu_RXX[512 * _spu_core + 205] = (_spu_RXX[512 * _spu_core + 205] & ~0x3F00) | ((n_clock_fixed & 0x3F) << 8);
 	return n_clock_fixed;
 }

@@ -150,10 +150,7 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop,
 
 			if ( sample_len < 28 )
 			{
-				if(flag_loop == 2)
-					flags = 3;
-				else
-					flags = 1;
+				flags = (flag_loop == 2) ? 3 : 1;
 			}
 		}
 	}
@@ -195,10 +192,8 @@ static void find_predict( short *samples, double *d_samples, int *predict_nr, in
         s_2 = _s_2;
         for ( j = 0; j < 28; j ++ ) {
             s_0 = (double) samples[j];                      // s[t-0]
-            if ( s_0 > 30719.0 )
-                s_0 = 30719.0;
-            if ( s_0 < - 30720.0 )
-                s_0 = -30720.0;
+            s_0 = ( s_0 > 30719.0 ) ? 30719.0 : s_0;
+            s_0 = ( s_0 < - 30720.0 ) ? -30720.0 : s_0;
             ds = s_0 + s_1 * f[i][0] + s_2 * f[i][1];
             buffer[j][i] = ds;
             if ( fabs( ds ) > max[i] )
@@ -260,10 +255,8 @@ static void pack( const double *d_samples, short *four_bit, int predict_nr, int 
 
         di = ( (int) ds + 0x800 ) & 0xfffff000;
 
-        if ( di > 32767 )
-            di = 32767;
-        if ( di < -32768 )
-            di = -32768;
+        di = ( di > 32767 ) ? 32767 : di;
+        di = ( di < -32768 ) ? -32768 : di;
 
         four_bit[i] = (short) di;
 

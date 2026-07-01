@@ -482,14 +482,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
   int byteCount = 0;
   u8 currChars[2];
 
-  if(lineStartP < lineEndP)
-    {
-      tempPos = lineStartP + lineSize;
-    }
-  else
-    {
-      tempPos = lineStartP;
-    }
+  tempPos = (lineStartP < lineEndP) ? (lineStartP + lineSize) : lineStartP;
 
   for(loopKey = 0; loopKey < PS2KBD_MAXKEYS; loopKey++)
     {
@@ -549,27 +542,13 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
 	    }
 	  else if(keyMods & PS2KBD_SHIFT) /* SHIFT */
 	    {
-	      if((ledStatus & PS2KBD_LED_CAPSLOCK) && (keycap[currKey]))
-		{
-		  currChars[0] = keymap[currKey];
-		}
-	      else
-		{
-		  currChars[0] = shiftkeymap[currKey];
-		}
+		  currChars[0] = ((ledStatus & PS2KBD_LED_CAPSLOCK) && (keycap[currKey])) ? keymap[currKey] : shiftkeymap[currKey];
 	    }
 	  else /* Normal key */
 	    {
 	      if(keymap[keys[loopKey]])
 		{
-		  if((ledStatus & PS2KBD_LED_CAPSLOCK) && (keycap[currKey]))
-		    {
-		      currChars[0] = shiftkeymap[currKey];
-		    }
-		  else
-		    {
-		      currChars[0] = keymap[currKey];
-		    }
+	      currChars[0] = ((ledStatus & PS2KBD_LED_CAPSLOCK) && (keycap[currKey])) ? shiftkeymap[currKey] : keymap[currKey];
 		}
 	    }
 	}
@@ -627,14 +606,7 @@ void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new_, const u8 *
   int tempPos = 0;
   int byteCount = 0;
 
-  if(lineStartP < lineEndP)
-    {
-      tempPos = lineStartP + lineSize;
-    }
-  else
-    {
-      tempPos = lineStartP;
-    }
+  tempPos = (lineStartP < lineEndP) ? (lineStartP + lineSize) : lineStartP;
 
   for(loopKey = 0; loopKey < 8; loopKey++)
     {
@@ -648,16 +620,8 @@ void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new_, const u8 *
 
 	  currKey = keyModValue[loopKey];
 
-	  if(keyModsMap & currMod) /* If key pressed */
-	    {
-	      lineBuffer[lineEndP++] = PS2KBD_RAWKEY_DOWN;
-	      //printf("Key down\n");
-	    }
-	  else
-	    {
-	      lineBuffer[lineEndP++] = PS2KBD_RAWKEY_UP;
-	      //printf("Key up\n");
-	    }
+    lineBuffer[lineEndP++] = (keyModsMap & currMod) /* If key pressed */ ? PS2KBD_RAWKEY_DOWN : PS2KBD_RAWKEY_UP;
+    //printf((keyModsMap & currMod) ? "Key down\n" : "Key up\n");
 
 	  lineEndP %= lineSize;
 	  lineBuffer[lineEndP++] = currKey;
@@ -1169,14 +1133,7 @@ void repeat_thread(void *arg)
 	      int tempPos = 0;
 
 	      WaitSema(lineSema);
-	      if(lineStartP < lineEndP)
-		{
-		  tempPos = lineStartP + lineSize;
-		}
-	      else
-		{
-		  tempPos = lineStartP;
-		}
+		  tempPos = (lineStartP < lineEndP) ? (lineStartP + lineSize) : lineStartP;
 
 	      if((devices[devLoop]->repeatkeys[0]) && (devices[devLoop]->repeatkeys[1]))
 		{

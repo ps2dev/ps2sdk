@@ -30,11 +30,7 @@ void SpuNSetVoiceAttr(int v_num, SpuVoiceAttr *arg)
 	int v5;
 
 	v3 = 8 * v_num;
-	attr_mask = arg->mask;
-	if ( attr_mask == 0 )
-	{
-		attr_mask = 0xFFFFFFFF;
-	}
+	attr_mask = ( arg->mask == 0 ) ? 0xFFFFFFFF : arg->mask;
 	v5 = 6 * v_num;
 	if ( (attr_mask & SPU_VOICE_PITCH) != 0 )
 		_spu_RXX[512 * _spu_core + 2 + v3] = arg->pitch;
@@ -165,21 +161,15 @@ void SpuNSetVoiceAttr(int v_num, SpuVoiceAttr *arg)
 		unsigned int ar;
 		s16 v13;
 
-		ar = arg->ar;
-		if ( ar >= 0x80 )
-			ar = 127;
-		v13 = 0;
-		if ( ((attr_mask & SPU_VOICE_ADSR_AMODE) != 0) && arg->a_mode == SPU_VOICE_EXPIncN )
-			v13 = 128;
+		ar = ( arg->ar >= 0x80 ) ? 127 : arg->ar;
+		v13 = ( ((attr_mask & SPU_VOICE_ADSR_AMODE) != 0) && arg->a_mode == SPU_VOICE_EXPIncN ) ? 128 : 0;
 		_spu_RXX[512 * _spu_core + 3 + v3] = (u8)_spu_RXX[512 * _spu_core + 3 + v3] | (u16)(((u16)ar | (u16)v13) << 8);
 	}
 	if ( (attr_mask & SPU_VOICE_ADSR_DR) != 0 )
 	{
 		unsigned int dr;
 
-		dr = arg->dr;
-		if ( dr >= 0x10 )
-			dr = 15;
+		dr = ( arg->dr >= 0x10 ) ? 15 : arg->dr;
 		_spu_RXX[512 * _spu_core + 3 + v3] = (_spu_RXX[512 * _spu_core + 3 + v3] & ~0xf0) | (16 * dr);
 	}
 	if ( (attr_mask & SPU_VOICE_ADSR_SR) != 0 )
@@ -187,9 +177,7 @@ void SpuNSetVoiceAttr(int v_num, SpuVoiceAttr *arg)
 		unsigned int sr;
 		s16 v16;
 
-		sr = arg->sr;
-		if ( sr >= 0x80 )
-			sr = 127;
+		sr = ( arg->sr >= 0x80 ) ? 127 : arg->sr;
 		v16 = 256;
 		if ( (attr_mask & SPU_VOICE_ADSR_SMODE) != 0 )
 		{
@@ -215,24 +203,15 @@ void SpuNSetVoiceAttr(int v_num, SpuVoiceAttr *arg)
 		unsigned int rr;
 		s16 v19;
 
-		rr = arg->rr;
-		if ( rr >= 0x20 )
-			rr = 31;
-		v19 = 0;
-		if ( (attr_mask & SPU_VOICE_ADSR_RMODE) != 0 )
-		{
-			if ( arg->r_mode == SPU_VOICE_EXPDec )
-				v19 = 32;
-		}
+		rr = ( arg->rr >= 0x20 ) ? 31 : arg->rr;
+		v19 = ( (attr_mask & SPU_VOICE_ADSR_RMODE) != 0 && arg->r_mode == SPU_VOICE_EXPDec ) ? 32 : 0;
 		_spu_RXX[512 * _spu_core + 4 + v3] = (_spu_RXX[512 * _spu_core + 4 + v3] & ~0x3f) | rr | v19;
 	}
 	if ( (attr_mask & SPU_VOICE_ADSR_SL) != 0 )
 	{
 		unsigned int sl;
 
-		sl = arg->sl;
-		if ( sl >= 0x10 )
-			sl = 15;
+		sl = ( arg->sl >= 0x10 ) ? 15 : arg->sl;
 		_spu_RXX[512 * _spu_core + 3 + v3] = (_spu_RXX[512 * _spu_core + 3 + v3] & ~0xF) | sl;
 	}
 	_spu_wait_SpuNSetVoiceAttr();

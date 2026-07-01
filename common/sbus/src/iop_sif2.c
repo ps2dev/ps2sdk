@@ -61,9 +61,7 @@ int SIF2_RestartDma(void)
     _sif2_xfer_chunk_size = (_sif2_xfer_size > SIF2_XFER_CHUNK_SIZE) ? SIF2_XFER_CHUNK_SIZE : _sif2_xfer_size;
 
     bs = ((_sif2_xfer_chunk_size + 3) / 4);
-    if (bs > 32) {
-        bs = 32;
-    }
+    bs = (bs > 32) ? 32 : bs;
 
     bc = (_sif2_xfer_chunk_size + ((bs * 4) - 1)) / (bs * 4);
 
@@ -86,9 +84,7 @@ int SIF2_set_dma(u32 addr, u32 size, u32 attr)
     _sif2_xfer_addr = addr;
     _sif2_xfer_size = size;
 
-    if (!(attr & PS2_DMA_FROM_MEM)) {
-        attr |= IOP_CHCR_30;
-    }
+    attr |= (!(attr & PS2_DMA_FROM_MEM)) ? IOP_CHCR_30 : 0;
 
     _sif2_xfer_attr = IOP_CHCR_TR | attr;
 

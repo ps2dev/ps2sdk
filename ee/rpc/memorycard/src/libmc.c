@@ -188,16 +188,7 @@ typedef struct libmc_target_desc_
 
 static inline int libmc_pre_rpc_impl(const libmc_target_desc_t *target, int flags, int only_type)
 {
-	// check mc lib is inited
-	if (!target->m_interface_data->m_client_data.server)
-		return -1;
-	// If MCSERV version does not support a feature, return error
-	if ((flags & LIBMC_PRE_CHECK_FLAG_ONLY_TYPE) != 0 && target->m_interface_data->m_mc_rpc_type != only_type)
-		return -1;
-	// check nothing else is processing
-	if (target->m_interface_data->m_current_command != MC_FUNC_NONE)
-		return target->m_interface_data->m_current_command;
-	return 0;
+	return /* check mc lib is inited */ (!target->m_interface_data->m_client_data.server) || /* If MCSERV version does not support a feature, return error */((flags & LIBMC_PRE_CHECK_FLAG_ONLY_TYPE) != 0 && target->m_interface_data->m_mc_rpc_type != only_type) ? -1 : (/* check nothing else is processing */(target->m_interface_data->m_current_command != MC_FUNC_NONE) ? target->m_interface_data->m_current_command : 0);
 }
 
 #define LIBMC_PRE_RPC(target, flags, only_type) \
@@ -319,8 +310,7 @@ static void mcStoreDir(void* arg)
 	int len;
 	char *currentDir = ep->m_extra_send_recv_param->m_cur_dir;
 	len = strlen(currentDir);
-	if (len >= 1024)
-		len = strlen(currentDir+1023);
+	len = (len >= 1024) ? strlen(currentDir+1023) : len;
 	memcpy(ep->m_dst_cur_dir, currentDir, len);
 	*(currentDir+len) = 0;
 }
@@ -489,18 +479,9 @@ static int libmc_rpc_get_info(const libmc_target_desc_t *target, int* type, int*
 	// set global variables
 	target->m_interface_data->m_name_desc_param.m_desc_param.port	= target->m_port;
 	target->m_interface_data->m_name_desc_param.m_desc_param.slot	= target->m_slot;
-	if (target->m_interface_data->m_mc_rpc_type == MC_TYPE_MC)
-	{
-		target->m_interface_data->m_name_desc_param.m_desc_param.size	= (type)	? 1 : 0;
-		target->m_interface_data->m_name_desc_param.m_desc_param.offset	= (free)	? 1 : 0;
-		target->m_interface_data->m_name_desc_param.m_desc_param.origin	= (format)	? 1 : 0;
-	}
-	else
-	{
-		target->m_interface_data->m_name_desc_param.m_desc_param.size	= (format)	? 1 : 0;
-		target->m_interface_data->m_name_desc_param.m_desc_param.offset	= (free)	? 1 : 0;
-		target->m_interface_data->m_name_desc_param.m_desc_param.origin	= (type)	? 1 : 0;
-	}
+	target->m_interface_data->m_name_desc_param.m_desc_param.size	= (target->m_interface_data->m_mc_rpc_type == MC_TYPE_MC) ? ((type)	? 1 : 0) : ((format)	? 1 : 0);
+	target->m_interface_data->m_name_desc_param.m_desc_param.offset	= (free)	? 1 : 0;
+	target->m_interface_data->m_name_desc_param.m_desc_param.origin	= (target->m_interface_data->m_mc_rpc_type == MC_TYPE_MC) ? ((format)	? 1 : 0) : ((type)	? 1 : 0);
 	target->m_interface_data->m_name_desc_param.m_desc_param.param	= target->m_interface_data->m_extra_send_recv_param.m_end_parameter;
 	target->m_interface_data->m_extra_end_param.m_p_type		= type;
 	target->m_interface_data->m_extra_end_param.m_p_free		= free;
@@ -572,18 +553,9 @@ static int libmc_rpc_write(const libmc_target_desc_t *target, const void *buffer
 
 	// set global variables
 	target->m_interface_data->m_name_desc_param.m_desc_param.fd	= target->m_fd;
-	if (size < 17)
-	{
-		target->m_interface_data->m_name_desc_param.m_desc_param.size	= 0;
-		target->m_interface_data->m_name_desc_param.m_desc_param.origin	= size;
-		target->m_interface_data->m_name_desc_param.m_desc_param.buffer	= 0;
-	}
-	else
-	{
-		target->m_interface_data->m_name_desc_param.m_desc_param.size	= size        - ( ((int)((const u8 *)buffer-1) & 0xFFFFFFF0) - (int)((const u8 *)buffer-16) );
-		target->m_interface_data->m_name_desc_param.m_desc_param.origin	=               ( ((int)((const u8 *)buffer-1) & 0xFFFFFFF0) - (int)((const u8 *)buffer-16) );
-		target->m_interface_data->m_name_desc_param.m_desc_param.buffer	= (void*)((int)(const u8 *)buffer + ( ((int)((const u8 *)buffer-1) & 0xFFFFFFF0) - (int)((const u8 *)buffer-16) ));
-	}
+	target->m_interface_data->m_name_desc_param.m_desc_param.size	= (size >= 17) ? (size        - ( ((int)((const u8 *)buffer-1) & 0xFFFFFFF0) - (int)((const u8 *)buffer-16) )) : 0;
+	target->m_interface_data->m_name_desc_param.m_desc_param.origin	= (size >= 17) ? (              ( ((int)((const u8 *)buffer-1) & 0xFFFFFFF0) - (int)((const u8 *)buffer-16) )) : size;
+	target->m_interface_data->m_name_desc_param.m_desc_param.buffer	= (size >= 17) ? ((void*)((int)(const u8 *)buffer + ( ((int)((const u8 *)buffer-1) & 0xFFFFFFF0) - (int)((const u8 *)buffer-16) ))) : 0;
 	for (i = 0; i < target->m_interface_data->m_name_desc_param.m_desc_param.origin; i++)
 	{
 		target->m_interface_data->m_name_desc_param.m_desc_param.data[i] = *(char*)((const u8 *)buffer+i);

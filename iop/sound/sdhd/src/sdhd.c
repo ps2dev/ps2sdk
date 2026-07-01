@@ -715,9 +715,7 @@ int sceSdHdGetMaxProgramNumber(void *buffer)
 	if ( result )
 		return result;
 	result = (int)do_get_prog_chunk(buffer, &dinfo);
-	if ( result )
-		return result;
-	return (int)dinfo.m_prog->maxProgramNumber;
+	return ( result ) ? result : (int)dinfo.m_prog->maxProgramNumber;
 }
 
 int sceSdHdGetMaxSampleSetNumber(void *buffer)
@@ -729,9 +727,7 @@ int sceSdHdGetMaxSampleSetNumber(void *buffer)
 	if ( result )
 		return result;
 	result = (int)do_get_sset_chunk(buffer, &dinfo);
-	if ( result )
-		return result;
-	return (int)dinfo.m_sset->maxSampleSetNumber;
+	return ( result ) ? result : (int)dinfo.m_sset->maxSampleSetNumber;
 }
 
 int sceSdHdGetMaxSampleNumber(void *buffer)
@@ -743,9 +739,7 @@ int sceSdHdGetMaxSampleNumber(void *buffer)
 	if ( result )
 		return result;
 	result = (int)do_get_smpl_chunk(buffer, &dinfo);
-	if ( result )
-		return result;
-	return (int)dinfo.m_smpl->maxSampleNumber;
+	return ( result ) ? result : (int)dinfo.m_smpl->maxSampleNumber;
 }
 
 int sceSdHdGetMaxVAGInfoNumber(void *buffer)
@@ -757,9 +751,7 @@ int sceSdHdGetMaxVAGInfoNumber(void *buffer)
 	if ( result )
 		return result;
 	result = (int)do_get_vagi_chunk(buffer, &dinfo);
-	if ( result )
-		return result;
-	return (int)dinfo.m_vagi->maxVagInfoNumber;
+	return ( result ) ? result : (int)dinfo.m_vagi->maxVagInfoNumber;
 }
 
 int sceSdHdGetProgramParamAddr(void *buffer, unsigned int programNumber, sceHardSynthProgramParam **ptr)
@@ -923,9 +915,7 @@ int sceSdHdCheckProgramNumber(void *buffer, unsigned int programNumber)
 	if ( result )
 		return result;
 	result = (int)do_get_prog_chunk(buffer, &dinfo);
-	if ( result )
-		return result;
-	return (int)do_check_chunk_in_bounds(buffer, &dinfo, 0x50726F67, programNumber);
+	return ( result ) ? result : (int)do_check_chunk_in_bounds(buffer, &dinfo, 0x50726F67, programNumber);
 }
 
 int sceSdHdGetSplitBlockCountByNote(void *buffer, unsigned int programNumber, unsigned int noteNumber)
@@ -1060,11 +1050,7 @@ int sceSdHdGetVAGInfoParamAddrBySampleNumber(void *buffer, unsigned int sampleNu
 	sceHardSynthSampleParam *p_sampleparam;
 
 	result = sceSdHdGetSampleParamAddr(buffer, sampleNumber, &p_sampleparam);
-	if ( result )
-		return result;
-	if ( p_sampleparam->VagIndex == 0xFFFF )
-		return (int)0x81039019;
-	return sceSdHdGetVAGInfoParamAddr(buffer, p_sampleparam->VagIndex, ptr);
+	return ( result ) ? result : (( p_sampleparam->VagIndex == 0xFFFF ) ? (int)0x81039019 : sceSdHdGetVAGInfoParamAddr(buffer, p_sampleparam->VagIndex, ptr));
 }
 
 int sceSdHdGetVAGInfoParamBySampleNumber(void *buffer, unsigned int sampleNumber, SceSdHdVAGInfoParam *param)
@@ -1108,9 +1094,7 @@ int sceSdHdGetVAGSize(void *buffer, unsigned int vagInfoNumber)
 	sceHardSynthVagParam *p_vagparam;
 
 	result = sceSdHdGetVAGInfoParamAddr(buffer, vagInfoNumber, &p_vagparam);
-	if ( result )
-		return result;
-	return (int)do_get_vag_size((sceHardSynthVersionChunk *)buffer, &p_vagparam->vagOffsetAddr);
+	return ( result ) ? result : (int)do_get_vag_size((sceHardSynthVersionChunk *)buffer, &p_vagparam->vagOffsetAddr);
 }
 
 int sceSdHdGetSplitBlockCount(void *buffer, unsigned int programNumber)
@@ -1119,9 +1103,7 @@ int sceSdHdGetSplitBlockCount(void *buffer, unsigned int programNumber)
 	sceHardSynthProgramParam *p_programparam;
 
 	result = sceSdHdGetProgramParamAddr(buffer, programNumber, &p_programparam);
-	if ( result )
-		return result;
-	return p_programparam->nSplit;
+	return ( result ) ? result : p_programparam->nSplit;
 }
 
 int sceSdHdGetMaxSplitBlockCount(void *buffer)
@@ -1459,8 +1441,7 @@ int sceSdHdGetValidProgramNumberCount(void *buffer)
 		return result;
 	for ( i = 0; dinfo.m_prog->maxProgramNumber >= i; i += 1 )
 	{
-		if ( dinfo.m_prog->programOffsetAddr[i] != 0xFFFFFFFF )
-			validcnt += 1;
+		validcnt += ( dinfo.m_prog->programOffsetAddr[i] != 0xFFFFFFFF ) ? 1 : 0;
 	}
 	return validcnt;
 }
@@ -1496,11 +1477,9 @@ int sceSdHdGetSampleNumberBySampleIndex(void *buffer, unsigned int sampleSetNumb
 	sceHardSynthSampleSetParam *p_samplesetparam;
 
 	result = sceSdHdGetSampleSetParamAddr(buffer, sampleSetNumber, &p_samplesetparam);
-	if ( result )
-		return result;
-	return ((unsigned int)p_samplesetparam->nSample - 1 < sampleIndexNumber) ?
+	return ( result ) ? result : (((unsigned int)p_samplesetparam->nSample - 1 < sampleIndexNumber) ?
 					 0x9006 :
-					 p_samplesetparam->sampleIndex[sampleIndexNumber];
+					 p_samplesetparam->sampleIndex[sampleIndexNumber]);
 }
 
 #ifdef _IOP

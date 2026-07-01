@@ -76,13 +76,9 @@ sif_cmd_data_t *sif_cmd_get_internal_data()
 
 static void sif_sys_cmd_handler_init_from_ee(const SifCmdChgAddrData_t *pkt, sif_cmd_data_t *sci)
 {
-	if ( pkt->header.opt )
+	iSetEventFlag(sci->ef, pkt->header.opt ? 0x800u : 0x100u);
+	if ( !pkt->header.opt )
 	{
-		iSetEventFlag(sci->ef, 0x800u);
-	}
-	else
-	{
-		iSetEventFlag(sci->ef, 0x100u);
 		sceSifSetMSFlag(SIF_STAT_CMDINIT);
 		sci->sif_send_eebuf = pkt->newaddr;
 	}
@@ -195,24 +191,13 @@ void sceSifSetSysCmdBuffer(SifCmdSysHandlerData_t *db, int size)
 
 void sceSifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg)
 {
-	if ( cid >= 0 )
-	{
-		sif_cmd_data.usr_cmd_handlers[cid].handler = handler;
-		sif_cmd_data.usr_cmd_handlers[cid].harg = harg;
-	}
-	else
-	{
-		sif_cmd_data.sys_cmd_handlers[cid + (cid & 0x7FFFFFFF)].handler = handler;
-		sif_cmd_data.sys_cmd_handlers[cid + (cid & 0x7FFFFFFF)].harg = harg;
-	}
+	*(( cid >= 0 ) ? &(sif_cmd_data.usr_cmd_handlers[cid].handler) : &(sif_cmd_data.sys_cmd_handlers[cid + (cid & 0x7FFFFFFF)].handler)) = handler;
+	*(( cid >= 0 ) ? &(sif_cmd_data.usr_cmd_handlers[cid].harg) : &(sif_cmd_data.sys_cmd_handlers[cid + (cid & 0x7FFFFFFF)].harg)) = harg;
 }
 
 void sceSifRemoveCmdHandler(int cid)
 {
-	if ( cid >= 0 )
-		sif_cmd_data.usr_cmd_handlers[cid].handler = NULL;
-	else
-		sif_cmd_data.sys_cmd_handlers[cid + (cid & 0x7FFFFFFF)].handler = NULL;
+	*(( cid >= 0 ) ? &(sif_cmd_data.usr_cmd_handlers[cid].handler) : &(sif_cmd_data.sys_cmd_handlers[cid + (cid & 0x7FFFFFFF)].handler)) = NULL;
 }
 
 static int sif_send_cmd_common(
@@ -230,7 +215,7 @@ static int sif_send_cmd_common(
 	SifDmaTransfer_t *dmatp;
 	int dmatc2;
 	int sif_send_eebuf;
-	unsigned int dmar1;
+	
 	SifDmaTransfer_t dmat[2];
 	int state;
 
@@ -269,24 +254,17 @@ static int sif_send_cmd_common(
 	dmatp->dest = (void *)sif_send_eebuf;
 	if ( (flags & 1) != 0 )
 	{
-		if ( (flags & 8) != 0 )
-			return sceSifSetDmaIntr(dmat, dmatc2, completion_cb, completion_cb_userdata);
-		else
-			return sceSifSetDma(dmat, dmatc2);
+		return ( (flags & 8) != 0 ) ? sceSifSetDmaIntr(dmat, dmatc2, completion_cb, completion_cb_userdata) : sceSifSetDma(dmat, dmatc2);
 	}
 	else
 	{
-		unsigned int dmar2;
+		unsigned int dmar1;
 
 		CpuSuspendIntr(&state);
-		if ( (flags & 8) != 0 )
-			dmar2 = sceSifSetDmaIntr(dmat, dmatc2, completion_cb, completion_cb_userdata);
-		else
-			dmar2 = sceSifSetDma(dmat, dmatc2);
-		dmar1 = dmar2;
+		dmar1 = ( (flags & 8) != 0 ) ? sceSifSetDmaIntr(dmat, dmatc2, completion_cb, completion_cb_userdata) : sceSifSetDma(dmat, dmatc2);
 		CpuResumeIntr(state);
+		return dmar1;
 	}
-	return dmar1;
 }
 
 unsigned int sceSifSendCmd(int cid, void *packet, int packet_size, void *src_extra, void *dest_extra, int size_extra)
@@ -380,10 +358,8 @@ static int sif_cmd_int_handler(void *userdata)
 		return 1;
 	}
 	*(u8 *)pktbuf1 = 0;
-	size_calc1 = size + 3;
 	pktbuf2 = pktbuf1;
-	if ( size + 3 < 0 )
-		size_calc1 = size + 6;
+	size_calc1 = ( size + 3 < 0 ) ? (size + 6) : (size + 3);
 	pktwords = size_calc1 >> 2;
 	i = 0;
 	tmpbuf1[2] = 0;

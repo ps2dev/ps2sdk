@@ -81,10 +81,7 @@ int hddCheckPresent()
 
 	rv = fileXioDevctl("hdd0:", HDIOC_STATUS, NULL, 0, NULL, 0);
 
-	if((rv >= 3) || (rv < 0))
-		return -1;
-	else
-		return 0;
+	return ((rv >= 3) || (rv < 0)) ? -1 : 0;
 }
 
 int hddCheckFormatted()
@@ -95,10 +92,7 @@ int hddCheckFormatted()
 		hddUpdateInfo();
 
 	rv = fileXioDevctl("hdd0:", HDIOC_STATUS, NULL, 0, NULL, 0);
-	if((rv >= 1) || (rv < 0))
-		return -1;
-	else
-		return 0;
+	return ((rv >= 1) || (rv < 0)) ? -1 : 0;
 }
 
 
@@ -279,8 +273,7 @@ static void hddUpdateInfo()
 	rv = fileXioDread(hddFd, &infoDirEnt);
 	while(rv > 0)
 	{
-		if(infoDirEnt.stat.mode != FS_TYPE_EMPTY)
-			hddUsed += infoDirEnt.stat.size / 2048; //Equal to, but avoids overflows of: infoDirEnt.stat.size * 512 / 1024 / 1024;
+		hddUsed += (infoDirEnt.stat.mode != FS_TYPE_EMPTY) ? (infoDirEnt.stat.size / 2048) : 0; //Equal to, but avoids overflows of: infoDirEnt.stat.size * 512 / 1024 / 1024;
 
 		rv = fileXioDread(hddFd, &infoDirEnt);
 	}

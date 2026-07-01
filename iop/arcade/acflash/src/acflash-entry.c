@@ -31,11 +31,5 @@ int acFlashEntry(int argc, char **argv)
 	int ret;
 
 	ret = acFlashModuleStart(argc, argv);
-	if ( ret < 0 )
-	{
-		return ret;
-	}
-	if ( RegisterLibraryEntries((struct irx_export_table *)&_exp_acflash) != 0 )
-		return -16;
-	return 0;
+	return ( ret < 0 ) ? ret : (( RegisterLibraryEntries(&_exp_acflash) != 0 ) ? -16 : 0);
 }

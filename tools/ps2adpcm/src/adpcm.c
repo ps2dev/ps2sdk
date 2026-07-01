@@ -53,10 +53,7 @@ AdpcmSetup *AdpcmCreate(AdpcmGetPCMfunc get, void *getpriv, AdpcmPutADPCMfunc pu
 
 	set->curblock = 0;
 
-	if (loopstart<0) /* disable looping (single shot) */
-		set->loopstart = -1;
-	else
-		set->loopstart = loopstart;
+	set->loopstart = (loopstart<0) /* disable looping (single shot) */ ? -1 : loopstart;
 
 	set->GetPCM = get;
 	set->getpriv = getpriv;

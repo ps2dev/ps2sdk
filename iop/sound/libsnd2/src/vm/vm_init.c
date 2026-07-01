@@ -25,10 +25,7 @@ void _SsVmInit(int voice_count)
 	memset(&_svm_sreg_dirty, 0, sizeof(_svm_sreg_dirty));
 	_svm_vab_count = 0;
 	memset(&_svm_vab_used, 0, sizeof(_svm_vab_used));
-	if ( ((char)voice_count & 0xFFFFu) < 0x18 )
-		_SsVmMaxVoice = (char)voice_count;
-	else
-		_SsVmMaxVoice = 24;
+	_SsVmMaxVoice = ( ((char)voice_count & 0xFFFFu) < 0x18 ) ? (char)voice_count : 24;
 	voice_attr.mask =
 		SPU_VOICE_VOLL | SPU_VOICE_VOLR | SPU_VOICE_PITCH | SPU_VOICE_WDSA | SPU_VOICE_ADSR_ADSR1 | SPU_VOICE_ADSR_ADSR2;
 	voice_attr.pitch = 0x1000;

@@ -63,8 +63,7 @@ static int NetDevAdaptorIoctl(unsigned int command, void *args, unsigned int arg
 				result = NETMAN_NETIF_ETH_LINK_MODE_10M_FDX; /* 10Base-TX FDX */
 			if (ret2 & 0x01)
 				result = NETMAN_NETIF_ETH_LINK_MODE_10M_HDX; /* 10Base-TX HDX */
-			if (!(ret2 & 0x40))
-				result |= NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE;
+			result |= (!(ret2 & 0x40)) ? NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE : 0;
 			break;
 		case NETMAN_NETIF_IOCTL_GET_LINK_STATUS:
 			g_ops->control(g_ops->priv, sceInetNDCC_GET_LINK_STATUS, &ret2, sizeof(ret2));
@@ -125,8 +124,7 @@ static int NetDevAdaptorIoctl(unsigned int command, void *args, unsigned int arg
 						break;
 				}
 			}
-			if (!(mode & NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE))
-				ret2 |= sceInetNDNEGO_PAUSE;
+			ret2 |= (!(mode & NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE)) ? sceInetNDNEGO_PAUSE : 0;
 			g_ops->control(g_ops->priv, sceInetNDCC_SET_NEGO_MODE, &ret2, sizeof(ret2));
 			break;
 		case NETMAN_NETIF_IOCTL_ETH_GET_STATUS:
@@ -139,8 +137,7 @@ static int NetDevAdaptorIoctl(unsigned int command, void *args, unsigned int arg
 				result = NETMAN_NETIF_ETH_LINK_MODE_10M_FDX; /* 10Base-TX FDX */
 			if (ret2 & 0x01)
 				result = NETMAN_NETIF_ETH_LINK_MODE_10M_HDX; /* 10Base-TX HDX */
-			if (!(ret2 & 0x40))
-				result |= NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE;
+			result |= (!(ret2 & 0x40)) ? NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE : 0;
 			((struct NetManEthStatus *)output)->LinkMode = result;
 			g_ops->control(g_ops->priv, sceInetNDCC_GET_LINK_STATUS, &ret2, sizeof(ret2));
 			result = (ret2 > 0) ? NETMAN_NETIF_ETH_LINK_STATE_UP : NETMAN_NETIF_ETH_LINK_STATE_DOWN;

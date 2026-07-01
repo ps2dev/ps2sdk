@@ -477,10 +477,7 @@ int usb_queue_cmd(struct scsi_interface *scsi, const unsigned char *cmd, unsigne
 #ifndef ASYNC
     result = -EIO;
     if (usb_bulk_command(dev, &ucmd.cbw) == USB_RC_OK) {
-        if (data_len > 0)
-            rcode = usb_bulk_transfer(dev, data_wr ? USB_BLK_EP_OUT : USB_BLK_EP_IN, data, data_len);
-        else
-            rcode = USB_RC_OK;
+        rcode = (data_len > 0) ? usb_bulk_transfer(dev, data_wr ? USB_BLK_EP_OUT : USB_BLK_EP_IN, data, data_len) : USB_RC_OK;
 
         result = usb_bulk_manage_status(dev, tag);
 
@@ -787,12 +784,7 @@ static void usb_mass_update(void *arg)
                 }
 
                 sceUsbdGetDeviceLocation(dev->devId, path);
-                if (path[0] == 2)
-                    dev->scsi.devNr = 0; // first USB port
-                else if  (path[0] == 1)
-                    dev->scsi.devNr = 1; // second USB port
-                else
-                    dev->scsi.devNr = 2; // hub?
+                dev->scsi.devNr = (path[0] == 2) ? 0 /* first USB port */ : ((path[0] == 1) ? 1 /* second USB port */ : 2 /* hub? */);
 
                 dev->status |= USBMASS_DEV_STAT_CONF;
                 scsi_connect(&dev->scsi);

@@ -52,12 +52,9 @@ static int pd_set_change_slot_buffer(s32 *status)
 	int i, ret = 1;
 
 	for (i = 0; i < 4; i++, status++) {
-		if ((*status + 1) < 2)
-			status[4] = 1;
-		else {
-			status[4] = 0;
+		status[4] = ((*status + 1) < 2) ? 1 : 0;
+		if ((*status + 1) >= 2)
 			ret = 0;
-		}
 	}
 
 	return ret;
@@ -497,10 +494,7 @@ u32 pdCheckConnection(u32 port, u32 slot)
 
 s32 pdGetError(u32 port, u32 slot)
 {
-	if(port < 2)
-		return padData[port][slot].error;
-	else
-		return -1;
+	return (port < 2) ? padData[port][slot].error : -1;
 }
 
 u32 pdSetCtrl1(u32 port, u32 slot, u32 ctrl)

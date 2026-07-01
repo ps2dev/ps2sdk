@@ -80,10 +80,7 @@ void get_slot_number_setup_td(u32 port, u32 reg)
 
 	td.in[td.in_size] = 0x21;
 
-	if(port < 2)
-		td.in[td.in_size + 1] = 0x12;
-	else
-		td.in[td.in_size + 1] = 0x13;
+	td.in[td.in_size + 1] = (port < 2) ? 0x12 : 0x13;
 
 	td.in_size += 6;
 	td.out_size += 6;
@@ -96,17 +93,7 @@ s32 get_slot_number_check_td(u32 bit)
 	s32 res;
 	u32 i;
 
-	if(read_stat6c_bit(bit, &td) != 1)
-	{
-		if(td.out[5] == 0x66)
-			res = -2;
-		else
-			res = td.out[3];
-	}
-	else
-	{
-		res = -1;
-	}
+	res = (read_stat6c_bit(bit, &td) != 1) ? ((td.out[5] == 0x66) ? -2 : td.out[3]) : -1;
 
 	for(i=0; i < 250; i++) td.out[i] = td.out[i+6];
 
@@ -171,21 +158,9 @@ void update_slot_numbers_thread(void *arg)
 		{
 			if(state_open[port] == 1)
 			{
-				if(state_getcon[port] == 0)
-					slots = get_slot_number(port, 10);
-				else
-					slots = get_slot_number(port, 0);
-
-				if(slots < 0)
-				{
-					state_slots[port] = 1;
-					state_getcon[port] = 0;
-				}
-				else
-				{
-					state_slots[port] = slots;
-					state_getcon[port] = 1;
-				}
+				slots = get_slot_number(port, (state_getcon[port] == 0) ? 10 : 0);
+				state_slots[port] = (slots < 0) ? 1 : slots;
+				state_getcon[port] = (slots < 0) ? 0 : 1;
 			}
 		}
 
@@ -207,14 +182,7 @@ s32 change_slot_setup_td(u32 port, s32 slot, u32 reg)
 
 	td.in[td.in_size] = 0x21;
 
-	if(port < 2)
-	{
-		td.in[td.in_size + 1] = 0x21;
-	}
-	else
-	{
-		td.in[td.in_size + 1] = 0x22;
-	}
+	td.in[td.in_size + 1] = (port < 2) ?  0x21 : 0x22;
 
 	td.in[td.in_size + 2] = (u8)slot;
 
@@ -234,18 +202,7 @@ s32 change_slot_check_td(u32 a)
 
 	if(td.out_size >= 7)
 	{
-		if(read_stat6c_bit(a, &td) != 1)
-		{
-			if(td.out[5] == 0x66)
-				res = -2;
-			else
-				res = td.out[5];
-
-		}
-		else
-		{
-			res = -1;
-		}
+		res = (read_stat6c_bit(a, &td) != 1) ? ((td.out[5] == 0x66) ? -2 : td.out[5]) : -1;
 	}
 	else
 	{
@@ -305,10 +262,7 @@ int change_slot(s32 *arg)
 				}
 				else
 				{
-					if(arg[port] == 0)
-						arg[port+4] = 1;
-					else
-						arg[port+4] = -1;
+					arg[port+4] = (arg[port] == 0) ? 1 : -1;
 				}
 			}
 			else
@@ -338,10 +292,7 @@ int change_slot(s32 *arg)
 					{
 						if(res >= 0)
 						{
-							if(res == arg[port])
-								arg[port+4] = 1;
-							else
-								arg[port+4] = -1;
+							arg[port+4] = (res == arg[port]) ? 1 : -1;
 
 							count--;
 						}
@@ -475,18 +426,9 @@ s32 mtapPortOpen(u32 port)
 
 		s32 res = get_slot_number(port, 10);
 
-		if(res < 0)
-		{
-			state_getcon[port] = 0;
-			state_slots[port] = 1;
-			return res;
-		}
-		else
-		{
-			state_getcon[port] = 1;
-			state_slots[port] = res;
-			return 1;
-		}
+		state_getcon[port] = (res < 0) ? 0 : 1;
+		state_slots[port] = (res < 0) ? 1 : res;
+		return (res < 0) ? res : 1;
 	}
 
 	return 0;
@@ -515,10 +457,7 @@ s32 mtapGetSlotNumber(u32 port)
 
 	res = get_slot_number(port, 10);
 
-	if(res >= 0)
-		return res;
-	else
-		return 1;
+	return (res >= 0) ? res : 1;
 }
 
 s32 mtapChangeSlot(u32 port, u32 slot)

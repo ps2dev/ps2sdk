@@ -14,9 +14,7 @@ unsigned int SpuWrite(u8 *addr, unsigned int size)
 {
 	unsigned int size_tmp;
 
-	size_tmp = size;
-	if ( size > 0x1FAFF0 )
-		size_tmp = 0x1FAFF0;
+	size_tmp = ( size > 0x1FAFF0 ) ? 0x1FAFF0 : size;
 	_spu_Fw(addr, size_tmp);
 	if ( !_spu_transferCallback )
 		_spu_inTransfer = 0;
@@ -45,9 +43,7 @@ unsigned int SpuAutoDMAWrite(u8 *addr, unsigned int size, unsigned int mode, ...
 #endif
 	if ( (mode & SPU_AUTODMA_LOOP) != 0 )
 		size >>= 1;
-	if ( (mode & SPU_AUTODMA_START_ADDR) != 0 )
-		return _spu_FwAutoDMAfrom(addr, size, mode_masked_1, v6);
-	return _spu_FwAutoDMA(addr, size, mode_masked_1);
+	return ( (mode & SPU_AUTODMA_START_ADDR) != 0 ) ? _spu_FwAutoDMAfrom(addr, size, mode_masked_1, v6) : _spu_FwAutoDMA(addr, size, mode_masked_1);
 #endif
 }
 

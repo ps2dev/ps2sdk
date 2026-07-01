@@ -1015,9 +1015,7 @@ int PS2CamOpenDevice(int device_index)
 		//see the error code to return
 		if((i+1) == (MAX_CAM_DEVICE))
 		{
-			if(index		==    0)return CAM_ERROR_NODEVICE;
-			if(index < device_index)return CAM_ERROR_BADRANGE;
-			return CAM_ERROR_UNKNOWN;
+			return (index		==    0) ? CAM_ERROR_NODEVICE : ((index < device_index) ? CAM_ERROR_BADRANGE : CAM_ERROR_UNKNOWN);
 		}
 	}
 
@@ -1154,18 +1152,7 @@ int PS2CamGetDeviceInfo(int handle,int *info)
 	PS2CamGetDeviceSring(cam, dev->iProduct,      (char *)&inf.product_name[0], 32);
 
 
-	if(dev->idProduct == PS2CAM_PROD_EYETOY)
-	{
-		strcpy((char *)&inf.model[0],"SLEH-00030\0");
-	}
-	else if(dev->idProduct == PS2CAM_PROD_EYETOY2)
-	{
-		strcpy((char *)&inf.model[0],"SLEH-00031\0");
-	}
-	else
-	{
-		strcpy((char *)&inf.model[0],"UNKNOWN\0");
-	}
+	strcpy((char *)&inf.model[0],(dev->idProduct == PS2CAM_PROD_EYETOY) ? "SLEH-00030\0" : ((dev->idProduct == PS2CAM_PROD_EYETOY2) ? "SLEH-00031\0" : "UNKNOWN\0"));
 	/**/
 	memcpy(info, &inf, size);
 

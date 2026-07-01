@@ -23,16 +23,8 @@ int SpuClearReverbWorkArea(int mode)
 	ck_1 = 0;
 	if ( (unsigned int)mode >= SPU_REV_MODE_MAX )
 		return -1;
-	if ( mode )
-	{
-		m = 8 * _spu_rev_workareasize[mode];
-		n = (SpuGetReverbEndAddr() - m) >> 1;
-	}
-	else
-	{
-		m = 32;
-		n = 2097120;
-	}
+	m = mode ? (8 * _spu_rev_workareasize[mode]) : 32;
+	n = mode ? ((SpuGetReverbEndAddr() - m) >> 1) : 2097120;
 	printf("### addr = %u  size = %u\n", n, m);
 	t = _spu_transMode;
 	if ( _spu_transMode == 1 )

@@ -62,20 +62,12 @@ int doGetDeviceLocation(UsbdDevice_t *dev, u8 *path)
 
 UsbdEndpoint_t *doOpenEndpoint(UsbdDevice_t *dev, const UsbEndpointDescriptor *endpDesc, u32 alignFlag)
 {
-	if ( !dev->m_parent )
-	{
-		return NULL;
-	}
-	if ( !endpDesc )
-		return dev->m_endpointListStart;  // default control EP was already opened
-	return openDeviceEndpoint(dev, endpDesc, alignFlag);
+	return ( !dev->m_parent ) ? NULL : (( !endpDesc ) ? dev->m_endpointListStart /* default control EP was already opened */ : openDeviceEndpoint(dev, endpDesc, alignFlag));
 }
 
 int doCloseEndpoint(UsbdEndpoint_t *ep)
 {
-	if ( ep->m_correspDevice->m_endpointListStart == ep )
-		return 0;
-	return removeEndpointFromDevice(ep->m_correspDevice, ep);
+	return ( ep->m_correspDevice->m_endpointListStart == ep ) ? 0 : removeEndpointFromDevice(ep->m_correspDevice, ep);
 }
 
 int attachIoReqToEndpoint(UsbdEndpoint_t *ep, UsbdIoRequest_t *req, void *destdata, u16 length, void *callback)
@@ -95,10 +87,7 @@ int attachIoReqToEndpoint(UsbdEndpoint_t *ep, UsbdIoRequest_t *req, void *destda
 	req->m_resultCode = USB_RC_OK;
 	req->m_callbackProc = (InternCallback)callback;
 	req->m_prev = ep->m_ioReqListEnd;
-	if ( ep->m_ioReqListEnd )
-		ep->m_ioReqListEnd->m_next = req;
-	else
-		ep->m_ioReqListStart = req;
+	*(ep->m_ioReqListEnd ? &(ep->m_ioReqListEnd->m_next) : &(ep->m_ioReqListStart)) = req;
 	req->m_next = NULL;
 	ep->m_ioReqListEnd = req;
 	handleIoReqList(ep);
@@ -387,14 +376,8 @@ void flushPort(UsbdDevice_t *dev)
 		}
 		for ( desc = dev->m_reportDescriptorStart; desc; desc = dev->m_reportDescriptorStart )
 		{
-			if ( desc->m_next )
-				desc->m_next->m_prev = desc->m_prev;
-			else
-				dev->m_reportDescriptorEnd = desc->m_prev;
-			if ( desc->m_prev )
-				desc->m_prev->m_next = desc->m_next;
-			else
-				dev->m_reportDescriptorStart = desc->m_next;
+			*(desc->m_next ? &(desc->m_next->m_prev) : &(dev->m_reportDescriptorEnd)) = desc->m_prev;
+			*(desc->m_prev ? &(desc->m_prev->m_next) : &(dev->m_reportDescriptorStart)) = desc->m_next;
 			CpuSuspendIntr(&state);
 			FreeSysMemory(desc);
 			CpuResumeIntr(state);
@@ -402,14 +385,8 @@ void flushPort(UsbdDevice_t *dev)
 		while ( dev->m_childListStart )
 		{
 			child = dev->m_childListStart;
-			if ( child->m_next )
-				child->m_next->m_prev = child->m_prev;
-			else
-				dev->m_childListEnd = child->m_prev;
-			if ( child->m_prev )
-				child->m_prev->m_next = child->m_next;
-			else
-				dev->m_childListStart = child->m_next;
+			*(child->m_next ? &(child->m_next->m_prev) : &(dev->m_childListEnd)) = child->m_prev;
+			*(child->m_prev ? &(child->m_prev->m_next) : &(dev->m_childListStart)) = child->m_next;
 			flushPort(child);
 			freeDevice(child);
 		}
@@ -427,7 +404,5 @@ int usbdInitInner(void)
 	if ( initHcdStructs() < 0 )
 		return -1;
 	dbg_printf("Hub driver...\n");
-	if ( initHubDriver() < 0 )
-		return -1;
-	return 0;
+	return ( initHubDriver() < 0 ) ? -1 : 0;
 }

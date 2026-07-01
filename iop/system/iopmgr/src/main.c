@@ -50,14 +50,7 @@ int _start(int argc, char *argv[])
 
   if (argc > 1)
   { /* Execute in command line mode, so parse command */
-    if(argc>2)
-    {
-      cmdline_handle(argv[1],argv[2]);
-    }
-    else
-    {
-      cmdline_handle(argv[1],NULL);
-    }
+    cmdline_handle(argv[1],(argc>2) ? argv[2] : NULL);
   }
   else
   { /* no params, so set into resident mode */

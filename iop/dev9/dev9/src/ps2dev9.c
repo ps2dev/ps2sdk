@@ -539,8 +539,7 @@ static int read_eeprom_data(void)
             SPD_REG8(SPD_R_PIO_DATA) = 0xc0;
             DelayThread(1);
             val = SPD_REG8(SPD_R_PIO_DATA);
-            if (val & 0x10)
-                eeprom_data[i + 1] |= (1 << j);
+            eeprom_data[i + 1] |= (val & 0x10) ? (1 << j) : 0;
             SPD_REG8(SPD_R_PIO_DATA) = 0x80;
             DelayThread(1);
         }
@@ -719,12 +718,9 @@ static int dev9_smap_read_phy(volatile u8 *emac3_regbase, unsigned int address, 
         i++;
     } while (i < 100);
 
-    if (i >= 100) {
-        return 1;
-    } else {
+    if (i < 100)
         *data = result;
-        return 0;
-    }
+    return (i >= 100) ? 1 : 0;
 }
 
 static int dev9_smap_write_phy(volatile u8 *emac3_regbase, unsigned char address, unsigned short int value)
@@ -918,11 +914,7 @@ static int speed_device_init(void)
 
     /* Print out the SPEED chip revision.  */
     spdrev = SPD_REG16(SPD_R_REV_1);
-    idx    = (spdrev & 0xffff) - 14;
-    if (spdrev == 9)
-        idx = 1; /* TS */
-    else if (spdrev < 9 || (spdrev < 16 || spdrev > 17))
-        idx = 0; /* Unknown revision */
+    idx = (spdrev == 9) ? 1 /* TS */ : ((spdrev < 9 || (spdrev < 16 || spdrev > 17)) ? 0 /* Unknown revision */ : ((spdrev & 0xffff) - 14));
 
     M_PRINTF("SPEED chip '%s', revision %0x\n", spdnames[idx], spdrev);
     return 0;
@@ -933,11 +925,7 @@ static int pcic_get_cardtype(void)
     USE_DEV9_REGS;
     u16 val = DEV9_REG(DEV9_R_1462) & 0x03;
 
-    if (val == 0)
-        return PC_CARD_TYPE_PCMCIA;  /* 16-bit */
-    else if (val < 3)                // If the bit pattern is either 10b or 01b
-        return PC_CARD_TYPE_CARDBUS; /* CardBus */
-    return PC_CARD_TYPE_NONE;
+    return (val == 0) ? PC_CARD_TYPE_PCMCIA /* 16-bit */ : ((val < 3) /* If the bit pattern is either 10b or 01b */ ? PC_CARD_TYPE_CARDBUS : PC_CARD_TYPE_NONE);
 }
 
 static int pcic_get_voltage(void)
@@ -945,13 +933,7 @@ static int pcic_get_voltage(void)
     USE_DEV9_REGS;
     u16 val = DEV9_REG(DEV9_R_1462) & 0x0c;
 
-    if (val == 0x04)
-        return PC_CARD_VOLTAGE_04h;
-    if (val == 0 || val == 0x08)
-        return PC_CARD_VOLTAGE_3V;
-    if (val == 0x0c)
-        return PC_CARD_VOLTAGE_5V;
-    return PC_CARD_VOLTAGE_INVALID;
+    return (val == 0x04) ? PC_CARD_VOLTAGE_04h : ((val == 0 || val == 0x08) ? PC_CARD_VOLTAGE_3V : ((val == 0x0c) ? PC_CARD_VOLTAGE_5V : PC_CARD_VOLTAGE_INVALID));
 }
 
 static int pcic_power(int voltage, int flag)
@@ -962,10 +944,8 @@ static int pcic_power(int voltage, int flag)
 
     DEV9_REG(DEV9_R_POWER) = 0;
 
-    if (voltage == 2)
-        val |= 0x08;
-    if (flag == 1)
-        val |= 0x10;
+    val |= (voltage == 2) ? 0x08 : 0;
+    val |= (flag == 1) ? 0x10 : 0;
 
     DEV9_REG(DEV9_R_POWER) = val;
     DelayThread(22000);
@@ -986,22 +966,14 @@ static void pcmcia_set_stat(int stat)
 
     if (stat & 0x10)
         val = 1;
-    if (stat & 0x02)
-        val |= 0x02;
-    if (stat & 0x20)
-        val |= 0x02;
-    if (stat & 0x04)
-        val |= 0x08;
-    if (stat & 0x08)
-        val |= 0x10;
-    if (stat & 0x200)
-        val |= 0x20;
-    if (stat & 0x100)
-        val |= 0x40;
-    if (stat & 0x400)
-        val |= 0x80;
-    if (stat & 0x800)
-        val |= 0x04;
+    val |= (stat & 0x02) ? 0x02 : 0;
+    val |= (stat & 0x20) ? 0x02 : 0;
+    val |= (stat & 0x04) ? 0x08 : 0;
+    val |= (stat & 0x08) ? 0x10 : 0;
+    val |= (stat & 0x200) ? 0x20 : 0;
+    val |= (stat & 0x100) ? 0x40 : 0;
+    val |= (stat & 0x400) ? 0x80 : 0;
+    val |= (stat & 0x800) ? 0x04 : 0;
     DEV9_REG(DEV9_R_1476) = val & 0xff;
 }
 

@@ -382,10 +382,7 @@ static void destroy_erl_record(struct erl_record_t * erl) {
 
     erl_flush_symbols(erl);
 
-    if (erl->prev)
-	erl->prev->next = erl->next;
-    else
-	erl_record_root = erl->next;
+	*(erl->prev ? &(erl->prev->next) : &erl_record_root) = erl->next;
 
     if (erl->next)
 	erl->next->prev = erl->prev;
@@ -429,26 +426,15 @@ static int apply_reloc(u8 * reloc, int type, u32 addr) {
 }
 
 struct symbol_t * erl_find_local_symbol(const char * symbol, struct erl_record_t * erl) {
-    if (!erl)
-	return 0;
-    if (hfind(erl->symbols, symbol, strlen(symbol)))
-	return hstuff(erl->symbols);
-    return 0;
+	return (!erl) ? 0 : ((hfind(erl->symbols, symbol, strlen(symbol))) ? hstuff(erl->symbols) : 0);
 }
 
 static struct symbol_t * r_find_symbol(const char * symbol, struct erl_record_t * erl) {
-    if (!erl)
-	return 0;
-    if (hfind(erl->symbols, symbol, strlen(symbol)))
-	return hstuff(erl->symbols);
-    return r_find_symbol(symbol, erl->next);
+	return (!erl) ? 0 : ((hfind(erl->symbols, symbol, strlen(symbol))) ? hstuff(erl->symbols) : r_find_symbol(symbol, erl->next));
 }
 
 struct symbol_t * erl_find_symbol(const char * symbol) {
-    if (global_symbols)
-	if (hfind(global_symbols, symbol, strlen(symbol)))
-	    return hstuff(global_symbols);
-    return r_find_symbol(symbol, erl_record_root);
+    return (global_symbols && hfind(global_symbols, symbol, strlen(symbol))) ? hstuff(global_symbols) : r_find_symbol(symbol, erl_record_root);
 }
 
 static struct dependancy_t * add_dependancy(struct erl_record_t * depender, struct erl_record_t * provider) {
@@ -473,10 +459,7 @@ static struct dependancy_t * add_dependancy(struct erl_record_t * depender, stru
 }
 
 static void destroy_dependancy(struct dependancy_t * d) {
-    if (d->prev)
-	d->prev->next = d->next;
-    else
-	dependancy_root = d->next;
+	*(d->prev ? &(d->prev->next) : &dependancy_root) = d->next;
 
     if (d->next)
 	d->next->prev = d->prev;
@@ -550,13 +533,9 @@ static int is_local(const char * symbol) {
 static int add_symbol(struct erl_record_t * erl, const char * symbol, u32 address) {
     htab * symbols;
 
-    if (erl) {
-	symbols = erl->symbols;
-    } else {
-	if (!global_symbols)
-	    global_symbols = hcreate(6);
-	symbols = global_symbols;
-    }
+    if (!erl && !global_symbols)
+        global_symbols = hcreate(6);
+    symbols = erl ? erl->symbols : global_symbols;
 
     if (!is_local(symbol) && erl_find_symbol(symbol))
 	return -1;
@@ -664,10 +643,9 @@ return code
     }
 
     // **TODO** handle compession
-    if (elf_mem) {
-	sec = (struct elf_section_t *) (elf_mem + head.e_shoff);
-    } else {
-        if (!(sec = (struct elf_section_t *) malloc(sizeof(struct elf_section_t) * head.e_shnum))) {
+	sec = elf_mem ? (struct elf_section_t *) (elf_mem + head.e_shoff) : (struct elf_section_t *) malloc(sizeof(struct elf_section_t) * head.e_shnum);
+    if (!elf_mem) {
+        if (!sec) {
     	    dprintf("Not enough memory.\n");
 	    free_and_return(-1);
 	}
@@ -677,10 +655,9 @@ return code
 
    // Reading the section names's table.
     // **TODO** handle compession
-    if (elf_mem) {
-	names = (char *) (elf_mem + sec[head.e_shstrndx].sh_offset);
-    } else {
-	if (!(names = (char *) malloc(sec[head.e_shstrndx].sh_size))) {
+	names = elf_mem ? (char *) (elf_mem + sec[head.e_shstrndx].sh_offset) : (char *) malloc(sec[head.e_shstrndx].sh_size);
+    if (!elf_mem) {
+	if (!names) {
 	    dprintf("Not enough memory.\n");
 	    free_and_return(-1);
 	}
@@ -788,10 +765,9 @@ return code
 
    // Loading strtab.
     // **TODO** handle compession
-    if (elf_mem) {
-	strtab_names = (char *) (elf_mem + sec[strtab].sh_offset);
-    } else {
-        if (!(strtab_names = (char *) malloc(sec[strtab].sh_size))) {
+	strtab_names = elf_mem ? (char *) (elf_mem + sec[strtab].sh_offset) : (char *) malloc(sec[strtab].sh_size);
+    if (!elf_mem) {
+        if (!strtab_names) {
     	    dprintf("Not enough memory.\n");
 	    free_and_return(-1);
 	}
@@ -802,10 +778,9 @@ return code
 
    // Loading symtab.
     // **TODO** handle compession
-    if (elf_mem) {
-	sym = (struct elf_symbol_t *) (elf_mem + sec[symtab].sh_offset);
-    } else {
-	if (!(sym = (struct elf_symbol_t *) malloc(sec[symtab].sh_size))) {
+	sym = elf_mem ? (struct elf_symbol_t *) (elf_mem + sec[symtab].sh_offset) : (struct elf_symbol_t *) malloc(sec[symtab].sh_size);
+    if (!elf_mem) {
+	if (!sym) {
 	    dprintf("Not enough memory.\n");
 	    free_and_return(-1);
 	}
@@ -827,11 +802,9 @@ return code
 
        // Loading relocation section.
         // **TODO** handle compession
-        if (elf_mem) {
-          reloc_section = (char *)(elf_mem + sec[i].sh_offset);
-        } else {
-	    lseek(elf_handle, sec[i].sh_offset, SEEK_SET);
-	    if (!(reloc_section = (char *) malloc(sec[i].sh_size))) {
+        reloc_section = elf_mem ? (char *)(elf_mem + sec[i].sh_offset) : (char *) malloc(sec[i].sh_size);
+        if (!elf_mem) {
+	    if (!reloc_section) {
 	        dprintf("Not enough memory.\n");
 	        free_and_return(-1);
   	    }
@@ -850,11 +823,10 @@ return code
 
 	    sym_n = reloc.r_info >> 8;
 
-        has_next_reloc = 0;
-        if ((u32)j+1 < (sec[i].sh_size / sec[i].sh_entsize)) {
+        has_next_reloc = ((u32)j+1 < (sec[i].sh_size / sec[i].sh_entsize)) ? 1 : 0;
+        if (has_next_reloc) {
             next_reloc = *((struct elf_reloc_t *) (reloc_section + ((j+1) * sec[i].sh_entsize)));
             next_sym_n = reloc.r_info >> 8;
-            has_next_reloc = 1;
         }
 
 	    dprintf("%6i: %08X %-14s %3i: ", j, reloc.r_offset, reloc_types[reloc.r_info & 255], sym_n);
@@ -989,19 +961,11 @@ static struct erl_record_t * load_erl(const char * fname, u8 * elf_mem, u32 addr
 	close(elf_handle);
     }
 
-	if ((s = erl_find_local_symbol("erl_id", r))) {
-		r->name = *(char **) s->address;
-	} else {
-		r->name = 0;
-	}
+	r->name = ((s = erl_find_local_symbol("erl_id", r))) ? *(char **) s->address : 0;
 
     dprintf("erl_id = %08X.\n", r->name);
 
-    if ((s = erl_find_local_symbol("erl_dependancies", r))) {
-	r->dependancies = (char **) s->address;
-    } else {
-	r->dependancies = 0;
-    }
+	r->dependancies = ((s = erl_find_local_symbol("erl_dependancies", r))) ? (char **) s->address : 0;
 
     dprintf("erl_dependancies = %08X.\n", r->dependancies);
 
@@ -1193,11 +1157,7 @@ int main(int argc, char *argv[]) {
 
     erl_add_global_symbol("printf", (u32) printf);
 
-    if (argc == 2) {
-	fname = argv[1];
-    } else {
-	fname = "host:hello-erl.erl";
-    }
+	fname = (argc == 2) ? argv[1] : "host:hello-erl.erl";
 
     if (!(erl = load_erl_from_file(fname))) {
 	dprintf("Error while loading erl file.\n");

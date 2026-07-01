@@ -132,9 +132,7 @@ void *heaplib_13_chunk_do_allocate(heaplib_chunk_t *chunk, unsigned int nbytes)
 
 	if ( !chunk || chunk->chunk_validation_key != (((u8 *)chunk) - 1) )
 		return 0;
-	size_calc1 = nbytes + 7;
-	if ( nbytes < 8 )
-		size_calc1 = 15;
+	size_calc1 = ( nbytes < 8 ) ? 15 : (nbytes + 7);
 	chunkfrag_prev_1 = chunk->chunk_fragment_prev;
 	size_calc2 = (size_calc1 >> 3) + 1;
 	chunkfrag_prev_2 = chunk->chunk_fragment_prev;
@@ -261,10 +259,7 @@ void *CreateHeap(int heapblocksize, int flag)
 	if ( heap_new )
 	{
 		heap_new->heap_validation_key = (((u8 *)heap_new) + 1);
-		if ( (flag & 1) != 0 )
-			heap_new->size2free_flags = calc_size;
-		else
-			heap_new->size2free_flags = 0;
+		heap_new->size2free_flags = ( (flag & 1) != 0 ) ? calc_size : 0;
 		heap_new->size2free_flags |= ((unsigned int)flag >> 1) & 1;
 		linked_list_set_self(&heap_new->l);
 		HeapPrepare(&heap_new->mem_chunk, calc_size - 16);
@@ -329,8 +324,7 @@ void *AllocHeapMemory(void *heap_, size_t nbytes)
 			if ( size2free_flags >= 4 )
 			{
 				size_rounded = 2 * (size2free_flags >> 1);
-				if ( (int)(size_rounded - 40) < (int)(nbytes) )
-					size_rounded = nbytes + 40;
+				size_rounded = ( (int)(size_rounded - 40) < (int)(nbytes) ) ? (nbytes + 40) : size_rounded;
 				heap_new = (heaplib_ll_t *)AllocSysMemory(heap->size2free_flags & 1, size_rounded, 0);
 				if ( heap_new )
 				{

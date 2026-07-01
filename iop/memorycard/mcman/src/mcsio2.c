@@ -502,8 +502,7 @@ int mcman_eraseblock(int port, int slot, int block, void **pagebuf, void *eccbuf
 		page = 0;
 		while (page < mcdi->blocksize) {
 			ecc_offset = page * mcdi->pagesize;
-			if (ecc_offset < 0)
-				ecc_offset += 0x1f;
+			ecc_offset += (ecc_offset < 0) ? 0x1f : 0;
 			ecc_offset = ecc_offset >> 5;
 			p_ecc = (void *)((u8 *)eccbuf + ecc_offset);
 			size = 0;
@@ -794,8 +793,7 @@ int McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsi
 	*blocksize = dev9_flash_info.block_pages;
 	*cardsize = dev9_flash_info.blocks * dev9_flash_info.block_pages;
 	*flags = 0x22 | CF_BAD_BLOCK;
-	if (dev9_flash_info.page_bytes != 512)
-		*flags |= CF_USE_ECC;
+	*flags |= (dev9_flash_info.page_bytes != 512) ? CF_USE_ECC : 0;
 #endif
 	DPRINTF("McGetCardSpec sio2cmd pagesize=%d blocksize=%u cardsize=%d flags%x\n", *pagesize, *blocksize, *cardsize, *flags);
     HAKAMA_SIGNALSEMA();
@@ -1117,10 +1115,7 @@ int mcman_probePS1Card(int port, int slot)
 		return -11;
 
 	if (mcman_sio2outbufs_PS1PDA[1] == 0) {
-		if (mcdi->cardform != 0)
-			return sceMcResSucceed;
-		else
-			return sceMcResNoFormat;
+		return (mcdi->cardform != 0) ? sceMcResSucceed : sceMcResNoFormat;
 	}
 	else if (mcman_sio2outbufs_PS1PDA[1] != 8) {
 		return -12;
@@ -1201,8 +1196,7 @@ int McWritePS1PDACard(int port, int slot, int page, void *buf) // Export #30
 	mcman_sio2packet_PS1PDA.regdata[1] = 0;
 
 	for (i = 0; i < 20; i++) {
-		if (mcdi->bad_block_list[i] == page)
-			page += 36;
+		page += (mcdi->bad_block_list[i] == page) ? 36 : 0;
 	}
 
 	mcman_sio2inbufs_PS1PDA[0] = 0x81;
@@ -1271,8 +1265,7 @@ int McReadPS1PDACard(int port, int slot, int page, void *buf) // Export #29
 	mcman_sio2packet_PS1PDA.regdata[1] = 0;
 
 	for (i = 0; i < 20; i++) {
-		if (mcdi->bad_block_list[i] == page)
-			page += 36;
+		page += (mcdi->bad_block_list[i] == page) ? 36 : 0;
 	}
 
 	mcman_sio2inbufs_PS1PDA[0] = 0x81;

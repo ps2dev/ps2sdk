@@ -337,14 +337,7 @@ int PS2CamExtractFrame(int handle, char *buffer, int bufsize)
 				pic_size = (int)(((head->Lo) + ((int)(head->Hi)<<8))<<3);
 
 
-				if(pos != pic_size)
-				{
-					return 0;
-				}
-				else
-				{
-					return pic_size;
-				}
+				return (pos != pic_size) ? 0 : pic_size;
 			}
 			else
 			{

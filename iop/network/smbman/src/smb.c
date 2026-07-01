@@ -446,10 +446,7 @@ static int AddPassword(char *Password, int PasswordType, int AuthType, void *Ans
         } else if (server_specs.PasswordType == SERVER_USE_PLAINTEXT_PASSWORD) {
             // It seems that PlainText passwords and Unicode isn't meant to be...
             passwordlen = strlen(Password);
-            if (passwordlen > 14)
-                passwordlen = 14;
-            else if (passwordlen == 0)
-                passwordlen = 1;
+            passwordlen = (passwordlen > 14) ? 14 : ((passwordlen == 0) ? 1 : passwordlen);
             memcpy(AnsiPassLen, &passwordlen, 2);
             memcpy(Buffer, Password, passwordlen);
         }
@@ -483,8 +480,7 @@ lbl_session_setup:
     SSR->smbH.Cmd    = SMB_COM_SESSION_SETUP_ANDX;
     SSR->smbH.Flags  = SMB_FLAGS_CASELESS_PATHNAMES;
     SSR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-    if (useUnicode)
-        SSR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
+    SSR->smbH.Flags2 |= (useUnicode) ? SMB_FLAGS2_UNICODE_STRING : 0;
     SSR->smbWordcount  = 13;
     SSR->smbAndxCmd    = SMB_COM_NONE; // no ANDX command
     SSR->MaxBufferSize = CLIENT_MAX_BUFFER_SIZE;
@@ -573,8 +569,7 @@ lbl_tree_connect:
     TCR->smbH.Cmd    = SMB_COM_TREE_CONNECT_ANDX;
     TCR->smbH.Flags  = SMB_FLAGS_CASELESS_PATHNAMES;
     TCR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-    if (server_specs.Capabilities & SERVER_CAP_UNICODE)
-        TCR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
+    TCR->smbH.Flags2 |= (server_specs.Capabilities & SERVER_CAP_UNICODE) ? SMB_FLAGS2_UNICODE_STRING : 0;
     TCR->smbH.UID     = UID;
     TCR->smbWordcount = 4;
     TCR->smbAndxCmd   = SMB_COM_NONE; // no ANDX command
@@ -776,8 +771,7 @@ query:
     QPIR->smbH.Cmd    = SMB_COM_TRANSACTION2;
     QPIR->smbH.Flags  = SMB_FLAGS_CANONICAL_PATHNAMES;
     QPIR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-    if (server_specs.Capabilities & SERVER_CAP_UNICODE)
-        QPIR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
+    QPIR->smbH.Flags2 |= (server_specs.Capabilities & SERVER_CAP_UNICODE) ? SMB_FLAGS2_UNICODE_STRING : 0;
     QPIR->smbH.UID     = (u16)UID;
     QPIR->smbH.TID     = (u16)TID;
     QPIR->smbWordcount = 15;
@@ -864,8 +858,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
     NTCR->smbH.Cmd    = SMB_COM_NT_CREATE_ANDX;
     NTCR->smbH.Flags  = SMB_FLAGS_CANONICAL_PATHNAMES;
     NTCR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-    if (server_specs.Capabilities & SERVER_CAP_UNICODE)
-        NTCR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
+    NTCR->smbH.Flags2 |= (server_specs.Capabilities & SERVER_CAP_UNICODE) ? SMB_FLAGS2_UNICODE_STRING : 0;
     NTCR->smbH.UID       = (u16)UID;
     NTCR->smbH.TID       = (u16)TID;
     NTCR->smbWordcount   = 24;
@@ -873,12 +866,8 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
     NTCR->AccessMask     = ((mode & O_RDWR) == O_RDWR || (mode & O_WRONLY)) ? 0x2019f : 0x20089;
     NTCR->FileAttributes = ((mode & O_RDWR) == O_RDWR || (mode & O_WRONLY)) ? EXT_ATTR_NORMAL : EXT_ATTR_READONLY;
     NTCR->ShareAccess    = 0x01; // Share in read mode only
-    if (mode & O_CREAT)
-        NTCR->CreateDisposition |= 0x02;
-    if (mode & O_TRUNC)
-        NTCR->CreateDisposition |= 0x04;
-    else
-        NTCR->CreateDisposition |= 0x01;
+    NTCR->CreateDisposition |= (mode & O_CREAT) ? 0x02 : 0;
+    NTCR->CreateDisposition |= (mode & O_TRUNC) ? 0x04 : 0x01;
     if (NTCR->CreateDisposition == 0x06)
         NTCR->CreateDisposition = 0x05;
     NTCR->ImpersonationLevel = 2;
@@ -943,20 +932,15 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
     OR->smbH.Cmd    = SMB_COM_OPEN_ANDX;
     OR->smbH.Flags  = SMB_FLAGS_CANONICAL_PATHNAMES;
     OR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-    if (server_specs.Capabilities & SERVER_CAP_UNICODE)
-        OR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
+    OR->smbH.Flags2 |= (server_specs.Capabilities & SERVER_CAP_UNICODE) ? SMB_FLAGS2_UNICODE_STRING : 0;
     OR->smbH.UID       = (u16)UID;
     OR->smbH.TID       = (u16)TID;
     OR->smbWordcount   = 15;
     OR->smbAndxCmd     = SMB_COM_NONE; // no ANDX command
     OR->AccessMask     = ((mode & O_RDWR) == O_RDWR || (mode & O_WRONLY)) ? 0x02 : 0x00;
     OR->FileAttributes = ((mode & O_RDWR) == O_RDWR || (mode & O_WRONLY)) ? EXT_ATTR_NORMAL : EXT_ATTR_READONLY;
-    if (mode & O_CREAT)
-        OR->CreateOptions |= 0x10;
-    if (mode & O_TRUNC)
-        OR->CreateOptions |= 0x02;
-    else
-        OR->CreateOptions |= 0x01;
+    OR->CreateOptions |= (mode & O_CREAT) ? 0x10 : 0;
+    OR->CreateOptions |= (mode & O_TRUNC) ? 0x02 : 0x01;
 
     offset = 0;
     if (server_specs.Capabilities & SERVER_CAP_UNICODE) {
@@ -1196,8 +1180,7 @@ int smb_Delete(int UID, int TID, char *Path)
     DR->smbH.Cmd    = SMB_COM_DELETE;
     DR->smbH.Flags  = SMB_FLAGS_CANONICAL_PATHNAMES;
     DR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-    if (server_specs.Capabilities & SERVER_CAP_UNICODE)
-        DR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
+    DR->smbH.Flags2 |= (server_specs.Capabilities & SERVER_CAP_UNICODE) ? SMB_FLAGS2_UNICODE_STRING : 0;
     DR->smbH.UID         = (u16)UID;
     DR->smbH.TID         = (u16)TID;
     DR->smbWordcount     = 1;
@@ -1238,8 +1221,7 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
     MDR->smbH.Cmd    = (u8)cmd;
     MDR->smbH.Flags  = SMB_FLAGS_CANONICAL_PATHNAMES;
     MDR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-    if (server_specs.Capabilities & SERVER_CAP_UNICODE)
-        MDR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
+    MDR->smbH.Flags2 |= (server_specs.Capabilities & SERVER_CAP_UNICODE) ? SMB_FLAGS2_UNICODE_STRING : 0;
     MDR->smbH.UID     = (u16)UID;
     MDR->smbH.TID     = (u16)TID;
     MDR->BufferFormat = 0x04;
@@ -1284,8 +1266,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
     RR->smbH.Cmd    = SMB_COM_RENAME;
     RR->smbH.Flags  = SMB_FLAGS_CANONICAL_PATHNAMES;
     RR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-    if (server_specs.Capabilities & SERVER_CAP_UNICODE)
-        RR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
+    RR->smbH.Flags2 |= (server_specs.Capabilities & SERVER_CAP_UNICODE) ? SMB_FLAGS2_UNICODE_STRING : 0;
     RR->smbH.UID     = (u16)UID;
     RR->smbH.TID     = (u16)TID;
     RR->smbWordcount = 1;
@@ -1349,8 +1330,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
     FFNR->smbH.Cmd    = SMB_COM_TRANSACTION2;
     FFNR->smbH.Flags  = SMB_FLAGS_CANONICAL_PATHNAMES;
     FFNR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-    if (server_specs.Capabilities & SERVER_CAP_UNICODE)
-        FFNR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
+    FFNR->smbH.Flags2 |= (server_specs.Capabilities & SERVER_CAP_UNICODE) ? SMB_FLAGS2_UNICODE_STRING : 0;
     FFNR->smbH.UID     = (u16)UID;
     FFNR->smbH.TID     = (u16)TID;
     FFNR->smbWordcount = 15;

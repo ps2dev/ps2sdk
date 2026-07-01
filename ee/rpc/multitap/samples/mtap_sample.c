@@ -130,10 +130,7 @@ void find_controllers()
 		mtapConnected[port] = mtapcon;
 
 		// Check for multitap
-		if(mtapConnected[port] == 1)
-			maxslot[port] = 4;
-		else
-			maxslot[port] = 1;
+		maxslot[port] = (mtapConnected[port] == 1) ? 4 : 1;
 
 		// Find any connected controllers
 		for(slot=0; slot < maxslot[port]; slot++)

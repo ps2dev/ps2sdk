@@ -81,10 +81,7 @@ void _SsSeqGetEof(s16 sep_no, s16 seq_no)
 			score_struct->m_flags |= 0x200u;
 			score_struct->m_flags |= 4u;
 			score_struct->m_play_mode = SSPLAY_PAUSE;
-			if ( (score_struct->m_flags & 0x400) != 0 )
-				score_struct->m_unk08 = score_struct->m_unk0C;
-			else
-				score_struct->m_unk08 = score_struct->m_unk04;
+			score_struct->m_unk08 = ( (score_struct->m_flags & 0x400) != 0 ) ? score_struct->m_unk0C : score_struct->m_unk04;
 			if ( score_struct->m_next_sep != -1 )
 			{
 				score_struct->m_play_mode = SSPLAY_PAUSE;
@@ -99,10 +96,7 @@ void _SsSeqGetEof(s16 sep_no, s16 seq_no)
 			score_struct->m_unk88 = 0;
 			score_struct->m_unk1C = 0;
 			score_struct->m_delta_value = 0;
-			if ( (score_struct->m_flags & 0x400) != 0 )
-				m_unk04 = score_struct->m_unk0C;
-			else
-				m_unk04 = score_struct->m_unk04;
+			m_unk04 = ( (score_struct->m_flags & 0x400) != 0 ) ? score_struct->m_unk0C : score_struct->m_unk04;
 			score_struct->m_seq_ptr = m_unk04;
 			score_struct->m_unk08 = m_unk04;
 		}
@@ -112,10 +106,7 @@ void _SsSeqGetEof(s16 sep_no, s16 seq_no)
 		score_struct->m_unk88 = 0;
 		score_struct->m_unk1C = 0;
 		score_struct->m_delta_value = 0;
-		if ( (score_struct->m_flags & 0x400) != 0 )
-			score_struct->m_seq_ptr = score_struct->m_unk0C;
-		else
-			score_struct->m_seq_ptr = score_struct->m_unk04;
+		score_struct->m_seq_ptr = ( (score_struct->m_flags & 0x400) != 0 ) ? score_struct->m_unk0C : score_struct->m_unk04;
 	}
 }
 

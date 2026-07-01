@@ -184,10 +184,7 @@ static void bungetc(struct fstrbuf *fb)
 	{
 		fb->cp -= 1;
 		fb->col -= 1;
-		if ( *fb->cp == '\n' )
-		{
-			fb->line -= 1;
-		}
+		fb->line -= ( *fb->cp == '\n' ) ? 1 : 0;
 	}
 }
 
@@ -705,16 +702,8 @@ static Srx_gen_table *make_srx_gen_table(TokenTree *tokentree)
 	result->section_list = (SectConf *)calloc(1, sizeof(SectConf));
 	for ( ; ttp->tkcode; )
 	{
-		if ( ttp[1].tkcode == TC_VECTOR )
-		{
-			ttp1 = ttp[1].value.subtree;
-			nttp = ttp + 2;
-		}
-		else
-		{
-			ttp1 = 0;
-			nttp = ttp + 1;
-		}
+		ttp1 = ( ttp[1].tkcode == TC_VECTOR ) ? ttp[1].value.subtree : 0;
+		nttp = ( ttp[1].tkcode == TC_VECTOR ) ? (ttp + 2) : (ttp + 1);
 		switch ( ttp->tkcode )
 		{
 			case TC_STRING:

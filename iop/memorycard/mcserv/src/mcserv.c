@@ -751,9 +751,7 @@ int _McWrite(void *rpc_buf)
 
 		r = McWrite(dP->fd, &mcserv_buf, size_to_write);
 		if (r != size_to_write) {
-			if (r < 0)
-				return r;
-			return r + size_written;
+			return (r < 0) ? r : (r + size_written);
 		}
 
 		size_written += size_to_write;
@@ -938,16 +936,11 @@ int _McGetInfo2(void *rpc_buf)
 	if (dP->offset > 0) {
 		mc_free = McGetFreeClusters(dP->port, dP->slot);
 
-		if (mc_free < 0)
-			eP.free = 0;
-		else
-			eP.free = mc_free;
+		eP.free = (mc_free < 0) ? 0 : mc_free;
 	}
 
 	if (dP->size > 0) {
-		eP.formatted = 0;
-		if (McGetFormat(dP->port, dP->slot) > 0)
-			eP.formatted = 1;
+		eP.formatted = (McGetFormat(dP->port, dP->slot) > 0) ? 1 : 0;
 	}
 
 dma_transfer:

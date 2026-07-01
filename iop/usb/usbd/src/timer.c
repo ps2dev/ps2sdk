@@ -17,34 +17,24 @@ int addTimerCallback(UsbdTimerCbStruct_t *arg, TimerCallback func, void *cbArg, 
 	if ( arg->m_isActive )
 		return -1;
 	arg->m_isActive = 1;
-	if ( delay > 0 )
-		delay -= 1;
+	delay -= ( delay > 0 ) ? 1 : 0;
 	arg->m_callbackProc = func;
 	arg->m_callbackArg = cbArg;
 	for ( pos = memPool->m_timerListStart; pos && delay >= (int)pos->m_delayCount;
 				delay -= pos->m_delayCount, pos = pos->m_prev )
 	{
 	}
+	arg->m_next = pos ? pos->m_next : memPool->m_timerListEnd;
+	*( pos ? (pos->m_next ? &(pos->m_next->m_prev) : &(memPool->m_timerListStart)) : (memPool->m_timerListEnd ? &(memPool->m_timerListEnd->m_prev) : &(memPool->m_timerListStart)) ) = arg;
+	arg->m_prev = pos;
 	if ( pos )
 	{
-		arg->m_next = pos->m_next;
-		if ( pos->m_next )
-			pos->m_next->m_prev = arg;
-		else
-			memPool->m_timerListStart = arg;
-		arg->m_prev = pos;
 		pos->m_next = arg;
 		pos->m_delayCount -= delay;
 	}
 	else
 	{
-		arg->m_next = memPool->m_timerListEnd;
-		if ( memPool->m_timerListEnd )
-			memPool->m_timerListEnd->m_prev = arg;
-		else
-			memPool->m_timerListStart = arg;
 		memPool->m_timerListEnd = arg;
-		arg->m_prev = NULL;
 	}
 	arg->m_delayCount = delay;
 	memPool->m_ohciRegs->HcInterruptEnable = OHCI_INT_SF;
@@ -57,14 +47,8 @@ int cancelTimerCallback(UsbdTimerCbStruct_t *arg)
 	{
 		return -1;
 	}
-	if ( arg->m_prev )
-		arg->m_prev->m_next = arg->m_next;
-	else
-		memPool->m_timerListEnd = arg->m_next;
-	if ( arg->m_next )
-		arg->m_next->m_prev = arg->m_prev;
-	else
-		memPool->m_timerListStart = arg->m_prev;
+	*( arg->m_prev ? &(arg->m_prev->m_next) : &(memPool->m_timerListEnd) ) = arg->m_next;
+	*( arg->m_next ? &(arg->m_next->m_prev) : &(memPool->m_timerListStart) ) = arg->m_prev;
 	arg->m_isActive = 0;
 	arg->m_next = NULL;
 	arg->m_prev = NULL;
@@ -78,8 +62,7 @@ void handleTimerList(void)
 	timer = memPool->m_timerListStart;
 	if ( timer )
 	{
-		if ( timer->m_delayCount > 0 )
-			timer->m_delayCount -= 1;
+		timer->m_delayCount -= ( timer->m_delayCount > 0 ) ? 1 : 0;
 		while ( 1 )
 		{
 			timer = memPool->m_timerListStart;
@@ -87,10 +70,7 @@ void handleTimerList(void)
 				break;
 			dbg_printf("timer expired\n");
 			memPool->m_timerListStart = timer->m_prev;
-			if ( timer->m_prev )
-				timer->m_prev->m_next = NULL;
-			else
-				memPool->m_timerListEnd = NULL;
+			*( timer->m_prev ? &(timer->m_prev->m_next) : &(memPool->m_timerListEnd) ) = NULL;
 			timer->m_next = NULL;
 			timer->m_prev = NULL;
 			timer->m_isActive = 0;

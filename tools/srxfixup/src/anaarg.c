@@ -64,19 +64,9 @@ int analize_arguments(const Opttable *dopttable, int argc, char **argv)
 			opt = 0;
 			for ( i = 0; opttable[i].option; i += 1 )
 			{
-				if ( opttable[i].havearg == ARG_HAVEARG_UNK3 )
+				if ( (opttable[i].havearg == ARG_HAVEARG_UNK3 ) ? (!strcmp(opttable[i].option, *argva)) : (!strncmp(opttable[i].option, *argva, strlen(opttable[i].option))) )
 				{
-					if ( !strcmp(opttable[i].option, *argva) )
-					{
-						break;
-					}
-				}
-				else
-				{
-					if ( !strncmp(opttable[i].option, *argva, strlen(opttable[i].option)) )
-					{
-						break;
-					}
+					break;
 				}
 			}
 			if ( !opttable[i].option )
@@ -102,14 +92,7 @@ int analize_arguments(const Opttable *dopttable, int argc, char **argv)
 				{
 					case 'F':
 					case 'f':
-						if ( (*argva)[strlen(opttable[i].option)] )
-						{
-							*(uint32_t *)opttable[i].var = strtoul(&(*argva)[strlen(opttable[i].option)], NULL, 16);
-						}
-						else
-						{
-							*(uint32_t *)opttable[i].var = (opttable[i].vartype == 'f') ? 1 : 0;
-						}
+						*(uint32_t *)opttable[i].var = ( (*argva)[strlen(opttable[i].option)] ) ? strtoul(&(*argva)[strlen(opttable[i].option)], NULL, 16) : ((opttable[i].vartype == 'f') ? 1 : 0);
 						break;
 					case 'h':
 						if ( opt != NULL )

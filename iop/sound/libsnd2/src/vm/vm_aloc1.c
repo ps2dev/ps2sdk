@@ -83,9 +83,7 @@ s16 _SsVmAlloc(void)
 	}
 	if ( voice_to_alloc_idx == 99 )
 	{
-		voice_to_alloc_idx = lowest_match;
-		if ( !match_counter )
-			voice_to_alloc_idx = _SsVmMaxVoice;
+		voice_to_alloc_idx = ( !match_counter ) ? _SsVmMaxVoice : lowest_match;
 	}
 	if ( voice_to_alloc_idx < _SsVmMaxVoice )
 	{
@@ -97,8 +95,7 @@ s16 _SsVmAlloc(void)
 			libsnd2_spu_voice_t *voice_struct_1;
 
 			voice_struct_1 = &_svm_voice[(u8)v16];
-			if ( (_snd_vmask & (1 << (u8)v16)) == 0 )
-				voice_struct_1->m_unk02 += 1;
+			voice_struct_1->m_unk02 += ( (_snd_vmask & (1 << (u8)v16)) == 0 ) ? 1 : 0;
 		}
 		voice_struct = &_svm_voice[voice_to_alloc_idx];
 		voice_struct->m_unk02 = 0;

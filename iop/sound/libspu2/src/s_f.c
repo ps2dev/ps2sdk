@@ -17,11 +17,7 @@ unsigned int SpuFlush(unsigned int ev)
 	unsigned int ev_tmp;
 
 	retval = 0;
-	ev_tmp = ev;
-	if ( ev_tmp == 0 )
-	{
-		ev_tmp = 0xFFFFFFFF;
-	}
+	ev_tmp = ( ev == 0 ) ? 0xFFFFFFFF : ev;
 	if ( ((ev_tmp & SPU_EVENT_PITCHLFO) != 0) && (_spu_RQmask & 2) != 0 )
 	{
 		vu16 *regstmp1;

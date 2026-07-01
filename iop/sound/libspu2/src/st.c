@@ -285,7 +285,6 @@ static void _SpuStCB_IRQ(void)
 	int v0;
 	unsigned int v1;
 	int v2;
-	int v3;
 
 	FlushDcache();
 	v0 = -1;
@@ -293,11 +292,7 @@ static void _SpuStCB_IRQ(void)
 	SpuSetIRQ(SPU_OFF);
 	SpuSetCore(v1);
 	v2 = 0;
-	if ( (_spu_st_stat_int & 0xF0) == 64 )
-		v3 = 66;
-	else
-		v3 = 51;
-	_spu_st_stat_int = v3;
+	_spu_st_stat_int = ( (_spu_st_stat_int & 0xF0) == 64 ) ? 66 : 51;
 	if ( _spu_st_stop_voice_bit )
 	{
 		int v4;
@@ -317,8 +312,7 @@ static void _SpuStCB_IRQ(void)
 				// Added in OSDSND 110U
 				v8 = ((_spu_st_Info.voice[v4].buf_addr >> 4) << 4) + last_size - 16;
 #endif
-				if ( !_spu_st_bufferP )
-					v8 += _spu_st_buf_sizeSBhalf;
+				v8 += ( !_spu_st_bufferP ) ? _spu_st_buf_sizeSBhalf : 0;
 				v9 = SpuSetCore(_st_core);
 				_spu_FsetRXX(226 + (v4 * 6), (v8 >> 4) << 4, 1);
 				_spu_core = v9;
@@ -352,9 +346,7 @@ static void _SpuStCB_IRQ(void)
 		// Added in OSDSND 110U
 		v10 = ((_spu_st_Info.voice[v0].buf_addr >> 4) << 4) + v2 - 16;
 #endif
-		_spu_st_addrIRQ = v10;
-		if ( !_spu_st_bufferP )
-			_spu_st_addrIRQ = v10 + _spu_st_buf_sizeSBhalf;
+		_spu_st_addrIRQ = v10 + (( !_spu_st_bufferP ) ? _spu_st_buf_sizeSBhalf : 0);
 		v11 = SpuSetCore(_st_core);
 		SpuSetIRQAddr(_spu_st_addrIRQ);
 		SpuSetCore(v11);
@@ -480,23 +472,17 @@ static void _SpuStCB_Transfer(void)
 		}
 		if ( _spu_st_cb_transfer_finished && _spu_st_start_voice_bit )
 			_spu_st_cb_transfer_finished(_spu_st_start_voice_bit, SPU_ST_PLAY);
-		v2 = _spu_st_stop_voice_smallest;
-		if ( _spu_st_start_voice_smallest < 24 )
-			v2 = _spu_st_start_voice_smallest;
+		v2 = ( _spu_st_start_voice_smallest < 24 ) ? _spu_st_start_voice_smallest : _spu_st_stop_voice_smallest;
 		v3 = (_spu_st_Info.voice[v2].buf_addr >> 4) << 4;
-		_spu_st_addrIRQ = v3;
 		_spu_st_bufferP = _spu_st_bufferP != 1;
-		if ( _spu_st_bufferP != 1 )
-			_spu_st_addrIRQ = v3 + _spu_st_buf_sizeSBhalf;
+		_spu_st_addrIRQ = v3 + (( _spu_st_bufferP != 1 ) ? _spu_st_buf_sizeSBhalf : 0);
 		v4 = SpuSetCore(_st_core);
 		SpuSetIRQAddr(_spu_st_addrIRQ);
 		SpuSetCore(v4);
 		v5 = SpuSetCore(_st_core);
 		SpuSetIRQ(SPU_ON);
 		SpuSetCore(v5);
-		_spu_st_stat_int = 64;
-		if ( _spu_st_start_voice_smallest < 24 )
-			_spu_st_stat_int = 50;
+		_spu_st_stat_int = ( _spu_st_start_voice_smallest < 24 ) ? 50 : 64;
 	}
 	FlushDcache();
 }
@@ -567,19 +553,7 @@ int SpuStTransfer(int flag, unsigned int voice_bit)
 	if ( !_spu_st_stat_int )
 		return 0;
 	v4 = voice_bit & 0xFFFFFF;
-	if ( (voice_bit & 0xFFFFFF) == 0 )
-	{
-		return SPU_ST_INVALID_ARGUMENT;
-	}
-	if ( flag == SPU_ST_PREPARE )
-	{
-		return _SpuStStartPrepare(v4);
-	}
-	if ( flag >= SPU_ST_PREPARE && flag <= SPU_ST_PLAY )
-	{
-		return _SpuStStart(v4);
-	}
-	return SPU_ST_INVALID_ARGUMENT;
+	return ( v4 == 0 ) ? SPU_ST_INVALID_ARGUMENT : (( flag == SPU_ST_PREPARE ) ? _SpuStStartPrepare(v4) : (( flag >= SPU_ST_PREPARE && flag <= SPU_ST_PLAY ) ? _SpuStStart(v4) : SPU_ST_INVALID_ARGUMENT));
 }
 
 static void _SpuStReset(void)

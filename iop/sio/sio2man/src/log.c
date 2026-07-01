@@ -108,8 +108,7 @@ void log_dma(int type, struct _sio2_dma_arg *arg)
 	log_write32(arg->count);
 
 	effective = arg->size * 4 * arg->count;
-	if (effective > DMA_MAX)
-		effective = DMA_MAX;
+	effective = (effective > DMA_MAX) ? DMA_MAX : effective;
 
 	for (i = 0, p = (u8 *)arg->addr; i < effective; i++)
 		log_write8(p[i]);

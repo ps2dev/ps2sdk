@@ -215,10 +215,7 @@ lbl1:
 
 	// read superblock to mc cache
 	for (i = 0; (unsigned int)i < sizeof (MCDevInfo); i += MCMAN_CLUSTERSIZE) {
-		if (i < 0)
-			size = i + (MCMAN_CLUSTERSIZE - 1);
-		else
-			size = i;
+		size = (i < 0) ? (i + (MCMAN_CLUSTERSIZE - 1)) : i;
 
 		if (McReadCluster(port, slot, size >> 10, &mce) != sceMcResSucceed)
 			return -48;
@@ -283,24 +280,15 @@ int mcman_dread2(int fd, MC_IO_DRE_T *dirent)
 	strcpy(dirent->name, fse->name);
 	*(u8 *)&dirent->name[32] = 0;
 
-	if (fse->mode & sceMcFileAttrReadable)
-		dirent->stat.mode |= MC_IO_S_RD;
-	if (fse->mode & sceMcFileAttrWriteable)
-		dirent->stat.mode |= MC_IO_S_WR;
-	if (fse->mode & sceMcFileAttrExecutable)
-		dirent->stat.mode |= MC_IO_S_EX;
+    dirent->stat.mode |= (fse->mode & sceMcFileAttrReadable) ? MC_IO_S_RD : 0;
+    dirent->stat.mode |= (fse->mode & sceMcFileAttrWriteable) ? MC_IO_S_WR : 0;
+    dirent->stat.mode |= (fse->mode & sceMcFileAttrExecutable) ? MC_IO_S_EX : 0;
 #if !MCMAN_ENABLE_EXTENDED_DEV_OPS
-	if (fse->mode & sceMcFileAttrPS1)
-		dirent->stat.mode |= sceMcFileAttrPS1;
-	if (fse->mode & sceMcFileAttrPDAExec)
-		dirent->stat.mode |= sceMcFileAttrPDAExec;
-	if (fse->mode & sceMcFileAttrDupProhibit)
-		dirent->stat.mode |= sceMcFileAttrDupProhibit;
+    dirent->stat.mode |= (fse->mode & sceMcFileAttrPS1) ? sceMcFileAttrPS1 : 0;
+    dirent->stat.mode |= (fse->mode & sceMcFileAttrPDAExec) ? sceMcFileAttrPDAExec : 0;
+    dirent->stat.mode |= (fse->mode & sceMcFileAttrDupProhibit) ? sceMcFileAttrDupProhibit : 0;
 #endif
-	if (fse->mode & sceMcFileAttrSubdir)
-		dirent->stat.mode |= MC_IO_S_DR;
-	else
-		dirent->stat.mode |= MC_IO_S_FL;
+	dirent->stat.mode |= (fse->mode & sceMcFileAttrSubdir) ? MC_IO_S_DR : MC_IO_S_FL;
 
 	dirent->stat.attr = fse->attr;
 	dirent->stat.size = fse->length;
@@ -324,24 +312,15 @@ int mcman_getstat2(int port, int slot, const char *filename, MC_IO_STA_T *stat)
 
 	mcman_wmemset((void *)stat, sizeof (MC_IO_STA_T), 0);
 
-	if (fse->mode & sceMcFileAttrReadable)
-		stat->mode |= MC_IO_S_RD;
-	if (fse->mode & sceMcFileAttrWriteable)
-		stat->mode |= MC_IO_S_WR;
-	if (fse->mode & sceMcFileAttrExecutable)
-		stat->mode |= MC_IO_S_EX;
+    stat->mode |= (fse->mode & sceMcFileAttrReadable) ? MC_IO_S_RD : 0;
+    stat->mode |= (fse->mode & sceMcFileAttrWriteable) ? MC_IO_S_WR : 0;
+    stat->mode |= (fse->mode & sceMcFileAttrExecutable) ? MC_IO_S_EX : 0;
 #if !MCMAN_ENABLE_EXTENDED_DEV_OPS
-	if (fse->mode & sceMcFileAttrPS1)
-		stat->mode |= sceMcFileAttrPS1;
-	if (fse->mode & sceMcFileAttrPDAExec)
-		stat->mode |= sceMcFileAttrPDAExec;
-	if (fse->mode & sceMcFileAttrDupProhibit)
-		stat->mode |= sceMcFileAttrDupProhibit;
+    stat->mode |= (fse->mode & sceMcFileAttrPS1) ? sceMcFileAttrPS1 : 0;
+    stat->mode |= (fse->mode & sceMcFileAttrPDAExec) ? sceMcFileAttrPDAExec : 0;
+    stat->mode |= (fse->mode & sceMcFileAttrDupProhibit) ? sceMcFileAttrDupProhibit : 0;
 #endif
-	if (fse->mode & sceMcFileAttrSubdir)
-		stat->mode |= MC_IO_S_DR;
-	else
-		stat->mode |= MC_IO_S_FL;
+	stat->mode |= (fse->mode & sceMcFileAttrSubdir) ? MC_IO_S_DR : MC_IO_S_FL;
 
 	stat->attr = fse->attr;
 
@@ -407,16 +386,7 @@ int mcman_setinfo2(int port, int slot, const char *filename, sceMcTblGetDir *inf
 
 		r = mcman_getdirinfo(port, slot, &mfe, info->EntryName, NULL, 1);
 		if (r != 1) {
-			if (r < 2) {
-				if (r == 0)
-					return sceMcResNoEntry;
-				return r;
-			}
-			else {
-				if (r != 2)
-					return r;
-				return sceMcResDeniedPermit;
-			}
+			return (r < 2) ? ((r == 0) ? sceMcResNoEntry : r) : ((r != 2) ? r : sceMcResDeniedPermit);
 		}
 	}
 
@@ -442,16 +412,12 @@ int mcman_setinfo2(int port, int slot, const char *filename, sceMcTblGetDir *inf
 		fse->attr = info->Reserve2;
 
 	if ((flags & sceMcFileAttrExecutable) != 0) {
-		fmode = 0xffff7fcf;
-		if (!PS1CardFlag)
-			fmode = 0x180f;
+		fmode = (!PS1CardFlag) ? 0x180f : 0xffff7fcf;
 		fse->mode = (fse->mode & ~fmode) | (info->AttrFile & fmode);
 	}
 
 	if ((flags & sceMcFileCreateFile) != 0)	{
-		fmode = 0x380f;
-		if (!PS1CardFlag)
-			fmode = 0x180f;
+		fmode = (!PS1CardFlag) ? 0x180f : 0x380f;
 		fse->mode = (fse->mode & ~fmode) | (info->AttrFile & fmode);
 	}
 
@@ -482,8 +448,7 @@ int mcman_read2(int fd, void *buffer, int nbyte)
 		register int temp, rpos;
 
 		temp = fh->filesize - fh->position;
-		if (nbyte > temp)
-			nbyte = temp;
+		nbyte = (nbyte > temp) ? temp : nbyte;
 
 		rpos = 0;
 		if (nbyte > 0) {
@@ -493,10 +458,7 @@ int mcman_read2(int fd, void *buffer, int nbyte)
 
 				offset = fh->position % mcdi->cluster_size;  // file pointer offset % cluster size
 				temp = mcdi->cluster_size - offset;
-				if (temp < nbyte)
-					size = temp;
-				else
-					size = nbyte;
+				size = (temp < nbyte) ? temp : nbyte;
 
 				r = mcman_fatRseek(fd);
 
@@ -572,10 +534,7 @@ int mcman_write2(int fd, void *buffer, int nbyte)
 
 			offset = fh->position % mcdi->cluster_size;  // file pointer offset % cluster size
 			r2 = mcdi->cluster_size - offset;
-			if (r2 < nbyte)
-				size = r2;
-			else
-				size = nbyte;
+			size = (r2 < nbyte) ? r2 : nbyte;
 
 			memcpy((void *)((u8 *)(mce->cl_data) + offset), (void *)((u8 *)buffer + wpos), size);
 
@@ -615,12 +574,7 @@ int mcman_close2(int fd)
 	if (r != sceMcResSucceed)
 		return -31;
 
-	if (fh->unknown2 == 0) {
-		fmode = fse1->mode | sceMcFileAttrClosed;
-	}
-	else {
-		fmode = fse1->mode & 0xff7f;
-	}
+	fmode = (fh->unknown2 == 0) ? (fse1->mode | sceMcFileAttrClosed) : (fse1->mode & 0xff7f);
 	fse1->mode = fmode;
 
 	mcman_getmcrtime(&fse1->modified);
@@ -658,8 +612,7 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 
 	DPRINTF("mcman_open2 port%d slot%d name %s flags %x\n", port, slot, filename, flags);
 
-	if ((flags & sceMcFileCreateFile) != 0)
-		flags |= sceMcFileAttrWriteable; // s5
+	flags |= ((flags & sceMcFileCreateFile) != 0) ? sceMcFileAttrWriteable : 0; // s5
 
 	//if (!mcman_checkpath(filename))
 	//	return sceMcResNoEntry;
@@ -682,10 +635,7 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 
 	mcdi = (MCDevInfo *)&mcman_devinfos[port][slot]; // s3
 
-	if ((flags & (sceMcFileCreateFile | sceMcFileCreateDir)) == 0)
-		cacheDir.maxent = -1; //sp20
-	else
-		cacheDir.maxent = 0;  //sp20
+	cacheDir.maxent = ((flags & (sceMcFileCreateFile | sceMcFileCreateDir)) == 0) ? -1 : 0; //sp20
 
 	//fse1 = sp28
 	//sp18 = cacheDir
@@ -809,15 +759,9 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 			fh->filesize = mcman_dircache[1].length;
 			fh->clink = fh->freeclink;
 
-			if (fh->rdflag != 0)
-				fh->rdflag = (*((u8 *)&mcman_dircache[1].mode)) & sceMcFileAttrReadable;
-			else
-				fh->rdflag = 0;
+			fh->rdflag = (fh->rdflag != 0) ? ((*((u8 *)&mcman_dircache[1].mode)) & sceMcFileAttrReadable) : 0;
 
-			if (fh->wrflag != 0)
-				fh->wrflag = (mcman_dircache[1].mode >> 1) & sceMcFileAttrReadable;
-			else
-				fh->wrflag = 0;
+			fh->wrflag = (fh->wrflag != 0) ? ((mcman_dircache[1].mode >> 1) & sceMcFileAttrReadable) : 0;
 
 			fh->status = 1;
 
@@ -1069,10 +1013,7 @@ int mcman_chdir(int port, int slot, const char *newdir, char *currentdir)
 lbl1:
 	if (strcmp(fse->name, ".")) {
 
-		if (strlen(fse->name) < 32)
-			len = strlen(fse->name);
-		else
-			len = 32;
+		len = (strlen(fse->name) < 32) ? strlen(fse->name) : 32;
 
 		if (strlen(currentdir)) {
 			len2 = strlen(currentdir);
@@ -1144,10 +1085,7 @@ int mcman_getdir2(int port, int slot, const char *dirname, int flags, int maxent
 		} while (1);
 
 		if (pos <= 0) {
-			if (pos == 0)
-				*p = 0;
-			else
-				p[-1] = 0;
+			p[(pos == 0) ? 0 : -1] = 0;
 		}
 		else {
 			mcman_curdirpath[pos] = 0;
@@ -1169,10 +1107,7 @@ int mcman_getdir2(int port, int slot, const char *dirname, int flags, int maxent
 		mcman_curdircluster = fse->cluster;
 		mcman_curdirlength = fse->length;
 
-		if ((fse->cluster == mcdi->rootdir_cluster) && (fse->dir_entry == 0))
-			mcman_curdirmaxent = 2;
-		else
-			mcman_curdirmaxent = 0;
+		mcman_curdirmaxent = ((fse->cluster == mcdi->rootdir_cluster) && (fse->dir_entry == 0)) ? 2 : 0;
 	}
 	else {
 		if (mcman_curdircluster < 0)
@@ -1325,9 +1260,7 @@ int mcman_unformat2(int port, int slot)
 	pageword_cnt = mcdi->pagesize >> 2;
 	blocks_on_card = mcdi->clusters_per_card / mcdi->clusters_per_block; //sp18
 
-	erase_value = 0xffffffff; //s6
-	if (!(mcdi->cardflags & CF_ERASE_ZEROES))
-		erase_value = 0x00000000;
+	erase_value = (!(mcdi->cardflags & CF_ERASE_ZEROES)) ? 0x00000000 : 0xffffffff; //s6
 
 	for (i = 0; i < pageword_cnt; i++)
 		mcman_pagebuf.word[i] = erase_value;

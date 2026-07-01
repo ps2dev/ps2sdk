@@ -183,9 +183,5 @@ iop_device_t *iopmgr_get_device(char *device)
  */
 int iopmgr_get_devicetype(char *device)
 {
-  if (iopmgr_get_iomandev(device) != NULL)
-    return(IOPMGR_DEVTYPE_IOMAN);
-  if (iopmgr_get_iomanxdev(device) != NULL)
-    return(IOPMGR_DEVTYPE_IOMANX);
-  return IOPMGR_DEVTYPE_INVALID;
+  return (iopmgr_get_iomandev(device) != NULL) ? IOPMGR_DEVTYPE_IOMAN : ((iopmgr_get_iomanxdev(device) != NULL) ? IOPMGR_DEVTYPE_IOMANX : IOPMGR_DEVTYPE_INVALID);
 }

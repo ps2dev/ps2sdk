@@ -235,10 +235,7 @@ int initHcdStructs(void)
 		endpointBuf[i].m_id = i;
 		endpointBuf[i].m_hcEd = &hcEdBufForEndpoint[i];
 		endpointBuf[i].m_prev = memPool->m_freeEpListEnd;
-		if ( memPool->m_freeEpListEnd )
-			memPool->m_freeEpListEnd->m_next = &endpointBuf[i];
-		else
-			memPool->m_freeEpListStart = &endpointBuf[i];
+		*(memPool->m_freeEpListEnd ? &(memPool->m_freeEpListEnd->m_next) : &(memPool->m_freeEpListStart)) = &endpointBuf[i];
 		endpointBuf[i].m_next = NULL;
 		memPool->m_freeEpListEnd = &endpointBuf[i];
 	}
@@ -251,10 +248,7 @@ int initHcdStructs(void)
 		deviceTreeBuf[i].m_id = (u8)i;
 		deviceTreeBuf[i].m_staticDeviceDescPtr = (u8 *)devDescBuf + (usbConfig.m_maxStaticDescSize * i);
 		deviceTreeBuf[i].m_prev = memPool->m_freeDeviceListEnd;
-		if ( memPool->m_freeDeviceListEnd )
-			memPool->m_freeDeviceListEnd->m_next = &deviceTreeBuf[i];
-		else
-			memPool->m_freeDeviceListStart = &deviceTreeBuf[i];
+		*(memPool->m_freeDeviceListEnd ? &(memPool->m_freeDeviceListEnd->m_next) : &(memPool->m_freeDeviceListStart)) = &deviceTreeBuf[i];
 		deviceTreeBuf[i].m_next = NULL;
 		memPool->m_freeDeviceListEnd = &deviceTreeBuf[i];
 	}
@@ -267,10 +261,7 @@ int initHcdStructs(void)
 	{
 		ioReqBuf[i].m_id = i;
 		ioReqBuf[i].m_prev = memPool->m_freeIoReqListEnd;
-		if ( memPool->m_freeIoReqListEnd )
-			memPool->m_freeIoReqListEnd->m_next = &ioReqBuf[i];
-		else
-			memPool->m_freeIoReqList = &ioReqBuf[i];
+		*(memPool->m_freeIoReqListEnd ? &(memPool->m_freeIoReqListEnd->m_next) : &(memPool->m_freeIoReqList)) = &ioReqBuf[i];
 		ioReqBuf[i].m_next = NULL;
 		memPool->m_freeIoReqListEnd = &ioReqBuf[i];
 	}

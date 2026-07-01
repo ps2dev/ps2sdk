@@ -1051,8 +1051,7 @@ static int xatapi_dev_devctl(
 			break;
 		case 0x4335:
 			retres1 = sceCdAtapi_BC();
-			if ( retres1 == 1 )
-				retres1 = 0;
+			retres1 = ( retres1 == 1 ) ? 0 : retres1;
 			break;
 		case 0x4336:
 			retres1 = sceCdAtapi_SC();
@@ -1554,10 +1553,7 @@ void xatapi_10_sceCdSpdAtaDmaEnd(void)
 	dev5_speed_regs->r_spd_if_ctrl |= 0x80;
 	dev5_speed_regs->r_spd_if_ctrl &= ~0x84;
 	ata_pio_mode(0);
-	if ( g_dma_mode_value )
-		ata_ultra_dma_mode(g_dma_speed_value);
-	else
-		ata_multiword_dma_mode(g_dma_speed_value);
+	(g_dma_mode_value ? ata_ultra_dma_mode : ata_multiword_dma_mode)(g_dma_speed_value);
 	g_should_wait_for_dma_flag = 0;
 	SetEventFlag(g_adma_evfid, 1);
 }
@@ -3553,10 +3549,7 @@ static int Mpeg2CheckPadding(char *buf, unsigned int bufsize, int *retptr, int *
 			{
 				if ( !bufoffs1[15] && bufoffs1[16] == 1 && (u8)bufoffs1[17] == 0xBB )
 					bufoffs2 = bufoffs1 + 38;
-				if ( !*bufoffs2 && !bufoffs2[1] && bufoffs2[2] == 1 && (u8)bufoffs2[3] != 0xBF && (bufoffs2[6] & 0x60) )
-				{
-					*pesscramblingpackptr += 1;
-				}
+				*pesscramblingpackptr += ( !*bufoffs2 && !bufoffs2[1] && bufoffs2[2] == 1 && (u8)bufoffs2[3] != 0xBF && (bufoffs2[6] & 0x60) ) ? 1 : 0;
 			}
 		}
 	}

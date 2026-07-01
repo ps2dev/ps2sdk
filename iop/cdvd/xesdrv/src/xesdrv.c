@@ -262,10 +262,7 @@ IRX_ID(MODNAME, 1, 1);
 
 int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-	if ( argc >= 0 )
-		return module_start(argc, argv, startaddr, mi);
-	else
-		return module_stop(argc, argv, startaddr, mi);
+	return (( argc >= 0 ) ? module_start : module_stop)(argc, argv, startaddr, mi);
 }
 
 static int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
@@ -292,9 +289,7 @@ static int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi
 	(void)startaddr;
 	(void)mi;
 
-	if ( iomanX_DelDrv(ESDRV.name) != 0 )
-		return MODULE_REMOVABLE_END;
-	return MODULE_NO_RESIDENT_END;
+	return ( iomanX_DelDrv(ESDRV.name) != 0 ) ? MODULE_REMOVABLE_END : MODULE_NO_RESIDENT_END;
 }
 
 static int esdrv_df_init(iomanX_iop_device_t *dev)
@@ -319,9 +314,7 @@ static int esdrv_df_exit(iomanX_iop_device_t *dev)
 {
 	(void)dev;
 
-	if ( DeleteSema(sema_id) != 0 )
-		return -1;
-	return 0;
+	return ( DeleteSema(sema_id) != 0 ) ? -1 : 0;
 }
 
 static int esdrv_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param)
@@ -1168,23 +1161,7 @@ static void EsAcsSetReg(u8 a1, u8 a2)
 
 static u8 EsDrvNnResultCheck(void)
 {
-	if ( EsAcsIsNnInvalid() != 0 )
-	{
-		return 4;
-	}
-	if ( EsAcsIsNnRevoked() != 0 )
-	{
-		return 3;
-	}
-	if ( EsAcsIsNnReplaced() != 0 )
-	{
-		return 2;
-	}
-	if ( EsAcsIsNnComplete() != 0 )
-	{
-		return 1;
-	}
-	return 0;
+	return ( EsAcsIsNnInvalid() != 0 ) ? 4 : (( EsAcsIsNnRevoked() != 0 ) ? 3 : (( EsAcsIsNnReplaced() != 0 ) ? 2 : (( EsAcsIsNnComplete() != 0 ) ? 1 : 0)));
 }
 
 static void EsDrvSoftReset(void)
@@ -1266,9 +1243,7 @@ static void EsDrvCmpltInitProcess(void)
 
 static u8 EsDrvRndNnCheck(void)
 {
-	if ( EsAcsIsBbStatusIdle() == 0 )
-		return -1;
-	return 0;
+	return ( EsAcsIsBbStatusIdle() == 0 ) ? -1 : 0;
 }
 
 static u8 EsDrvRandom(void)
@@ -1635,11 +1610,7 @@ esioctl2_func_5(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, v
 	(void)buf;
 	(void)buflen;
 
-	if ( EsDrvRndNnCheck() )
-		return -EINTR;
-	if ( EsDrvRandom() != 0 )
-		return -EIO;
-	return 0;
+	return ( EsDrvRndNnCheck() ) ? -EINTR : (( EsDrvRandom() != 0 ) ? -EIO : 0);
 }
 
 static int
@@ -1764,9 +1735,7 @@ esioctl2_func_c(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, v
 	(void)buf;
 	(void)buflen;
 
-	if ( EsDrvAaStop() != 0 )
-		return -ECHILD;
-	return 0;
+	return ( EsDrvAaStop() != 0 ) ? -ECHILD : 0;
 }
 
 static int
@@ -1807,7 +1776,5 @@ esioctl2_func_f(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, v
 	(void)buf;
 	(void)buflen;
 
-	if ( EsDrvBbStop() != 0 )
-		return -ECHILD;
-	return 0;
+	return ( EsDrvBbStop() != 0 ) ? -ECHILD : 0;
 }

@@ -25,14 +25,10 @@ void SpuSetCommonAttr(SpuCommonAttr *attr)
 	u16 attrtmp3;
 
 	left_1 = 0;
-	mask = attr->mask;
 	right_1 = 0;
 	mov_left_part1 = 0;
 	mov_right_part1 = 0;
-	if ( mask == 0 )
-	{
-		mask = 0xFFFFFFFF;
-	}
+	mask = ( attr->mask == 0 ) ? 0xFFFFFFFF : attr->mask;
 	if ( (mask & SPU_COMMON_MVOLL) != 0 )
 	{
 		if ( (mask & SPU_COMMON_MVOLMODEL) != 0 )
@@ -70,13 +66,7 @@ void SpuSetCommonAttr(SpuCommonAttr *attr)
 			int left_2;
 
 			left_2 = attr->mvol.left;
-			left_1 = 127;
-			if ( left_2 < 128 )
-			{
-				left_1 = 0;
-				if ( left_2 >= 0 )
-					left_1 = attr->mvol.left;
-			}
+			left_1 = ( left_2 < 128 ) ? (( left_2 >= 0 ) ? attr->mvol.left : 0) : 127;
 		}
 		_spu_RXX[20 * _spu_core + 944] = (left_1 & ~0x8000) | mov_left_part1;
 	}
@@ -121,13 +111,7 @@ void SpuSetCommonAttr(SpuCommonAttr *attr)
 			s16 right_3;
 
 			right_2 = attr->mvol.right;
-			right_3 = 127;
-			if ( right_2 < 128 )
-			{
-				right_3 = 0;
-				if ( right_2 >= 0 )
-					right_3 = attr->mvol.right;
-			}
+			right_3 = ( right_2 < 128 ) ? (( right_2 >= 0 ) ? attr->mvol.right : 0) : 127;
 			right_masked = right_3 & ~0x8000;
 		}
 		_spu_RXX[20 * _spu_core + 945] = right_masked | mov_right_part1;
@@ -143,28 +127,19 @@ void SpuSetCommonAttr(SpuCommonAttr *attr)
 	if ( (mask & SPU_COMMON_CDREV) != 0 )
 	{
 		regstmp1 = &_spu_RXX[512 * _spu_core];
-		if ( attr->cd.reverb == SPU_ON )
-			attrtmp1 = regstmp1[205] | 4;
-		else
-			attrtmp1 = regstmp1[205] & ~4;
+		attrtmp1 = ( attr->cd.reverb == SPU_ON ) ? (regstmp1[205] | 4) : (regstmp1[205] & ~4);
 		regstmp1[205] = attrtmp1;
 	}
 	if ( (mask & SPU_COMMON_CDMIX) != 0 )
 	{
 		regstmp2 = &_spu_RXX[512 * _spu_core];
-		if ( attr->cd.mix == SPU_ON )
-			attrtmp2 = regstmp2[205] | 1;
-		else
-			attrtmp2 = regstmp2[205] & ~1;
+		attrtmp2 = ( attr->cd.mix == SPU_ON ) ? (regstmp2[205] | 1) : (regstmp2[205] & ~1);
 		regstmp2[205] = attrtmp2;
 	}
 	if ( (mask & SPU_COMMON_EXTREV) != 0 )
 	{
 		regstmp3 = &_spu_RXX[512 * _spu_core];
-		if ( attr->ext.reverb == SPU_ON )
-			attrtmp3 = regstmp3[205] | 8;
-		else
-			attrtmp3 = regstmp3[205] & ~8;
+		attrtmp3 = ( attr->ext.reverb == SPU_ON ) ? (regstmp3[205] | 8) : (regstmp3[205] & ~8);
 		regstmp3[205] = attrtmp3;
 	}
 	if ( (mask & SPU_COMMON_EXTMIX) != 0 )

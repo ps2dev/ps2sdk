@@ -145,7 +145,6 @@ static int InitInitRmCmd(struct RmData *RmData);
 
 int _start(int argc, char *argv[])
 {
-	int result;
 	struct irx_export_table *export_table;
 
 	(void)argc;
@@ -161,13 +160,7 @@ int _start(int argc, char *argv[])
 	export_table = &_exp_rmman;
 #endif
 
-	if(RegisterLibraryEntries(export_table) == 0)
-	{
-		result = CreateMainThread() <= 0 ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
-	}
-	else result = MODULE_NO_RESIDENT_END;
-
-	return result;
+	return (RegisterLibraryEntries(export_table) == 0) ? (CreateMainThread() <= 0 ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END) : MODULE_NO_RESIDENT_END;
 }
 
 int rmmanInit(void)
@@ -362,10 +355,7 @@ static void MainThread(void *arg)
 					if(evfInfo.currBits == RM_EF_CLOSE_PORT)
 					{
 						RmData[port][slot].powerMode = 3;
-						if(InitRemote(&RmData[port][slot]) == 0)
-							RmData[port][slot].closed = 0;
-						else
-							RmData[port][slot].closed = 1;
+						RmData[port][slot].closed = (InitRemote(&RmData[port][slot]) == 0) ? 0 : 1;
 
 						SetEventFlag(RmData[port][slot].eventFlagID, RM_EF_CLOSE_PORT_DONE);
 					} else {
@@ -545,22 +535,13 @@ static int InitPollRmCmd(struct RmData *RmData)
 
 static int RmExecute(struct RmData *RmData)
 {
-	int result;
-
 	sio2_rm_transfer_init();
 	sio2_transfer(&RmData->sio2Data);
 	sio2_transfer_reset();
 
-	if(((RmData->sio2Data.stat6c >> 14) & 3) == 0)
-	{
-		RmData->connected = 1;
-		result = 1;
-	} else {
-		RmData->connected = 0;
-		result = 0;
-	}
+	RmData->connected = (((RmData->sio2Data.stat6c >> 14) & 3) == 0) ? 1 : 0;
 
-	return result;
+	return RmData->connected;
 }
 
 static int HandleRmTaskFailed(struct RmData *RmData)

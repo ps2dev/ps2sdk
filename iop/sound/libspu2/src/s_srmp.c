@@ -28,8 +28,7 @@ int SpuSetReverbModeParam(SpuReverbAttr *attr)
 	mask = attr->mask;
 	b_mode_is_7_to_9_bit0x10 = 0;
 	entry.flags = 0;
-	if ( mask == 0 )
-		mask = 0xFFFFFFFF;
+	mask = ( mask == 0 ) ? 0xFFFFFFFF : mask;
 	if ( (mask & SPU_REV_MODE) != 0 )
 	{
 		unsigned int mode;
@@ -91,15 +90,11 @@ int SpuSetReverbModeParam(SpuReverbAttr *attr)
 		b_mode_is_7_to_9_bit0x10 = 1;
 		if ( !b_r_mode_in_bounds )
 		{
-			if ( b_mode_is_7_to_9_bit0x8 )
-			{
-				flagstmp = entry.flags | 0x80;
-			}
-			else
+			if ( !b_mode_is_7_to_9_bit0x8 )
 			{
 				memcpy(&entry, &_spu_rev_param[_spu_rev_attr.mode], sizeof(entry));
-				flagstmp = 128;
 			}
+			flagstmp = b_mode_is_7_to_9_bit0x8 ? (entry.flags | 0x80) : 128;
 			entry.flags = flagstmp;
 		}
 		_spu_rev_attr.feedback = attr->feedback;

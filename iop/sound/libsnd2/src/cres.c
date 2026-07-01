@@ -37,15 +37,11 @@ void _SsSndCrescendo(s16 sep_no, s16 seq_no)
 			score_struct->m_unk4A = new_field_4a;
 			_SsVmGetSeqVol(sep_no | (seq_no << 8), &seq_left_vol, &seq_right_vol);
 			voll_clamped = (u16)seq_left_vol + vol_inc_by;
-			if ( voll_clamped >= 128 )
-				voll_clamped = 127;
-			if ( voll_clamped < 0 )
-				voll_clamped = 0;
+			voll_clamped = ( voll_clamped >= 128 ) ? 127 : voll_clamped;
+			voll_clamped = ( voll_clamped < 0 ) ? 0 : voll_clamped;
 			volr_clamped = (u16)seq_right_vol + vol_inc_by;
-			if ( volr_clamped >= 128 )
-				volr_clamped = 127;
-			if ( volr_clamped < 0 )
-				volr_clamped = 0;
+			volr_clamped = ( volr_clamped >= 128 ) ? 127 : volr_clamped;
+			volr_clamped = ( volr_clamped < 0 ) ? 0 : volr_clamped;
 			_SsVmSetSeqVol(sep_no | (seq_no << 8), voll_clamped, volr_clamped);
 			if ( (voll_clamped == 127 && volr_clamped == 127) || (voll_clamped == 0 && volr_clamped == 0) )
 			{

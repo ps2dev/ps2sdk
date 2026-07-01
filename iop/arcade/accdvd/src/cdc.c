@@ -32,9 +32,7 @@ static int cdc_errno_set(struct cdc_softc *cdcc, int ret)
 				int asc;
 
 				asc = ret & 0xFFFF;
-				ret = 48;
-				if ( asc == 8448 )
-					ret = 50;
+				ret = ( asc == 8448 ) ? 50 : 48;
 			}
 		}
 		else
@@ -107,9 +105,7 @@ static int cdc_unlock(struct cdc_softc *cdcc, int ret, acCdvdsifId fno)
 		int v6;
 		int eveid;
 
-		v6 = 0;
-		if ( ret < 0 )
-			v6 = -ret;
+		v6 = ( ret < 0 ) ? -ret : 0;
 		cdc_errno_set(cdcc, v6);
 		eveid = cdcc->syncid;
 		cdcc->stat = 0;
@@ -148,9 +144,7 @@ static void cdc_done(struct acd *acd, struct cdc_softc *arg, int ret)
 	int eveid;
 
 	(void)acd;
-	v3 = 0;
-	if ( ret < 0 )
-		v3 = -ret;
+	v3 = ( ret < 0 ) ? -ret : 0;
 	cdc_errno_set(arg, v3);
 	done = arg->done;
 	arg->done = 0;
@@ -200,9 +194,7 @@ int cdc_sync(int nonblocking)
 	{
 		return 1;
 	}
-	bits = 1;
-	if ( nonblocking < 0 )
-		bits = 3;
+	bits = ( nonblocking < 0 ) ? 3 : 1;
 	if ( Cdcc.syncid > 0 )
 		WaitEventFlag(Cdcc.syncid, bits, 1, &bits);
 	return ((bits & 0xFF) ^ 1) & 1;
@@ -229,8 +221,7 @@ int cdc_ready(int nonblocking)
 		if ( ret >= 0 )
 		{
 			v4 = acd_readcapacity();
-			if ( v4 < 0 )
-				v4 = 0;
+			v4 = ( v4 < 0 ) ? 0 : v4;
 			Cdcc.cdsize = v4;
 			ret = 2;
 		}
@@ -254,9 +245,7 @@ int cdc_ready(int nonblocking)
 			}
 			else
 			{
-				delay = 0;
-				if ( asc == 10496 )
-					delay = acd_delay();
+				delay = ( asc == 10496 ) ? acd_delay() : 0;
 			}
 		}
 		else
@@ -294,9 +283,7 @@ int cdc_medium()
 	v0 = acd_setup(&acd_data, 0, 0, 5000000);
 	v1 = acd_getmedium(v0);
 	ret = v1;
-	v3 = 0;
-	if ( v1 < 0 )
-		v3 = -v1;
+	v3 = ( v1 < 0 ) ? -v1 : 0;
 	cdc_errno_set(&Cdcc, v3);
 	switch ( ret )
 	{
@@ -350,30 +337,19 @@ int cdc_stat()
 		return Cdcc.stat;
 	}
 	v2 = acd_getstatus();
-	if ( v2 < 0 )
-		return 32;
-	return (v2 != 0) ? 2 : 0;
+	return ( v2 < 0 ) ? 32 : ((v2 != 0) ? 2 : 0);
 }
 
 int cdc_readtoc(unsigned char *toc, cdc_xfer_t xfer)
 {
-	acInt32 ret;
+	acInt32 err;
 	int v7;
 	int ret_v3;
 
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		ret = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			ret = 19;
-	}
-	else
-	{
-		ret = 17;
-	}
-	if ( ret )
-	{
-		Cdcc.error = ret;
+		Cdcc.error = err;
 		return 0;
 	}
 	v7 = -16;
@@ -401,24 +377,15 @@ int cdc_readtoc(unsigned char *toc, cdc_xfer_t xfer)
 
 int cdc_lookup(sceCdlFILE *fp, const char *name, int namlen, cdc_xfer_t xfer)
 {
-	acInt32 ret;
+	acInt32 err;
 	int ret_v2;
 	int ret_v3;
 	struct cdfs_dirent dirent;
 
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		ret = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			ret = 19;
-	}
-	else
-	{
-		ret = 17;
-	}
-	if ( ret )
-	{
-		Cdcc.error = ret;
+		Cdcc.error = err;
 		return 0;
 	}
 	ret_v2 = -16;
@@ -468,12 +435,8 @@ int cdc_lookup(sceCdlFILE *fp, const char *name, int namlen, cdc_xfer_t xfer)
 				fp->name[d_namlen + 1] = (dirent.d_vol & 0xFF) + 48;
 				fp->name[d_namlen + 2] = 0;
 				memcpy(fp->name, dirent.d_name, d_namlen);
-				ret_v3 = 0;
 			}
-			else
-			{
-				ret_v3 = cdfs_recover(ret_v4);
-			}
+			ret_v3 = ( ret_v4 >= 0 ) ? 0 : cdfs_recover(ret_v4);
 		}
 	}
 	return cdc_unlock(&Cdcc, ret_v3, AC_CDVDSIF_ID_LOOKUP);
@@ -482,24 +445,15 @@ int cdc_lookup(sceCdlFILE *fp, const char *name, int namlen, cdc_xfer_t xfer)
 int cdc_seek(unsigned int lsn, cdc_done_t done)
 {
 	acCdvdsifId fno;
-	acInt32 v5;
+	acInt32 err;
 	int v8;
 	int ret_v4;
 
 	fno = AC_CDVDSIF_ID_SEEK;
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		v5 = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			v5 = 19;
-	}
-	else
-	{
-		v5 = 17;
-	}
-	if ( v5 )
-	{
-		Cdcc.error = v5;
+		Cdcc.error = err;
 		return 0;
 	}
 	v8 = -16;
@@ -532,49 +486,18 @@ int cdc_seek(unsigned int lsn, cdc_done_t done)
 
 static int cdc_ioctl(acCdvdsifId fno, int state, int tmout, cdc_done_t done)
 {
-	acInt32 ret;
+	acInt32 err;
 	int ret_v2;
 	acCdvdsifId v12;
 	int ret_v4;
 
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		ret = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			ret = 19;
-	}
-	else
-	{
-		ret = 17;
-	}
-	if ( ret )
-	{
-		Cdcc.error = ret;
+		Cdcc.error = err;
 		return 0;
 	}
-	if ( state == 4 )
-	{
-		ret_v2 = 0;
-	}
-	else if ( state >= 5 )
-	{
-		if ( state == 6 )
-		{
-			ret_v2 = 1;
-		}
-		else
-		{
-			ret_v2 = 10;
-			if ( state == 16 )
-				ret_v2 = 18;
-		}
-	}
-	else
-	{
-		ret_v2 = 10;
-		if ( state == 1 )
-			ret_v2 = 2;
-	}
+	ret_v2 = ( state == 4 ) ? 0 : (( state >= 5 ) ? (( state == 6 ) ? 1 : (( state == 16 ) ? 18 : 10)) : (( state == 1 ) ? 2 : 10));
 	if ( fno )
 	{
 		v12 = -16;
@@ -644,9 +567,7 @@ int cdc_tray(int mode, u32 *traycnt)
 	{
 		int ret;
 
-		ret = 134;
-		if ( mode )
-			ret = 131;
+		ret = ( mode ) ? 131 : 134;
 		v5 = cdc_ioctl(AC_CDVDSIF_ID_TRAY, ret, 5000000, 0);
 	}
 	v8 = acd_gettray();
@@ -657,31 +578,21 @@ int cdc_tray(int mode, u32 *traycnt)
 
 int cdc_getpos()
 {
-	acInt32 v0;
+	acInt32 err;
 	int ret;
 
-	v0 = 17;
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		v0 = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			v0 = 19;
-	}
-	if ( v0 )
-	{
-		Cdcc.error = v0;
+		Cdcc.error = err;
 		return 0;
 	}
 	if ( Cdcc.fno )
 	{
-		if ( Cdcc.fno == AC_CDVDSIF_ID_READ )
-		{
-			ret = Cdcc.rd.pos << 11;
-		}
-		else
+		ret = ( Cdcc.fno == AC_CDVDSIF_ID_READ ) ? (Cdcc.rd.pos << 11) : 0;
+		if ( Cdcc.fno != AC_CDVDSIF_ID_READ )
 		{
 			Cdcc.error = 19;
-			ret = 0;
 		}
 	}
 	else
@@ -723,17 +634,14 @@ static int cdc_rmode(struct cdc_softc *cdcc, const sceCdRMode *mode)
 			int v9;
 
 			v9 = 3 * (speed - 1);
-			speed = v9 >> 2;
-			if ( v9 < 0 )
-				speed = (v9 + 3) >> 2;
+			speed = ( v9 < 0 ) ? ((v9 + 3) >> 2) : (v9 >> 2);
 		}
 		if ( acd_setspeed(acd, speed) >= 0 )
 			cdcc->rd.spindle = spindlctrl;
 	}
-	trycount = mode->trycount - 1;
 	acd_v7 = acd_setup(&cdcc->acd, 0, 0, 5000000);
-	if ( trycount < 0 )
-		trycount = 254;
+	trycount = mode->trycount - 1;
+	trycount = ( trycount < 0 ) ? 254 : trycount;
 	while ( acd_setretry(acd_v7, trycount) == -61 && acd_getretry(acd_v7) >= 0 )
 		;
 	return 0;
@@ -758,17 +666,11 @@ static void cdc_read_done(struct acd *acd, struct cdc_softc *arg, int ret)
 		cpos = arg->rd.pos;
 		size = arg->rd.size;
 		xfer = arg->rd.xfer;
-		npos = cpos + ret;
-		xlen = size - cpos;
 		buf = &arg->rd.buf[2048 * cpos];
 		bsize = arg->rd.bsize;
-		rlen = size - (cpos + ret);
-		if ( size < cpos + ret )
-			npos = arg->rd.size;
-		if ( bsize < rlen )
-			rlen = arg->rd.bsize;
-		if ( bsize < xlen )
-			xlen = arg->rd.bsize;
+		npos = ( size < (cpos + ret) ) ? size : (cpos + ret);
+		rlen = ( bsize < (size - (cpos + ret)) ) ? bsize : (size - (cpos + ret));
+		xlen = ( bsize < (size - cpos) ) ? bsize : (size - cpos);
 		arg->rd.pos = npos;
 		if ( xfer )
 		{
@@ -825,25 +727,16 @@ static void cdc_read_done(struct acd *acd, struct cdc_softc *arg, int ret)
 int cdc_read(unsigned int lsn, void *buf, int sectors, const sceCdRMode *mode, cdc_xfer_t xfer, cdc_done_t done)
 {
 	acCdvdsifId fno;
-	acInt32 v11;
+	acInt32 err;
 	int v14;
 	int ret_v4;
 	unsigned int n;
 
 	fno = AC_CDVDSIF_ID_READ;
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		v11 = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			v11 = 19;
-	}
-	else
-	{
-		v11 = 17;
-	}
-	if ( v11 )
-	{
-		Cdcc.error = v11;
+		Cdcc.error = err;
 		return 0;
 	}
 	v14 = -16;
@@ -861,15 +754,13 @@ int cdc_read(unsigned int lsn, void *buf, int sectors, const sceCdRMode *mode, c
 		fno = AC_CDVDSIF_ID_NOP;
 		return cdc_unlock(&Cdcc, ret_v4, fno);
 	}
-	n = 16;
 	if ( lsn >= Cdcc.cdsize )
 	{
 		ret_v4 = -34;
 	}
 	else
 	{
-		if ( lsn + sectors >= Cdcc.cdsize )
-			sectors = Cdcc.cdsize - lsn;
+		sectors = ( lsn + sectors >= Cdcc.cdsize ) ? (Cdcc.cdsize - lsn) : sectors;
 		Cdcc.rd.buf = (acUint8 *)buf;
 		Cdcc.done = done;
 		Cdcc.rd.size = sectors;
@@ -878,10 +769,8 @@ int cdc_read(unsigned int lsn, void *buf, int sectors, const sceCdRMode *mode, c
 		Cdcc.rd.xfer = xfer;
 		Cdcc.rd.pos = 0;
 		Cdcc.rd.bank = 0;
-		if ( xfer )
-			buf = Cdcc.buf;
-		if ( (unsigned int)sectors < 0x10 )
-			n = sectors;
+		buf = xfer ? Cdcc.buf : Cdcc.rd.buf;
+		n = ( (unsigned int)sectors < 0x10 ) ? sectors : 16;
 		ret_v4 = cdc_rmode(&Cdcc, mode);
 		// cppcheck-suppress knownConditionTrueFalse
 		if ( ret_v4 < 0 )
@@ -961,9 +850,7 @@ static void cdc_stream_done(struct acd *acd, struct cdc_softc *arg, int ret)
 		size = arg->st.size;
 		bsize = arg->st.bsize;
 		cdsize = arg->cdsize;
-		head = arg->st.head + v4;
-		if ( head >= size )
-			head = 0;
+		head = ( (arg->st.head + v4) >= size ) ? 0 : (arg->st.head + v4);
 		lsn = arg->st.lsn + v4;
 		if ( (flag & 0x10) != 0 )
 		{
@@ -980,34 +867,13 @@ static void cdc_stream_done(struct acd *acd, struct cdc_softc *arg, int ret)
 				flag = (flag | 6) ^ 2;
 			}
 		}
-		xlen = tail - head;
-		if ( head >= tail )
-			xlen = size - head;
+		xlen = ( head >= tail ) ? (size - head) : (tail - head);
+		xlen = ( bsize < xlen ) ? bsize : xlen;
 		v15 = lsn + xlen;
-		if ( bsize < xlen )
-		{
-			xlen = bsize;
-			v15 = lsn + bsize;
-		}
-		if ( v15 >= cdsize )
-			xlen = cdsize - lsn;
+		xlen = ( v15 >= cdsize ) ? (cdsize - lsn) : xlen;
 		buf = &arg->st.buf[2048 * head];
 		size_v12 = flag & 0x28;
-		if ( size_v12 == 32 )
-		{
-			arg->st.flag = flag & 0xFFFFFFFD;
-		}
-		else
-		{
-			if ( ((flag & 0x28) >= 0x21) ? (size_v12 != 40) : (size_v12 != 8) )
-			{
-				arg->st.flag = flag;
-			}
-			else
-			{
-				arg->st.flag = flag & 4;
-			}
-		}
+		arg->st.flag = ( size_v12 == 32 ) ? (flag & 0xFFFFFFFD) : (( ((flag & 0x28) >= 0x21) ? (size_v12 != 40) : (size_v12 != 8) ) ? flag : (flag & 4));
 		arg->st.head = head;
 		arg->st.lsn = lsn;
 		CpuResumeIntr(state);
@@ -1088,15 +954,11 @@ static int cdc_stream(struct cdc_softc *cdcc)
 	CpuSuspendIntr(&state);
 	head = cdcc->st.head;
 	tail = cdcc->st.tail;
-	xlen = tail - head;
-	if ( head >= tail )
-		xlen = cdcc->st.size - head;
 	flag = cdcc->st.flag;
-	if ( cdcc->st.bsize < xlen )
-		xlen = cdcc->st.bsize;
+	xlen = ( head >= tail ) ? (cdcc->st.size - head) : (tail - head);
+	xlen = ( cdcc->st.bsize < xlen ) ? cdcc->st.bsize : xlen;
+	xlen = ( (flag & 6) != 0 || (flag & 0x28) != 0 || (flag & 1) == 0 ) ? 0 : xlen;
 	buf = &cdcc->st.buf[2048 * head];
-	if ( (flag & 6) != 0 || (flag & 0x28) != 0 || (flag & 1) == 0 )
-		xlen = 0;
 	lsn = 0;
 	if ( xlen )
 	{
@@ -1142,7 +1004,6 @@ static int cdc_stream(struct cdc_softc *cdcc)
 int cdc_reads(void *buf, int sectors, int mode, int *errp, cdc_xfer_t xfer)
 {
 	int v5;
-	int v7;
 	unsigned char *v11;
 	acInt32 rlen;
 	int ret_v8;
@@ -1170,21 +1031,14 @@ int cdc_reads(void *buf, int sectors, int mode, int *errp, cdc_xfer_t xfer)
 	resbits = (u32 *)&v33;
 	while ( v5 > 0 )
 	{
-		acInt32 v6;
+		acInt32 err;
 		acInt32 ret;
 		int len;
 
-		v6 = 17;
-		if ( Cdcc.lockid )
+		err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+		if ( err )
 		{
-			v7 = WaitSema(Cdcc.lockid);
-			v6 = 0;
-			if ( v7 )
-				v6 = 19;
-		}
-		if ( v6 )
-		{
-			Cdcc.error = v6;
+			Cdcc.error = err;
 			break;
 		}
 		ret = 27;
@@ -1220,9 +1074,7 @@ int cdc_reads(void *buf, int sectors, int mode, int *errp, cdc_xfer_t xfer)
 			}
 			if ( ((ret_v8 & 4) == 0) && (head == rlen) )
 			{
-				v17 = 0;
-				if ( rlen_v10 )
-					v17 = -34;
+				v17 = ( rlen_v10 ) ? -34 : 0;
 				ret = v17;
 			}
 			else
@@ -1233,10 +1085,8 @@ int cdc_reads(void *buf, int sectors, int mode, int *errp, cdc_xfer_t xfer)
 				rlen_v13 = 0;
 				if ( rlen >= head )
 				{
-					xlen = Cdcc.st.size - rlen;
 					tmp = v11;
-					if ( v5 < Cdcc.st.size - rlen )
-						xlen = v5;
+					xlen = ( v5 < Cdcc.st.size - rlen ) ? v5 : (Cdcc.st.size - rlen);
 					len = v5 - xlen;
 					v11 += 2048 * xlen;
 					rlen_v13 = xlen;
@@ -1247,9 +1097,7 @@ int cdc_reads(void *buf, int sectors, int mode, int *errp, cdc_xfer_t xfer)
 						if ( v21 >= 0 )
 						{
 							CpuSuspendIntr(&state_2);
-							ret_v17 = rlen + rlen_v13;
-							if ( rlen + rlen_v13 >= Cdcc.st.size )
-								ret_v17 = 0;
+							ret_v17 = ( rlen + rlen_v13 >= Cdcc.st.size ) ? 0 : (rlen + rlen_v13);
 							Cdcc.st.tail = ret_v17;
 							Cdcc.st.flag &= ~4u;
 							CpuResumeIntr(state_2);
@@ -1337,24 +1185,15 @@ int cdc_reads(void *buf, int sectors, int mode, int *errp, cdc_xfer_t xfer)
 
 int cdc_starts(unsigned int lsn, const sceCdRMode *mode)
 {
-	acInt32 v4;
+	acInt32 err;
 	int v7;
 	int ret;
 	acSpl state;
 
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		v4 = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			v4 = 19;
-	}
-	else
-	{
-		v4 = 17;
-	}
-	if ( v4 )
-	{
-		Cdcc.error = v4;
+		Cdcc.error = err;
 		return 0;
 	}
 	v7 = 27;
@@ -1405,7 +1244,7 @@ int cdc_starts(unsigned int lsn, const sceCdRMode *mode)
 
 int cdc_stops()
 {
-	acInt32 v0;
+	acInt32 err;
 	int sync;
 	int ret;
 	int sync_v5;
@@ -1413,16 +1252,10 @@ int cdc_stops()
 	int state;
 	u32 pattern;
 
-	v0 = 17;
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		v0 = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			v0 = 19;
-	}
-	if ( v0 )
-	{
-		Cdcc.error = v0;
+		Cdcc.error = err;
 		return 0;
 	}
 	sync = 27;
@@ -1463,7 +1296,7 @@ int cdc_stops()
 
 int cdc_pauses()
 {
-	acInt32 v0;
+	acInt32 err;
 	int sync;
 	int ret;
 	int sync_v5;
@@ -1471,16 +1304,10 @@ int cdc_pauses()
 	int state;
 	u32 pattern;
 
-	v0 = 17;
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		v0 = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			v0 = 19;
-	}
-	if ( v0 )
-	{
-		Cdcc.error = v0;
+		Cdcc.error = err;
 		return 0;
 	}
 	sync = 27;
@@ -1523,21 +1350,15 @@ int cdc_pauses()
 
 int cdc_resumes()
 {
-	acInt32 v0;
+	acInt32 err;
 	int ret_v2;
 	int ret_v3;
 	acSpl state;
 
-	v0 = 17;
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		v0 = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			v0 = 19;
-	}
-	if ( v0 )
-	{
-		Cdcc.error = v0;
+		Cdcc.error = err;
 		return 0;
 	}
 	ret_v2 = 27;
@@ -1573,32 +1394,21 @@ int cdc_resumes()
 		if ( (Cdcc.st.flag & 2) == 0 && (Cdcc.st.flag & 0x20) != 0 )
 			Cdcc.st.flag ^= 0x20u;
 		CpuResumeIntr(state);
-		ret_v3 = 0;
-		if ( (flag & 0x20) != 0 )
-			ret_v3 = cdc_stream(&Cdcc);
+		ret_v3 = ( (flag & 0x20) != 0 ) ? cdc_stream(&Cdcc) : 0;
 	}
 	return cdc_unlocks(&Cdcc, ret_v3, AC_CDVDSIF_ID_RESUMES);
 }
 
 int cdc_inits(void *buf, unsigned int size, unsigned int bsize)
 {
-	acInt32 ret;
+	acInt32 err;
 	int v9;
 	int ret_v3;
 
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		ret = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			ret = 19;
-	}
-	else
-	{
-		ret = 17;
-	}
-	if ( ret )
-	{
-		Cdcc.error = ret;
+		Cdcc.error = err;
 		return 0;
 	}
 	v9 = -16;
@@ -1628,21 +1438,15 @@ int cdc_inits(void *buf, unsigned int size, unsigned int bsize)
 
 int cdc_seeks(unsigned int lsn)
 {
-	acInt32 v2;
+	acInt32 err;
 	int v5;
 	int ret;
 	acSpl state;
 
-	v2 = 17;
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		v2 = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			v2 = 19;
-	}
-	if ( v2 )
-	{
-		Cdcc.error = v2;
+		Cdcc.error = err;
 		return 0;
 	}
 	v5 = 27;
@@ -1671,20 +1475,14 @@ int cdc_seeks(unsigned int lsn)
 
 int cdc_stats()
 {
-	acInt32 v0;
+	acInt32 err;
 	int ret;
 	acSpl state;
 
-	v0 = 17;
-	if ( Cdcc.lockid )
+	err = Cdcc.lockid ? (WaitSema(Cdcc.lockid) ? 19 : 0) : 17;
+	if ( err )
 	{
-		v0 = 0;
-		if ( WaitSema(Cdcc.lockid) )
-			v0 = 19;
-	}
-	if ( v0 )
-	{
-		Cdcc.error = v0;
+		Cdcc.error = err;
 		return 0;
 	}
 	ret = 27;
@@ -1702,20 +1500,7 @@ int cdc_stats()
 	if ( ret > 0 )
 	{
 		CpuSuspendIntr(&state);
-		ret = Cdcc.st.size;
-		if ( Cdcc.st.head == Cdcc.st.tail )
-		{
-			if ( (Cdcc.st.flag & 4) == 0 )
-				ret = 0;
-		}
-		else if ( Cdcc.st.head < Cdcc.st.tail )
-		{
-			ret = Cdcc.st.size + Cdcc.st.head - Cdcc.st.tail;
-		}
-		else
-		{
-			ret = Cdcc.st.head - Cdcc.st.tail;
-		}
+		ret = ( Cdcc.st.head == Cdcc.st.tail ) ? (( (Cdcc.st.flag & 4) == 0 ) ? 0 : Cdcc.st.size) : (( Cdcc.st.head < Cdcc.st.tail ) ? (Cdcc.st.size + Cdcc.st.head - Cdcc.st.tail) : (Cdcc.st.head - Cdcc.st.tail));
 		CpuResumeIntr(state);
 	}
 	if ( Cdcc.fno == AC_CDVDSIF_ID_STATS )
@@ -1728,9 +1513,7 @@ int cdc_stats()
 	{
 		SignalSema(Cdcc.lockid);
 	}
-	if ( ret < 0 )
-		return 0;
-	return ret;
+	return ( ret < 0 ) ? 0 : ret;
 }
 
 int cdc_module_status()
@@ -1739,10 +1522,7 @@ int cdc_module_status()
 	int state;
 
 	CpuSuspendIntr(&state);
-	if ( Cdcc.fno )
-		ret = 2;
-	else
-		ret = Cdcc.lockid > 0;
+	ret = ( Cdcc.fno ) ? 2 : (Cdcc.lockid > 0);
 	CpuResumeIntr(state);
 	return ret;
 }
@@ -1774,16 +1554,7 @@ int cdc_module_start(int argc, char **argv)
 		int ret_v3;
 
 		ret_v3 = mods_120[v6].status();
-		ret_v4 = ret_v3;
-		if ( ret_v3 <= 0 )
-		{
-			if ( !ret_v3 )
-				ret_v4 = mods_120[v6].start(argc, argv);
-		}
-		else
-		{
-			ret_v4 = 0;
-		}
+		ret_v4 = ( ret_v3 <= 0 ) ? ((!ret_v3) ? mods_120[v6].start(argc, argv) : ret_v3) : 0;
 		if ( ret_v4 < 0 )
 		{
 			printf("cdc:init_modules:S:%d: error %d\n", index, ret_v4);
@@ -1860,11 +1631,7 @@ int cdc_module_stop()
 		int ret_v5;
 
 		ret_v5 = mods_120[i].status();
-		lockid_v6 = ret_v5;
-		if ( ret_v5 < 0 )
-		{
-			lockid_v6 = 0;
-		}
+		lockid_v6 = ( ret_v5 < 0 ) ? 0 : ret_v5;
 		if ( ret_v5 > 0 )
 		{
 			lockid_v6 = mods_120[i].stop();

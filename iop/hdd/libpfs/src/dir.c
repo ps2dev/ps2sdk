@@ -173,8 +173,7 @@ pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo_t *b
 	dcache=pfsGetDentry(dir, filename, &dentry, &size, 1);
 	if (dcache != NULL){
 		len=dentry->aLen & 0xFFF;
-		if (dentry->pLen)
-			len-=(dentry->pLen + 11) & 0x1FC;
+		len-=(dentry->pLen) ? ((dentry->pLen + 11) & 0x1FC) : 0;
 		dentry->aLen=(dentry->aLen & FIO_S_IFMT) | ((dentry->aLen & 0xFFF) - len);
 		dentry=(pfs_dentry_t *)((u8*)dentry + (dentry->aLen & 0xFFF));
 	}else{
@@ -221,8 +220,7 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 					dnext->inode=0;
 					dnext->pLen=0;
 
-					if (size+aLen >= clink->u.inode->size)
-							clink->u.inode->size -= aLen;
+					clink->u.inode->size -= (size+aLen >= clink->u.inode->size) ? aLen : 0;
 				}
 				return c;
 			}
@@ -335,8 +333,6 @@ pfs_cache_t *pfsInodeGetFile(pfs_mount_t *pfsMount, pfs_cache_t *clink,
 
 void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo_t *bi, u16 mode, u16 uid, u16 gid)
 {
-	u32 val;
-
 	memset(ci->u.inode, 0, pfsMetaSize);
 
 	ci->u.inode->magic=PFS_SEGD_MAGIC;
@@ -353,16 +349,10 @@ void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo_t *bi, u16 mode, u16 uid, u16 g
 	ci->u.inode->uid=uid;
 	ci->u.inode->gid=gid;
 
-	if ((mode & FIO_S_IFMT) == FIO_S_IFDIR){
-		ci->u.inode->attr=0xA0;
-		ci->u.inode->size=sizeof(pfs_dentry_t);
-		val=2;
-	}else{
-		ci->u.inode->size=0;
-		val=1;
-	}
-	ci->u.inode->number_data=val;
-	ci->u.inode->number_blocks=val;
+	ci->u.inode->attr=((mode & FIO_S_IFMT) == FIO_S_IFDIR) ? 0xA0 : ci->u.inode->attr;
+	ci->u.inode->size=((mode & FIO_S_IFMT) == FIO_S_IFDIR) ? sizeof(pfs_dentry_t) : 0;
+	ci->u.inode->number_data=((mode & FIO_S_IFMT) == FIO_S_IFDIR) ? 2 : 1;
+	ci->u.inode->number_blocks=((mode & FIO_S_IFMT) == FIO_S_IFDIR) ? 2 : 1;
 
 	pfsGetTime(&ci->u.inode->ctime);
 	memcpy(&ci->u.inode->atime, &ci->u.inode->ctime, sizeof(pfs_datetime_t));
@@ -559,11 +549,7 @@ int pfsCheckAccess(pfs_cache_t *clink, int flags)
 	if ((clink->pfsMount->flags & FIO_MT_RDONLY) && (flags & FIO_O_WRONLY))
 		return -EROFS;
 
-	if (((clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR) &&
-		((clink->u.inode->mode & 0111) == 0))
-		mode=6;
-	else
-		mode=7;
+	mode = (((clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR) && ((clink->u.inode->mode & 0111) == 0)) ? 6 : 7;
 	return ((mode & flags) & 7) == flags ? 0 : -EACCES;
 }
 
@@ -683,11 +669,9 @@ void pfsFreeZones(pfs_cache_t *pfree)
 				b.count = j;
 				b.number = bi->number +
 					bi->count;
-				j = 0;
 				clink->flags |= PFS_CACHE_FLAG_DIRTY;
 			}
-			else
-				j -= bi->count;
+			j -= (j < bi->count) ? j : bi->count;
 		}
 	}
 

@@ -63,14 +63,11 @@ int _start(int argc, char **argv)
 	int priority;
 
 	maxnode = (argc >= 2) ? strtol(argv[1], 0, 10) : 0;
-	if ( maxnode < 2 || maxnode >= 16 )
-		maxnode = 2;
+	maxnode = ( maxnode < 2 || maxnode >= 16 ) ? 2 : maxnode;
 	mynode = (argc >= 3) ? strtol(argv[2], 0, 10) : 0;
-	if ( mynode <= 0 || maxnode < mynode )
-		mynode = 1;
+	mynode = ( mynode <= 0 || maxnode < mynode ) ? 1 : mynode;
 	priority = (argc >= 4) ? strtol(argv[3], 0, 10) : 0;
-	if ( priority < 9 || priority >= 124 )
-		priority = 28;
+	priority = ( priority < 9 || priority >= 124 ) ? 28 : priority;
 	gbBRE = (argc >= 5 && toupper(*argv[4]) == 'N' && toupper(argv[4][1]) == 'B' && toupper(argv[4][2]) == 'R') ? 0 : 1;
 	printf("== S147LINK (%d/%d)@%d ", mynode, maxnode, priority);
 	if ( !gbBRE )
@@ -92,16 +89,14 @@ static void T_fix(CL_COM *io_pCommon)
 		io_pCommon->T_out = 0;
 		io_pCommon->T_in = io_pCommon->T_out;
 		io_pCommon->rbfix += 1;
-		if ( !io_pCommon->rbfix )
-			io_pCommon->rbfix -= 1;
+		io_pCommon->rbfix -= ( !io_pCommon->rbfix ) ? 1 : 0;
 	}
 	if ( io_pCommon->T_remain == 0x100 && io_pCommon->T_in != io_pCommon->T_out )
 	{
 		io_pCommon->T_out = 0;
 		io_pCommon->T_in = io_pCommon->T_out;
 		io_pCommon->rbfix += 1;
-		if ( !io_pCommon->rbfix )
-			io_pCommon->rbfix -= 1;
+		io_pCommon->rbfix -= ( !io_pCommon->rbfix ) ? 1 : 0;
 	}
 }
 
@@ -186,8 +181,7 @@ static int clink_InterruptHandler(void *userdata)
 							else if ( io_pCommon->R_pd[i] )
 							{
 								io_pCommon->R_lost[i] += 1;
-								if ( !io_pCommon->R_lost[i] )
-									io_pCommon->R_lost[i] += 1;
+								io_pCommon->R_lost[i] += ( !io_pCommon->R_lost[i] ) ? 1 : 0;
 							}
 							else
 							{
@@ -226,8 +220,7 @@ static int clink_InterruptHandler(void *userdata)
 							else if ( io_pCommon->R_pd[i] )
 							{
 								io_pCommon->R_lost[i] += 1;
-								if ( !io_pCommon->R_lost[i] )
-									io_pCommon->R_lost[i] += 1;
+								io_pCommon->R_lost[i] += ( !io_pCommon->R_lost[i] ) ? 1 : 0;
 							}
 							else
 							{
@@ -338,8 +331,7 @@ static int cl_mread(void *dstptr, int count)
 		cl_info.R_out = 0;
 		cl_info.R_in = 0;
 		cl_info.rbfix += 1;
-		if ( !cl_info.rbfix )
-			cl_info.rbfix -= 1;
+		cl_info.rbfix -= ( !cl_info.rbfix ) ? 1 : 0;
 		count = 0;
 	}
 	if ( cl_info.R_remain == 512 && cl_info.R_in != cl_info.R_out )
@@ -347,8 +339,7 @@ static int cl_mread(void *dstptr, int count)
 		cl_info.R_out = 0;
 		cl_info.R_in = 0;
 		cl_info.rbfix += 1;
-		if ( !cl_info.rbfix )
-			cl_info.rbfix -= 1;
+		cl_info.rbfix -= ( !cl_info.rbfix ) ? 1 : 0;
 		count = 0;
 	}
 	CpuResumeIntr(state);
@@ -782,10 +773,8 @@ static void *dispatch(int fno, void *buf, int size)
 	*(u32 *)buf |= (cl_info.online ? 0x10000 : 0);
 	for ( i = 1; i < cl_info.maxnode; i += 1 )
 	{
-		if ( cl_info.T_error[i] )
-			*(u32 *)buf |= 0x10000 << i;
-		if ( cl_info.R_lost[i] )
-			*(u32 *)buf |= 0x10000 << i;
+		*(u32 *)buf |= ( cl_info.T_error[i] ) ? (0x10000 << i) : 0;
+		*(u32 *)buf |= ( cl_info.R_lost[i] ) ? (0x10000 << i) : 0;
 	}
 	FlushDcache();
 	return buf;

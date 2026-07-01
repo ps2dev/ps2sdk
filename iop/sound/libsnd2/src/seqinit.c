@@ -118,11 +118,7 @@ s16 _SsInitSoundSeq(s16 seq_no, s16 vab_id, u8 *addr)
 		v27 = 10 * score_struct->m_resolution_of_quarter_note * score_struct->m_tempo / tmp2;
 		v28 = 10 * score_struct->m_resolution_of_quarter_note * score_struct->m_tempo % tmp2;
 		score_struct->m_unk52 = -1;
-		score_struct->m_unk54 = v27;
-		if ( (unsigned int)(30 * tmp1) < v28 )
-		{
-			score_struct->m_unk54 = v27 + 1;
-		}
+		score_struct->m_unk54 =  ( (unsigned int)(30 * tmp1) < v28 ) ? (v27 + 1) : v27;
 	}
 	score_struct->m_unk56 = score_struct->m_unk54;
 	return 0;

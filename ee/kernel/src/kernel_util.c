@@ -40,11 +40,7 @@ s32 WaitSemaEx(s32 semaid, int signal, u64 *timeout)
     if (timeout != NULL && *timeout == 0)
     {
         ret = PollSema(semaid);
-        if (ret < 0)
-        {
-            return ret;
-        }
-        return semaid;
+        return (ret < 0) ? ret : semaid;
     }
 
     if (timeout != NULL)

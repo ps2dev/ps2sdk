@@ -12,16 +12,8 @@
 
 void SsSetTickMode(int tick_mode)
 {
-	if ( (tick_mode & SS_NOTICK) != 0 )
-	{
-		_snd_seq_tick_env.m_manual_tick = 1;
-		_snd_seq_tick_env.m_tick_mode = tick_mode & 0xFFF;
-	}
-	else
-	{
-		_snd_seq_tick_env.m_manual_tick = 0;
-		_snd_seq_tick_env.m_tick_mode = tick_mode;
-	}
+	_snd_seq_tick_env.m_manual_tick = ( (tick_mode & SS_NOTICK) != 0 ) ? 1 : 0;
+	_snd_seq_tick_env.m_tick_mode = ( (tick_mode & SS_NOTICK) != 0 ) ? (tick_mode & 0xFFF) : tick_mode;
 	switch ( _snd_seq_tick_env.m_tick_mode )
 	{
 		case SS_NOTICK0:

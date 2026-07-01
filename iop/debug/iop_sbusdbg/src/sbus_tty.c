@@ -80,9 +80,7 @@ static int ttyfs_write(iop_file_t *file, void *ptr, int size) {
     {
         int toWrite;
 
-        toWrite = (size - bCount);
-        if(toWrite > 64)
-            toWrite = 64;
+        toWrite = ((size - bCount) > 64) ? 64 : (size - bCount);
 
         memcpy(temp, &(((u8 *)ptr)[bCount]), toWrite);
         temp[toWrite] = '\0';

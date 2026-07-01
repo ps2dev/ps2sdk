@@ -66,10 +66,7 @@ int GetDelay(int device)
 		return -1;
 	}
 	v1 = delay_table[device];
-	if (v1 == NULL) {
-		return -1;
-	}
-	return *v1;
+	return (v1 == NULL) ? -1 : *v1;
 }
 
 static vu32 *base_address_table[13] =
@@ -112,10 +109,7 @@ int GetBaseAddress(int device)
 		return -1;
 	}
 	v1 = base_address_table[device];
-	if (v1 == NULL) {
-		return -1;
-	}
-	return *v1;
+	return (v1 == NULL) ? -1 : *v1;
 }
 
 int SetRecoveryTime(unsigned int value)

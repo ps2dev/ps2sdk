@@ -44,16 +44,12 @@ void _SsSndTempo(s16 sep_no, s16 seq_no)
 
 				v16 = m_unk94 - m_unk4E;
 				m_unkAC = score_struct->m_unkAC;
-				score_struct->m_unk94 = v16;
-				if ( m_unkAC < v16 )
-					score_struct->m_unk94 = m_unkAC;
+				score_struct->m_unk94 = ( m_unkAC < v16 ) ? m_unkAC : v16;
 			}
 		}
 		else
 		{
-			score_struct->m_unk94 = v14;
-			if ( v14 < m_unkAC )
-				score_struct->m_unk94 = m_unkAC;
+			score_struct->m_unk94 = ( v14 < m_unkAC ) ? m_unkAC : v14;
 		}
 	}
 	else if ( m_unk4E > 0 )
@@ -65,10 +61,7 @@ void _SsSndTempo(s16 sep_no, s16 seq_no)
 			return;
 		v9 = score_struct->m_unk94;
 		v10 = score_struct->m_unkAC;
-		if ( v10 < v9 )
-			score_struct->m_unk94 = v9 - 1;
-		else if ( v9 < v10 )
-			score_struct->m_unk94 = v9 + 1;
+		score_struct->m_unk94 = ( v10 < v9 ) ? (v9 - 1) : (( v9 < v10 ) ? (v9 + 1) : score_struct->m_unk94);
 	}
 	else
 	{
@@ -77,9 +70,7 @@ void _SsSndTempo(s16 sep_no, s16 seq_no)
 	calc = 10 * score_struct->m_resolution_of_quarter_note * score_struct->m_unk94 / (unsigned int)(60 * VBLANK_MINUS);
 	if ( (60 * VBLANK_MINUS) == 0 )
 		__builtin_trap();
-	score_struct->m_unk54 = calc;
-	if ( (int)calc <= 0 )
-		score_struct->m_unk54 = 1;
+	score_struct->m_unk54 = ( (int)calc <= 0 ) ? 1 : calc;
 	if ( !score_struct->m_unkA8 || score_struct->m_unk94 == score_struct->m_unkAC )
 	{
 		score_struct->m_flags &= ~0x40u;

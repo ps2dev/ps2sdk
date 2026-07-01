@@ -32,11 +32,5 @@ int acTimerEntry(int argc, char **argv)
 	int ret;
 
 	ret = acTimerModuleStart(argc, argv);
-	if ( ret < 0 )
-	{
-		return ret;
-	}
-	if ( RegisterLibraryEntries(&_exp_actimer) != 0 )
-		return -16;
-	return 0;
+	return ( ret < 0 ) ? ret : (( RegisterLibraryEntries(&_exp_actimer) != 0 ) ? -16 : 0);
 }

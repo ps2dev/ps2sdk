@@ -88,12 +88,6 @@ void SpuGetCommonMasterVolumeAttr(s16 *mvol_left, s16 *mvol_right, s16 *mvolmode
 	}
 	*mvolmode_left = v4;
 	*mvolmode_right = v8;
-	if ( v6 < 0x4000u )
-		*mvol_left = v6;
-	else
-		*mvol_left = v6 + 0x8000;
-	if ( v7 < 0x4000u )
-		*mvol_right = v7;
-	else
-		*mvol_right = v7 + 0x8000;
+	*mvol_left = ( v6 < 0x4000u ) ? v6 : (v6 + 0x8000);
+	*mvol_right = ( v7 < 0x4000u ) ? v7 : (v7 + 0x8000);
 }

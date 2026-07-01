@@ -254,22 +254,9 @@ int graph_set_screen(int x, int y, int width, int height)
 	}
 
 	// Set the display attributes but use the user defined height.
-	if (graph_filter)
-	{
-
-		// For flicker filter, we need to get add an extra line.
-		*GS_REG_DISPLAY1 = GS_SET_DISPLAY(dx,dy,graph_magh-1,graph_magv-1,dw-1,height-1);
-		*GS_REG_DISPLAY2 = GS_SET_DISPLAY(dx,dy,graph_magh-1,graph_magv-1,dw-1,height-2);
-
-	}
-	else
-	{
-
-		*GS_REG_DISPLAY1 = GS_SET_DISPLAY(dx,dy,graph_magh-1,graph_magv-1,dw-1,height-1);
-		*GS_REG_DISPLAY2 = GS_SET_DISPLAY(dx,dy,graph_magh-1,graph_magv-1,dw-1,height-1);
-
-	}
-
+	// For flicker filter, we need to get add an extra line.
+	*GS_REG_DISPLAY1 = GS_SET_DISPLAY(dx,dy,graph_magh-1,graph_magv-1,dw-1,height-1);
+	*GS_REG_DISPLAY2 = GS_SET_DISPLAY(dx,dy,graph_magh-1,graph_magv-1,dw-1,height-(graph_filter ? 2 : 1));
 	return 0;
 
 }
@@ -286,21 +273,8 @@ void graph_set_framebuffer_filtered(int fbp, int width, int psm, int x, int y)
 
 void graph_set_framebuffer(int context, int fbp, int width, int psm, int x, int y)
 {
-
-	if (context == 0)
-	{
-
-		*GS_REG_DISPFB1 = GS_SET_DISPFB(fbp>>11,width>>6,psm,x,y);
-
-	}
-	else
-	{
-
-		// For flicker filter, we need to offset the lines by 1 for the other read circuit.
-		*GS_REG_DISPFB2 = GS_SET_DISPFB(fbp>>11,width>>6,psm,x,y);
-
-	}
-
+	// For flicker filter, we need to offset the lines by 1 for the other read circuit.
+	*((context == 0) ? GS_REG_DISPFB1 : GS_REG_DISPFB2) = GS_SET_DISPFB(fbp>>11,width>>6,psm,x,y);
 }
 
 void graph_set_bgcolor(unsigned char r, unsigned char g, unsigned char b)
@@ -323,20 +297,7 @@ void graph_set_output(int rc1, int rc2, int alpha_select, int alpha_output, int 
 // numbered lines are more biased against the even lines, producing less jitter.
 void graph_enable_output(void)
 {
-
-	if (graph_filter)
-	{
-
-		graph_set_output(GRAPH_ENABLE,GRAPH_ENABLE,GRAPH_VALUE_ALPHA,GRAPH_RC1_ALPHA,GRAPH_BLEND_RC2,0x70);
-
-	}
-	else
-	{
-
-		graph_set_output(0,1,0,1,0,0x80);
-
-	}
-
+	graph_set_output(graph_filter ? GRAPH_ENABLE : GRAPH_DISABLE,GRAPH_ENABLE, graph_filter ? GRAPH_VALUE_ALPHA : GRAPH_VALUE_RC1, graph_filter ? GRAPH_RC1_ALPHA : GRAPH_RC2_ALPHA, GRAPH_BLEND_RC2, graph_filter ? 0x70 : 0x80);
 }
 
 void graph_disable_output(void)
@@ -413,18 +374,7 @@ float graph_aspect_ratio(void)
 	float graph_aspect;
 
 	// Get the tv screen type as defined in the osd configuration.
-	if (configGetTvScreenType() == TV_SCREEN_169)
-	{
-
-		graph_aspect = 1.78f;
-
-	}
-	else
-	{
-
-		graph_aspect = 1.33f;
-
-	}
+	graph_aspect = (configGetTvScreenType() == TV_SCREEN_169) ? 1.78f : 1.33f;
 
 	// Return the current aspect ratio
 	return graph_aspect * (graph_height / graph_width);

@@ -90,10 +90,7 @@ s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 		{
 			volatile u16 *statx;
 
-			if(size > 64)
-				count = 64;
-			else
-				count = size;
+			count = (size > 64) ? 64 : size;
 
 			if(count > 0)
 			{
@@ -125,10 +122,7 @@ int sceSdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size)
 
 	chan &= 1;
 
-	if(mode & SD_TRANS_MODE_IO)
-		VoiceTransIoMode[chan] = 1;
-	else
-		VoiceTransIoMode[chan] = 0;
+	VoiceTransIoMode[chan] = (mode & SD_TRANS_MODE_IO) ? 1 : 0;
 
 	if(VoiceTransIoMode[chan] == 0)
 	{

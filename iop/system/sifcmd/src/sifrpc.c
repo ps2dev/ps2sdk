@@ -185,10 +185,7 @@ static void *sif_rpc_get_fpacket(sif_rpc_data_t *rpc_data)
 
 static void *sif_rpc_get_fpacket2(sif_rpc_data_t *rpc_data, int rid)
 {
-	if ( rid >= 0 && rid < rpc_data->client_table_len )
-		return &rpc_data->client_table[64 * rid];
-	else
-		return sif_rpc_get_fpacket(rpc_data);
+	return ( rid >= 0 && rid < rpc_data->client_table_len ) ? &rpc_data->client_table[64 * rid] : sif_rpc_get_fpacket(rpc_data);
 }
 
 static void sif_cmd_handler_end(SifRpcRendPkt_t *data, sif_rpc_data_t *harg)
@@ -227,9 +224,7 @@ static unsigned int sif_cmd_handler_rdata_alarm_retry(void *userdata)
 	SifRpcRendPkt_t *a1;
 
 	a1 = (SifRpcRendPkt_t *)userdata;
-	if ( isceSifSendCmd(SIF_CMD_RPC_END, a1, 64, a1->sd, a1->buf, (int)a1->cbuf) != 0 )
-		return 0;
-	return 0xF000;
+	return ( isceSifSendCmd(SIF_CMD_RPC_END, a1, 64, a1->sd, a1->buf, (int)a1->cbuf) != 0 ) ? 0 : 0xF000;
 }
 
 static void sif_cmd_handler_rdata(SifRpcOtherDataPkt_t *data, sif_rpc_data_t *harg)
@@ -240,10 +235,7 @@ static void sif_cmd_handler_rdata(SifRpcOtherDataPkt_t *data, sif_rpc_data_t *ha
 	iop_sys_clock_t clk;
 
 	rec_id = data->rec_id;
-	if ( (rec_id & 4) != 0 )
-		fpacket2 = (SifRpcRendPkt_t *)sif_rpc_get_fpacket2(harg, (rec_id >> 16) & 0xFFFF);
-	else
-		fpacket2 = (SifRpcRendPkt_t *)sif_rpc_get_fpacket(harg);
+	fpacket2 = ( (rec_id & 4) != 0 ) ? (SifRpcRendPkt_t *)sif_rpc_get_fpacket2(harg, (rec_id >> 16) & 0xFFFF) : (SifRpcRendPkt_t *)sif_rpc_get_fpacket(harg);
 	fpacket2->pkt_addr = data->pkt_addr;
 	recvbuf = (SifRpcClientData_t *)data->recvbuf;
 	fpacket2->cid = SIF_CMD_RPC_RDATA;
@@ -338,9 +330,7 @@ static SifRpcServerData_t *sif_search_svdata(int sid, const sif_rpc_data_t *rpc_
 
 static unsigned int sif_cmd_handler_bind_alarm_retry(void *a1)
 {
-	if ( isceSifSendCmd(SIF_CMD_RPC_END, a1, 64, 0, 0, 0) != 0 )
-		return 0;
-	return 0xF000;
+	return ( isceSifSendCmd(SIF_CMD_RPC_END, a1, 64, 0, 0, 0) != 0 ) ? 0 : 0xF000;
 }
 
 static void sif_cmd_handler_bind(SifRpcBindPkt_t *data, sif_rpc_data_t *harg)
@@ -356,16 +346,8 @@ static void sif_cmd_handler_bind(SifRpcBindPkt_t *data, sif_rpc_data_t *harg)
 	fpacket->cid = SIF_CMD_RPC_BIND;
 	fpacket->cd = cd;
 	sd = sif_search_svdata(data->sid, harg);
-	if ( sd )
-	{
-		fpacket->sd = sd;
-		fpacket->buf = sd->buf;
-	}
-	else
-	{
-		fpacket->sd = 0;
-		fpacket->buf = 0;
-	}
+	fpacket->sd = sd ? sd : 0;
+	fpacket->buf = sd ? sd->buf : 0;
 	if ( !isceSifSendCmd(SIF_CMD_RPC_END, fpacket, 64, 0, 0, 0) )
 	{
 		clk.hi = 0;
@@ -439,10 +421,7 @@ static void sif_cmd_handler_call(SifRpcCallPkt_t *data, sif_rpc_data_t *harg)
 
 	sd = data->sd;
 	base = sd->base;
-	if ( base->start )
-		base->end->next = sd;
-	else
-		base->start = sd;
+	*(base->start ? &(base->end->next) : &(base->start)) = sd;
 	base->end = sd;
 	sd->pkt_addr = data->pkt_addr;
 	sd->client = data->cd;
@@ -490,10 +469,7 @@ int sceSifCallRpc(
 		{
 			void *dest_extra;
 
-			if ( end_function )
-				call->rmode = 1;
-			else
-				call->rmode = 0;
+			call->rmode = end_function ? 1 : 0;
 			dest_extra = cd->buf;
 			cd->hdr.sema_id = -1;
 			if ( sceSifSendCmd(SIF_CMD_RPC_CALL, call, 64, sendbuf, dest_extra, ssize) == 0 )
@@ -669,15 +645,8 @@ SifRpcServerData_t *sceSifGetNextRequest(SifRpcDataQueue_t *qd)
 
 	CpuSuspendIntr(&state);
 	sd = qd->start;
-	if ( sd )
-	{
-		qd->active = 1;
-		qd->start = sd->next;
-	}
-	else
-	{
-		qd->active = 0;
-	}
+	qd->active = sd ? 1 : 0;
+	qd->start = sd ? sd->next : sd;
 	CpuResumeIntr(state);
 	return sd;
 }
@@ -696,16 +665,11 @@ void sceSifExecRequest(SifRpcServerData_t *sd)
 	SifDmaTransfer_t dmat2[2];
 	int state[2];
 
-	size_extra = 0;
 	rec = (void *)sd->func(sd->rpc_number, sd->buf, sd->size);
-	if ( rec )
-		size_extra = sd->rsize;
+	size_extra = rec ? sd->rsize : 0;
 	CpuSuspendIntr(state);
 	rid = sd->rid;
-	if ( (rid & 4) != 0 )
-		fpacket2 = (SifRpcRendPkt_t *)sif_rpc_get_fpacket2(&sif_rpc_data, (rid >> 16) & 0xFFFF);
-	else
-		fpacket2 = (SifRpcRendPkt_t *)sif_rpc_get_fpacket(&sif_rpc_data);
+	fpacket2 = ( (rid & 4) != 0 ) ? (SifRpcRendPkt_t *)sif_rpc_get_fpacket2(&sif_rpc_data, (rid >> 16) & 0xFFFF) : (SifRpcRendPkt_t *)sif_rpc_get_fpacket(&sif_rpc_data);
 	rend = fpacket2;
 	CpuResumeIntr(state[0]);
 	cd = sd->client;

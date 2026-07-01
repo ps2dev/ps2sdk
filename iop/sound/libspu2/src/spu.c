@@ -124,20 +124,9 @@ int _spu_init(int flag)
 
 int spu_do_set_DmaCoreIndex(int dma_core_index)
 {
-	int (*v1)(void *);
-
 	g_DmaCoreIndex = dma_core_index;
-	if ( dma_core_index )
-	{
-		_SpuDataCallback(_spu_FiAutoDMA);
-		v1 = _spu_FiDMA;
-	}
-	else
-	{
-		_SpuDataCallback(_spu_FiDMA);
-		v1 = _spu_FiAutoDMA;
-	}
-	_SpuAutoDMACallback(v1);
+	_SpuDataCallback(dma_core_index ? _spu_FiAutoDMA : _spu_FiDMA);
+	_SpuAutoDMACallback(dma_core_index ? _spu_FiDMA : _spu_FiAutoDMA);
 	return g_DmaCoreIndex;
 }
 
@@ -156,9 +145,7 @@ static void _spu_FwriteByIO(void *addr, u32 size)
 		s32 i;
 		unsigned int v9;
 
-		v6 = 64;
-		if ( size <= 64 )
-			v6 = size;
+		v6 = ( size <= 64 ) ? size : 64;
 		for ( i = 0; i < v6; i += 2 )
 		{
 			*((vu16 *)0xBF9001AC) = *(u16 *)((char *)addr + 2 * i);
@@ -220,19 +207,14 @@ int _spu_FiAutoDMA(void *userdata)
 	if ( gMode != SPU_AUTODMA_ONESHOT )
 	{
 		gWhichBuff = 1 - gWhichBuff;
-		if ( gWhichBuff )
-			*((vu32 *)0xBF8010C0) = (u32)&gHostAddr[512 * (gBufferSize48 / 512)];
-		else
-			*((vu32 *)0xBF8010C0) = (u32)&gHostAddr[0];
+		*((vu32 *)0xBF8010C0) = gWhichBuff ? (u32)&gHostAddr[512 * (gBufferSize48 / 512)] : (u32)&gHostAddr[0];
 		if ( gWhichBuff )
 		{
 			int v1;
 			int v2;
 
 			v1 = (gBufferSize48 / 512) << 9;
-			v2 = (2 * gBufferSize48 - v1) >> 6;
-			if ( 2 * gBufferSize48 - v1 < 0 )
-				v2 = (2 * gBufferSize48 - v1 + 63) >> 6;
+			v2 = ( 2 * gBufferSize48 - v1 < 0 ) ? ((2 * gBufferSize48 - v1 + 63) >> 6) : ((2 * gBufferSize48 - v1) >> 6);
 			*((vu16 *)0xBF8010C6) = v2 + ((2 * gBufferSize48 - ((gBufferSize48 / 512) << 9)) % 64 > 0);
 		}
 		else
@@ -245,15 +227,8 @@ int _spu_FiAutoDMA(void *userdata)
 	if ( (gMode & SPU_AUTODMA_LOOP) != 0 )
 	{
 		gWhichBuff = 1 - gWhichBuff;
-		if ( gWhichBuff )
-			*(u32 *)(1088 * g_DmaCoreIndex + 0xBF8010C0) = (u32)&gHostAddr[512 * (gBufferSize48 / 512)];
-		else
-			*(u32 *)(1088 * g_DmaCoreIndex + 0xBF8010C0) = (u32)gHostAddr;
-		if ( gWhichBuff )
-			*(u16 *)(1088 * g_DmaCoreIndex + 0xBF8010C6) = (2 * gBufferSize48 - ((gBufferSize48 / 512) << 9)) / 64
-																									 + ((2 * gBufferSize48 - ((gBufferSize48 / 512) << 9)) % 64 > 0);
-		else
-			*(u16 *)(1088 * g_DmaCoreIndex + 0xBF8010C6) = 8 * (gBufferSize48 / 512);
+		*(u32 *)(1088 * g_DmaCoreIndex + 0xBF8010C0) = gWhichBuff ? (u32)&gHostAddr[512 * (gBufferSize48 / 512)] : (u32)gHostAddr;
+		*(u16 *)(1088 * g_DmaCoreIndex + 0xBF8010C6) = gWhichBuff ? ((2 * gBufferSize48 - ((gBufferSize48 / 512) << 9)) / 64 + ((2 * gBufferSize48 - ((gBufferSize48 / 512) << 9)) % 64 > 0)) : 8 * (gBufferSize48 / 512);
 		*(u32 *)(1088 * g_DmaCoreIndex + 0xBF8010C8) = 0x1000201;
 	}
 #endif
@@ -308,17 +283,12 @@ int _spu_t(int count, ...)
 			_spu_RXX[724] = (_spu_tsa[1] >> 16) & 0xFFFF;
 			break;
 		case 3:
-			if ( _spu_dma_mode == 1 )
-				_spu_FsetDelayR(1);
-			else
-				_spu_FsetDelayW(1);
+			(( _spu_dma_mode == 1 ) ? _spu_FsetDelayR : _spu_FsetDelayW)(1);
 			_spu_transfer_startaddr = spu_tmp;
 			_spu_transfer_time = (ck >> 6) + ((ck & 0x3F) != 0);
 			((vu32 *)0xBF8010C0)[272] = spu_tmp;
 			((vu32 *)0xBF8010C4)[272] = (_spu_transfer_time << 16) | 0x10;
-			v6 = 0x1000201;
-			if ( _spu_dma_mode == 1 )
-				v6 = 16777728;
+			v6 = ( _spu_dma_mode == 1 ) ? 16777728 : 0x1000201;
 			((vu32 *)0xBF8010C8)[272] = v6;
 			break;
 		default:
@@ -349,10 +319,8 @@ int _spu_StopAutoDMA(void)
 #else
 	int v0;
 
-	v0 = 0;
 #ifdef LIB_1600
-	if ( *((vu16 *)0xBF9001B0) )
-		v0 = *((vu32 *)0xBF8010C0);
+	v0 = ( *((vu16 *)0xBF9001B0) ) ? *((vu32 *)0xBF8010C0) : 0;
 	*((vu32 *)0xBF8010C8) &= ~0x1000000u;
 #else
 	int do_set_dmacoreindex;
@@ -365,8 +333,7 @@ int _spu_StopAutoDMA(void)
 		*((vu16 *)0xBF9007C0) &= ~0xc0;
 	}
 	v2 = (u16 *)((g_DmaCoreIndex << 10) + 0xBF9001B0);
-	if ( *v2 )
-		v0 = *(u32 *)(1088 * g_DmaCoreIndex + 0xBF8010C0);
+	v0 = ( *v2 ) ? *(u32 *)(1088 * g_DmaCoreIndex + 0xBF8010C0) : 0;
 	*(u32 *)(1088 * g_DmaCoreIndex + 0xBF8010C8) &= ~0x1000000u;
 #endif
 #endif
@@ -434,10 +401,7 @@ unsigned int _spu_FwAutoDMA(u8 *addr, unsigned int size, int mode)
 	*(u16 *)((g_DmaCoreIndex << 10) + 0xBF90019A) &= ~0x30;
 	*(u16 *)((g_DmaCoreIndex << 10) + 0xBF9001A8) = 0;
 	*(u16 *)((g_DmaCoreIndex << 10) + 0xBF9001AA) = 0;
-	if ( g_DmaCoreIndex != 0 )
-		*(u16 *)((g_DmaCoreIndex << 10) + 0xBF9001B0) = 2;
-	else
-		*(u16 *)((g_DmaCoreIndex << 10) + 0xBF9001B0) = 1;
+	*(u16 *)((g_DmaCoreIndex << 10) + 0xBF9001B0) = ( g_DmaCoreIndex != 0 ) ? 2 : 1;
 	_spu_FsetDelayW(g_DmaCoreIndex);
 	*(u32 *)((1088 * g_DmaCoreIndex) + 0xBF8010C0) = (u32)addr;
 	*(u16 *)((1088 * g_DmaCoreIndex) + 0xBF8010C4) = 16;
@@ -465,9 +429,7 @@ unsigned int _spu_FwAutoDMAfrom(u8 *addr, unsigned int size, int mode, u8 *unk_a
 	int v7;
 #endif
 
-	v4 = unk_a4;
-	if ( !unk_a4 )
-		v4 = addr;
+	v4 = ( !unk_a4 ) ? addr : unk_a4;
 	gHostAddr = addr;
 	gWhichBuff = 0;
 	gBufferSize48 = size;
@@ -496,9 +458,7 @@ unsigned int _spu_FwAutoDMAfrom(u8 *addr, unsigned int size, int mode, u8 *unk_a
 	*((vu16 *)0xBF9001B0) = 1;
 	*((vu32 *)0xBF8010C0) = (u32)v4;
 	*((vu32 *)0xBF8010C4) = 16;
-	v7 = v5 >> 6;
-	if ( v5 < 0 )
-		v7 = (v5 + 63) >> 6;
+	v7 = ( v5 < 0 ) ? ((v5 + 63) >> 6) : (v5 >> 6);
 	*((vu16 *)0xBF8010C6) = v7 + (v5 - (v7 << 6) > 0);
 	*((vu32 *)0xBF8010C8) = 0x1000201;
 	*((vu16 *)0xBF900198) |= 0xC0u;
@@ -513,10 +473,7 @@ unsigned int _spu_FwAutoDMAfrom(u8 *addr, unsigned int size, int mode, u8 *unk_a
 	*(u16 *)((g_DmaCoreIndex << 10) + 0xBF90019A) &= ~0x30;
 	*(u16 *)((g_DmaCoreIndex << 10) + 0xBF9001A8) = 0;
 	*(u16 *)((g_DmaCoreIndex << 10) + 0xBF9001AA) = 0;
-	if ( g_DmaCoreIndex != 0 )
-		*(u16 *)((g_DmaCoreIndex << 10) + 0xBF9001B0) = 2;
-	else
-		*(u16 *)((g_DmaCoreIndex << 10) + 0xBF9001B0) = 1;
+	*(u16 *)((g_DmaCoreIndex << 10) + 0xBF9001B0) = ( g_DmaCoreIndex != 0 ) ? 2 : 1;
 	*(u32 *)((1088 * g_DmaCoreIndex) + 0xBF8010C0) = (u32)v4;
 	*(u16 *)((1088 * g_DmaCoreIndex) + 0xBF8010C4) = 16;
 	*(u16 *)((1088 * g_DmaCoreIndex) + 0xBF8010C6) = v5 / 64 + (v5 % 64 > 0);
@@ -558,16 +515,8 @@ void _spu_FsetRXX(int l, u32 addr, int flag)
 	vu16 *v3;
 
 	v3 = &_spu_RXX[512 * _spu_core + l];
-	if ( flag )
-	{
-		*v3 = addr >> 17;
-		v3[1] = addr >> 1;
-	}
-	else
-	{
-		*v3 = addr >> 14;
-		v3[1] = 4 * addr;
-	}
+	*v3 = addr >> (flag ? 17 : 14);
+	v3[1] = flag ? (addr >> 1) : (4 * addr);
 }
 
 int _spu_FsetRXXa(int l, u32 flag)

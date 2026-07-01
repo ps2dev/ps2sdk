@@ -56,10 +56,7 @@ void SsQueueReverb(int voices, int reverb)
 			if ( v2 >= 16 )
 			{
 				v9 = v2 - 16;
-				if ( v8 == 0 )
-					v10 = _svm_orev2 & ~(1 << v9);
-				else
-					v10 = _svm_orev2 | (1 << v9);
+				v10 = ( v8 == 0 ) ? (_svm_orev2 & ~(1 << v9)) : (_svm_orev2 | (1 << v9));
 				_svm_orev2 = v10;
 			}
 			else
@@ -77,10 +74,8 @@ void SsQueueRegisters(int vc, SndRegisterAttr *sra)
 {
 	u32 mask;
 
-	mask = sra->mask;
 	printf("SsQueueRegisters \n");
-	if ( mask == 0 )
-		mask = 0xFFFFFFFF;
+	mask = ( sra->mask == 0 ) ? 0xFFFFFFFF : sra->mask;
 	if ( (mask & SND_VOLL) != 0 )
 	{
 		_svm_sreg_buf[vc].m_vol_left = sra->volume.left & ~0x8000;
@@ -115,9 +110,7 @@ void SsQueueRegisters(int vc, SndRegisterAttr *sra)
 
 s16 SsGetActualProgFromProg(s16 vab_id, s16 prog)
 {
-	if ( !((u16)vab_id < 0x11u && prog >= 0 && kMaxPrograms >= prog) )
-		return -1;
-	return _svm_vab_pg[vab_id][prog].m_fake_prog_idx;
+	return ( !((u16)vab_id < 0x11u && prog >= 0 && kMaxPrograms >= prog) ) ? -1 : _svm_vab_pg[vab_id][prog].m_fake_prog_idx;
 }
 
 void SsSetVoiceSettings(int vc, const SndVoiceStats *snd_v_attr)
@@ -145,11 +138,5 @@ s16 SsVoiceCheck(int vc, int vab_id, s16 note)
 	if ( (unsigned int)vc >= 0x18 )
 		return -1;
 	voice_struct = &_svm_voice[vc];
-	if ( voice_struct->m_vab_id != vab_id >> 8 )
-		return -1;
-	if ( voice_struct->m_prog != (u8)vab_id )
-		return -1;
-	if ( voice_struct->m_note != note )
-		return -1;
-	return 0;
+	return ( voice_struct->m_vab_id != vab_id >> 8 || voice_struct->m_prog != (u8)vab_id || voice_struct->m_note != note ) ? -1 : 0;
 }

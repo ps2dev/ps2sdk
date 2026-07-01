@@ -67,10 +67,8 @@ static void ata_thread(void *arg)
 		CpuResumeIntr(state);
 		if ( atah )
 		{
-			tmout = atah->a_tmout;
 			a_ops = atah->a_ops;
-			if ( !tmout )
-				tmout = 5000000;
+			tmout = ( !atah->a_tmout ) ? 5000000 : atah->a_tmout;
 			atah->a_state = 3;
 			acTimerAdd(&argt->timer, (acTimerDone)ata_timer_done, argt, tmout);
 			v10 = a_ops->ao_command(atah, 32, 78);
@@ -116,9 +114,7 @@ int ata_request(struct ac_ata_h *atah, int (*wakeup)(int thid))
 	acSpl state;
 
 	CpuSuspendIntr(&state);
-	unit = 1;
-	if ( (atah->a_flag & 0x10) != 0 )
-		unit = 2;
+	unit = ( (atah->a_flag & 0x10) != 0 ) ? 2 : 1;
 	thid = Atac.thid;
 	if ( (Atac.active & unit) == 0 )
 	{
@@ -146,10 +142,7 @@ int ata_request(struct ac_ata_h *atah, int (*wakeup)(int thid))
 			atah->a_chain.q_prev = q_prev;
 			q_prev->q_next = &atah->a_chain;
 			Atac.requestq.q_prev = &atah->a_chain;
-			if ( wakeup )
-				atah->a_state = 3;
-			else
-				atah->a_state = 1;
+			atah->a_state = wakeup ? 3 : 1;
 		}
 	}
 	CpuResumeIntr(state);
@@ -215,8 +208,7 @@ int ata_probe(acAtaReg atareg)
 				break;
 			++count;
 		}
-		if ( count )
-			active |= 1 << unit;
+		active |= ( count ) ? (1 << unit) : 0;
 		++unit;
 		count = 0;
 	}
@@ -229,9 +221,7 @@ static int ata_module_optarg(const char *str, int default_value)
 	char *next;
 
 	result = strtol(str, &next, 0);
-	if ( next == str )
-		return default_value;
-	return result;
+	return ( next == str ) ? default_value : result;
 }
 
 int acAtaModuleStart(int argc, char **argv)
@@ -252,17 +242,10 @@ int acAtaModuleStart(int argc, char **argv)
 	{
 		return -16;
 	}
-	cmdprio = Atac.cprio;
-	prio = Atac.prio;
-	delay = 2000000;
-	if ( !Atac.cprio )
-		cmdprio = 32;
+	cmdprio = ( !Atac.cprio ) ? 32 : Atac.cprio;
 	index = 1;
-	if ( !Atac.prio )
-	{
-		delay = 1000000;
-		prio = 78;
-	}
+	delay = ( !Atac.prio ) ? 1000000 : 2000000;
+	prio = ( !Atac.prio ) ? 78 : Atac.prio;
 	v11 = argv + 1;
 	while ( index < argc )
 	{
@@ -416,13 +399,7 @@ int acAtaModuleStatus()
 	int state;
 
 	CpuSuspendIntr(&state);
-	ret = 0;
-	if ( Atac.thid )
-	{
-		ret = 2;
-		if ( !Atac.requestq.q_next )
-			ret = 1;
-	}
+	ret = ( Atac.thid ) ? (( !Atac.requestq.q_next ) ? 1 : 2) : 0;
 	CpuResumeIntr(state);
 	return ret;
 }

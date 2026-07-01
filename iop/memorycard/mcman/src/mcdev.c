@@ -188,9 +188,7 @@ int mcman_modloadcb(const char *filename, int *port, int *slot)
 
 	if (port) {
 		upos --;
-		if (((u8)path[upos] - 0x30) < 10)
-			*port = (u8)path[upos] - 0x30;
-		else *port = 0;
+		*port = (((u8)path[upos] - 0x30) < 10) ? ((u8)path[upos] - 0x30) : 0;
 	}
 
 	upos--;
@@ -548,13 +546,13 @@ int mc_chstat(MC_IO_FIL_T *f, const char *filename, MC_IO_STA_T *stat, unsigned 
 		if (statmask & MC_IO_CST_MODE) {
 			flags |= 0x200;
 			mctbl.AttrFile = 0;
-			if (stat->mode & MC_IO_S_RD) mctbl.AttrFile |= sceMcFileAttrReadable;
-			if (stat->mode & MC_IO_S_WR) mctbl.AttrFile |= sceMcFileAttrWriteable;
-			if (stat->mode & MC_IO_S_EX) mctbl.AttrFile |= sceMcFileAttrExecutable;
+			mctbl.AttrFile |= (stat->mode & MC_IO_S_RD) ? sceMcFileAttrReadable : 0;
+			mctbl.AttrFile |= (stat->mode & MC_IO_S_WR) ? sceMcFileAttrWriteable : 0;
+			mctbl.AttrFile |= (stat->mode & MC_IO_S_EX) ? sceMcFileAttrExecutable : 0;
 #if !MCMAN_ENABLE_EXTENDED_DEV_OPS
-			if (stat->mode & SCE_STM_C) mctbl.AttrFile |= sceMcFileAttrDupProhibit;
-			if (stat->mode & sceMcFileAttrPS1) mctbl.AttrFile |= sceMcFileAttrPS1;
-			if (stat->mode & sceMcFileAttrPDAExec) mctbl.AttrFile |= sceMcFileAttrPDAExec;
+			mctbl.AttrFile |= (stat->mode & SCE_STM_C) ? sceMcFileAttrDupProhibit : 0;
+			mctbl.AttrFile |= (stat->mode & sceMcFileAttrPS1) ? sceMcFileAttrPS1 : 0;
+			mctbl.AttrFile |= (stat->mode & sceMcFileAttrPDAExec) ? sceMcFileAttrPDAExec : 0;
 #endif
 		}
 

@@ -286,9 +286,7 @@ static void cdvdfsv_main_th(void *arg)
 int *cdvdfsv_dummyentry(int arg1)
 {
 	VERBOSE_PRINTF(1, "Dummy Entry Called\n");
-	if ( arg1 != 128 )
-		return 0;
-	return &g_verbose_level;
+	return ( arg1 != 128 ) ? 0 : &g_verbose_level;
 }
 
 static void cdvdfsv_parseargs(int ac, char **av)
@@ -1477,11 +1475,9 @@ static void cdvdfsv_rpc5_03_readdvdv(const cdvdfsv_rpc5_inpacket_t *inbuf, int b
 			buf_align_remain = buf_1_toalign - buf_aligned;
 			buf_offs_mod_sector_size = (buf_aligned - inbuf->m_pkt_03.m_buf) % 0x810;
 			sector_count_in_bytes = (0x8100 >= buf_align_remain) ? buf_align_remain : 0x8100;
-			sectors = (0x8100 >= buf_align_remain) ? (buf_align_remain / 0x810 + (!!(buf_align_remain % 0x810))) : 16;
-			sectors += !!buf_offs_mod_sector_size;
 			lbn = inbuf->m_pkt_03.m_lbn + (buf_aligned - inbuf->m_pkt_03.m_buf) / 0x810;
-			if ( sectors > (inbuf->m_pkt_03.m_lbn + inbuf->m_pkt_03.m_nsectors) - lbn )
-				sectors = (inbuf->m_pkt_03.m_lbn + inbuf->m_pkt_03.m_nsectors) - lbn;
+			sectors = ((0x8100 >= buf_align_remain) ? (buf_align_remain / 0x810 + (!!(buf_align_remain % 0x810))) : 16) + (!!buf_offs_mod_sector_size);
+			sectors = ( sectors > (inbuf->m_pkt_03.m_lbn + inbuf->m_pkt_03.m_nsectors) - lbn ) ? ((inbuf->m_pkt_03.m_lbn + inbuf->m_pkt_03.m_nsectors) - lbn) : sectors;
 			cmd_error = sceCdReadDVDV(lbn, sectors, g_cdvdfsv_fsvrbuf[readbuf], (sceCdRMode *)&inbuf->m_pkt_03.m_mode);
 			if ( firstflag )
 			{

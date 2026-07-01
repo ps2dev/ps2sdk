@@ -89,10 +89,7 @@ apa_cache_t *apaCacheUnLink(apa_cache_t *clink)
 int apaCacheTransfer(apa_cache_t *clink, int type)
 {
 	int err;
-	if(type)
-		err=apaWriteHeader(clink->device, clink->header, clink->sector);
-	else// 0
-		err=apaReadHeader(clink->device, clink->header, clink->sector);
+	err = (type ? apaWriteHeader : apaReadHeader)(clink->device, clink->header, clink->sector);
 
 	if(err)
 	{

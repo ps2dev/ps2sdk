@@ -115,10 +115,7 @@ static int fat_readEmptyClusters12(fat_driver *fatd)
 
         recordOffset = (cluster * 3) / 2; // offset of the cluster record (in bytes) from the FAT start
         fatSector    = recordOffset / fatd->partBpb.sectorSize;
-        sectorSpan   = 0;
-        if ((recordOffset % fatd->partBpb.sectorSize) == (fatd->partBpb.sectorSize - 1)) {
-            sectorSpan = 1;
-        }
+        sectorSpan = ((recordOffset % fatd->partBpb.sectorSize) == (fatd->partBpb.sectorSize - 1)) ? 1 : 0;
         if (lastFatSector != fatSector || sectorSpan) {
             ret = READ_SECTOR(DEV_ACCESSOR(fatd), fatd->partBpb.partStart + fatd->partBpb.resSectors + fatSector, sbuf);
             if (ret < 0) {
@@ -139,11 +136,7 @@ static int fat_readEmptyClusters12(fat_driver *fatd)
                 xbuf[3] = sbuf[1];
             }
         }
-        if (sectorSpan) { // use xbuf as source buffer
-            clusterValue = fat_getClusterRecord12(xbuf + (recordOffset % fatd->partBpb.sectorSize) - (fatd->partBpb.sectorSize - 2), cluster % 2);
-        } else { // use sector buffer as source buffer
-            clusterValue = fat_getClusterRecord12(sbuf + (recordOffset % fatd->partBpb.sectorSize), cluster % 2);
-        }
+        clusterValue = fat_getClusterRecord12(sectorSpan ? (xbuf + (recordOffset % fatd->partBpb.sectorSize) - (fatd->partBpb.sectorSize - 2)) /* use xbuf as source buffer */ : (sbuf + (recordOffset % fatd->partBpb.sectorSize)) /* use sector buffer as source buffer */, cluster % 2);
         if (clusterValue == 0) {
             fatd->clStackLast                 = cluster;
             fatd->clStack[fatd->clStackIndex] = cluster;
@@ -305,34 +298,20 @@ static int fat_readEmptyClusters(fat_driver *fatd)
 */
 static void fat_setClusterRecord12(unsigned char *buf, unsigned int cluster, int type)
 {
-
-    if (type) { // type 1
-        buf[0] = (buf[0] & 0x0F) + ((cluster & 0x0F) << 4);
-        buf[1] = (cluster & 0xFF0) >> 4;
-    } else { // type 0
-        buf[0] = (cluster & 0xFF);
-        buf[1] = (buf[1] & 0xF0) + ((cluster & 0xF00) >> 8);
-    }
+    buf[0] = type ? ((buf[0] & 0x0F) + ((cluster & 0x0F) << 4)) /* type 1 */ : (cluster & 0xFF) /* type 0 */;
+    buf[1] = type ? ((cluster & 0xFF0) >> 4) /* type 1 */ : ((buf[1] & 0xF0) + ((cluster & 0xF00) >> 8)) /* type 0 */;
 }
 
 //---------------------------------------------------------------------------
 static void fat_setClusterRecord12part1(unsigned char *buf, unsigned int cluster, int type)
 {
-    if (type) { // type 1
-        buf[0] = (buf[0] & 0x0F) + ((cluster & 0x0F) << 4);
-    } else { // type 0
-        buf[0] = (cluster & 0xFF);
-    }
+    buf[0] = type ? ((buf[0] & 0x0F) + ((cluster & 0x0F) << 4)) /* type 1 */ : (cluster & 0xFF) /* type 0 */;
 }
 
 //---------------------------------------------------------------------------
 static void fat_setClusterRecord12part2(unsigned char *buf, unsigned int cluster, int type)
 {
-    if (type) { // type 1
-        buf[0] = (cluster & 0xFF0) >> 4;
-    } else { // type 0
-        buf[0] = (buf[0] & 0xF0) + ((cluster & 0xF00) >> 8);
-    }
+    buf[0] = type ? ((cluster & 0xFF0) >> 4) /* type 1 */ : ((buf[0] & 0xF0) + ((cluster & 0xF00) >> 8)) /* type 0 */;
 }
 
 //---------------------------------------------------------------------------
@@ -360,9 +339,7 @@ static int fat_saveClusterRecord12(fat_driver *fatd, unsigned int currentCluster
         fatSector = fatd->partBpb.partStart + fatd->partBpb.resSectors + (fatNumber * fatd->partBpb.fatSize);
         fatSector += recordOffset / fatd->partBpb.sectorSize;
         sectorSpan = fatd->partBpb.sectorSize - (recordOffset % fatd->partBpb.sectorSize);
-        if (sectorSpan > 1) {
-            sectorSpan = 0;
-        }
+        sectorSpan = (sectorSpan > 1) ? 0 : sectorSpan;
         recordType = currentCluster % 2;
 
         ret = READ_SECTOR(DEV_ACCESSOR(fatd), fatSector, sbuf);
@@ -656,15 +633,8 @@ static unsigned int fat_getFreeCluster(fat_driver *fatd, unsigned int currentClu
     // pop from cluster stack
     fatd->clStackIndex--;
     result = fatd->clStack[fatd->clStackIndex];
-    // append the cluster chain
-    if (currentCluster) {
-        ret = fat_appendClusterChain(fatd, currentCluster, result);
-    } else { // create new cluster chain
-        ret = fat_createClusterChain(fatd, result);
-    }
-    if (ret < 0)
-        return 0;
-    return result;
+    ret = currentCluster ? fat_appendClusterChain(fatd, currentCluster, result) /* append the cluster chain */ : fat_createClusterChain(fatd, result) /* create new cluster chain */;
+    return (ret < 0) ? 0 : result;
 }
 
 //---------------------------------------------------------------------------
@@ -711,10 +681,7 @@ static void setLfnEntry(const char *lname, int nameSize, unsigned char chsum, fa
     int nameStart;
 
     nameStart = 13 * (part - 1);
-    j         = nameSize - nameStart;
-    if (j > 13) {
-        j = 13;
-    }
+    j         = ((nameSize - nameStart) > 13) ? 13 : (nameSize - nameStart);
 
     // fake unicode conversion
     for (i = 0; i < j; i++) {
@@ -724,18 +691,12 @@ static void setLfnEntry(const char *lname, int nameSize, unsigned char chsum, fa
 
     // rest of the name is zero terminated and padded with 0xFF
     for (i = j; i < 13; i++) {
-        if (i == j) {
-            name[i * 2]     = 0;
-            name[i * 2 + 1] = 0;
-        } else {
-            name[i * 2]     = 0xFF;
-            name[i * 2 + 1] = 0xFF;
-        }
+        name[i * 2]     = (i == j) ? 0 : 0xFF;
+        name[i * 2 + 1] = (i == j) ? 0 : 0xFF;
     }
 
     dlfn->entrySeq = part;
-    if (maxPart == part)
-        dlfn->entrySeq |= 0x40;
+    dlfn->entrySeq |= (maxPart == part) ? 0x40 : 0;
     dlfn->checksum = chsum;
     // 1st part of the name
     for (i = 0; i < 10; i++)
@@ -836,11 +797,7 @@ static void setSfnEntry(const char *shortName, char directory, fat_direntry_sfn 
     for (i = 0; i < 3; i++)
         dsfn->ext[i] = shortName[i + 8];
 
-    if (directory > 0) {
-        dsfn->attr = FAT_ATTR_DIRECTORY;
-    } else {
-        dsfn->attr = FAT_ATTR_ARCHIVE;
-    }
+    dsfn->attr = (directory > 0) ? FAT_ATTR_DIRECTORY : FAT_ATTR_ARCHIVE;
     dsfn->reservedNT  = 0;
     dsfn->clusterH[0] = (cluster & 0xFF0000) >> 16;
     dsfn->clusterH[1] = (cluster & 0xFF000000) >> 24;
@@ -968,10 +925,7 @@ static int separatePathAndName(const char *fname, char *path, char *name)
     int path_len;
     const char *sp, *np;
 
-    if (!(sp = strrchr(fname, '/')))               // if last path separator missing ?
-        np = fname;                                //  name starts at start of fname string
-    else                                           // else last path separator found
-        np = sp + 1;                               //  name starts after separator
+    np = (!(sp = strrchr(fname, '/'))) /* if last path separator missing ? */  ? fname /* name starts at start of fname string */ : /* else last path separator found */ (sp + 1) /* name starts after separator */;
     if (strlen(np) >= FAT_MAX_NAME)                // if name is too long
         return -ENAMETOOLONG;                      //  return error code
     strcpy(name, np);                              // copy name from correct part of fname string
@@ -1243,9 +1197,7 @@ static int fat_fillDirentryInfo(fat_driver *fatd, const char *lname, const char 
                             // file we want to create already exist - return the cluster of the file
                             if ((directory >= 0) && ((dir.attr & FAT_ATTR_DIRECTORY) != directory)) {
                                 // found directory but requested is file (and vice veresa)
-                                if (directory)
-                                    return -ENOTDIR;
-                                return -EISDIR;
+                                return (directory) ? -ENOTDIR : -EISDIR;
                             } // ends "if" clause for mismatched file/folder state
                             XPRINTF("I: entry found! %s, %s = %s\n", dir.name, dir.sname, lname);
                             *retSector               = theSector;
@@ -1257,8 +1209,7 @@ static int fat_fillDirentryInfo(fat_driver *fatd, const char *lname, const char 
                             return 0;
                         } // ends "if" clause for matching name
                         seq = getShortNameSequence((char *)dir_entry->sfn.name, (char *)dir_entry->sfn.ext, sname);
-                        if (seq < SEQ_MASK_SIZE)
-                            fatd->seq_mask[seq >> 3] |= (1 << (seq & 7));
+                        fatd->seq_mask[seq >> 3] |= (seq < SEQ_MASK_SIZE) ? (1 << (seq & 7)) : 0;
                         fatd->deIdx = 0;
                         // clear name strings
                         dir.sname[0] = 0;
@@ -2397,13 +2348,8 @@ int fat_writeFile(fat_driver *fatd, fat_dir *fatDir, int *updateClusterIndices, 
                 j       = (size + dataSkip) / fatd->partBpb.sectorSize + sectorSkip;
                 toWrite = 0;
                 while (1) {
-                    if (j >= fatd->partBpb.clusterSize) {
-                        toWrite += fatd->partBpb.clusterSize;
-                        j -= fatd->partBpb.clusterSize;
-                    } else {
-                        toWrite += j;
-                        j = 0;
-                    }
+                    toWrite += (j >= fatd->partBpb.clusterSize) ? fatd->partBpb.clusterSize : j;
+                    j -= (j >= fatd->partBpb.clusterSize) ? fatd->partBpb.clusterSize : j;
 
                     // Check that the next cluster is adjacent to this one, so we can write across.
                     if ((i >= chainSize - 1) || (fatd->cbuf[i] != (fatd->cbuf[i + 1] - 1)))
@@ -2420,8 +2366,7 @@ int fat_writeFile(fat_driver *fatd, fat_dir *fatDir, int *updateClusterIndices, 
                 // process all sectors of the cluster (and skip leading sectors if needed)
                 if (dataSkip > 0) {
                     bufSize = mass_device->sectorSize - dataSkip;
-                    if (size < bufSize)
-                        bufSize = size;
+                    bufSize = (size < bufSize) ? size : bufSize;
 
                     ret = fat_writeSingleSector(fatd->dev, startSector, buffer + bufferPos, bufSize, dataSkip);
                     if (ret != 1) {

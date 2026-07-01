@@ -120,36 +120,28 @@ void SetAutoVol(int vc)
 		int v13;
 
 		v13 = (u16)v10 * (127 - (u8)_svm_cur.m_mpan);
-		v10 = (unsigned int)v13 >> 6;
-		if ( v13 < 0 )
-			v10 = (unsigned int)(v13 + 63) >> 6;
+		v10 = ( v13 < 0 ) ? ((unsigned int)(v13 + 63) >> 6) : ((unsigned int)v13 >> 6);
 	}
 	else
 	{
 		int v12;
 
 		v12 = (u16)v11 * (u8)_svm_cur.m_mpan;
-		v11 = (unsigned int)v12 >> 6;
-		if ( v12 < 0 )
-			v11 = (unsigned int)(v12 + 63) >> 6;
+		v11 = ( v12 < 0 ) ? ((unsigned int)(v12 + 63) >> 6) : ((unsigned int)v12 >> 6);
 	}
 	if ( (u8)_svm_cur.m_unk05 >= 0x40u )
 	{
 		int v15;
 
 		v15 = (u16)v10 * (127 - (u8)_svm_cur.m_unk05);
-		v10 = (unsigned int)v15 >> 6;
-		if ( v15 < 0 )
-			v10 = (unsigned int)(v15 + 63) >> 6;
+		v10 = ( v15 < 0 ) ? ((unsigned int)(v15 + 63) >> 6) : ((unsigned int)v15 >> 6);
 	}
 	else
 	{
 		int v14;
 
 		v14 = (u16)v11 * (u8)_svm_cur.m_unk05;
-		v11 = (unsigned int)v14 >> 6;
-		if ( v14 < 0 )
-			v11 = (unsigned int)(v14 + 63) >> 6;
+		v11 = ( v14 < 0 ) ? ((unsigned int)(v14 + 63) >> 6) : ((unsigned int)v14 >> 6);
 	}
 	if ( _svm_stereo_mono == 1 )
 	{

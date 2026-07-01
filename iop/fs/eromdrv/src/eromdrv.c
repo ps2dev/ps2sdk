@@ -263,21 +263,7 @@ static u32 get_string_hash(const char *name)
 		int tmpval2;
 
 		tmpval1 = (u8)nametmp[i];
-		tmpval2 = tmpval1 - 64;
-		if ( (u32)(tmpval1 - 65) >= 0xD )
-		{
-			tmpval2 = 14;
-			if ( tmpval1 )
-			{
-				tmpval2 = (u8)tmpval1 - 63;
-				if ( (u8)tmpval1 < 0x4Eu )
-				{
-					tmpval2 = 28;
-					if ( (u8)tmpval1 != 32 )
-						tmpval2 = (u8)tmpval1 - 19;
-				}
-			}
-		}
+		tmpval2 = ( (u32)(tmpval1 - 65) >= 0xD ) ? (( tmpval1 ) ? (( (u8)tmpval1 < 0x4Eu ) ? (( (u8)tmpval1 != 32 ) ? ((u8)tmpval1 - 19) : 28) : ((u8)tmpval1 - 63)) : 14) : (tmpval1 - 64);
 		ret = 40 * ret + tmpval2;
 	}
 	return ret;
@@ -295,9 +281,7 @@ static int get_val_from_hash0(u32 obfval)
 		int tmpval2;
 
 		tmpval1 = obfval % 0x12;
-		tmpval2 = (tmpval1 - 1) << i;
-		if ( tmpval1 - 1 >= 0xA )
-			tmpval2 = (tmpval1 - 2) << i;
+		tmpval2 = ( tmpval1 - 1 >= 0xA ) ? ((tmpval1 - 2) << i) : ((tmpval1 - 1) << i);
 		ret |= tmpval2;
 		obfval /= 0x12u;
 	}
@@ -314,9 +298,7 @@ static int get_val_from_hash1(u32 obfval)
 	{
 		u32 tmpval1;
 
-		tmpval1 = obfval % 0x13 + 9;
-		if ( obfval % 0x13 - 1 >= 6 )
-			tmpval1 = obfval % 0x13 - 8;
+		tmpval1 = ( obfval % 0x13 - 1 >= 6 ) ? (obfval % 0x13 - 8) : (obfval % 0x13 + 9);
 		ret |= tmpval1 << i;
 		obfval /= 0x13u;
 	}

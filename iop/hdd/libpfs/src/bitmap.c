@@ -76,9 +76,7 @@ void pfsBitmapAllocFree(pfs_cache_t *clink, u32 operation, u32 subpart, u32 chun
 
 		chunk++;
 
-		sector = (1 << clink->pfsMount->inode_scale) + chunk;
-		if(subpart==0)
-			sector += 0x2000 >> pfsBlockSize;
+		sector = (1 << clink->pfsMount->inode_scale) + chunk + ((subpart==0) ? (0x2000 >> pfsBlockSize ) : 0);
 
 		clink = pfsCacheGetData(clink->pfsMount, subpart, sector, PFS_CACHE_FLAG_BITMAP, &result);
 	}
@@ -108,8 +106,7 @@ int pfsBitmapAllocateAdditionalZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi,
 		u32 sector=(1<<pfsMount->inode_scale) + info.chunk;
 
 		// if main partition, add offset (in units of blocks)
-		if (bi->subpart==0)
-			sector += 0x2000 >> pfsBlockSize;
+		sector += (bi->subpart==0) ? (0x2000 >> pfsBlockSize) : 0;
 
 		// Read the bitmap chunk from the hdd
 		c=pfsCacheGetData(pfsMount, bi->subpart, sector, PFS_CACHE_FLAG_BITMAP, &result);
@@ -170,9 +167,7 @@ int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 amount)
 	        ((info.partitionRemainder!=0) && (info.chunk < info.partitionChunks+1)); info.chunk++){
 		u32 *bitmapEnd;
 
-		sector = info.chunk + (1 << pfsMount->inode_scale);
-		if(bi->subpart==0)
-			sector += 0x2000 >> pfsBlockSize;
+		sector = info.chunk + (1 << pfsMount->inode_scale) + ((bi->subpart==0) ? (0x2000 >> pfsBlockSize) : 0);
 
 		// read in the bitmap chunk
 		bitmap = pfsCacheGetData(pfsMount, bi->subpart, sector, PFS_CACHE_FLAG_BITMAP, &result);
@@ -203,9 +198,7 @@ int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 amount)
 						if (bitmap->block != (startChunk + (1 << pfsMount->inode_scale)))
 						{
 							pfsCacheFree(bitmap);
-							sector = (1 << pfsMount->inode_scale) + startChunk;
-							if(bi->subpart==0)
-								sector += 0x2000 >> pfsBlockSize;
+							sector = (1 << pfsMount->inode_scale) + startChunk + ((bi->subpart==0) ? (0x2000 >> pfsBlockSize) : 0);
 
 							bitmap = pfsCacheGetData(pfsMount, bi->subpart, sector, PFS_CACHE_FLAG_BITMAP, &result);
 						}
@@ -238,9 +231,8 @@ int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 max_
 	if (bi->number)
 		num = pfsMount->num_subs + 2;
 
-	count = max_count < 33 ? max_count : 32;		//min(max_count, 32)
-	if(count < bi->count)
-		count = bi->count;				//max(count, bi->count)
+	count = max_count < 33 ? max_count : 32;			//min(max_count, 32)
+	count = (count < bi->count) ? bi->count : count;	//max(count, bi->count)
 								// => count = bound(bi->count, 32);
 
 	for(i = num - 1; i < num; i--)
@@ -275,9 +267,7 @@ void pfsBitmapFreeBlockSegment(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi)
 
 	pfsBitmapSetupInfo(pfsMount, &info, bi->subpart, bi->number);
 
-	sector = (1 << pfsMount->inode_scale) + info.chunk;
-	if(bi->subpart==0)
-		sector += 0x2000 >> pfsBlockSize;
+	sector = (1 << pfsMount->inode_scale) + info.chunk + ((bi->subpart==0) ? (0x2000 >> pfsBlockSize) : 0);
 
 	if((clink=pfsCacheGetData(pfsMount, (u16)bi->subpart, sector, PFS_CACHE_FLAG_BITMAP, &rv)) != NULL)
 	{
@@ -305,9 +295,7 @@ int pfsBitmapCalcFreeZones(pfs_mount_t *pfsMount, int sub)
 
 		bitmapSize = info.chunk==info.partitionChunks ? info.partitionRemainder / 8 : pfsMetaSize;
 
-		sector = (1<<pfsMount->inode_scale) + info.chunk;
-		if (sub==0)
-			sector +=0x2000>>pfsBlockSize;
+		sector = (1<<pfsMount->inode_scale) + info.chunk + ((sub==0) ? (0x2000>>pfsBlockSize) : 0);
 
 		if ((clink=pfsCacheGetData(pfsMount, sub, sector, PFS_CACHE_FLAG_BITMAP, &result)))
 		{
@@ -344,8 +332,7 @@ void pfsBitmapShow(pfs_mount_t *pfsMount)
 			u32 sector = (1<<pfsMount->inode_scale) + info.chunk;
 			u32 i;
 
-			if(pn==0)
-				sector += 0x2000 >> pfsBlockSize;
+			sector += (pn == 0) ? (0x2000 >> pfsBlockSize) : 0;
 			clink=pfsCacheGetData(pfsMount, pn, sector, PFS_CACHE_FLAG_BITMAP, &result);
 
 			if (info.chunk == info.partitionChunks)

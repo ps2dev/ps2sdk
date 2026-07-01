@@ -79,7 +79,7 @@ void waitlist_insert(struct thread *thread, struct event *event, s32 priority)
 void update_timer_compare(int timid, u64 time, struct list_head *alarm_list)
 {
     struct alarm *prev, *i;
-    u32 counter, new_compare = 0;
+    u32 new_compare = 0;
 
     // what if list is empty? (luckily its not but....)
     prev = list_first_entry(alarm_list, struct alarm, alarm_list);
@@ -94,12 +94,7 @@ void update_timer_compare(int timid, u64 time, struct list_head *alarm_list)
         }
     }
 
-    if (prev->target - time >= thctx.unk4c8) {
-        new_compare = prev->target;
-    } else {
-        counter     = GetTimerCounter(timid);
-        new_compare = counter + thctx.unk4c8;
-    }
+    new_compare = (prev->target - time >= thctx.unk4c8) ? prev->target : (GetTimerCounter(timid) + thctx.unk4c8);
 
     SetTimerCompare(timid, new_compare);
 }
@@ -163,11 +158,7 @@ int thread_leave(int ret1, int ret2, int intr_state, int release)
     register u32 a2 __asm__("a2") = intr_state;
     register s32 result __asm__("v0");
 
-    if (!release) {
-        thctx.current_thread->reason_counter = &thctx.current_thread->thread_preemption_count;
-    } else {
-        thctx.current_thread->reason_counter = &thctx.current_thread->release_count;
-    }
+    thctx.current_thread->reason_counter = !release ? &thctx.current_thread->thread_preemption_count : &thctx.current_thread->release_count;
 
     __asm__ __volatile__("li $v0, 0x20\n"
                      "syscall\n"

@@ -31,28 +31,7 @@ int SpuRGetAllKeysStatus(int min_, int max_, char *status)
 		const vu16 *v9;
 
 		v9 = &_spu_RXX[512 * _spu_core + 8 * voice];
-		if ( (_spu_keystat[_spu_core] & (1 << voice)) != 0 )
-		{
-			if ( v9[5] )
-			{
-				status[voice] = SPU_ON;
-			}
-			else
-			{
-				status[voice] = SPU_ON_ENV_OFF;
-			}
-		}
-		else
-		{
-			if ( v9[5] )
-			{
-				status[voice] = SPU_OFF_ENV_ON;
-			}
-			else
-			{
-				status[voice] = SPU_OFF;
-			}
-		}
+		status[voice] = ( (_spu_keystat[_spu_core] & (1 << voice)) != 0 ) ? (( v9[5] ) ? SPU_ON : SPU_ON_ENV_OFF) : (( v9[5] ) ? SPU_OFF_ENV_ON : SPU_OFF);
 	}
 	return SPU_SUCCESS;
 }

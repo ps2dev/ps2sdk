@@ -679,11 +679,7 @@ int s147nand_8_multi_write_dma(void *ptr, int pageoffs, int pagecnt)
 
 int s147nand_9_get_nand_partition(int part)
 {
-	if ( part == 8 )
-		return g_nand_header.m_nand_partition_8_info.m_offset;
-	if ( part >= 0 && part < 8 )
-		return g_nand_header.m_nand_partition_info[part].m_offset;
-	return 0;
+	return ( part == 8 ) ? g_nand_header.m_nand_partition_8_info.m_offset : (( part >= 0 && part < 8 ) ? g_nand_header.m_nand_partition_info[part].m_offset : 0);
 }
 
 static int get_nand_partition_offset(int part)
@@ -693,11 +689,7 @@ static int get_nand_partition_offset(int part)
 
 int s147nand_10_get_nand_partition_size(int part)
 {
-	if ( part == 8 )
-		return g_nand_header.m_nand_partition_8_info.m_size;
-	if ( part >= 0 && part < 8 )
-		return g_nand_header.m_nand_partition_info[part].m_size;
-	return 0;
+	return ( part == 8 ) ? g_nand_header.m_nand_partition_8_info.m_size : (( part >= 0 && part < 8 ) ? g_nand_header.m_nand_partition_info[part].m_size : 0);
 }
 
 static int nand_mdev_open_special(iop_file_t *f, const char *name)
@@ -1230,11 +1222,7 @@ static int nand_lowlevel_write_dma(void *ptr, int pageoffs, int byteoffs, int by
 	s147nand_dev9_io_mmio->m_nand_write_cmd_unlock = 0;
 	if ( g_nand_watchdog_enabled == 1 )
 		s147_dev9_mem_mmio->m_watchdog_flag2 = 0;
-	if ( (flgtmp & 0x80) == 0 )
-		return -1470030;
-	if ( (flgtmp & 1) != 0 )
-		return -1470020;
-	return 0;
+	return ( (flgtmp & 0x80) == 0 ) ? -1470030 : (( (flgtmp & 1) != 0 ) ? -1470020 : 0);
 }
 
 static int nand_lowlevel_write_pio(void *ptr, int pageoffs, int byteoffs, int bytecnt)
@@ -1269,11 +1257,7 @@ static int nand_lowlevel_write_pio(void *ptr, int pageoffs, int byteoffs, int by
 	s147nand_dev9_io_mmio->m_nand_write_cmd_unlock = 0;
 	if ( g_nand_watchdog_enabled == 1 )
 		s147_dev9_mem_mmio->m_watchdog_flag2 = 0;
-	if ( (flgtmp & 0x80) == 0 )
-		return -1470030;
-	if ( (flgtmp & 1) != 0 )
-		return -1470020;
-	return 0;
+	return ( (flgtmp & 0x80) == 0 ) ? -1470030 : (( (flgtmp & 1) != 0 ) ? -1470020 : 0);
 }
 
 static int nand_lowlevel_blockerase(int pageoffs)
@@ -1299,11 +1283,7 @@ static int nand_lowlevel_blockerase(int pageoffs)
 	s147nand_dev9_io_mmio->m_nand_write_cmd_unlock = 0;
 	if ( g_nand_watchdog_enabled == 1 )
 		s147_dev9_mem_mmio->m_watchdog_flag2 = 0;
-	if ( (flgtmp & 0x80) == 0 )
-		return -1470030;
-	if ( (flgtmp & 1) != 0 )
-		return -1470020;
-	return 0;
+	return ( (flgtmp & 0x80) == 0 ) ? -1470030 : (( (flgtmp & 1) != 0 ) ? -1470020 : 0);
 }
 
 static int nand_lowlevel_readid(void *ptr)

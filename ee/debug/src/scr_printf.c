@@ -271,10 +271,8 @@ void scr_vprintf(const char *format, va_list opt)
 
 void scr_setXY(int x, int y)
 {
-    if (x < MX && x >= 0)
-        X = x;
-    if (y < MY && y >= 0)
-        Y = y;
+    X = (x < MX && x >= 0) ? x : X;
+    Y = (y < MY && y >= 0) ? y : Y;
 }
 
 int scr_getX()

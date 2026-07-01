@@ -59,32 +59,12 @@ int acFlashStop()
 
 int acFlashErase(acFlashAddr addr)
 {
-	if ( Flashc.status == 1 )
-		return -13;
-	if ( Flashc.status != 2 )
-	{
-		return -6;
-	}
-	if ( addr >= (acUint32)Flashc.size )
-		return -34;
-	return Flashc.ops->fo_erase(addr + 0xB0000000);
+	return ( Flashc.status == 1 ) ? -13 : (( Flashc.status != 2 ) ? -6 : (( addr >= (acUint32)Flashc.size ) ? -34 : Flashc.ops->fo_erase(addr + 0xB0000000)));
 }
 
 int acFlashProgram(acFlashAddr addr, void *buf, int count)
 {
-	if ( Flashc.status == 1 )
-		return -13;
-	if ( Flashc.status != 2 )
-	{
-		return -6;
-	}
-	if ( (addr & 1) != 0 )
-	{
-		return -14;
-	}
-	if ( addr >= (acUint32)Flashc.size )
-		return -34;
-	return Flashc.ops->fo_program(addr + 0xB0000000, (flash_data_t *)buf, count);
+	return ( Flashc.status == 1 ) ? -13 : (( Flashc.status != 2 ) ? -6 : (( (addr & 1) != 0 ) ? -14 : (( addr >= (acUint32)Flashc.size ) ? -34 : Flashc.ops->fo_program(addr + 0xB0000000, (flash_data_t *)buf, count))));
 }
 
 int acFlashRead(acFlashAddr addr, void *buf, int count)
@@ -171,15 +151,7 @@ int acFlashVerify(acFlashAddr addr, void *buf, int count)
 
 int acFlashStatus(acFlashAddr addr)
 {
-	if ( Flashc.status == 1 )
-		return 1;
-	if ( Flashc.status == 2 )
-	{
-		if ( addr >= (acUint32)Flashc.size )
-			return -34;
-		return Flashc.ops->fo_status(addr + 0xB0000000);
-	}
-	return -6;
+	return ( Flashc.status == 1 ) ? 1 : (( Flashc.status == 2 ) ? (( addr >= (acUint32)Flashc.size ) ? -34 : Flashc.ops->fo_status(addr + 0xB0000000)) : -6);
 }
 
 int acFlashInfo(acFlashInfoData *info)

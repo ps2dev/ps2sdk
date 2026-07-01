@@ -50,14 +50,12 @@ static int ram_dma_xfer(acDmaT dma, int intr, acDmaOp op)
 			break;
 		}
 	}
-	size = dmatmp->size;
 	output = dmatmp->addr & 1;
 	addr = dmatmp->addr - output;
 	if ( bank < 0 )
 		return -34;
 	v10 = Ram_limits[bank];
-	if ( addr + size >= v10 )
-		size = v10 - addr;
+	size = ( addr + dmatmp->size >= v10 ) ? (v10 - addr) : dmatmp->size;
 	v11 = bank << 21;
 	if ( size <= 0 )
 		return -34;
@@ -66,12 +64,8 @@ static int ram_dma_xfer(acDmaT dma, int intr, acDmaOp op)
 	buf = dmatmp->buf;
 	*(acUint16 *)((size & 0x7FC) + v11 + 0xB4000000 + 0x20000) = size >> 11;
 	ioaddr = (void *)(v11 + 0xB4000000 + 0x100000);
-	if ( bank > 0 )
-		addr -= Ram_limits[bank - 1];
-	if ( output )
-		v16 = 0x70000;
-	else
-		v16 = 0x60000;
+	addr -= ( bank > 0 ) ? Ram_limits[bank - 1] : 0;
+	v16 = output ? 0x70000 : 0x60000;
 	*(acRamReg)((char *)ramreg + (addr & 0x7FC) + v16) = addr >> 11;
 	return op(dma, ioaddr, buf, size);
 }
@@ -99,10 +93,7 @@ static void ram_dma_error(acDmaT dma, int intr, acDmaState state, int result)
 	dmatmp->size = 0;
 	if ( thid )
 	{
-		if ( intr )
-			iWakeupThread(thid);
-		else
-			WakeupThread(thid);
+		(intr ? iWakeupThread : WakeupThread)(thid);
 	}
 	Kprintf("acram:dma_error: state=%d ret=%d\n", state, result);
 }
@@ -167,9 +158,7 @@ static void ram_thread(void *arg)
 	while ( 1 )
 	{
 		CpuSuspendIntr(&state);
-		ram = 0;
-		if ( qh != qh->q_next )
-			ram = (acRamT)qh->q_next;
+		ram = ( qh != qh->q_next ) ? (acRamT)qh->q_next : 0;
 		CpuResumeIntr(state);
 		if ( ram )
 		{
@@ -413,9 +402,7 @@ int acRamModuleStop()
 		}
 	}
 	ret_v3 = CancelAlarm(ram_refresh, &Ramc);
-	if ( ret_v3 != 0 )
-		return -6;
-	return 0;
+	return ( ret_v3 != 0 ) ? -6 : 0;
 }
 
 int acRamModuleRestart(int argc, char **argv)
@@ -432,16 +419,7 @@ int acRamModuleStatus()
 	int state;
 
 	CpuSuspendIntr(&state);
-	if ( Ramc.thid )
-	{
-		ret = 2;
-		if ( Ramc.requestq.q_next == &Ramc.requestq )
-			ret = 1;
-	}
-	else
-	{
-		ret = 0;
-	}
+	ret = Ramc.thid ? (( Ramc.requestq.q_next == &Ramc.requestq ) ? 1 : 2) : 0;
 	CpuResumeIntr(state);
 	return ret;
 }

@@ -30,10 +30,7 @@ int SpuMallocWithStartAddr(unsigned int addr, int size)
 	libspu2_malloc_t *v22;
 	int v29;
 
-	if ( _spu_rev_reserve_wa )
-		v7 = 0x200000 - _spu_rev_offsetaddr;
-	else
-		v7 = 0;
+	v7 = _spu_rev_reserve_wa ? (0x200000 - _spu_rev_offsetaddr) : 0;
 	v8 = 2 * ((int)addr >> 1);
 	v9 = 2 * (size >> 1);
 	if ( v8 < 0x5010 || (int)(0x200000 - v7) < v8 + v9 )
@@ -59,9 +56,7 @@ int SpuMallocWithStartAddr(unsigned int addr, int size)
 		size_area = v17->size_area;
 		addr_area = v17->addr_area;
 		v2 = v17->addr_area & 0xFFFFFFF;
-		v19 = size_area;
-		if ( v2 < v8 )
-			v19 = size_area - (v8 - v2);
+		v19 = ( v2 < v8 ) ? (size_area - (v8 - v2)) : size_area;
 		if ( v19 >= v9 )
 		{
 			v5 = addr_area & 0xF0000000;
@@ -138,20 +133,5 @@ int SpuMallocWithStartAddr(unsigned int addr, int size)
 
 static int getNeedBlock(int unk_a1, int unk_a2, int addr_area, int unk_a4)
 {
-	if ( (addr_area & 0xFFFFFFF) >= unk_a1 )
-	{
-		if ( unk_a2 != unk_a4 )
-			return 1;
-		return (addr_area & 0x40000000) != 0;
-	}
-	else
-	{
-		if ( unk_a2 == unk_a4 )
-		{
-			if ( (addr_area & 0x40000000) != 0 )
-				return 2;
-			return 1;
-		}
-	}
-	return 2;
+	return ( (addr_area & 0xFFFFFFF) >= unk_a1 ) ? (( unk_a2 != unk_a4 ) ? 1 : ((addr_area & 0x40000000) != 0)) : (( unk_a2 == unk_a4 ) ? (( (addr_area & 0x40000000) != 0 ) ? 2 : 1) : 2);
 }

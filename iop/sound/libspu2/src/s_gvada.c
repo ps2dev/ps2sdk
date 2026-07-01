@@ -21,9 +21,7 @@ void SpuGetVoiceADSRAttr(
 	v10 = v9[3];
 	v11 = v9[4];
 	*ar = (v10 >> 8) & 0x3F;
-	*ar_mode = SPU_VOICE_LINEARIncN;
-	if ( (v10 & 0x8000) != 0 )
-		*ar_mode = SPU_VOICE_EXPIncN;
+	*ar_mode = ( (v10 & 0x8000) != 0 ) ? SPU_VOICE_EXPIncN : SPU_VOICE_LINEARIncN;
 	*dr = (u8)(v10 & 0xF0) >> 4;
 	*sr = (v11 >> 6) & 0x7F;
 	switch ( v11 & 0xE000 )
@@ -42,8 +40,6 @@ void SpuGetVoiceADSRAttr(
 			break;
 	}
 	*rr = v11 & 0x1F;
-	*rr_mode = SPU_VOICE_LINEARDecN;
-	if ( (v11 & 0x20) != 0 )
-		*rr_mode = SPU_VOICE_EXPDec;
+	*rr_mode = ( (v11 & 0x20) != 0 ) ? SPU_VOICE_EXPDec : SPU_VOICE_LINEARDecN;
 	*sl = v10 & 0xF;
 }

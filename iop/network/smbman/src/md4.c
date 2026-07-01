@@ -164,12 +164,9 @@ unsigned char *MD4(unsigned char *message, int len, unsigned char *cipher)
     memcpy(buffer.ucbuff, message, len);
     buffer.ucbuff[len] = 0x80;
 
-    if (len < 56) {
-        buffer.uibuff[56 / sizeof(unsigned int)] = b;
-        transform(buffer.ucbuff);
-    } else {
-        buffer.uibuff[120 / sizeof(unsigned int)] = b;
-        transform(buffer.ucbuff);
+    buffer.uibuff[((len < 56) ? 56 : 120) / sizeof(unsigned int)] = b;
+    transform(buffer.ucbuff);
+    if (len >= 56) {
         transform(&buffer.ucbuff[64]);
     }
 
