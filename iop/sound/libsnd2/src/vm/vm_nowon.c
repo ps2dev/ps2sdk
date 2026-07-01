@@ -27,26 +27,14 @@ void _SsVmKeyOnNow(s16 vag_count, s16 pitch)
 	m_voice_idx = _svm_cur.m_voice_idx;
 	left = _svm_cur.m_voll * 0x3FFF * _svm_vh->mvol / 0x3F01 * _svm_cur.m_mvol * _svm_cur.m_vol / 0x3F01u;
 	left_tmp2 = left;
-	score_struct = NULL;
-	if ( _svm_cur.m_seq_sep_no != 33 )
-	{
-		score_struct = &_ss_score[(_svm_cur.m_seq_sep_no & 0xFF)][(_svm_cur.m_seq_sep_no & 0xFF00) >> 8];
-	}
+	score_struct = ( _svm_cur.m_seq_sep_no != 33 ) ? &_ss_score[(_svm_cur.m_seq_sep_no & 0xFF)][(_svm_cur.m_seq_sep_no & 0xFF00) >> 8] : NULL;
 	if ( score_struct != NULL )
 	{
 		left_tmp2 = left * (u16)score_struct->m_voll / 0x7F;
 		left = left * (u16)score_struct->m_volr / 0x7F;
 	}
-	if ( (u8)_svm_cur.m_pan >= 0x40u )
-	{
-		left_tmp = left;
-		right_tmp = left_tmp2 * (127 - (u8)_svm_cur.m_pan) / 0x3F;
-	}
-	else
-	{
-		right_tmp = left_tmp2;
-		left_tmp = left * (u8)_svm_cur.m_pan / 0x3F;
-	}
+	left_tmp = ( (u8)_svm_cur.m_pan >= 0x40u ) ? left : (left * (u8)_svm_cur.m_pan / 0x3F);
+	right_tmp = ( (u8)_svm_cur.m_pan >= 0x40u ) ? (left_tmp2 * (127 - (u8)_svm_cur.m_pan) / 0x3F) : left_tmp2;
 	if ( (u8)_svm_cur.m_mpan >= 0x40u )
 		right_tmp = right_tmp * (127 - (u8)_svm_cur.m_mpan) / 0x3F;
 	else
@@ -73,16 +61,8 @@ void _SsVmKeyOnNow(s16 vag_count, s16 pitch)
 	_svm_sreg_dirty[_svm_cur.m_voice_idx] |= 7u;
 	voice_struct = &_svm_voice[_svm_cur.m_voice_idx];
 	voice_struct->m_pitch = pitch;
-	if ( _svm_cur.m_voice_idx >= 16 )
-	{
-		bits_lower = 0;
-		bits_upper = 1 << ((_svm_cur.m_voice_idx & 0xFF) - 16);
-	}
-	else
-	{
-		bits_lower = 1 << (_svm_cur.m_voice_idx & 0xFF);
-		bits_upper = 0;
-	}
+	bits_lower = ( _svm_cur.m_voice_idx >= 16 ) ? 0 : (1 << (_svm_cur.m_voice_idx & 0xFF));
+	bits_upper = ( _svm_cur.m_voice_idx >= 16 ) ? (1 << ((_svm_cur.m_voice_idx & 0xFF) - 16)) : 0;
 	if ( (_svm_cur.m_mode & 4) != 0 )
 	{
 		_svm_orev1 |= bits_lower;

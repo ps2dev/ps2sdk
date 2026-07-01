@@ -59,22 +59,13 @@ void _SsContDataEntry(s16 sep_no, s16 seq_no, u8 control_value)
 		score_struct->m_delta_value = _SsReadDeltaValue(sep_no, seq_no);
 		return;
 	}
-	if ( score_struct->m_unk1B == 16 )
-		SsFCALL.ccentry[(u8)score_struct->m_fn_idx](
-			(char)score_struct->m_vab_id,
-			(u8)score_struct->m_programs[m_channel_idx],
-			0,
-			old_vag_attr,
-			score_struct->m_fn_idx,
-			control_value);
-	else
-		SsFCALL.ccentry[(u8)score_struct->m_fn_idx](
-			(char)score_struct->m_vab_id,
-			(u8)score_struct->m_programs[m_channel_idx],
-			score_struct->m_unk1B,
-			old_vag_attr,
-			score_struct->m_fn_idx,
-			control_value);
+	SsFCALL.ccentry[(u8)score_struct->m_fn_idx](
+		(char)score_struct->m_vab_id,
+		(u8)score_struct->m_programs[m_channel_idx],
+		( score_struct->m_unk1B == 16 ) ? 0 : score_struct->m_unk1B,
+		old_vag_attr,
+		score_struct->m_fn_idx,
+		control_value);
 	score_struct->m_delta_value = _SsReadDeltaValue(sep_no, seq_no);
 	score_struct->m_unk1F = 0;
 }

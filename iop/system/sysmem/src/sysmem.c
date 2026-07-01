@@ -117,10 +117,7 @@ int sysmem_reinit(void)
 
 u32 QueryMemSize()
 {
-	if ( sysmem_internals.alloclist )
-		return sysmem_internals.memsize;
-	else
-		return 0;
+	return sysmem_internals.alloclist ? sysmem_internals.memsize : 0;
 }
 
 u32 QueryMaxFreeMemSize()
@@ -165,8 +162,7 @@ u32 QueryTotalFreeMemSize()
 			unsigned int info;
 
 			info = list->info;
-			if ( (info & 1) == 0 )
-				v0 += info >> 17;
+			v0 += ( (info & 1) == 0 ) ? (info >> 17) : 0;
 			list = list->next;
 		} while ( list );
 	}
@@ -225,10 +221,7 @@ void *QueryBlockTopAddress(void *address)
 		unsigned int info;
 
 		info = v3->info;
-		if ( (info & 1) != 0 )
-			v2 = (u16)info >> 1 << 8;
-		else
-			v2 = ((u16)info >> 1 << 8) + 0x80000000;
+		v2 = ( (info & 1) != 0 ) ? ((u16)info >> 1 << 8) : (((u16)info >> 1 << 8) + 0x80000000);
 	}
 	cCpuResumeIntr(state);
 	return (void *)v2;
@@ -249,8 +242,7 @@ int QueryBlockSize(void *address)
 
 		info = v3->info;
 		v2 = info >> 17 << 8;
-		if ( (info & 1) == 0 )
-			v2 |= 0x80000000;
+		v2 |= ( (info & 1) == 0 ) ? 0x80000000 : 0;
 	}
 	cCpuResumeIntr(state);
 	return v2;
@@ -304,19 +296,14 @@ void GetSysMemoryInfo(int flag, sysmem_info_t *info)
 		{
 			alloclist = alloclist->next;
 		}
-		if ( alloclist )
-		{
-			info->blockinfo.flags_memsize |= 2u;
-		}
+		info->blockinfo.flags_memsize |= ( alloclist ) ? 2u : 0;
 	}
 	else
 	{
 		info->blockinfo.flags_memsize |= 1;
 	}
 	next = info->blockinfo.table_info->next;
-	info->blockinfo.table_info = next;
-	if ( !((unsigned int)next->list[0].next >> 17) )
-		info->blockinfo.table_info = 0;
+	info->blockinfo.table_info = ( !((unsigned int)next->list[0].next >> 17) ) ? 0 : next;
 	cCpuResumeIntr(state);
 }
 
@@ -708,29 +695,20 @@ static sysmem_alloc_element_t *search_block(void *a1)
 static int cCpuSuspendIntr(int *state)
 {
 	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(sysmem_internals.intr_suspend_tbl);
-	if ( intrman_callbacks && intrman_callbacks->cbCpuSuspendIntr )
-		return intrman_callbacks->cbCpuSuspendIntr(state);
-	else
-		return 0;
+	return ( intrman_callbacks && intrman_callbacks->cbCpuSuspendIntr ) ? intrman_callbacks->cbCpuSuspendIntr(state) : 0;
 }
 
 static int cCpuResumeIntr(int state)
 {
 	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(sysmem_internals.intr_suspend_tbl);
-	if ( intrman_callbacks && intrman_callbacks->cbCpuResumeIntr )
-		return intrman_callbacks->cbCpuResumeIntr(state);
-	else
-		return 0;
+	return ( intrman_callbacks && intrman_callbacks->cbCpuResumeIntr ) ? intrman_callbacks->cbCpuResumeIntr(state) : 0;
 }
 
 #if 0
 static int cQueryIntrContext(void)
 {
 	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(sysmem_internals.intr_suspend_tbl);
-	if ( intrman_callbacks && intrman_callbacks->cbQueryIntrContext )
-		return intrman_callbacks->cbQueryIntrContext();
-	else
-		return 0;
+	return ( intrman_callbacks && intrman_callbacks->cbQueryIntrContext ) ? intrman_callbacks->cbQueryIntrContext() : 0;
 }
 #endif
 

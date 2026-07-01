@@ -233,22 +233,12 @@ static void hubCalculateMagicPowerValue(UsbdUsbHub_t *hubDevice)
 	{
 		if ( (int)dev->m_magicPowerValue >= 0 && (int)dev->m_magicPowerValue < 6 && (int)dev->m_magicPowerValue >= 3 )
 		{
-			if ( (hubDevice->m_hubStatus & 1) != 0 )
-				dev->m_magicPowerValue = 4;
-			else
-				dev->m_magicPowerValue = 5;
+			dev->m_magicPowerValue = ( (hubDevice->m_hubStatus & 1) != 0 ) ? 4 : 5;
 		}
-	}
-	else if ( hubDevice->m_isSelfPowered )
-	{
-		if ( (int)hubDevice->m_maxPower <= 0 )
-			dev->m_magicPowerValue = 2;
-		else
-			dev->m_magicPowerValue = 3;
 	}
 	else
 	{
-		dev->m_magicPowerValue = (int)hubDevice->m_maxPower > 0;
+		dev->m_magicPowerValue = ( hubDevice->m_isSelfPowered ) ? (( (int)hubDevice->m_maxPower <= 0 ) ? 2 : 3) : ((int)hubDevice->m_maxPower > 0);
 	}
 }
 

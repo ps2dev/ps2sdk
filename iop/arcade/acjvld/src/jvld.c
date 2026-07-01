@@ -49,9 +49,7 @@ static char *jvld_path(char *name)
 	char *str;
 
 	str = strchr(name, ':');
-	if ( str == 0 )
-		return name;
-	return str + 1;
+	return ( str == 0 ) ? name : (str + 1);
 }
 
 static char *jvld_basename(char *name)
@@ -59,26 +57,14 @@ static char *jvld_basename(char *name)
 	char *str;
 	char *str_v3;
 	char *str_v4;
-	char *str_v5;
-	char *str_v6;
 
 	str = strchr(name, ':');
 	if ( str == 0 )
 		return name;
 	str_v3 = str + 1;
 	str_v4 = strrchr(str_v3, '/');
-	if ( str_v4 == 0 )
-	{
-		str_v6 = strrchr(str_v3, '\\');
-		if ( str_v6 == 0 )
-			return str_v3;
-		str_v5 = str_v6 + 1;
-	}
-	else
-	{
-		str_v5 = str_v4 + 1;
-	}
-	return str_v5;
+	str_v4 = ( str_v4 == 0 ) ? strrchr(str_v3, '\\') : str_v4;
+	return ( str_v4 == 0 ) ? str_v3 : (str_v4 + 1);
 }
 
 #define acJvLoader _start
@@ -90,9 +76,7 @@ int acJvLoader(int argc, char **argv)
 	char *name;
 	int fd;
 
-	prog = 0;
-	if ( argv )
-		prog = *argv;
+	prog = ( argv ) ? *argv : 0;
 	if ( argc < 2 )
 	{
 		ret = -22;
@@ -161,21 +145,8 @@ int acJvLoader(int argc, char **argv)
 				*ret_v10++ = *ptr++;
 			}
 		}
-		if ( sent != lseek(fd, 0, 2) )
-		{
-			ret = -5;
-		}
-		else
-		{
-			ret = sent;
-			if ( !sent )
-			{
-				ret = -8;
-			}
-		}
+		ret = ( sent != lseek(fd, 0, 2) ) ? -5 : (( !sent ) ? -8 : sent);
 		close(fd);
 	}
-	if ( ret >= 0 )
-		return 1;
-	return 4 * ret + 1;
+	return ( ret >= 0 ) ? 1 : (4 * ret + 1);
 }

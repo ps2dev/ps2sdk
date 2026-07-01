@@ -207,7 +207,6 @@ static int sifman_interrupt_handler(void *userdata)
 	void (*dma_intr_handler)(void *userdata);
 	sif_completion_cb_info_arr_t *sif_otherbufcom;
 	int v4;
-	sif_completion_cb_info_arr_t *p_sif_bufcom1;
 	sifman_internals_t *smi;
 	USE_IOP_MMIO_HWPORT();
 	USE_SIF_MMIO_HWPORT();
@@ -241,19 +240,9 @@ static int sifman_interrupt_handler(void *userdata)
 			sif_mmio_hwport->controlreg = 32;
 		++smi->dma_count;
 		smi->dmatag_index = 0;
-		if ( smi->sif_curbuf == smi->sif_buf1 )
-		{
-			smi->sif_curbuf = smi->sif_buf2;
-			smi->sif_curbufcom = &smi->sif_bufcom2;
-			p_sif_bufcom1 = &smi->sif_bufcom1;
-		}
-		else
-		{
-			smi->sif_curbufcom = &smi->sif_bufcom1;
-			p_sif_bufcom1 = &smi->sif_bufcom2;
-			smi->sif_curbuf = smi->sif_buf1;
-		}
-		smi->sif_otherbufcom = p_sif_bufcom1;
+		smi->sif_curbufcom = ( smi->sif_curbuf == smi->sif_buf1 ) ? &smi->sif_bufcom2 : &smi->sif_bufcom1;
+		smi->sif_otherbufcom = ( smi->sif_curbuf == smi->sif_buf1 ) ? &smi->sif_bufcom1 : &smi->sif_bufcom2;
+		smi->sif_curbuf = ( smi->sif_curbuf == smi->sif_buf1 ) ? smi->sif_buf2 : smi->sif_buf1;
 		iop_mmio_hwport->dmac2.newch[2].chcr = 0x1000701;
 	}
 	return 1;
@@ -290,15 +279,13 @@ static int sif_dma_setup_tag(SifDmaTransfer_t *a1)
 	v3 = a1->size + 3;
 	v1->data = v2;
 	v4 = v3 >> 2;
-	if ( (a1->attr & 2) != 0 )
-		v1->data = v2 | 0x40000000;
+	v1->data |= ( (a1->attr & 2) != 0 ) ? 0x40000000 : 0;
 	v1->words = v4 & 0xFFFFFF;
 	v5 = v3 >> 4;
 	if ( (v4 & 3) != 0 )
 		++v5;
 	v1->count = v5 | 0x10000000;
-	if ( (a1->attr & 4) != 0 )
-		v1->count |= 0x80000000;
+	v1->count |= ( (a1->attr & 4) != 0 ) ? 0x80000000 : 0;
 	v1->addr = (int)a1->dest & 0x1FFFFFFF;
 	return ++sifman_internals.dmatag_index;
 }
@@ -309,7 +296,6 @@ static int set_dma_inner(SifDmaTransfer_t *dmat, int count, void (*func)(void *u
 	int dma_count;
 	int i;
 	int v14;
-	sif_completion_cb_info_arr_t *p_sif_bufcom1;
 	USE_IOP_MMIO_HWPORT();
 	USE_SIF_MMIO_HWPORT();
 
@@ -346,19 +332,9 @@ static int set_dma_inner(SifDmaTransfer_t *dmat, int count, void (*func)(void *u
 				iop_mmio_hwport->dmac2.newch[2].bcr = (iop_mmio_hwport->dmac2.newch[2].bcr & 0xFFFF0000) | 32;
 				sifman_internals.dmatag_index = 0;
 				++sifman_internals.dma_count;
-				if ( sifman_internals.sif_curbuf == sifman_internals.sif_buf1 )
-				{
-					sifman_internals.sif_curbuf = sifman_internals.sif_buf2;
-					sifman_internals.sif_curbufcom = &sifman_internals.sif_bufcom2;
-					p_sif_bufcom1 = &sifman_internals.sif_bufcom1;
-				}
-				else
-				{
-					sifman_internals.sif_curbuf = sifman_internals.sif_buf1;
-					sifman_internals.sif_curbufcom = &sifman_internals.sif_bufcom1;
-					p_sif_bufcom1 = &sifman_internals.sif_bufcom2;
-				}
-				sifman_internals.sif_otherbufcom = p_sif_bufcom1;
+				sifman_internals.sif_curbufcom = ( sifman_internals.sif_curbuf == sifman_internals.sif_buf1 ) ? &sifman_internals.sif_bufcom2 : &sifman_internals.sif_bufcom1;
+				sifman_internals.sif_otherbufcom = ( sifman_internals.sif_curbuf == sifman_internals.sif_buf1 ) ? &sifman_internals.sif_bufcom1 : &sifman_internals.sif_bufcom2;
+				sifman_internals.sif_curbuf = ( sifman_internals.sif_curbuf == sifman_internals.sif_buf1 ) ? sifman_internals.sif_buf2 : sifman_internals.sif_buf1;
 				iop_mmio_hwport->dmac2.newch[2].chcr = 0x1000701;
 				v14 = dma_count << 16;
 			}
@@ -381,18 +357,7 @@ static int dma_stat_inner(unsigned int a1)
 {
 	USE_IOP_MMIO_HWPORT();
 
-	if ( (iop_mmio_hwport->dmac2.newch[2].chcr & 0x1000000) == 0 && !iop_mmio_hwport->dmac2.new_unusedch.madr )
-	{
-		if ( (iop_mmio_hwport->dmac2.dicr2 & 0x4000000) == 0 )
-			return -1;
-	}
-	if ( sifman_internals.dma_count != ((a1 >> 16) & 0xFFFF) )
-	{
-		if ( sifman_internals.dma_count == (u16)(((a1 >> 16) & 0xFFFF) + 1) )
-			return 0;
-		return -1;
-	}
-	return 1;
+	return ( (iop_mmio_hwport->dmac2.newch[2].chcr & 0x1000000) == 0 && !iop_mmio_hwport->dmac2.new_unusedch.madr && (iop_mmio_hwport->dmac2.dicr2 & 0x4000000) == 0 ) ? -1 : (( sifman_internals.dma_count != ((a1 >> 16) & 0xFFFF) ) ? (( sifman_internals.dma_count == (u16)(((a1 >> 16) & 0xFFFF) + 1) ) ? 0 : -1) : 1);
 }
 
 int sceSifDmaStat(int trid)
@@ -426,8 +391,7 @@ void sceSifSetOneDma(SifDmaTransfer_t dmat)
 	if ( (v2 & 3) != 0 )
 		++v3;
 	sifman_internals.one.count = v3 | 0x10000000;
-	if ( (dmat.attr & 4) != 0 )
-		sifman_internals.one.count |= 0x80000000;
+	sifman_internals.one.count |= ( (dmat.attr & 4) != 0 ) ? 0x80000000 : 0;
 	sifman_internals.one.addr = (int)dmat.dest & 0xFFFFFFF;
 	if ( (sif_mmio_hwport->controlreg & 0x20) == 0 )
 		sif_mmio_hwport->controlreg = 32;
@@ -466,10 +430,7 @@ void sceSifDma0Transfer(void *addr, int size, int mode)
 		sif_mmio_hwport->controlreg = 32;
 	iop_mmio_hwport->dmac2.newch[2].chcr = 0;
 	iop_mmio_hwport->dmac2.newch[2].madr = (unsigned int)addr & 0xFFFFFF;
-	if ( (v4 & 0x1F) != 0 )
-		v5 = (v4 >> 5) + 1;
-	else
-		v5 = v4 >> 5;
+	v5 = ( (v4 & 0x1F) != 0 ) ? ((v4 >> 5) + 1) : (v4 >> 5);
 	iop_mmio_hwport->dmac2.newch[2].bcr = ((v5 & 0xFFFF) << 16) | 32;
 	iop_mmio_hwport->dmac2.newch[2].chcr = 0x1000201;
 }
@@ -502,15 +463,9 @@ void sceSifDma1Transfer(void *addr, int size, int mode)
 		sif_mmio_hwport->controlreg = 64;
 	iop_mmio_hwport->dmac2.newch[3].chcr = 0;
 	iop_mmio_hwport->dmac2.newch[3].madr = (unsigned int)addr & 0xFFFFFF;
-	if ( (v4 & 0x1F) != 0 )
-		v5 = (v4 >> 5) + 1;
-	else
-		v5 = v4 >> 5;
+	v5 = ( (v4 & 0x1F) != 0 ) ? ((v4 >> 5) + 1) : (v4 >> 5);
 	iop_mmio_hwport->dmac2.newch[3].bcr = ((v5 & 0xFFFF) << 16) | 32;
-	if ( (mode & 0x10) != 0 )
-		v6 = 0x41000000;
-	else
-		v6 = 0x1000000;
+	v6 = ( (mode & 0x10) != 0 ) ? 0x41000000 : 0x1000000;
 	iop_mmio_hwport->dmac2.newch[3].chcr = v6 | 0x200;
 }
 
@@ -534,7 +489,6 @@ void sceSifDma2Transfer(void *addr, int size, int mode)
 	unsigned int v4;
 	u16 v5;
 	int v6;
-	int v7;
 	USE_IOP_MMIO_HWPORT();
 	USE_SIF_MMIO_HWPORT();
 
@@ -546,26 +500,9 @@ void sceSifDma2Transfer(void *addr, int size, int mode)
 	iop_mmio_hwport->dmac1.oldch[2].madr = (unsigned int)addr & 0xFFFFFF;
 	if ( v4 >= 0x21 )
 		v5 = 32;
-	if ( (v4 & 0x1F) != 0 )
-		v6 = (v4 >> 5) + 1;
-	else
-		v6 = v4 >> 5;
+	v6 = ( (v4 & 0x1F) != 0 ) ? ((v4 >> 5) + 1) : (v4 >> 5);
 	iop_mmio_hwport->dmac1.oldch[2].bcr = ((v6 & 0xFFFF) << 16) | (v5 & 0xFFFF);
-	if ( (mode & 1) != 0 )
-	{
-		v7 = 0x1000201;
-	}
-	else
-	{
-		int v8;
-
-		if ( (mode & 0x10) != 0 )
-			v8 = 0x41000000;
-		else
-			v8 = 0x1000000;
-		v7 = v8 | 0x200;
-	}
-	iop_mmio_hwport->dmac1.oldch[2].chcr = v7;
+	iop_mmio_hwport->dmac1.oldch[2].chcr = ( (mode & 1) != 0 ) ? 0x1000201 : ((( (mode & 0x10) != 0 ) ? 0x41000000 : 0x1000000) | 0x200);
 }
 
 void sceSifDma2Sync()

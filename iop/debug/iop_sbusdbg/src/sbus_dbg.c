@@ -62,8 +62,7 @@ void _sif2_cmd_dbg_control(SIF2_CmdPkt *cmd, void *param)
 
         if(_iop_exception_state == 0) { return; }
 
-        if(_iop_exception_state == 1) { frame = _iop_ex_def_frame; }
-        else { frame = _iop_ex_dbg_frame; }
+        frame = (_iop_exception_state == 1) ? _iop_ex_def_frame : _iop_ex_dbg_frame;
 
         // update the register frame and release the CPU.
         memcpy(frame, &params->reg_frame, sizeof(IOP_RegFrame));

@@ -139,10 +139,7 @@ IRX_ID(MODNAME, 1, 1);
 
 int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-    if (argc >= 0)
-        return module_start(argc, argv, startaddr, mi);
-    else
-        return module_stop(argc, argv, startaddr, mi);
+    return ((argc >= 0) ? module_start : module_stop)(argc, argv, startaddr, mi);
 }
 
 int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
@@ -181,9 +178,7 @@ int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
     (void)startaddr;
     (void)mi;
 
-    if (iomanX_DelDrv(DVRMISC.name) != 0)
-        return MODULE_REMOVABLE_END;
-    return MODULE_NO_RESIDENT_END;
+    return (iomanX_DelDrv(DVRMISC.name) != 0) ? MODULE_REMOVABLE_END : MODULE_NO_RESIDENT_END;
 }
 
 int dvrmisc_df_init(iomanX_iop_device_t *dev)
@@ -208,9 +203,7 @@ int dvrmisc_df_exit(iomanX_iop_device_t *dev)
 {
     (void)dev;
 
-    if (DeleteSema(sema_id) != 0)
-        return -1;
-    return 0;
+    return (DeleteSema(sema_id) != 0) ? -1 : 0;
 }
 
 int dvrmisc_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param)
@@ -743,13 +736,8 @@ int dvrioctl2_partition_free(
         return -EIO;
     }
     *(u64 *)buf = v10;
-    if (*(s64 *)buf <= 0x7FFFFFF) {
-        *(u32 *)buf = 0;
-        *((u32 *)buf + 1) = 0;
-    } else {
-        *(u32 *)buf = v10 - 0x8000000;
-        *((u32 *)buf + 1) = (v10 >> 32) - 1 + ((unsigned int)(v10 - 0x8000000) < 0xF8000000);
-    }
+    *(u32 *)buf = (*(s64 *)buf <= 0x7FFFFFF) ? 0 : (v10 - 0x8000000);
+    *((u32 *)buf + 1) = (*(s64 *)buf <= 0x7FFFFFF) ? 0 : ((v10 >> 32) - 1 + ((unsigned int)(v10 - 0x8000000) < 0xF8000000));
     return 0;
 }
 
@@ -1187,9 +1175,7 @@ int dvrioctl2_get_device_key(
         while (1) {
             int v21;
             int v22;
-            v21 = v18;
-            if (v20 >= 0x11)
-                v21 = 16;
+            v21 = (v20 >= 0x11) ? 16 : v18;
             cmdack.command = 0x511A;
             cmdack.input_word[0] = v17;
             cmdack.input_word[1] = v21;

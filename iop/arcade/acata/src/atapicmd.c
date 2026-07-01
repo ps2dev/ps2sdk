@@ -35,10 +35,7 @@ static int atapi_dma_xfer(acDmaT dma, int intr, acDmaOp op)
 	}
 	thid = dmatmp->ad_thid;
 	dmatmp->ad_state = 3;
-	if ( intr )
-		iWakeupThread(thid);
-	else
-		WakeupThread(thid);
+	(intr ? iWakeupThread : WakeupThread)(thid);
 	return 0;
 }
 
@@ -65,10 +62,7 @@ static void atapi_dma_error(acDmaT dma, int intr, acDmaState state, int result)
 	dmatmp->ad_result = result;
 	if ( thid )
 	{
-		if ( intr )
-			iWakeupThread(thid);
-		else
-			WakeupThread(thid);
+		(intr ? iWakeupThread : WakeupThread)(thid);
 	}
 	Kprintf("acata:P:dma_error: state=%d ret=%d\n", state, result);
 }
@@ -164,11 +158,8 @@ static int atapi_pio_read(acAtaReg atareg, acUint16 *buf, int count, int flag)
 		if ( (sr_v5 & 8) == 0 )
 			break;
 		xlen_v6 = (*((volatile acUint16 *)0xB6050000) << 8) + *((volatile acUint16 *)0xB6040000);
-		drop = xlen_v6 - rest;
-		if ( rest >= xlen_v6 )
-			drop = 0;
-		else
-			xlen_v6 = rest;
+		drop = ( rest >= xlen_v6 ) ? 0 : (xlen_v6 - rest);
+		xlen_v6 = ( rest < xlen_v6 ) ? rest : xlen_v6;
 		rest -= xlen_v6;
 		xlen_v8 = (xlen_v6 + 1) / 2 - 1;
 		while ( xlen_v8 >= 0 )
@@ -261,14 +252,10 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	if ( ret_v5 >= 0 )
 	{
 		int v12;
+		v12 = ( atah->a_state < 0x1FFu ) ? 0 : -116;
 		if ( atah->a_state < 0x1FFu )
 		{
 			atah->a_state = 31;
-			v12 = 0;
-		}
-		else
-		{
-			v12 = -116;
 		}
 		ret_v5 = -116;
 		if ( v12 >= 0 )
@@ -343,11 +330,8 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 							break;
 						}
 						xlen_v15 = (*((volatile acUint16 *)0xB6050000) << 8) + *((volatile acUint16 *)0xB6040000);
-						drop = xlen_v15 - a_size;
-						if ( a_size >= xlen_v15 )
-							drop = 0;
-						else
-							xlen_v15 = a_size;
+						drop = ( a_size >= xlen_v15 ) ? 0 : (xlen_v15 - a_size);
+						xlen_v15 = ( a_size < xlen_v15 ) ? a_size : xlen_v15;
 						a_size -= xlen_v15;
 						xlen_v17 = (xlen_v15 + 1) / 2 - 1;
 						for ( sr_v18 = drop + 1; xlen_v17 >= 0; sr_v18 = drop + 1 )
@@ -372,14 +356,10 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	ChangeThreadPriority(0, pri);
 	if ( ret_v5 < 0 )
 		return ret_v5;
+	v28 = ( atah->a_state < 0x1FFu ) ? 0 : -116;;
 	if ( atah->a_state < 0x1FFu )
 	{
 		atah->a_state = 63;
-		v28 = 0;
-	}
-	else
-	{
-		v28 = -116;
 	}
 	if ( v28 < 0 )
 		return -116;
@@ -440,9 +420,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					*((volatile acUint16 *)0xB6010000));
 				if ( ret_v23 < 1023 )
 					acDmaCancel(&dma_data.ad_dma, -116);
-				ad_result = 0;
-				if ( !v30 )
-					ad_result = -116;
+				ad_result = ( !v30 ) ? -116 : 0;
 				break;
 			}
 			ret_v23 = dma_data.ad_state;
@@ -453,9 +431,7 @@ static int atapi_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 			}
 			if ( SleepThread() )
 			{
-				ret_v23 = 511;
-				if ( dma_data.ad_state == 31 )
-					ret_v23 = 1023;
+				ret_v23 = ( dma_data.ad_state == 31 ) ? 1023 : 511;
 			}
 		}
 		ret_v5 = ad_result;
@@ -563,9 +539,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 				printf("acata:C:io_done: TIMEDOUT\n");
 				v6 = -116;
 			}
-			v3 = v5;
-			if ( v6 < 0 )
-				v3 = -116;
+			v3 = ( v6 < 0 ) ? -116 : v5;
 			ret = v3;
 		}
 		else
@@ -578,11 +552,7 @@ static int atapi_ops_error(struct ac_ata_h *atah, int ret)
 			}
 		}
 	}
-	if ( ret > 0 )
-		return -((sense.s_key << 16) | (sense.s_asc << 8) | sense.s_ascq);
-	if ( !ret )
-		return -5;
-	return ret;
+	return ( ret > 0 ) ? (-((sense.s_key << 16) | (sense.s_asc << 8) | sense.s_ascq)) : (( !ret ) ? -5 : ret);
 }
 
 acAtapiT acAtapiSetup(acAtapiData *atapi, acAtapiDone done, void *arg, unsigned int tmout)
@@ -640,11 +610,5 @@ int acAtapiStatus(acAtapiT atapi)
 		return -22;
 	}
 	state = atapi->ap_h.a_state;
-	if ( (unsigned int)(state - 1) >= 0x7E )
-	{
-		return 0;
-	}
-	if ( state != 1 )
-		return 2;
-	return 1;
+	return ( (unsigned int)(state - 1) >= 0x7E ) ? 0 : (( state != 1 ) ? 2 : 1);
 }

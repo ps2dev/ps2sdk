@@ -24,30 +24,5 @@ int SpuGetKeyStatus(unsigned int voice_bit)
 			break;
 		}
 	}
-	if ( v1 == -1 )
-	{
-		return -1;
-	}
-	if ( (_spu_keystat[_spu_core] & (1 << v1)) != 0 )
-	{
-		if ( _spu_RXX[512 * _spu_core + 5 + 8 * v1] != 0 )
-		{
-			return SPU_ON;
-		}
-		else
-		{
-			return SPU_ON_ENV_OFF;
-		}
-	}
-	else
-	{
-		if ( _spu_RXX[512 * _spu_core + 5 + 8 * v1] != 0 )
-		{
-			return SPU_OFF_ENV_ON;
-		}
-		else
-		{
-			return SPU_OFF;
-		}
-	}
+	return ( v1 == -1 ) ? -1 : (( (_spu_keystat[_spu_core] & (1 << v1)) != 0 ) ? (( _spu_RXX[512 * _spu_core + 5 + 8 * v1] != 0 ) ? SPU_ON : SPU_ON_ENV_OFF) : (( _spu_RXX[512 * _spu_core + 5 + 8 * v1] != 0 ) ? SPU_OFF_ENV_ON : SPU_OFF));
 }

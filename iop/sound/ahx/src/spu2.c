@@ -324,13 +324,8 @@ void InitCoreVolume(s32 flag)
 {
     *SD_C_SPDIF_OUT = 0xC032;
 
-    if (flag) {
-        *SD_CORE_ATTR(0) = SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE;
-        *SD_CORE_ATTR(1) = SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE | SD_ENABLE_EX_INPUT;
-    } else {
-        *SD_CORE_ATTR(0) = SD_SPU2_ON | SD_MUTE;
-        *SD_CORE_ATTR(1) = SD_SPU2_ON | SD_MUTE | SD_ENABLE_EX_INPUT;
-    }
+    *SD_CORE_ATTR(0) = SD_SPU2_ON | (flag ? SD_ENABLE_EFFECTS : 0) | SD_MUTE;
+    *SD_CORE_ATTR(1) = SD_SPU2_ON | (flag ? SD_ENABLE_EFFECTS : 0) | SD_MUTE | SD_ENABLE_EX_INPUT;
 
 // HIgh is voices 0-15, LOw is 16-23, representing voices 0..23 (24)
 #ifndef ISJPCM
@@ -524,10 +519,7 @@ void sceSdSetParam(u16 reg, u16 val)
     core = reg & 1;
 
     // Determine the channel offset
-    if (reg & 0x80)
-        offs = (40 * core) >> 1;
-    else
-        offs = (1024 * core) >> 1;
+    offs = (reg & 0x80) ? ((40 * core) >> 1) : ((1024 * core) >> 1);
 
     reg_index = (reg >> 8) & 0xFF;
     voice     = (reg & 0x3E) << 2;
@@ -579,10 +571,7 @@ u32 DmaStop(u32 core)
 
     core &= 1;
 
-    if (*U16_REGISTER(0x1B0 + (core * 1024)) == 0)
-        retval = 0;
-    else
-        retval = *SD_DMA_ADDR(core);
+    retval = (*U16_REGISTER(0x1B0 + (core * 1024)) == 0) ? 0 : (*SD_DMA_ADDR(core));
 
     *SD_DMA_CHCR(core) &= ~SD_DMA_START;
     *U16_REGISTER(0x1B0 + (core * 1024)) = 0;
@@ -629,8 +618,7 @@ s32 BlockTransWriteFrom(u8 *iopaddr, u32 size, s32 chan, u16 mode, u8 *startaddr
         }
     }
 
-    if (offset & 1023)
-        offset += 1024;
+    offset += (offset & 1023) ? 1024 : 0;
 
     iopaddr += (BlockTransSize[core] * BlockTransBuff[core]) + offset;
 
@@ -816,10 +804,7 @@ u32 sceSdBlockTransStatus(s16 chan, s16 flag)
 
     chan &= 1;
 
-    if (*U16_REGISTER(0x1B0 + (chan * 1024)) == 0)
-        retval = 0;
-    else
-        retval = *SD_DMA_ADDR(chan);
+    retval = (*U16_REGISTER(0x1B0 + (chan * 1024)) == 0) ? 0 : (*SD_DMA_ADDR(chan));
 
     retval = (BlockTransBuff[chan] << 24) | (retval & 0xFFFFFF);
 

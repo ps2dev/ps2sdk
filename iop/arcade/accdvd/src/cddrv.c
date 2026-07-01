@@ -116,9 +116,7 @@ static int cddrv_close(iop_file_t *io)
 
 static int cddrv_read(iop_file_t *io, void *buf, int cnt)
 {
-	if ( !buf || !cnt )
-		return 0;
-	return cdfs_read((struct cdfs_file *)io->privdata, buf, cnt);
+	return ( !buf || !cnt ) ? 0 : cdfs_read((struct cdfs_file *)io->privdata, buf, cnt);
 }
 
 static int cddrv_write(iop_file_t *io, void *buf, int cnt)
@@ -137,16 +135,9 @@ static int cddrv_lseek(iop_file_t *io, int offset, int whence)
 
 	file = (struct cdfs_file *)io->privdata;
 	size = file->f_size;
-	if ( whence == 1 )
-	{
-		offset += file->f_pos;
-	}
-	else if ( whence == 2 )
-	{
-		offset += size;
-	}
-	if ( size < (unsigned int)offset )
-		offset = file->f_size;
+	offset += ( whence == 1 ) ? file->f_pos : 0;
+	offset += ( whence == 2 ) ? size : 0;
+	offset = ( size < (unsigned int)offset ) ? file->f_size : offset;
 	file->f_pos = offset;
 	return offset;
 }
@@ -162,28 +153,14 @@ static int cddrv_ioctl(iop_file_t *io, int cmd, void *arg)
 
 int cddrv_module_start(int argc, char **argv)
 {
-	int v2;
-	int v3;
-
 	(void)argc;
 	(void)argv;
-	v2 = AddDrv(&Cddrv);
-	v3 = 0;
-	if ( v2 < 0 )
-		return -16;
-	return v3;
+	return ( AddDrv(&Cddrv) < 0 ) ? -16 : 0;
 }
 
 int cddrv_module_stop()
 {
-	int v0;
-	int v1;
-
-	v0 = DelDrv(Cddrv.name);
-	v1 = 0;
-	if ( v0 < 0 )
-		return -16;
-	return v1;
+	return ( DelDrv(Cddrv.name) < 0 ) ? -16 : 0;
 }
 
 int cddrv_module_restart(int argc, char **argv)

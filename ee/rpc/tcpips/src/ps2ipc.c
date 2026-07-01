@@ -331,15 +331,8 @@ int ps2ipc_send(int s, const void *dataptr, int size, unsigned int flags)
 	pkt->flags = flags;
 	pkt->ee_addr = (void *)dataptr;
 
-	if((u32)dataptr & 0x3f)
-	{
-		miss = 64 - ((u32)dataptr & 0x3f);
-		if(miss > size) miss = size;
-
-	} else {
-
-		miss = 0;
-	}
+	miss = ((u32)dataptr & 0x3f) ? (64 - ((u32)dataptr & 0x3f)) : 0;
+	if(miss > size) miss = size;
 
 	pkt->malign = miss;
 
@@ -379,15 +372,8 @@ int ps2ipc_sendto(int s, const void *dataptr, int size, unsigned int flags,
 	pkt->ee_addr = (void *)dataptr;
 	memcpy((void *)&pkt->sockaddr, (void *)to, sizeof(struct sockaddr));
 
-	if((u32)dataptr & 0x3f)
-	{
-		miss = 64 - ((u32)dataptr & 0x3f);
-		if(miss > size) miss = size;
-
-	} else {
-
-		miss = 0;
-	}
+	miss = ((u32)dataptr & 0x3f) ? (64 - ((u32)dataptr & 0x3f)) : 0;
+	if(miss > size) miss = size;
 
 	pkt->malign = miss;
 
@@ -493,12 +479,9 @@ static void ps2ipc_pack_fdset(ps2ip_rpc_fd_set *dst, struct fd_set *src, int max
 	int i;
 	memset(dst, 0, sizeof(*dst));
 	if (src == NULL) return;
-	if (maxfdp1 > (int)(sizeof(dst->fd_bits) * 8))
-		maxfdp1 = (int)(sizeof(dst->fd_bits) * 8);
+	maxfdp1 = (maxfdp1 > (int)(sizeof(dst->fd_bits) * 8)) ? (int)(sizeof(dst->fd_bits) * 8) : maxfdp1;
 	for (i = 0; i < maxfdp1; i++) {
-		if (FD_ISSET(i, src)) {
-			dst->fd_bits[i >> 3] |= (unsigned char)(1U << (i & 7));
-		}
+		dst->fd_bits[i >> 3] |= (FD_ISSET(i, src)) ? (unsigned char)(1U << (i & 7)) : 0;
 	}
 }
 

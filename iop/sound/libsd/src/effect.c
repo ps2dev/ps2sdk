@@ -252,10 +252,7 @@ int sceSdClearEffectWorkArea(int core, int chan, int effect_type)
 		{
 			u32 size;
 
-			if(effect_size < 1024)
-				size = effect_size;
-			else
-				size = 1024;
+			size = (effect_size < 1024) ? effect_size : 1024;
 
 			sceSdVoiceTrans(chan, 0, (u8*)ClearEffectData, (u32*)effect_addr, size);
 			sceSdVoiceTransStatus(chan, 1); // Wait for completion

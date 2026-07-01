@@ -24,12 +24,9 @@ void store_kbit(void *buffer, const void *kbit)
     int offset                     = 0x20;
     u8 *kbit_offset;
 
-    if (header->BIT_count > 0)
-        offset += header->BIT_count * 0x10; // They used a loop for this. D:
-    if (((header->flags) & 1) != 0)
-        offset += ((unsigned char *)buffer)[offset] + 1;
-    if (((header->flags) & 0xF000) == 0)
-        offset += 8;
+    offset += (header->BIT_count > 0) ? (header->BIT_count * 0x10) : 0; // They used a loop for this. D:
+    offset += (((header->flags) & 1) != 0) ? (((unsigned char *)buffer)[offset] + 1) : 0;
+    offset += (((header->flags) & 0xF000) == 0) ? (8) : 0;
 
     kbit_offset = (u8 *)buffer + offset;
     memcpy((void *)kbit_offset, kbit, 16);
@@ -43,12 +40,9 @@ void store_kc(void *buffer, const void *kc)
     int offset                     = 0x20;
     u8 *kc_offset;
 
-    if (header->BIT_count > 0)
-        offset += header->BIT_count * 0x10; // They used a loop for this. D:
-    if (((header->flags) & 1) != 0)
-        offset += ((unsigned char *)buffer)[offset] + 1;
-    if (((header->flags) & 0xF000) == 0)
-        offset += 8;
+    offset += (header->BIT_count > 0) ? (header->BIT_count * 0x10) : 0; // They used a loop for this. D:
+    offset += (((header->flags) & 1) != 0) ? (((unsigned char *)buffer)[offset] + 1) : 0;
+    offset += (((header->flags) & 0xF000) == 0) ? (8) : 0;
 
     kc_offset = (u8 *)buffer + offset + 0x10;
     memcpy((void *)kc_offset, kc, 16);
@@ -62,12 +56,9 @@ void get_Kbit(const void *buffer, void *Kbit)
     int offset                     = sizeof(SecrKELFHeader_t);
     u8 *kbit_offset;
 
-    if (header->BIT_count > 0)
-        offset += header->BIT_count * sizeof(SecrBitBlockData_t); // They used a loop for this. D:
-    if (((header->flags) & 1) != 0)
-        offset += ((unsigned char *)buffer)[offset] + 1;
-    if (((header->flags) & 0xF000) == 0)
-        offset += 8;
+    offset += (header->BIT_count > 0) ? (header->BIT_count * sizeof(SecrBitBlockData_t)) : 0; // They used a loop for this. D:
+    offset += (((header->flags) & 1) != 0) ? (((unsigned char *)buffer)[offset] + 1) : 0;
+    offset += (((header->flags) & 0xF000) == 0) ? (8) : 0;
 
     kbit_offset = (u8 *)buffer + offset;
     memcpy(Kbit, (void *)kbit_offset, 16);
@@ -81,12 +72,9 @@ void get_Kc(const void *buffer, void *Kc)
     int offset                     = sizeof(SecrKELFHeader_t);
     u8 *kc_offset;
 
-    if (header->BIT_count > 0)
-        offset += header->BIT_count * sizeof(SecrBitBlockData_t); // They used a loop for this. D:
-    if (((header->flags) & 1) != 0)
-        offset += ((unsigned char *)buffer)[offset] + 1;
-    if (((header->flags) & 0xF000) == 0)
-        offset += 8;
+    offset += (header->BIT_count > 0) ? (header->BIT_count * sizeof(SecrBitBlockData_t)) : 0; // They used a loop for this. D:
+    offset += (((header->flags) & 1) != 0) ? (((unsigned char *)buffer)[offset] + 1) : 0;
+    offset += (((header->flags) & 0xF000) == 0) ? (8) : 0;
 
     kc_offset = (u8 *)buffer + offset + 0x10; // Goes after Kbit
     memcpy(Kc, (void *)kc_offset, 16);

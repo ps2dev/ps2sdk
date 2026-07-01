@@ -150,11 +150,7 @@ int _SsInitSoundSep(s16 sep_no, int seq_no, u8 vab_id, u8 *addr)
 		v36 = 10 * score_struct->m_resolution_of_quarter_note * score_struct->m_tempo / tmp2;
 		v37 = 10 * score_struct->m_resolution_of_quarter_note * score_struct->m_tempo % tmp2;
 		score_struct->m_unk52 = -1;
-		score_struct->m_unk54 = v36;
-		if ( (unsigned int)(30 * tmp1) < v37 )
-		{
-			score_struct->m_unk54 = v36 + 1;
-		}
+		score_struct->m_unk54 = ( (unsigned int)(30 * tmp1) < v37 ) ? (v36 + 1) : v36;
 	}
 	score_struct->m_unk56 = score_struct->m_unk54;
 	return v33 + v27;

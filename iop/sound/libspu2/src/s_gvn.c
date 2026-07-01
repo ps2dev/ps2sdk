@@ -17,8 +17,5 @@ void SpuGetVoiceNote(int v_num, u16 *note)
 
 	v3 = (u16)_spu_voice_centerNote[_spu_core][v_num];
 	v4 = _spu_pitch2note(v3 >> 8, (u8)v3, _spu_RXX[512 * _spu_core + 2 + 8 * (v_num & 0x1F)]);
-	if ( v4 < 0 )
-		*note = 0;
-	else
-		*note = v4;
+	*note = ( v4 < 0 ) ? 0 : v4;
 }

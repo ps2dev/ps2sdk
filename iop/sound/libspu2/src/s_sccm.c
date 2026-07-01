@@ -16,9 +16,6 @@ void SpuSetCommonCDMix(int cd_mix)
 	u16 v2;
 
 	v1 = &_spu_RXX[512 * _spu_core];
-	if ( cd_mix )
-		v2 = v1[205] | 1;
-	else
-		v2 = v1[205] & ~1;
+	v2 = cd_mix ? (v1[205] | 1) : (v1[205] & ~1);
 	v1[205] = v2;
 }

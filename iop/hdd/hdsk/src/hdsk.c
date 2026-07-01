@@ -703,8 +703,7 @@ static int HdskDevctl(iomanX_iop_file_t *fd, const char *name, int cmd, void *ar
             break;
         case HDSK_DEVCTL_POLL:
             result = PollEventFlag(hdskEventFlagID, 1, WEF_CLEAR | WEF_OR, &bits);
-            if (result == KE_EVF_COND)
-                result = 1;
+            result = (result == KE_EVF_COND) ? 1 : result;
             break;
         case HDSK_DEVCTL_GET_STATUS:
             result = hdskStatus;

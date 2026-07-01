@@ -192,18 +192,15 @@ static int func_00000bfc(void *dest, unsigned int size)
         }
     */
     while (size > 0) {
-        if (size >= 16) { // if(size>>4!=0)
-            if (func_00001b00(dest, 0x10) == 0) {
-                return 0;
-            }
-            size -= 0x10;
-            dest = (void *)((u8 *)dest + 0x10);
-        } else {
-            if (func_00001b00(dest, size) == 0) {
-                return 0;
-            }
-            size = 0;
+        int cur_sz;
+
+        // (size>>4!=0)
+        cur_sz = (size >= 0x10) ? 0x10 : size;
+        if (func_00001b00(dest, cur_sz) == 0) {
+            return 0;
         }
+        size -= cur_sz;
+        dest = (void *)((u8 *)dest + cur_sz);
     }
 
     return 1;
@@ -827,15 +824,13 @@ static int secr_set_header(int mode, int cnum, int arg2, void *buffer)
 
     while (HeaderLength > 0) {
         int write_data_result;
+        int cur_sz;
 
-        if (HeaderLength >= 0x10) { // if(HeaderLength>>4!=0)
-            write_data_result = write_data(buffer, 0x10);
-            buffer            = (void *)((u8 *)buffer + 0x10);
-            HeaderLength -= 0x10;
-        } else {
-            write_data_result = write_data(buffer, HeaderLength);
-            HeaderLength      = 0;
-        }
+        // (HeaderLength>>4!=0)
+        cur_sz = (HeaderLength >= 0x10) ? 0x10 : HeaderLength;
+        write_data_result = write_data(buffer, cur_sz);
+        buffer            = (void *)((u8 *)buffer + cur_sz);
+        HeaderLength -= cur_sz;
 
         if (write_data_result == 0) {
             _printf("secr_set_header: fail write_data\n");
@@ -864,18 +859,14 @@ static int Read_BIT(SecrBitTable_t *BitTable)
     DataToCopy = BitLength;
 
     while (DataToCopy != 0) {
-        if (DataToCopy >= 0x10) {
-            if (func_00001b00(BitTable, 0x10) == 0) {
-                return 0;
-            }
-            BitTable = (SecrBitTable_t *)((u8 *)BitTable + 0x10);
-            DataToCopy -= 0x10;
-        } else {
-            if (func_00001b00(BitTable, DataToCopy) == 0) {
-                return 0;
-            }
-            DataToCopy = 0;
+        int cur_sz;
+
+        cur_sz = (DataToCopy >= 0x10) ? 0x10 : DataToCopy;
+        if (func_00001b00(BitTable, cur_sz) == 0) {
+            return 0;
         }
+        BitTable = (SecrBitTable_t *)((u8 *)BitTable + cur_sz);
+        DataToCopy -= cur_sz;
     }
 
     return BitLength;
@@ -917,12 +908,9 @@ static unsigned int get_BitTableOffset(const void *buffer)
     const SecrKELFHeader_t *header = buffer;
     int offset                     = sizeof(SecrKELFHeader_t);
 
-    if (header->BIT_count > 0)
-        offset += header->BIT_count * sizeof(SecrBitBlockData_t); // They used a loop for this. D:
-    if ((header->flags & 1) != 0)
-        offset += ((const unsigned char *)buffer)[offset] + 1;
-    if ((header->flags & 0xF000) == 0)
-        offset += 8;
+    offset += (header->BIT_count > 0) ? (header->BIT_count * sizeof(SecrBitBlockData_t)) : 0; // They used a loop for this. D:
+    offset += ((header->flags & 1) != 0) ? (((const unsigned char *)buffer)[offset] + 1) : 0;
+    offset += ((header->flags & 0xF000) == 0) ? 8 : 0;
     return (offset + 0x20); // Goes after Kbit and Kc.
 }
 

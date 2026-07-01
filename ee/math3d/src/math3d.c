@@ -67,16 +67,16 @@
   vector_copy(work, input0);
 
   // Clamp the minimum values.
-  if (work[0] < min) { work[0] = min; }
-  if (work[1] < min) { work[1] = min; }
-  if (work[2] < min) { work[2] = min; }
-  if (work[3] < min) { work[3] = min; }
+  work[0] = (work[0] < min) ? min : work[0];
+  work[1] = (work[1] < min) ? min : work[1];
+  work[2] = (work[2] < min) ? min : work[2];
+  work[3] = (work[3] < min) ? min : work[3];
 
   // Clamp the maximum values.
-  if (work[0] > max) { work[0] = max; }
-  if (work[1] > max) { work[1] = max; }
-  if (work[2] > max) { work[2] = max; }
-  if (work[3] > max) { work[3] = max; }
+  work[0] = (work[0] > max) ? max : work[0];
+  work[1] = (work[1] > max) ? max : work[1];
+  work[2] = (work[2] > max) ? max : work[2];
+  work[3] = (work[3] > max) ? max : work[3];
 
   // Output the result.
   vector_copy(output, work);

@@ -528,9 +528,7 @@ int iRotateThreadReadyQueue(int priority)
         }
     } else {
         priority = readyq_highest();
-        if (thread->priority < priority) {
-            priority = thread->priority;
-        }
+        priority = (thread->priority < priority) ? thread->priority : priority;
     }
 
     if (list_empty(&thctx.ready_queue[priority])) {
@@ -1107,13 +1105,7 @@ int ReferSystemStatus(iop_sys_status_t *info, size_t size)
 
     ret = CpuSuspendIntr(&state);
 
-    if (QueryIntrContext()) {
-        info->status = TSS_NOTHREAD;
-    } else if (ret == KE_CPUDI) {
-        info->status = TSS_DISABLEINTR;
-    } else {
-        info->status = TSS_THREAD;
-    }
+    info->status = QueryIntrContext() ? TSS_NOTHREAD : ((ret == KE_CPUDI) ? TSS_DISABLEINTR : TSS_THREAD);
 
     info->systemLowTimerWidth = 32;
     info->idleClocks.hi       = thctx.idle_thread->run_clocks_hi;
@@ -1453,11 +1445,7 @@ static void thread_get_status(struct thread *thread, iop_thread_info_t *info)
     }
 
     info->wakeupCount = thread->wakeup_count;
-    if (thread->status == THS_DORMANT || thread->status == THS_RUN) {
-        info->regContext = 0;
-    } else {
-        info->regContext = (long *)thread->saved_regs;
-    }
+    info->regContext = (thread->status == THS_DORMANT || thread->status == THS_RUN) ? 0 : (long *)thread->saved_regs;
 }
 
 static void thread_get_run_stats(struct thread *thread, iop_thread_run_status_t *stat)

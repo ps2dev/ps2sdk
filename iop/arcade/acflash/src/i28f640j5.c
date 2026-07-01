@@ -29,8 +29,7 @@ static int flash_wait(flash_ptr_t ptr, int tick, int count)
 
 		*ptr = 0x70;
 		sr = *ptr;
-		if ( (sr & 0x80) == 0 )
-			sr = -116;
+		sr = ( (sr & 0x80) == 0 ) ? -116 : sr;
 		if ( sr >= 0 )
 			return sr;
 		threshold--;
@@ -42,8 +41,7 @@ static int flash_wait(flash_ptr_t ptr, int tick, int count)
 		DelayThread(tick);
 		*ptr = 0x70;
 		sr_v3 = *ptr;
-		if ( (sr_v3 & 0x80) == 0 )
-			sr_v3 = -116;
+		sr_v3 = ( (sr_v3 & 0x80) == 0 ) ? -116 : sr_v3;
 		if ( sr_v3 >= 0 )
 			return sr_v3;
 		--count;
@@ -76,18 +74,15 @@ static int flash_program(flash_addr_t addr, const flash_data_t *buf, int size)
 		if ( rest <= 0 )
 			return size - rest;
 		blen = 0x20000 - (addr & 0x1FFFF);
-		if ( rest < blen )
-			blen = rest;
+		blen = ( rest < blen ) ? rest : blen;
 		rest -= blen;
 		while ( blen > 0 )
 		{
 			flash_addr_t v8;
 
 			v8 = addr & 0xF;
-			xlen = 16 - v8;
 			count = 2;
-			if ( blen < (int)(16 - v8) )
-				xlen = blen;
+			xlen = ( blen < (int)(16 - v8) ) ? blen : (16 - v8);
 			threshold = 399;
 			while ( 1 )
 			{
@@ -148,16 +143,12 @@ flash_ops_t flash_probe_i28f640f5(flash_addr_t addr)
 	device = *(volatile acUint16 *)(addr + 2);
 	*(volatile acUint16 *)addr = 0xFF;
 	// cppcheck-suppress knownConditionTrueFalse
-	if ( vendor != 0x89 || device != 0x15 )
-		return 0;
-	return &ops_30;
+	return ( vendor != 0x89 || device != 0x15 ) ? 0 : &ops_30;
 }
 
 static int flash_status(flash_addr_t addr)
 {
 	*(volatile acUint16 *)addr = 0x70;
 	// cppcheck-suppress knownConditionTrueFalse
-	if ( (*(volatile acUint16 *)addr & 0x80) != 0 )
-		return 1;
-	return 2;
+	return ( (*(volatile acUint16 *)addr & 0x80) != 0 ) ? 1 : 2;
 }

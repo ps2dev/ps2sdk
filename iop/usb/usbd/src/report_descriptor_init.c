@@ -99,10 +99,7 @@ int handleStaticDeviceDescriptor(UsbdDevice_t *dev, UsbDeviceDescriptor *devDesc
 						hidDescriptor->m_length = wItemLength;
 						hidDescriptor->m_cfgNum = cfgNum;
 						hidDescriptor->m_prev = dev->m_reportDescriptorEnd;
-						if ( dev->m_reportDescriptorEnd )
-							dev->m_reportDescriptorEnd->m_next = hidDescriptor;
-						else
-							dev->m_reportDescriptorStart = hidDescriptor;
+						*(dev->m_reportDescriptorEnd ? &(dev->m_reportDescriptorEnd->m_next) : &(dev->m_reportDescriptorStart)) = hidDescriptor;
 						hidDescriptor->m_next = NULL;
 						dev->m_reportDescriptorEnd = hidDescriptor;
 					}

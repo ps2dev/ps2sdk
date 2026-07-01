@@ -86,149 +86,18 @@ u32 padSetupEEButtonData(u32 port, u32 slot, padState_t *pstate)
 
 			//Check button status & update pressure data
 			value = ~((data[2] << 8) | data[3]);
-			if(value & 0x2000)
-			{
-				if(data[8] == 0)
-					data[8] = 1;
-			}
-			else
-			{
-				{
-					data[8] = 0;
-				}
-			}
-
-			if(value & 0x8000)
-			{
-				if(data[9] == 0)
-					data[9] = 1;
-			}
-			else
-			{
-				{
-					data[9] = 0;
-				}
-			}
-
-			if(value & 0x1000)
-			{
-				if(data[10] == 0)
-					data[10] = 1;
-			}
-			else
-			{
-				{
-					data[10] = 0;
-				}
-			}
-
-			if(value & 0x4000)
-			{
-				if(data[11] == 0)
-					data[11] = 1;
-			}
-			else
-			{
-				{
-					data[11] = 0;
-				}
-			}
-
-			if(value & 0x0010)
-			{
-				if(data[12] == 0)
-					data[12] = 1;
-			}
-			else
-			{
-				{
-					data[12] = 0;
-				}
-			}
-
-			if(value & 0x0020)
-			{
-				if(data[13] == 0)
-					data[13] = 1;
-			}
-			else
-			{
-				{
-					data[13] = 0;
-				}
-			}
-
-			if(value & 0x0040)
-			{
-				if(data[14] == 0)
-					data[14] = 1;
-			}
-			else
-			{
-				{
-					data[14] = 0;
-				}
-			}
-
-			if(value & 0x0080)
-			{
-				if(data[15] == 0)
-					data[15] = 1;
-			}
-			else
-			{
-				{
-					data[15] = 0;
-				}
-			}
-
-			if(value & 0x0004)
-			{
-				if(data[16] == 0)
-					data[16] = 1;
-			}
-			else
-			{
-				{
-					data[16] = 0;
-				}
-			}
-
-			if(value & 0x0008)
-			{
-				if(data[17] == 0)
-					data[17] = 1;
-			}
-			else
-			{
-				{
-					data[17] = 0;
-				}
-			}
-
-			if(value & 0x0001)
-			{
-				if(data[18] == 0)
-					data[18] = 1;
-			}
-			else
-			{
-				{
-					data[18] = 0;
-				}
-			}
-
-			if(value & 0x0002)
-			{
-				if(data[19] == 0)
-					data[19] = 1;
-			}
-			else
-			{
-				{
-					data[19] = 0;
-				}
-			}
+			data[8] = (value & 0x2000) ? ((data[8] == 0) ? 1 : data[8]) : 0;
+			data[9] = (value & 0x8000) ? ((data[9] == 0) ? 1 : data[9]) : 0;
+			data[10] = (value & 0x1000) ? ((data[10] == 0) ? 1 : data[10]) : 0;
+			data[11] = (value & 0x4000) ? ((data[11] == 0) ? 1 : data[11]) : 0;
+			data[12] = (value & 0x0010) ? ((data[12] == 0) ? 1 : data[12]) : 0;
+			data[13] = (value & 0x0020) ? ((data[13] == 0) ? 1 : data[13]) : 0;
+			data[14] = (value & 0x0040) ? ((data[14] == 0) ? 1 : data[14]) : 0;
+			data[15] = (value & 0x0080) ? ((data[15] == 0) ? 1 : data[15]) : 0;
+			data[16] = (value & 0x0004) ? ((data[16] == 0) ? 1 : data[16]) : 0;
+			data[17] = (value & 0x0008) ? ((data[17] == 0) ? 1 : data[17]) : 0;
+			data[18] = (value & 0x0001) ? ((data[18] == 0) ? 1 : data[18]) : 0;
+			data[19] = (value & 0x0002) ? ((data[19] == 0) ? 1 : data[19]) : 0;
 		}
 
 		return 32;
@@ -281,10 +150,7 @@ static void DmaSendEE(void)
 
 		if (pad_ee_addr)
 		{
-			if( (sif_buffer[0] % 2) == 0)
-				sifdma_td[sifdma_count].dest = (void *)(((u8 *)pad_ee_addr) + 128);
-			else
-				sifdma_td[sifdma_count].dest = pad_ee_addr;
+			sifdma_td[sifdma_count].dest = ( (sif_buffer[0] % 2) == 0) ? (void *)(((u8 *)pad_ee_addr) + 128) : pad_ee_addr;
 
 			sifdma_td[sifdma_count].src = sif_buffer;
 			sifdma_td[sifdma_count].size = 128;
@@ -320,11 +186,7 @@ static void DmaSendEE(void)
 					p->ee_pdata.currentTask = p->currentTask;
 					p->ee_old_pdata.frame = p->frame;
 					p->ee_old_pdata.model = p->model;
-					p->ee_old_pdata.state = p->state;
-					if (p->state == PAD_STATE_ERROR && p->findPadRetries != 0)
-					{
-						p->ee_old_pdata.state = PAD_STATE_FINDPAD;
-					}
+					p->ee_old_pdata.state = (p->state == PAD_STATE_ERROR && p->findPadRetries != 0) ? PAD_STATE_FINDPAD : p->state;
 					p->ee_old_pdata.reqState = p->reqState;
 
 					p->frame++;
@@ -352,10 +214,7 @@ static void DmaSendEE(void)
 
 					*((pad_ee_addr) ? &(p->ee_pdata.length) : &(p->ee_old_pdata.length)) = (p->buttonDataReady == 1) ? padSetupEEButtonData(port, slot, p) : 0;
 
-					if( (p->frame & 1) == 0)
-						sifdma_td[sifdma_count].dest = (void*)p->padarea_ee_addr;
-					else
-						sifdma_td[sifdma_count].dest = (void*)(p->padarea_ee_addr + (pad_ee_addr ? 128 : 64));
+					sifdma_td[sifdma_count].dest = ( (p->frame & 1) == 0) ? (void*)p->padarea_ee_addr : (void*)(p->padarea_ee_addr + (pad_ee_addr ? 128 : 64));
 
 					sifdma_td[sifdma_count].src = pad_ee_addr ? (void *)&p->ee_pdata : (void *)&p->ee_old_pdata;
 					sifdma_td[sifdma_count].size = pad_ee_addr ? 128 : 64;
@@ -417,10 +276,7 @@ static u32 GetThreadsStatus(padState_t *state)
 		if( (tinfo.status & THS_DORMANT) == 0) count++;
 	}
 
-	if(count == 0)
-		return 1;
-	else
-		return 0;
+	return (count == 0) ? 1 : 0;
 }
 
 static void DeleteThreads(padState_t *state)

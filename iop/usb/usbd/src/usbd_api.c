@@ -337,10 +337,7 @@ static void signalCallbackThreadFunc(UsbdIoRequest_t *req)
 
 	CpuSuspendIntr(&state);
 	req->m_prev = cbListEnd;
-	if ( !cbListEnd )
-		cbListStart = req;
-	else
-		cbListEnd->m_next = req;
+	*(cbListEnd ? &(cbListEnd->m_next) : &(cbListStart)) = req;
 	req->m_next = NULL;
 	cbListEnd = req;
 	CpuResumeIntr(state);
@@ -476,14 +473,10 @@ static int usbdTransferPipeImpl(
 		{
 			case TYPE_ISOCHRON:
 			{
+				req->m_waitFrames = request ? request->bRelStartFrame : (u32)option;
 				if ( request )
 				{
-					req->m_waitFrames = request->bRelStartFrame;
 					memcpy(&(req->m_req), request, sizeof(sceUsbdMultiIsochronousRequest));
-				}
-				else
-				{
-					req->m_waitFrames = (u32)option;
 				}
 				res = attachIoReqToEndpoint(ep, req, data, length, signalCallbackThreadFunc);
 				break;

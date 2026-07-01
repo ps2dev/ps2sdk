@@ -16,7 +16,5 @@ void SpuGetVoiceARAttr(int v_num, u16 *ar, int *ar_mode)
 
 	v3 = _spu_RXX[512 * _spu_core + 3 + 8 * (v_num & 0x1F)];
 	*ar = (v3 >> 8) & 0x3F;
-	*ar_mode = SPU_VOICE_LINEARIncN;
-	if ( (v3 & 0x8000) != 0 )
-		*ar_mode = SPU_VOICE_EXPIncN;
+	*ar_mode = ( (v3 & 0x8000) != 0 ) ? SPU_VOICE_EXPIncN : SPU_VOICE_LINEARIncN;
 }

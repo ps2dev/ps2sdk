@@ -51,8 +51,7 @@ void SpuSetVoiceADSRAttr(int v_num, u16 ar, u16 dr, u16 sr, u16 rr, u16 sl, int 
 			break;
 	}
 	v13 = v10 | v12;
-	if ( rr_mode == SPU_VOICE_EXPDec )
-		v13 = v10 | v12 | 0x20;
+	v13 |= ( rr_mode == SPU_VOICE_EXPDec ) ? 0x20 : 0;
 	_spu_RXX[512 * _spu_core + 4 + v11] = v13;
 	_spu_wait_SpuSetVoiceADSRAttr();
 }

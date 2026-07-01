@@ -125,10 +125,7 @@ static int hdd_blkio_fs_driver_mount_bd(int mount_info_index, struct block_devic
         return -1;
     }
     // Check if drive is formatted in APA
-    if (apaGetFormat(mount_info_index, &hddDevices[mount_info_index].format) != 0)
-    {
-        hddDevices[mount_info_index].status -= 1;
-    }
+    hddDevices[mount_info_index].status -= (apaGetFormat(mount_info_index, &hddDevices[mount_info_index].format) != 0) ? 1 : 0;
     if (hddDevices[mount_info_index].status != 0)
     {
         fs_driver_mount_info[mount_info_index].mounted_bd = NULL;
@@ -265,10 +262,7 @@ int hdd_blkio_vhdd_mount(int slot, const char *filename)
             goto cleanup;
         }
         // Check if drive is formatted in APA
-        if (apaGetFormat(slot, &hddDevices[slot].format) != 0)
-        {
-            hddDevices[slot].status -= 1;
-        }
+        hddDevices[slot].status -= (apaGetFormat(slot, &hddDevices[slot].format) != 0) ? 1 : 0;
         if (hddDevices[slot].status != 0)
         {
             r = -EIO;

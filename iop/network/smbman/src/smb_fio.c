@@ -433,9 +433,7 @@ int smb_read(iop_file_t *f, void *buf, int size)
     smb_io_lock();
 
     r = smb_ReadFile(UID, TID, fh->smb_fid, fh->position, buf, size);
-    if (r > 0) {
-        fh->position += r;
-    }
+    fh->position += (r > 0) ? r : 0;
 
     smb_io_unlock();
 
@@ -459,8 +457,7 @@ int smb_write(iop_file_t *f, void *buf, int size)
     r = smb_WriteFile(UID, TID, fh->smb_fid, fh->position, buf, size);
     if (r > 0) {
         fh->position += r;
-        if (fh->position > fh->filesize)
-            fh->filesize += fh->position - fh->filesize;
+        fh->filesize += (fh->position > fh->filesize) ? (fh->position - fh->filesize) : 0;
     }
 
     smb_io_unlock();

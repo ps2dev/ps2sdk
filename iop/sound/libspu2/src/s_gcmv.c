@@ -23,12 +23,6 @@ void SpuGetCommonMasterVolume(s16 *mvol_left, s16 *mvol_right)
 		v3 &= ~0xF000;
 	if ( (v2[945] & 0x8000) != 0 )
 		v4 &= ~0xF000;
-	if ( v3 < 0x4000u )
-		*mvol_left = v3;
-	else
-		*mvol_left = v3 + 0x8000;
-	if ( v4 < 0x4000u )
-		*mvol_right = v4;
-	else
-		*mvol_right = v4 + 0x8000;
+	*mvol_left = ( v3 < 0x4000u ) ? v3 : (v3 + 0x8000);
+	*mvol_right = ( v4 < 0x4000u ) ? v4 : (v4 + 0x8000);
 }

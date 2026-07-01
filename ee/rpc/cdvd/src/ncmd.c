@@ -199,12 +199,7 @@ int sceCdRead(u32 lbn, u32 sectors, void *buf, sceCdRMode *mode)
     readData[5] = (u32)&curReadPos;
 
     // work out buffer size
-    if (mode->datapattern == SCECdSecS2328)
-        bufSize = sectors * 2328;
-    else if (mode->datapattern == SCECdSecS2340)
-        bufSize = sectors * 2340;
-    else
-        bufSize = sectors * 2048;
+    bufSize = sectors * ((mode->datapattern == SCECdSecS2328) ? 2328 : (mode->datapattern == SCECdSecS2340) ? 2340 : 2048);
 
     curReadPos = 0;
     sceSifWriteBackDCache(buf, bufSize);
@@ -313,8 +308,6 @@ int sceCdReadCDDA(u32 lbn, u32 nsectors, void *buf, sceCdRMode *rm)
 #ifdef F_sceCdGetToc
 int sceCdGetToc(u8 *toc)
 {
-    u8 *tocPtr, *tocEnd;
-
     if (_CdCheckNCmd(CD_NCMD_GETTOC) == 0)
         return 0;
 
@@ -326,25 +319,7 @@ int sceCdGetToc(u8 *toc)
         return 0;
     }
 
-    tocPtr = UNCACHED_SEG(tocBuff);
-    tocEnd = tocPtr + 1024;
-    if (*(u32 *)(nCmdRecvBuff + 4)) {
-        do {
-            memcpy(toc, tocPtr, 32);
-            tocPtr += 32;
-            toc += 32;
-        } while (tocPtr < tocEnd);
-    } else {
-        tocEnd = tocPtr + 2048;
-
-        do {
-            memcpy(toc, tocPtr, 32);
-            tocPtr += 32;
-            toc += 32;
-        } while (tocPtr < tocEnd);
-
-        memcpy(toc, tocPtr, 16);
-    }
+    memcpy(toc, UNCACHED_SEG(tocBuff), *(u32 *)(nCmdRecvBuff + 4) ? 1024 : 2064);
 
     SignalSema(nCmdSemaId);
     return *(int *)UNCACHED_SEG(nCmdRecvBuff);
@@ -548,12 +523,7 @@ int sceCdReadChain(sceCdRChain *readChain, sceCdRMode *mode)
     readChainData[65].lbn     = (mode->trycount) | (mode->spindlctrl << 8) | (mode->datapattern << 16);
     readChainData[65].sectors = (u32)&curReadPos;
 
-    if (mode->datapattern == SCECdSecS2328)
-        sectorType = 2328;
-    else if (mode->datapattern == SCECdSecS2340)
-        sectorType = 2340;
-    else
-        sectorType = 2048;
+    sectorType = (mode->datapattern == SCECdSecS2328) ? 2328 : ((mode->datapattern == SCECdSecS2340) ? 2340 : 2048);
 
     curReadPos = 0;
     if (CdDebug > 0)
@@ -596,10 +566,7 @@ int sceCdReadChain(sceCdRChain *readChain, sceCdRMode *mode)
 #ifdef F_sceCdGetReadPos
 u32 sceCdGetReadPos(void)
 {
-    if (CdCallbackNum == CD_NCMD_READ) {
-        return *(u32 *)UNCACHED_SEG(curReadPos);
-    }
-    return 0;
+    return (CdCallbackNum == CD_NCMD_READ) ? *(u32 *)UNCACHED_SEG(curReadPos) : 0;
 }
 #endif
 
@@ -744,10 +711,7 @@ int sceCdCddaStream(u32 lbn, u32 nsectors, void *buf, CdvdStCmd_t cmd, sceCdRMod
     if (_CdCheckNCmd(17) == 0)
         return cmd < CDVD_ST_CMD_INIT ? -1 : 0;
 
-    if (rm->datapattern == SCECdSecS2368)
-        sector_size = 2368;
-    else
-        sector_size = 2352;
+    sector_size = (rm->datapattern == SCECdSecS2368) ? 2368 : 2352;
 
     readStreamData[0] = lbn;
     readStreamData[1] = nsectors * sector_size;

@@ -171,10 +171,7 @@ int PFS_ENTRYPOINT(int argc, char *argv[])
 
 	// Get filename of IRX
 	filename = strrchr(argv[0], '/');
-	if(filename++)
-		pfsFilename = filename;
-	else
-		pfsFilename = argv[0];
+	pfsFilename = (filename++) ? filename : argv[0];
 
 	argc--;
 	argv++;

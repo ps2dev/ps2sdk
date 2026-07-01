@@ -58,12 +58,7 @@ static inline void setloopflags(int id, u8 *buf, int len)
 	{
 //		if (buf[i+1] == 0)
 //		{
-			if (id == 0 && i==0)
-				buf[i+1] = 6; /* Set 'repeat start' when at the begining of buf0 */
-			else if (id == 1 && ((i+16)>=len))
-				buf[i+1] = 3; /* Set 'repeat from begining' when at the end of buf1 */
-			else
-				buf[i+1] = 2; /* Set 'in repeat section' when elsewhere */
+			buf[i+1] = (id == 0 && i==0) ? 6 /* Set 'repeat start' when at the begining of buf0 */ : (((id == 1 && ((i+16)>=len)) ? 3 /* Set 'repeat from begining' when at the end of buf1 */ : 2 /* Set 'in repeat section' when elsewhere */));
 //		}
 	}
 }
@@ -310,10 +305,7 @@ int sndStreamPlay(void)
 		return(0);
 
 	/* Press down the keys :) */
-	if (stream_chans>1)
-		sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYDOWN, 1<<(stream_voice[0]>>1) | 1<<(stream_voice[1]>>1));
-	else
-		sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYDOWN, 1<<(stream_voice[0]>>1));
+	sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYDOWN, 1<<(stream_voice[0]>>1) | ((stream_chans>1) ? (1<<(stream_voice[1]>>1)) : 0));
 
 	sceSdSetCoreAttr(SD_CORE_IRQ_ENABLE, 1);
 
@@ -332,10 +324,7 @@ int sndStreamPause(void)
 		return(0);
 
 	/* Release keys */
-	if (stream_chans>1)
-		sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYUP, 1<<(stream_voice[0]>>1) | 1<<(stream_voice[1]>>1));
-	else
-		sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYUP, 1<<(stream_voice[0]>>1));
+	sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYUP, 1<<(stream_voice[0]>>1) | ((stream_chans>1) ? (1<<(stream_voice[1]>>1)) : 0));
 
 	sceSdSetCoreAttr(SD_CORE_IRQ_ENABLE, 0); /* disable pesky interrupts for a minute */
 

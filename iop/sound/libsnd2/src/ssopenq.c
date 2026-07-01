@@ -69,7 +69,5 @@ s16 SsSeqOpen(unsigned int *addr, s16 vab_id)
 	SsFCALL.ccentry[DE_ECHO_FB] = _SsSetNrpnVabAttr17;
 	SsFCALL.ccentry[DE_ECHO_DELAY] = _SsSetNrpnVabAttr18;
 	SsFCALL.ccentry[DE_DELAY] = _SsSetNrpnVabAttr19;
-	if ( seq_init == -1 )
-		return -1;
-	return open_counter_2;
+	return ( seq_init == -1 ) ? -1 : open_counter_2;
 }

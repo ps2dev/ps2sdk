@@ -470,10 +470,7 @@ static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
     fileSlot->nsub = clink->header->nsub;
     memcpy(&fileSlot->id, &clink->header->id, APA_IDMAX);
     apaCacheFree(clink);
-    if (apaPassCmp(clink->header->fpwd, params->fpwd) != 0) {
-        rv = (!(mode & FIO_O_WRONLY)) ? apaPassCmp(clink->header->rpwd, params->rpwd) : -EACCES;
-    } else
-        rv = 0;
+    rv = (apaPassCmp(clink->header->fpwd, params->fpwd) != 0) ? ((!(mode & FIO_O_WRONLY)) ? apaPassCmp(clink->header->rpwd, params->rpwd) : -EACCES) : 0;
 
     return rv;
 }
@@ -622,11 +619,7 @@ int hddOpen(iomanX_iop_file_t *f, const char *name, int flags, int mode)
             }
         } else {
 #ifdef APA_SUPPORT_BHDD
-            if (strcmp(f->device->name, "bhdd") == 0) {
-                fileSlot->parts[0].start = hddDevices[f->unit].totalLBA;
-            } else {
-                fileSlot->parts[0].start = 0;
-            }
+            fileSlot->parts[0].start = (strcmp(f->device->name, "bhdd") == 0) ? hddDevices[f->unit].totalLBA : 0;
 #endif
             fileSlot->f = f;
             f->privdata = fileSlot;
@@ -703,13 +696,10 @@ static void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
     memcpy(&stat->ctime, &clink->header->created, sizeof(apa_ps2time_t));
     memcpy(&stat->atime, &clink->header->created, sizeof(apa_ps2time_t));
     memcpy(&stat->mtime, &clink->header->created, sizeof(apa_ps2time_t));
+    stat->private_0 = (clink->header->flags & APA_FLAG_SUB) ? clink->header->number : clink->header->nsub;
     stat->private_1 = 0;
     stat->private_2 = 0;
-    if (clink->header->flags & APA_FLAG_SUB)
-        stat->private_0 = clink->header->number;
-    else {
-        stat->private_0 = clink->header->nsub;
-
+    if (!(clink->header->flags & APA_FLAG_SUB)) {
         u64 totalsize = (u64)clink->header->length;
         for (int i = 0; i < clink->header->nsub; i++) {
             totalsize += (u64)clink->header->subs[i].length;
@@ -787,10 +777,7 @@ int hddDread(iomanX_iop_file_t *f, iox_dirent_t *dirent)
             rv = strlen(dirent->name);
         }
         fioGetStatFiller(clink, &dirent->stat);
-        if (clink->header->next == 0)
-            fileSlot->parts[0].start = -1; // mark end
-        else
-            fileSlot->parts[0].start = clink->header->next; // set next
+        fileSlot->parts[0].start = (clink->header->next == 0) ? -1 /* mark end */ : clink->header->next /* set next */;
         apaCacheFree(clink);
     }
     SignalSema(fioSema);

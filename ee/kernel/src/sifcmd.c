@@ -96,10 +96,7 @@ unsigned int _SifSendCmd(int cid, int mode, void *pkt, int pktsize, void *src,
 
     sceSifWriteBackDCache(pkt, pktsize);
 
-    if (mode & SIF_CMD_M_INTR) /* INTERRUPT DMA TRANSFER */
-        return isceSifSetDma(dmat, count);
-    else
-        return sceSifSetDma(dmat, count);
+    return ((mode & SIF_CMD_M_INTR) /* INTERRUPT DMA TRANSFER */ ? isceSifSetDma : sceSifSetDma)(dmat, count);
 }
 #endif
 
@@ -313,16 +310,8 @@ void sceSifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg)
 {
     u32 id = cid & ~SIF_CMD_ID_SYSTEM;
 
-    if (cid & SIF_CMD_ID_SYSTEM)
-    {
-        _sif_cmd_data.sys_cmd_handlers[id].handler = handler;
-        _sif_cmd_data.sys_cmd_handlers[id].harg    = harg;
-    }
-    else
-    {
-        _sif_cmd_data.usr_cmd_handlers[id].handler = handler;
-        _sif_cmd_data.usr_cmd_handlers[id].harg    = harg;
-    }
+    *((cid & SIF_CMD_ID_SYSTEM) ? &(_sif_cmd_data.sys_cmd_handlers[id].handler) : &(_sif_cmd_data.usr_cmd_handlers[id].handler)) = handler;
+    *((cid & SIF_CMD_ID_SYSTEM) ? &(_sif_cmd_data.sys_cmd_handlers[id].harg) : &(_sif_cmd_data.usr_cmd_handlers[id].harg))       = harg;
 }
 #endif
 
@@ -331,10 +320,7 @@ void sceSifRemoveCmdHandler(int cid)
 {
     u32 id = cid & ~SIF_CMD_ID_SYSTEM;
 
-    if (cid & SIF_CMD_ID_SYSTEM)
-        _sif_cmd_data.sys_cmd_handlers[id].handler = NULL;
-    else
-        _sif_cmd_data.usr_cmd_handlers[id].handler = NULL;
+    *((cid & SIF_CMD_ID_SYSTEM) ? &(_sif_cmd_data.sys_cmd_handlers[id].handler) : &(_sif_cmd_data.usr_cmd_handlers[id].handler)) = NULL;
 }
 #endif
 

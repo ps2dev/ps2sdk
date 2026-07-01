@@ -90,9 +90,7 @@ int RegisterVblankHandler(int startend, int priority, int (*handler)(void *userd
 		CpuResumeIntr(state);
 		return KE_NO_MEMORY;
 	}
-	list = &vblank_internals.list_11;
-	if ( !startend )
-		list = &vblank_internals.list_00;
+	list = ( !startend ) ? &vblank_internals.list_00 : &vblank_internals.list_11;
 	item = list->next;
 	if ( list->next != list )
 	{
@@ -140,9 +138,7 @@ int ReleaseVblankHandler(int startend, int (*handler)(void *userdata))
 		return KE_ILLEGAL_CONTEXT;
 	}
 	CpuSuspendIntr(&state);
-	list = &vblank_internals.list_11;
-	if ( !startend )
-		list = &vblank_internals.list_00;
+	list = ( !startend ) ? &vblank_internals.list_00 : &vblank_internals.list_11;
 	item = list->next;
 	if ( list->next == list )
 	{

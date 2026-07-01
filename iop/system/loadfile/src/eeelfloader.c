@@ -27,10 +27,7 @@ static int *allocate_heap_buffer(unsigned int lower_bound, unsigned int upper_bo
 
 	upper_bound_rounded = upper_bound;
 	// Align to 4 bytes
-	if ( (upper_bound_rounded & 3) != 0 )
-	{
-		upper_bound_rounded += (4 - (upper_bound_rounded & 3));
-	}
+	upper_bound_rounded +=  ( (upper_bound_rounded & 3) != 0 ) ? (4 - (upper_bound_rounded & 3)) : 0;
 	CpuSuspendIntr(&state);
 	heap_buffer_base = AllocSysMemory(ALLOC_LAST, upper_bound_rounded, NULL);
 	CpuResumeIntr(state);
@@ -50,10 +47,7 @@ static void *elf_load_alloc_buffer_from_heap(u32 alloc_size)
 
 	alloc_size_rounded = alloc_size;
 	// Align to 4 bytes
-	if ( (alloc_size & 3) != 0 )
-	{
-		alloc_size_rounded += (4 - (alloc_size & 3));
-	}
+	alloc_size_rounded += ( (alloc_size & 3) != 0 ) ? (4 - (alloc_size & 3)) : 0;
 	// Validity check...
 	{
 		u8 *new_ptr;
@@ -119,60 +113,12 @@ static int check_elf_header(const loadfile_elf32_ehdr_t **pehdr)
 	const loadfile_elf32_ehdr_t *ehdr;
 
 	ehdr = *pehdr;
-	if ( ehdr->e_ident[0] != '\x7F' )
-	{
-		return -1;
-	}
-	if ( ehdr->e_ident[1] != 'E' )
-	{
-		return -1;
-	}
-	if ( ehdr->e_ident[2] != 'L' )
-	{
-		return -1;
-	}
-	if ( ehdr->e_ident[3] != 'F' )
-	{
-		return -1;
-	}
-	return 0;
+	return ( ehdr->e_ident[0] != '\x7F' || ehdr->e_ident[1] != 'E' || ehdr->e_ident[2] != 'L' || ehdr->e_ident[3] != 'F' ) ? -1 : 0;
 }
 
 static int check_elf_architecture(const loadfile_file_load_handler_struct_t *flhs)
 {
-	if ( flhs->elf_header.e_ident[4] != 1 )
-	{
-		return -1;
-	}
-	if ( flhs->elf_header.e_ident[5] != 1 )
-	{
-		return -2;
-	}
-	if ( flhs->elf_header.e_type != 2 )
-	{
-		return -3;
-	}
-	if ( flhs->elf_header.e_machine != 8 )
-	{
-		return -4;
-	}
-	if ( flhs->elf_header.e_ehsize != 52 )
-	{
-		return -5;
-	}
-	if ( flhs->elf_header.e_phentsize != 32 )
-	{
-		return -6;
-	}
-	if ( !flhs->elf_header.e_shnum )
-	{
-		return 1;
-	}
-	if ( flhs->elf_header.e_shentsize != 40 )
-	{
-		return -7;
-	}
-	return 1;
+	return ( flhs->elf_header.e_ident[4] != 1 ) ? -1 : (( flhs->elf_header.e_ident[5] != 1 ) ? -2 : (( flhs->elf_header.e_type != 2 ) ? -3 : (( flhs->elf_header.e_machine != 8 ) ? -4 : (( flhs->elf_header.e_ehsize != 52 ) ? -5 : (( flhs->elf_header.e_phentsize != 32 ) ? -6 : (( flhs->elf_header.e_shnum && flhs->elf_header.e_shentsize != 40 ) ? -7 : 1))))));
 }
 
 static int
@@ -386,9 +332,7 @@ static int elf_load_proc(
 				}
 			}
 			sh_size_for_offset = sh_offset_total - rbc->buffer_offset;
-			sh_size_for_alignment = sh_size_cur;
-			if ( rbc->buffer_length - sh_size_for_offset < sh_size_cur )
-				sh_size_for_alignment = rbc->buffer_length - sh_size_for_offset;
+			sh_size_for_alignment = ( rbc->buffer_length - sh_size_for_offset < sh_size_cur ) ? (rbc->buffer_length - sh_size_for_offset) : sh_size_cur;
 			dmat.src = &rbc->buffer_base[sh_size_for_offset];
 			sh_size_cur -= sh_size_for_alignment;
 			dmat.size = sh_size_for_alignment;
@@ -472,9 +416,7 @@ static int elf_load_single_section(
 		for ( i = allocate_info; sh_offset_total >= (u32)(allocate_info->read_buffer_offset); i = allocate_info )
 			fileio_reader_function(flhs->fd, i, 0);
 		sh_size_for_offset = sh_offset_total - rbc->buffer_offset;
-		sh_size_for_alignment = sh_size;
-		if ( rbc->buffer_length - sh_size_for_offset < sh_size )
-			sh_size_for_alignment = rbc->buffer_length - sh_size_for_offset;
+		sh_size_for_alignment = ( rbc->buffer_length - sh_size_for_offset < sh_size ) ? (rbc->buffer_length - sh_size_for_offset) : sh_size;
 		dmat.src = &rbc->buffer_base[sh_size_for_offset];
 		sh_size -= sh_size_for_alignment;
 		dmat.size = sh_size_for_alignment;
@@ -660,19 +602,11 @@ finish_returnresult:
 int loadfile_elfload_innerproc(
 	const char *filename, int epc, const char *section_name, int *result_out, int *result_module_out)
 {
-	if ( IsIllegalBootDevice(filename) != 0 )
-	{
-		return KE_ILLEGAL_OBJECT;
-	}
-	return elf_load_common(filename, epc, section_name, result_out, result_module_out, 0);
+	return ( IsIllegalBootDevice(filename) != 0 ) ? KE_ILLEGAL_OBJECT : elf_load_common(filename, epc, section_name, result_out, result_module_out, 0);
 }
 
 int loadfile_mg_elfload_proc(
 	const char *filename, int epc, const char *section_name, int *result_out, int *result_module_out)
 {
-	if ( strcmp(section_name, "all") != 0 )
-	{
-		return KE_ILLEGAL_MODE;
-	}
-	return elf_load_common(filename, epc, section_name, result_out, result_module_out, 1);
+	return ( strcmp(section_name, "all") != 0 ) ? KE_ILLEGAL_MODE : elf_load_common(filename, epc, section_name, result_out, result_module_out, 1);
 }

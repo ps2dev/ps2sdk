@@ -180,9 +180,7 @@ int sceSdSqGetMaxMidiNumber(void *addr)
 	if ( result )
 		return result;
 	result = (int)do_get_midi_chunk(addr, &dinfo);
-	if ( result )
-		return result;
-	return (int)dinfo.m_midi->maxMidiNumber;
+	return ( result ) ? result : (int)dinfo.m_midi->maxMidiNumber;
 }
 
 int sceSdSqGetMaxSongNumber(void *addr)
@@ -194,9 +192,7 @@ int sceSdSqGetMaxSongNumber(void *addr)
 	if ( result )
 		return result;
 	result = (int)do_get_song_chunk(addr, &dinfo);
-	if ( result )
-		return result;
-	return (int)dinfo.m_song->maxSongNumber;
+	return ( result ) ? result : (int)dinfo.m_song->maxSongNumber;
 }
 
 int sceSdSqInitMidiData(void *addr, u32 midiNumber, SceSdSqMidiData *midiData)
@@ -490,11 +486,7 @@ int sceSdSqGetMaxCompTableIndex(void *addr, u32 midiNumber)
 	sceSeqMidiDataBlock *dblk;
 
 	result = (int)do_get_midi_data_block(addr, midiNumber, &dblk);
-	if ( result )
-		return result;
-	if ( dblk->sequenceDataOffset == 6 )
-		return (int)0x81049028;
-	return dblk->compBlock[0].compTableSize >> 1;
+	return ( result ) ? result : (( dblk->sequenceDataOffset == 6 ) ? (int)0x81049028 : (dblk->compBlock[0].compTableSize >> 1));
 }
 
 int sceSdSqGetCompTableOffset(void *addr, u32 midiNumber, u32 *offset)

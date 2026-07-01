@@ -906,13 +906,7 @@ static int get_nand_partition_offset(int part, int abspart)
 		if ( abspart == -1 && g_device_info->m_block_size == (int)0x80000000 )
 			__builtin_trap();
 	}
-	if ( !part )
-		return get_nand_block_size_div_32_div_64();
-	if ( abspart )
-		return g_device_info->m_block_size / abspart * part;
-	if ( part != 1 )
-		return -1;
-	return g_device_info->m_block_size / 4;
+	return ( !part ) ? get_nand_block_size_div_32_div_64() : (abspart ? (g_device_info->m_block_size / abspart * part) : (( part != 1 ) ? -1 : (g_device_info->m_block_size / 4)));
 }
 
 static int get_nand_partition_size(int part, int abspart)
@@ -927,9 +921,7 @@ static int get_nand_partition_size(int part, int abspart)
 			__builtin_trap();
 		return g_device_info->m_block_size / abspart - (part ? 0 : get_nand_block_size_div_32_div_64());
 	}
-	if ( part )
-		return (part == 1) ? (3 * (g_device_info->m_block_size / 4)) : 0;
-	return g_device_info->m_block_size / 4 - get_nand_block_size_div_32_div_64();
+	return ( part ) ? ((part == 1) ? (3 * (g_device_info->m_block_size / 4)) : 0) : (g_device_info->m_block_size / 4 - get_nand_block_size_div_32_div_64());
 }
 
 static int get_nand_block_size_div_32_div_64(void)
@@ -1054,8 +1046,7 @@ static const nand_id_desc_info_t *do_parse_device_info(const char *nandid)
 
 		cmpval = 0;
 		for ( j = 0; j < 5; j += 1 )
-			if ( ((int)g_nand_type_info[i].m_id[j] == -1) || ((u8)g_nand_type_info[i].m_id[j] == (u8)nandid[j]) )
-				cmpval += 1;
+			cmpval += ( ((int)g_nand_type_info[i].m_id[j] == -1) || ((u8)g_nand_type_info[i].m_id[j] == (u8)nandid[j]) ) ? 1 : 0;
 		if ( cmpval == 5 )
 			return &g_nand_type_info[i];
 	}

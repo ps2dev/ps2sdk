@@ -20,14 +20,7 @@ void _iop_ex_handler(IOP_RegFrame *frame)
 {
     int excode = M_IOP_GET_CAUSE_EXCODE(frame->cause);
 
-    if(excode == IOP_EXCEPTION_HDB)
-    {
-        _iop_exception_state = 2;
-    }
-    else
-    {
-        _iop_exception_state = 1;
-    }
+    _iop_exception_state = (excode == IOP_EXCEPTION_HDB) ? 2 : 1;
 
     _iop_controlled = 1;
 

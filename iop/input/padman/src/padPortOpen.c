@@ -63,10 +63,7 @@ static void UpdatePadThread(void *arg)
 
 				pstate->buttonDataReady = 1;
 
-				if(pstate->modeConfig == MODE_CONFIG_QUERY_PAD)
-					pstate->state = PAD_STATE_FINDCTP1;
-				else
-					pstate->state = PAD_STATE_STABLE ;
+				pstate->state = (pstate->modeConfig == MODE_CONFIG_QUERY_PAD) ? PAD_STATE_FINDCTP1 : PAD_STATE_STABLE;
 
 				if( (pstate->reqState == PAD_RSTAT_BUSY) && (pstate->runTask == TASK_NONE))
 					pstate->reqState = PAD_RSTAT_COMPLETE;

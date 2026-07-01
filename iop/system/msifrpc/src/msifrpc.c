@@ -391,10 +391,7 @@ static void sif_cmdh_unbindrpc_8000001D(struct msif_cmd_unbindrpc_8000001D *data
 static void sif_cmdh_callrpc_8000001A(struct msif_cmd_callrpc_8000001A *data, struct msif_data *harg)
 {
 	(void)harg;
-	if ( data->m_sd->base->start )
-		data->m_sd->base->end->next = data->m_sd;
-	else
-		data->m_sd->base->start = data->m_sd;
+	*(data->m_sd->base->start ? &(data->m_sd->base->end->next) : &(data->m_sd->base->start)) = data->m_sd;
 	data->m_sd->base->end = data->m_sd;
 	data->m_sd->paddr = data->m_paddr;
 	data->m_sd->client = data->m_cd;
@@ -502,10 +499,7 @@ static struct _sifm_serve_data *do_msif_get_next_request(sceSifMQueueData *qd)
 	CpuSuspendIntr(&state);
 	start = qd->start;
 	qd->active = start ? 1 : 0;
-	if ( start )
-	{
-		qd->start = start->next;
-	}
+	qd->start = start ? start->next : start;
 	CpuResumeIntr(state);
 	return start;
 }
@@ -518,10 +512,8 @@ static void do_msif_exec_request(sceSifMServeData *sd)
 	int adddmat;
 	int state;
 
-	size_extra = 0;
 	sentry_ret = sd->sentry->func(sd->fno, sd->func_buff, sd->size);
-	if ( sentry_ret )
-		size_extra = sd->rsize;
+	size_extra = ( sentry_ret ) ? sd->rsize : 0;
 	CpuSuspendIntr(&state);
 	fpacket2 = (sd->rid & 4) ? (SifMRpcRendPkt_t *)sif_mrpc_get_fpacket2(&g_msif_data, (sd->rid >> 16) & 0xFFFF) :
 														 (SifMRpcRendPkt_t *)sif_mrpc_get_fpacket(&g_msif_data);
@@ -773,10 +765,7 @@ int sceSifMTermRpc(int request, int flags)
 	}
 	if ( cur_entry )
 	{
-		if ( tmp_entry )
-			tmp_entry->next = cur_entry->next;
-		else
-			g_msif_data.g_mserv_entries_ll = cur_entry->next;
+		*(tmp_entry ? &(tmp_entry->next) : &(g_msif_data.g_mserv_entries_ll)) = cur_entry->next;
 	}
 	CpuResumeIntr(state);
 	if ( cur_entry )

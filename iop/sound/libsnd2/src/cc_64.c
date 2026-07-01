@@ -15,9 +15,6 @@ void _SsContDamper(s16 sep_no, s16 seq_no, u8 control_value)
 	libsnd2_sequence_struct_t *score_struct;
 
 	score_struct = &_ss_score[sep_no][seq_no];
-	if ( control_value >= 0x40u )
-		_SsVmDamperOn();
-	else
-		_SsVmDamperOff();
+	(( control_value >= 0x40u ) ? _SsVmDamperOn : _SsVmDamperOff)();
 	score_struct->m_delta_value = _SsReadDeltaValue(sep_no, seq_no);
 }

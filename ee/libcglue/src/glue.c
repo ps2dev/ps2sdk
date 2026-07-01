@@ -454,11 +454,7 @@ int getdents(int fd, void *dd_buf, int count)
 		_libcglue_fdman_fd_info_t *fdinfo;
 
 		fdinfo = &(__descriptormap[fd]->info);
-		rv = -ENOSYS;
-		if (fdinfo->ops != NULL && fdinfo->ops->dread != NULL)
-		{
-			rv = __transform_errno(fdinfo->ops->dread(fdinfo->userdata, dirp));
-		}
+		rv = (fdinfo->ops != NULL && fdinfo->ops->dread != NULL) ? __transform_errno(fdinfo->ops->dread(fdinfo->userdata, dirp)) : -ENOSYS;
 	}
 	if (rv < 0) {
 		return __transform_errno(rv);
@@ -1290,15 +1286,7 @@ int ps2sdk_get_iop_fd(int fd)
 {
 	_libcglue_fdman_fd_info_t *fdinfo;
 	fdinfo = libcglue_get_fd_info(fd);
-	if (fdinfo == NULL)
-	{
-		return -EBADF;
-	}
-	if (fdinfo->ops == NULL || fdinfo->ops->getfd == NULL)
-	{
-		return -ENOSYS;
-	}
-	return fdinfo->ops->getfd(fdinfo->userdata);
+	return (fdinfo == NULL) ? -EBADF : ((fdinfo->ops == NULL || fdinfo->ops->getfd == NULL) ? -ENOSYS : fdinfo->ops->getfd(fdinfo->userdata));
 }
 #endif
 
@@ -1307,15 +1295,7 @@ char *ps2sdk_get_iop_filename(int fd)
 {
 	_libcglue_fdman_fd_info_t *fdinfo;
 	fdinfo = libcglue_get_fd_info(fd);
-	if (fdinfo == NULL)
-	{
-		return NULL;
-	}
-	if (fdinfo->ops == NULL || fdinfo->ops->getfilename == NULL)
-	{
-		return NULL;
-	}
-	return fdinfo->ops->getfilename(fdinfo->userdata);
+	return (fdinfo == NULL || fdinfo->ops == NULL || fdinfo->ops->getfilename == NULL) ? NULL : fdinfo->ops->getfilename(fdinfo->userdata);
 }
 #endif
 
@@ -1324,15 +1304,7 @@ int _ps2sdk_close(int fd)
 {
 	_libcglue_fdman_fd_info_t *fdinfo;
 	fdinfo = libcglue_get_fd_info(fd);
-	if (fdinfo == NULL)
-	{
-		return -EBADF;
-	}
-	if (fdinfo->ops == NULL || fdinfo->ops->close == NULL)
-	{
-		return -ENOSYS;
-	}
-	return fdinfo->ops->close(fdinfo->userdata);
+	return (fdinfo == NULL) ? -EBADF : ((fdinfo->ops == NULL || fdinfo->ops->close == NULL) ? -ENOSYS : fdinfo->ops->close(fdinfo->userdata));
 }
 #endif
 
@@ -1348,15 +1320,7 @@ int _ps2sdk_read(int fd, void *buf, int nbytes)
 {
 	_libcglue_fdman_fd_info_t *fdinfo;
 	fdinfo = libcglue_get_fd_info(fd);
-	if (fdinfo == NULL)
-	{
-		return -EBADF;
-	}
-	if (fdinfo->ops == NULL || fdinfo->ops->read == NULL)
-	{
-		return -ENOSYS;
-	}
-	return fdinfo->ops->read(fdinfo->userdata, buf, nbytes);
+	return (fdinfo == NULL) ? -EBADF : ((fdinfo->ops == NULL || fdinfo->ops->read == NULL) ? -ENOSYS : fdinfo->ops->read(fdinfo->userdata, buf, nbytes));
 }
 #endif
 
@@ -1365,15 +1329,7 @@ int _ps2sdk_lseek(int fd, int offset, int whence)
 {
 	_libcglue_fdman_fd_info_t *fdinfo;
 	fdinfo = libcglue_get_fd_info(fd);
-	if (fdinfo == NULL)
-	{
-		return -EBADF;
-	}
-	if (fdinfo->ops == NULL || fdinfo->ops->lseek == NULL)
-	{
-		return -ENOSYS;
-	}
-	return fdinfo->ops->lseek(fdinfo->userdata, offset, whence);
+	return (fdinfo == NULL) ? -EBADF : ((fdinfo->ops == NULL || fdinfo->ops->lseek == NULL) ? -ENOSYS : fdinfo->ops->lseek(fdinfo->userdata, offset, whence));
 }
 #endif
 
@@ -1382,15 +1338,7 @@ int64_t _ps2sdk_lseek64(int fd, int64_t offset, int whence)
 {
 	_libcglue_fdman_fd_info_t *fdinfo;
 	fdinfo = libcglue_get_fd_info(fd);
-	if (fdinfo == NULL)
-	{
-		return -EBADF;
-	}
-	if (fdinfo->ops == NULL || fdinfo->ops->lseek64 == NULL)
-	{
-		return -ENOSYS;
-	}
-	return fdinfo->ops->lseek64(fdinfo->userdata, offset, whence);
+	return (fdinfo == NULL) ? -EBADF : ((fdinfo->ops == NULL || fdinfo->ops->lseek64 == NULL) ? -ENOSYS : fdinfo->ops->lseek64(fdinfo->userdata, offset, whence));
 }
 #endif
 
@@ -1399,15 +1347,7 @@ int _ps2sdk_write(int fd, const void *buf, int nbytes)
 {
 	_libcglue_fdman_fd_info_t *fdinfo;
 	fdinfo = libcglue_get_fd_info(fd);
-	if (fdinfo == NULL)
-	{
-		return -EBADF;
-	}
-	if (fdinfo->ops == NULL || fdinfo->ops->write == NULL)
-	{
-		return -ENOSYS;
-	}
-	return fdinfo->ops->write(fdinfo->userdata, buf, nbytes);
+	return (fdinfo == NULL) ? -EBADF : ((fdinfo->ops == NULL || fdinfo->ops->write == NULL) ? -ENOSYS : fdinfo->ops->write(fdinfo->userdata, buf, nbytes));
 }
 #endif
 
@@ -1416,15 +1356,7 @@ int _ps2sdk_ioctl(int fd, int request, void *data)
 {
 	_libcglue_fdman_fd_info_t *fdinfo;
 	fdinfo = libcglue_get_fd_info(fd);
-	if (fdinfo == NULL)
-	{
-		return -EBADF;
-	}
-	if (fdinfo->ops == NULL || fdinfo->ops->ioctl == NULL)
-	{
-		return -ENOSYS;
-	}
-	return fdinfo->ops->ioctl(fdinfo->userdata, request, data);
+	return (fdinfo == NULL) ? -EBADF : ((fdinfo->ops == NULL || fdinfo->ops->ioctl == NULL) ? -ENOSYS : fdinfo->ops->ioctl(fdinfo->userdata, request, data));
 }
 #endif
 
@@ -1433,15 +1365,7 @@ int _ps2sdk_ioctl2(int fd, int request, void *arg, unsigned int arglen, void *bu
 {
 	_libcglue_fdman_fd_info_t *fdinfo;
 	fdinfo = libcglue_get_fd_info(fd);
-	if (fdinfo == NULL)
-	{
-		return -EBADF;
-	}
-	if (fdinfo->ops == NULL || fdinfo->ops->ioctl == NULL)
-	{
-		return -ENOSYS;
-	}
-	return fdinfo->ops->ioctl2(fdinfo->userdata, request, arg, arglen, buf, buflen);
+	return (fdinfo == NULL) ? -EBADF : ((fdinfo->ops == NULL || fdinfo->ops->ioctl == NULL) ? -ENOSYS : fdinfo->ops->ioctl2(fdinfo->userdata, request, arg, arglen, buf, buflen));
 }
 #endif
 
@@ -1450,15 +1374,7 @@ int _ps2sdk_dread(int fd, struct dirent *dir)
 {
 	_libcglue_fdman_fd_info_t *fdinfo;
 	fdinfo = libcglue_get_fd_info(fd);
-	if (fdinfo == NULL)
-	{
-		return -EBADF;
-	}
-	if (fdinfo->ops == NULL || fdinfo->ops->dread == NULL)
-	{
-		return -ENOSYS;
-	}
-	return fdinfo->ops->dread(fdinfo->userdata, dir);
+	return (fdinfo == NULL) ? -EBADF : ((fdinfo->ops == NULL || fdinfo->ops->dread == NULL) ? -ENOSYS : fdinfo->ops->dread(fdinfo->userdata, dir));
 }
 #endif
 
@@ -1559,12 +1475,7 @@ int unlinkat(int dirfd, const char *pathname, int flags)
 {
 	// If flags contains AT_REMOVEDIR, then the path refers to a directory.
 	// Otherwise, the path refers to a file.
-	if (flags & AT_REMOVEDIR) {
-		return rmdir(pathname);
-	}
-	else {
-		return unlink(pathname);
-	}
+	return ((flags & AT_REMOVEDIR) ? rmdir : unlink)(pathname);
 }
 #endif /* F_unlinkat  */
 

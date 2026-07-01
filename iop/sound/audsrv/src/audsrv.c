@@ -277,14 +277,7 @@ int audsrv_init()
  */
 int audsrv_available()
 {
-	if (writepos <= readpos)
-	{
-		return readpos - writepos;
-	}
-	else
-	{
-		return (ringbuf_size - (writepos - readpos));
-	}
+	return (writepos <= readpos) ? (readpos - writepos) : (ringbuf_size - (writepos - readpos));
 }
 
 /** Returns the number of bytes already in queue
@@ -294,14 +287,7 @@ int audsrv_available()
  */
 int audsrv_queued()
 {
-	if (writepos < readpos)
-	{
-		return (ringbuf_size - (readpos - writepos));
-	}
-	else
-	{
-		return writepos - readpos;
-	}
+	return (writepos < readpos) ? (ringbuf_size - (readpos - writepos)) : (writepos - readpos);
 }
 
 /** Blocks until there is enough space to enqueue chunk

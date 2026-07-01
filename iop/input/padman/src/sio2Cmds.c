@@ -116,18 +116,12 @@ static u32 FindPadsGetPortCtrl1(u32 a, u32 b)
 {
 	(void)b;
 
-	if(a == 0)
-		return 0xFFC00505;
-	else
-		return 0xFF060505;
+	return (a == 0) ? 0xFFC00505 : 0xFF060505;
 }
 
 static u32 FindPadsGetPortCtrl2(u32 a)
 {
-	if(a == 0)
-		return 0x2000A;
-	else
-		return 0x2012C;
+	return (a == 0) ? 0x2000A : 0x2012C;
 }
 
 static u32 FindPadsGetSize1(void)
@@ -208,18 +202,12 @@ static u32 MouseGetPortCtrl1(u32 a, u32 b)
 {
 	(void)b;
 
-	if(a == 0)
-		return 0xFFC00505;
-	else
-		return 0xFF060505;
+	return (a == 0) ? 0xFFC00505 : 0xFF060505;
 }
 
 static u32 MouseGetPortCtrl2(u32 a)
 {
-	if(a == 0)
-		return 0x20014;
-	else
-		return 0x2012C;
+	return (a == 0) ? 0x20014 : 0x2012C;
 }
 
 static u32 MouseRegData(void)
@@ -299,19 +287,13 @@ static u32 NegiconGetPortCtrl1(u32 a, u32 b)
 {
 	(void)b;
 
-	if(a == 0)
-		return 0xFFC00505;
-	else
-		return 0xFF060505;
+	return (a == 0) ? 0xFFC00505 : 0xFF060505;
 }
 
 
 static u32 NegiconGetPortCtrl2(u32 a)
 {
-	if(a == 0)
-		return 0x20014;
-	else
-		return 0x2012C;
+	return (a == 0) ? 0x20014 : 0x2012C;
 }
 
 static u32 NegiconRegData(void)
@@ -388,18 +370,12 @@ static u32 KonamiGunGetPortCtrl1(u32 a, u32 b)
 {
 	(void)b;
 
-	if(a == 0)
-		return 0xFFC00505;
-	else
-		return 0xFF060505;
+	return (a == 0) ? 0xFFC00505 : 0xFF060505;
 }
 
 static u32 KonamiGunGetPortCtrl2(u32 a)
 {
-	if(a == 0)
-		return 0x20014;
-	else
-		return 0x2012C;
+	return (a == 0) ? 0x20014 : 0x2012C;
 }
 
 static u32 KonamiGunRegData(void)
@@ -472,18 +448,12 @@ static u32 DigitalGetPortCtrl1(u32 a, u32 b)
 {
 	(void)b;
 
-	if(a == 0)
-		return 0xFFC00505;
-	else
-		return 0xFF060505;
+	return (a == 0) ? 0xFFC00505 : 0xFF060505;
 }
 
 static u32 DigitalGetPortCtrl2(u32 a)
 {
-	if(a == 0)
-		return 0x20014;
-	else
-		return 0x2012C;
+	return (a == 0) ? 0x20014 : 0x2012C;
 }
 
 static u32 DigitalRegData(void)
@@ -560,18 +530,12 @@ static u32 JoystickGetPortCtrl1(u32 a, u32 b)
 {
 	(void)b;
 
-	if(a == 0)
-		return 0xFFC00505;
-	else
-		return 0xFF060505;
+	return (a == 0) ? 0xFFC00505 : 0xFF060505;
 }
 
 static u32 JoystickGetPortCtrl2(u32 a)
 {
-	if(a == 0)
-		return 0x20014;
-	else
-		return 0x2012C;
+	return (a == 0) ? 0x20014 : 0x2012C;
 }
 
 static u32 JoystickRegData(void)
@@ -652,18 +616,12 @@ static u32 NamcoGunGetPortCtrl1(u32 a, u32 b)
 {
 	(void)b;
 
-	if(a == 0)
-		return 0xFFC00505;
-	else
-		return 0xFF060505;
+	return (a == 0) ? 0xFFC00505 : 0xFF060505;
 }
 
 static u32 NamcoGunGetPortCtrl2(u32 a)
 {
-	if(a == 0)
-		return 0x20014;
-	else
-		return 0x2012C;
+	return (a == 0) ? 0x20014 : 0x2012C;
 }
 
 static u32 NamcoGunRegData(void)
@@ -754,24 +712,15 @@ static u32 AnalogGetPortCtrl1(u32 a, u32 b)
 	{
 		u32 val1, val2, val3 ;
 
-		if((b & 0x2) == 0)
-			val1 = 0x5;
-		else
-			val1 = 0xA;
+		val1 = ((b & 0x2) == 0) ? 0x5 : 0xA;
 
-		if((b & 0x2) == 0)
-			val2 = 0x5;
-		else
-			val2 = 0xA;
+		val2 = ((b & 0x2) == 0) ? 0x5 : 0xA;
 
 		val1 &= 0xFFFF00FF;
 
 		val3 = val1 | ( val2 << 8);
 
-		if((b & 0x2) == 0)
-			val1 = 0xC0;
-		else
-			val1 = 0x60;
+		val1 = ((b & 0x2) == 0) ? 0xC0 : 0x60;
 
 		val3 &= 0xFF00FFFF;
 		val3 = val3 | (val1 << 16) | 0xFF000000;
@@ -782,10 +731,7 @@ static u32 AnalogGetPortCtrl1(u32 a, u32 b)
 
 static u32 AnalogGetPortCtrl2(u32 a)
 {
-	if(a == 0)
-		return 0x20014;
-	else
-		return 0x2012C;
+	return (a == 0) ? 0x20014 : 0x2012C;
 }
 
 static u32 AnalogEnterConfigMode(u8 *a)
@@ -861,18 +807,12 @@ static u32 JogconGetPortCtrl1(u32 a, u32 b)
 {
 	(void)b;
 
-	if(a == 0)
-		return 0xFFC00505;
-	else
-		return 0xFF060505;
+	return (a == 0) ? 0xFFC00505 : 0xFF060505;
 }
 
 static u32 JogconGetPortCtrl2(u32 a)
 {
-	if(a == 0)
-		return 0x20014;
-	else
-		return 0x2012C;
+	return (a == 0) ? 0x20014 : 0x2012C;
 }
 
 static u32 JogconRegData(void)
@@ -957,18 +897,12 @@ static u32 ConfigGetPortCtrl1(u32 a, u32 b)
 {
 	(void)b;
 
-	if(a == 0)
-		return 0xFFC00505;
-	else
-		return 0xFF060505;
+	return (a == 0) ? 0xFFC00505 : 0xFF060505;
 }
 
 static u32 ConfigGetPortCtrl2(u32 a)
 {
-	if(a == 0)
-		return 0x20014;
-	else
-		return 0x2012C;
+	return (a == 0) ? 0x20014 : 0x2012C;
 }
 
 static u32 ConfigRegData(void)

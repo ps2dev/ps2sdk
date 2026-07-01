@@ -144,9 +144,7 @@ int sceSdrChangeThreadPriority(int priority_main, int priority_cb)
 	cur_priority = (priority_cb < priority_main) ? priority_main : priority_cb;
 	ReferThreadStatus(0, &thstatus);
 	ChangeThreadPriority(0, 8);
-	ret = 0;
-	if ( g_sdrInfo.m_thid_main > 0 )
-		ret = ChangeThreadPriority(g_sdrInfo.m_thid_main, priority_main);
+	ret = ( g_sdrInfo.m_thid_main > 0 ) ? ChangeThreadPriority(g_sdrInfo.m_thid_main, priority_main) : 0;
 	if ( ret < 0 )
 		return ret;
 	if ( g_eeCBInfo.m_thid_cb > 0 )

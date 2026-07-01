@@ -114,10 +114,7 @@ int isErrorHeader(char *mimeBuffer)
 	line[i] = '\0';
 
 	code = (int)strtol(line,NULL, 10);
-	if( code == 200 )
-		return 0;
-	else
-		return code;
+	return ( code == 200 ) ? 0 : code;
 }
 
 /**

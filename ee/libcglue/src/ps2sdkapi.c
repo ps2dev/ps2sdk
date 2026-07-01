@@ -69,15 +69,15 @@ int __fioOpenHelper(_libcglue_fdman_fd_info_t *info, const char *buf, int flags,
     int iop_fd;
 
     // newlib flags differ from iop flags
-    if ((flags & 3) == O_RDONLY) iop_flags |= IOP_O_RDONLY;
-    if ((flags & 3) == O_WRONLY) iop_flags |= IOP_O_WRONLY;
-    if ((flags & 3) == O_RDWR  ) iop_flags |= IOP_O_RDWR;
-    if (flags & O_NONBLOCK)      iop_flags |= IOP_O_NBLOCK;
-    if (flags & O_APPEND)        iop_flags |= IOP_O_APPEND;
-    if (flags & O_CREAT)         iop_flags |= IOP_O_CREAT;
-    if (flags & O_TRUNC)         iop_flags |= IOP_O_TRUNC;
-    if (flags & O_EXCL)          iop_flags |= IOP_O_EXCL;
-    //if (flags & O_???)           iop_flags |= IOP_O_NOWAIT;
+    iop_flags |= ((flags & 3) == O_RDONLY) ? IOP_O_RDONLY : 0;
+    iop_flags |= ((flags & 3) == O_WRONLY) ? IOP_O_WRONLY : 0;
+    iop_flags |= ((flags & 3) == O_RDWR  ) ? IOP_O_RDWR : 0;
+    iop_flags |= (flags & O_NONBLOCK)      ? IOP_O_NBLOCK : 0;
+    iop_flags |= (flags & O_APPEND)        ? IOP_O_APPEND : 0;
+    iop_flags |= (flags & O_CREAT)         ? IOP_O_CREAT : 0;
+    iop_flags |= (flags & O_TRUNC)         ? IOP_O_TRUNC : 0;
+    iop_flags |= (flags & O_EXCL)          ? IOP_O_EXCL : 0;
+    //iop_flags |= (flags & O_???) ? IOP_O_NOWAIT : 0;
     if (flags & O_DIRECTORY) {
         iop_flags |= IOP_O_DIROPEN;
         is_dir = 1;
@@ -397,11 +397,11 @@ static time_t io_to_posix_time(const unsigned char *ps2time)
 static mode_t io_to_posix_mode(unsigned int ps2mode)
 {
         mode_t posixmode = 0;
-        if (ps2mode & FIO_SO_IFREG) posixmode |= S_IFREG;
-        if (ps2mode & FIO_SO_IFDIR) posixmode |= S_IFDIR;
-        if (ps2mode & FIO_SO_IROTH) posixmode |= S_IRUSR|S_IRGRP|S_IROTH;
-        if (ps2mode & FIO_SO_IWOTH) posixmode |= S_IWUSR|S_IWGRP|S_IWOTH;
-        if (ps2mode & FIO_SO_IXOTH) posixmode |= S_IXUSR|S_IXGRP|S_IXOTH;
+        posixmode |= (ps2mode & FIO_SO_IFREG) ? (S_IFREG) : 0;
+        posixmode |= (ps2mode & FIO_SO_IFDIR) ? (S_IFDIR) : 0;
+        posixmode |= (ps2mode & FIO_SO_IROTH) ? (S_IRUSR|S_IRGRP|S_IROTH) : 0;
+        posixmode |= (ps2mode & FIO_SO_IWOTH) ? (S_IWUSR|S_IWGRP|S_IWOTH) : 0;
+        posixmode |= (ps2mode & FIO_SO_IXOTH) ? (S_IXUSR|S_IXGRP|S_IXOTH) : 0;
         return posixmode;
 }
 

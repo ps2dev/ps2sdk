@@ -28,13 +28,7 @@ static apa_journal_t journalBuf;
 
 int apaJournalFlush(s32 device)
 {// this write any thing that in are journal buffer :)
-	if(blkIoFlushCache(device))
-		return -EIO;
-	if(blkIoDmaTransfer(device, &journalBuf, APA_SECTOR_APAL, 1, BLKIO_DIR_WRITE))
-		return -EIO;
-	if(blkIoFlushCache(device))
-		return -EIO;
-	return 0;
+	return (blkIoFlushCache(device) || blkIoDmaTransfer(device, &journalBuf, APA_SECTOR_APAL, 1, BLKIO_DIR_WRITE) || blkIoFlushCache(device)) ? -EIO : 0;
 }
 
 int apaJournalReset(s32 device)

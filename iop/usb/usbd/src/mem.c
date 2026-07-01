@@ -23,9 +23,7 @@ UsbdDevice_t *fetchDeviceById(int devId)
 		return NULL;
 	}
 	dev = &memPool->m_deviceTreeBuf[devId];
-	if ( !dev->m_parent )
-		return NULL;
-	return dev;
+	return ( !dev->m_parent ) ? NULL : dev;
 }
 
 UsbdEndpoint_t *fetchEndpointById(int id)
@@ -41,9 +39,7 @@ UsbdEndpoint_t *fetchEndpointById(int id)
 		return NULL;
 	}
 	ep = &memPool->m_endpointBuf[id];
-	if ( !ep->m_correspDevice )
-		return NULL;
-	return ep;
+	return ( !ep->m_correspDevice ) ? NULL : ep;
 }
 
 UsbdDevice_t *getDeviceTreeRoot(void)
@@ -61,14 +57,8 @@ UsbdDevice_t *attachChildDevice(UsbdDevice_t *parent, u32 portNum)
 		dbg_printf("Ran out of device handles\n");
 		return NULL;
 	}
-	if ( newDev->m_next )
-		newDev->m_next->m_prev = newDev->m_prev;
-	else
-		memPool->m_freeDeviceListEnd = newDev->m_prev;
-	if ( newDev->m_prev )
-		newDev->m_prev->m_next = newDev->m_next;
-	else
-		memPool->m_freeDeviceListStart = newDev->m_next;
+	*( newDev->m_next ? &(newDev->m_next->m_prev) : &(memPool->m_freeDeviceListEnd) ) = newDev->m_prev;
+	*( newDev->m_prev ? &(newDev->m_prev->m_next) : &(memPool->m_freeDeviceListStart) ) = newDev->m_next;
 	newDev->m_endpointListEnd = NULL;
 	newDev->m_endpointListStart = NULL;
 	newDev->m_devDriver = NULL;
@@ -83,10 +73,7 @@ UsbdDevice_t *attachChildDevice(UsbdDevice_t *parent, u32 portNum)
 	if ( parent )
 	{
 		newDev->m_prev = parent->m_childListEnd;
-		if ( parent->m_childListEnd )
-			parent->m_childListEnd->m_next = newDev;
-		else
-			parent->m_childListStart = newDev;
+		*( parent->m_childListEnd ? &(parent->m_childListEnd->m_next) : &(parent->m_childListStart) ) = newDev;
 		newDev->m_next = NULL;
 		parent->m_childListEnd = newDev;
 	}
@@ -101,10 +88,7 @@ void freeDevice(UsbdDevice_t *dev)
 		return;
 	}
 	dev->m_prev = memPool->m_freeDeviceListEnd;
-	if ( memPool->m_freeDeviceListEnd )
-		memPool->m_freeDeviceListEnd->m_next = dev;
-	else
-		memPool->m_freeDeviceListStart = dev;
+	*( memPool->m_freeDeviceListEnd ? &(memPool->m_freeDeviceListEnd->m_next) : &(memPool->m_freeDeviceListStart) ) = dev;
 	dev->m_next = NULL;
 	memPool->m_freeDeviceListEnd = dev;
 	dev->m_parent = NULL;
@@ -120,14 +104,8 @@ UsbdIoRequest_t *allocIoRequest(void)
 		dbg_printf("ran out of IoReqs\n");
 		return NULL;
 	}
-	if ( res->m_next )
-		res->m_next->m_prev = res->m_prev;
-	else
-		memPool->m_freeIoReqListEnd = res->m_prev;
-	if ( res->m_prev )
-		res->m_prev->m_next = res->m_next;
-	else
-		memPool->m_freeIoReqList = res->m_next;
+	*( res->m_next ? &(res->m_next->m_prev) : &(memPool->m_freeIoReqListEnd) ) = res->m_prev;
+	*( res->m_prev ? &(res->m_prev->m_next) : &(memPool->m_freeIoReqList) ) = res->m_next;
 	return res;
 }
 
@@ -154,10 +132,7 @@ void freeIoRequest(UsbdIoRequest_t *req)
 	}
 	req->m_busyFlag = 0;
 	req->m_prev = memPool->m_freeIoReqListEnd;
-	if ( memPool->m_freeIoReqListEnd )
-		memPool->m_freeIoReqListEnd->m_next = req;
-	else
-		memPool->m_freeIoReqList = req;
+	*( memPool->m_freeIoReqListEnd ? &(memPool->m_freeIoReqListEnd->m_next) : &(memPool->m_freeIoReqList) ) = req;
 	req->m_next = NULL;
 	memPool->m_freeIoReqListEnd = req;
 }
@@ -171,14 +146,8 @@ UsbdEndpoint_t *allocEndpointForDevice(UsbdDevice_t *dev, u32 align)
 	{
 		return NULL;
 	}
-	if ( newEp->m_next )
-		newEp->m_next->m_prev = newEp->m_prev;
-	else
-		memPool->m_freeEpListEnd = newEp->m_prev;
-	if ( newEp->m_prev )
-		newEp->m_prev->m_next = newEp->m_next;
-	else
-		memPool->m_freeEpListStart = newEp->m_next;
+	*( newEp->m_next ? &(newEp->m_next->m_prev) : &(memPool->m_freeEpListEnd) ) = newEp->m_prev;
+	*( newEp->m_prev ? &(newEp->m_prev->m_next) : &(memPool->m_freeEpListStart) ) = newEp->m_next;
 	newEp->m_correspDevice = dev;
 	newEp->m_ioReqListEnd = NULL;
 	newEp->m_ioReqListStart = NULL;
@@ -187,10 +156,7 @@ UsbdEndpoint_t *allocEndpointForDevice(UsbdDevice_t *dev, u32 align)
 	newEp->m_inTdQueue = 0;
 	newEp->m_alignFlag = align;
 	newEp->m_prev = dev->m_endpointListEnd;
-	if ( dev->m_endpointListEnd )
-		dev->m_endpointListEnd->m_next = newEp;
-	else
-		dev->m_endpointListStart = newEp;
+	*( dev->m_endpointListEnd ? &(dev->m_endpointListEnd->m_next) : &(dev->m_endpointListStart) ) = newEp;
 	newEp->m_next = NULL;
 	dev->m_endpointListEnd = newEp;
 	return newEp;
@@ -204,29 +170,14 @@ int cleanUpFunc(UsbdDevice_t *dev, UsbdEndpoint_t *ep)
 	}
 	if ( ep->m_inTdQueue != NOTIN_QUEUE )
 	{
-		if ( ep->m_busyNext )
-			ep->m_busyNext->m_busyPrev = ep->m_busyPrev;
-		else
-			memPool->m_tdQueueEnd = ep->m_busyPrev;
-		if ( ep->m_busyPrev )
-			ep->m_busyPrev->m_busyNext = ep->m_busyNext;
-		else
-			memPool->m_tdQueueStart = ep->m_busyNext;
+		*( ep->m_busyNext ? &(ep->m_busyNext->m_busyPrev) : &(memPool->m_tdQueueEnd) ) = ep->m_busyPrev;
+		*( ep->m_busyPrev ? &(ep->m_busyPrev->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep->m_busyNext;
 		ep->m_inTdQueue = NOTIN_QUEUE;
 	}
-	if ( ep->m_next )
-		ep->m_next->m_prev = ep->m_prev;
-	else
-		dev->m_endpointListEnd = ep->m_prev;
-	if ( ep->m_prev )
-		ep->m_prev->m_next = ep->m_next;
-	else
-		dev->m_endpointListStart = ep->m_next;
+	*( ep->m_next ? &(ep->m_next->m_prev) : &(dev->m_endpointListEnd) ) = ep->m_prev;
+	*( ep->m_prev ? &(ep->m_prev->m_next) : &(dev->m_endpointListStart) ) = ep->m_next;
 	ep->m_prev = memPool->m_freeEpListEnd;
-	if ( memPool->m_freeEpListEnd )
-		memPool->m_freeEpListEnd->m_next = ep;
-	else
-		memPool->m_freeEpListStart = ep;
+	*( memPool->m_freeEpListEnd ? &(memPool->m_freeEpListEnd->m_next) : &(memPool->m_freeEpListStart) ) = ep;
 	ep->m_next = NULL;
 	memPool->m_freeEpListEnd = ep;
 	ep->m_correspDevice = NULL;

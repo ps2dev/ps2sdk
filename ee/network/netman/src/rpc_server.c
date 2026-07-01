@@ -184,13 +184,8 @@ static void NETMAN_RxThread(void *arg)
 		do {
 			DI();
 			PacketLength = bd->length;
-			if (PacketLength > 0)
-			{
-				run = 1;
-			} else {
-				run = 0;
-				IsProcessingRx = 0;
-			}
+			run = (PacketLength > 0) ? 1 : 0;
+			IsProcessingRx = (PacketLength > 0) ? IsProcessingRx : 0;
 			EI();
 
 			if(!run)

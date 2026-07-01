@@ -133,26 +133,9 @@ int main(int argc, char **argv)
 	const char *source;
 
 	myname_1 = strrchr(*argv, '/');
-	if ( !myname_1 )
-	{
-		myname_1 = strrchr(*argv, '\\');
-	}
-	if ( myname_1 )
-	{
-		myname_2 = myname_1 + 1;
-	}
-	else
-	{
-		myname_2 = *argv;
-	}
-	if ( (strncmp(myname_2, "ee", 2) != 0) && (strncmp(myname_2, "EE", 2) != 0) )
-	{
-		defaultconf = iop_defaultconf;
-	}
-	else
-	{
-		defaultconf = ee_defaultconf;
-	}
+	myname_1 = ( !myname_1 ) ? strrchr(*argv, '\\') : myname_1;
+	myname_2 = myname_1 ? (myname_1 + 1) : *argv;
+	defaultconf = ( (strncmp(myname_2, "ee", 2) != 0) && (strncmp(myname_2, "EE", 2) != 0) ) ? iop_defaultconf : ee_defaultconf;
 	if ( strlen(*argv) > 5 && !strcmp(&(*argv)[strlen(*argv) - 5], "strip") )
 	{
 		int argca;
@@ -227,16 +210,7 @@ int main(int argc, char **argv)
 	{
 		exit(1);
 	}
-	if (
-		((elf->ehp->e_flags & EF_MIPS_MACH) == EF_MIPS_MACH_5900)
-		&& ((elf->ehp->e_flags & EF_MIPS_ARCH) == EF_MIPS_ARCH_3) )
-	{
-		srxgen_1 = read_conf(ee_defaultconf, conffile, print_config);
-	}
-	else
-	{
-		srxgen_1 = read_conf(iop_defaultconf, conffile, print_config);
-	}
+	srxgen_1 = read_conf(( ((elf->ehp->e_flags & EF_MIPS_MACH) == EF_MIPS_MACH_5900) && ((elf->ehp->e_flags & EF_MIPS_ARCH) == EF_MIPS_ARCH_3) ) ? ee_defaultconf : iop_defaultconf, conffile, print_config);
 	if ( !srxgen_1 )
 	{
 		exit(1);

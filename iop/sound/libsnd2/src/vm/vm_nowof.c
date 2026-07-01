@@ -20,16 +20,8 @@ void _SsVmKeyOffNow(void)
 	libsnd2_spu_voice_t *voice_struct;
 
 	m_voice_idx = (u16)_svm_cur.m_voice_idx;
-	if ( (u16)m_voice_idx >= 0x10u )
-	{
-		bits_upper = 0;
-		bits_lower = 1 << ((m_voice_idx & 0xFF) - 16);
-	}
-	else
-	{
-		bits_upper = 1 << (m_voice_idx & 0xFF);
-		bits_lower = 0;
-	}
+	bits_upper = ( (u16)m_voice_idx >= 0x10u ) ? 0 : (1 << (m_voice_idx & 0xFF));
+	bits_lower = ( (u16)m_voice_idx >= 0x10u ) ? (1 << ((m_voice_idx & 0xFF) - 16)) : 0;
 	voice_struct = &_svm_voice[m_voice_idx];
 	voice_struct->m_unk1d = 0;
 	okof1_tmp = _svm_okof1;

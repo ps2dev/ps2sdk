@@ -51,10 +51,7 @@ unsigned int ioplib_getTableSize(iop_library_t *lib)
     void **exp;
     unsigned int size;
 
-    exp = NULL;
-    if (lib != NULL) {
-        exp = lib->exports;
-    }
+    exp = (lib != NULL) ? lib->exports : NULL;
     size = 0;
 
     if (exp != NULL)

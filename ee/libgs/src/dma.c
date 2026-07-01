@@ -81,14 +81,7 @@ void GsDmaSend(const void *addr, u32 qwords)
 	DMA_CHCR		chcr;
 	static char		spr;
 
-	if((u32)addr >= 0x70000000 && (u32)addr <= 0x70003fff)
-	{
-		spr = 1;
-	}
-	else
-	{
-		spr = 0;
-	}
+	spr = ((u32)addr >= 0x70000000 && (u32)addr <= 0x70003fff) ? 1 : 0;
 
 	*((vu32 *)(gif_madr)) = ( u32 )((( u32 )addr) & 0x7FFFFFFF) << 0 | (u32)((spr) & 0x00000001) << 31;;
 
@@ -116,14 +109,7 @@ void GsDmaSend_tag(const void *addr, u32 qwords, const GS_GIF_DMACHAIN_TAG *tag)
 	DMA_CHCR		chcr;
 	static char		spr;
 
-	if((u32)addr >= 0x70000000 && (u32)addr <= 0x70003fff)
-	{
-		spr = 1;
-	}
-	else
-	{
-		spr = 0;
-	}
+	spr = ((u32)addr >= 0x70000000 && (u32)addr <= 0x70003fff) ? 1 : 0;
 
 	*((vu32 *)(gif_madr)) = ( u32 )((( u32 )addr) & 0x7FFFFFFF) << 0 | (u32)((spr) & 0x00000001) << 31;
 	*((vu32 *)(gif_qwc)) = qwords;

@@ -114,7 +114,7 @@ static void fileXio_Thread(void* param);
 int _start( int argc, char *argv[])
 {
 	struct _iop_thread param;
-	int th, result;
+	int th;
 
 	(void)argc;
 	(void)argv;
@@ -130,11 +130,9 @@ int _start( int argc, char *argv[])
 	if (th > 0)
 	{
 		StartThread(th, NULL);
-		result=MODULE_RESIDENT_END;
 	}
-	else result=MODULE_NO_RESIDENT_END;
 
-	return result;
+	return (th > 0) ? MODULE_RESIDENT_END : MODULE_NO_RESIDENT_END;
 }
 
 static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount)
@@ -229,10 +227,7 @@ static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_
 		buffer = read_buf;
 		aebuffer = 0;
 	}else{
-		if ((read_buf2 & 0x3F) == 0)
-			srest=0;
-		else
-			srest=(int)RDOWN_64(read_buf2) - read_buf2 + 64;
+		srest=((read_buf2 & 0x3F) == 0) ? 0 : ((int)RDOWN_64(read_buf2) - read_buf2 + 64);
 		buffer = read_buf;
 		abuffer = read_buf2 + srest;
 		aebuffer=(void *)RDOWN_64(read_buf2 + read_size);
@@ -317,8 +312,7 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
 		wlen=iomanX_write(outfd, misbuf, mis);
 		if (wlen != mis)
             {
-			if (wlen > 0)
-				total += wlen;
+			total += (wlen > 0) ? wlen : 0;
 			return (total);
 		}
 		total += wlen;
@@ -332,8 +326,7 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
 		sceSifGetOtherData(&rdata, (void *)pos, rwbuf, writelen, 0);
 		wlen=iomanX_write(outfd, rwbuf, writelen);
 		if (wlen != writelen){
-			if (wlen>0)
-				total+=wlen;
+			total += (wlen>0) ? wlen : 0;
 			return (total);
 		}
 		left -=writelen;
@@ -870,10 +863,7 @@ static void* fileXioRpc_Devctl(unsigned int* sbuff)
 		ret_buf->dest = packet->buf;
 
 		// EE is expecting data.. on error, simply use size of 0 so no data is copied.
-		if(ret >= 0)
-			ret_buf->len = packet->buflen;
-		else
-			ret_buf->len = 0;
+		ret_buf->len = (ret >= 0) ? packet->buflen : 0;
 
 		CpuSuspendIntr(&intStatus);
 		sceSifSetDma(&dmatrans, 1);
@@ -922,10 +912,7 @@ static void* fileXioRpc_Ioctl2(unsigned int* sbuff)
 		ret_buf->dest = packet->buf;
 
 		// EE is expecting data.. on error, simply use size of 0 so no data is copied.
-		if(ret >= 0)
-			ret_buf->len = packet->buflen;
-		else
-			ret_buf->len = 0;
+		ret_buf->len = (ret >= 0) ? packet->buflen : 0;
 
 		CpuSuspendIntr(&intStatus);
 		sceSifSetDma(&dmatrans, 1);

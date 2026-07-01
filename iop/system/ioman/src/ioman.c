@@ -94,11 +94,7 @@ static int open_tty_handles(void)
 	io_close(0);
 	io_close(1);
 	result = io_open("tty00:", 3);
-	if (result == 0)
-	{
-		return io_open("tty00:", 2);
-	}
-	return result;
+	return (result == 0) ? io_open("tty00:", 2) : result;
 }
 
 static int setup_tty_device(int should_not_add_tty_device)
@@ -243,10 +239,7 @@ static char * find_iop_device(const char *dev, int *unit, iop_io_device_t **devi
 	if (unit) {
 		int num;
 
-		num = 0;
-		if (isnum(canon[len])) {
-			num = strtol(canon + len, 0, 10);
-		}
+		num = (isnum(canon[len])) ? strtol(canon + len, 0, 10) : 0;
 		*unit = num;
 	}
 

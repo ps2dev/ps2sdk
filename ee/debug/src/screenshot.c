@@ -198,12 +198,7 @@ int ps2_screenshot( void *pDest, unsigned int VramAdress, unsigned int x,
 
   // Calc size depending on Psm
 
-  if( Psm == PS2SS_GSPSMCT16 )
-    uQSize = ((Width*Height*2)/16);
-  else if( Psm == PS2SS_GSPSMCT24 )
-    uQSize = ((Width*Height*3)/16);
-  else
-    uQSize = (Width*Height*4)/16;
+  uQSize = ( Psm == PS2SS_GSPSMCT16 ) ? ((Width*Height*2)/16) : (( Psm == PS2SS_GSPSMCT24 ) ? ((Width*Height*3)/16) : ((Width*Height*4)/16));
 
   // Setup transfer texture back to memory
 

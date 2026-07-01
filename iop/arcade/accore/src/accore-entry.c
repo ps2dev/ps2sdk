@@ -61,11 +61,5 @@ int acCoreEntry(int argc, char **argv)
 			break;
 		}
 	}
-	if ( ret_v4 < 0 )
-	{
-		return ret_v4;
-	}
-	if ( RegisterLibraryEntries(&_exp_accore) != 0 )
-		return -16;
-	return 0;
+	return ( ret_v4 < 0 ) ? ret_v4 : (( RegisterLibraryEntries(&_exp_accore) != 0 ) ? -16 : 0);
 }

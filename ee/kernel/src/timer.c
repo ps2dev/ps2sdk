@@ -209,11 +209,7 @@ __attribute__((weak)) s32 EndTimer(void)
 #ifdef F_GetTimerPreScaleFactor
 s32 GetTimerPreScaleFactor(void)
 {
-    if (g_Timer.intc_handler < 0)
-    {
-        return 0x80008001; // EINIT
-    }
-    return (*T2_MODE) & 3;
+    return (g_Timer.intc_handler < 0) ? 0x80008001 /* EINIT */ : ((*T2_MODE) & 3);
 }
 #endif
 
@@ -790,15 +786,7 @@ u64 iGetTimerBaseTime(s32 id)
     counter_struct_t *timer_current;
 
     timer_current = TIMER_ID_TO_PTR(id);
-    if (!TIMER_ID_IS_VALID(id))
-    {
-        return -1;
-    }
-    if ((timer_current->timer_mode & TIMER_MODE_START) == 0)
-    {
-        return 0;
-    }
-    return timer_current->timer_base_time - timer_current->timer_base_count;
+    return (!TIMER_ID_IS_VALID(id)) ? -1 : (((timer_current->timer_mode & TIMER_MODE_START) == 0) ? 0 : (timer_current->timer_base_time - timer_current->timer_base_count));
 }
 #endif
 
@@ -830,10 +818,7 @@ u64 iGetTimerCount(s32 id)
         return -1;
     }
     ret = timer_current->timer_base_count;
-    if ((timer_current->timer_mode & TIMER_MODE_START) != 0)
-    {
-        ret += iGetTimerSystemTime() - timer_current->timer_base_time;
-    }
+    ret += ((timer_current->timer_mode & TIMER_MODE_START) != 0) ? (iGetTimerSystemTime() - timer_current->timer_base_time) : 0;
     return ret;
 }
 #endif

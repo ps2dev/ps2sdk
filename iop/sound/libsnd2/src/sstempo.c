@@ -42,11 +42,7 @@ void SsSetTempo(s16 sep_no, s16 seq_no, s16 tempo)
 		v11 = 10 * score_struct->m_resolution_of_quarter_note * score_struct->m_unk94 / v7;
 		v12 = 10 * score_struct->m_resolution_of_quarter_note * score_struct->m_unk94 % v7;
 		score_struct->m_unk52 = -1;
-		score_struct->m_unk54 = v11;
-		if ( (unsigned int)(2 * v6) < v12 )
-		{
-			score_struct->m_unk54 = v11 + 1;
-		}
+		score_struct->m_unk54 = ( (unsigned int)(2 * v6) < v12 ) ? (v11 + 1) : v11;
 	}
 	score_struct->m_unk56 = score_struct->m_unk54;
 }

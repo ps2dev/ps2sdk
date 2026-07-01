@@ -22,11 +22,7 @@ int _SsVmKeyOn(int seq_sep_no, s16 vab_id, s16 prog, s16 note, s16 voll, s16 unk
 	u8 vag_nums[128];
 	u8 vag_index_nums[128];
 
-	score_struct = NULL;
-	if ( seq_sep_no != 33 )
-	{
-		score_struct = &_ss_score[(u8)seq_sep_no][(seq_sep_no & 0xFF00) >> 8];
-	}
+	score_struct = ( seq_sep_no != 33 ) ? &_ss_score[(u8)seq_sep_no][(seq_sep_no & 0xFF00) >> 8] : NULL;
 	on_keys_mask_1 = 0;
 	on_keys_mask_2 = -1;
 	if ( _SsVmVSetUp(vab_id, prog) != 0 )
@@ -36,10 +32,7 @@ int _SsVmKeyOn(int seq_sep_no, s16 vab_id, s16 prog, s16 note, s16 voll, s16 unk
 	_svm_cur.m_seq_sep_no = seq_sep_no;
 	_svm_cur.m_note = note;
 	_svm_cur.m_fine = 0;
-	if ( score_struct != NULL )
-		_svm_cur.m_voll = (u16)voll * score_struct->m_vol[score_struct->m_channel_idx] / 127;
-	else
-		_svm_cur.m_voll = voll;
+	_svm_cur.m_voll = ( score_struct != NULL ) ? ((u16)voll * score_struct->m_vol[score_struct->m_channel_idx] / 127) : voll;
 	_svm_cur.m_unk05 = unknown27;
 	prog_attr_Ptr = &_svm_pg[prog];
 	_svm_cur.m_mvol = prog_attr_Ptr->mvol;
@@ -141,21 +134,8 @@ int _SsVmSeKeyOn(s16 vab_id, s16 prog, u16 note, int pitch, u16 voll, u16 volr)
 
 	(void)pitch;
 
-	if ( voll == volr )
-	{
-		unknown27 = 64;
-		voll_ = voll;
-	}
-	else if ( volr >= (unsigned int)voll )
-	{
-		voll_ = volr;
-		unknown27 = 127 - (voll << 6) / volr;
-	}
-	else
-	{
-		voll_ = voll;
-		unknown27 = (volr << 6) / voll;
-	}
+	voll_ = ( voll == volr ) ? voll : (( volr >= (unsigned int)voll ) ? volr : voll);
+	unknown27 = ( voll == volr ) ? 64 : (( volr >= (unsigned int)voll ) ? (127 - (voll << 6) / volr) : ((volr << 6) / voll));
 	return _SsVmKeyOn(33, vab_id, prog, note, voll_, unknown27);
 }
 

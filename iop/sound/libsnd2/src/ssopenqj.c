@@ -30,7 +30,5 @@ s16 SsSeqOpenJ(unsigned int *addr, s16 vab_id)
 		}
 	}
 	_snd_openflag |= 1 << v2;
-	if ( _SsInitSoundSeq(v2, vab_id, (u8 *)addr) == -1 )
-		return -1;
-	return v2;
+	return ( _SsInitSoundSeq(v2, vab_id, (u8 *)addr) == -1 ) ? -1 : v2;
 }

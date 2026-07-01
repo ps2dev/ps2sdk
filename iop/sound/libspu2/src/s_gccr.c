@@ -12,7 +12,5 @@
 
 void SpuGetCommonCDReverb(int *cd_reverb)
 {
-	*cd_reverb = SPU_OFF;
-	if ( (_spu_RXX[512 * _spu_core + 205] & 4) != 0 )
-		*cd_reverb = SPU_ON;
+	*cd_reverb = ( (_spu_RXX[512 * _spu_core + 205] & 4) != 0 ) ? SPU_ON : SPU_OFF;
 }

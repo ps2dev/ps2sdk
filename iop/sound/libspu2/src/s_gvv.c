@@ -19,12 +19,6 @@ void SpuGetVoiceVolume(int v_num, s16 *voll, s16 *volr)
 	v3 = &_spu_RXX[512 * _spu_core + 8 * (v_num & 0x1F)];
 	v4 = v3[1];
 	v5 = v3[0];
-	if ( v5 < 0x4000 )
-		*voll = v5;
-	else
-		*voll = v5 + 0x8000;
-	if ( v4 < 0x4000u )
-		*volr = v4;
-	else
-		*volr = v4 + 0x8000;
+	*voll = ( v5 < 0x4000 ) ? v5 : (v5 + 0x8000);
+	*volr = ( v4 < 0x4000u ) ? v4 : (v4 + 0x8000);
 }

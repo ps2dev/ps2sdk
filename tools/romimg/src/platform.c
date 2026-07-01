@@ -109,10 +109,7 @@ int GetCurrentWorkingDirectory(char *buffer, unsigned int BufferSize)
 #if defined(_WIN32) || defined(WIN32)
 	return (GetCurrentDirectoryA(BufferSize, buffer) == 0 ? EIO : 0);
 #else
-	if (getcwd(buffer, BufferSize) != NULL)
-		return 0;
-	else
-		return EIO;
+	return (getcwd(buffer, BufferSize) != NULL) ? 0 : EIO;
 #endif
 }
 

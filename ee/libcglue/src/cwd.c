@@ -224,7 +224,7 @@ int __path_absolute(const char *in, char *out, int len)
 		memcpy(out, __cwd, __cwd_len);
 		out[__cwd_len] = '\x00';
 		dr = __get_drive(out, &separatorType);
-		if(dr < 0) dr = 0;
+		dr = (dr < 0) ? 0 : dr;
 		out[dr] = 0;
 		strncat(out, in, len);
 	} else {
@@ -238,7 +238,7 @@ int __path_absolute(const char *in, char *out, int len)
 
 	/* Now normalize the pathname portion */
 	dr = __get_drive(out, &separatorType);
-	if(dr < 0) dr = 0;
+	dr = (dr < 0) ? 0 : dr;
 	return __path_normalize(out + dr, len - dr, separatorType == SeparatorTypePOSIX);
 }
 #endif

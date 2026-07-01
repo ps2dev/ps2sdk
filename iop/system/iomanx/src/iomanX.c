@@ -194,25 +194,13 @@ static inline void handle_result_pre(int in_result, iomanX_iop_file_t *f, int op
 static inline int handle_result(int in_result, iomanX_iop_file_t *f, int op)
 {
 	handle_result_pre(in_result, f, op);
-	if ( in_result < 0 )
-		return set_errno(-in_result);
-	if ( (op & HANDLE_RESULT_RETURN_ZERO) )
-		return 0;
-	if ( (op & HANDLE_RESULT_RETURN_FD) )
-		return f - file_table;
-	return in_result;
+	return ( in_result < 0 ) ? set_errno(-in_result) : (( (op & HANDLE_RESULT_RETURN_ZERO) ) ? 0 : (( (op & HANDLE_RESULT_RETURN_FD) ) ? (f - file_table) : in_result));
 }
 
 static inline s64 handle_result64(s64 in_result, iomanX_iop_file_t *f, int op)
 {
 	handle_result_pre(in_result, f, op);
-	if ( in_result < 0 )
-		return set_errno(-(int)in_result);
-	if ( (op & HANDLE_RESULT_RETURN_ZERO) )
-		return 0;
-	if ( (op & HANDLE_RESULT_RETURN_FD) )
-		return f - file_table;
-	return in_result;
+	return ( in_result < 0 ) ? set_errno(-(int)in_result) : (( (op & HANDLE_RESULT_RETURN_ZERO) ) ? 0 : (( (op & HANDLE_RESULT_RETURN_FD) ) ? (f - file_table) : in_result));
 }
 
 #ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
@@ -328,20 +316,14 @@ int mode2modex(int mode)
 {
 	int modex = 0;
 
-	if ( (mode & FIO_SO_IFLNK) != 0 )
-		modex |= FIO_S_IFLNK;
-	if ( (mode & FIO_SO_IFREG) != 0 )
-		modex |= FIO_S_IFREG;
-	if ( (mode & FIO_SO_IFDIR) != 0 )
-		modex |= FIO_S_IFDIR;
+    modex |= ( (mode & FIO_SO_IFLNK) != 0 ) ? FIO_S_IFLNK : 0;
+    modex |= ( (mode & FIO_SO_IFREG) != 0 ) ? FIO_S_IFREG : 0;
+    modex |= ( (mode & FIO_SO_IFDIR) != 0 ) ? FIO_S_IFDIR : 0;
 
 	/* Convert the file access modes.  */
-	if ( mode & FIO_SO_IROTH )
-		modex |= FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH;
-	if ( mode & FIO_SO_IWOTH )
-		modex |= FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH;
-	if ( mode & FIO_SO_IXOTH )
-		modex |= FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH;
+    modex |= ( mode & FIO_SO_IROTH ) ? (FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH) : 0;
+    modex |= ( mode & FIO_SO_IWOTH ) ? (FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH) : 0;
+    modex |= ( mode & FIO_SO_IXOTH ) ? (FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH) : 0;
 
 	return modex;
 }
@@ -350,20 +332,14 @@ int modex2mode(int modex)
 {
 	int mode = 0;
 
-	if ( (modex & FIO_S_IFLNK) != 0 )
-		mode |= FIO_SO_IFLNK;
-	if ( (modex & FIO_S_IFREG) != 0 )
-		mode |= FIO_SO_IFREG;
-	if ( (modex & FIO_S_IFDIR) != 0 )
-		mode |= FIO_SO_IFDIR;
+    mode |= ( (modex & FIO_S_IFLNK) != 0 ) ? FIO_SO_IFLNK : 0;
+    mode |= ( (modex & FIO_S_IFREG) != 0 ) ? FIO_SO_IFREG : 0;
+    mode |= ( (modex & FIO_S_IFDIR) != 0 ) ? FIO_SO_IFDIR : 0;
 
 	/* Convert the file access modes.  */
-	if ( modex & (FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH) )
-		mode |= FIO_SO_IROTH;
-	if ( modex & (FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH) )
-		mode |= FIO_SO_IWOTH;
-	if ( modex & (FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH) )
-		mode |= FIO_SO_IXOTH;
+    mode |= ( modex & (FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH) ) ? FIO_SO_IROTH : 0;
+    mode |= ( modex & (FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH) ) ? FIO_SO_IWOTH : 0;
+    mode |= ( modex & (FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH) ) ? FIO_SO_IXOTH : 0;
 
 	return mode;
 }
@@ -423,9 +399,7 @@ void iomanX_StdioInit(int mode)
 
 static int open_tty_handles(const char *tty_name)
 {
-	if ( iomanX_open(tty_name, 3) != 0 || iomanX_open(tty_name, 2) != 1 )
-		return -1;
-	return 0;
+	return ( iomanX_open(tty_name, 3) != 0 || iomanX_open(tty_name, 2) != 1 ) ? -1 : 0;
 }
 
 int iomanX_open(const char *name, int flags, ...)
@@ -496,9 +470,7 @@ int iomanX_read(int fd, void *ptr, int size)
 	iomanX_iop_file_t *f;
 
 	f = get_iob(fd);
-	if ( !f || !(f->mode & FIO_O_RDONLY) )
-		return handle_result(-EBADF, f, 0);
-	return handle_result(f->device->ops->read(f, ptr, size), f, 0);
+	return ( !f || !(f->mode & FIO_O_RDONLY) ) ? handle_result(-EBADF, f, 0) : handle_result(f->device->ops->read(f, ptr, size), f, 0);
 }
 
 int iomanX_write(int fd, void *ptr, int size)
@@ -506,9 +478,7 @@ int iomanX_write(int fd, void *ptr, int size)
 	iomanX_iop_file_t *f;
 
 	f = get_iob(fd);
-	if ( !f || !(f->mode & FIO_O_WRONLY) )
-		return handle_result(-EBADF, f, 0);
-	return handle_result(f->device->ops->write(f, ptr, size), f, 0);
+	return ( !f || !(f->mode & FIO_O_WRONLY) ) ? handle_result(-EBADF, f, 0) : handle_result(f->device->ops->write(f, ptr, size), f, 0);
 }
 
 int iomanX_close(int fd)
@@ -516,9 +486,7 @@ int iomanX_close(int fd)
 	iomanX_iop_file_t *f;
 
 	f = get_iob(fd);
-	if ( !f )
-		return handle_result(-EBADF, f, 0);
-	return handle_result(
+	return ( !f ) ? handle_result(-EBADF, f, 0) : handle_result(
 		(f->mode & FIO_O_DIROPEN) ? f->device->ops->dclose(f) : f->device->ops->close(f),
 		f,
 		HANDLE_RESULT_CLEAR_INFO | HANDLE_RESULT_RETURN_FD);
@@ -529,9 +497,7 @@ int iomanX_ioctl(int fd, int cmd, void *param)
 	iomanX_iop_file_t *f;
 
 	f = get_iob(fd);
-	if ( !f )
-		return handle_result(-EBADF, f, 0);
-	return handle_result(f->device->ops->ioctl(f, cmd, param), f, 0);
+	return ( !f ) ? handle_result(-EBADF, f, 0) : handle_result(f->device->ops->ioctl(f, cmd, param), f, 0);
 }
 
 int iomanX_ioctl2(int fd, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
@@ -539,12 +505,7 @@ int iomanX_ioctl2(int fd, int cmd, void *arg, unsigned int arglen, void *buf, un
 	iomanX_iop_file_t *f;
 
 	f = get_iob(fd);
-	if ( !f )
-		return handle_result(-EBADF, f, 0);
-	// The filesystem must support these ops.
-	if ( (f->device->type & 0xF0000000) != IOP_DT_FSEXT )
-		return handle_result(-EUNSUP, f, 0);
-	return handle_result(f->device->ops->ioctl2(f, cmd, arg, arglen, buf, buflen), f, 0);
+	return ( !f ) ? handle_result(-EBADF, f, 0) : (/* The filesystem must support these ops. */( (f->device->type & 0xF0000000) != IOP_DT_FSEXT ) ? handle_result(-EUNSUP, f, 0) : handle_result(f->device->ops->ioctl2(f, cmd, arg, arglen, buf, buflen), f, 0));
 }
 
 int iomanX_dopen(const char *path)
@@ -615,9 +576,7 @@ int iomanX_remove(const char *name)
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
 #endif
 	parsefile_res = parsefile(name, &(f->device), &(f->unit));
-	if ( !parsefile_res )
-		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
-	return handle_result(
+	return ( !parsefile_res ) ? handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR) : handle_result(
 		f->device->ops->remove(f, parsefile_res), f, HANDLE_RESULT_CLEAR_INFO | HANDLE_RESULT_RETURN_ZERO);
 }
 
@@ -723,9 +682,7 @@ int iomanX_format(const char *dev, const char *blockdev, void *arg, int arglen)
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
 #endif
 	parsefile_res = parsefile(dev, &(f->device), &(f->unit));
-	if ( !parsefile_res )
-		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
-	return handle_result(
+	return ( !parsefile_res ) ? handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR) : handle_result(
 		f->device->ops->format(f, parsefile_res, blockdev, arg, arglen),
 		f,
 		HANDLE_RESULT_CLEAR_INFO | HANDLE_RESULT_RETURN_ZERO);
@@ -864,15 +821,10 @@ int iomanX_mount(const char *fsname, const char *devname, int flag, void *arg, i
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
 #endif
 	parsefile_res = parsefile(fsname, &(f->device), &(f->unit));
-	if ( !parsefile_res )
-		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
-	// The filesystem must support these ops.
-	if ( (f->device->type & 0xF0000000) != IOP_DT_FSEXT )
-		return handle_result(-EUNSUP, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
-	return handle_result(
-		f->device->ops->mount(f, parsefile_res, devname, flag, arg, arglen),
-		f,
-		HANDLE_RESULT_CLEAR_INFO | HANDLE_RESULT_RETURN_ZERO);
+	return ( !parsefile_res ) ? handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR) : (/* The filesystem must support these ops. */ ( (f->device->type & 0xF0000000) != IOP_DT_FSEXT ) ? handle_result(-EUNSUP, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR) : handle_result(
+	f->device->ops->mount(f, parsefile_res, devname, flag, arg, arglen),
+	f,
+	HANDLE_RESULT_CLEAR_INFO | HANDLE_RESULT_RETURN_ZERO));
 }
 
 int iomanX_umount(const char *fsname)
@@ -891,13 +843,8 @@ int iomanX_umount(const char *fsname)
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
 #endif
 	parsefile_res = parsefile(fsname, &(f->device), &(f->unit));
-	if ( !parsefile_res )
-		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
-	// The filesystem must support these ops.
-	if ( (f->device->type & 0xF0000000) != IOP_DT_FSEXT )
-		return handle_result(-EUNSUP, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
-	return handle_result(
-		f->device->ops->umount(f, parsefile_res), f, HANDLE_RESULT_CLEAR_INFO | HANDLE_RESULT_RETURN_ZERO);
+	return ( !parsefile_res ) ? handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR) : (/* The filesystem must support these ops. */ ( (f->device->type & 0xF0000000) != IOP_DT_FSEXT ) ? handle_result(-EUNSUP, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR) : handle_result(
+		f->device->ops->umount(f, parsefile_res), f, HANDLE_RESULT_CLEAR_INFO | HANDLE_RESULT_RETURN_ZERO));
 }
 
 int iomanX_devctl(const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
@@ -916,13 +863,8 @@ int iomanX_devctl(const char *name, int cmd, void *arg, unsigned int arglen, voi
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
 #endif
 	parsefile_res = parsefile(name, &(f->device), &(f->unit));
-	if ( !parsefile_res )
-		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
-	// The filesystem must support these ops.
-	if ( (f->device->type & 0xF0000000) != IOP_DT_FSEXT )
-		return handle_result(-EUNSUP, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
-	return handle_result(
-		f->device->ops->devctl(f, parsefile_res, cmd, arg, arglen, buf, buflen), f, HANDLE_RESULT_CLEAR_INFO);
+	return ( !parsefile_res ) ? handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR) : (/* The filesystem must support these ops. */( (f->device->type & 0xF0000000) != IOP_DT_FSEXT ) ? handle_result(-EUNSUP, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR) : handle_result(
+		f->device->ops->devctl(f, parsefile_res, cmd, arg, arglen, buf, buflen), f, HANDLE_RESULT_CLEAR_INFO));
 }
 
 int iomanX_readlink(const char *path, char *buf, unsigned int buflen)
@@ -941,12 +883,7 @@ int iomanX_readlink(const char *path, char *buf, unsigned int buflen)
 		return handle_result(-EMFILE, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
 #endif
 	parsefile_res = parsefile(path, &(f->device), &(f->unit));
-	if ( !parsefile_res )
-		return handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
-	// The filesystem must support these ops.
-	if ( (f->device->type & 0xF0000000) != IOP_DT_FSEXT )
-		return handle_result(-EUNSUP, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR);
-	return handle_result(f->device->ops->readlink(f, parsefile_res, buf, buflen), f, HANDLE_RESULT_CLEAR_INFO);
+	return ( !parsefile_res ) ? handle_result(-ENODEV, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR) : (/* The filesystem must support these ops. */ ( (f->device->type & 0xF0000000) != IOP_DT_FSEXT ) ? handle_result(-EUNSUP, f, HANDLE_RESULT_CLEAR_INFO_ON_ERROR) : handle_result(f->device->ops->readlink(f, parsefile_res, buf, buflen), f, HANDLE_RESULT_CLEAR_INFO));
 }
 
 static int _ioabort(const char *str1, const char *str2)
@@ -983,9 +920,7 @@ static iomanX_iop_file_t *new_iob(void)
 
 static iomanX_iop_file_t *get_iob(int fd)
 {
-	if ( (fd < 0) || (fd >= (int)(sizeof(file_table) / sizeof(file_table[0]))) || (!file_table[fd].device) )
-		return NULL;
-	return &file_table[fd];
+	return ( (fd < 0) || (fd >= (int)(sizeof(file_table) / sizeof(file_table[0]))) || (!file_table[fd].device) ) ? NULL : &file_table[fd];
 }
 
 static iomanX_iop_device_t *lookup_dev(const char *name, int show_unkdev_msg)
@@ -1211,9 +1146,7 @@ unsigned int iomanX_GetDevType(int fd)
 	iomanX_iop_file_t *f;
 
 	f = get_iob(fd);
-	if ( !f )
-		return handle_result(-EBADF, f, 0);
-	return f->device->type;
+	return ( !f ) ? handle_result(-EBADF, f, 0) : f->device->type;
 }
 
 static void ShowDrv(void)

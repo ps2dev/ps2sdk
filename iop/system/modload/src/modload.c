@@ -378,9 +378,7 @@ int LoadModuleWithOption(const char *filename, const LMWOoption *option)
 	mltargs.access = option->access & 0xFF;
 	mltargs.distaddr = option->distaddr;
 	mltargs.distoffset = option->distoffset;
-	functable = option->functable;
-	if ( !functable )
-		functable = &default_filefunc_functable;
+	functable = option->functable ? option->functable : &default_filefunc_functable;
 	mltargs.functable = functable;
 	mltargs.funcopt = option->funcopt;
 	return ModuleLoaderThread(&mltargs);
@@ -391,10 +389,7 @@ int LoadModuleAddress(const char *name, void *addr, int offset)
 	module_thread_args_t mltargs;
 
 	mltargs.command = 0;
-	if ( addr )
-		mltargs.position = 2;
-	else
-		mltargs.position = 0;
+	mltargs.position = addr ? 2 : 0;
 	mltargs.access = 1;
 	mltargs.filename = name;
 	mltargs.buffer = 0;
@@ -415,10 +410,7 @@ int LoadModuleBufferAddress(void *buffer, void *addr, int offset)
 	module_thread_args_t mltargs;
 
 	mltargs.command = 2;
-	if ( addr )
-		mltargs.position = 2;
-	else
-		mltargs.position = 0;
+	mltargs.position = addr ? 2 : 0;
 	mltargs.buffer = buffer;
 	mltargs.access = 0;
 	mltargs.filename = 0;
@@ -594,9 +586,7 @@ int SearchModuleByName(const char *name)
 			modid = i->id;
 	}
 	CpuResumeIntr(state);
-	if ( !modid )
-		return KE_UNKNOWN_MODULE;
-	return modid;
+	return ( !modid ) ? KE_UNKNOWN_MODULE : modid;
 }
 
 int SearchModuleByAddress(const void *addr)
@@ -607,9 +597,7 @@ int SearchModuleByAddress(const void *addr)
 	CpuSuspendIntr(&state);
 	image_info = SearchModuleCBByAddr((void *)addr);
 	CpuResumeIntr(state);
-	if ( !image_info )
-		return KE_UNKNOWN_MODULE;
-	return image_info->id;
+	return ( !image_info ) ? KE_UNKNOWN_MODULE : image_info->id;
 }
 
 int LoadStartKelfModule(const char *name, int arglen, const char *args, int *result)
@@ -649,15 +637,8 @@ int LoadStartKelfModule(const char *name, int arglen, const char *args, int *res
 	{
 		iop_exec_buffer = SecrDiskBootFile_func_ptr(iop_exec_encrypted_buffer);
 	}
-	ret_tmp = KE_ILLEGAL_OBJECT;
-	if ( iop_exec_buffer )
-	{
-		ret_tmp = LoadModuleBuffer(iop_exec_buffer);
-	}
-	if ( ret_tmp > 0 )
-	{
-		ret_tmp = StartModule(ret_tmp, name, arglen, args, result);
-	}
+	ret_tmp = ( iop_exec_buffer ) ? LoadModuleBuffer(iop_exec_buffer) : KE_ILLEGAL_OBJECT;
+	ret_tmp = ( ret_tmp > 0 ) ? StartModule(ret_tmp, name, arglen, args, result) : ret_tmp;
 	CpuSuspendIntr(&state);
 	FreeSysMemory(iop_exec_encrypted_buffer);
 	CpuResumeIntr(state);
@@ -811,18 +792,7 @@ static void ExecModuleLoad(void *userdata)
 		default:
 			break;
 	}
-	if ( res_tmp )
-	{
-		*mltargs->ret_ptr = res_tmp;
-	}
-	else if ( !mi )
-	{
-		*mltargs->ret_ptr = KE_UNKNOWN_MODULE;
-	}
-	else
-	{
-		*mltargs->ret_ptr = mi->id;
-	}
+	*mltargs->ret_ptr = res_tmp ? res_tmp : (!mi ? KE_UNKNOWN_MODULE : mi->id);
 	if ( mltargs->thread_ef )
 	{
 		ChangeThreadPriority(0, 1);
@@ -1148,9 +1118,7 @@ stop_module(ModuleInfo_t *module_info, int command, int modid_2, int arglen, con
 		return KE_NOT_REMOVABLE;
 	if ( command == 4 && modid_2 == module_info->id )
 		return KE_CAN_NOT_STOP;
-	data = "self";
-	if ( command == 4 )
-		data = "other";
+	data = ( command == 4 ) ? "other" : "self";
 	in_argc = 1;
 	data_strlen = strlen(data) + 1;
 	in_argv_size_strs = data_strlen;
@@ -1180,8 +1148,7 @@ stop_module(ModuleInfo_t *module_info, int command, int modid_2, int arglen, con
 
 	module_info->newflags &= 0xFFF0u;
 	module_info->newflags |= 4;
-	if ( command != 4 )
-		module_info->newflags |= 1;
+	module_info->newflags |= ( command != 4 ) ? 1 : 0;
 	// TODO: save/restore gp register
 	module_result =
 		((int (*)(int argc, char **argv, elf_header_t **eh, ModuleInfo_t *mi))module_info->entry)(-in_argc, in_argv_ptrs, 0, module_info);
@@ -1199,8 +1166,7 @@ stop_module(ModuleInfo_t *module_info, int command, int modid_2, int arglen, con
 		case 1:
 		{
 			module_info->newflags |= 6;
-			if ( command != 4 )
-				module_info->newflags |= 1;
+			module_info->newflags |= ( command != 4 ) ? 1 : 0;
 			break;
 		}
 		case 2:
@@ -1370,14 +1336,12 @@ do_load_seek(module_thread_args_t *mltargs, int module_fd, FileInfo_t *fi, int *
 		fi->EntryPoint = &relocate_offset[(u32)(u8 *)fi->EntryPoint];
 		fi->gp = &relocate_offset[(u32)(u8 *)fi->gp];
 		mod_id = fi->mod_id;
-		if ( mod_id != (IopModuleID_t *)-1 )
-			fi->mod_id = (IopModuleID_t *)&relocate_offset[(u32)(u8 *)mod_id];
+		fi->mod_id = ( mod_id != (IopModuleID_t *)-1 ) ? (IopModuleID_t *)&relocate_offset[(u32)(u8 *)mod_id] : mod_id;
 		size = 0;
 		for ( i = 1; i < lshdr.elfhdr.shnum; i += 1 )
 		{
 			type = elfshdr[i].type;
-			if ( (type == 9 || type == 4) && size < elfshdr[i].size )
-				size = elfshdr[i].size;
+			size = ( (type == 9 || type == 4) && size < elfshdr[i].size ) ? elfshdr[i].size : size;
 		}
 		switch ( mltargs->access )
 		{
@@ -1434,10 +1398,7 @@ do_load_seek(module_thread_args_t *mltargs, int module_fd, FileInfo_t *fi, int *
 					for ( j = 0; j < shdrcnt; j += relnumi1 )
 					{
 						relnumi1 = 1;
-						if ( (elfrelhdr[0].info & 0xFF) == 5 || (elfrelhdr[0].info & 0xFF) == 250 )
-						{
-							relnumi1 += 1;
-						}
+						relnumi1 += ( (elfrelhdr[0].info & 0xFF) == 5 || (elfrelhdr[0].info & 0xFF) == 250 ) ? 1 : 0;
 						{
 							int k;
 							for ( k = 0; k < relnumi1; k += 1 )
@@ -1666,9 +1627,7 @@ static int load_memory_helper_cmpinner(modload_ll_t *a1, int a2, modload_ll_t *a
 	}
 	v4 = (char *)a1 + a2;
 	v6 = v4 - 1;
-	if ( v6 < (char *)a3 )
-		return 0;
-	return v6 < (char *)a4 + (int)a3;
+	return ( v6 < (char *)a3 ) ? 0 : (v6 < (char *)a4 + (int)a3);
 }
 
 static modload_ll_t *
@@ -1734,10 +1693,7 @@ static int allocate_module_block(
 			allocaddr1 = (char *)(((unsigned int)(text_start_tmp - 0x30) >> 8 << 8) & 0x1FFFFFFF);
 			if ( AllocSysMemory(2, &text_start_tmp[fi->MemSize] - allocaddr1, allocaddr1) != 0 )
 				return 1;
-			if ( (int)QueryBlockTopAddress(allocaddr1) <= 0 )
-				*result_out = KE_NO_MEMORY;
-			else
-				*result_out = KE_MEMINUSE;
+			*result_out = ( (int)QueryBlockTopAddress(allocaddr1) <= 0 ) ? KE_NO_MEMORY : KE_MEMINUSE;
 			return 0;
 		}
 		case 4:
@@ -1758,14 +1714,7 @@ static int allocate_module_block(
 			{
 				modload_load_memory_t *allocaddr2;
 
-				if ( memalloctype == 2 )
-				{
-					allocaddr2 = loadmem;
-				}
-				else
-				{
-					allocaddr2 = 0;
-				}
+				allocaddr2 = ( memalloctype == 2 ) ? loadmem : 0;
 				fi->text_start = AllocSysMemory(memalloctype, fi->MemSize + 0x30, allocaddr2);
 			}
 			if ( !fi->text_start )
@@ -2066,20 +2015,14 @@ static void TerminateResidentEntriesDI(const char *command, unsigned int options
 		char *command_ptr;
 
 		iopboot_entrypoint = GetFileDataFromImage((const void *)0xBFC00000, (const void *)0xBFC10000, "IOPBOOT");
+		ram_size_in_mb = (QueryMemSize() + 0x100) >> 20;
 		// Unofficial: Check if command is NULL befire checking its contents
-		if ( command && command[0] )
+		command_ptr = ( command && command[0] ) ? (char *)0x480 : 0;
+		if ( command_ptr )
 		{
-			ml_strcpy((char *)0x480, command);
-			ram_size_in_mb = (QueryMemSize() + 0x100) >> 20;
-			flagstmp = (options & 0xFF00) | 2;
-			command_ptr = (char *)0x480;
+			ml_strcpy(command_ptr, command);
 		}
-		else
-		{
-			ram_size_in_mb = (QueryMemSize() + 0x100) >> 20;
-			flagstmp = 1;
-			command_ptr = 0;
-		}
+		flagstmp = command_ptr ? ((options & 0xFF00) | 2) : 1;
 		((int (*)(u32 ram_mb, int flags, char *cmdptr, u32 xunk))iopboot_entrypoint)(ram_size_in_mb, flagstmp, command_ptr, 0);
 	}
 }

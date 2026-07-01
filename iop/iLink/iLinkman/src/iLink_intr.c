@@ -253,23 +253,12 @@ static void ReadRequestHandler(unsigned int header, volatile unsigned int *buffe
         ReadReqHeader[i] = *buffer;
     }
 
-    if (tCode == IEEE1394_TCODE_READB) {
-        offset_low        = BSWAP32(((struct ieee1394_TrCommonRdPktHdr *)ReadReqHeader)->offset_low);
-        offset_high       = BSWAP32(((struct ieee1394_TrCommonRdPktHdr *)ReadReqHeader)->offset_high);
-        DestinationNodeID = BSWAP16((unsigned short int)offset_high);
-    } else {
-        offset_low        = ((struct ieee1394_TrCommonRdPktHdr *)ReadReqHeader)->offset_low;
-        offset_high       = ((struct ieee1394_TrCommonRdPktHdr *)ReadReqHeader)->offset_high;
-        DestinationNodeID = (unsigned short int)(offset_high >> 16);
-    }
+    offset_low        = (tCode == IEEE1394_TCODE_READB) ? BSWAP32(((struct ieee1394_TrCommonRdPktHdr *)ReadReqHeader)->offset_low) : ((struct ieee1394_TrCommonRdPktHdr *)ReadReqHeader)->offset_low;
+    offset_high       = (tCode == IEEE1394_TCODE_READB) ? BSWAP32(((struct ieee1394_TrCommonRdPktHdr *)ReadReqHeader)->offset_high) : ((struct ieee1394_TrCommonRdPktHdr *)ReadReqHeader)->offset_high;
+    DestinationNodeID = (tCode == IEEE1394_TCODE_READB) ? BSWAP16((unsigned short int)offset_high) : (unsigned short int)(offset_high >> 16);
 
-    if (tCode == IEEE1394_TCODE_READQ) {
-        nBytes = 4;
-        speed  = (((struct ieee1394_TrQuadRdPacketHdr *)ReadReqHeader)->trailer >> 16) & 0x7;
-    } else {
-        nBytes = ((struct ieee1394_TrBlockRdPacketHdr *)ReadReqHeader)->nBytes >> 16;
-        speed  = (((struct ieee1394_TrBlockRdPacketHdr *)ReadReqHeader)->trailer >> 16) & 0x7;
-    }
+    nBytes = (tCode == IEEE1394_TCODE_READQ) ? 4 : (((struct ieee1394_TrBlockRdPacketHdr *)ReadReqHeader)->nBytes >> 16);
+    speed  = (tCode == IEEE1394_TCODE_READQ) ? ((((struct ieee1394_TrQuadRdPacketHdr *)ReadReqHeader)->trailer >> 16) & 0x7) : ((((struct ieee1394_TrBlockRdPacketHdr *)ReadReqHeader)->trailer >> 16) & 0x7);
 
     DEBUG_PRINTF(" read request to 0x%08x %08x with length %u.\n", offset_high, offset_low, nBytes);
 
@@ -344,8 +333,7 @@ int iLinkIntrHandler(void *arg)
 
         DEBUG_PRINTF("iLink interrupt: 0x%08x 0x%08x\n", LocalCachedIntr0Register, LocalCachedIntr1Register);
 
-        if (LocalCachedIntr1Register & iLink_INTR1_UTD)
-            EventFlagBitsToSet |= iLinkEventDataSent;
+        EventFlagBitsToSet |= (LocalCachedIntr1Register & iLink_INTR1_UTD) ? iLinkEventDataSent : 0;
 
 #ifdef REQ_CHECK_DMAC_STAT
         if (LocalCachedIntr0Register & iLink_INTR0_DRFR) {
@@ -384,9 +372,7 @@ int iLinkIntrHandler(void *arg)
             iDEBUG_PRINTF("-=PHTs initialized=-\n");
         }
 
-        if (LocalCachedIntr0Register & iLink_INTR0_URx) {
-            EventFlagBitsToSet |= iLinkEventURx;
-        }
+        EventFlagBitsToSet |= (LocalCachedIntr0Register & iLink_INTR0_URx) ? iLinkEventURx : 0;
 
         if (LocalCachedIntr0Register & (iLink_INTR0_InvAck | iLink_INTR0_RetEx | iLink_INTR0_UResp)) {
             EventFlagBitsToSet |= iLinkEventError;

@@ -95,10 +95,7 @@ struct_itr_sema itr_sema_table[32];
 
 int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-    if (argc >= 0)
-        return module_start(argc, argv, startaddr, mi);
-    else
-        return module_stop(argc, argv, startaddr, mi);
+    return ((argc >= 0) ? module_start : module_stop)(argc, argv, startaddr, mi);
 }
 
 int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
@@ -128,9 +125,7 @@ int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
     (void)mi;
 
     ReleaseLibraryEntries(&_exp_pvrdrv);
-    if (DvrdrvEnd() != 0)
-        return MODULE_REMOVABLE_END;
-    return MODULE_NO_RESIDENT_END;
+    return (DvrdrvEnd() != 0) ? MODULE_REMOVABLE_END : MODULE_NO_RESIDENT_END;
 }
 
 int DvrdrvInit()
@@ -310,9 +305,7 @@ LABEL_26:
                     }
                 }
             }
-            v25 = 64;
-            if ((SPD_REG16(0x4228) & 1) == 0)
-                v25 = (u8)(SPD_REG16(0x4228) & 0xFC) >> 2;
+            v25 = ((SPD_REG16(0x4228) & 1) == 0) ? ((u8)(SPD_REG16(0x4228) & 0xFC) >> 2) : 64;
             *status_4228 = v25;
             for (i = 0; (u32)i < *status_4228; ++ack_status) {
                 ++i;
@@ -472,10 +465,7 @@ int DvrdrvWaitDmaEnd(struct_itr_sema *itrsema, u16 command)
             int v7;
 
             v5 = 0;
-            if ((SPD_REG16(0x4228) & 1) != 0)
-                v6 = 64;
-            else
-                v6 = (u8)(SPD_REG16(0x4228) & 0xFC) >> 2;
+            v6 = ((SPD_REG16(0x4228) & 1) != 0) ? 64 : ((u8)(SPD_REG16(0x4228) & 0xFC) >> 2);
             v7 = 0;
             if (v6) {
                 char *v8;
@@ -558,10 +548,7 @@ int DvrdrvWaitCmdComp(struct_itr_sema *itrsema, u16 command, u16 *status_4220, u
             if ((v10 & 4) != 0) {
                 int v11;
                 v9 = 0;
-                if ((SPD_REG16(0x4228) & 1) != 0)
-                    v11 = 64;
-                else
-                    v11 = (u8)(SPD_REG16(0x4228) & 0xFC) >> 2;
+                v11 = ((SPD_REG16(0x4228) & 1) != 0) ? 64 : ((u8)(SPD_REG16(0x4228) & 0xFC) >> 2);
                 *status_4228 = v11;
                 v12 = 0;
                 if (*status_4228 > 0) {
@@ -759,9 +746,7 @@ void INTR_CMD_ACK_HANDLER(int a1, void *a2)
 
         Kprintf("ACK:GetItrSidTbl(%04Xh) error\n", SPD_REG16(0x4220));
         Kprintf("Clear \"Reply FIFO\"\n");
-        v3 = 64;
-        if ((SPD_REG16(0x4228) & 1) == 0)
-            v3 = (u8)(SPD_REG16(0x4228) & 0xFC) >> 2;
+        v3 = ((SPD_REG16(0x4228) & 1) == 0) ? ((u8)(SPD_REG16(0x4228) & 0xFC) >> 2) : 64;
         v4 = 0;
         if (v3) {
             char *v5;
@@ -817,9 +802,7 @@ void INTR_CMD_COMP_HANDLER(int a1, void *a2)
 
         Kprintf("COMP:GetItrSidTbl(%04Xh) error\n", SPD_REG16(0x4220));
         Kprintf("Clear \"Reply FIFO\"\n");
-        v3 = 64;
-        if ((SPD_REG16(0x4228) & 1) == 0)
-            v3 = (u8)(SPD_REG16(0x4228) & 0xFC) >> 2;
+        v3 = ((SPD_REG16(0x4228) & 1) == 0) ? ((u8)(SPD_REG16(0x4228) & 0xFC) >> 2) : 64;
         v4 = 0;
         if (v3) {
             char *v5;
@@ -1142,10 +1125,7 @@ int DvrdrvExecCmdAckDmaSendComp(drvdrv_exec_cmd_ack *a1)
         DvrdrvBlockPhase();
         DvrdrvSetDmaDirection(1u);
         v8 = a1->input_buffer_length;
-        if ((v8 & 0x7F) != 0)
-            v18 = (v8 / 128 + 1) << 7;
-        else
-            v18 = a1->input_buffer_length;
+        v18 = ((v8 & 0x7F) != 0) ? ((v8 / 128 + 1) << 7) : a1->input_buffer_length;
         v9 = a1->command;
         input_word_count = 2;
         v12 = (v9 & 0xF0FF) | 0x200;

@@ -154,11 +154,7 @@ static void fileio_rpc_read(struct _fio_read_arg *buffer, int length, int *outbu
     v6   = 0;
 #if 0
     if (size >= 64) {
-        if ((ptr & 0x3F) != 0) {
-            v7 = (ptr >> 6 << 6) - (ptr - 64);
-        } else {
-            v7 = 0;
-        }
+        v7 = ((ptr & 0x3F) != 0) ? ((ptr >> 6 << 6) - (ptr - 64)) : 0;
         v21 = ptr;
         v8  = (char *)(ptr + v7);
         v9  = ((ptr + size) >> 6 << 6) - (ptr + v7);
@@ -167,11 +163,7 @@ static void fileio_rpc_read(struct _fio_read_arg *buffer, int length, int *outbu
     }
 #else
     if (size >= 16) {
-        if ((ptr & 0xF) != 0) {
-            v7 = (ptr >> 4 << 4) - (ptr - 16);
-        } else {
-            v7 = 0;
-        }
+        v7 = ((ptr & 0xF) != 0) ? ((ptr >> 4 << 4) - (ptr - 16)) : 0;
         v21 = (void *)ptr;
         v8  = (char *)(ptr + v7);
         v9  = ((ptr + size) >> 4 << 4) - (ptr + v7);
@@ -192,10 +184,7 @@ static void fileio_rpc_read(struct _fio_read_arg *buffer, int length, int *outbu
     if (v7 > 0) {
         v12 = io_read(fd, read_data_out.buf1, v7);
         if (v7 != v12) {
-            v7 = 0;
-            if (v12 > 0) {
-                v7 = v12;
-            }
+            v7 = (v12 > 0) ? v12 : 0;
             v6 = v7;
             goto LABEL_26;
         }
@@ -206,18 +195,13 @@ static void fileio_rpc_read(struct _fio_read_arg *buffer, int length, int *outbu
         if (v10 > 0) {
             v16 = io_read(fd, read_data_out.buf2, v10);
             if (v10 != v16) {
-                v10 = 0;
-                if (v16 > 0) {
-                    v10 = v16;
-                }
+                v10 = (v16 > 0) ? v16 : 0;
             }
             v6 += v10;
         }
     } else {
         for (;;) {
-            v13 = v9;
-            if (xfer_size < v9)
-                v13 = xfer_size;
+            v13 = (xfer_size < v9) ? xfer_size : v9;
             while (sceSifDmaStat(v11) >= 0)
                 ;
             v14 = io_read(fd, xfer_buffer, v13);
@@ -298,9 +282,7 @@ static void fileio_rpc_write(struct _fio_write_arg *buffer, int length, int *out
 
         v9 = io_write(fd, buffer->aligned, mis);
         if (v9 != mis) {
-            if (v9 > 0) {
-                v15 += v9;
-            }
+            v15 += (v9 > 0) ? v9 : 0;
             *outbuffer = v15;
             return;
         }
@@ -315,10 +297,7 @@ static void fileio_rpc_write(struct _fio_write_arg *buffer, int length, int *out
     for (;;) {
         int v12;
 
-        v12 = v10;
-        if (xfer_size < v10) {
-            v12 = xfer_size;
-        }
+        v12 = (xfer_size < v10) ? xfer_size : v10;
         sceSifGetOtherData(&v14, v11, xfer_buffer, v12, 0);
         v13 = io_write(fd, xfer_buffer, v12);
         v10 -= v12;
@@ -332,9 +311,7 @@ static void fileio_rpc_write(struct _fio_write_arg *buffer, int length, int *out
             return;
         }
     }
-    if (v13 > 0) {
-        v15 += v13;
-    }
+    v15 += (v13 > 0) ? v13 : 0;
     *outbuffer = v15;
 }
 

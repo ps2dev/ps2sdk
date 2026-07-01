@@ -53,11 +53,7 @@ void _SsGetMetaEvent(s16 sep_no, s16 seq_no, u8 meta_event)
 		v15 = 10 * score_struct->m_resolution_of_quarter_note * score_struct->m_unk94 / v11;
 		v16 = 10 * score_struct->m_resolution_of_quarter_note * score_struct->m_unk94 % v11;
 		score_struct->m_unk52 = -1;
-		score_struct->m_unk54 = v15;
-		if ( (unsigned int)(2 * (v10 - v9)) < v16 )
-		{
-			score_struct->m_unk54 = v15 + 1;
-		}
+		score_struct->m_unk54 = ( (unsigned int)(2 * (v10 - v9)) < v16 ) ? (v15 + 1) : v15;
 	}
 	score_struct->m_delta_value = _SsReadDeltaValue(sep_no, seq_no);
 }

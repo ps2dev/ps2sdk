@@ -14,11 +14,7 @@ void SpuSetEnv(const SpuEnv *env)
 {
 	int mask;
 
-	mask = env->mask;
-	if ( mask == 0 )
-	{
-		mask = 0xFFFFFFFF;
-	}
+	mask = ( env->mask == 0 ) ? 0xFFFFFFFF : env->mask;
 	if ( (mask & SPU_ENV_EVENT_QUEUEING) != 0 )
 	{
 		switch ( env->queueing )

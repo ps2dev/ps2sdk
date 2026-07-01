@@ -119,14 +119,7 @@ int acTimerModuleStart(int argc, char **argv)
 	if ( argc >= 2 )
 	{
 		tick = strtol(argv[1], &next, 10);
-		if ( next == argv[1] )
-		{
-			tick = 1000000;
-		}
-		else if ( tick < 1000 )
-		{
-			tick = 1000;
-		}
+		tick = ( next == argv[1] ) ? 1000000 : (( tick < 1000 ) ? 1000 : tick);
 	}
 	Timerc.tick = 0LL;
 	Timerc.waitq.q_prev = (acQueueT)&Timerc;

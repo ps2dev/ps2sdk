@@ -311,11 +311,9 @@ int _start(int argc, char *argv[])
         Official adaptors appear to have a 0x0001 set for this register, but not compatibles.
         While official I/O to this register are 8-bit, some compatibles have a 0x01 for the lower 8-bits,
         but the upper 8-bits contain some random value. Hence perform a 16-bit read instead. */
-    if (SPD_REG16(0x20) != 1) {
-        ata_gamestar_workaround = 1;
+    ata_gamestar_workaround = (SPD_REG16(0x20) != 1) ? 1 : 0;
+    if (ata_gamestar_workaround) {
         M_PRINTF("Compatible adaptor detected.\n");
-    } else {
-        ata_gamestar_workaround = 0;
     }
 #endif
 #endif
@@ -917,9 +915,7 @@ static int ata_device_pkt_identify(int device, void *info)
     int res;
 
     res = sceAtaExecCmd(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_PACKET_DEVICE);
-    if (!res)
-        return sceAtaWaitResult();
-    return res;
+    return (!res) ? sceAtaWaitResult() : res;
 }
 
 /* Export 14 */
@@ -1289,11 +1285,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 
         /* Save the total sector counts before we overwrite ata_param with the value of Sony identify drive command. */
         total_sectors_nonlba48 = (ata_param[ATA_ID_SECTOTAL_HI] << 16) | ata_param[ATA_ID_SECTOTAL_LO];
-        if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
-            total_sectors_lba48 = 0xffffffff;
-        } else {
-            total_sectors_lba48 = (ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16) | ata_param[ATA_ID_48BIT_SECTOTAL_LO];
-        }
+        total_sectors_lba48 = (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) ? 0xffffffff : ((ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16) | ata_param[ATA_ID_48BIT_SECTOTAL_LO]);
 
         devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
@@ -1323,18 +1315,9 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
         /* Set standby timer to 21min 15s.  */
         sceAtaIdle(i, 0xff);
 
-        if (devinfo[i].lba48) {
-            /* If this device is emulated through the DVRP, use the non-48-bit LBA size.  */
-            if (ata_dvrp_workaround) {
-                devinfo[i].total_sectors = total_sectors_nonlba48;
-            } else {
-                devinfo[i].total_sectors = total_sectors_lba48;
-            }
-            devinfo[i].total_sectors_lba48 = total_sectors_lba48;
-        } else {
-            devinfo[i].total_sectors       = total_sectors_nonlba48;
-            devinfo[i].total_sectors_lba48 = total_sectors_nonlba48;
-        }
+        /* If this device is emulated through the DVRP, use the non-48-bit LBA size.  */
+        devinfo[i].total_sectors = devinfo[i].lba48 ? (ata_dvrp_workaround ? total_sectors_nonlba48 : total_sectors_lba48) : total_sectors_nonlba48;
+        devinfo[i].total_sectors_lba48 = devinfo[i].lba48 ? total_sectors_lba48 : total_sectors_nonlba48;
 
         /* Call the proprietary identify command. */
 #ifdef ATA_SCE_AUTH_HDD

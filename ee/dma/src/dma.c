@@ -85,14 +85,7 @@ int dma_channel_initialize(int channel, void *handler, int flags)
 	dma_handler_id[channel] = AddDmacHandler(channel, handler, 0);
 
 	// Enable the channel interrupt.
-		if (flags & DMA_FLAG_INTERRUPTSAFE)
-		{
-			iEnableDmac(channel);
-		}
-		else
-		{
-			EnableDmac(channel);
-		}
+		((flags & DMA_FLAG_INTERRUPTSAFE) ? iEnableDmac : EnableDmac)(channel);
 
 	}
 
@@ -189,14 +182,7 @@ int dma_channel_send_chain(int channel, void *data, int data_size, int flags, in
 	// clear channel status
 	*DMA_REG_STAT = DMA_SET_STAT(1 << channel,0,0,0,0,0,0);
 
-	if (flags & DMA_FLAG_INTERRUPTSAFE)
-	{
-		iSyncDCache(data, (void *)((u8 *)data + (data_size<<4)));
-	}
-	else
-	{
-		SyncDCache(data, (void *)((u8 *)data + (data_size<<4)));
-	}
+	((flags & DMA_FLAG_INTERRUPTSAFE) ? iSyncDCache : SyncDCache)(data, (void *)((u8 *)data + (data_size<<4)));
 
 	// Set the size of the data, in quadwords.
 	*(vu32 *)dma_qwc[channel] = DMA_SET_QWC(0);
@@ -245,14 +231,7 @@ int dma_channel_send_normal(int channel, void *data, int qwc, int flags, int spr
 	*DMA_REG_STAT = DMA_SET_STAT(1 << channel,0,0,0,0,0,0);
 
 	// Not sure if this should be here.
-	if (flags & DMA_FLAG_INTERRUPTSAFE)
-	{
-		iSyncDCache(data, (void *)((u8 *)data + (qwc<<4)));
-	}
-	else
-	{
-		SyncDCache(data, (void *)((u8 *)data + (qwc<<4)));
-	}
+	((flags & DMA_FLAG_INTERRUPTSAFE) ? iSyncDCache : SyncDCache)(data, (void *)((u8 *)data + (qwc<<4)));
 
 	// Set the size of the data, in quadwords.
 	*(vu32 *)dma_qwc[channel] = DMA_SET_QWC(qwc);
@@ -274,14 +253,7 @@ int dma_channel_send_normal_ucab(int channel, void *data, int qwc, int flags)
 	*DMA_REG_STAT = DMA_SET_STAT(1 << channel,0,0,0,0,0,0);
 
 	// Not sure if this should be here.
-	if (flags & DMA_FLAG_INTERRUPTSAFE)
-	{
-		iSyncDCache(data, (void *)((u8 *)data + (qwc<<4)));
-	}
-	else
-	{
-		SyncDCache(data, (void *)((u8 *)data + (qwc<<4)));
-	}
+	((flags & DMA_FLAG_INTERRUPTSAFE) ? iSyncDCache : SyncDCache)(data, (void *)((u8 *)data + (qwc<<4)));
 
 	// Set the size of the data, in quadwords.
 	*(vu32 *)dma_qwc[channel] = DMA_SET_QWC(qwc);
@@ -368,14 +340,7 @@ int dma_channel_shutdown(int channel, int flags)
 	{
 
 	// Disable the channel.
-		if (flags & DMA_FLAG_INTERRUPTSAFE)
-		{
-			iDisableDmac(channel);
-		}
-		else
-		{
-			DisableDmac(channel);
-		}
+		((flags & DMA_FLAG_INTERRUPTSAFE) ? iDisableDmac : DisableDmac)(channel);
 
 		// Remove the handler.
 		RemoveDmacHandler(channel, dma_handler_id[channel]);

@@ -140,9 +140,7 @@ static int meme_xfer_ioptodev(struct meme_softc *memec, acMemVecT mvec, meme_xfe
 	dst = mvec->mv_dst & 0xFFFFFFE;
 	for ( src = (acUint8 *)(mvec->mv_src & 0xFFFFFFE); mv_size > 0; src += v9 )
 	{
-		v9 = 0x20000;
-		if ( mv_size <= 0x20000 )
-			v9 = mv_size;
+		v9 = ( mv_size <= 0x20000 ) ? mv_size : 0x20000;
 		ret = xfer(dst, src, v9);
 		dst += v9;
 		if ( ret <= 0 )
@@ -162,7 +160,6 @@ static int meme_op_xfer(struct meme_softc *memec, struct ac_memsif_reply *rpl, c
 	meme_xfer_t xfer_src;
 	acMemAddr v10;
 	meme_xfer_t xfer_dst;
-	int v12;
 	acMemAddr mv_dst;
 	int v14;
 	acUint8 *dst;
@@ -217,56 +214,24 @@ static int meme_op_xfer(struct meme_softc *memec, struct ac_memsif_reply *rpl, c
 		{
 			mvec = &memec->mvec[pos_v35];
 			v8 = memec->mvec[pos_v35].mv_src & 0xF0000000;
-			if ( v8 == 1342177280 )
-			{
-				xfer_src = meme_sram_read;
-			}
-			else if ( v8 > 0x50000000 )
-			{
-				xfer_src = 0;
-				if ( v8 == 0x60000000 )
-					xfer_src = meme_jv_read;
-			}
-			else
-			{
-				xfer_src = 0;
-				if ( v8 == 0x40000000 )
-					xfer_src = meme_ram_read;
-			}
+			xfer_src = ( v8 == 1342177280 ) ? meme_sram_read : (( v8 > 0x50000000 ) ? (( v8 == 0x60000000 ) ? meme_jv_read : 0) : (( v8 == 0x40000000 ) ? meme_ram_read : 0));
 			v10 = memec->mvec[pos_v35].mv_dst & 0xF0000000;
-			if ( v10 == 0x50000000 )
-			{
-				xfer_dst = meme_sram_write;
-			}
-			else if ( v10 > 0x50000000 )
-			{
-				xfer_dst = 0;
-				if ( v10 == 0x60000000 )
-					xfer_dst = meme_jv_write;
-			}
-			else
-			{
-				xfer_dst = 0;
-				if ( v10 == 0x40000000 )
-					xfer_dst = meme_ram_write;
-			}
+			xfer_dst = ( v10 == 0x50000000 ) ? meme_sram_write : (( v10 > 0x50000000 ) ? (( v10 == 0x60000000 ) ? meme_jv_write : 0) : (( v10 == 0x40000000 ) ? meme_ram_write : 0));
 			ret = 0;
 			if ( xfer_src )
 			{
-				v12 = -134;
 				if ( xfer_dst )
 				{
 					mvec->mv_result = -134;
-					ret = v12;
+					ret = -134;
 				}
 			}
 			else
 			{
-				v12 = -134;
 				if ( !xfer_dst )
 				{
 					mvec->mv_result = -134;
-					ret = v12;
+					ret = -134;
 				}
 			}
 			if ( ret >= 0 )
@@ -287,9 +252,7 @@ static int meme_op_xfer(struct meme_softc *memec, struct ac_memsif_reply *rpl, c
 							mv_size = memec->mvec[pos_v35].mv_size;
 							for ( src = memec->mvec[pos_v35].mv_src & v40; mv_size > 0; src += ret_v14 )
 							{
-								ret_v14 = 0x20000;
-								if ( mv_size <= 0x20000 )
-									ret_v14 = mv_size;
+								ret_v14 = ( mv_size <= 0x20000 ) ? mv_size : 0x20000;
 								v14 = xfer_src(src, dst, ret_v14);
 								dst += ret_v14;
 								if ( v14 <= 0 )
@@ -311,21 +274,15 @@ static int meme_op_xfer(struct meme_softc *memec, struct ac_memsif_reply *rpl, c
 							v23 = mvec->mv_size;
 							for ( ret = 0; v23 > 0; dst_v15 += v27 )
 							{
-								xlen = v23;
-								if ( bsize < v23 )
-									xlen = bsize;
+								xlen = ( bsize < v23 ) ? bsize : v23;
 								ret = xfer_src(src_v16, &buf[pos], xlen);
 								if ( ret <= 0 )
 									break;
-								v25 = mem_data_v29;
-								if ( !pos )
-									v25 = &mem_data_v29[1];
+								v25 = ( !pos ) ? &mem_data_v29[1] : mem_data_v29;
 								ret = acMemWait(v25, 100, 110);
 								if ( ret < 0 )
 									break;
-								size_v22 = mem_data_v29;
-								if ( pos )
-									size_v22 = &mem_data_v29[1];
+								size_v22 = ( pos ) ? &mem_data_v29[1] : mem_data_v29;
 								v27 = acMemSend(size_v22, dst_v15, xlen, 10);
 								ret = v27;
 								if ( v27 <= 0 )
@@ -334,24 +291,14 @@ static int meme_op_xfer(struct meme_softc *memec, struct ac_memsif_reply *rpl, c
 								src_v16 += v27;
 								v23 -= v27;
 							}
-							size_v24 = mem_data_v29;
-							if ( !pos )
-								size_v24 = &mem_data_v29[1];
+							size_v24 = ( !pos ) ? &mem_data_v29[1] : mem_data_v29;
 							acMemWait(size_v24, 100, 110);
 							mvec->mv_result = mvec->mv_size - v23;
 						}
 					}
 					else
 					{
-						if ( (memec->mvec[pos_v35].mv_src & 1) != 0 )
-						{
-							ret = meme_xfer_ioptodev(memec, &memec->mvec[pos_v35], xfer_dst);
-						}
-						else
-						{
-							v12 = meme_xfer_eetodev(memec, &memec->mvec[pos_v35], xfer_dst);
-							ret = v12;
-						}
+						ret = (( (memec->mvec[pos_v35].mv_src & 1) != 0 ) ? meme_xfer_ioptodev : meme_xfer_eetodev)(memec, &memec->mvec[pos_v35], xfer_dst);
 					}
 				}
 			}
@@ -380,9 +327,7 @@ static int meme_op_xfer(struct meme_softc *memec, struct ac_memsif_reply *rpl, c
 			break;
 		v5 = v37;
 	}
-	v31 = ret;
-	if ( v31 > 0 )
-		v31 = 0;
+	v31 = ( ret > 0 ) ? 0 : ret;
 	rpl->error = v31;
 	return v36 - v37;
 }
@@ -410,9 +355,7 @@ static int meme_op_init(struct meme_softc *memec, struct ac_memsif_reply *rpl, c
 	}
 	if ( v4 == 0 )
 	{
-		if ( memec->buf == 0 )
-			return -6;
-		return memec->size;
+		return ( memec->buf == 0 ) ? -6 : memec->size;
 	}
 	buf_v3 = AllocSysMemory(0, argt->size, 0);
 	if ( buf_v3 == 0 )
@@ -434,17 +377,7 @@ static void *meme_request(unsigned int fno, struct meme_softc *data, int size)
 
 	data->status = 2;
 	data->pkt.rpl.error = 0;
-	if ( size != 16 )
-	{
-		v5 = -122;
-	}
-	else
-	{
-		if ( fno >= 3 || (op = ops_48[fno]) == 0 )
-			v5 = -88;
-		else
-			v5 = op(data, &data->pkt.rpl, data, 16);
-	}
+	v5 = ( size != 16 ) ? -122 : (( fno >= 3 || (op = ops_48[fno]) == 0 ) ? -88 : op(data, &data->pkt.rpl, data, 16));
 	if ( v5 < 0 )
 	{
 		data->pkt.rpl.error = -v5;

@@ -76,20 +76,9 @@ extern "C"
         assert(((u32)packet2->next & 0xF) == 0); // Free space in packet is aligned properly.
         assert(packet2->tag_opened_at == NULL);  // All previous tags are closed.
 
-        if (qwc == PACKET2_COUNT_QWC)
-        {
-            packet2_chain_set_dma_tag((dma_tag_t *)packet2->next, 0, pce, id, irq, addr, spr); // placeholder
-            packet2->tag_opened_at = (dma_tag_t *)packet2->next;
-        }
-        else
-        {
-            packet2_chain_set_dma_tag((dma_tag_t *)packet2->next, qwc, pce, id, irq, addr, spr);
-            packet2->tag_opened_at = (dma_tag_t *)NULL;
-        }
-        if (!packet2->tte)
-            packet2_advance_next(packet2, sizeof(dma_tag_t));
-        else
-            packet2_advance_next(packet2, sizeof(u64));
+        packet2_chain_set_dma_tag((dma_tag_t *)packet2->next, (qwc == PACKET2_COUNT_QWC) ? 0 : qwc, pce, id, irq, addr, spr); // placeholder
+        packet2->tag_opened_at = (qwc == PACKET2_COUNT_QWC) ? (dma_tag_t *)packet2->next : NULL;
+        packet2_advance_next(packet2, !packet2->tte ? sizeof(dma_tag_t) : sizeof(u64));
     }
 
     /** 
