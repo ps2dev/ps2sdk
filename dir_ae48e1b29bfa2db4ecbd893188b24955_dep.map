@@ -1,0 +1,39 @@
+<map id="iop/memorycard/mcman" name="iop/memorycard/mcman">
+<area shape="rect" id="node2" href="dir_55de3dde79234ee6800af66dd2b2efb1.html" title="include" alt="" coords="341,159,413,207"/>
+<area shape="rect" id="node4" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="268,255,340,303"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000535_000530.html" title="1" alt="" coords="335,238,344,253"/>
+<area shape="rect" id="node9" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html" title="common" alt="" coords="265,351,343,399"/>
+<area shape="rect" id="edge11-headlabel" href="dir_000535_000000.html" title="1" alt="" coords="336,333,345,348"/>
+<area shape="rect" id="node3" href="dir_a7b91cccb02c4e3ff005f6cfec8ac8b2.html" title="src" alt="" coords="341,63,413,111"/>
+<area shape="rect" id="edge18-headlabel" href="dir_000174_000535.html" title="6" alt="" coords="381,133,390,148"/>
+<area shape="rect" id="edge15-headlabel" href="dir_000174_000530.html" title="2" alt="" coords="312,230,322,245"/>
+<area shape="rect" id="node5" href="dir_65b0066184b118a668041f55a1e77c0f.html" title="security" alt="" coords="143,63,217,111"/>
+<area shape="rect" id="edge16-headlabel" href="dir_000174_000193.html" title="2" alt="" coords="231,88,240,102"/>
+<area shape="rect" id="node6" href="dir_40ac35421bc63b72c26b6c69b1517fd6.html" title="system" alt="" coords="260,543,332,591"/>
+<area shape="rect" id="edge17-headlabel" href="dir_000174_000226.html" title="18" alt="" coords="343,553,361,567"/>
+<area shape="rect" id="node7" href="dir_a12d8da7b0731a57c6a388326ad5e612.html" title="cdvd" alt="" coords="345,447,417,495"/>
+<area shape="rect" id="edge19-headlabel" href="dir_000174_000061.html" title="1" alt="" coords="407,427,416,442"/>
+<area shape="rect" id="node8" href="dir_6133ef156cce03413acfdeebec722ba1.html" title="sio" alt="" coords="144,159,216,207"/>
+<area shape="rect" id="edge20-headlabel" href="dir_000174_000200.html" title="2" alt="" coords="232,157,241,171"/>
+<area shape="rect" id="edge21-headlabel" href="dir_000174_000000.html" title="1" alt="" coords="348,338,358,352"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000530_000000.html" title="2" alt="" coords="299,325,308,339"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000193_000535.html" title="1" alt="" coords="324,142,333,156"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000193_000530.html" title="6" alt="" coords="282,227,292,242"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000193_000226.html" title="28" alt="" coords="235,540,252,555"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000193_000061.html" title="2" alt="" coords="328,431,337,446"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000193_000200.html" title="2" alt="" coords="184,133,193,148"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000193_000000.html" title="1" alt="" coords="248,330,258,344"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000226_000530.html" title="89" alt="" coords="335,313,352,328"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000226_000000.html" title="30" alt="" coords="293,410,310,425"/>
+<area shape="rect" id="edge12-headlabel" href="dir_000061_000530.html" title="13" alt="" coords="321,315,338,330"/>
+<area shape="rect" id="edge13-headlabel" href="dir_000061_000226.html" title="64" alt="" coords="327,528,344,542"/>
+<area shape="rect" id="edge14-headlabel" href="dir_000061_000000.html" title="17" alt="" coords="328,411,346,426"/>
+<area shape="rect" id="edge22-headlabel" href="dir_000200_000530.html" title="7" alt="" coords="257,230,266,245"/>
+<area shape="rect" id="edge23-headlabel" href="dir_000200_000226.html" title="39" alt="" coords="283,515,300,530"/>
+<area shape="rect" id="edge24-headlabel" href="dir_000200_000000.html" title="2" alt="" coords="280,323,290,338"/>
+<area shape="rect" id="edge25-headlabel" href="dir_000000_000530.html" title="3" alt="" coords="300,314,309,329"/>
+<area shape="rect" id="edge26-headlabel" href="dir_000000_000226.html" title="16" alt="" coords="290,517,307,531"/>
+<area shape="rect" id="edge27-headlabel" href="dir_000000_000061.html" title="1" alt="" coords="344,420,353,435"/>
+<area shape="rect" id="clust2" href="dir_ae48e1b29bfa2db4ecbd893188b24955.html" alt="" coords="331,52,520,217"/>
+<area shape="rect" id="clust1" href="dir_5805bfcfbe100e4767f47461b3e6402b.html" title="memorycard" alt="" coords="320,16,531,228"/>
+</map>

@@ -1,0 +1,40 @@
+<map id="ee/erl/include/erl.h" name="ee/erl/include/erl.h">
+<area shape="rect" id="node1" title=" " alt="" coords="3571,5,3713,32"/>
+<area shape="rect" id="node2" href="$debug_2src_2erl-support_8c_source.html" title=" " alt="" coords="5,87,196,114"/>
+<area shape="rect" id="node3" href="$dma_2src_2erl-support_8c_source.html" title=" " alt="" coords="220,87,400,114"/>
+<area shape="rect" id="node4" href="$draw_2src_2erl-support_8c_source.html" title=" " alt="" coords="424,87,607,114"/>
+<area shape="rect" id="node5" href="$eedebug_2src_2erl-support_8c_source.html" title=" " alt="" coords="631,80,773,121"/>
+<area shape="rect" id="node6" href="$erl_8c.html" title=" " alt="" coords="798,87,913,114"/>
+<area shape="rect" id="node7" href="$erl-loader_8c_source.html" title=" " alt="" coords="937,80,1086,121"/>
+<area shape="rect" id="node8" href="$font_2src_2erl-support_8c_source.html" title=" " alt="" coords="1111,87,1288,114"/>
+<area shape="rect" id="node9" href="$graph_2src_2erl-support_8c_source.html" title=" " alt="" coords="1312,87,1500,114"/>
+<area shape="rect" id="node10" href="$input_2src_2erl-support_8c_source.html" title=" " alt="" coords="1525,87,1709,114"/>
+<area shape="rect" id="node11" href="$iopreboot_2src_2erl-support_8c_source.html" title=" " alt="" coords="1733,80,1881,121"/>
+<area shape="rect" id="node12" href="$kernel_2src_2erl-support_8c_source.html" title=" " alt="" coords="1905,87,2096,114"/>
+<area shape="rect" id="node13" href="$libgs_2src_2erl-support_8c_source.html" title=" " alt="" coords="2120,87,2303,114"/>
+<area shape="rect" id="node14" href="$libvux_2src_2erl-support_8c_source.html" title=" " alt="" coords="2327,87,2517,114"/>
+<area shape="rect" id="node15" href="$math3d_2src_2erl-support_8c_source.html" title=" " alt="" coords="2541,87,2743,114"/>
+<area shape="rect" id="node16" href="$mpeg_2src_2erl-support_8c_source.html" title=" " alt="" coords="2767,87,2955,114"/>
+<area shape="rect" id="node17" href="$network_2netman_2src_2erl-support_8c_source.html" title=" " alt="" coords="2979,80,3151,121"/>
+<area shape="rect" id="node18" href="$network_2tcpip_2src_2erl-support_8c_source.html" title=" " alt="" coords="3175,80,3330,121"/>
+<area shape="rect" id="node19" href="$packet_2src_2erl-support_8c_source.html" title=" " alt="" coords="3354,87,3549,114"/>
+<area shape="rect" id="node20" href="$packet2_2src_2erl-support_8c_source.html" title=" " alt="" coords="3573,80,3711,121"/>
+<area shape="rect" id="node21" href="$rpc_2ahx_2src_2erl-support_8c_source.html" title=" " alt="" coords="3735,80,3869,121"/>
+<area shape="rect" id="node22" href="$rpc_2audsrv_2src_2erl-support_8c_source.html" title=" " alt="" coords="3894,80,4049,121"/>
+<area shape="rect" id="node23" href="$rpc_2camera_2src_2erl-support_8c_source.html" title=" " alt="" coords="4073,80,4232,121"/>
+<area shape="rect" id="node24" href="$rpc_2cdvd_2src_2erl-support_8c_source.html" title=" " alt="" coords="4257,80,4398,121"/>
+<area shape="rect" id="node25" href="$rpc_2filexio_2src_2erl-support_8c_source.html" title=" " alt="" coords="4423,80,4552,121"/>
+<area shape="rect" id="node26" href="$rpc_2hdd_2src_2erl-support_8c_source.html" title=" " alt="" coords="4576,80,4711,121"/>
+<area shape="rect" id="node27" href="$rpc_2keyboard_2src_2erl-support_8c_source.html" title=" " alt="" coords="4735,80,4885,121"/>
+<area shape="rect" id="node28" href="$rpc_2memorycard_2src_2erl-support_8c_source.html" title=" " alt="" coords="4909,80,5081,121"/>
+<area shape="rect" id="node29" href="$rpc_2mouse_2src_2erl-support_8c_source.html" title=" " alt="" coords="5106,80,5261,121"/>
+<area shape="rect" id="node30" href="$rpc_2multitap_2src_2erl-support_8c_source.html" title=" " alt="" coords="5285,80,5429,121"/>
+<area shape="rect" id="node31" href="$rpc_2pad_2src_2erl-support_8c_source.html" title=" " alt="" coords="5453,80,5588,121"/>
+<area shape="rect" id="node32" href="$rpc_2poweroff_2src_2erl-support_8c_source.html" title=" " alt="" coords="5613,80,5759,121"/>
+<area shape="rect" id="node33" href="$rpc_2ps2snd_2src_2erl-support_8c_source.html" title=" " alt="" coords="5784,80,5940,121"/>
+<area shape="rect" id="node34" href="$rpc_2remote_2src_2erl-support_8c_source.html" title=" " alt="" coords="5965,80,6122,121"/>
+<area shape="rect" id="node35" href="$rpc_2secr_2src_2erl-support_8c_source.html" title=" " alt="" coords="6147,80,6284,121"/>
+<area shape="rect" id="node36" href="$rpc_2sior_2src_2erl-support_8c_source.html" title=" " alt="" coords="6308,80,6443,121"/>
+<area shape="rect" id="node37" href="$rpc_2tcpips_2src_2erl-support_8c_source.html" title=" " alt="" coords="6467,80,6617,121"/>
+<area shape="rect" id="node38" href="$sbv_2src_2erl-support_8c_source.html" title=" " alt="" coords="6641,87,6816,114"/>
+</map>

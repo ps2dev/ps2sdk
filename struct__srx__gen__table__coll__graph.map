@@ -1,0 +1,10 @@
+<map id="_srx_gen_table" name="_srx_gen_table">
+<area shape="rect" id="node1" title=" " alt="" coords="95,496,215,523"/>
+<area shape="rect" id="node2" href="$struct__crtsymconf.html" title=" " alt="" coords="113,356,215,383"/>
+<area shape="rect" id="node3" href="$struct__segconf.html" title=" " alt="" coords="111,201,191,228"/>
+<area shape="rect" id="node8" href="$struct__pheader__info.html#union__pheader__info_1_1__pheader__info__d" title=" " alt="" coords="189,291,371,332"/>
+<area shape="rect" id="node4" href="$struct__elf__section.html" title=" " alt="" coords="101,96,201,123"/>
+<area shape="rect" id="node5" href="$struct___elf32___shdr.html" title=" " alt="" coords="101,5,200,32"/>
+<area shape="rect" id="node6" href="$struct__sectconf.html" title=" " alt="" coords="362,407,446,433"/>
+<area shape="rect" id="node7" href="$struct__pheader__info.html" title=" " alt="" coords="223,407,337,433"/>
+</map>

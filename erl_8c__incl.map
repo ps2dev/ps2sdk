@@ -1,0 +1,23 @@
+<map id="ee/erl/src/erl.c" name="ee/erl/src/erl.c">
+<area shape="rect" id="node1" title=" " alt="" coords="249,5,363,32"/>
+<area shape="rect" id="node2" href="$stdlib_8h.html" title=" " alt="" coords="5,80,76,107"/>
+<area shape="rect" id="node3" href="$stdio_8h.html" title=" " alt="" coords="151,155,218,181"/>
+<area shape="rect" id="node9" href="$string_8h_source.html" title=" " alt="" coords="440,80,511,107"/>
+<area shape="rect" id="node14" href="$sys_2fcntl_8h_source.html" title=" " alt="" coords="203,80,292,107"/>
+<area shape="rect" id="node15" href="$unistd_8h_source.html" title=" " alt="" coords="316,80,416,107"/>
+<area shape="rect" id="node16" href="$erl_8h.html" title=" " alt="" coords="127,304,178,331"/>
+<area shape="rect" id="node17" href="$hashtab_8h_source.html" title=" " alt="" coords="535,80,621,107"/>
+<area shape="rect" id="node21" href="$recycle_8h_source.html" title=" " alt="" coords="645,80,727,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="230,229,305,256"/>
+<area shape="rect" id="node5" href="$irx_8h.html" title=" " alt="" coords="155,229,206,256"/>
+<area shape="rect" id="node6" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="339,304,409,331"/>
+<area shape="rect" id="node7" title=" " alt="" coords="446,379,521,405"/>
+<area shape="rect" id="node8" href="$tamtypes_8h.html" title=" " alt="" coords="227,379,323,405"/>
+<area shape="rect" id="node10" href="$sysclib_8h.html" title=" " alt="" coords="339,155,417,181"/>
+<area shape="rect" id="node11" title=" " alt="" coords="380,229,451,256"/>
+<area shape="rect" id="node12" href="$setjmp_8h.html" title=" " alt="" coords="236,304,315,331"/>
+<area shape="rect" id="node13" href="$ctype_8h.html" title=" " alt="" coords="475,229,545,256"/>
+<area shape="rect" id="node18" href="$standard_8h_source.html" title=" " alt="" coords="611,155,702,181"/>
+<area shape="rect" id="node19" title=" " alt="" coords="621,229,692,256"/>
+<area shape="rect" id="node20" title=" " alt="" coords="717,229,799,256"/>
+</map>

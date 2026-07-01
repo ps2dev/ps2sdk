@@ -1,0 +1,7 @@
+<map id="sdsq_info" name="sdsq_info">
+<area shape="rect" id="node1" title=" " alt="" coords="365,95,449,121"/>
+<area shape="rect" id="node2" href="$structsce_hard_synth_version_chunk__.html" title=" " alt="" coords="5,5,213,32"/>
+<area shape="rect" id="node3" href="$structsce_seq_header_chunk__.html" title=" " alt="" coords="237,5,400,32"/>
+<area shape="rect" id="node4" href="$structsce_seq_midi_chunk__.html" title=" " alt="" coords="424,5,568,32"/>
+<area shape="rect" id="node5" href="$structsce_seq_song_chunk__.html" title=" " alt="" coords="593,5,741,32"/>
+</map>

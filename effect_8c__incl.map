@@ -1,0 +1,14 @@
+<map id="iop/sound/libsd/src/effect.c" name="iop/sound/libsd/src/effect.c">
+<area shape="rect" id="node1" title=" " alt="" coords="36,5,178,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="6,169,77,196"/>
+<area shape="rect" id="node3" title=" " alt="" coords="22,95,88,121"/>
+<area shape="rect" id="node4" href="$spu2regs_8h.html" title=" " alt="" coords="112,95,206,121"/>
+<area shape="rect" id="node5" href="$sysclib_8h.html" title=" " alt="" coords="230,95,309,121"/>
+<area shape="rect" id="node6" href="$irx_8h.html" title=" " alt="" coords="120,169,171,196"/>
+<area shape="rect" id="node10" title=" " alt="" coords="195,169,270,196"/>
+<area shape="rect" id="node11" href="$setjmp_8h.html" title=" " alt="" coords="261,244,340,271"/>
+<area shape="rect" id="node12" href="$ctype_8h.html" title=" " alt="" coords="345,169,416,196"/>
+<area shape="rect" id="node7" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="136,244,206,271"/>
+<area shape="rect" id="node8" title=" " alt="" coords="134,319,208,345"/>
+<area shape="rect" id="node9" href="$tamtypes_8h.html" title=" " alt="" coords="246,319,342,345"/>
+</map>

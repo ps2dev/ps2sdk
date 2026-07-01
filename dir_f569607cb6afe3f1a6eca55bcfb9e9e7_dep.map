@@ -1,0 +1,22 @@
+<map id="ee/rpc/sior/src" name="ee/rpc/sior/src">
+<area shape="rect" id="node1" href="dir_f569607cb6afe3f1a6eca55bcfb9e9e7.html" title="src" alt="" coords="107,52,179,100"/>
+<area shape="rect" id="node2" href="dir_a0a8ac7efb6662b749c1285408048e6d.html" title="erl" alt="" coords="34,148,106,196"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000375_000400.html" title="1" alt="" coords="101,131,111,146"/>
+<area shape="rect" id="node3" href="dir_7a30004114210d8a58166e09a9078b00.html" title="include" alt="" coords="231,148,303,196"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000375_000464.html" title="1" alt="" coords="223,123,232,138"/>
+<area shape="rect" id="node4" href="dir_0981ace215aa2029f526b70c145b9fbe.html" title="iop" alt="" coords="181,244,253,292"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000375_000011.html" title="2" alt="" coords="205,216,214,231"/>
+<area shape="rect" id="node5" href="dir_694ec83a64f58cbdefbefce65cd1011c.html" title="kernel" alt="" coords="103,436,175,484"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000375_000324.html" title="2" alt="" coords="99,410,108,425"/>
+<area shape="rect" id="node6" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html" title="common" alt="" coords="100,340,179,388"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000375_000000.html" title="1" alt="" coords="144,314,153,329"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000400_000011.html" title="4" alt="" coords="165,220,175,234"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000400_000000.html" title="1" alt="" coords="128,312,137,327"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000011_000000.html" title="255" alt="" coords="155,323,181,338"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000324_000400.html" title="1" alt="" coords="54,206,63,221"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000324_000011.html" title="5" alt="" coords="199,301,208,316"/>
+<area shape="rect" id="edge11-headlabel" href="dir_000324_000000.html" title="35" alt="" coords="131,400,149,414"/>
+<area shape="rect" id="edge12-headlabel" href="dir_000000_000011.html" title="20" alt="" coords="179,294,197,309"/>
+<area shape="rect" id="edge13-headlabel" href="dir_000000_000324.html" title="1" alt="" coords="134,410,143,425"/>
+<area shape="rect" id="clust1" href="dir_d4a6eac35d72455d405007552e574e19.html" title="sior" alt="" coords="97,16,190,111"/>
+</map>
