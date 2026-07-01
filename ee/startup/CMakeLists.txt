@@ -1,0 +1,5 @@
+add_library(crt0 OBJECT src/crt0.c)
+target_include_directories(crt0 PUBLIC include)
+target_include_directories(crt0 PRIVATE ${EE_INC})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/crt0.dir/src/crt0.c.obj DESTINATION lib RENAME "crt0.o")
+install(FILES src/linkfile DESTINATION startup)
