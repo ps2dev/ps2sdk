@@ -17,12 +17,12 @@ extern struct irx_export_table _exp_sysclib;
 extern struct irx_export_table _exp_stdio;
 
 int _start(int argc, char *argv[]) {
-	(void)argc;
 	(void)argv;
 
     if (RegisterLibraryEntries(&_exp_sysclib) != 0)
         return MODULE_NO_RESIDENT_END;
-    if (RegisterLibraryEntries(&_exp_stdio) != 0)
+    // Unofficial: only attempt to register stdio stub if in boot stage
+    if (!argc && RegisterLibraryEntries(&_exp_stdio) != 0)
         return MODULE_NO_RESIDENT_END;
 
     return MODULE_RESIDENT_END;
