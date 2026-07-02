@@ -190,7 +190,7 @@ static unsigned int alarm_cb_1e4(void *userdata)
 
 	priv = (struct spduart_internals_ *)userdata;
 	priv->spduart_modem_ops.rcv_len = priv->recv_buf_struct.m_cur_xfer_len;
-	iSetEventFlag(priv->spduart_modem_ops.evfid, 0x100u);
+	iSetEventFlag(priv->spduart_modem_ops.evfid, sceModemEFP_Recv);
 	return 0;
 }
 
@@ -218,7 +218,7 @@ static int spduart_send(struct spduart_internals_ *priv)
 	{
 		if ( m_cur_xfer_len > 16 )
 			m_cur_xfer_len = 16;
-		if ( (priv->spduart_msr_cached & 0x10) != 0 )
+		if ( ((priv->spduart_msr_cached >> 4) & sceModemLINE_CTS) != 0 )
 		{
 			if ( (spduart_internals.dev9_uart_reg_area->r_msr & 0x20) != 0 )
 			{
@@ -258,7 +258,6 @@ static int spduart_dev9_intr_cb(int flag)
 	u8 r_msr;
 	int m_offset1;
 	char r_scr;
-	u32 v18;
 
 	(void)flag;
 
@@ -277,17 +276,17 @@ static int spduart_dev9_intr_cb(int flag)
 				}
 				if ( (spduart_internals.dev9_uart_reg_area->r_scr & 1) != 0 )
 				{
-					if ( (spduart_internals.dev9_uart_reg_area->r_scr & 0x10) != 0 )
+					if ( ((spduart_internals.dev9_uart_reg_area->r_scr >> 4) & sceModemLINE_CTS) != 0 )
 					{
 						v2 |= 4u;
 					}
 				}
 				if ( r_scr & 2 )
 				{
-					if ( (spduart_internals.dev9_uart_reg_area->r_scr & 0x20) == 0 )
+					if ( ((spduart_internals.dev9_uart_reg_area->r_scr >> 4) & sceModemLINE_DSR) == 0 )
 					{
 						spduart_internals.shutdown_flag = 1;
-						iSetEventFlag(spduart_internals.spduart_modem_ops.evfid, 2);
+						iSetEventFlag(spduart_internals.spduart_modem_ops.evfid, sceModemEFP_PlugOut);
 					}
 					else
 					{
@@ -295,20 +294,17 @@ static int spduart_dev9_intr_cb(int flag)
 						{
 							v2 |= 4u;
 							spduart_internals.spduart_data_set_ready_flag = 1;
-							iSetEventFlag(spduart_internals.spduart_modem_ops.evfid, 513);
+							iSetEventFlag(spduart_internals.spduart_modem_ops.evfid, sceModemEFP_StartDone | sceModemEFP_Send);
 						}
 					}
 				}
 				if ( r_scr & 4 )
 				{
-					iSetEventFlag(spduart_internals.spduart_modem_ops.evfid, 0x40u);
+					iSetEventFlag(spduart_internals.spduart_modem_ops.evfid, sceModemEFP_Ring);
 				}
-				if ( (r_scr & 8) && ((spduart_internals.spduart_msr_cached ^ (u8)r_scr) & 0x80) != 0 )
+				if ( (r_scr & 8) && (((spduart_internals.spduart_msr_cached ^ (u8)r_scr) >> 4) & sceModemLINE_DCD) != 0 )
 				{
-					v18 = 32;
-					if ( (r_scr & 0x80) != 0 )
-						v18 = 16;
-					iSetEventFlag(spduart_internals.spduart_modem_ops.evfid, v18);
+					iSetEventFlag(spduart_internals.spduart_modem_ops.evfid, ( ((r_scr >> 4) & sceModemLINE_DCD) != 0 ) ? sceModemEFP_Connect : sceModemEFP_Disconnect);
 				}
 				spduart_internals.spduart_msr_cached = r_scr;
 				break;
@@ -494,7 +490,7 @@ static int spduart_send_now(struct spduart_internals_ *priv, const char *in_buf,
 		{
 			r_scr = spduart_internals.dev9_uart_reg_area->r_scr;
 			priv->spduart_msr_cached = r_scr;
-			if ( (r_scr & 0x10) != 0 && (spduart_internals.dev9_uart_reg_area->r_msr & 0x20) != 0 )
+			if ( ((r_scr >> 4) & sceModemLINE_CTS) != 0 && ((spduart_internals.dev9_uart_reg_area->r_msr >> 4) & sceModemLINE_DSR) != 0 )
 			{
 				v11 = 15;
 				do
@@ -568,7 +564,7 @@ static void spduart_init_hw(struct spduart_internals_ *priv)
 					{
 						sleep_on_shutdown(priv);
 						priv->spduart_msr_cached = spduart_internals.dev9_uart_reg_area->r_scr;
-						if ( (priv->spduart_msr_cached & 0x20) != 0 )
+						if ( ((priv->spduart_msr_cached >> 4) & sceModemLINE_DSR) != 0 )
 							break;
 						DelayThread(100000);
 					}
@@ -721,7 +717,7 @@ static void spduart_thread_proc(void *arg)
 				{
 					if ( priv->shutdown_flag )
 						break;
-					if ( (priv->spduart_msr_cached & 0x80) == 0 )
+					if ( ((priv->spduart_msr_cached >> 4) & sceModemLINE_DCD) == 0 )
 					{
 						priv->spduart_mcr_cached = 3;
 						spduart_internals.dev9_uart_reg_area->r_mcr = 3;
@@ -749,7 +745,7 @@ static void spduart_thread_proc(void *arg)
 						if ( m_cur_xfer_len >= 257 )
 						{
 							priv->spduart_modem_ops.snd_len = 1024 - m_cur_xfer_len;
-							SetEventFlag(priv->spduart_modem_ops.evfid, 0x200u);
+							SetEventFlag(priv->spduart_modem_ops.evfid, sceModemEFP_Send);
 						}
 					}
 				}
@@ -765,7 +761,7 @@ static void spduart_thread_proc(void *arg)
 				if ( v10 >= 257 )
 				{
 					priv->spduart_modem_ops.rcv_len = v10;
-					SetEventFlag(priv->spduart_modem_ops.evfid, 0x100u);
+					SetEventFlag(priv->spduart_modem_ops.evfid, sceModemEFP_Recv);
 				}
 				else
 				{
@@ -783,14 +779,14 @@ static void spduart_thread_proc(void *arg)
 			spduart_internals.dev9_uart_reg_area->r_lsr = 3;
 			priv->spduart_msr_cached = spduart_internals.dev9_uart_reg_area->r_scr;
 			spduart_dump_msr(priv->spduart_msr_cached);
-			if ( (priv->spduart_msr_cached & 0x20) != 0 )
+			if ( ((priv->spduart_msr_cached >> 4) & sceModemLINE_DSR) != 0 )
 			{
-				SetEventFlag(priv->spduart_modem_ops.evfid, 0x201u);
+				SetEventFlag(priv->spduart_modem_ops.evfid, sceModemEFP_StartDone | sceModemEFP_Send);
 				priv->spduart_data_set_ready_flag = 1;
 			}
-			if ( (priv->spduart_msr_cached & 0x80) != 0 )
+			if ( ((priv->spduart_msr_cached >> 4) & sceModemLINE_DCD) != 0 )
 			{
-				SetEventFlag(priv->spduart_modem_ops.evfid, 0x10u);
+				SetEventFlag(priv->spduart_modem_ops.evfid, sceModemEFP_Connect);
 			}
 			priv->spduart_start_flag = 0;
 			SetAlarm(&priv->spduart_clock_1e6, alarm_cb_1e6, priv);
@@ -922,9 +918,9 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 	priv = (struct spduart_internals_ *)userdata;
 	switch ( code )
 	{
-		case 0xC0000110:
-		case 0xC0000111:
-		case 0xC0000200:
+		case sceModemCC_FLUSH_RXBUF:
+		case sceModemCC_FLUSH_TXBUF:
+		case sceModemCC_GET_DIALCONF:
 			break;
 		default:
 		{
@@ -934,18 +930,18 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 	}
 	switch ( code )
 	{
-		case 0xC0000000:
+		case sceModemCC_GET_THPRI:
 		{
 			bcopy(&priv->spduart_thpri_, ptr, 4);
 			return 0;
 		}
-		case 0xC0000100:
+		case sceModemCC_GET_IF_TYPE:
 		{
-			v22 = 1;
+			v22 = sceModemIFT_SERIAL;
 			bcopy(&v22, ptr, 4);
 			return 0;
 		}
-		case 0xC0000110:
+		case sceModemCC_FLUSH_RXBUF:
 		{
 			CpuSuspendIntr(&state);
 			priv->recv_buf_struct.m_offset1 = 0;
@@ -955,7 +951,7 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			CpuResumeIntr(state);
 			return 0;
 		}
-		case 0xC0000111:
+		case sceModemCC_FLUSH_TXBUF:
 		{
 			CpuSuspendIntr(&state);
 			priv->send_buf_struct.m_offset1 = 0;
@@ -965,7 +961,7 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			CpuResumeIntr(state);
 			return 0;
 		}
-		case 0xC0000200:
+		case sceModemCC_GET_DIALCONF:
 		{
 			int v13;
 
@@ -977,54 +973,53 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			bcopy(priv->spduart_dial_, ptr, v13);
 			return 0;
 		}
-		case 0xC0010000:
+		case sceModemCC_GET_RX_COUNT:
 		{
 			bcopy(&priv->spduart_rx_count, ptr, 4);
 			return 0;
 		}
-		case 0xC0010001:
+		case sceModemCC_GET_TX_COUNT:
 		{
 			bcopy(&priv->spduart_tx_count, ptr, 4);
 			return 0;
 		}
-		case 0xC0010002:
+		case sceModemCC_GET_OE_COUNT:
 		{
 			bcopy(&priv->spduart_overrun_error_count, ptr, 4);
 			return 0;
 		}
-		case 0xC0010003:
+		case sceModemCC_GET_PE_COUNT:
 		{
 			bcopy(&priv->spduart_parity_error_count, ptr, 4);
 			return 0;
 		}
-		case 0xC0010004:
+		case sceModemCC_GET_FE_COUNT:
 		{
 			bcopy(&priv->spduart_framing_error_count, ptr, 4);
 			return 0;
 		}
-		case 0xC0010005:
+		case sceModemCC_GET_BO_COUNT:
 		{
 			bcopy(&priv->spduart_buffer_overflow_count, ptr, 4);
 			return 0;
 		}
-		case 0xC0020000:
+		case sceModemCC_GET_PARAM:
 		{
-			v25 = ((priv->spduart_mcr_cached & 3) << 28) | ((priv->spduart_mcr_cached & 0x18) << 27) | priv->spduart_baud_
-					| 0x2000000;
-			if ( (priv->spduart_mcr_cached & 4) != 0 )
-				v25 |= 0xC000000;
-			else
-				v25 |= 0x4000000;
+			v25 = sceModemPARAM_RTSCTS;
+			v25 |= ((priv->spduart_mcr_cached << 30) & (sceModemPARAM_PARODD | sceModemPARAM_PARENB));
+			v25 |= ((priv->spduart_mcr_cached << 28) & sceModemPARAM_CSIZE);
+			v25 |= priv->spduart_baud_;
+			v25 |= ( (priv->spduart_mcr_cached & 4) != 0 ) ? sceModemPARAM_STOP2 : sceModemPARAM_STOP1;
 			bcopy((int *)&v25, ptr, 4);
 			return 0;
 		}
-		case 0xC0030000:
+		case sceModemCC_GET_LINE:
 		{
-			v26 = (16 * (priv->spduart_signal_pin & 3)) | ((u8)priv->spduart_msr_cached >> 4);
+			v26 = ((priv->spduart_signal_pin << 4) & (sceModemLINE_DTR | sceModemLINE_RTS)) | (((u8)priv->spduart_msr_cached >> 4) & (sceModemLINE_DCD | sceModemLINE_DSR | sceModemLINE_RI | sceModemLINE_DCD));
 			bcopy(&v26, ptr, 4);
 			return 0;
 		}
-		case 0xC1000000:
+		case sceModemCC_SET_THPRI:
 		{
 			int v6;
 
@@ -1043,26 +1038,23 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			}
 			return v6;
 		}
-		case 0xC1020000:
+		case sceModemCC_SET_PARAM:
 		{
 			int v17;
-			unsigned int v18;
 
 			bcopy(ptr, &v25, 4);
-			v17 = spduart_set_baud(v25 & 0x3FFFFF);
+			v17 = spduart_set_baud(v25 & sceModemPARAM_SPEED);
 			if ( !v17 )
-			{
 				return -512;
-			}
-			if ( ((v25 >> 26) & 1) == 0 || (v25 & 0x1800000) != 0 )
+			if ( (v25 & sceModemPARAM_STOP1) == 0 || (v25 & (sceModemPARAM_XON | sceModemPARAM_XOFF)) != 0 )
 				return -512;
-			v18 = v25 >> 30;
-			if ( v18 == 1 || (v25 & 0x2000000) == 0 )
-			{
+			if ( (v25 & sceModemPARAM_PARODD) != 0 || (v25 & sceModemPARAM_RTSCTS) == 0 )
 				return -512;
-			}
-			priv->spduart_mcr_cached =
-				v18 | ((int)((v25 >> 26) & 3) >> 1) | ((v25 >> 28) & 3) | (priv->spduart_mcr_cached & 0x40) | 0x80;
+			priv->spduart_mcr_cached &= 0x40;
+			priv->spduart_mcr_cached |= ((v25 & (sceModemPARAM_PARODD | sceModemPARAM_PARENB)) >> 30);
+			priv->spduart_mcr_cached |= ((v25 & sceModemPARAM_CSIZE) >> 28);
+			priv->spduart_mcr_cached |= ((v25 & sceModemPARAM_STOPS) >> 27);
+			priv->spduart_mcr_cached |= 0x80;
 			spduart_internals.dev9_uart_reg_area->r_mcr = priv->spduart_mcr_cached;
 			spduart_internals.dev9_uart_reg_area->r_wrthr_rdrbr = v17;
 			spduart_internals.dev9_uart_reg_area->r_wrfcr_rdiir = (v17 >> 8) & 0xFF;
@@ -1071,15 +1063,13 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			spduart_internals.dev9_uart_reg_area->r_mcr = priv->spduart_mcr_cached;
 			return 0;
 		}
-		case 0xC1030000:
+		case sceModemCC_SET_LINE:
 		{
 			bcopy(ptr, &v26, 4);
-			if ( (v26 & 0xFFFFFFCF) != 0 )
-			{
+			if ( (v26 & ~(sceModemLINE_DTR | sceModemLINE_RTS)) != 0 )
 				return -512;
-			}
 			priv->spduart_signal_pin &= ~3;
-			priv->spduart_signal_pin |= ((unsigned int)v26 >> 4);
+			priv->spduart_signal_pin |= ((unsigned int)(v26 & (sceModemLINE_DTR | sceModemLINE_RTS)) >> 4);
 			spduart_internals.dev9_uart_reg_area->r_lsr = priv->spduart_signal_pin;
 			return 0;
 		}
@@ -1275,7 +1265,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 		for ( v14 = 0; v14 < 30; v14 += 1 )
 		{
 			spduart_internals.spduart_msr_cached = spduart_internals.dev9_uart_reg_area->r_scr;
-			if ( (spduart_internals.spduart_msr_cached & 0x20) != 0 )
+			if ( ((spduart_internals.spduart_msr_cached >> 4) & sceModemLINE_DSR) != 0 )
 			{
 				sceInetPrintf("spduart: Modem module detected\n");
 				Dev9RegisterPowerOffHandler(1, shutdown_cb);
@@ -1302,12 +1292,12 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 							spduart_internals.spduart_modem_ops.module_name = "spduart";
 							spduart_internals.spduart_modem_ops.vendor_name = "SCE";
 							spduart_internals.spduart_modem_ops.device_name = "Modem (Network Adaptor)";
-							spduart_internals.spduart_modem_ops.bus_type = 5;
+							spduart_internals.spduart_modem_ops.bus_type = sceModemBus_NIC;
 							spduart_internals.spduart_modem_ops.start = spduart_op_start;
 							spduart_internals.spduart_modem_ops.stop = spduart_op_stop;
 							spduart_internals.spduart_modem_ops.recv = spduart_op_recv;
 							spduart_internals.spduart_modem_ops.send = spduart_op_send;
-							spduart_internals.spduart_modem_ops.prot_ver = 0;
+							spduart_internals.spduart_modem_ops.prot_ver = sceModemProtVer;
 							spduart_internals.spduart_modem_ops.impl_ver = 0;
 							spduart_internals.spduart_modem_ops.priv = &spduart_internals;
 							spduart_internals.spduart_modem_ops.control = spduart_op_control;
