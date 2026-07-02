@@ -15,6 +15,7 @@
 #include "sifrpc.h"
 #include "sifcmd.h"
 #include "string.h"
+#include <stdio.h>
 #include <iopcontrol.h>
 #include "iopheap-common.h"
 
@@ -104,8 +105,7 @@ int SifLoadIopHeap(const char *path, void *addr)
         return -E_LIB_API_INIT;
 
     arg.p.addr = addr;
-    strncpy(arg.path, path, LIH_PATH_MAX - 1);
-    arg.path[LIH_PATH_MAX - 1] = 0;
+    snprintf(arg.path, sizeof(arg.path), "%s", path);
 
     if (sceSifCallRpc(&_ih_cd, 3, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
         return -E_SIF_RPC_CALL;

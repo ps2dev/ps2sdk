@@ -10,6 +10,7 @@
 
 #include <ioprpgen.h>
 #include <string.h>
+#include <stdio.h>
 
 static int ioprpgen_dummy_writecb(void *userdata, const struct ioprpgen_ctx *ctx, const void *buf, u32 size)
 {
@@ -72,11 +73,7 @@ ioprpgen_write_romdir_entry(const struct ioprpgen_ctx *ctx, const char *name, u3
 {
 	struct ioprp_romdir_entry ent;
 	memset(&ent, 0, sizeof(ent));
-	if ( name )
-	{
-		strncpy(ent.m_name, name, sizeof(ent.m_name) - 1);
-		ent.m_name[sizeof(ent.m_name) - 1] = 0;
-	}
+	snprintf(ent.m_name, sizeof(ent.m_name), "%s", name ? name : "");
 	ent.m_extinfo_size = extinfo_size;
 	ent.m_data_size = data_size;
 	return ctx->m_write_cb(ctx->m_write_cb_userdata, ctx, &ent, sizeof(ent)) == sizeof(ent);

@@ -64,12 +64,10 @@ int GetSonyRXModInfo(const char *path, char *description, unsigned int MaxLength
 
                                     if (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_IOPMOD_TAB)) {
                                         *version = ((iopmod_t *)buffer)->version;
-                                        strncpy(description, ((iopmod_t *)buffer)->modname, MaxLength - 1);
-                                        description[MaxLength - 1] = '\0';
+                                        snprintf(description, MaxLength, "%s", ((iopmod_t *)buffer)->modname);
                                     } else if (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_EEMOD_TAB)) {
                                         *version = ((eemod_t *)buffer)->version;
-                                        strncpy(description, ((eemod_t *)buffer)->modname, MaxLength - 1);
-                                        description[MaxLength - 1] = '\0';
+                                        snprintf(description, MaxLength, "%s", ((eemod_t *)buffer)->modname);
                                     }
                                 }
 

@@ -17,6 +17,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <string.h>
+#include <stdio.h>
 #include <iopcontrol.h>
 #include "libmc.h"
 
@@ -520,8 +521,7 @@ static int libmc_rpc_open(const libmc_target_desc_t *target, const char *name, i
 	target->m_interface_data->m_name_desc_param.m_name_param.m_port		= target->m_port;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_slot		= target->m_slot;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_flags		= mode;
-	strncpy(target->m_interface_data->m_name_desc_param.m_name_param.m_name, name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1);
-	target->m_interface_data->m_name_desc_param.m_name_param.m_name[sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1] = 0;
+	snprintf(target->m_interface_data->m_name_desc_param.m_name_param.m_name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name), "%s", name);
 
 	return libmc_post_rpc(target, MC_RPCCMD_OPEN, 0, NULL, NULL);
 }
@@ -621,8 +621,7 @@ static int libmc_rpc_chdir(const libmc_target_desc_t *target, const char* newDir
 	target->m_interface_data->m_name_desc_param.m_name_param.m_port		= target->m_port;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_slot		= target->m_slot;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_curdir		= target->m_interface_data->m_extra_send_recv_param.m_cur_dir;
-	strncpy(target->m_interface_data->m_name_desc_param.m_name_param.m_name, newDir, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1);
-	target->m_interface_data->m_name_desc_param.m_name_param.m_name[sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1] = 0;
+	snprintf(target->m_interface_data->m_name_desc_param.m_name_param.m_name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name), "%s", newDir);
 	sceSifWriteBackDCache(target->m_interface_data->m_extra_send_recv_param.m_cur_dir, sizeof(target->m_interface_data->m_extra_send_recv_param.m_cur_dir));
 	target->m_interface_data->m_extra_end_param.m_dst_cur_dir = currentDir;
 	target->m_interface_data->m_extra_end_param.m_extra_send_recv_param = UNCACHED_SEG(&target->m_interface_data->m_extra_send_recv_param);
@@ -640,8 +639,7 @@ static int libmc_rpc_getdir(const libmc_target_desc_t *target, const char *name,
 	target->m_interface_data->m_name_desc_param.m_name_param.m_flags	= mode;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_maxent	= maxent;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_mcT		= table;
-	strncpy(target->m_interface_data->m_name_desc_param.m_name_param.m_name, name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1);
-	target->m_interface_data->m_name_desc_param.m_name_param.m_name[sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1] = 0;
+	snprintf(target->m_interface_data->m_name_desc_param.m_name_param.m_name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name), "%s", name);
 	sceSifWriteBackDCache(table, maxent * sizeof(sceMcTblGetDir));
 
 	return libmc_post_rpc(target, MC_RPCCMD_GET_DIR, 0, NULL, NULL);
@@ -658,8 +656,7 @@ static int libmc_rpc_setfileinfo(const libmc_target_desc_t *target, const char* 
 	target->m_interface_data->m_name_desc_param.m_name_param.m_mcT		= &(target->m_interface_data->m_extra_send_recv_param.m_file_info_buff);
 	memcpy(&(target->m_interface_data->m_extra_send_recv_param.m_file_info_buff), info, sizeof(sceMcTblGetDir));
 
-	strncpy(target->m_interface_data->m_name_desc_param.m_name_param.m_name, name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1);
-	target->m_interface_data->m_name_desc_param.m_name_param.m_name[sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1] = 0;
+	snprintf(target->m_interface_data->m_name_desc_param.m_name_param.m_name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name), name);
 	FlushCache(0);
 
 	return libmc_post_rpc(target, MC_RPCCMD_SET_INFO, 0, NULL, NULL);
@@ -673,8 +670,7 @@ static int libmc_rpc_delete(const libmc_target_desc_t *target, const char *name)
 	target->m_interface_data->m_name_desc_param.m_name_param.m_port = target->m_port;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_slot = target->m_slot;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_flags = 0;
-	strncpy(target->m_interface_data->m_name_desc_param.m_name_param.m_name, name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1);
-	target->m_interface_data->m_name_desc_param.m_name_param.m_name[sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1] = 0;
+	snprintf(target->m_interface_data->m_name_desc_param.m_name_param.m_name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name), "%s", name);
 
 	return libmc_post_rpc(target, MC_RPCCMD_DELETE, 0, NULL, NULL);
 }
@@ -708,8 +704,7 @@ static int libmc_rpc_get_ent_space(const libmc_target_desc_t *target, const char
 	// set global variables
 	target->m_interface_data->m_name_desc_param.m_name_param.m_port = target->m_port;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_slot = target->m_slot;
-	strncpy(target->m_interface_data->m_name_desc_param.m_name_param.m_name, path, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1);
-	target->m_interface_data->m_name_desc_param.m_name_param.m_name[sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1] = 0;
+	snprintf(target->m_interface_data->m_name_desc_param.m_name_param.m_name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name), "%s", path);
 
 	return libmc_post_rpc(target, MC_RPCCMD_GET_ENT, 0, NULL, NULL);
 }
@@ -724,10 +719,8 @@ static int libmc_rpc_rename(const libmc_target_desc_t *target, const char* oldNa
 	target->m_interface_data->m_name_desc_param.m_name_param.m_slot = target->m_slot;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_flags = 0x10;
 	target->m_interface_data->m_name_desc_param.m_name_param.m_mcT = &(target->m_interface_data->m_extra_send_recv_param.m_file_info_buff);
-	strncpy(target->m_interface_data->m_name_desc_param.m_name_param.m_name, oldName, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1);
-	target->m_interface_data->m_name_desc_param.m_name_param.m_name[sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name) - 1] = 0;
-	strncpy((char*)target->m_interface_data->m_extra_send_recv_param.m_file_info_buff.EntryName, newName, sizeof(target->m_interface_data->m_extra_send_recv_param.m_file_info_buff.EntryName) - 1);
-	target->m_interface_data->m_extra_send_recv_param.m_file_info_buff.EntryName[sizeof(target->m_interface_data->m_extra_send_recv_param.m_file_info_buff.EntryName) - 1] = 0;
+	snprintf(target->m_interface_data->m_name_desc_param.m_name_param.m_name, sizeof(target->m_interface_data->m_name_desc_param.m_name_param.m_name), "%s", oldName);
+	snprintf((char*)target->m_interface_data->m_extra_send_recv_param.m_file_info_buff.EntryName, sizeof(target->m_interface_data->m_extra_send_recv_param.m_file_info_buff.EntryName), "%s", newName);
 	FlushCache(0);
 
 	return libmc_post_rpc(target, MC_RPCCMD_SET_INFO, 0, NULL, NULL);

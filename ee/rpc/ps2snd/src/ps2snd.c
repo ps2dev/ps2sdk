@@ -243,7 +243,7 @@ int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize)
 	buf[1] = flags;
 	buf[2] = bufaddr;
 	buf[3] = bufsize;
-	strncpy((char*)&buf[4], file, 27*4);
+	snprintf((char*)&buf[4], 27*4, "%s", file);
 	buf[31] = 0;
 
 	sceSifCallRpc(&sd_client, PS2SND_StreamOpen, 0, buf, 128, buf, 4, NULL, NULL);

@@ -463,8 +463,7 @@ int AddFile(ROMIMG *ROMImg, const char *path, int upperconv)
 		const char* fname = strrchr(path, PATHSEP);
 		if (fname == NULL) fname = path; else fname++;
         if (upperconv) {
-            strncpy(tbuf, fname, sizeof(tbuf));
-            tbuf[sizeof(tbuf) - 1] = '\0';
+            snprintf(tbuf, sizeof(tbuf), "%s", fname);
             if (tbuf[0] != '\0') {
                 upperbuff(tbuf);
                 char* T = strrchr(tbuf, '.');
@@ -487,8 +486,7 @@ int AddFile(ROMIMG *ROMImg, const char *path, int upperconv)
 					file = &ROMImg->files[ROMImg->NumFiles - 1];
 					memset(&ROMImg->files[ROMImg->NumFiles - 1], 0, sizeof(struct FileEntry));
 
-					strncpy(file->RomDir.name, fname, sizeof(file->RomDir.name));
-                    file->RomDir.name[sizeof(file->RomDir.name) - 1] = '\0';
+					snprintf(file->RomDir.name, sizeof(file->RomDir.name), "%s", fname);
 					file->RomDir.ExtInfoEntrySize = 0;
 
 					FileDateStamp = GetFileCreationDate(path);

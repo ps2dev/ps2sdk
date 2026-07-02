@@ -214,8 +214,7 @@ s32 sceCdSearchFile(sceCdlFILE *file, const char *name)
         }
     }
 
-    strncpy(searchFileSendBuff.name, name, 255);
-    searchFileSendBuff.name[255] = '\0';
+    snprintf(searchFileSendBuff.name, sizeof(searchFileSendBuff.name), "%s", name);
     searchFileSendBuff.dest      = &searchFileSendBuff;
 
     if (CdDebug > 0)
