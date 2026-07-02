@@ -1050,7 +1050,7 @@ struct erl_record_t * _init_load_erl_from_file(const char * fname, char * erl_id
     argv[0] = erl_id;
     argv[1] = 0;
 
-    snprintf(tfname, sizeof(tfname), "%s%s", _init_erl_prefix, fname);
+    snprintf(tfname, sizeof(tfname), "%*s%s", sizeof(_init_erl_prefix), _init_erl_prefix, fname);
 
     return load_erl_from_file(tfname, 1, argv);
 }
@@ -1093,7 +1093,7 @@ struct erl_record_t * _init_load_erl_from_file_to_addr(const char * fname, u32 a
     argv[0] = erl_id;
     argv[1] = 0;
 
-    snprintf(tfname, sizeof(tfname), "%s%s", _init_erl_prefix, fname);
+    snprintf(tfname, sizeof(tfname), "%*s%s", sizeof(_init_erl_prefix), _init_erl_prefix, fname);
 
     return load_erl_from_file_to_addr(tfname, addr, 1, argv);
 }
