@@ -15,6 +15,7 @@
 #include <sys/param.h>
 #include <dirent.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #ifdef F___cwd
 /* the present working directory variable. */
@@ -33,9 +34,10 @@ extern size_t __cwd_len;
 #define defaultCWD "host:"
 
 enum SeparatorType {
+	SeparatorTypeNotFound,
 	SeparatorTypeNone,
 	SeparatorTypePOSIX,
-	SeparatorTypeWindows
+	SeparatorTypeWindows,
 };
 
 #define isnum(c) ((c) >= '0' && (c) <= '9')
@@ -43,33 +45,25 @@ enum SeparatorType {
 #ifdef F___get_drive
 /* Return the number of bytes taken up by the "drive:" prefix,
    or -1 if it's not found */
-int __get_drive(const char *dev, enum SeparatorType *usePOSIXSeparator)
+int __get_drive(const char *dev, enum SeparatorType *usePOSIXSeparator, int maxLen)
 {
-	const char *tail;
+	const char *t;
 	const char *d;
 	int devname_len;
 
 	/* Skip leading spaces */
-	d = dev;
-	while (*d == ' ')
-	{
-		d += 1;
-	}
+	for (d = dev; ((int)(d - dev) < maxLen) && *d == ' '; d += 1);
 
 	/* Get colon position */
-	tail = strchr(d, ':');
-	if (tail == NULL)
+	for (t = d; ((int)(t - dev) < maxLen) && *t && *t != ':'; t += 1);
+	if (*t != ':')
 	{
-		return -1;
+		*usePOSIXSeparator = SeparatorTypeNotFound;
+		return 0;
 	}
-
-	devname_len = (int)(tail - d);
 
 	/* Reduce length to not include index */
-	while (isnum(d[devname_len - 1]))
-	{
-		devname_len -= 1;
-	}
+	for (devname_len = (int)(t - d); isnum(d[devname_len - 1]); devname_len -= 1);
 
 	*usePOSIXSeparator = SeparatorTypePOSIX;
 	switch (devname_len)
@@ -99,27 +93,37 @@ int __get_drive(const char *dev, enum SeparatorType *usePOSIXSeparator)
 	 * - device index
 	 * - colon
 	 */
-	return (tail - dev) + 1;
+	return (t - dev) + 1;
 }
 #else 
-int __get_drive(const char *dev, enum SeparatorType *usePOSIXSeparator);
+int __get_drive(const char *dev, enum SeparatorType *usePOSIXSeparator, int maxLen);
 #endif
 
 #ifdef F_getcwd
 char *getcwd(char *buf, size_t size)
 {
-	if(!buf) {
+	if (!buf)
+	{
+		size = __cwd_len + 1;
+		buf = malloc(size);
+		if (!buf)
+		{
+			errno = ENOMEM;
+			return NULL;
+		}
+	}
+	else if (!size)
+	{
 		errno = EINVAL;
 		return NULL;
-	}		
-
-	if(__cwd_len >= size) {
+	}
+	else if (size < (__cwd_len + 1))
+	{
 		errno = ERANGE;
 		return NULL;
 	}
 
-	memcpy(buf, __cwd, __cwd_len);
-	buf[__cwd_len] = '\x00';
+	snprintf(buf, size, "%*s", __cwd_len, __cwd);
 	return buf;
 }
 #endif
@@ -202,43 +206,30 @@ int __path_absolute(const char *in, char *out, int len)
 	int dr;
 	enum SeparatorType separatorType;
 	size_t in_len;
+	size_t out_len;
 
 	in_len = strlen(in);
 	/* See what the relative URL starts with */
-	dr = __get_drive(in, &separatorType);
+	dr = __get_drive(in, &separatorType, in_len);
 	char separator = separatorType == SeparatorTypePOSIX ? '/' : '\\';
 
-	if(dr > 0 && (separatorType == SeparatorTypeNone || in[dr] == separator)) {
+	if((separatorType != SeparatorTypeNotFound) && (separatorType == SeparatorTypeNone || in[dr] == separator)) {
 		/* It starts with "drive:" and has no separator or "drive:/", so it's already absolute */
-		if (in_len >= len) return -1;
-		strncpy(out, in, len);
-	} else if(dr > 0 && in[dr - 1] == ':') {
+		out_len = snprintf(out, len, "%*s", in_len, in);
+	} else if((separatorType != SeparatorTypeNotFound) && in[dr - 1] == ':') {
 		/* It starts with "drive:", so it's already absoulte, however it misses the "/" after unit */
-		if (in_len + 1 >= len) return -2;
-		strncpy(out, in, dr);
-		out[dr] = separator;
-		strncpy(out + dr + 1, in + dr, len - dr - 1);
+		out_len = snprintf(out, len, "%*s%c%*s", dr, in, separator, in_len - dr, in + dr);
 	} else if(in[0] == '\\' || in[0] == '/') {
 		/* It's absolute, but missing the drive, so use cwd's drive */
-		if(__cwd_len + in_len >= len) return -3;
-		memcpy(out, __cwd, __cwd_len);
-		out[__cwd_len] = '\x00';
-		dr = __get_drive(out, &separatorType);
-		if(dr < 0) dr = 0;
-		out[dr] = 0;
-		strncat(out, in, len);
+		out_len = snprintf(out, len, "%*s%*s", __get_drive(__cwd, &separatorType, __cwd_len), __cwd, in_len, in);
 	} else {
 		/* It's not absolute, so append it to the current cwd */
-		if(__cwd_len + 1 + in_len >= len) return -5;
-		memcpy(out, __cwd, __cwd_len);
-		out[__cwd_len] = separator;
-		out[__cwd_len + 1] = '\x00';
-		strncat(out, in, len);
+		out_len = snprintf(out, len, "%*s%c%*s", __cwd_len, __cwd, separator, in_len, in);
 	}
+	if (out_len >= len) return -1;
 
 	/* Now normalize the pathname portion */
-	dr = __get_drive(out, &separatorType);
-	if(dr < 0) dr = 0;
+	dr = __get_drive(out, &separatorType, out_len);
 	return __path_normalize(out + dr, len - dr, separatorType == SeparatorTypePOSIX);
 }
 #endif
