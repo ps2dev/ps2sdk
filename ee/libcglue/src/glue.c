@@ -170,7 +170,7 @@ int _open(const char *buf, int flags, ...) {
 	mode = va_arg(alist, int);	// Retrieve the mode argument, regardless of whether it is expected or not.
 	va_end(alist);
 
-	if(__path_absolute(buf, t_fname, MAXNAMLEN) < 0) {
+	if(__path_absolute(buf, t_fname, sizeof(t_fname)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
@@ -279,7 +279,7 @@ int _write(int fd, const void *buf, size_t nbytes) {
 int _stat(const char *path, struct stat *buf) {
 	char dest[MAXNAMLEN + 1];
 
-	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+	if(__path_absolute(path, dest, sizeof(dest)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
@@ -518,13 +518,13 @@ off64_t lseek64(int fd, off64_t offset, int whence)
 int chdir(const char *path) {
 	char dest[MAXNAMLEN + 1];
 
-	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+	if(__path_absolute(path, dest, sizeof(dest)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
 
-	strncpy(__cwd, dest, sizeof(__cwd));
-	__cwd_len = strnlen(__cwd, sizeof(__cwd));
+	__cwd_len = snprintf(__cwd, sizeof(__cwd), "%*s", sizeof(dest) - 1, dest);
+	__cwd_len = (__cwd_len > (sizeof(__cwd) - 1)) ? (sizeof(__cwd) - 1) : __cwd_len;
 	return 0;
 }
 #endif
@@ -543,7 +543,7 @@ int _mkdir(const char *path, mode_t mode)
 {
 	char dest[MAXNAMLEN + 1];
 
-	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+	if(__path_absolute(path, dest, sizeof(dest)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
@@ -573,7 +573,7 @@ int mkdir(const char *path, mode_t mode);
 int rmdir(const char *path) {
 	char dest[MAXNAMLEN + 1];
 
-	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+	if(__path_absolute(path, dest, sizeof(dest)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
@@ -600,7 +600,7 @@ int _link(const char *old, const char *new_) {
 // Called from newlib unlinkr.c
 int _unlink(const char *path) {
 	char dest[MAXNAMLEN + 1];
-	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+	if(__path_absolute(path, dest, sizeof(dest)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
@@ -621,12 +621,12 @@ int _rename(const char *old, const char *new_) {
 	char oldname[MAXNAMLEN + 1];
 	char newname[MAXNAMLEN + 1];
 
-	if(__path_absolute(old, oldname, MAXNAMLEN) < 0) {
+	if(__path_absolute(old, oldname, sizeof(oldname)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
 
-	if(__path_absolute(new_, newname, MAXNAMLEN) < 0) {
+	if(__path_absolute(new_, newname, sizeof(newname)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
@@ -993,12 +993,12 @@ int _symlink(const char *target, const char *linkpath)
 	char dest_target[MAXNAMLEN + 1];
 	char dest_linkpath[MAXNAMLEN + 1];
 
-	if(__path_absolute(target, dest_target, MAXNAMLEN) < 0) {
+	if(__path_absolute(target, dest_target, sizeof(dest_target)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
 
-	if(__path_absolute(linkpath, dest_linkpath, MAXNAMLEN) < 0) {
+	if(__path_absolute(linkpath, dest_linkpath, sizeof(dest_linkpath)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
@@ -1027,7 +1027,7 @@ ssize_t _readlink(const char *path, char *buf, size_t bufsiz)
 {
 	char dest[MAXNAMLEN + 1];
 
-	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+	if(__path_absolute(path, dest, sizeof(dest)) < 0) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
