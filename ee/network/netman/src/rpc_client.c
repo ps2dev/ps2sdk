@@ -2,6 +2,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <string.h>
+#include <stdio.h>
 #include <malloc.h>
 #include <netman.h>
 #include <netman_rpc.h>
@@ -293,7 +294,7 @@ int NetManSetMainIF(const char *name)
 
 	WaitSema(NetManIOSemaID);
 
-	strncpy(TransmitBuffer.netifName, name, NETMAN_NETIF_NAME_MAX_LEN);
+	snprintf(TransmitBuffer.netifName, sizeof(TransmitBuffer.netifName), "%s", name);
 	TransmitBuffer.netifName[NETMAN_NETIF_NAME_MAX_LEN-1] = '\0';
 	if((result=sceSifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SET_MAIN_NETIF, 0, &TransmitBuffer, NETMAN_NETIF_NAME_MAX_LEN, &ReceiveBuffer, sizeof(s32), NULL, NULL))>=0)
 		result=ReceiveBuffer.result;
@@ -316,7 +317,7 @@ int NetManQueryMainIF(char *name)
 	{
 		if((result=ReceiveBuffer.QueryMainNetIFResult.result) == 0)
 		{
-			strncpy(name, ReceiveBuffer.QueryMainNetIFResult.name, NETMAN_NETIF_NAME_MAX_LEN);
+			sprintf(name, "%*s", (int)sizeof(ReceiveBuffer.QueryMainNetIFResult.name), ReceiveBuffer.QueryMainNetIFResult.name);
 			name[NETMAN_NETIF_NAME_MAX_LEN-1] = '\0';
 		}
 	}

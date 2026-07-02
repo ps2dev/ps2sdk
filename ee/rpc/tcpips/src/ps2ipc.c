@@ -15,6 +15,7 @@
 
 #include <tamtypes.h>
 #include <string.h>
+#include <stdio.h>
 #include <kernel.h>
 #include <sifrpc.h>
 #include <iopcontrol.h>
@@ -467,8 +468,7 @@ int ps2ipc_ps2ip_getconfig(char *netif_name, t_ip_info *ip_info)
 	WaitSema(lock_sema);
 
 	// call with netif name
-	strncpy(_rpc_buffer.netif_name, netif_name, sizeof(_rpc_buffer.netif_name));
-	_rpc_buffer.netif_name[sizeof(_rpc_buffer.netif_name) - 1] = '\0';
+	snprintf(_rpc_buffer.netif_name, sizeof(_rpc_buffer.netif_name), "%s", netif_name);
 
 	if (sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETCONFIG, 0, (void*)_rpc_buffer.netif_name, sizeof(_rpc_buffer.netif_name), (void*)&_rpc_buffer.ip_info, sizeof(t_ip_info), NULL, NULL) < 0)
 	{
@@ -721,8 +721,7 @@ struct hostent *ps2ipc_gethostbyname(const char *name)
 	WaitSema(lock_sema);
 
 	result = NULL;
-	strncpy(_rpc_buffer.hostname, name, sizeof(_rpc_buffer.hostname));
-	_rpc_buffer.hostname[sizeof(_rpc_buffer.hostname) - 1] = '\0';
+	snprintf(_rpc_buffer.hostname, sizeof(_rpc_buffer.hostname), "%s", name);
 	if(sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETHOSTBYNAME, 0, (void*)_rpc_buffer.hostname, sizeof(_rpc_buffer.hostname), (void*)res_pkt, sizeof(gethostbyname_res_pkt), NULL, NULL) >=0)
 	{
 		if(res_pkt->result == 0)

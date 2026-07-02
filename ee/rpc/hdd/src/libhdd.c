@@ -323,7 +323,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 	}
 
 	// Check if filesystem already exists
-	snprintf(openString, sizeof(openString), "hdd0:%s", fsName);
+	snprintf(openString, sizeof(openString), "hdd0:%*s", (int)(sizeof(fsName) - 1), fsName);
 	partFd = fileXioOpen(openString, FIO_O_RDONLY);
 	if(partFd > 0 || partFd == -EACCES)	// Filesystem already exists
 	{
@@ -345,7 +345,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 		printf(">>> Attempting to create main partition, size %d MB\n", partSize);
 #endif
 
-		snprintf(openString, sizeof(openString), "hdd0:%s,,,%s,PFS", fsName, sizesString[useIndex]);
+		snprintf(openString, sizeof(openString), "hdd0:%*s,,,%s,PFS", (int)(sizeof(fsName) - 1), fsName, sizesString[useIndex]);
 #ifdef DEBUG
 		printf(">>> openString = %s\n", openString);
 #endif
@@ -441,7 +441,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 
 	fileXioClose(partFd);
 
-	snprintf(openString, sizeof(openString), "hdd0:%s", fsName);
+	snprintf(openString, sizeof(openString), "hdd0:%*s", (int)(sizeof(fsName) - 1), fsName);
 	retVal = fileXioFormat("pfs:", openString, (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
 	if(retVal < 0)
 	{

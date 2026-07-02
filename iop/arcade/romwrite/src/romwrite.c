@@ -613,7 +613,7 @@ static int do_format_device(int abspart)
 	STATUS_PRINTF("\n");
 	STATUS_PRINTF(" [3/3]Write Boot Sector and Logical Address Table\n");
 	memset(&g_nand_partbuf.m_hdr, 0, sizeof(g_nand_partbuf.m_hdr));
-	strncpy(g_nand_partbuf.m_hdr.m_sig, "S147NAND", 9);
+	strcpy(g_nand_partbuf.m_hdr.m_sig, "S147NAND");
 	g_nand_partbuf.m_hdr.m_bootsector_ver_1 = 3;
 	g_nand_partbuf.m_hdr.m_bootsector_ver_2 = 0;
 	for ( i = 0; i < 8; i += 1 )

@@ -61,7 +61,7 @@ struct passwd __dummy_passwd;
 __attribute__((constructor))
 static void __dummy_passwd_init(void)
 {
-	strncpy(__dummy_passwd_loginbuf, "ps2user", sizeof(__dummy_passwd_loginbuf));
+	strcpy(__dummy_passwd_loginbuf, "ps2user");
 	__dummy_passwd.pw_name = &__dummy_passwd_loginbuf[0];
 	__dummy_passwd.pw_passwd = "xxx";
 	__dummy_passwd.pw_uid = 1000;
