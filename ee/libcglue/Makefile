@@ -62,6 +62,7 @@ PS2SDKAPI_OBJS = \
 	__fioMkdirHelper.o \
 	__fioGetstatHelper.o \
 	__fioOpsInitializeImpl.o \
+	_ps2sdk_get_default_fdman_path_ops.o \
 	_libcglue_fdman_path_ops.o \
 	_libcglue_fdman_socket_ops.o \
 	_libcglue_fdman_inet_ops.o
