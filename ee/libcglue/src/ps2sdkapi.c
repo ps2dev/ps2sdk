@@ -474,7 +474,6 @@ void __fioOpsInitializeImpl(void)
     if (&rmdir) __fio_fdman_path_ops.rmdir = fioRmdir;
     // cppcheck-suppress knownConditionTrueFalse
     if ((&_stat) || (&_fstat)) __fio_fdman_path_ops.stat = __fioGetstatHelper;
-    if (!_libcglue_fdman_path_ops) _libcglue_fdman_path_ops = &__fio_fdman_path_ops;
 
     memset(&__fio_fdman_ops_file, 0, sizeof(__fio_fdman_ops_file));
     __fio_fdman_ops_file.getfd = __fioGetFdHelper;
@@ -502,8 +501,22 @@ void __fioOpsInitializeImpl(void)
 }
 #endif
 
+extern _libcglue_fdman_path_ops_t * __attribute__((weak)) _ps2sdk_get_default_fdman_path_ops(void);
+#ifdef F__ps2sdk_get_default_fdman_path_ops
+_libcglue_fdman_path_ops_t * __attribute__((weak)) _ps2sdk_get_default_fdman_path_ops(void)
+{
+    return &__fio_fdman_path_ops;
+}
+#endif
+
 #ifdef F__libcglue_fdman_path_ops
 _libcglue_fdman_path_ops_t *_libcglue_fdman_path_ops = NULL;
+
+__attribute__((constructor))
+static void __libcglue_fdman_path_ops_initialize(void)
+{
+    _libcglue_fdman_path_ops = _ps2sdk_get_default_fdman_path_ops();
+}
 #endif
 
 #ifdef F__libcglue_fdman_socket_ops
