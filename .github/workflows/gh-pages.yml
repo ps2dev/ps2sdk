@@ -51,7 +51,7 @@ jobs:
     - name: Extract artifact
       run: |
         mkdir -p docs/html
-        tar -xpzf */*.tgz -C docs/html
+        find . -name "*.tgz" -exec tar -xpzf {} -C docs/html \;
 
     - name: Deploy
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
