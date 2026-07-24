@@ -16,6 +16,7 @@ There are multiple configurations of this library, allowing the choice of
 balancing between size, speed, and features.
 
 *   `acram` -> The recommended version.
+*   `acram_extended` -> Supports up to 128mb of ACRAM, only on system246 Rack A
 
 ## How to use this module in your program
 
