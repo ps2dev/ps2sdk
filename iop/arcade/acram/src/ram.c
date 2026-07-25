@@ -14,7 +14,20 @@ static int ram_dma_xfer(acDmaT dma, int intr, acDmaOp op);
 static void ram_dma_done(acDmaT dma);
 static void ram_dma_error(acDmaT dma, int intr, acDmaState state, int result);
 
-static acUint32 Ram_limits[] = {0x2000000, 0x4000000, 0x4000000};
+static acUint32 Ram_limits[] = {
+#ifdef ALLOW_128MB_ACRAM
+#define MAX_BANK 4
+    0x2000000,
+    0x4000000,
+    0x6000000,
+    0x8000000,
+#else
+#define MAX_BANK 3
+    0x2000000,
+    0x4000000,
+    0x4000000
+#endif
+};
 static const acDmaOpsData ops_22 = {&ram_dma_xfer, &ram_dma_done, &ram_dma_error};
 static struct ram_softc Ramc;
 
@@ -44,7 +57,7 @@ static int ram_dma_xfer(acDmaT dma, int intr, acDmaOp op)
 		if ( dmatmp->addr < Ram_limits[v5] )
 			break;
 		v5 = ++i;
-		if ( (unsigned int)i >= 3 )
+		if ( (unsigned int)i > MAX_BANK )
 		{
 			bank = -14;
 			break;
