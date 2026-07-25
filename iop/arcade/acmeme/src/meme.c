@@ -14,7 +14,9 @@ static int meme_op_xfer(struct meme_softc *memec, struct ac_memsif_reply *rpl, c
 static int meme_op_init(struct meme_softc *memec, struct ac_memsif_reply *rpl, const void *arg, int size);
 
 static meme_ops_t ops_48[3] = {NULL, &meme_op_init, &meme_op_xfer};
-static struct meme_softc Memec;
+static struct meme_softc Memec = {
+	.status = 0,
+};
 
 static int meme_jv_read(acMemAddr addr, void *buf, int size)
 {
