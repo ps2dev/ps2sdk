@@ -13,6 +13,7 @@
  * EE UGLY DEBUG ON SCREEN
  */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <tamtypes.h>
 #include <sifcmd.h>
@@ -26,6 +27,8 @@ static short int X, Y;
 static const short int MX = 80, MY = 40;
 static u32 bgcolor, fontcolor, cursorcolor;
 static short int cursor;
+
+static u32 defcols[16];
 
 struct t_setupscr
 {
@@ -128,6 +131,35 @@ void scr_setfontcolor(u32 color)
 	fontcolor = color;
 }
 
+static int hex2int(char c)
+{
+    if (c >= '0' && c <= '9')
+        return c - '0';
+
+    c &= ~0x20; // a-f -> A-F
+
+    if (c >= 'A' && c <= 'F')
+        return c - 'A' + 10;
+
+    return -1;
+}
+
+void scr_change_defaultcolor(int index, u32 color) {
+    defcols[index] = color;
+}
+
+void scr_setfontcolorescape(char n1, char n2)
+{
+    int bg = hex2int(n1);
+    int fg = hex2int(n2);
+
+    if (bg >= 0)
+        bgcolor = defcols[bg];
+
+    if (fg >= 0)
+        fontcolor = defcols[fg];
+}
+
 void scr_setcursorcolor(u32 color)
 {
 	cursorcolor = color;
@@ -152,6 +184,23 @@ void init_scr(void)
     scr_setbgcolor(0);
     scr_setfontcolor(0xffffff);
     scr_setcursorcolor(0xffffff);
+    defcols[0] = 0x000000;
+    defcols[1] = 0xDA3700;
+    defcols[2] = 0xDD963A;
+    defcols[3] = 0x981788;
+    defcols[4] = 0x1F0FC5;
+    defcols[5] = 0xCCCCCC;
+    defcols[6] = 0x009CC1;
+    defcols[7] = 0x767676;
+    defcols[8] = 0xFF783B;
+    defcols[9] = 0xD6D661;
+    defcols[10] = 0x0CC616;
+    defcols[11] = 0x9E00B4;
+    defcols[12] = 0x5648E7;
+    defcols[13] = 0xF2F2F2;
+    defcols[14] = 0xA5F1F9;
+    defcols[15] = 0xFFFFFF;
+
     scr_setCursor(1);
     DmaReset();
 
@@ -251,7 +300,12 @@ void scr_vprintf(const char *format, va_list opt)
                 break;
             case '\r':
                 X = 0;
-                // scr_clearline(Y); //Should we clear the line?
+                break;
+            case '\x1b': // color escape
+                if (i+2 < bufsz && isxdigit((unsigned char)buff[i+1]) && isxdigit((unsigned char)buff[i+2])) {
+                    scr_setfontcolorescape(buff[i+1], buff[i+2]);
+                    i+=2;
+                }
                 break;
             default:
                 scr_putchar(X * 7, Y * 8, fontcolor, c);

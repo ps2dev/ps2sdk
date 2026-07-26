@@ -41,6 +41,7 @@ extern void scr_setfontcolor(u32 color);
 extern void scr_setcursorcolor(u32 color);
 extern void scr_setCursor(int enable);
 extern int scr_getCursor(void);
+extern void scr_change_defaultcolor(int index, u32 color);
 #ifdef __cplusplus
 }
 #endif
