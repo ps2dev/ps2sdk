@@ -507,6 +507,18 @@ static int ata_device_select(int device)
     return ata_wait_bus_busy();
 }
 
+static int g_atad_search_command = 0;
+static int g_atad_search_type = 0;
+
+/* Export 20 */
+int ata_set_command_type(int command, int type)
+{
+    g_atad_search_command = command;
+    g_atad_search_type = type;
+
+    return 0;
+}
+
 /* Export 6 */
 /*
     28-bit LBA:
@@ -562,6 +574,10 @@ int sceAtaExecCmd(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector,
             break;
         }
     }
+
+    // Unofficial: allow overriding the command type if not handled in table
+    if (!type && searchcmd == g_atad_search_command)
+        type = g_atad_search_type;
 
     if (!(atad_cmd_state.type = type & 0x7F)) // Non-SONY: ignore the 48-bit LBA flag.
         return ATA_RES_ERR_CMD;
