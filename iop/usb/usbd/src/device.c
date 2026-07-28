@@ -92,6 +92,7 @@ int attachIoReqToEndpoint(UsbdEndpoint_t *ep, UsbdIoRequest_t *req, void *destda
 	req->m_correspEndpoint = ep;
 	req->m_destPtr = destdata;
 	req->m_length = length;
+	req->m_transferedBytes = 0;
 	req->m_resultCode = USB_RC_OK;
 	req->m_callbackProc = (InternCallback)callback;
 	req->m_prev = ep->m_ioReqListEnd;
@@ -103,6 +104,33 @@ int attachIoReqToEndpoint(UsbdEndpoint_t *ep, UsbdIoRequest_t *req, void *destda
 	ep->m_ioReqListEnd = req;
 	handleIoReqList(ep);
 	return USB_RC_OK;
+}
+
+/* Drivers such as usbmass_bd pass a *pipe id* to sceUsbdClearEndpointFeature().
+ * The control request wIndex must be bEndpointAddress (ep number + USB_DIR_IN).
+ * Remap pipe id -> address from the pipe's HcED, and force host toggle to DATA0. */
+static u16 remapEndpointFeatureIndex(u16 index)
+{
+	UsbdEndpoint_t *target;
+	u16 hc;
+	u16 addr;
+
+	target = fetchEndpointById((int)index);
+	if ( !target || !target->m_hcEd )
+		return index;
+
+	hc = target->m_hcEd->m_hcArea.stru.m_hcArea;
+	addr = (hc >> 7) & 0x0F;
+	if ( hc & HCED_DIR_IN )
+		addr |= USB_DIR_IN;
+
+	/* Drop Halted + ToggleCarry (bits 0-1). DATA0 after ClearFeature(HALT). */
+	{
+		uiptr head = (uiptr)target->m_hcEd->m_tdHead;
+		target->m_hcEd->m_tdHead = (UsbdHcTD_t *)(head & ~(uiptr)0x3);
+	}
+
+	return addr;
 }
 
 int doControlTransfer(
@@ -120,6 +148,10 @@ int doControlTransfer(
 	{
 		dbg_printf("ERROR: doControlTransfer: IoReq busy\n");
 		return USB_RC_BUSY;
+	}
+	if ( ((requestType & 0x1F) == USB_RECIP_ENDPOINT) && (request == USB_REQ_CLEAR_FEATURE || request == USB_REQ_SET_FEATURE || request == USB_REQ_GET_STATUS) )
+	{
+		index = remapEndpointFeatureIndex(index);
 	}
 	req->m_devReq.requesttype = requestType;
 	req->m_devReq.request = request;
