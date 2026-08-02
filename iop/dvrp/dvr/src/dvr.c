@@ -64,7 +64,7 @@ extern int dvrioctl2_finish_auto_process(iomanX_iop_file_t *a1, const char *name
 extern int dvrioctl2_make_menu(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrioctl2_re_enc_start(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrioctl2_rec_pictclip(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrpAuthEnc(u16);
+extern int dvrpAuthEnc(u16 in_word);
 
 // The following has been excluded.
 unsigned char dvrpAuth_tbl[256] = {0x00};
@@ -1109,10 +1109,12 @@ int dvrioctl2_pre_update_a(
     (void)a1;
     (void)name;
     (void)cmd;
-    (void)arg;
-    (void)arglen;
     (void)buflen;
 
+    // Unofficial: fill in dvrpAuth_tbl if provided by argument
+    if (arglen >= sizeof(dvrpAuth_tbl)) {
+        memcpy(&dvrpAuth_tbl, arg, sizeof(dvrpAuth_tbl));
+    }
     cmdack.command = 0x2115;
     cmdack.input_word_count = 0;
     cmdackerr = DvrdrvExecCmdAck(&cmdack);
@@ -1455,9 +1457,9 @@ int dvrioctl2_re_enc_start(
     return 0;
 }
 
-int dvrpAuthEnc(u16 a1)
+int dvrpAuthEnc(u16 in_word)
 {
-    return (u8)dvrpAuth_tbl[(u8)a1] | ((u8)dvrpAuth_tbl[a1 >> 8] << 8);
+    return (u8)dvrpAuth_tbl[(u8)in_word] | ((u8)dvrpAuth_tbl[in_word >> 8] << 8);
 }
 
 int dvr_recv_dma(iomanX_iop_file_t *a1, u8 *buf, int buflen)
