@@ -40,8 +40,16 @@ extern apa_device_t hddDevices[];
 
 #ifdef APA_FORMAT_MAKE_PARTITIONS
 // TODO: For DVRP firmware 48-bit, __xdata and __xcontents partitions are created
+#ifndef APA_FORMAT_WIPE_COMMON_ONLY
 static const char *formatPartList[] = {
     "__net", "__system", "__sysconf", "__common", NULL};
+#endif
+#endif
+
+#ifdef APA_FORMAT_WIPE_COMMON_ONLY
+#define APA_WIPE_CHUNK_START (8 + 256)
+#else
+#define APA_WIPE_CHUNK_START 8
 #endif
 
 #ifndef APA_8MB_PARTITION_SIZE
@@ -340,7 +348,9 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
     // clear apa headers
     // TODO: Why does DVRP firmware start clearing at 1024 * 4104 when not 48-bit?
     // TODO: DVRP firmware 48-bit clears offset_24+0x2000, offset_24+0x42000, offset_24+0x242000
-    for (i = 1024 * 8; i < hddDevices[f->unit].totalLBA; i += (1024 * 256)) {
+    for (i = 1024 * APA_WIPE_CHUNK_START; i < hddDevices[f->unit].totalLBA; i += (1024 * 256)) {
+        // NOTE: XOSD variant traps on LBA 0 if __mbr detected:
+        // "hdd: <trap> __mbr will be unformated or destroyed."
         blkIoDmaTransfer(f->unit, clink->header, i, sizeof(apa_header_t) / 512,
                              BLKIO_DIR_WRITE);
     }
@@ -348,6 +358,7 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
     if ((rv = apaJournalReset(f->unit)) != 0)
         return rv;
 
+#ifndef APA_FORMAT_WIPE_COMMON_ONLY
     // set up mbr :)
     if ((clink = apaCacheGetHeader(f->unit, APA_SECTOR_MBR, APA_IO_MODE_WRITE, &rv))) {
         apa_header_t *header = clink->header;
@@ -393,6 +404,7 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
         hddDevices[f->unit].status = 0;
         hddDevices[f->unit].format = APA_MBR_VERSION;
     }
+#endif
     // TODO: DVRP firmware 48-bit creates __extend partition at offset_24_bit, with same params as __mbr except content is empty
 #ifdef APA_FORMAT_MAKE_PARTITIONS
     memset(&emptyBlocks, 0, sizeof(emptyBlocks));
@@ -403,6 +415,17 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
     // TODO: For DVRP firmware 48-bit, __xdata is created with size 1024 * 2048
     // TODO: For DVRP firmware 48-bit, __xcontents is created with size (offset_48_bit - offset_24_bit) - 0x240000 & 0xfffff7ff
     // add __net, __system....
+#ifdef APA_FORMAT_WIPE_COMMON_ONLY
+    memset(params.id, 0, sizeof(params.id));
+    strcpy(params.id, "__sysconf");
+    if ( !(clink = apaFindPartition(f->unit, params.id, &rv)) )
+        return rv;
+    apaCacheFree(clink);
+    memset(params.id, 0, APA_IDMAX);
+    strcpy(params.id, "__common");
+    if ( !hddAddPartitionHere(f->unit, &params, emptyBlocks, clink->sector, &rv) )
+        return rv;
+#else
     for (i = 0; formatPartList[i]; i++) {
         memset(params.id, 0, APA_IDMAX);
         strcpy(params.id, formatPartList[i]);
@@ -414,6 +437,7 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
         if (hddDevices[f->unit].partitionMaxSize < params.size)
             params.size = hddDevices[f->unit].partitionMaxSize;
     }
+#endif
 #endif
     return rv;
 }
