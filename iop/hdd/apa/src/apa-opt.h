@@ -25,6 +25,7 @@
 #ifdef APA_XOSD_VER
 #define APA_OSD_VER
 #define APA_SUPPORT_BHDD
+#define APA_FORMAT_WIPE_COMMON_ONLY
 #endif
 
 #ifdef APA_OSD_VER
