@@ -1026,12 +1026,14 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
     USE_SPD_REGS;
     int res = 0, retries;
     u16 sector, lcyl, hcyl, select, command, len;
+    u32 chunk;
 
     while (res == 0 && nsectors > 0) {
 
         if (atad_devinfo[device].lba48 && (ata_dvrp_workaround ? (lba >= atad_devinfo[device].total_sectors) : 1)) {
             /* Setup for 48-bit LBA.  */
-            len = (u16)((nsectors > 65536) ? 65536 : nsectors); /* 0 means 65536 in LBA48 */
+            chunk = (nsectors > 65536) ? 65536 : nsectors;
+            len   = (u16)chunk; /* 0 means 65536 in the LBA48 sector count register. */
 
             /* Combine bits 24-31 and bits 0-7 of lba into sector.  */
             sector = ((lba >> 16) & 0xff00) | (lba & 0xff);
@@ -1043,7 +1045,8 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
             command = (dir == 1) ? ATA_C_WRITE_DMA_EXT : ATA_C_READ_DMA_EXT;
         } else {
             /* Setup for 28-bit LBA.  */
-            len    = (nsectors > 256) ? 256 : nsectors;
+            chunk  = (nsectors > 256) ? 256 : nsectors;
+            len    = (u16)chunk;
             sector = lba & 0xff;
             lcyl   = (lba >> 8) & 0xff;
             hcyl   = (lba >> 16) & 0xff;
@@ -1062,7 +1065,7 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
 #endif
 #endif
 
-            if ((res = sceAtaExecCmd(buf, len, 0, len, sector, lcyl, hcyl, select, command)) != 0)
+            if ((res = sceAtaExecCmd(buf, chunk, 0, len, sector, lcyl, hcyl, select, command)) != 0)
                 break;
 
 #ifdef ATA_USE_DEV9
@@ -1084,9 +1087,9 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
                 break;
         }
 
-        buf = (void *)((u8 *)buf + len * 512);
-        lba += len;
-        nsectors -= len;
+        buf = (void *)((u8 *)buf + chunk * 512);
+        lba += chunk;
+        nsectors -= chunk;
     }
 
     return res;
