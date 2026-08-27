@@ -293,8 +293,16 @@ int _start(int argc, char *argv[])
         The problem is obviously in the DVRP's firmware, but we currently have no way to fix these bugs because the DVRP is even more heavily secured that the IOP.
         In the eyes of Sony, there isn't a problem because none of their retail PlayStation 2 software ever supported 48-bit LBA.
 
-        The workaround here is to return the 28-bit LBA as the total size and only use 48-bit LBA commands when required. */
+        The workaround here is to return the 28-bit LBA as the total size and only use 48-bit LBA commands when required.
+
+        Some third-party/clone network adaptors assert SPD_CAPS_DVR even though they are not DVRP-based and
+        handle 48-bit LBA addressing correctly. On such targets the workaround wrongly truncates the reported
+        capacity to 28-bit LBA (128GiB), so builds for those adaptors can opt out with ATA_DISABLE_DVRP_WORKAROUND. */
+#ifdef ATA_DISABLE_DVRP_WORKAROUND
+    ata_dvrp_workaround = 0;
+#else
     ata_dvrp_workaround = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR) ? 1 : 0;
+#endif
 #endif
 
 #ifdef ATA_USE_AIFDEV9
