@@ -311,11 +311,12 @@ int _start(int argc, char *argv[])
         Official adaptors appear to have a 0x0001 set for this register, but not compatibles.
         While official I/O to this register are 8-bit, some compatibles have a 0x01 for the lower 8-bits,
         but the upper 8-bits contain some random value. Hence perform a 16-bit read instead. */
-    if (SPD_REG16(0x20) != 1) {
-        ata_gamestar_workaround = 1;
+    ata_gamestar_workaround = (SPD_REG16(0x20) != 1) ? 1 : 0;
+    if (ata_gamestar_workaround) {
         M_PRINTF("Compatible adaptor detected.\n");
-    } else {
-        ata_gamestar_workaround = 0;
+        /* Reportedly, some compatible adapters output more than SPD_CAPS_SMAP | SPD_CAPS_ATA | SPD_CAPS_UART in the SPD_R_REV_3 register. */
+        /* https://github.com/regttycomit/PS2_CXD9731_HDD_ADAPTOR/blob/7a6d058019f932eb701ced3bddca6c7eda498b50/hdl/chip.v#L506 */
+        ata_dvrp_workaround = 0;
     }
 #endif
 #endif
