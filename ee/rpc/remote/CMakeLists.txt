@@ -1,0 +1,6 @@
+add_library(remote)
+target_include_directories(remote PUBLIC include)
+target_include_directories(remote PRIVATE ${EE_INC})
+target_sources(remote PRIVATE src/librm.c src/erl-support.c)
+install(TARGETS remote)
+target_add_erl(remote)

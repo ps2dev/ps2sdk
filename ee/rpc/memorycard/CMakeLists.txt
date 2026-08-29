@@ -1,0 +1,6 @@
+add_library(memorycard)
+target_include_directories(memorycard PUBLIC include)
+target_include_directories(memorycard PRIVATE ${EE_INC})
+target_sources(memorycard PRIVATE src/libmc.c src/erl-support.c)
+install(TARGETS memorycard)
+target_add_erl(memorycard)
