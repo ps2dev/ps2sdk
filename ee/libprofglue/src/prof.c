@@ -245,3 +245,46 @@ void __mcount(unsigned int frompc, unsigned int selfpc)
         arc->count++;
     }
 }
+
+__asm__
+(
+    "\t" ".set push" "\n"
+    "\t" ".set noreorder" "\n"
+    "\t" ".set noat" "\n"
+
+    "\t" ".global _mcount" "\n"
+    "\t" ".ent _mcount" "\n"
+
+    "\t" "_mcount:" "\n"
+
+    // Generated code already substracts 8 bytes
+    // We store our ra, at and a0-a3
+    "\t" "\t" "daddiu $sp, $sp, -56" "\n" // Adjust stack pointer for 64-bit registers, 7 registers * 8 bytes each
+    "\t" "\t" "sd   $ra, 0($sp)" "\n" // store ra
+    "\t" "\t" "sd   $at, 8($sp)" "\n" // at = ra of caller
+    "\t" "\t" "sd   $a0, 16($sp)" "\n"
+    "\t" "\t" "sd   $a1, 24($sp)" "\n"
+    "\t" "\t" "sd   $a2, 32($sp)" "\n"
+    "\t" "\t" "sd   $a3, 40($sp)" "\n"
+
+    // Call internal C handler
+    "\t" "\t" "move $a0, $at" "\n"
+    "\t" "\t" "move $a1, $ra" "\n"
+    "\t" "\t" "jal  __mcount" "\n"
+    "\t" "\t" "nop" "\n"
+
+    // Restore registers
+    "\t" "\t" "ld   $ra, 0($sp)" "\n"
+    "\t" "\t" "ld   $at, 8($sp)" "\n"
+    "\t" "\t" "ld   $a0, 16($sp)" "\n"
+    "\t" "\t" "ld   $a1, 24($sp)" "\n"
+    "\t" "\t" "ld   $a2, 32($sp)" "\n"
+    "\t" "\t" "ld   $a3, 40($sp)" "\n"
+    "\t" "\t" "daddiu $sp, $sp, 56" "\n" // Adjust stack pointer back
+    "\t" "\t" "jr   $ra" "\n"
+    "\t" "\t" "move $ra, $at" "\n" // restore caller's ra
+
+    "\t" ".end _mcount" "\n"
+
+    "\t" ".set pop" "\n"
+);
