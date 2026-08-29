@@ -57,6 +57,21 @@ extern int sbv_patch_user_mem_clear(void *start);
  *   2. The RPC dispatcher code for remove() has a missing break, resulting in mkdir() being called after remove() returns.
  */
 extern int sbv_patch_fileio(void);
+/**
+ * @param iop_reset_addr address of RESET-headered ROMDIR block in IOP memory
+ * @param romdir_size size of ROMDIR block in IOP memory
+ * @return 0: success, none-zero: error
+ *
+ * Patches data inside ROMDRV to point to an arbritary RESET image in memory.
+ * This avoids requiring code patches, such as those done for the following:
+ * * LoadModuleBuffer enable patch
+ * * Disable prefix check patch
+ * As a result, it is compatible with ROMDRV found in the following:
+ * * SDK 1.3 (protokernel)
+ * * SDK 1.6 (most systems)
+ * * SDK 3.1.0 (last SDK, flashable in ROM on DTL-T)
+ */
+extern int sbv_patch_romdrv_set_rom1_info(void *iop_reset_addr, int romdir_size);
 
 #ifdef __cplusplus
 }
