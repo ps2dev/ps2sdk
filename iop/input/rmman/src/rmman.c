@@ -513,12 +513,10 @@ static int PollRemote(struct RmData *RmData)
 		return 0;
 	}
 #ifdef BUILDING_RMMANX
-	RmData->outBuffer[0] = rmbuf[0];
-	for (i = 1; i < 5; i += 1)
+	for (i = 0; i < 5; i += 1)
 	{
-		RmData->outBuffer[i] = rmbuf[(i - 1) * 2];
+		RmData->outBuffer[i] = rmbuf[i * 2];
 	}
-	RmData->outBuffer[4] = rmbuf[8];
 #else
 	for (i = 0; i < 4; i += 1)
 	{
