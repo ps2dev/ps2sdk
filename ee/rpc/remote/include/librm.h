@@ -98,9 +98,9 @@ struct remote_data
 /** @{ */
 #define RM_PS2_POWER     0x0050D1DA /* 21 */
 #define RM_PS2_EJECT     0x0060D1DA
-#define RM_PS2_RESET     0x0070D1DA
 #define RM_PS2_POWERON   0x00E0D2DA /* 46 */
 #define RM_PS2_POWEROFF  0x00F0D2DA
+#define RM_PS2_RESET     0x0010D7DA
 #define RM_PS2_NOLIGHT   0x0050D7DA
 /** @}*/
 
