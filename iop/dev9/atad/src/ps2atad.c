@@ -1291,6 +1291,16 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
            either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
         devinfo[i].lba48 = (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400) != 0;
 
+        /* Check for "PS2LBA48" magic in reserved words 121-124 */
+        if (ata_dvrp_workaround &&
+            ata_param[121] == 0x4456 &&
+            ata_param[122] == 0x524c &&
+            ata_param[123] == 0x4241 &&
+            ata_param[124] == 0x3438) {
+            M_PRINTF("LBA48-capable DVRP firmware detected, disabling the workaround\n");
+            ata_dvrp_workaround = 0;
+        }
+
         /* Save the total sector counts before we overwrite ata_param with the value of Sony identify drive command. */
         total_sectors_nonlba48 = (ata_param[ATA_ID_SECTOTAL_HI] << 16) | ata_param[ATA_ID_SECTOTAL_LO];
         if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
