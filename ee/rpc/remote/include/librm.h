@@ -22,6 +22,7 @@ struct remote_data
 {
     u32 status;
     u32 button;
+    u32 front_button;
 };
 
 /**
@@ -199,12 +200,32 @@ struct remote_data
 #define RM_DESR_FLASH_FORW 0x0050D793
 /** @} */
 
+/** @name Additional DESR remote commands that Dragon or DVRP responds to
+ */
+/** @{ */
+#define RM_DESR_DVRP_UNK  0x00E0D493
+#define RM_DESR_POWER_ON  0x00E0D293
+#define RM_DESR_POWER_OFF 0x00F0D293
+#define RM_DESR_NOLIGHT   0x00F0D793
+/** @} */
+
 /** @name Different modes depending on the switch for RMT-Pxxx
  */
 /** @{ */
 #define RM_DESR_MODE_1 0x00000093
 #define RM_DESR_MODE_2 0x0000009B
 #define RM_DESR_MODE_3 0x000000A3
+/** @} */
+
+/** @name Definitions for front buttons on DESR
+ */
+/** @{ */
+#define RM_DESR_FB_HOME  0x00000001
+#define RM_DESR_FB_UP    0x00000002
+#define RM_DESR_FB_DOWN  0x00000003
+#define RM_DESR_FB_LEFT  0x00000004
+#define RM_DESR_FB_RIGHT 0x00000005
+#define RM_DESR_FB_ENTER 0x00000006
 /** @} */
 
 /** @name Additional BD remote commands (from RMT-B119A)
