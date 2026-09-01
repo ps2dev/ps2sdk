@@ -28,7 +28,7 @@ static u64 nanosleep_wakeup_callback(s32 alarm_id, u64 scheduled_time, u64 actua
 	(void)actual_time;
 	(void)pc_value;
 
-	iSignalSema((s32)arg);
+	iWakeupThread((s32)arg);
 	ExitHandler();
 	return 0;
 }
@@ -36,9 +36,8 @@ static u64 nanosleep_wakeup_callback(s32 alarm_id, u64 scheduled_time, u64 actua
 int nanosleep(const struct timespec *req, struct timespec *rem)
 {
 	u32 eie;
-	s32 sema_id;
+	volatile s32 thread_id;
 	s32 timer_alarm_id;
-	ee_sema_t sema;
 
 	eie = get_mips_cop_reg(0, COP0_REG_Status);
 	if ((eie & 0x10000) == 0)
@@ -46,25 +45,16 @@ int nanosleep(const struct timespec *req, struct timespec *rem)
 		errno = ENOSYS;  // Functionality not available
         return -1;
 	}
-	sema.max_count = 1;
-	sema.option = (u32)"nanosleep";
-	sema.init_count = 0;
-	sema_id = CreateSema(&sema);
-	if (sema_id < 0)
-	{
-		errno = EAGAIN;  // Resource temporarily unavailable
-        return -1;
-	}
-	timer_alarm_id = SetTimerAlarm(Sec2TimerBusClock(req->tv_sec) + NSec2TimerBusClock(req->tv_nsec), nanosleep_wakeup_callback, (void *)sema_id);
+	thread_id = GetThreadId();
+	timer_alarm_id = SetTimerAlarm(Sec2TimerBusClock(req->tv_sec) + NSec2TimerBusClock(req->tv_nsec), nanosleep_wakeup_callback, (void *)thread_id);
 	if (timer_alarm_id < 0)
 	{
-		DeleteSema(sema_id);
+		thread_id = -1;
 		errno = EAGAIN;  // Resource temporarily unavailable
         return -1;
 	}
-	WaitSema(sema_id);
-	DeleteSema(sema_id);
-
+	SleepThread();
+	thread_id = -1;
     if (rem != NULL)
     {
         rem->tv_sec = 0;

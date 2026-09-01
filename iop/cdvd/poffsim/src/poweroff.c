@@ -17,7 +17,7 @@ struct poffemu_param_stru
 	int m_cdvdman_intr_efid;
 	void (*m_cdvdman_poff_cb)(void *arg);
 	void *m_cdvdman_poffarg;
-	int m_sema_id;
+	int m_thread_id;
 };
 
 static struct poffemu_param_stru sCdPtbl;
@@ -32,25 +32,21 @@ static unsigned int _sceCdPoffEmu(void *userdata)
 	iSetEventFlag(arg->m_cdvdman_intr_efid, 0x10);
 	if ( arg->m_cdvdman_poff_cb )
 		arg->m_cdvdman_poff_cb(arg->m_cdvdman_poffarg);
-	iSignalSema(arg->m_sema_id);
+	iWakeupThread(arg->m_thread_id);
 	return 0;
 }
 
 int _start(int ac, char **av)
 {
 	int unusedval;
-	iop_sema_t semaparam;
 	// Unofficial: the following variable has been made local stack
 	iop_sys_clock_t sCdPoff_time;
 
 	(void)ac;
 	(void)av;
 
-	semaparam.attr = 1;
-	semaparam.initial = 0;
-	semaparam.max = 1;
-	semaparam.option = 0;
-	sCdPtbl.m_sema_id = CreateSema(&semaparam);
+	// Unofficial: Use GetThreadId/iWakeupThread/SleepThread instead of CreateSema/iSignalSema/WaitSema
+	sCdPtbl.m_thread_id = GetThreadId();
 	sCdPtbl.m_cdvdman_intr_efid = sceCdSC(0xFFFFFFF5, &unusedval);
 	sCdPtbl.m_cdvdman_poff_cb = 0;
 	if ( (unsigned int)sceCdSC(0xFFFFFFF7, &unusedval) < 0x222 )
@@ -64,7 +60,7 @@ int _start(int ac, char **av)
 	sCdPoff_time.hi = 0;
 	sCdPoff_time.lo = 0x90000;
 	SetAlarm(&sCdPoff_time, _sceCdPoffEmu, &sCdPtbl);
-	WaitSema(sCdPtbl.m_sema_id);
-	DeleteSema(sCdPtbl.m_sema_id);
+	SleepThread();
+	sCdPtbl.m_thread_id = -1;
 	return 1;
 }
