@@ -321,17 +321,10 @@ void RMMan_Read(int port, int slot, struct remote_data *data)
 
     if (rmman_type == 2)
     {
-        int status;
-        int button;
-        status = RM_READY;
-        button = 0;
-        if (pdata->data[0] == 0x14)
-        {
-            status = RM_KEYPRESSED;
-            button = pdata->data[1] | (pdata->data[2] << 8) | (pdata->data[3] << 16);
-        }
-        data->status = status;
-        data->button = button;
+        data->status = (pdata->data[0] == 0x14) ? RM_KEYPRESSED : RM_READY;
+        data->button = (data->status == RM_KEYPRESSED) ? (pdata->data[1] | (pdata->data[2] << 8) | ((pdata->data[3] & ~7) << 16)) : 0;
+        /* rmman2 bitwise ORs into the unused four bits, while rmmanx separates it out into tne next element */
+        data->front_button = (pdata->data[3] & 7) | pdata->data[4];
     }
     else
     {
