@@ -59,11 +59,17 @@ extern int dvrioctl2_set_dv_nodeid(iomanX_iop_file_t *a1, int cmd, void *arg, un
 extern int dvrioctl2_get_dv_nodeid(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrioctl2_diag_test(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 
+#ifdef DVRMISC_CFW_EXTENSIONS
+extern int dvrioctl2_cfw_ping(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_cfw_get_max_lba48(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_cfw_mem_peek_poke(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+#endif
+
 struct DevctlCmdTbl_t
 {
     u16 cmd;
     int (*fn)(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-} DevctlCmdTbl[25] =
+} DevctlCmdTbl[] =
     {
         {0x5668, &dvrioctl2_get_sircs},
         {0x5666, &dvrioctl2_led_hdd_rec},
@@ -90,6 +96,12 @@ struct DevctlCmdTbl_t
         {0x567A, &dvrioctl2_set_dv_nodeid},
         {0x567B, &dvrioctl2_get_dv_nodeid},
         {0x5682, &dvrioctl2_diag_test},
+#ifdef DVRMISC_CFW_EXTENSIONS
+        {0x5690, &dvrioctl2_cfw_ping},
+        {0x5691, &dvrioctl2_cfw_get_max_lba48},
+        {0x5692, &dvrioctl2_cfw_mem_peek_poke},
+#endif
+
 };
 
 IOMANX_RETURN_VALUE_IMPL(EUNSUP);
@@ -1406,3 +1418,100 @@ int dvrioctl2_diag_test(
     DPRINTF("\n");
     return 0;
 }
+
+#ifdef DVRMISC_CFW_EXTENSIONS
+int dvrioctl2_cfw_ping(
+    iomanX_iop_file_t *a1,
+    int cmd,
+    void *arg,
+    unsigned int arglen,
+    void *buf,
+    unsigned int buflen)
+{
+    drvdrv_exec_cmd_ack cmdack;
+
+    cmdack.command = 0x5130;
+    cmdack.input_word_count = 0;
+    if (DvrdrvExecCmdAck(&cmdack)) {
+        DPRINTF("dvrioctl2_cfw_ping -> Handshake error!\n");
+        return -EIO;
+    } else {
+        if (cmdack.ack_status_ack) {
+            DPRINTF("dvrioctl2_cfw_ping -> Status error!\n");
+            return (int)(s16)cmdack.ack_status_ack;
+        }
+    }
+    return 0;
+}
+
+int dvrioctl2_cfw_get_max_lba48(
+    iomanX_iop_file_t *a1,
+    int cmd,
+    void *arg,
+    unsigned int arglen,
+    void *buf,
+    unsigned int buflen)
+{
+    drvdrv_exec_cmd_ack cmdack;
+
+    if ((arglen < 2) || (buflen < 10)) {
+        DPRINTF("dvrioctl2_cfw_get_max_lba48 -> invalid buffer length!\n");
+        return -EINVAL;
+    }
+
+    cmdack.command = 0x5131;
+    cmdack.input_word[0] = *(u16 *)arg;
+    cmdack.input_word_count = 1;
+    if (DvrdrvExecCmdAck(&cmdack)) {
+        DPRINTF("dvrioctl2_cfw_get_max_lba48 -> Handshake error!\n");
+        return -EIO;
+    } else if (cmdack.ack_status_ack) {
+        return (int)(s16)cmdack.ack_status_ack;
+    } else {
+        *(u16 *)buf = cmdack.output_word[0];
+        *((u16 *)buf + 1) = cmdack.output_word[1];
+        *((u16 *)buf + 2) = cmdack.output_word[2];
+        *((u16 *)buf + 3) = cmdack.output_word[3];
+    }
+    return 0;
+}
+
+int dvrioctl2_cfw_mem_peek_poke(
+    iomanX_iop_file_t *a1,
+    int cmd,
+    void *arg,
+    unsigned int arglen,
+    void *buf,
+    unsigned int buflen)
+{
+    drvdrv_exec_cmd_ack cmdack;
+
+    if ((arglen < 14) || (buflen < 10)) {
+        DPRINTF("dvrioctl2_cfw_mem_peek_poke -> invalid buffer length!\n");
+        return -EINVAL;
+    }
+
+    cmdack.command = 0x5132;
+    cmdack.input_word[0] = *(u16 *)arg;
+    cmdack.input_word[1] = *((u16 *)arg + 1);
+    cmdack.input_word[2] = *((u16 *)arg + 2);
+    cmdack.input_word[3] = *((u16 *)arg + 3);
+    cmdack.input_word[4] = *((u16 *)arg + 4);
+    cmdack.input_word[5] = *((u16 *)arg + 5);
+    cmdack.input_word[6] = *((u16 *)arg + 6);
+    cmdack.input_word_count = 7;
+    if (DvrdrvExecCmdAck(&cmdack)) {
+        DPRINTF("dvrioctl2_cfw_mem_peek_poke -> Handshake error!\n");
+        return -EIO;
+    } else if (cmdack.ack_status_ack) {
+        DPRINTF("dvrioctl2_cfw_mem_peek_poke -> Status error!\n");
+        return (int)(s16)cmdack.ack_status_ack;
+    } else {
+        *(u16 *)buf = cmdack.output_word[0];
+        *((u16 *)buf + 1) = cmdack.output_word[1];
+        *((u16 *)buf + 2) = cmdack.output_word[2];
+        *((u16 *)buf + 3) = cmdack.output_word[3];
+    }
+    return 0;
+}
+#endif
