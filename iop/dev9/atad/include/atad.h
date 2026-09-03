@@ -72,7 +72,9 @@ extern int sceAtaSmartSaveAttr(int device);
 extern int sceAtaFlushCache(int device);
 extern int sceAtaIdleImmediate(int device);
 
+/* Unofficial APIs follow. */
 extern int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir);
+extern int ata_set_command_type(int command, int type);
 
 #define atad_IMPORTS_start DECLARE_IMPORT_TABLE(atad, 1, 3)
 #define atad_IMPORTS_end   END_IMPORT_TABLE
@@ -93,6 +95,7 @@ extern int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, 
 #define I_sceAtaFlushCache                DECLARE_IMPORT(17, sceAtaFlushCache)
 #define I_sceAtaIdleImmediate             DECLARE_IMPORT(18, sceAtaIdleImmediate)
 #define I_ata_device_sector_io64          DECLARE_IMPORT(19, ata_device_sector_io64)
+#define I_ata_set_command_type            DECLARE_IMPORT(20, ata_set_command_type)
 
 // Backward-compatibility definitions
 #define ata_get_devinfo sceAtaInit
