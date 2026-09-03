@@ -1,0 +1,7 @@
+<map id="Packet2 library" name="Packet2 library">
+<area shape="rect" id="node1" href="$group__packet2__types.html" title="Structures and enums used in libpacket2." alt="" coords="172,5,231,31"/>
+<area shape="rect" id="node2" href="$group__packet2__chain.html" title="Chain mode related functions of libpacket2." alt="" coords="172,55,231,80"/>
+<area shape="rect" id="node3" href="$group__packet2__vif.html" title="VIF related functions of libpacket2." alt="" coords="180,104,223,129"/>
+<area shape="rect" id="node4" title="Successor of packet_t. Main goal of this library is to create simple API for packet management...." alt="" coords="5,80,124,105"/>
+<area shape="rect" id="node5" href="$group__packet2__utils.html" title="Useful functions and examples for libpacket2." alt="" coords="175,153,227,179"/>
+</map>

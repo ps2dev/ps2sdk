@@ -1,0 +1,28 @@
+var structthread =
+[
+    [ "tag", "structthread.html#aed34b06f981d0cde170eb6093bde1525", null ],
+    [ "queue", "structthread.html#acffb6a92b6aea09c2ab0a35d8e772a59", null ],
+    [ "status", "structthread.html#a5b07e4558d9f14a57952bc72a3f6d3d2", null ],
+    [ "priority", "structthread.html#af00e4e7c8ebee50d1daebe5bf3821348", null ],
+    [ "saved_regs", "structthread.html#aa071b5889fa4844ac32660a912352207", null ],
+    [ "unk14", "structthread.html#af5ce0fd400e393c5c2045bc2b995667e", null ],
+    [ "unk18", "structthread.html#a244fe1caab7b9e9de077ddd53d997a3d", null ],
+    [ "wait_type", "structthread.html#a364d1d85588b9a446ab0ca87d2ff33bb", null ],
+    [ "wakeup_count", "structthread.html#a6bf5951464cf9221758eef9a535ef9f8", null ],
+    [ "thread_list", "structthread.html#a8e5b12aa09550013fbdee7153535b798", null ],
+    [ "event_bits", "structthread.html#ac7e9acb1b5419eafc1a78dc46c586f8d", null ],
+    [ "event_mode", "structthread.html#a7d9e17471f24943de82c0ad92be358d9", null ],
+    [ "init_priority", "structthread.html#a254b63bb61cc555fffa269e2195fd71e", null ],
+    [ "run_clocks_hi", "structthread.html#a8f31127c43a68736bc17507829ab3fd6", null ],
+    [ "run_clocks_lo", "structthread.html#aef90b7d81c715fae92f7493bd3cc75d4", null ],
+    [ "entry", "structthread.html#a63da05495f248726440a94da038bef85", null ],
+    [ "stack_top", "structthread.html#a7764fb6d141353cbca2d78e9101d9ede", null ],
+    [ "stack_size", "structthread.html#ac34ddd6dda9bd5b6d2dc1eec691bd78a", null ],
+    [ "gp", "structthread.html#ae6fbaa61d0d26dad748421e32e93e2d5", null ],
+    [ "attr", "structthread.html#ad58df8834e5a86d9b54dfd228d0140cf", null ],
+    [ "option", "structthread.html#a6eda85c1c26957c39c10ec39b3c04c8d", null ],
+    [ "reason_counter", "structthread.html#a23ebe4450fe86b3b228a77cc3594be45", null ],
+    [ "irq_preemption_count", "structthread.html#a4069acd2aad2b45eda4c9d9d993f6a49", null ],
+    [ "thread_preemption_count", "structthread.html#aad3a10dcb78c64437d437d5e16d88f8c", null ],
+    [ "release_count", "structthread.html#aba0087f5187aa8e68a08e89f7ba33912", null ]
+];

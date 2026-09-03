@@ -1,0 +1,6 @@
+<map id="_elf_proghead" name="_elf_proghead">
+<area shape="rect" id="node1" title=" " alt="" coords="29,187,144,213"/>
+<area shape="rect" id="node2" href="$struct___elf32___phdr.html" title=" " alt="" coords="5,96,104,123"/>
+<area shape="rect" id="node3" href="$struct__elf__section.html" title=" " alt="" coords="129,96,229,123"/>
+<area shape="rect" id="node4" href="$struct___elf32___shdr.html" title=" " alt="" coords="129,5,228,32"/>
+</map>

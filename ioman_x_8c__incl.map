@@ -1,0 +1,22 @@
+<map id="iop/system/iomanx/src/iomanX.c" name="iop/system/iomanx/src/iomanX.c">
+<area shape="rect" id="node1" title=" " alt="" coords="203,5,374,47"/>
+<area shape="rect" id="node2" href="$string_8h_source.html" title=" " alt="" coords="168,95,239,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,244,76,271"/>
+<area shape="rect" id="node9" title=" " alt="" coords="322,244,397,271"/>
+<area shape="rect" id="node12" href="$intrman_8h.html" title=" " alt="" coords="42,169,127,196"/>
+<area shape="rect" id="node13" href="$stdio_8h.html" title=" " alt="" coords="255,169,322,196"/>
+<area shape="rect" id="node14" href="$ioman_x_8h.html" title=" " alt="" coords="397,169,481,196"/>
+<area shape="rect" id="node20" href="$errno_8h.html" title=" " alt="" coords="448,95,516,121"/>
+<area shape="rect" id="node3" href="$sysclib_8h.html" title=" " alt="" coords="152,169,231,196"/>
+<area shape="rect" id="node5" href="$irx_8h.html" title=" " alt="" coords="101,244,151,271"/>
+<area shape="rect" id="node10" href="$setjmp_8h.html" title=" " alt="" coords="168,319,247,345"/>
+<area shape="rect" id="node11" href="$ctype_8h.html" title=" " alt="" coords="227,244,297,271"/>
+<area shape="rect" id="node6" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="73,319,144,345"/>
+<area shape="rect" id="node7" title=" " alt="" coords="61,393,135,420"/>
+<area shape="rect" id="node8" href="$tamtypes_8h.html" title=" " alt="" coords="159,393,255,420"/>
+<area shape="rect" id="node15" href="$io__common_8h.html" title=" " alt="" coords="532,244,643,271"/>
+<area shape="rect" id="node18" href="$iox__stat_8h.html" title=" " alt="" coords="421,244,508,271"/>
+<area shape="rect" id="node16" href="$sys_2fcntl_8h_source.html" title=" " alt="" coords="539,319,628,345"/>
+<area shape="rect" id="node17" href="$unistd_8h_source.html" title=" " alt="" coords="652,319,752,345"/>
+<area shape="rect" id="node19" href="$time_8h.html" title=" " alt="" coords="419,319,510,345"/>
+</map>

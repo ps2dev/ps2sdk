@@ -1,0 +1,25 @@
+var usbdpriv_8h_struct__ohci_regs =
+[
+    [ "HcRevision", "usbdpriv_8h.html#a59d6e56f561f0619ff67a32210f7449b", null ],
+    [ "HcControl", "usbdpriv_8h.html#ad1015c232a1c3d60a46087de27a87885", null ],
+    [ "HcCommandStatus", "usbdpriv_8h.html#ad57431e9a1b01177bcf436d4f838e90f", null ],
+    [ "HcInterruptStatus", "usbdpriv_8h.html#a6884b005811a3f858f976bbfe94bddc2", null ],
+    [ "HcInterruptEnable", "usbdpriv_8h.html#a9994d74537deb209f218eb63115d0374", null ],
+    [ "HcInterruptDisable", "usbdpriv_8h.html#a9f233a37d7dbf336f72f3f6fc7d2b270", null ],
+    [ "HcHCCA", "usbdpriv_8h.html#ad03137f07706cf37adc63b616d92159f", null ],
+    [ "HcPeriodCurrentEd", "usbdpriv_8h.html#ae88433405675cbf10b8b0cf7e7d14fb1", null ],
+    [ "HcControlHeadEd", "usbdpriv_8h.html#a86ce88b7ec450ee9a3337e04c91b398c", null ],
+    [ "HcControlCurrentEd", "usbdpriv_8h.html#a1ff127ded90b7aecd7524b2181f9584b", null ],
+    [ "HcBulkHeadEd", "usbdpriv_8h.html#a33557041ddf7359a033d2d783c7ba6e5", null ],
+    [ "HcBulkCurrentEd", "usbdpriv_8h.html#a7a164a880028daff0d9fbfd45a702c4a", null ],
+    [ "HcDoneHead", "usbdpriv_8h.html#af083b501e95229240c05120453b85bdf", null ],
+    [ "HcFmInterval", "usbdpriv_8h.html#a3baca9398f018446fcdb3a63adf388b9", null ],
+    [ "HcFmRemaining", "usbdpriv_8h.html#a75b6f7c4ff498edad7b8493dc67c7224", null ],
+    [ "HcFmNumber", "usbdpriv_8h.html#a3c0dea182b2eaefe9f995413cb0df356", null ],
+    [ "HcPeriodicStart", "usbdpriv_8h.html#acc131b6e4f043f12995a1e8d1504f653", null ],
+    [ "HcLsThreshold", "usbdpriv_8h.html#abd864324b7777788f2fd919ee1d6216b", null ],
+    [ "HcRhDescriptorA", "usbdpriv_8h.html#a4a0c9e8829350e10e36472f3706c0f8f", null ],
+    [ "HcRhDescriptorB", "usbdpriv_8h.html#a35f83485309861c03608a49dd9f00272", null ],
+    [ "HcRhStatus", "usbdpriv_8h.html#aebbb89031ca3a81aa5c17a783719366d", null ],
+    [ "HcRhPortStatus", "usbdpriv_8h.html#af40bb5ff9d29eaecf7b85561574962e5", null ]
+];

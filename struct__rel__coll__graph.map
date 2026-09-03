@@ -1,0 +1,8 @@
+<map id="_rel" name="_rel">
+<area shape="rect" id="node1" title=" " alt="" coords="118,276,165,303"/>
+<area shape="rect" id="node2" href="$struct__syment.html" title=" " alt="" coords="47,187,126,213"/>
+<area shape="rect" id="node3" href="$struct___elf32___sym.html" title=" " alt="" coords="5,96,104,123"/>
+<area shape="rect" id="node4" href="$struct__elf__section.html" title=" " alt="" coords="129,96,229,123"/>
+<area shape="rect" id="node5" href="$struct___elf32___shdr.html" title=" " alt="" coords="129,5,228,32"/>
+<area shape="rect" id="node6" href="$struct___elf32___rel.html" title=" " alt="" coords="151,187,241,213"/>
+</map>

@@ -1,0 +1,28 @@
+var pad_misc_funcs_8c =
+[
+    [ "DeleteThreadsEventFlag", "pad_misc_funcs_8c.html#ae81eed156bd5390655d016eaa97f7a2d", null ],
+    [ "padEnd", "pad_misc_funcs_8c.html#a989b3a2f0e92bd304bbcbdefbd79c9ee", null ],
+    [ "padPortClose", "pad_misc_funcs_8c.html#ac610f2e2ffb326eef046cbc4640d8cb3", null ],
+    [ "padSetMainMode", "pad_misc_funcs_8c.html#a0889f31b37bdb2db7b0aa946cf0e4a06", null ],
+    [ "padInfoAct", "pad_misc_funcs_8c.html#a518556b37f4bdec342714031dac6a988", null ],
+    [ "padInfoComb", "pad_misc_funcs_8c.html#a691f8a7b6e8dbac5a69d98bf6821fbfe", null ],
+    [ "padInfoMode", "pad_misc_funcs_8c.html#a2ae00357436380b0df639bccfac323d3", null ],
+    [ "ActDirectTotal", "pad_misc_funcs_8c.html#a10100c8ed861062d9c86dd1534d14f87", null ],
+    [ "CheckAirDirectTotal", "pad_misc_funcs_8c.html#a2c5206228b4da53cf5920a99eca98f97", null ],
+    [ "padSetActDirect", "pad_misc_funcs_8c.html#ad9a40abeba1492aebef2f7b89a8e8293", null ],
+    [ "padSetActAlign", "pad_misc_funcs_8c.html#a1b9ff160b3889933c26532312e5ae244", null ],
+    [ "padGetButtonMask", "pad_misc_funcs_8c.html#a122c04f21c8f98816eeb20deedfe17a4", null ],
+    [ "padSetButtonInfo", "pad_misc_funcs_8c.html#aa94f18f990d167626484f7b52c0c11d7", null ],
+    [ "padSetVrefParam", "pad_misc_funcs_8c.html#ac34311c00e26c408dfa95c2ad41502b9", null ],
+    [ "padGetPortMax", "pad_misc_funcs_8c.html#a9e588caf6361bfcc99f8b74e5b3e4b5a", null ],
+    [ "padGetSlotMax", "pad_misc_funcs_8c.html#ababb22fdb9c10afc537eebace9aaf300", null ],
+    [ "padGetModVersion", "pad_misc_funcs_8c.html#a68717f8f7f13721f1d4f1203c1f6580c", null ],
+    [ "padGetInBuffer", "pad_misc_funcs_8c.html#a9706e429ba16269cd6f2200cebb91419", null ],
+    [ "padGetModeConfig", "pad_misc_funcs_8c.html#a804658806cebe7e15ee2088df9ed1cf0", null ],
+    [ "_irx_id", "pad_misc_funcs_8c.html#aa0b6c78cfa948afd76385927bde7bccb", null ],
+    [ "padState", "pad_misc_funcs_8c.html#a513c2442c622a558dccd2cf82e36209a", null ],
+    [ "openSlots", "pad_misc_funcs_8c.html#a28bb14333fdcb714dbd54871075733a8", null ],
+    [ "vblankData", "pad_misc_funcs_8c.html#a499d068c284654b27d0ba66694bf34d3", null ],
+    [ "padman_init", "pad_misc_funcs_8c.html#ab533fa576ce23ab987abab166c4a0c5e", null ],
+    [ "pad_ee_addr", "pad_misc_funcs_8c.html#a006012f39405b36330dd0c7140a51882", null ]
+];
