@@ -164,7 +164,14 @@ void InitSpu2()
     *U32_REGISTER(0x1404) = 0xBF900000;
     *U32_REGISTER(0x140C) = 0xBF900800;
     *U32_REGISTER(0x10F0) |= 0x80000;
+#if 0
+    // Original
     *U32_REGISTER(0x1570) |= 8;
+#else
+    // Patch to allow SPU2 and USB to work together on newer slims
+    // Taken from https://gitlab.com/ps2max/linux/kernelloader/-/blob/7255483bf03e42fa3b34c4a990ffcb0e61a7b7da/loader/loader.c#L564
+    *U32_REGISTER(0x1570) |= 0x8000008;
+#endif
     *U32_REGISTER(0x1014) = 0x200B31E1;
     *U32_REGISTER(0x1414) = 0x200B31E1;
 }
