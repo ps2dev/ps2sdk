@@ -33,7 +33,7 @@ extern int SifIopRebootBufferEncrypted(const void *udnl, int size);
  * @param size Size of the IOPRP image in bytes.
  * @return 1 for success or 0 for failure.
  */
-extern int SifIopRebootBuffer(const void *ioprp, int size);
+extern int SifIopRebootBuffer(void *ioprp, int size);
 
 #ifdef __cplusplus
 }

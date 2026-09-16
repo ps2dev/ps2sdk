@@ -8,8 +8,17 @@
 
 EE_LIB = libpatches.a
 
-EE_OBJS = smem.o smod.o slib.o patch_enable_lmb.o patch_disable_prefix_check.o \
-	patch_user_mem_clear.o patch_fileio.o common.o erl-support.o
+EE_OBJS = \
+	smem.o \
+	smod.o \
+	slib.o \
+	patch_enable_lmb.o \
+	patch_disable_prefix_check.o \
+	patch_user_mem_clear.o \
+	patch_romdrv_set_rom1_info.o \
+	patch_fileio.o \
+	common.o \
+	erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
