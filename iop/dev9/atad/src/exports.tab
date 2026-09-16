@@ -22,6 +22,7 @@ DECLARE_EXPORT_TABLE(atad, 1, 3)
 	DECLARE_EXPORT(sceAtaFlushCache)
 	DECLARE_EXPORT(sceAtaIdleImmediate)
 	DECLARE_EXPORT(ata_device_sector_io64)
+	DECLARE_EXPORT(ata_set_command_type)
 END_EXPORT_TABLE
 
 void _retonly() {}
