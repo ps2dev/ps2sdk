@@ -1,0 +1,9 @@
+<map id="t_SifMRpcBindPkt" name="t_SifMRpcBindPkt">
+<area shape="rect" id="node1" title=" " alt="" coords="360,185,497,212"/>
+<area shape="rect" id="node2" href="$struct__sifm__client__data.html" title=" " alt="" coords="204,95,341,121"/>
+<area shape="rect" id="node3" href="$struct__sifm__serve__data.html" title=" " alt="" coords="139,185,276,212"/>
+<area shape="rect" id="node4" href="$struct__sifm__serve__entry.html" title=" " alt="" coords="5,305,148,332"/>
+<area shape="rect" id="node5" href="$struct__sifm__queue__data.html" title=" " alt="" coords="233,305,374,332"/>
+<area shape="rect" id="node6" href="$struct__sifm__rpc__data.html" title=" " alt="" coords="212,5,333,32"/>
+<area shape="rect" id="node7" href="$sifcmd-common_8h.html#structt___sif_cmd_header" title=" " alt="" coords="366,95,494,121"/>
+</map>

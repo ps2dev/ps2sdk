@@ -1,0 +1,6 @@
+<map id="route" name="route">
+<area shape="rect" id="node1" title=" " alt="" coords="179,216,235,243"/>
+<area shape="rect" id="node2" href="$structsce_net_cnf_command.html" title=" " alt="" coords="5,125,161,152"/>
+<area shape="rect" id="node3" href="$structsce_net_cnf_routing_entry.html" title=" " alt="" coords="246,125,419,152"/>
+<area shape="rect" id="node4" href="$structsce_net_cnf_address.html" title=" " alt="" coords="262,5,403,32"/>
+</map>

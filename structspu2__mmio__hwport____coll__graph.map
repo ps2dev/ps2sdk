@@ -1,0 +1,12 @@
+<map id="spu2_mmio_hwport_" name="spu2_mmio_hwport_">
+<area shape="rect" id="node1" title=" " alt="" coords="123,735,280,761"/>
+<area shape="rect" id="node2" href="$spu2__mmio__hwport_8h.html#unionspu2__mmio__hwport___1_1spu2__regs__union__" title=" " alt="" coords="119,631,284,672"/>
+<area shape="rect" id="node3" href="$spu2__mmio__hwport_8h.html#structspu2__regs__extra__" title=" " alt="" coords="83,452,219,479"/>
+<area shape="rect" id="node4" href="$spu2__mmio__hwport_8h.html#structspu2__different__regs__" title=" " alt="" coords="5,348,163,375"/>
+<area shape="rect" id="node5" href="$spu2__mmio__hwport_8h.html#structspu2__core__regs__" title=" " alt="" coords="228,348,359,375"/>
+<area shape="rect" id="node10" href="$spu2__mmio__hwport_8h.html#structspu2__core__regs__padded__" title=" " alt="" coords="243,452,429,479"/>
+<area shape="rect" id="node6" href="$spu2__mmio__hwport_8h.html#structspu2__voice__address__" title=" " alt="" coords="213,191,373,218"/>
+<area shape="rect" id="node7" href="$spu2__mmio__hwport_8h.html#structspu2__u16pair__" title=" " alt="" coords="50,5,166,32"/>
+<area shape="rect" id="node8" href="$spu2__mmio__hwport_8h.html#structspu2__voice__params__" title=" " alt="" coords="398,191,557,218"/>
+<area shape="rect" id="node9" href="$spu2__mmio__hwport_8h.html#structspu2__regs__main__" title=" " alt="" coords="253,541,387,568"/>
+</map>

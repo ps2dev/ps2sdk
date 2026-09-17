@@ -1,0 +1,12 @@
+<map id="sceNetCnfEnv" name="sceNetCnfEnv">
+<area shape="rect" id="node1" title=" " alt="" coords="258,608,371,635"/>
+<area shape="rect" id="node2" href="$structsce_net_cnf_interface.html" title=" " alt="" coords="224,231,371,257"/>
+<area shape="rect" id="node8" href="$structsce_net_cnf_pair.html" title=" " alt="" coords="357,413,470,440"/>
+<area shape="rect" id="node9" href="$structsce_net_cnf_ctl.html" title=" " alt="" coords="404,321,511,348"/>
+<area shape="rect" id="node3" href="$structsce_net_cnf_interface__want__allow.html" title=" " alt="" coords="5,112,152,153"/>
+<area shape="rect" id="node4" href="$structsce_net_cnf_command.html" title=" " alt="" coords="177,119,333,146"/>
+<area shape="rect" id="node5" href="$structsce_net_cnf_unknown_list.html" title=" " alt="" coords="460,119,633,146"/>
+<area shape="rect" id="node7" href="$structsce_net_cnf_root.html" title=" " alt="" coords="354,519,473,545"/>
+<area shape="rect" id="node10" href="$structsce_net_cnf_dial.html" title=" " alt="" coords="400,231,515,257"/>
+<area shape="rect" id="node6" href="$structsce_net_cnf_unknown.html" title=" " alt="" coords="471,7,622,33"/>
+</map>
