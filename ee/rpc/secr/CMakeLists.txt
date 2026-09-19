@@ -1,0 +1,6 @@
+add_library(secr)
+target_include_directories(secr PUBLIC include)
+target_include_directories(secr PRIVATE ${EE_INC})
+target_sources(secr PRIVATE src/libsecr.c src/erl-support.c)
+install(TARGETS secr)
+target_add_erl(secr)

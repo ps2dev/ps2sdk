@@ -1,0 +1,6 @@
+add_library(mouse)
+target_include_directories(mouse PUBLIC include)
+target_include_directories(mouse PRIVATE ${EE_INC})
+target_sources(mouse PRIVATE src/libmouse.c src/erl-support.c)
+install(TARGETS mouse)
+target_add_erl(mouse)
