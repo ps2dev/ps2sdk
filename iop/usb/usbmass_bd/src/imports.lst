@@ -19,6 +19,9 @@ I_CreateThread
 I_StartThread
 I_DeleteThread
 I_DelayThread
+I_GetThreadId
+I_WakeupThread
+I_SleepThread
 thbase_IMPORTS_end
 
 thsemap_IMPORTS_start
