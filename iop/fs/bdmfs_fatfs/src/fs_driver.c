@@ -28,6 +28,9 @@
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
+void *malloc(int size);
+void free(void *ptr);
+
 fatfs_fs_driver_mount_info fs_driver_mount_info[FF_VOLUMES];
 
 #define FATFS_FS_DRIVER_MOUNT_INFO_MAX ((int)(sizeof(fs_driver_mount_info) / sizeof(fs_driver_mount_info[0])))
@@ -303,6 +306,9 @@ void disconnect_bd(struct block_device *bd)
 
 #define MAX_FILES 128
 static FIL fil_structures[MAX_FILES];
+#if FF_USE_FASTSEEK
+static DWORD *fil_clmt[MAX_FILES];
+#endif
 
 #define MAX_DIRS 16
 static DIR dir_structures[MAX_DIRS];
@@ -320,6 +326,82 @@ static FIL *fs_find_free_fil_structure(void)
     }
     return NULL;
 }
+
+#if FF_USE_FASTSEEK
+static int fs_fil_index(FIL *file)
+{
+    return (int)(file - fil_structures);
+}
+
+static void fs_fastseek_release(FIL *file)
+{
+    int index;
+
+    if (file == NULL)
+        return;
+
+    index = fs_fil_index(file);
+    if (index < 0 || index >= MAX_FILES)
+        return;
+
+    file->cltbl = NULL;
+    if (fil_clmt[index] != NULL) {
+        free(fil_clmt[index]);
+        fil_clmt[index] = NULL;
+    }
+}
+
+static void fs_fastseek_enable(FIL *file)
+{
+    DWORD *table;
+    DWORD required;
+    int index;
+    FRESULT ret;
+
+    if (file == NULL || file->obj.objsize == 0)
+        return;
+
+    index = fs_fil_index(file);
+    if (index < 0 || index >= MAX_FILES)
+        return;
+
+    /* The smallest valid CLMT describes one contiguous fragment:
+     * size, length, start cluster, terminator. If the file is fragmented,
+     * FatFs returns the exact number of DWORDs required in table[0]. */
+    table = malloc(4 * sizeof(*table));
+    if (table == NULL)
+        return;
+
+    table[0] = 4;
+    file->cltbl = table;
+    ret = f_lseek(file, CREATE_LINKMAP);
+    if (ret == FR_NOT_ENOUGH_CORE) {
+        required = table[0];
+        free(table);
+        file->cltbl = NULL;
+
+        if (required < 4)
+            return;
+
+        table = malloc(required * sizeof(*table));
+        if (table == NULL)
+            return;
+
+        table[0] = required;
+        file->cltbl = table;
+        ret = f_lseek(file, CREATE_LINKMAP);
+    }
+
+    if (ret != FR_OK) {
+        file->cltbl = NULL;
+        free(table);
+        return;
+    }
+
+    fil_clmt[index] = table;
+    printf("[fastseek] slot=%d clmt_words=%lu\n", index, (unsigned long)table[0]);
+}
+#endif
 
 static DIR *fs_find_free_dir_structure(void)
 {
@@ -380,6 +462,12 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
         fd->privdata = NULL;
         ret          = -ret;
     } else {
+#if FF_USE_FASTSEEK
+        /* FastSeek is useful only for stable read-only files. Writes and files
+         * which may grow keep the normal FatFs path. */
+        if (!(flags & (O_WRONLY | O_CREAT | O_TRUNC | O_APPEND)))
+            fs_fastseek_enable((FIL *)fd->privdata);
+#endif
         ret = 1;
     }
 
@@ -397,6 +485,9 @@ static int fs_close(iop_file_t *fd)
     _fs_lock();
 
     if (fd->privdata) {
+#if FF_USE_FASTSEEK
+        fs_fastseek_release((FIL *)fd->privdata);
+#endif
         ret = f_close(fd->privdata);
         fd->privdata = NULL;
     }
