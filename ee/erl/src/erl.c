@@ -853,7 +853,7 @@ return code
         has_next_reloc = 0;
         if ((u32)j+1 < (sec[i].sh_size / sec[i].sh_entsize)) {
             next_reloc = *((struct elf_reloc_t *) (reloc_section + ((j+1) * sec[i].sh_entsize)));
-            next_sym_n = reloc.r_info >> 8;
+            next_sym_n = next_reloc.r_info >> 8;
             has_next_reloc = 1;
         }
 
