@@ -1,0 +1,14 @@
+<map id="common/include/netman.h" name="common/include/netman.h">
+<area shape="rect" id="node1" title=" " alt="" coords="659,5,855,32"/>
+<area shape="rect" id="node2" href="$netman__rpc_8h.html" title=" " alt="" coords="485,80,669,121"/>
+<area shape="rect" id="node3" href="$ee_2network_2netman_2src_2netman_8c_source.html" title=" " alt="" coords="5,169,177,211"/>
+<area shape="rect" id="node4" href="$ee_2network_2netman_2src_2rpc__client_8c_source.html" title=" " alt="" coords="201,169,373,211"/>
+<area shape="rect" id="node5" href="$ee_2network_2netman_2src_2rpc__server_8c_source.html" title=" " alt="" coords="397,169,569,211"/>
+<area shape="rect" id="node6" href="$iop_2network_2netman_2src_2netman_8c_source.html" title=" " alt="" coords="593,169,747,211"/>
+<area shape="rect" id="node7" href="$iop_2network_2netman_2src_2rpc__client_8c_source.html" title=" " alt="" coords="771,169,924,211"/>
+<area shape="rect" id="node8" href="$iop_2network_2netman_2src_2rpc__server_8c_source.html" title=" " alt="" coords="948,169,1101,211"/>
+<area shape="rect" id="node9" href="$ee_2network_2tcpip_2src_2ps2ip_8c.html" title=" " alt="" coords="845,80,999,121"/>
+<area shape="rect" id="node10" href="$netdev_8c_source.html" title=" " alt="" coords="1024,80,1177,121"/>
+<area shape="rect" id="node11" href="$iop_2tcpip_2tcpip-netman_2src_2irx__imports_8h_source.html" title=" " alt="" coords="1201,80,1371,121"/>
+<area shape="rect" id="node12" href="$iop_2tcpip_2tcpip-netman_2src_2ps2ip_8c.html" title=" " alt="" coords="1395,80,1564,121"/>
+</map>

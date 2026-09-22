@@ -1,0 +1,28 @@
+var usbdpriv_8h_struct__device =
+[
+    [ "m_id", "usbdpriv_8h.html#a3aab8358edca4ce75580d8fedbae9119", null ],
+    [ "m_next", "usbdpriv_8h.html#a36436d10e00392cff3fc0169a57129bc", null ],
+    [ "m_prev", "usbdpriv_8h.html#a2cbd8584fc1e4c6e316c72b20636a6f5", null ],
+    [ "m_endpointListStart", "usbdpriv_8h.html#acdaf6431f60dc0d0b2d79c2468a23443", null ],
+    [ "m_endpointListEnd", "usbdpriv_8h.html#a41e582d0b1ef16ff44d4e37508379471", null ],
+    [ "m_devDriver", "usbdpriv_8h.html#a663b03916a8a1b14b54e017a3c462707", null ],
+    [ "m_deviceStatus", "usbdpriv_8h.html#a0a5fb568094f7571c6bfcabdcba295be", null ],
+    [ "m_functionAddress", "usbdpriv_8h.html#a64e5705f509eb5635fbfb6c2a85e8af4", null ],
+    [ "m_isLowSpeedDevice", "usbdpriv_8h.html#a1037b2ef8c035dae86321bcb041a8dd1", null ],
+    [ "m_resetFlag", "usbdpriv_8h.html#a19daf15eeae76c403cb54db9d4f61de8", null ],
+    [ "m_magicPowerValue", "usbdpriv_8h.html#ad3b5bd29305022eaff7f42490722b566", null ],
+    [ "m_childListStart", "usbdpriv_8h.html#a7edd5fec5352e9e044ad7f2adb2a7619", null ],
+    [ "m_childListEnd", "usbdpriv_8h.html#a14bd5fd54e3bef88e2e63f7e944bc29d", null ],
+    [ "m_parent", "usbdpriv_8h.html#a7d86ab8cd3ef2b68fed4e9d4bb0711d3", null ],
+    [ "m_attachedToPortNo", "usbdpriv_8h.html#ac3102436bbae5dbb5c4d73aa162192b4", null ],
+    [ "m_privDataField", "usbdpriv_8h.html#a9b7a2bfbef4a15d3cd0b565c3e3afcf7", null ],
+    [ "m_timer", "usbdpriv_8h.html#a533e46c9c76b1a2640880e455c575d47", null ],
+    [ "m_ioRequest", "usbdpriv_8h.html#a7657aaf540cdbef745994f9d701aa8e7", null ],
+    [ "m_functionDelay", "usbdpriv_8h.html#a33083f6d823dd319671d14c05fe06b2f", null ],
+    [ "m_staticDeviceDescPtr", "usbdpriv_8h.html#a9c904664d15a2a1aaa38f7729d299399", null ],
+    [ "m_staticDeviceDescEndPtr", "usbdpriv_8h.html#a61461614d30b3a86f66cc565d13d05fc", null ],
+    [ "m_fetchDescriptorCounter", "usbdpriv_8h.html#a550b8452e94f2bf0784f029de1f43d6a", null ],
+    [ "m_reportDescriptorCurForFetch", "usbdpriv_8h.html#a52fb0f4022aa287906668e18637cfe38", null ],
+    [ "m_reportDescriptorStart", "usbdpriv_8h.html#a438c0a8312dd0c5b1abc661e6ab86158", null ],
+    [ "m_reportDescriptorEnd", "usbdpriv_8h.html#a57c306f58a74672da9a3af990dd858fa", null ]
+];

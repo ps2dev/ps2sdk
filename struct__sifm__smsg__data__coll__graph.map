@@ -1,0 +1,8 @@
+<map id="_sifm_smsg_data" name="_sifm_smsg_data">
+<area shape="rect" id="node1" title=" " alt="" coords="5,216,141,243"/>
+<area shape="rect" id="node2" href="$struct__sifm__serve__entry.html" title=" " alt="" coords="169,5,311,32"/>
+<area shape="rect" id="node3" href="$struct__sifm__serve__data.html" title=" " alt="" coords="247,96,385,123"/>
+<area shape="rect" id="node4" href="$struct__sifm__client__data.html" title=" " alt="" coords="191,216,329,243"/>
+<area shape="rect" id="node6" href="$struct__sifm__queue__data.html" title=" " alt="" coords="376,216,517,243"/>
+<area shape="rect" id="node5" href="$struct__sifm__rpc__data.html" title=" " alt="" coords="93,96,214,123"/>
+</map>

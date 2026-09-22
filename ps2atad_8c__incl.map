@@ -1,0 +1,21 @@
+<map id="iop/dev9/atad/src/ps2atad.c" name="iop/dev9/atad/src/ps2atad.c">
+<area shape="rect" id="node1" title=" " alt="" coords="253,5,455,32"/>
+<area shape="rect" id="node2" title=" " alt="" coords="212,155,283,181"/>
+<area shape="rect" id="node3" href="$defs_8h.html" title=" " alt="" coords="5,155,68,181"/>
+<area shape="rect" id="node7" href="$irx_8h.html" title=" " alt="" coords="375,155,426,181"/>
+<area shape="rect" id="node8" href="$loadcore_8h.html" title=" " alt="" coords="147,80,238,107"/>
+<area shape="rect" id="node9" href="$thbase_8h.html" title=" " alt="" coords="263,80,341,107"/>
+<area shape="rect" id="node10" href="$thevent_8h.html" title=" " alt="" coords="365,80,449,107"/>
+<area shape="rect" id="node11" href="$stdio_8h.html" title=" " alt="" coords="629,80,695,107"/>
+<area shape="rect" id="node13" href="$sysclib_8h.html" title=" " alt="" coords="525,80,604,107"/>
+<area shape="rect" id="node16" href="$atad_8h.html" title=" " alt="" coords="60,80,123,107"/>
+<area shape="rect" id="node17" href="$atahw_8h.html" title=" " alt="" coords="724,155,797,181"/>
+<area shape="rect" id="node4" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="361,229,432,256"/>
+<area shape="rect" id="node5" title=" " alt="" coords="359,304,434,331"/>
+<area shape="rect" id="node6" href="$tamtypes_8h.html" title=" " alt="" coords="550,304,646,331"/>
+<area shape="rect" id="node12" title=" " alt="" coords="625,155,699,181"/>
+<area shape="rect" id="node14" href="$setjmp_8h.html" title=" " alt="" coords="456,229,535,256"/>
+<area shape="rect" id="node15" href="$ctype_8h.html" title=" " alt="" coords="529,155,600,181"/>
+<area shape="rect" id="node18" href="$aifregs_8h.html" title=" " alt="" coords="559,229,637,256"/>
+<area shape="rect" id="node19" href="$speedregs_8h.html" title=" " alt="" coords="662,229,763,256"/>
+</map>
