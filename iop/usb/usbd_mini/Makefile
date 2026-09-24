@@ -6,9 +6,35 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/usb/usbd/src/
+# usbd_mini: FreeUsbd implementation (pre-b1f7ff96), not the SCE rewrite in ../usbd.
+# See README.md / ps2sdk issue #908.
+
+IOP_PREFER_GPOPT = 16384
 
 IOP_CFLAGS += -DMINI_DRIVER
-IOP_IMPORT_INCS += usb/usbd/
 
-include $(PS2SDKSRC)/iop/usb/usbd/Makefile
+IOP_IMPORT_INCS += \
+	system/intrman \
+	system/loadcore \
+	system/stdio \
+	system/sysclib \
+	system/sysmem \
+	system/threadman \
+	usb/usbd
+
+IOP_OBJS = \
+	hcd.o \
+	hub.o \
+	interface.o \
+	mem.o \
+	usbd.o \
+	usbio.o \
+	driver.o \
+	usbd_v12_stubs.o \
+	imports.o \
+	exports.o
+
+include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
