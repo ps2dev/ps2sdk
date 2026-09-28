@@ -88,10 +88,6 @@ extern u32 GetHoldReg(int holdnum);
 
 extern int GetHardTimerIntrCode(int timid);
 
-// guessed name
-extern u32 GetTimerMode(int timid);
-extern u32 (*GetTimerReadFunc(int timid))();
-
 // clang-format off
 #define timrman_IMPORTS \
 	timrman_IMPORTS_start \
@@ -135,8 +131,6 @@ extern u32 (*GetTimerReadFunc(int timid))();
 #define I_GetHoldMode          DECLARE_IMPORT(14, GetHoldMode)
 #define I_GetHoldReg           DECLARE_IMPORT(15, GetHoldReg)
 #define I_GetHardTimerIntrCode DECLARE_IMPORT(16, GetHardTimerIntrCode)
-#define I_GetTimerMode         DECLARE_IMPORT(17, GetTimerMode)
-#define I_GetTimerReadFunc     DECLARE_IMPORT(18, GetTimerReadFunc)
 
 #ifdef __cplusplus
 }

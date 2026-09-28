@@ -28,7 +28,7 @@ I_memcpy
 I_memset
 sysclib_IMPORTS_end
 
-timrman_IMPORTS_start
+xtimrman_IMPORTS_start
 I_AllocHardTimer
 I_SetTimerMode
 I_GetTimerStatus
@@ -37,7 +37,7 @@ I_GetTimerCounter
 I_SetTimerCompare
 I_GetHardTimerIntrCode
 I_GetTimerReadFunc
-timrman_IMPORTS_end
+xtimrman_IMPORTS_end
 
 heaplib_IMPORTS_start
 I_CreateHeap

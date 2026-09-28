@@ -9,8 +9,8 @@
 #include <intrman.h>
 #include <stdio.h>
 #include <sysclib.h>
-#include <timrman.h>
 #include <heaplib.h>
 #include <loadcore.h>
+#include <xtimrman.h>
 
 #endif // IRX_IMPORTS_H_
