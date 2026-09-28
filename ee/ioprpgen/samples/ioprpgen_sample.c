@@ -22,6 +22,9 @@
 extern unsigned char igreeting_irx[];
 extern unsigned int size_igreeting_irx;
 
+extern unsigned char timemani_irx[];
+extern unsigned int size_timemani_irx;
+
 extern unsigned char threadman_irx[];
 extern unsigned int size_threadman_irx;
 
@@ -32,7 +35,7 @@ int main(int ac, char **av)
 {
 	struct ioprpgen_ctx ctx;
 	struct ioprpgen_memwrite_ctx memwrite_ctx;
-	struct ioprpgen_entry entries[3];
+	struct ioprpgen_entry entries[5];
 	int sz;
 	int sz2;
 	void *buf;
@@ -49,10 +52,16 @@ int main(int ac, char **av)
 	entries[1].m_name = "SIFINIT";
 	entries[1].m_data = sifinit_irx;
 	entries[1].m_data_size = size_sifinit_irx;
+	entries[2].m_name = "TIMEMANI";
+	entries[2].m_data = timemani_irx;
+	entries[2].m_data_size = size_timemani_irx;
+	entries[3].m_name = "THREADMAN";
+	entries[3].m_data = threadman_irx;
+	entries[3].m_data_size = size_threadman_irx;
 	// Ensure the end is NULL terminated
-	entries[2].m_name = NULL;
-	entries[2].m_data = NULL;
-	entries[2].m_data_size = 0;
+	entries[4].m_name = NULL;
+	entries[4].m_data = NULL;
+	entries[4].m_data_size = 0;
 	ioprpgen_setup_membuf(&ctx, &memwrite_ctx, NULL, 0);
 	sz = ioprpgen_write_ioprp(&ctx, entries);
 	if ( !sz )
