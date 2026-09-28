@@ -1,8 +1,7 @@
-#include "intrman.h"
+#include <irx_imports.h>
 #include "kerr.h"
 #include "thcommon.h"
 #include "thpool.h"
-#include "heaplib.h"
 
 static void vpl_get_info(struct vpool *vpl, iop_vpl_info_t *info);
 
@@ -25,7 +24,7 @@ int CreateVpl(iop_vpl_param *param)
 
     CpuSuspendIntr(&state);
 
-    vpl = heap_alloc(TAG_VPL, sizeof(*vpl));
+    vpl = (struct vpool *)heap_alloc(TAG_VPL, sizeof(*vpl));
     if (!vpl) {
         CpuResumeIntr(state);
         return KE_NO_MEMORY;
@@ -56,7 +55,7 @@ int DeleteVpl(int vplId)
     }
 
     CpuSuspendIntr(&state);
-    vpl = HANDLE_PTR(vplId);
+    vpl = (struct vpool *)HANDLE_PTR(vplId);
     if (!HANDLE_VERIFY(vplId, TAG_VPL)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_VPLID;
@@ -99,13 +98,13 @@ void *AllocateVpl(int vplId, int size)
         Kprintf("WARNING: AllocateVpl KE_CAN_NOT_WAIT\n");
     }
 
-    vpl = HANDLE_PTR(vplId);
+    vpl = (struct vpool *)HANDLE_PTR(vplId);
     if (!HANDLE_VERIFY(vplId, TAG_VPL)) {
         CpuResumeIntr(state);
         return (void *)KE_UNKNOWN_VPLID;
     }
 
-    if (!size || vpl->free_size < size) {
+    if (!size || (int)vpl->free_size < (int)size) {
         CpuResumeIntr(state);
         return (void *)KE_ILLEGAL_MEMSIZE;
     }
@@ -125,12 +124,13 @@ void *AllocateVpl(int vplId, int size)
     vpl->event.waiter_count++;
 
     if (vpl->event.attr & VA_THPRI) {
+        // Unofficial: the following was inlined
         waitlist_insert(thread, &vpl->event, thread->priority);
     } else {
         list_insert(&vpl->event.waiters, &thread->queue);
     }
 
-    return (void *)thread_leave(size, 0, state, 1);
+    return (void *)(uiptr)thread_leave(size, 0, state, 1);
 }
 
 void *pAllocateVpl(int vplId, int size)
@@ -144,13 +144,13 @@ void *pAllocateVpl(int vplId, int size)
     }
 
     CpuSuspendIntr(&state);
-    vpl = HANDLE_PTR(vplId);
+    vpl = (struct vpool *)HANDLE_PTR(vplId);
     if (!HANDLE_VERIFY(vplId, TAG_VPL)) {
         CpuResumeIntr(state);
         return (void *)KE_UNKNOWN_VPLID;
     }
 
-    if (!size || vpl->free_size < size) {
+    if (!size || (int)vpl->free_size < (int)size) {
         CpuResumeIntr(state);
         return (void *)KE_ILLEGAL_MEMSIZE;
     }
@@ -174,7 +174,7 @@ void *ipAllocateVpl(int vplId, int size)
         return (void *)KE_ILLEGAL_CONTEXT;
     }
 
-    vpl = HANDLE_PTR(vplId);
+    vpl = (struct vpool *)HANDLE_PTR(vplId);
     if (!HANDLE_VERIFY(vplId, TAG_VPL)) {
         return (void *)KE_UNKNOWN_VPLID;
     }
@@ -199,7 +199,7 @@ int FreeVpl(int vplId, void *memory)
     }
 
     CpuSuspendIntr(&state);
-    vpl = HANDLE_PTR(vplId);
+    vpl = (struct vpool *)HANDLE_PTR(vplId);
     if (!HANDLE_VERIFY(vplId, TAG_VPL)) {
         CpuResumeIntr(state);
         // BUG: originally wrong value
@@ -207,12 +207,12 @@ int FreeVpl(int vplId, void *memory)
         return KE_UNKNOWN_VPLID;
     }
 
-    if (FreeHeapMemory(vpl->heap, memory) < 0) {
+    if ((int)FreeHeapMemory(vpl->heap, memory) < (int)0) {
         CpuResumeIntr(state);
         return KE_ERROR;
     }
 
-    if (vpl->event.waiter_count) {
+    if ((int)vpl->event.waiter_count > (int)0) {
         thread  = list_first_entry(&vpl->event.waiters, struct thread, queue);
         new_mem = AllocHeapMemory(vpl->heap, thread->saved_regs->v0);
         if (new_mem) {
@@ -240,7 +240,7 @@ int ReferVplStatus(int vplId, iop_vpl_info_t *info)
     }
 
     CpuSuspendIntr(&state);
-    vpl = HANDLE_PTR(vplId);
+    vpl = (struct vpool *)HANDLE_PTR(vplId);
     if (!HANDLE_VERIFY(vplId, TAG_VPL)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_VPLID;
@@ -261,7 +261,7 @@ int iReferVplStatus(int vplId, iop_vpl_info_t *info)
         return KE_ILLEGAL_CONTEXT;
     }
 
-    vpl = HANDLE_PTR(vplId);
+    vpl = (struct vpool *)HANDLE_PTR(vplId);
     if (!HANDLE_VERIFY(vplId, TAG_VPL)) {
         return KE_UNKNOWN_VPLID;
     }

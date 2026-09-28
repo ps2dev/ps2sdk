@@ -1,4 +1,4 @@
-#include "intrman.h"
+#include <irx_imports.h>
 #include "kerr.h"
 #include "thcommon.h"
 #include "thmsgbx.h"
@@ -21,7 +21,7 @@ int CreateMbx(iop_mbx_t *mbx_param)
 
     CpuSuspendIntr(&state);
 
-    mbx = heap_alloc(TAG_MBX, sizeof(*mbx));
+    mbx = (struct mbox *)heap_alloc(TAG_MBX, sizeof(*mbx));
     if (!mbx) {
         CpuResumeIntr(state);
         return KE_NO_MEMORY;
@@ -51,7 +51,7 @@ int DeleteMbx(int mbxid)
 
     CpuSuspendIntr(&state);
 
-    mbx = HANDLE_PTR(mbxid);
+    mbx = (struct mbox *)HANDLE_PTR(mbxid);
     if (!HANDLE_VERIFY(mbxid, TAG_MBX)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_MBXID;
@@ -91,14 +91,14 @@ int SendMbx(int mbxid, void *msg)
 
     CpuSuspendIntr(&state);
 
-    mbx = HANDLE_PTR(mbxid);
+    mbx = (struct mbox *)HANDLE_PTR(mbxid);
     if (!HANDLE_VERIFY(mbxid, TAG_MBX)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_MBXID;
     }
 
-    if (mbx->event.waiter_count == 0) {
-        mbx_send(mbx, msg);
+    if ((int)mbx->event.waiter_count <= (int)0) {
+        mbx_send(mbx, (iop_message_t *)msg);
         CpuResumeIntr(state);
         return KE_OK;
     }
@@ -128,13 +128,13 @@ int iSendMbx(int mbxid, void *msg)
         return KE_ILLEGAL_CONTEXT;
     }
 
-    mbx = HANDLE_PTR(mbxid);
+    mbx = (struct mbox *)HANDLE_PTR(mbxid);
     if (!HANDLE_VERIFY(mbxid, TAG_MBX)) {
         return KE_UNKNOWN_MBXID;
     }
 
-    if (mbx->event.waiter_count == 0) {
-        mbx_send(mbx, msg);
+    if ((int)mbx->event.waiter_count <= (int)0) {
+        mbx_send(mbx, (iop_message_t *)msg);
         return KE_OK;
     }
 
@@ -169,13 +169,13 @@ int ReceiveMbx(void **msgvar, int mbxid)
         Kprintf("WARNING: ReceiveMbx:KE_CAN_NOT_WAIT\n");
     }
 
-    mbx = HANDLE_PTR(mbxid);
+    mbx = (struct mbox *)HANDLE_PTR(mbxid);
     if (!HANDLE_VERIFY(mbxid, TAG_MBX)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_MBXID;
     }
 
-    if (mbx->msg_count == 0) {
+    if ((int)mbx->msg_count <= (int)0) {
         thread             = thctx.current_thread;
         thread->status     = THS_WAIT;
         thread->wait_type  = TSW_MBX;
@@ -183,6 +183,7 @@ int ReceiveMbx(void **msgvar, int mbxid)
         thctx.run_next     = NULL;
 
         if (mbx->event.attr & MBA_THPRI) {
+            // Unofficial: the following was inlined
             waitlist_insert(thread, &mbx->event, thread->priority);
         } else {
             list_insert(&mbx->event.waiters, &thread->queue);
@@ -218,13 +219,13 @@ int PollMbx(void **msgvar, int mbxid)
 
     CpuSuspendIntr(&state);
 
-    mbx = HANDLE_PTR(mbxid);
+    mbx = (struct mbox *)HANDLE_PTR(mbxid);
     if (!HANDLE_VERIFY(mbxid, TAG_MBX)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_MBXID;
     }
 
-    if (mbx->msg_count == 0) {
+    if ((int)mbx->msg_count <= (int)0) {
         CpuResumeIntr(state);
         return KE_MBOX_NOMSG;
     }
@@ -255,7 +256,7 @@ int ReferMbxStatus(int mbxid, iop_mbx_status_t *info)
 
     CpuSuspendIntr(&state);
 
-    mbx = HANDLE_PTR(mbxid);
+    mbx = (struct mbox *)HANDLE_PTR(mbxid);
     if (!HANDLE_VERIFY(mbxid, TAG_MBX)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_MBXID;
@@ -276,7 +277,7 @@ int iReferMbxStatus(int mbxid, iop_mbx_status_t *info)
         return KE_ILLEGAL_CONTEXT;
     }
 
-    mbx = HANDLE_PTR(mbxid);
+    mbx = (struct mbox *)HANDLE_PTR(mbxid);
     if (!HANDLE_VERIFY(mbxid, TAG_MBX)) {
         return KE_UNKNOWN_MBXID;
     }
@@ -306,34 +307,19 @@ static void mbx_send(struct mbox *mbx, iop_message_t *new_msg)
         latest->next    = new_msg;
         mbx->newest_msg = new_msg;
     } else {
-        // FIXME this is mostly copied out of ghidra because its awful
-        iop_message_t *piVar1;
-        iop_message_t *piVar2;
-        u32 prio;
+        iop_message_t *cur_msg1;
+        iop_message_t *cur_msg2;
 
-        prio   = latest->next->priority;
-        piVar2 = latest;
-        piVar1 = latest->next;
+        for (cur_msg2 = latest, cur_msg1 = latest->next; (u32)new_msg->priority >= (u32)cur_msg1->priority; cur_msg1 = cur_msg1->next) {
+            cur_msg2 = cur_msg1;
 
-        while (1) {
-            if (new_msg->priority < prio) {
-                new_msg->next = piVar2->next;
-                piVar2->next  = new_msg;
-                return;
-            }
-
-            piVar2 = piVar1;
-
-            if (piVar1 == latest) {
+            if (cur_msg1 == latest) {
                 mbx->newest_msg = new_msg;
-                new_msg->next   = piVar2->next;
-                piVar2->next    = new_msg;
-                return;
+                break;
             }
-
-            prio   = piVar1->next->priority;
-            piVar1 = piVar1->next;
         }
+        new_msg->next = cur_msg2->next;
+        cur_msg2->next  = new_msg;
     }
 }
 

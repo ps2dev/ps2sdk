@@ -1,14 +1,8 @@
+#include <irx_imports.h>
+#include <defs.h>
 #include "thcommon.h"
 #include "kerr.h"
 #include "thevent.h"
-#include "timrman.h"
-#include "sysmem.h"
-#include "heaplib.h"
-#include "intrman.h"
-#include "loadcore.h"
-#include "sysclib.h"
-#include "stdio.h"
-#include <defs.h>
 
 #include <limits.h>
 
@@ -27,7 +21,7 @@ struct alarm *alarm_alloc()
 {
     struct alarm *alarm;
     if (list_empty(&thctx.alarm_pool)) {
-        alarm = heap_alloc(0, sizeof(*alarm));
+        alarm = (struct alarm *)heap_alloc(0, sizeof(*alarm));
         thctx.alarm_id++;
         alarm->tag.id = thctx.alarm_id;
     } else {
@@ -40,7 +34,7 @@ struct alarm *alarm_alloc()
 
 void alarm_free(struct alarm *alarm)
 {
-    if (alarm->tag.id >= 33) {
+    if ((u32)alarm->tag.id >= (u32)33) {
         heap_free(&alarm->tag);
     } else {
         list_insert(&thctx.alarm_pool, &alarm->alarm_list);
@@ -52,7 +46,7 @@ void alarm_insert(struct list_head *list, struct alarm *alarm)
     struct alarm *i;
 
     list_for_each (i, list, alarm_list) {
-        if (alarm->target < i->target) {
+        if ((s64)alarm->target < (s64)i->target) {
             break;
         }
     }
@@ -68,7 +62,7 @@ void waitlist_insert(struct thread *thread, struct event *event, s32 priority)
 
     weaker = list_first_entry(&event->waiters, struct thread, queue);
     list_for_each (weaker, &event->waiters, queue) {
-        if (priority < weaker->priority) {
+        if ((int)priority < (int)weaker->priority) {
             break;
         }
     }
@@ -79,14 +73,13 @@ void waitlist_insert(struct thread *thread, struct event *event, s32 priority)
 void update_timer_compare(int timid, u64 time, struct list_head *alarm_list)
 {
     struct alarm *prev, *i;
-    u32 counter, new_compare = 0;
 
     // what if list is empty? (luckily its not but....)
     prev = list_first_entry(alarm_list, struct alarm, alarm_list);
 
     if (!list_empty(alarm_list)) {
         list_for_each (i, alarm_list, alarm_list) {
-            if (i->target >= prev->target + thctx.unk4c8) {
+            if ((s64)i->target >= (s64)(prev->target + thctx.unk4c8)) {
                 break;
             }
 
@@ -94,19 +87,12 @@ void update_timer_compare(int timid, u64 time, struct list_head *alarm_list)
         }
     }
 
-    if (prev->target - time >= thctx.unk4c8) {
-        new_compare = prev->target;
-    } else {
-        counter     = GetTimerCounter(timid);
-        new_compare = counter + thctx.unk4c8;
-    }
-
-    SetTimerCompare(timid, new_compare);
+    SetTimerCompare(timid, ((s64)(prev->target - time) >= (s64)thctx.unk4c8) ? prev->target : (GetTimerCounter(timid) + thctx.unk4c8));
 }
 
 unsigned int thread_delay_cb(void *user)
 {
-    struct thread *thread = user;
+    struct thread *thread = (struct thread *)user;
 
     list_remove(&thread->queue);
     thread->status = THS_READY;
@@ -121,7 +107,7 @@ int check_thread_stack()
     int stack_remaining;
     stack_remaining = (u32)&stack_remaining - (u32)thctx.current_thread->stack_top;
 
-    if (stack_remaining < 0xa8) {
+    if ((int)stack_remaining < (int)0xa8) {
         CpuDisableIntr();
         Kprintf("CheckThreadStack()\n");
         thread_leave(0, 0, 0, 0);
@@ -132,7 +118,7 @@ int check_thread_stack()
 
 void *heap_alloc(u16 tag, u32 bytes)
 {
-    struct heaptag *ptr = AllocHeapMemory(thctx.heap, bytes);
+    struct heaptag *ptr = (struct heaptag *)AllocHeapMemory(thctx.heap, bytes);
     if (ptr) {
         memset(ptr, 0, bytes);
         ptr->tag = tag;
@@ -163,11 +149,7 @@ int thread_leave(int ret1, int ret2, int intr_state, int release)
     register u32 a2 __asm__("a2") = intr_state;
     register s32 result __asm__("v0");
 
-    if (!release) {
-        thctx.current_thread->reason_counter = &thctx.current_thread->thread_preemption_count;
-    } else {
-        thctx.current_thread->reason_counter = &thctx.current_thread->release_count;
-    }
+    thctx.current_thread->reason_counter = release ? &thctx.current_thread->release_count : &thctx.current_thread->thread_preemption_count;
 
     __asm__ __volatile__("li $v0, 0x20\n"
                      "syscall\n"
@@ -180,7 +162,7 @@ int thread_leave(int ret1, int ret2, int intr_state, int release)
 
 int thread_start(struct thread *thread, int intr_state)
 {
-    if (thread->priority < thctx.current_thread->priority) {
+    if ((int)thread->priority < (int)thctx.current_thread->priority) {
         thctx.current_thread->status = THS_READY;
         readyq_insert_front(thctx.current_thread);
         thread->status = THS_RUN;
@@ -217,15 +199,20 @@ int thread_init_and_start(struct thread *thread, int intr_state)
     return thread_start(thread, intr_state);
 }
 
-int post_boot_callback_1(iop_init_entry_t *next, int delayed)
+static int post_boot_callback_1(iop_init_entry_t *next, int delayed)
 {
+    (void)next;
+    (void)delayed;
+
     CpuEnableIntr();
     printf("\r\nIOP Realtime Kernel Ver. 2.2\r\n    Copyright 1999-2002 (C) Sony Computer Entertainment Inc. \r\n");
     return 0;
 }
 
-int post_boot_callback_2(iop_init_entry_t *next, int delayed)
+static int post_boot_callback_2(iop_init_entry_t *next, int delayed)
 {
+    (void)delayed;
+
     CpuEnableIntr();
     ChangeThreadPriority(TH_SELF, 126);
     if (!next->callback) {
@@ -242,7 +229,7 @@ int read_sys_time(iop_sys_clock_t *clock)
     u32 hi      = thctx.time_hi;
     u32 counter = GetTimerCounter(thctx.timer_id);
 
-    if (counter >= thctx.time_lo) {
+    if ((u32)counter >= (u32)thctx.time_lo) {
         thctx.time_lo = counter;
     } else {
         hi++;
@@ -286,7 +273,7 @@ static u32 ntz(u32 x)
 
 u32 readyq_highest()
 {
-    for (int i = 0; i < 4; i++) {
+    for (u32 i = 0; i < (u32)(sizeof(thctx.queue_map) / sizeof(thctx.queue_map[0])); i++) {
         if (thctx.queue_map[i]) {
             return ntz(thctx.queue_map[i]) + 32 * i;
         }
@@ -295,17 +282,17 @@ u32 readyq_highest()
     return 128;
 }
 
-void report_stack_overflow(struct thread *thread)
+static void report_stack_overflow(struct thread *thread)
 {
     ModuleInfo_t *img_info;
-    char *name;
+    const char *name;
 
     Kprintf("\nThread (thid=%x, #%d) stack overflow\n Stack = %x, Stack size = %x, SP=%x\n",
-            MAKE_HANDLE(thread),
+            (unsigned int)MAKE_HANDLE(thread),
             thread->tag.id,
-            thread->stack_top,
-            thread->stack_size,
-            thread->saved_regs);
+            (unsigned int)(uiptr)thread->stack_top,
+            (unsigned int)thread->stack_size,
+            (unsigned int)(uiptr)thread->saved_regs);
 
     img_info = FindImageInfo(thread->entry);
     if (img_info) {
@@ -318,7 +305,7 @@ void report_stack_overflow(struct thread *thread)
     __builtin_trap();
 }
 
-void do_delete_thread()
+static void do_delete_thread()
 {
     struct thread *thread;
 
@@ -335,7 +322,7 @@ void do_delete_thread()
     }
 }
 
-void schedule_next()
+static void schedule_next()
 {
     struct thread *cur, *new_;
     u32 prio;
@@ -347,25 +334,30 @@ void schedule_next()
 
     // originally would fall down and hit the bottom kprintf
     // but i don't want the nesting
-    if (prio >= 128) {
-        Kprintf("Panic: not found ready Thread\n");
+    if ((int)prio >= (int)128) {
+        if (cur->status == THS_RUN) {
+            Kprintf("Panic: not found ready Thread\n");
+        }
+        else {
+            Kprintf("Panic: not found executable Thread\n");
+        }
         return;
     }
 
     new_ = list_first_entry(&thctx.ready_queue[prio], struct thread, queue);
 
-    if (thctx.current_thread->status == THS_RUN) {
+    if (cur->status == THS_RUN) {
         if (thctx.debug_flags & 4) {
-            Kprintf("    THS_RUN cp=%d : hp=%d ", cur->priority, prio);
+            Kprintf("    THS_RUN cp=%d : hp=%d ", cur->priority, (int)prio);
         }
 
-        if (prio < cur->priority) {
+        if ((int)prio < (int)cur->priority) {
             if (thctx.debug_flags & 4) {
                 Kprintf("  readyq = %x, newrun = %x:%d, prio = %d",
-                        &thctx.ready_queue[prio],
-                        new_,
+                        (unsigned int)(uiptr)&thctx.ready_queue[prio],
+                        (unsigned int)(uiptr)new_,
                         new_->tag.id,
-                        prio);
+                        (int)prio);
             }
 
             readyq_remove(new_, prio);
@@ -379,10 +371,10 @@ void schedule_next()
             Kprintf("    not THS_RUN ");
 
             Kprintf(" readyq = %x, newrun = %x:%d, prio = %d",
-                    &thctx.ready_queue[prio],
-                    new_,
+                    (unsigned int)(uiptr)&thctx.ready_queue[prio],
+                    (unsigned int)(uiptr)new_,
                     new_->tag.id,
-                    prio);
+                    (int)prio);
         }
 
         readyq_remove(new_, prio);
@@ -394,7 +386,7 @@ void schedule_next()
         Kprintf("\n");
 }
 
-struct regctx *new_context_cb(struct regctx *ctx)
+static struct regctx *new_context_cb(struct regctx *ctx)
 {
     u64 new_time;
     u32 timer;
@@ -404,11 +396,11 @@ struct regctx *new_context_cb(struct regctx *ctx)
             Kprintf("[%3d->", thctx.current_thread->tag.id);
         if ((thctx.debug_flags & 3) == 2)
             Kprintf("switch_context(%x:%x,pc=%x,ei=%x =>%x:%d)\n",
-                    ctx,
-                    ctx->unk,
-                    ctx->pc,
-                    ctx->I_CTRL,
-                    thctx.current_thread,
+                    (unsigned int)(uiptr)ctx,
+                    (unsigned int)ctx->unk,
+                    (unsigned int)ctx->pc,
+                    (unsigned int)ctx->I_CTRL,
+                    (unsigned int)(uiptr)thctx.current_thread,
                     thctx.current_thread->tag.id);
     }
 
@@ -444,11 +436,11 @@ struct regctx *new_context_cb(struct regctx *ctx)
             Kprintf("%3d]", thctx.run_next->tag.id);
         if ((thctx.debug_flags & 3) == 2)
             Kprintf("   switch_context --> %x:%x,pc=%x,ei=%x =>%x:%d\n",
-                    thctx.run_next->saved_regs,
-                    thctx.run_next->saved_regs->unk,
-                    thctx.run_next->saved_regs->pc,
-                    thctx.run_next->saved_regs->I_CTRL,
-                    thctx.run_next,
+                    (unsigned int)(uiptr)thctx.run_next->saved_regs,
+                    (unsigned int)thctx.run_next->saved_regs->unk,
+                    (unsigned int)thctx.run_next->saved_regs->pc,
+                    (unsigned int)thctx.run_next->saved_regs->I_CTRL,
+                    (unsigned int)(uiptr)thctx.run_next,
                     thctx.run_next->tag.id);
     }
 
@@ -460,8 +452,10 @@ struct regctx *new_context_cb(struct regctx *ctx)
     return thctx.run_next->saved_regs;
 }
 
-int preempt_cb(int unk)
+static int preempt_cb(int unk)
 {
+    (void)unk;
+
     if (thctx.run_next != thctx.current_thread) {
         thctx.current_thread->reason_counter = &thctx.current_thread->irq_preemption_count;
         return 1;
@@ -470,15 +464,15 @@ int preempt_cb(int unk)
     return 0;
 }
 
-void idle_thread()
+static void idle_thread()
 {
     while (1)
         ;
 }
 
-int timer_handler(void *user)
+static int timer_handler(void *user)
 {
-    struct thread_context *thctx = user;
+    struct thread_context *thctx = (struct thread_context *)user;
     struct alarm *alarm;
     u32 status, counter, ret;
     u64 time = 0;
@@ -497,13 +491,13 @@ int timer_handler(void *user)
         list_for_each_safe (alarm, &thctx->alarm, alarm_list) {
             counter = GetTimerCounter(thctx->timer_id);
             status  = GetTimerStatus(thctx->timer_id);
-            if (counter < thctx->time_lo && (status & 0x1000)) {
+            if ((u32)counter < (u32)thctx->time_lo && (status & 0x1000)) {
                 thctx->time_hi++;
                 thctx->time_lo = counter;
             }
 
             time = as_u64(thctx->time_hi, counter);
-            if (time < alarm->target) {
+            if ((s64)time < (s64)alarm->target) {
                 break;
             }
 
@@ -520,7 +514,7 @@ int timer_handler(void *user)
                     continue;
                 }
 
-                if (ret < thctx->min_wait) {
+                if ((u32)ret < (u32)thctx->min_wait) {
                     ret = thctx->min_wait;
                 }
 
@@ -538,7 +532,7 @@ int timer_handler(void *user)
 }
 
 
-void init_timer()
+static void init_timer()
 {
     iop_sys_clock_t compare;
     s32 timer_id, timer_irq;
@@ -578,8 +572,8 @@ void init_timer()
 
     thctx.alarm_count = 1;
 
-    for (int i = 0; i < 32; i++) {
-        alarm = heap_alloc(0, sizeof(*alarm));
+    for (int i = 0; (int)i < (int)32; i++) {
+        alarm = (struct alarm *)heap_alloc(0, sizeof(*alarm));
         thctx.alarm_id++;
         alarm->tag.id = thctx.alarm_id;
         alarm_free(alarm);
@@ -601,6 +595,9 @@ int _start(int argc, char **argv)
     int *BootMode;
     int state;
     int i;
+
+    (void)argc;
+    (void)argv;
 
     if (RegisterNonAutoLinkEntries(&_exp_thrdman)) {
         return MODULE_NO_RESIDENT_END;
@@ -633,23 +630,23 @@ int _start(int argc, char **argv)
     list_init(&thctx.delete_queue);
     list_init(&thctx.thread_list);
 
-    for (int i = 0; i < 128; i++) {
+    for (i = 0; i < (int)(sizeof(thctx.ready_queue) / sizeof(thctx.ready_queue[0])); i++) {
         list_init(&thctx.ready_queue[i]);
     }
 
     thctx.heap = CreateHeap(2048, 1);
 
     // Create the idle thread
-    idle                = heap_alloc(TAG_THREAD, sizeof(*idle));
+    idle                = (struct thread *)heap_alloc(TAG_THREAD, sizeof(*idle));
     idle->tag.id        = ++thctx.thread_id;
     idle->stack_size    = 512;
-    idle->stack_top     = AllocSysMemory(1, 512, 0);
+    idle->stack_top     = AllocSysMemory(1, 512, NULL);
     idle->init_priority = 127;
     idle->priority      = 127;
     idle->attr          = TH_C;
     idle->status        = THS_READY;
     idle->entry         = idle_thread;
-    idle->saved_regs    = idle->stack_top + (((idle->stack_size << 2) >> 2) - RESERVED_REGCTX_SIZE);
+    idle->saved_regs    = (struct regctx *)(idle->stack_top + (((idle->stack_size << 2) >> 2) - RESERVED_REGCTX_SIZE));
     memset(idle->saved_regs, 0, RESERVED_REGCTX_SIZE);
     idle->gp = GetGP();
 
@@ -668,12 +665,11 @@ int _start(int argc, char **argv)
     readyq_insert_back(idle);
 
     // Create a thread entry for our current state
-    current         = heap_alloc(TAG_THREAD, sizeof(*current));
+    current         = (struct thread *)heap_alloc(TAG_THREAD, sizeof(*current));
     current->tag.id = ++thctx.thread_id;
-    // Taking the address of a stack variable to get
-    // the allocated stack and size. Cute.
-    current->stack_size    = QueryBlockSize(&i);
-    current->stack_top     = QueryBlockTopAddress(&i);
+    // Unofficial: use __builtin_stack_address() to get stack pointer
+    current->stack_size    = QueryBlockSize(__builtin_stack_address());
+    current->stack_top     = QueryBlockTopAddress(__builtin_stack_address());
     current->init_priority = 8;
     current->priority      = 1;
     current->attr          = TH_C;
@@ -700,8 +696,8 @@ int _start(int argc, char **argv)
         SetEventFlag(thctx.sytem_status_flag, 1 << (*BootMode & 3));
     }
 
-    RegisterPostBootCallback(post_boot_callback_1, 2, 0);
-    RegisterPostBootCallback(post_boot_callback_2, 3, 0);
+    RegisterPostBootCallback(post_boot_callback_1, 2, NULL);
+    RegisterPostBootCallback(post_boot_callback_2, 3, NULL);
 
     // mismatched with suspend?
     CpuEnableIntr();
