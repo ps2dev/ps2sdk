@@ -10,6 +10,7 @@ SUBDIRS = \
 	adddrv \
 	addrom2 \
 	bdm \
+	cacheio \
 	bdmfs_fatfs \
 	bdmfs_vfat \
 	devfs \
