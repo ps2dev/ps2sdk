@@ -14,6 +14,7 @@ struct bd_cache
     struct block_device *bd;
     int weight[BLOCK_COUNT];
     u64 sector[BLOCK_COUNT];
+    u16 count[BLOCK_COUNT];
     u8 cache[BLOCK_COUNT][SECTORS_PER_BLOCK*512];
 #ifdef DEBUG
     u32 sectors_read;
@@ -23,18 +24,18 @@ struct bd_cache
 };
 
 /* cache overlaps with requested area ? */
-static int _overlaps(u64 csector, u64 sector, u16 count)
+static int _overlaps(u64 csector, u16 ccount, u64 sector, u16 count)
 {
-    if ((sector < (csector + SECTORS_PER_BLOCK)) && ((sector + count) > csector))
+    if (ccount != 0 && (sector < (csector + ccount)) && ((sector + count) > csector))
         return 1;
     else
         return 0;
 }
 
 /* cache contains requested area ? */
-static int _contains(u64 csector, u64 sector, u16 count)
+static int _contains(u64 csector, u16 ccount, u64 sector, u16 count)
 {
-    if ((sector >= csector) && ((sector + count) <= (csector + SECTORS_PER_BLOCK)))
+    if (ccount != 0 && (sector >= csector) && ((sector + count) <= (csector + ccount)))
         return 1;
     else
         return 0;
@@ -45,9 +46,10 @@ static void _invalidate(struct bd_cache *c, u64 sector, u16 count)
     int blkidx;
 
     for (blkidx = 0; blkidx < BLOCK_COUNT; blkidx++) {
-        if (_overlaps(c->sector[blkidx], sector, count)) {
+        if (_overlaps(c->sector[blkidx], c->count[blkidx], sector, count)) {
             // Invalidate cache entry
             c->sector[blkidx] = 0xffffffffffffffff;
+            c->count[blkidx] = 0;
         }
     }
 }
@@ -71,7 +73,7 @@ static int _read(struct block_device *bd, u64 sector, void *buffer, u16 count)
     // Do a cached read
     int blkidx;
     for (blkidx = 0; blkidx < BLOCK_COUNT; blkidx++) {
-        if (_contains(c->sector[blkidx], sector, count)) {
+        if (_contains(c->sector[blkidx], c->count[blkidx], sector, count)) {
 #ifdef DEBUG
             c->sectors_cache += count;
             //M_DEBUG("- CACHE HIT[%d] [block %d] [devread %ds, hit-ratio %d%%]\n", sector, blkidx, c->sectors_dev, (c->sectors_cache * 100) / c->sectors_read);
@@ -113,9 +115,23 @@ static int _read(struct block_device *bd, u64 sector, void *buffer, u16 count)
     //M_DEBUG("- CACHE READ[%d] -> [block %d] [devread %ds, hit-ratio %d%%]\n", sector, blkidx_best, c->sectors_dev, (c->sectors_cache * 100) / c->sectors_read);
 #endif
 
-    // Fill the block
-    c->bd->read(c->bd, sector, c->cache[blkidx_best], SECTORS_PER_BLOCK);
+    // Fill the block with read-ahead. Some devices reject a speculative
+    // multi-sector read even though the requested sectors themselves are
+    // valid (for example when the read-ahead crosses the end of the media).
+    // Fall back to exactly the requested range in that case.
+    u16 fill_count = SECTORS_PER_BLOCK;
+    int result = c->bd->read(c->bd, sector, c->cache[blkidx_best], fill_count);
+    if (result != fill_count) {
+        fill_count = count;
+        result = c->bd->read(c->bd, sector, c->cache[blkidx_best], fill_count);
+        if (result != fill_count) {
+            c->sector[blkidx_best] = 0xffffffffffffffff;
+            c->count[blkidx_best] = 0;
+            return result < 0 ? result : -1;
+        }
+    }
     c->sector[blkidx_best] = sector;
+    c->count[blkidx_best] = fill_count;
 
     // Read from cache
     u64 offset = (sector - c->sector[blkidx_best]) * 512;
@@ -169,6 +185,7 @@ struct block_device *bd_cache_create(struct block_device *bd)
     for (blkidx = 0; blkidx < BLOCK_COUNT; blkidx++) {
         c->weight[blkidx] = 0;
         c->sector[blkidx] = 0xffffffffffffffff;
+        c->count[blkidx] = 0;
     }
 #ifdef DEBUG
     c->sectors_read = 0;
