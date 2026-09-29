@@ -27,28 +27,28 @@ extern "C" {
 
 typedef struct sysmem_meminfo_
 {
-	int allocation_count;
-	int memsize;
-	sysmem_alloc_table_t *memlist_last;
-	sysmem_alloc_table_t *memlist_first;
+	int m_allocation_count;
+	int m_memsize;
+	sysmem_alloc_table_t *m_memlist_last;
+	sysmem_alloc_table_t *m_memlist_first;
 } sysmem_meminfo_t;
 
 typedef struct sysmem_blockinfo_
 {
-	void *block_address;
+	void *m_block_address;
 	/* Low 8 bits are flags. The rest is the size of this block */
 	/* flags_memsize == 0: block not found in passed in list */
 	/* flags_memsize & 1: passed in list is empty */
 	/* flags_memsize & 2: block is allocated */
-	u32 flags_memsize;
-	void *unused08;
-	sysmem_alloc_table_t *table_info;
+	u32 m_flags_memsize;
+	int m_unused08;
+	sysmem_alloc_table_t *m_table_info;
 } sysmem_blockinfo_t;
 
 typedef union sysmem_info_
 {
-	sysmem_blockinfo_t blockinfo; /* when flag of GetSysMemoryInfo is zero */
-	sysmem_meminfo_t meminfo; /* when flag of GetSysMemoryInfo is nonzero */
+	sysmem_blockinfo_t m_blockinfo; /* when flag of GetSysMemoryInfo is zero */
+	sysmem_meminfo_t m_meminfo; /* when flag of GetSysMemoryInfo is nonzero */
 } sysmem_info_t;
 
 // The following was implemented around SDK 3.0.0

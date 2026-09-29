@@ -33,28 +33,36 @@ extern "C" {
 #define USED	0x00000000
 #define FREE	0x80000000
 
-typedef struct sysmem_alloc_element_
+typedef struct sysmem_alloc_block_info_
 {
-	struct sysmem_alloc_element_ *next;
-	unsigned int info;
-} sysmem_alloc_element_t;
+	u32 m_allocated : 1;
+	u32 m_address : 15;
+	u32 m_pad : 1;
+	u32 m_size : 15;
+} sysmem_alloc_block_info_t;
+
+typedef struct sysmem_alloc_block_
+{
+	struct sysmem_alloc_block_ *m_next;
+	sysmem_alloc_block_info_t m_info;
+} sysmem_alloc_block_t;
 
 typedef struct sysmem_alloc_table_
 {
-	struct sysmem_alloc_table_ *next;
-	sysmem_alloc_element_t list[31];
-	int padding;
+	struct sysmem_alloc_table_ *m_next;
+	sysmem_alloc_block_t m_blkarray[31];
+	int m_padding;
 } sysmem_alloc_table_t;
 
 /** Sysmem internal data structure. */
 typedef struct sysmem_internals_
 {
-	int memsize;
-	sysmem_alloc_table_t *alloclist;
+	int m_memsize;
+	sysmem_alloc_table_t *m_alloclist;
 	/* The following members may change depending on the version of the module. */
-	void *intr_suspend_tbl;
-	int allocation_count;
-	sysmem_alloc_table_t *smemupdate_cur;
+	void *m_intr_suspend_tbl;
+	int m_allocation_count;
+	sysmem_alloc_table_t *m_smemupdate_cur;
 } sysmem_internals_t;
 
 extern sysmem_internals_t *GetSysmemInternalData(void);
