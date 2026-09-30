@@ -73,7 +73,6 @@ struct _mass_dev
     unsigned char interfaceAlt;    // interface alternate setting
     unsigned int sectorSize;       // = 512; // store size of sector from usb mass
     unsigned int maxLBA;
-    int ioSema;
     cache_set *cache;
     usbmass_cb_t callback;
 };
