@@ -189,10 +189,6 @@ extern int sceSifGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest, in
 
 extern SifRpcServerData_t *sceSifRemoveRpc(SifRpcServerData_t *sd, SifRpcDataQueue_t *qd);
 extern SifRpcDataQueue_t *sceSifRemoveRpcQueue(SifRpcDataQueue_t *qd);
-#ifdef _IOP
-extern void sceSifSetSif1CB(void (*func)(void *userdata), void *userdata);
-extern void sceSifClearSif1CB(void);
-#endif
 
 #ifdef __cplusplus
 }
