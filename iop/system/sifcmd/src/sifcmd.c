@@ -8,8 +8,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#include "irx_imports.h"
 #include "sifcmd.h"
+#include "irx_imports.h"
 
 extern struct irx_export_table _exp_sifcmd;
 
@@ -20,146 +20,135 @@ IRX_ID("IOP_SIF_rpc_interface", 2, 8);
 
 typedef struct sif_cmd_data_
 {
-	void *pktbuf;
-	void *unused;
-	int sif_send_eebuf;
-	SifCmdSysHandlerData_t *sys_cmd_handlers;
-	int nr_sys_handlers;
-	SifCmdHandlerData_t *usr_cmd_handlers;
-	int nr_usr_handlers;
-	unsigned int *sregs_ptr;
-	int ef;
-	void (*sif_1_callback)(void *userdata);
-	void *sif_1_callback_userdata;
-	SifCmdSysHandlerData_t sys_cmd_handler_handler[32];
-	unsigned int sregs[32];
+	void *m_pckt_buffer;
+	void *m_sys_buffer;
+	int m_sif_send_eebuf;
+	SifCmdSysHandlerData_t *m_sys_cmd_handlers;
+	int m_nr_sys_handlers;
+	SifCmdHandlerData_t *m_usr_cmd_handlers;
+	int m_nr_usr_handlers;
+	unsigned int *m_sregs_ptr;
+	int m_ef;
+	void (*m_sif_1_callback)(void *userdata);
+	void *m_sif_1_callback_userdata;
+	SifCmdSysHandlerData_t m_sys_cmd_handler_handler[32];
+	unsigned int m_soft_reg[32];
 } __attribute__((aligned(16))) sif_cmd_data_t;
 
 typedef struct t_SifCmdChgAddrData
 {
-	SifCmdHeader_t header;
-	u32 newaddr;
+	SifCmdHeader_t m_header;
+	u32 m_newaddr;
 } SifCmdChgAddrData_t;
 
-static sif_cmd_data_t sif_cmd_data;
-static u8 sif_iop_recvbuf[0x80] __attribute__((aligned(16)));
-static u8 sif_unused[0x40] __attribute__((aligned(16)));
+static sif_cmd_data_t g_sif_cmd_data_table;
+static u8 g_sif_pckt_buffer[0x80] __attribute__((aligned(16)));
+static u8 g_sif_sys_buffer[0x40] __attribute__((aligned(16)));
 
-static int sif_cmd_int_handler(void *userdata);
+static int _sceSifCmdIntrHdlr(void *userdata);
 
-static void sif_sys_cmd_handler_set_sreg(const SifCmdSRegData_t *pkt, sif_cmd_data_t *sci)
+static void _set_sreg(void *data, void *harg)
 {
-	sci->sregs_ptr[pkt->index] = pkt->value;
+	const SifCmdSRegData_t *pkt;
+	sif_cmd_data_t *sci;
+
+	pkt = (const SifCmdSRegData_t *)data;
+	sci = (sif_cmd_data_t *)harg;
+	sci->m_sregs_ptr[pkt->index] = pkt->value;
 }
 
-static void sif_sys_cmd_handler_change_addr(const SifCmdChgAddrData_t *pkt, sif_cmd_data_t *sci)
+static void _change_addr(void *data, void *harg)
 {
-	sci->sif_send_eebuf = pkt->newaddr;
+	const SifCmdChgAddrData_t *pkt;
+	sif_cmd_data_t *sci;
+
+	pkt = (const SifCmdChgAddrData_t *)data;
+	sci = (sif_cmd_data_t *)harg;
+	sci->m_sif_send_eebuf = pkt->m_newaddr;
 }
 
 unsigned int sceSifGetSreg(int sreg)
 {
-	return sif_cmd_data.sregs[sreg];
+	// Unofficial: use m_sregs_ptr
+	return g_sif_cmd_data_table.m_sregs_ptr[sreg];
 }
 
 void sceSifSetSreg(int sreg, unsigned int value)
 {
-	sif_cmd_data.sregs[sreg] = value;
+	// Unofficial: use m_sregs_ptr
+	g_sif_cmd_data_table.m_sregs_ptr[sreg] = value;
 }
 
-#if 0
-sif_cmd_data_t *sif_cmd_get_internal_data()
+#ifdef DEAD_CODE
+sif_cmd_data_t *sceSifGetDataTable(void)
 {
-	return &sif_cmd_data;
+	return (sif_cmd_data_t *)&g_sif_cmd_data_table;
 }
 #endif
 
-static void sif_sys_cmd_handler_init_from_ee(const SifCmdChgAddrData_t *pkt, sif_cmd_data_t *sci)
+static void sif_sys_cmd_handler_init_from_ee(void *data, void *harg)
 {
-	if ( pkt->header.opt )
-	{
-		iSetEventFlag(sci->ef, 0x800u);
-	}
-	else
-	{
-		iSetEventFlag(sci->ef, 0x100u);
-		sceSifSetMSFlag(SIF_STAT_CMDINIT);
-		sci->sif_send_eebuf = pkt->newaddr;
-	}
+	const SifCmdChgAddrData_t *pkt;
+	sif_cmd_data_t *sci;
+
+	pkt = (const SifCmdChgAddrData_t *)data;
+	sci = (sif_cmd_data_t *)harg;
+	iSetEventFlag(sci->m_ef, pkt->m_header.opt ? 0x800 : 0x100);
+	if ( pkt->m_header.opt )
+		return;
+	sceSifSetMSFlag(SIF_STAT_CMDINIT);
+	sci->m_sif_send_eebuf = pkt->m_newaddr;
 }
 
 int _start(int ac, char **av)
 {
 	const int *BootMode3;
+	unsigned int i;
 
 	(void)ac;
 	(void)av;
 
 	BootMode3 = QueryBootMode(3);
-	if ( BootMode3 )
+	if ( BootMode3 && (BootMode3[1] & 1) )
 	{
-		int BootMode3_1;
-
-		BootMode3_1 = BootMode3[1];
-		if ( (BootMode3_1 & 1) != 0 )
-		{
-			printf(" No SIF service(sifcmd)\n");
-			return 1;
-		}
-		if ( (BootMode3_1 & 2) != 0 )
-		{
-			printf(" No SIFCMD/RPC service\n");
-			return 1;
-		}
+		printf(" No SIF service(sifcmd)\n");
+		return MODULE_NO_RESIDENT_END;
+	}
+	if ( BootMode3 && (BootMode3[1] & 2) )
+	{
+		printf(" No SIFCMD/RPC service\n");
+		return MODULE_NO_RESIDENT_END;
 	}
 	if ( !sceSifCheckInit() )
 		sceSifInit();
-	if ( RegisterLibraryEntries(&_exp_sifcmd) == 0 )
-	{
-		unsigned int i;
-
-		sif_cmd_data.pktbuf = sif_iop_recvbuf;
-		sif_cmd_data.unused = sif_unused;
-		sif_cmd_data.sys_cmd_handlers = sif_cmd_data.sys_cmd_handler_handler;
-		sif_cmd_data.nr_sys_handlers =
-			sizeof(sif_cmd_data.sys_cmd_handler_handler) / sizeof(sif_cmd_data.sys_cmd_handler_handler[0]);
-		sif_cmd_data.sif_send_eebuf = 0;
-		sif_cmd_data.usr_cmd_handlers = 0;
-		sif_cmd_data.nr_usr_handlers = 0;
-		sif_cmd_data.sregs_ptr = sif_cmd_data.sregs;
-		sif_cmd_data.sif_1_callback = 0;
-		sif_cmd_data.sif_1_callback_userdata = 0;
-		for ( i = 0; i < sizeof(sif_cmd_data.sys_cmd_handler_handler) / sizeof(sif_cmd_data.sys_cmd_handler_handler[0]);
-					i += 1 )
-		{
-			sif_cmd_data.sys_cmd_handler_handler[i].handler = NULL;
-			sif_cmd_data.sys_cmd_handler_handler[i].harg = NULL;
-		}
-		for ( i = 0; i < sizeof(sif_cmd_data.sregs) / sizeof(sif_cmd_data.sregs[0]); i += 1 )
-		{
-			sif_cmd_data.sregs[i] = 0;
-		}
-		sif_cmd_data.sys_cmd_handler_handler[0].handler = (SifCmdHandler_t)sif_sys_cmd_handler_change_addr;
-		sif_cmd_data.sys_cmd_handler_handler[0].harg = &sif_cmd_data;
-		sif_cmd_data.sys_cmd_handler_handler[1].handler = (SifCmdHandler_t)sif_sys_cmd_handler_set_sreg;
-		sif_cmd_data.sys_cmd_handler_handler[1].harg = &sif_cmd_data;
-		sif_cmd_data.ef = GetSystemStatusFlag();
-		sif_cmd_data.sys_cmd_handler_handler[2].handler = (SifCmdHandler_t)sif_sys_cmd_handler_init_from_ee;
-		sif_cmd_data.sys_cmd_handler_handler[2].harg = &sif_cmd_data;
-		RegisterIntrHandler(IOP_IRQ_DMA_SIF1, 1, sif_cmd_int_handler, &sif_cmd_data);
-		EnableIntr(0x22B);
-		sceSifSetSubAddr((u32)sif_iop_recvbuf);
-		return 0;
-	}
-	return 1;
+	if ( RegisterLibraryEntries(&_exp_sifcmd) )
+		return MODULE_NO_RESIDENT_END;
+	g_sif_cmd_data_table.m_pckt_buffer = g_sif_pckt_buffer;
+	g_sif_cmd_data_table.m_sys_buffer = g_sif_sys_buffer;
+	sceSifSetSysCmdBuffer(
+		g_sif_cmd_data_table.m_sys_cmd_handler_handler,
+		sizeof(g_sif_cmd_data_table.m_sys_cmd_handler_handler) / sizeof(g_sif_cmd_data_table.m_sys_cmd_handler_handler[0]));
+	g_sif_cmd_data_table.m_sif_send_eebuf = 0;
+	sceSifSetCmdBuffer(NULL, 0);
+	g_sif_cmd_data_table.m_sregs_ptr = g_sif_cmd_data_table.m_soft_reg;
+	sceSifClearSif1CB();
+	for ( i = 0; i < (unsigned int)g_sif_cmd_data_table.m_nr_sys_handlers; i += 1 )
+		sceSifRemoveCmdHandler(0x80000000 + i);
+	for ( i = 0; i < sizeof(g_sif_cmd_data_table.m_soft_reg) / sizeof(g_sif_cmd_data_table.m_soft_reg[0]); i += 1 )
+		sceSifSetSreg(i, 0);
+	sceSifAddCmdHandler(SIF_CMD_CHANGE_SADDR, _change_addr, (void *)&g_sif_cmd_data_table);
+	sceSifAddCmdHandler(SIF_CMD_SET_SREG, _set_sreg, (void *)&g_sif_cmd_data_table);
+	sceSifAddCmdHandler(SIF_CMD_INIT_CMD, sif_sys_cmd_handler_init_from_ee, (void *)&g_sif_cmd_data_table);
+	g_sif_cmd_data_table.m_ef = GetSystemStatusFlag();
+	RegisterIntrHandler(IOP_IRQ_DMA_SIF1, 1, _sceSifCmdIntrHdlr, &g_sif_cmd_data_table);
+	EnableIntr(0x200 | IOP_IRQ_DMA_SIF1);
+	sceSifSetSubAddr((u32)g_sif_cmd_data_table.m_pckt_buffer);
+	return MODULE_RESIDENT_END;
 }
 
 int sifcmd_deinit(void)
 {
-	int old_irq;
-
-	DisableIntr(IOP_IRQ_DMA_SIF1, &old_irq);
-	ReleaseIntrHandler(IOP_IRQ_DMA_SIF1);
+	sceSifExitCmd();
 #if 0
 	// FIXME: Do we really need this call?
 	sifman_2();
@@ -170,7 +159,7 @@ int sifcmd_deinit(void)
 void sceSifInitCmd(void)
 {
 	sceSifSetSMFlag(SIF_STAT_CMDINIT);
-	WaitEventFlag(sif_cmd_data.ef, 0x100u, 0, 0);
+	WaitEventFlag(g_sif_cmd_data_table.m_ef, 0x100, WEF_AND, NULL);
 }
 
 void sceSifExitCmd(void)
@@ -183,39 +172,31 @@ void sceSifExitCmd(void)
 
 void sceSifSetCmdBuffer(SifCmdHandlerData_t *db, int size)
 {
-	sif_cmd_data.usr_cmd_handlers = db;
-	sif_cmd_data.nr_usr_handlers = size;
+	g_sif_cmd_data_table.m_usr_cmd_handlers = db;
+	g_sif_cmd_data_table.m_nr_usr_handlers = size;
 }
 
 void sceSifSetSysCmdBuffer(SifCmdSysHandlerData_t *db, int size)
 {
-	sif_cmd_data.sys_cmd_handlers = db;
-	sif_cmd_data.nr_sys_handlers = size;
+	g_sif_cmd_data_table.m_sys_cmd_handlers = db;
+	g_sif_cmd_data_table.m_nr_sys_handlers = size;
 }
 
 void sceSifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg)
 {
-	if ( cid >= 0 )
-	{
-		sif_cmd_data.usr_cmd_handlers[cid].handler = handler;
-		sif_cmd_data.usr_cmd_handlers[cid].harg = harg;
-	}
-	else
-	{
-		sif_cmd_data.sys_cmd_handlers[cid + (cid & 0x7FFFFFFF)].handler = handler;
-		sif_cmd_data.sys_cmd_handlers[cid + (cid & 0x7FFFFFFF)].harg = harg;
-	}
+	*((!(cid & 0x80000000)) ? &(g_sif_cmd_data_table.m_usr_cmd_handlers[cid].handler) :
+														&(g_sif_cmd_data_table.m_sys_cmd_handlers[(cid & 0x7FFFFFFF)].handler)) = handler;
+	*((!(cid & 0x80000000)) ? &(g_sif_cmd_data_table.m_usr_cmd_handlers[cid].harg) :
+														&(g_sif_cmd_data_table.m_sys_cmd_handlers[(cid & 0x7FFFFFFF)].harg)) = harg;
 }
 
 void sceSifRemoveCmdHandler(int cid)
 {
-	if ( cid >= 0 )
-		sif_cmd_data.usr_cmd_handlers[cid].handler = NULL;
-	else
-		sif_cmd_data.sys_cmd_handlers[cid + (cid & 0x7FFFFFFF)].handler = NULL;
+	// Unofficial: also set harg to NULL
+	sceSifAddCmdHandler(cid, NULL, NULL);
 }
 
-static int sif_send_cmd_common(
+static int _sceSifSendCmd(
 	int cid,
 	char flags,
 	SifCmdHeader_t *packet,
@@ -226,72 +207,40 @@ static int sif_send_cmd_common(
 	void (*completion_cb)(void *userdata),
 	void *completion_cb_userdata)
 {
-	int dmatc1;
-	SifDmaTransfer_t *dmatp;
-	int dmatc2;
-	int sif_send_eebuf;
-	unsigned int dmar1;
+	int dmatc;
+	unsigned int trid;
 	SifDmaTransfer_t dmat[2];
 	int state;
 
 	if ( (unsigned int)(packet_size - 16) >= 0x61 )
 		return 0;
-	dmatc1 = 0;
-	if ( size_extra <= 0 )
-	{
-		int tmp1;
-
-		tmp1 = *(u8 *)packet;
-		packet->dest = 0;
-		*(u32 *)packet = tmp1;
-	}
-	else
-	{
-		int tmp2;
-
-		dmatc1 = 1;
-		dmat[0].dest = dest_extra;
-		dmat[0].size = size_extra;
-		dmat[0].attr = 0;
-		dmat[0].src = src_extra;
-		tmp2 = *(u8 *)packet;
-		packet->dest = dest_extra;
-		*(u32 *)packet = tmp2 | (size_extra << 8);
-	}
-	dmatp = &dmat[dmatc1];
-	dmatc2 = dmatc1 + 1;
-	*(u8 *)packet = packet_size;
+	dmatc = 0;
+	packet->dest = (size_extra > 0) ? dest_extra : NULL;
+	packet->dsize = (size_extra > 0) ? size_extra : 0;
+	dmat[dmatc].dest = dest_extra;
+	dmat[dmatc].size = size_extra;
+	dmat[dmatc].attr = 0;
+	dmat[dmatc].src = src_extra;
+	dmatc += !!(size_extra > 0);
+	packet->psize = packet_size;
 	packet->cid = cid;
-	dmatp->src = packet;
-	sif_send_eebuf = sif_cmd_data.sif_send_eebuf;
-	dmatp->attr = 4;
-	dmatp->size = packet_size;
-	dmatp->dest = (void *)sif_send_eebuf;
-	if ( (flags & 1) != 0 )
-	{
-		if ( (flags & 8) != 0 )
-			return sceSifSetDmaIntr(dmat, dmatc2, completion_cb, completion_cb_userdata);
-		else
-			return sceSifSetDma(dmat, dmatc2);
-	}
-	else
-	{
-		unsigned int dmar2;
-
-		CpuSuspendIntr(&state);
-		if ( (flags & 8) != 0 )
-			dmar2 = sceSifSetDmaIntr(dmat, dmatc2, completion_cb, completion_cb_userdata);
-		else
-			dmar2 = sceSifSetDma(dmat, dmatc2);
-		dmar1 = dmar2;
-		CpuResumeIntr(state);
-	}
-	return dmar1;
+	dmat[dmatc].src = packet;
+	dmat[dmatc].attr = SIF_DMA_INT_O;
+	dmat[dmatc].size = packet_size;
+	dmat[dmatc].dest = (void *)(g_sif_cmd_data_table.m_sif_send_eebuf);
+	if ( (flags & 1) )
+		return (flags & 8) ? sceSifSetDmaIntr(dmat, dmatc + 1, completion_cb, completion_cb_userdata) :
+												 (unsigned int)sceSifSetDma(dmat, dmatc + 1);
+	CpuSuspendIntr(&state);
+	trid = (flags & 8) ? sceSifSetDmaIntr(dmat, dmatc + 1, completion_cb, completion_cb_userdata) :
+											 (unsigned int)sceSifSetDma(dmat, dmatc + 1);
+	CpuResumeIntr(state);
+	return trid;
 }
 
 unsigned int sceSifSendCmd(int cid, void *packet, int packet_size, void *src_extra, void *dest_extra, int size_extra)
 {
-	return sif_send_cmd_common(cid, 0, (SifCmdHeader_t *)packet, packet_size, src_extra, dest_extra, size_extra, 0, 0);
+	return _sceSifSendCmd(cid, 0, (SifCmdHeader_t *)packet, packet_size, src_extra, dest_extra, size_extra, NULL, NULL);
 }
 
 unsigned int sceSifSendCmdIntr(
@@ -304,7 +253,7 @@ unsigned int sceSifSendCmdIntr(
 	void (*completion_cb)(void *userdata),
 	void *completion_cb_userdata)
 {
-	return sif_send_cmd_common(
+	return _sceSifSendCmd(
 		cid,
 		8,
 		(SifCmdHeader_t *)packet,
@@ -318,7 +267,7 @@ unsigned int sceSifSendCmdIntr(
 
 unsigned int isceSifSendCmd(int cid, void *packet, int packet_size, void *src_extra, void *dest_extra, int size_extra)
 {
-	return sif_send_cmd_common(cid, 1, (SifCmdHeader_t *)packet, packet_size, src_extra, dest_extra, size_extra, 0, 0);
+	return _sceSifSendCmd(cid, 1, (SifCmdHeader_t *)packet, packet_size, src_extra, dest_extra, size_extra, NULL, NULL);
 }
 
 unsigned int isceSifSendCmdIntr(
@@ -331,7 +280,7 @@ unsigned int isceSifSendCmdIntr(
 	void (*completion_cb)(void *userdata),
 	void *completion_cb_userdata)
 {
-	return sif_send_cmd_common(
+	return _sceSifSendCmd(
 		cid,
 		9,
 		(SifCmdHeader_t *)packet,
@@ -343,81 +292,54 @@ unsigned int isceSifSendCmdIntr(
 		completion_cb_userdata);
 }
 
+static void sif_sif1_handler_noop(void *userdata)
+{
+	(void)userdata;
+}
+
 void sceSifSetSif1CB(void (*func)(void *userdata), void *userdata)
 {
-	sif_cmd_data.sif_1_callback = func;
-	sif_cmd_data.sif_1_callback_userdata = userdata;
+	// Unofficial: use no-op function if function is NULL
+	g_sif_cmd_data_table.m_sif_1_callback = func ? func : &sif_sif1_handler_noop;
+	g_sif_cmd_data_table.m_sif_1_callback_userdata = userdata;
 }
 
 void sceSifClearSif1CB(void)
 {
-	sif_cmd_data.sif_1_callback = NULL;
-	sif_cmd_data.sif_1_callback_userdata = NULL;
+	sceSifSetSif1CB(NULL, NULL);
 }
 
-static int sif_cmd_int_handler(void *userdata)
+static int _sceSifCmdIntrHdlr(void *userdata)
 {
-	void (*sif_1_callback)(void *userdata);
-	SifCmdHeader_t *pktbuf1;
+	SifCmdHeader_t *pkt;
 	int size;
-	int size_calc1;
-	SifCmdHeader_t *pktbuf2;
-	int pktwords;
 	int i;
-	u32 tmp1;
-	u32 tmpbuf1[32];
+	u32 tmpbuf[32];
 	sif_cmd_data_t *sci;
 
 	sci = (sif_cmd_data_t *)userdata;
-	sif_1_callback = sci->sif_1_callback;
-	if ( sif_1_callback )
-		sif_1_callback(sci->sif_1_callback_userdata);
-	pktbuf1 = (SifCmdHeader_t *)sci->pktbuf;
-	size = *(u8 *)sci->pktbuf;
-	if ( !*(u8 *)sci->pktbuf )
+	// Unofficial: unconditionally call callback
+	sci->m_sif_1_callback(sci->m_sif_1_callback_userdata);
+	pkt = (SifCmdHeader_t *)sci->m_pckt_buffer;
+	size = pkt->psize;
+	if ( !size )
 	{
 		sceSifSetDChain();
 		return 1;
 	}
-	*(u8 *)pktbuf1 = 0;
-	size_calc1 = size + 3;
-	pktbuf2 = pktbuf1;
-	if ( size + 3 < 0 )
-		size_calc1 = size + 6;
-	pktwords = size_calc1 >> 2;
-	i = 0;
-	tmpbuf1[2] = 0;
-	if ( size_calc1 >> 2 > 0 )
-	{
-		u32 *tmpptr1;
-
-		tmpptr1 = tmpbuf1;
-		do
-		{
-			tmp1 = *(u32 *)pktbuf2;
-			pktbuf2 = (SifCmdHeader_t *)((char *)pktbuf2 + 4);
-			++i;
-			*tmpptr1++ = tmp1;
-		} while ( i < pktwords );
-	}
+	pkt->psize = 0;
+	size += 3;
+	size += (size < 0) ? 3 : 0;
+	tmpbuf[2] = 0;  // cid
+	for ( i = 0; i < (size / (int)sizeof(tmpbuf[0])); i += 1 )
+		tmpbuf[i] = ((u32 *)pkt)[i];
+	pkt = (SifCmdHeader_t *)tmpbuf;
 	sceSifSetDChain();
-	if ( (tmpbuf1[2] & 0x80000000) == 0 )
-	{
-		if ( (int)tmpbuf1[2] < sci->nr_usr_handlers )
-		{
-			if ( sif_cmd_data.usr_cmd_handlers[tmpbuf1[2]].handler != NULL )
-			{
-				sif_cmd_data.usr_cmd_handlers[tmpbuf1[2]].handler(tmpbuf1, sif_cmd_data.usr_cmd_handlers[tmpbuf1[2]].harg);
-			}
-		}
-	}
-	else if ( (signed int)(tmpbuf1[2] & 0x7FFFFFFF) < sci->nr_sys_handlers )
-	{
-		if ( sif_cmd_data.sys_cmd_handlers[tmpbuf1[2] + (tmpbuf1[2] & 0x7FFFFFFF)].handler != NULL )
-		{
-			sif_cmd_data.sys_cmd_handlers[tmpbuf1[2] + (tmpbuf1[2] & 0x7FFFFFFF)].handler(
-				tmpbuf1, sif_cmd_data.usr_cmd_handlers[tmpbuf1[2] + (tmpbuf1[2] & 0x7FFFFFFF)].harg);
-		}
-	}
+	if ( ((int)(pkt->cid & 0x7FFFFFFF) < ((!(pkt->cid & 0x80000000)) ? sci->m_nr_usr_handlers : sci->m_nr_sys_handlers)) && ((!(pkt->cid & 0x80000000)) ? g_sif_cmd_data_table.m_usr_cmd_handlers[pkt->cid].handler : g_sif_cmd_data_table.m_sys_cmd_handlers[(pkt->cid & 0x7FFFFFFF)].handler) )
+		((!(pkt->cid & 0x80000000)) ? g_sif_cmd_data_table.m_usr_cmd_handlers[pkt->cid].handler :
+																	g_sif_cmd_data_table.m_sys_cmd_handlers[(pkt->cid & 0x7FFFFFFF)].handler)(
+			pkt,
+			(!(pkt->cid & 0x80000000)) ? g_sif_cmd_data_table.m_usr_cmd_handlers[pkt->cid].harg :
+																	 g_sif_cmd_data_table.m_sys_cmd_handlers[(pkt->cid & 0x7FFFFFFF)].harg);
 	return 1;
 }
