@@ -1,13 +1,9 @@
 #include "thbase.h"
-#include "loadcore.h"
-#include "sysclib.h"
-#include "sysmem.h"
+#include <irx_imports.h>
+#include <defs.h>
 #include "kerr.h"
-#include "intrman.h"
 #include "thsemap.h"
 #include "xthbase.h"
-#include "xtimrman.h"
-#include <defs.h>
 
 #include "thcommon.h"
 
@@ -38,7 +34,7 @@ int CreateThread(iop_thread_t *thparam)
         return KE_ILLEGAL_ATTR;
     }
 
-    if (thparam->priority > 126) {
+    if ((u32)thparam->priority > (u32)126) {
         return KE_ILLEGAL_PRIORITY;
     }
 
@@ -46,20 +42,20 @@ int CreateThread(iop_thread_t *thparam)
         return KE_ILLEGAL_ENTRY;
     }
 
-    if (thparam->stacksize < 0x130) {
+    if ((u32)thparam->stacksize < (u32)0x130) {
         return KE_ILLEGAL_STACK_SIZE;
     }
 
     CpuSuspendIntr(&state);
 
-    thread = heap_alloc(TAG_THREAD, sizeof(*thread));
+    thread = (struct thread *)heap_alloc(TAG_THREAD, sizeof(*thread));
     if (!thread) {
         CpuResumeIntr(state);
         return KE_NO_MEMORY;
     }
 
     thparam->stacksize = ALIGN_256(thparam->stacksize);
-    stack              = AllocSysMemory(1, thparam->stacksize, 0);
+    stack              = AllocSysMemory(1, thparam->stacksize, NULL);
     if (!stack) {
         heap_free(&thread->tag);
         CpuResumeIntr(state);
@@ -103,7 +99,7 @@ int DeleteThread(int thid)
 
     CpuSuspendIntr(&state);
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (!HANDLE_VERIFY(thid, TAG_THREAD) || thread == thctx.idle_thread) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_THID;
@@ -144,7 +140,7 @@ int StartThread(int thid, void *arg)
 
     CpuSuspendIntr(&state);
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_THID;
@@ -157,7 +153,7 @@ int StartThread(int thid, void *arg)
 
     // zero out register state
     reg_offset         = ALIGN(thread->stack_size) - RESERVED_REGCTX_SIZE;
-    thread->saved_regs = thread->stack_top + reg_offset;
+    thread->saved_regs = (struct regctx *)(thread->stack_top + reg_offset);
     memset(thread->saved_regs, 0, RESERVED_REGCTX_SIZE);
 
     thread->saved_regs->a0 = (u32)arg;
@@ -181,7 +177,7 @@ int StartThreadArgs(int thid, int args, void *argp)
 
     CpuSuspendIntr(&state);
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_THID;
@@ -194,7 +190,7 @@ int StartThreadArgs(int thid, int args, void *argp)
 
     // stash the args at the bottom of stack
     arg_offset = ALIGN(thread->stack_size) - ALIGN(args);
-    if (args > 0 && argp) {
+    if ((int)args > (int)0 && argp) {
         memcpy(thread->stack_top + arg_offset, argp, args);
     }
 
@@ -203,7 +199,7 @@ int StartThreadArgs(int thid, int args, void *argp)
     // memset(thread->saved_regs, 0, RESERVED_REGCTX_SIZE);
 
     reg_offset         = arg_offset - RESERVED_REGCTX_SIZE;
-    thread->saved_regs = thread->stack_top + reg_offset;
+    thread->saved_regs = (struct regctx *)(thread->stack_top + reg_offset);
 
     memset(thread->saved_regs, 0, RESERVED_REGCTX_SIZE);
 
@@ -264,7 +260,7 @@ int TerminateThread(int thid)
 
     CpuSuspendIntr(&state);
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_THID;
@@ -281,7 +277,7 @@ int TerminateThread(int thid)
         list_remove(&thread->queue);
         if (thread->wait_type == TSW_DELAY) {
             CancelAlarm(thread_delay_cb, thread);
-        } else if (thread->wait_type >= TSW_DELAY && thread->wait_type <= TSW_FPL) {
+        } else if ((int)thread->wait_type >= (int)TSW_DELAY && (int)thread->wait_type <= (int)TSW_FPL) {
             thread->wait_event->waiter_count--;
         }
     }
@@ -305,7 +301,7 @@ int iTerminateThread(int thid)
         return KE_ILLEGAL_THID;
     }
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
         return KE_UNKNOWN_THID;
     }
@@ -325,7 +321,7 @@ int iTerminateThread(int thid)
             if (thread->status == THS_WAIT) {
                 if (thread->wait_type == TSW_DELAY) {
                     iCancelAlarm(thread_delay_cb, thread);
-                } else {
+                } else if ((int)thread->wait_type >= (int)TSW_DELAY && (int)thread->wait_type <= (int)TSW_FPL) {
                     thread->wait_event->waiter_count--;
                 }
             }
@@ -362,7 +358,7 @@ int ChangeThreadPriority(int thid, int priority)
     if (thid == 0) {
         thread = thctx.current_thread;
     } else {
-        thread = HANDLE_PTR(thid);
+        thread = (struct thread *)HANDLE_PTR(thid);
         if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
             CpuResumeIntr(state);
             return KE_UNKNOWN_THID;
@@ -375,7 +371,7 @@ int ChangeThreadPriority(int thid, int priority)
     }
 
     if (priority) {
-        if (priority - 1 >= 126) {
+        if ((u32)(priority - 1) >= (u32)126) {
             CpuResumeIntr(state);
             return KE_ILLEGAL_PRIORITY;
         }
@@ -384,7 +380,7 @@ int ChangeThreadPriority(int thid, int priority)
     }
 
     if (thread == thctx.current_thread) {
-        if (priority >= readyq_highest()) {
+        if ((int)priority >= (int)readyq_highest()) {
             thread->status   = THS_READY;
             thread->priority = priority;
             readyq_insert_back(thread);
@@ -430,7 +426,7 @@ int iChangeThreadPriority(int thid, int priority)
         return KE_ILLEGAL_THID;
     }
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
         return KE_UNKNOWN_THID;
     }
@@ -443,7 +439,7 @@ int iChangeThreadPriority(int thid, int priority)
         priority = thctx.current_thread->priority;
     }
 
-    if (priority - 1 >= 126) {
+    if ((u32)(priority - 1) >= (u32)126) {
         return KE_ILLEGAL_PRIORITY;
     }
 
@@ -480,7 +476,7 @@ int RotateThreadReadyQueue(int priority)
         return KE_ILLEGAL_CONTEXT;
     }
 
-    if (priority >= 127) {
+    if ((u32)priority >= (u32)127) {
         return KE_ILLEGAL_PRIORITY;
     }
 
@@ -508,7 +504,7 @@ int RotateThreadReadyQueue(int priority)
 
     thread->status = THS_READY;
     readyq_insert_back(thread);
-    thctx.run_next = 0;
+    thctx.run_next = NULL;
     return thread_leave(KE_OK, 0, state, 0);
 }
 
@@ -523,12 +519,12 @@ int iRotateThreadReadyQueue(int priority)
     thread = thctx.current_thread;
 
     if (priority) {
-        if (priority >= 126) {
+        if ((u32)priority >= (u32)126) {
             return KE_ILLEGAL_PRIORITY;
         }
     } else {
         priority = readyq_highest();
-        if (thread->priority < priority) {
+        if ((int)thread->priority < (int)priority) {
             priority = thread->priority;
         }
     }
@@ -565,7 +561,7 @@ int ReleaseWaitThread(int thid)
 
     CpuSuspendIntr(&state);
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (thread == thctx.current_thread) {
         CpuResumeIntr(state);
         return KE_ILLEGAL_THID;
@@ -587,7 +583,7 @@ int ReleaseWaitThread(int thid)
 
     if (thread->wait_type == TSW_DELAY) {
         CancelAlarm(thread_delay_cb, thread);
-    } else {
+    } else if ((int)thread->wait_type >= (int)TSW_DELAY && (int)thread->wait_type <= (int)TSW_FPL) {
         thread->wait_event->waiter_count--;
     }
 
@@ -606,7 +602,7 @@ int iReleaseWaitThread(int thid)
         return KE_ILLEGAL_THID;
     }
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
 
     if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
         return KE_UNKNOWN_THID;
@@ -622,7 +618,7 @@ int iReleaseWaitThread(int thid)
 
     if (thread->wait_type == TSW_DELAY) {
         iCancelAlarm(thread_delay_cb, thread);
-    } else {
+    } else if ((int)thread->wait_type >= (int)TSW_DELAY && (int)thread->wait_type <= (int)TSW_FPL) {
         thread->wait_event->waiter_count--;
     }
 
@@ -662,7 +658,7 @@ int ReferThreadStatus(int thid, iop_thread_info_t *info)
     CpuSuspendIntr(&state);
 
     thread = refer_thread(thid, 1);
-    if (thread < 0) {
+    if ((int)thread < (int)0) {
         CpuResumeIntr(state);
         return (int)thread;
     }
@@ -682,7 +678,7 @@ int iReferThreadStatus(int thid, iop_thread_info_t *info)
         return KE_ILLEGAL_THID;
     }
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
 
     if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
         return KE_UNKNOWN_THID;
@@ -741,7 +737,7 @@ int WakeupThread(int thid)
 
     CpuSuspendIntr(&state);
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (thread == thctx.current_thread) {
         return KE_ILLEGAL_THID;
     }
@@ -781,7 +777,7 @@ int iWakeupThread(int thid)
         return KE_ILLEGAL_THID;
     }
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
         return KE_UNKNOWN_THID;
     }
@@ -813,7 +809,7 @@ int CancelWakeupThread(int thid)
 
     CpuSuspendIntr(&state);
     if (thid) {
-        thread = HANDLE_PTR(thid);
+        thread = (struct thread *)HANDLE_PTR(thid);
         if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
             CpuResumeIntr(state);
             return KE_UNKNOWN_THID;
@@ -842,7 +838,7 @@ int iCancelWakeupThread(int thid)
         return KE_ILLEGAL_THID;
     }
 
-    thread = HANDLE_PTR(thid);
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
         return KE_UNKNOWN_THID;
     }
@@ -855,21 +851,25 @@ int iCancelWakeupThread(int thid)
 
 int SuspendThread(int thid)
 {
+    (void)thid;
     return KE_ERROR;
 }
 
 int iSuspendThread(int thid)
 {
+    (void)thid;
     return KE_ERROR;
 }
 
 int ResumeThread(int thid)
 {
+    (void)thid;
     return KE_ERROR;
 }
 
 int iResumeThread(int thid)
 {
+    (void)thid;
     return KE_ERROR;
 }
 
@@ -942,7 +942,7 @@ int SetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *userdata
         return KE_NO_MEMORY;
     }
 
-    if (sys_clock->hi == 0 && sys_clock->lo < thctx.min_wait) {
+    if (sys_clock->hi == 0 && (u32)sys_clock->lo < (u32)thctx.min_wait) {
         sys_clock->lo = thctx.min_wait;
     }
 
@@ -985,7 +985,7 @@ int iSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *userdat
         return KE_NO_MEMORY;
     }
 
-    if (sys_clock->hi == 0 && sys_clock->lo < thctx.min_wait) {
+    if (sys_clock->hi == 0 && (u32)sys_clock->lo < (u32)thctx.min_wait) {
         sys_clock->lo = thctx.min_wait;
     }
 
@@ -1099,7 +1099,7 @@ unsigned int GetSystemTimeLow(void)
 int ReferSystemStatus(iop_sys_status_t *info, size_t size)
 {
     int state, ret;
-    if (size < sizeof(*info)) {
+    if ((u32)size < (u32)sizeof(*info)) {
         return KE_ERROR;
     }
 
@@ -1107,13 +1107,7 @@ int ReferSystemStatus(iop_sys_status_t *info, size_t size)
 
     ret = CpuSuspendIntr(&state);
 
-    if (QueryIntrContext()) {
-        info->status = TSS_NOTHREAD;
-    } else if (ret == KE_CPUDI) {
-        info->status = TSS_DISABLEINTR;
-    } else {
-        info->status = TSS_THREAD;
-    }
+    info->status = QueryIntrContext() ? TSS_NOTHREAD : ((ret == KE_CPUDI) ? TSS_DISABLEINTR : TSS_THREAD);
 
     info->systemLowTimerWidth = 32;
     info->idleClocks.hi       = thctx.idle_thread->run_clocks_hi;
@@ -1138,12 +1132,12 @@ int ReferThreadRunStatus(int thid, iop_thread_run_status_t *stat, size_t size)
     CpuSuspendIntr(&state);
 
     thread = refer_thread(thid, 1);
-    if ((int)thread <= 0) {
+    if ((int)thread <= (int)0) {
         CpuResumeIntr(state);
         return (int)thread;
     }
 
-    if (size < sizeof(*stat)) {
+    if ((u32)size < (u32)sizeof(*stat)) {
         CpuResumeIntr(state);
         return KE_ILLEGAL_SIZE;
     }
@@ -1173,18 +1167,18 @@ int GetThreadStackFreeSize(int thid)
     CpuSuspendIntr(&state);
 
     thread = refer_thread(thid, 1);
-    if ((int)thread < 0) {
+    if ((int)thread < (int)0) {
         CpuResumeIntr(state);
         return (int)thread;
     }
 
-    stack      = thread->stack_top;
+    stack      = (u32 *)thread->stack_top;
     stack_size = thread->stack_size / 4;
     CpuResumeIntr(state);
 
-    for (i = 0; i < stack_size; i++) {
-        if (stack[i] != -1) {
-            return i * 4;
+    for (i = 0; (u32)i < (u32)stack_size; i++) {
+        if (stack[i] != (u32)-1) {
+            break;
         }
     }
 
@@ -1210,7 +1204,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
             struct thread *thread;
             list_for_each (thread, &thctx.thread_list, thread_list) {
                 if (thread != thctx.idle_thread) {
-                    if (write_count < readbufsize) {
+                    if ((int)write_count < (int)readbufsize) {
                         *readbuf++ = MAKE_HANDLE(thread);
                         write_count++;
                     }
@@ -1221,7 +1215,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         case TMID_Semaphore: {
             struct semaphore *sema;
             list_for_each (sema, &thctx.semaphore, sema_list) {
-                if (write_count < readbufsize) {
+                if ((int)write_count < (int)readbufsize) {
                     *readbuf++ = MAKE_HANDLE(sema);
                     write_count++;
                 }
@@ -1231,7 +1225,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         case TMID_EventFlag: {
             struct event_flag *evf;
             list_for_each (evf, &thctx.event_flag, evf_list) {
-                if (write_count < readbufsize) {
+                if ((int)write_count < (int)readbufsize) {
                     *readbuf++ = MAKE_HANDLE(evf);
                     write_count++;
                 }
@@ -1241,7 +1235,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         case TMID_Mbox: {
             struct mbox *mbx;
             list_for_each (mbx, &thctx.mbox, mbox_list) {
-                if (write_count < readbufsize) {
+                if ((int)write_count < (int)readbufsize) {
                     *readbuf++ = MAKE_HANDLE(mbx);
                     write_count++;
                 }
@@ -1251,7 +1245,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         case TMID_Vpl: {
             struct vpool *vpl;
             list_for_each (vpl, &thctx.vpool, vpl_list) {
-                if (write_count < readbufsize) {
+                if ((int)write_count < (int)readbufsize) {
                     *readbuf++ = MAKE_HANDLE(vpl);
                     write_count++;
                 }
@@ -1261,7 +1255,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         case TMID_Fpl: {
             struct fpool *fpl;
             list_for_each (fpl, &thctx.fpool, fpl_list) {
-                if (write_count < readbufsize) {
+                if ((int)write_count < (int)readbufsize) {
                     *readbuf++ = MAKE_HANDLE(fpl);
                     write_count++;
                 }
@@ -1271,7 +1265,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         case TMID_SleepThread: {
             struct thread *thread;
             list_for_each (thread, &thctx.sleep_queue, queue) {
-                if (write_count < readbufsize) {
+                if ((int)write_count < (int)readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;
                 }
@@ -1281,7 +1275,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         case TMID_DelayThread: {
             struct thread *thread;
             list_for_each (thread, &thctx.delay_queue, queue) {
-                if (write_count < readbufsize) {
+                if ((int)write_count < (int)readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;
                 }
@@ -1291,7 +1285,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         case TMID_DormantThread: {
             struct thread *thread;
             list_for_each (thread, &thctx.dormant_queue, queue) {
-                if (write_count < readbufsize) {
+                if ((int)write_count < (int)readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;
                 }
@@ -1299,11 +1293,11 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
             }
         } break;
         default: {
-            struct heaptag *tag = HANDLE_PTR(type);
+            struct heaptag *tag = (struct heaptag *)HANDLE_PTR(type);
             struct thread *thread;
             struct event *event;
 
-            if (type < 0 || tag->tag < TAG_SEMA || tag->tag > TAG_FPL || tag->id != HANDLE_ID(type)) {
+            if ((int)type < (int)0 || (u32)tag->tag < (u32)TAG_SEMA || (u32)tag->tag > (u32)TAG_FPL || tag->id != HANDLE_ID(type)) {
                 CpuResumeIntr(state);
                 return KE_ILLEGAL_TYPE;
             }
@@ -1327,7 +1321,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
             }
 
             list_for_each (thread, &event->waiters, queue) {
-                if (write_count < readbufsize) {
+                if ((int)write_count < (int)readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;
                 }
@@ -1362,35 +1356,28 @@ static void clock_div(iop_sys_clock_t *dst, iop_sys_clock_t *src, u32 d, u32 *r)
     int v4;
     u32 hi;
     u32 lo;
-    u32 v7;
     u32 v8;
     u32 v9;
     int i;
-    unsigned int v11;
-    u32 v12;
-    u32 v13;
 
     v4 = 0;
     hi = src->hi;
     lo = src->lo;
-    v7 = hi / d;
+    v9 = hi / d;
     v8 = hi % d;
-    v9 = v7;
-    for (i = 0; i < 4; ++i) {
-        v11 = (v8 << 8) | (lo >> 24);
+    for (i = 0; (int)i < (int)sizeof(*r); ++i) {
+        hi = (v8 << 8) | (lo >> 24);
         lo <<= 8;
-        v12 = v11 / d;
         v4  = (v4 << 8) | (v9 >> 24);
-        v13 = v11 % d;
-        v8  = v11 % d;
-        v9  = (v9 << 8) + v12;
+        v8  = hi % d;
+        v9  = (v9 << 8) + (hi / d);
     }
     if (dst) {
         dst->hi = v4;
         dst->lo = v9;
     }
     if (r) {
-        *r = v13;
+        *r = v8;
     }
 }
 
@@ -1403,7 +1390,11 @@ static struct thread *refer_thread(int thid, int current)
         return thctx.current_thread;
     }
 
-    thread = HANDLE_PTR(thid);
+    if ((int)thid <= (int)0) {
+        return (struct thread *)KE_UNKNOWN_THID;
+    }
+
+    thread = (struct thread *)HANDLE_PTR(thid);
     if (!HANDLE_VERIFY(thid, TAG_THREAD)) {
         return (struct thread *)KE_UNKNOWN_THID;
     }
@@ -1453,11 +1444,7 @@ static void thread_get_status(struct thread *thread, iop_thread_info_t *info)
     }
 
     info->wakeupCount = thread->wakeup_count;
-    if (thread->status == THS_DORMANT || thread->status == THS_RUN) {
-        info->regContext = 0;
-    } else {
-        info->regContext = (long *)thread->saved_regs;
-    }
+    info->regContext = (thread->status == THS_DORMANT || thread->status == THS_RUN) ? NULL : (long *)thread->saved_regs;
 }
 
 static void thread_get_run_stats(struct thread *thread, iop_thread_run_status_t *stat)

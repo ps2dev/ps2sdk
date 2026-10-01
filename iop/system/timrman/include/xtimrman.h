@@ -28,6 +28,11 @@ extern "C" {
 #define TC_PIXEL    2
 #define TC_HLINE    4
 
+// guessed name
+extern u32 GetTimerMode(int timid);
+// guessed name
+extern u32 (*GetTimerReadFunc(int timid))();
+
 extern int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void *userdata), void *common);
 extern int SetOverflowHandler(int timid, unsigned int (*handler)(void *userdata), void *common);
 extern int SetupHardTimer(int timid, int source, int mode, int prescale);
@@ -37,6 +42,8 @@ extern int StopHardTimer(int timid);
 #define xtimrman_IMPORTS_start DECLARE_IMPORT_TABLE(timrman, 1, 2)
 #define xtimrman_IMPORTS_end   END_IMPORT_TABLE
 
+#define I_GetTimerMode       DECLARE_IMPORT(17, GetTimerMode)
+#define I_GetTimerReadFunc   DECLARE_IMPORT(18, GetTimerReadFunc)
 #define I_SetTimerHandler    DECLARE_IMPORT(20, SetTimerHandler)
 #define I_SetOverflowHandler DECLARE_IMPORT(21, SetOverflowHandler)
 #define I_SetupHardTimer     DECLARE_IMPORT(22, SetupHardTimer)

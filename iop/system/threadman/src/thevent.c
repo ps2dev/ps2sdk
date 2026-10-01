@@ -1,5 +1,5 @@
 #include "thevent.h"
-#include "intrman.h"
+#include <irx_imports.h>
 #include "kerr.h"
 #include "thcommon.h"
 #include "list.h"
@@ -21,7 +21,7 @@ int CreateEventFlag(iop_event_t *event_params)
 
     CpuSuspendIntr(&state);
 
-    event = heap_alloc(TAG_EVF, sizeof(*event));
+    event = (struct event_flag *)heap_alloc(TAG_EVF, sizeof(*event));
     if (!event) {
         CpuResumeIntr(state);
         return KE_NO_MEMORY;
@@ -44,7 +44,7 @@ int CreateEventFlag(iop_event_t *event_params)
 
 int DeleteEventFlag(int ef)
 {
-    struct event_flag *event;
+    struct event_flag *evt;
     struct thread *waiter;
     u32 waiter_count;
     int state;
@@ -55,22 +55,22 @@ int DeleteEventFlag(int ef)
 
     CpuSuspendIntr(&state);
 
-    event = HANDLE_PTR(ef);
+    evt = (struct event_flag *)HANDLE_PTR(ef);
     if (!HANDLE_VERIFY(ef, TAG_EVF)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_EVFID;
     }
 
-    list_for_each_safe (waiter, &event->event.waiters, queue) {
+    list_for_each_safe (waiter, &evt->event.waiters, queue) {
         waiter->saved_regs->v0 = KE_WAIT_DELETE;
         list_remove(&waiter->queue);
         waiter->status = THS_READY;
         readyq_insert_back(waiter);
     }
 
-    waiter_count = event->event.waiter_count;
-    list_remove(&event->evf_list);
-    heap_free(&event->tag);
+    waiter_count = evt->event.waiter_count;
+    list_remove(&evt->evf_list);
+    heap_free(&evt->tag);
 
     if (waiter_count) {
         thctx.run_next = NULL;
@@ -94,7 +94,7 @@ int SetEventFlag(int ef, u32 bits)
     }
 
     CpuSuspendIntr(&state);
-    evt = HANDLE_PTR(ef);
+    evt = (struct event_flag *)HANDLE_PTR(ef);
     if (!HANDLE_VERIFY(ef, TAG_EVF)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_EVFID;
@@ -145,8 +145,8 @@ int SetEventFlag(int ef, u32 bits)
         return thread_start(thread, state);
     }
 
-    if (num_wakeups > 0) {
-        thctx.run_next = 0;
+    if ((int)num_wakeups > (int)0) {
+        thctx.run_next = NULL;
         return thread_leave(KE_OK, 0, state, 0);
     }
 
@@ -165,7 +165,7 @@ int iSetEventFlag(int ef, u32 bits)
         return KE_ILLEGAL_CONTEXT;
     }
 
-    evt = HANDLE_PTR(ef);
+    evt = (struct event_flag *)HANDLE_PTR(ef);
     if (!HANDLE_VERIFY(ef, TAG_EVF)) {
         return KE_UNKNOWN_EVFID;
     }
@@ -222,7 +222,7 @@ int ClearEventFlag(int ef, u32 bits)
 
     CpuSuspendIntr(&state);
 
-    evt = HANDLE_PTR(ef);
+    evt = (struct event_flag *)HANDLE_PTR(ef);
     if (!HANDLE_VERIFY(ef, TAG_EVF)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_EVFID;
@@ -243,7 +243,7 @@ int iClearEventFlag(int ef, u32 bits)
         return KE_ILLEGAL_CONTEXT;
     }
 
-    evt = HANDLE_PTR(ef);
+    evt = (struct event_flag *)HANDLE_PTR(ef);
     if (!HANDLE_VERIFY(ef, TAG_EVF)) {
         return KE_UNKNOWN_EVFID;
     }
@@ -273,26 +273,25 @@ int WaitEventFlag(int ef, u32 bits, int mode, u32 *resbits)
     }
 
     if (CpuSuspendIntr(&state) == KE_CPUDI && (thctx.debug_flags & 8)) {
-        Kprintf("WARNING: DelayThread KE_CAN_NOT_WAIT\n");
+        Kprintf("WARNING: WaitEventFlag KE_CAN_NOT_WAIT\n");
     }
 
     check_thread_stack();
 
-    evt = HANDLE_PTR(ef);
+    evt = (struct event_flag *)HANDLE_PTR(ef);
     if (!HANDLE_VERIFY(ef, TAG_EVF)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_EVFID;
     }
 
-    if ((evt->event.attr & EA_MULTI) == 0 && evt->event.waiter_count >= 0) {
+    if ((evt->event.attr & EA_MULTI) == 0 && (int)evt->event.waiter_count > (int)0) {
         CpuResumeIntr(state);
         return KE_EVF_MULTI;
     }
 
-    if (mode & WEF_OR) {
-        shared_bits = evt->bits & bits;
-    } else {
-        shared_bits = (evt->bits & bits) == bits;
+    shared_bits = evt->bits & bits;
+    if ((mode & WEF_OR) == 0) {
+        shared_bits = shared_bits == bits;
     }
 
     if (shared_bits) {
@@ -343,21 +342,20 @@ int PollEventFlag(int ef, u32 bits, int mode, u32 *resbits)
 
     CpuSuspendIntr(&state);
 
-    evt = HANDLE_PTR(ef);
+    evt = (struct event_flag *)HANDLE_PTR(ef);
     if (!HANDLE_VERIFY(ef, TAG_EVF)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_EVFID;
     }
 
-    if ((evt->event.attr & EA_MULTI) == 0 && evt->event.waiter_count >= 0) {
+    if ((evt->event.attr & EA_MULTI) == 0 && (int)evt->event.waiter_count > (int)0) {
         CpuResumeIntr(state);
         return KE_EVF_MULTI;
     }
 
-    if (mode & WEF_OR) {
-        shared_bits = evt->bits & bits;
-    } else {
-        shared_bits = (evt->bits & bits) == bits;
+    shared_bits = evt->bits & bits;
+    if ((mode & WEF_OR) == 0) {
+        shared_bits = shared_bits == bits;
     }
 
     if (shared_bits == 0) {
@@ -380,7 +378,7 @@ int PollEventFlag(int ef, u32 bits, int mode, u32 *resbits)
 
 int ReferEventFlagStatus(int ef, iop_event_info_t *info)
 {
-    struct event_flag *event;
+    struct event_flag *evt;
     int state;
 
     if (QueryIntrContext()) {
@@ -389,13 +387,13 @@ int ReferEventFlagStatus(int ef, iop_event_info_t *info)
 
     CpuSuspendIntr(&state);
 
-    event = HANDLE_PTR(ef);
+    evt = (struct event_flag *)HANDLE_PTR(ef);
     if (!HANDLE_VERIFY(ef, TAG_EVF)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_EVFID;
     }
 
-    event_get_status(event, info);
+    event_get_status(evt, info);
 
     CpuResumeIntr(state);
 
@@ -404,18 +402,18 @@ int ReferEventFlagStatus(int ef, iop_event_info_t *info)
 
 int iReferEventFlagStatus(int ef, iop_event_info_t *info)
 {
-    struct event_flag *event;
+    struct event_flag *evt;
 
     if (!QueryIntrContext()) {
         return KE_ILLEGAL_CONTEXT;
     }
 
-    event = HANDLE_PTR(ef);
+    evt = (struct event_flag *)HANDLE_PTR(ef);
     if (!HANDLE_VERIFY(ef, TAG_EVF)) {
         return KE_UNKNOWN_EVFID;
     }
 
-    event_get_status(event, info);
+    event_get_status(evt, info);
 
     return KE_OK;
 }

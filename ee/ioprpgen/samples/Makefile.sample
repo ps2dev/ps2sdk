@@ -7,7 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 EE_BIN = ioprpgen_sample.elf
-EE_OBJS = ioprpgen_sample.o sifinit_irx.o threadman_irx.o igreeting_irx.o
+EE_OBJS = ioprpgen_sample.o sifinit_irx.o timemani_irx.o threadman_irx.o igreeting_irx.o
 EE_LIBS = -lioprpgen -liopreboot -lc -lpatches -ldebug
 
 all: $(EE_BIN)

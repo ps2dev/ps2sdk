@@ -1,7 +1,7 @@
+#include <irx_imports.h>
 #include "thcommon.h"
 #include "thsemap.h"
 #include "kerr.h"
-#include "intrman.h"
 
 static void sema_get_status(struct semaphore *sema, iop_sema_info_t *info);
 
@@ -20,7 +20,7 @@ int CreateSema(iop_sema_t *sema_params)
 
     CpuSuspendIntr(&state);
 
-    sema = heap_alloc(TAG_SEMA, sizeof(*sema));
+    sema = (struct semaphore *)heap_alloc(TAG_SEMA, sizeof(*sema));
     if (!sema) {
         CpuResumeIntr(state);
         return KE_NO_MEMORY;
@@ -55,7 +55,7 @@ int DeleteSema(int semid)
 
     CpuSuspendIntr(&state);
 
-    sema = HANDLE_PTR(semid);
+    sema = (struct semaphore *)HANDLE_PTR(semid);
     if (!HANDLE_VERIFY(semid, TAG_SEMA)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_SEMID;
@@ -94,13 +94,13 @@ int SignalSema(int semid)
 
     CpuSuspendIntr(&state);
 
-    sema = HANDLE_PTR(semid);
+    sema = (struct semaphore *)HANDLE_PTR(semid);
     if (!HANDLE_VERIFY(semid, TAG_SEMA)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_SEMID;
     }
 
-    if (sema->event.waiter_count > 0) {
+    if (sema->event.waiter_count) {
         thread = list_first_entry(&sema->event.waiters, struct thread, queue);
         sema->event.waiter_count--;
         list_remove(&thread->queue);
@@ -109,7 +109,7 @@ int SignalSema(int semid)
         return thread_start(thread, state);
     }
 
-    if (sema->count >= sema->max_count) {
+    if ((int)sema->count >= (int)sema->max_count) {
         CpuResumeIntr(state);
         return KE_SEMA_OVF;
     }
@@ -130,24 +130,24 @@ int iSignalSema(int semid)
         return KE_ILLEGAL_CONTEXT;
     }
 
-    sema = HANDLE_PTR(semid);
+    sema = (struct semaphore *)HANDLE_PTR(semid);
     if (!HANDLE_VERIFY(semid, TAG_SEMA)) {
         return KE_UNKNOWN_SEMID;
     }
 
-    if (sema->event.waiter_count > 0) {
+    if (sema->event.waiter_count) {
         thread = list_first_entry(&sema->event.waiters, struct thread, queue);
         sema->event.waiter_count--;
         list_remove(&thread->queue);
         thread->saved_regs->v0 = KE_OK;
         thread->status         = THS_READY;
         readyq_insert_back(thread);
-        thctx.run_next = 0;
+        thctx.run_next = NULL;
 
         return KE_OK;
     }
 
-    if (sema->count >= sema->max_count) {
+    if ((int)sema->count >= (int)sema->max_count) {
         return KE_SEMA_OVF;
     }
 
@@ -167,12 +167,12 @@ int WaitSema(int semid)
     }
 
     if (CpuSuspendIntr(&state) == KE_CPUDI && (thctx.debug_flags & 8)) {
-        Kprintf("WARNING: DelayThread KE_CAN_NOT_WAIT\n");
+        Kprintf("WARNING: WaitSema KE_CAN_NOT_WAIT\n");
     }
 
     check_thread_stack();
 
-    sema = HANDLE_PTR(semid);
+    sema = (struct semaphore *)HANDLE_PTR(semid);
     if (!HANDLE_VERIFY(semid, TAG_SEMA)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_SEMID;
@@ -180,7 +180,7 @@ int WaitSema(int semid)
 
     thread = thctx.current_thread;
 
-    if (sema->count >= 1) {
+    if ((int)sema->count > (int)0) {
         sema->count--;
         CpuResumeIntr(state);
         return KE_OK;
@@ -193,8 +193,7 @@ int WaitSema(int semid)
     sema->event.waiter_count++;
 
     if (sema->event.attr & SA_THPRI) {
-        // originally just a loop (or inlined)
-        // i don't see why not to use this function though
+        // Unofficial: the following was inlined
         waitlist_insert(thread, &sema->event, thread->priority);
     } else {
         list_insert(&sema->event.waiters, &thread->queue);
@@ -214,13 +213,13 @@ int PollSema(int semid)
 
     CpuSuspendIntr(&state);
 
-    sema = HANDLE_PTR(semid);
+    sema = (struct semaphore *)HANDLE_PTR(semid);
     if (!HANDLE_VERIFY(semid, TAG_SEMA)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_SEMID;
     }
 
-    if (sema->count == 0) {
+    if ((int)sema->count <= (int)0) {
         CpuResumeIntr(state);
         return KE_SEMA_ZERO;
     }
@@ -242,7 +241,7 @@ int ReferSemaStatus(int semid, iop_sema_info_t *info)
 
     CpuSuspendIntr(&state);
 
-    sema = HANDLE_PTR(semid);
+    sema = (struct semaphore *)HANDLE_PTR(semid);
     if (!HANDLE_VERIFY(semid, TAG_SEMA)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_SEMID;
@@ -263,7 +262,7 @@ int iReferSemaStatus(int semid, iop_sema_info_t *info)
         return KE_ILLEGAL_CONTEXT;
     }
 
-    sema = HANDLE_PTR(semid);
+    sema = (struct semaphore *)HANDLE_PTR(semid);
     if (!HANDLE_VERIFY(semid, TAG_SEMA)) {
         return KE_UNKNOWN_SEMID;
     }

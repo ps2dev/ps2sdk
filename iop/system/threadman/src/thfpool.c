@@ -1,4 +1,4 @@
-#include "intrman.h"
+#include <irx_imports.h>
 #include "kerr.h"
 #include "thcommon.h"
 #include "thpool.h"
@@ -37,7 +37,7 @@ int CreateFpl(iop_fpl_param *param)
         return KE_NO_MEMORY;
     }
 
-    fpl = heap_alloc(TAG_FPL, sizeof(*fpl));
+    fpl = (struct fpool *)heap_alloc(TAG_FPL, sizeof(*fpl));
     if (!fpl) {
         FreeSysMemory(mem);
         CpuResumeIntr(state);
@@ -55,8 +55,8 @@ int CreateFpl(iop_fpl_param *param)
     list_insert(&thctx.fpool, &fpl->fpl_list);
 
     fpl->free = NULL;
-    for (int i = 0; i < param->blocks; i++, mem += block_size) {
-        fpl_block_free(fpl, mem);
+    for (int i = 0; (int)i < (int)param->blocks; i++, mem += block_size) {
+        fpl_block_free(fpl, (struct fpl_block *)mem);
     }
 
     CpuResumeIntr(state);
@@ -76,7 +76,7 @@ int DeleteFpl(int fplId)
     }
 
     CpuSuspendIntr(&state);
-    fpl = HANDLE_PTR(fplId);
+    fpl = (struct fpool *)HANDLE_PTR(fplId);
     if (!HANDLE_VERIFY(fplId, TAG_FPL)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_FPLID;
@@ -119,7 +119,7 @@ void *AllocateFpl(int fplId)
         Kprintf("WARNING: AllocateFpl KE_CAN_NOT_WAIT\n");
     }
 
-    fpl = HANDLE_PTR(fplId);
+    fpl = (struct fpool *)HANDLE_PTR(fplId);
     if (!HANDLE_VERIFY(fplId, TAG_FPL)) {
         CpuResumeIntr(state);
         return (void *)KE_UNKNOWN_FPLID;
@@ -141,12 +141,13 @@ void *AllocateFpl(int fplId)
     fpl->event.waiter_count++;
 
     if (fpl->event.attr & FA_THPRI) {
+        // Unofficial: the following was inlined
         waitlist_insert(thread, &fpl->event, thread->priority);
     } else {
         list_insert(&fpl->event.waiters, &thread->queue);
     }
 
-    return (void *)thread_leave(KE_OK, 0, state, 1);
+    return (void *)(uiptr)thread_leave(KE_OK, 0, state, 1);
 }
 
 void *pAllocateFpl(int fplId)
@@ -161,7 +162,7 @@ void *pAllocateFpl(int fplId)
 
     CpuSuspendIntr(&state);
 
-    fpl = HANDLE_PTR(fplId);
+    fpl = (struct fpool *)HANDLE_PTR(fplId);
     if (!HANDLE_VERIFY(fplId, TAG_FPL)) {
         CpuResumeIntr(state);
         return (void *)KE_UNKNOWN_FPLID;
@@ -186,7 +187,7 @@ void *ipAllocateFpl(int fplId)
         return (void *)KE_ILLEGAL_CONTEXT;
     }
 
-    fpl = HANDLE_PTR(fplId);
+    fpl = (struct fpool *)HANDLE_PTR(fplId);
     if (!HANDLE_VERIFY(fplId, TAG_FPL)) {
         return (void *)KE_UNKNOWN_FPLID;
     }
@@ -209,7 +210,7 @@ int FreeFpl(int fplId, void *memory)
     }
 
     CpuSuspendIntr(&state);
-    fpl = HANDLE_PTR(fplId);
+    fpl = (struct fpool *)HANDLE_PTR(fplId);
     if (!HANDLE_VERIFY(fplId, TAG_FPL)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_FPLID;
@@ -219,7 +220,7 @@ int FreeFpl(int fplId, void *memory)
         return KE_ILLEGAL_MEMBLOCK;
     }
 
-    if (fpl->event.waiter_count) {
+    if ((int)fpl->event.waiter_count > (int)0) {
         waiter = list_first_entry(&fpl->event.waiters, struct thread, queue);
         fpl->event.waiter_count--;
         list_remove(&waiter->queue);
@@ -229,7 +230,7 @@ int FreeFpl(int fplId, void *memory)
         return thread_start(waiter, state);
     }
 
-    fpl_block_free(fpl, memory);
+    fpl_block_free(fpl, (struct fpl_block *)memory);
 
     return KE_OK;
 }
@@ -244,7 +245,7 @@ int ReferFplStatus(int fplId, iop_fpl_info_t *info)
     }
 
     CpuSuspendIntr(&state);
-    fpl = HANDLE_PTR(fplId);
+    fpl = (struct fpool *)HANDLE_PTR(fplId);
     if (!HANDLE_VERIFY(fplId, TAG_FPL)) {
         CpuResumeIntr(state);
         return KE_UNKNOWN_FPLID;
@@ -265,7 +266,7 @@ int iReferFplStatus(int fplId, iop_fpl_info_t *info)
         return KE_ILLEGAL_CONTEXT;
     }
 
-    fpl = HANDLE_PTR(fplId);
+    fpl = (struct fpool *)HANDLE_PTR(fplId);
     if (!HANDLE_VERIFY(fplId, TAG_FPL)) {
         return KE_UNKNOWN_FPLID;
     }
