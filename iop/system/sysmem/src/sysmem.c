@@ -18,17 +18,17 @@ IRX_ID("System_Memory_Manager", 2, 3);
 #endif
 // Based on the module from SCE SDK 3.1.0.
 
-static sysmem_internals_t sysmem_internals;
-static KprintfHandler_t *kprintf_cb;
-static void *kprintf_cb_userdata;
+static sysmem_internals_t g_sysmem_internals;
+static KprintfHandler_t *g_kprintf_cb;
+static void *g_kprintf_cb_userdata;
 
 extern int sysmem_reinit(void);
 static int cCpuSuspendIntr(int *state);
 static int cCpuResumeIntr(int state);
-static int allocSysMemory_internal(int flags, int size, void *mem);
-static int freeSysMemory_internal(void *ptr);
+static void *allocSysMemory_internal(int flags, int size, const void *mem);
+static int freeSysMemory_internal(const void *ptr);
 static void updateSmemCtlBlk(void);
-static sysmem_alloc_element_t *search_block(void *a1);
+static sysmem_alloc_block_t *search_block(const void *address);
 
 typedef struct intrman_callbacks_
 {
@@ -40,580 +40,419 @@ typedef struct intrman_callbacks_
 
 int _start(unsigned int memsize)
 {
-	if ( memsize > 0x7FFF00 )
-		memsize = 0x7FFF00;
-	sysmem_internals.alloclist = (sysmem_alloc_table_t *)0x401100;
-	sysmem_internals.memsize = memsize & 0xFFFFFF00;
-	sysmem_internals.intr_suspend_tbl = 0;
-	sysmem_internals.allocation_count = 0;
-	sysmem_internals.smemupdate_cur = 0;
-	if ( (memsize & 0xFFFFFF00) >= 0x401200 )
-		return sysmem_reinit();
-	sysmem_internals.alloclist = 0;
-	return 0;
+	memsize = (memsize > 0x7FFF00) ? 0x7FFF00 : memsize;
+	g_sysmem_internals.m_alloclist =
+		((memsize & 0xFFFFFF00) >= ((((uiptr)((&g_sysmem_internals))) + sizeof(g_sysmem_internals) + 255) >> 8 << 8)
+																 + sizeof(sysmem_alloc_table_t)) ?
+			(sysmem_alloc_table_t *)((((uiptr)((&g_sysmem_internals))) + sizeof(g_sysmem_internals) + 255) >> 8 << 8) :
+			NULL;
+	g_sysmem_internals.m_memsize = memsize & 0xFFFFFF00;
+	g_sysmem_internals.m_intr_suspend_tbl = NULL;
+	g_sysmem_internals.m_allocation_count = 0;
+	g_sysmem_internals.m_smemupdate_cur = NULL;
+	return g_sysmem_internals.m_alloclist ? sysmem_reinit() : 0;
 }
 
 int sysmem_reinit(void)
 {
 	sysmem_alloc_table_t *alloclist;
-	sysmem_alloc_table_t *v1;
-	int v2;
-	int v3;
-	sysmem_alloc_table_t *v4;
-	sysmem_alloc_element_t *v5;
-	int memsize;
-	unsigned int info;
-	const sysmem_alloc_table_t *v8;
-	const sysmem_alloc_element_t *list;
-	int result;
+	unsigned int i;
+	const sysmem_alloc_block_t *blklist;
 
-	alloclist = sysmem_internals.alloclist;
-	if ( !sysmem_internals.alloclist )
+	alloclist = g_sysmem_internals.m_alloclist;
+	if ( !alloclist )
 		return 0;
-	v1 = sysmem_internals.alloclist;
-	sysmem_internals.alloclist->next = 0;
-	v2 = 0;
-	v3 = 12;
-	v4 = alloclist;
-	do
+	alloclist->m_next = NULL;
+	for ( i = 0; i < (sizeof(alloclist->m_blkarray) / sizeof(alloclist->m_blkarray[0])); i += 1 )
 	{
-		v5 = (sysmem_alloc_element_t *)((char *)v1 + v3);
-		v3 += 8;
-		v4->list[0].next = v5;
-		v4->list[0].info = 0;
-		++v2;
-		v4 = (sysmem_alloc_table_t *)((char *)v4 + 8);
-	} while ( v2 < 31 );
-	memsize = sysmem_internals.memsize;
-	info = v1->list[0].info;
-	v1->list[30].next = 0;
-	v1->list[0].info = (info & 0x1FFFF) | ((memsize / 256) << 17);
-	sysmem_internals.allocation_count = 1;
+		alloclist->m_blkarray[i].m_next = &(alloclist->m_blkarray[i + 1]);
+		alloclist->m_blkarray[i].m_info.m_allocated = 0;
+		alloclist->m_blkarray[i].m_info.m_address = 0;
+		alloclist->m_blkarray[i].m_info.m_pad = 0;
+		alloclist->m_blkarray[i].m_info.m_size = 0;
+	}
+	alloclist->m_blkarray[(sizeof(alloclist->m_blkarray) / sizeof(alloclist->m_blkarray[0])) - 1].m_next = NULL;
+	alloclist->m_blkarray[0].m_info.m_size = g_sysmem_internals.m_memsize >> 8;
+	g_sysmem_internals.m_allocation_count = 1;
 	if (
-		AllocSysMemory(0, (int)sysmem_internals.alloclist, 0)
-		|| (v8 = (sysmem_alloc_table_t *)AllocSysMemory(0, 0xFC, 0), list = v8->list, v8 != sysmem_internals.alloclist) )
+		AllocSysMemory(ALLOC_FIRST, (int)alloclist, NULL) != NULL
+		|| (sysmem_alloc_table_t *)AllocSysMemory(ALLOC_FIRST, sizeof(*alloclist) - sizeof(alloclist->m_padding), NULL)
+				 != alloclist )
 	{
-		sysmem_internals.alloclist = 0;
+		g_sysmem_internals.m_alloclist = NULL;
 		return 0;
 	}
-	result = 0;
-	if ( list )
-	{
-		unsigned int v11;
-
-		while ( 1 )
-		{
-			v11 = list->info;
-			if ( (v11 & 1) == 0 )
-				break;
-			list = list->next;
-			if ( !list )
-				return 0;
-		}
-		return (u16)v11 >> 1 << 8;
-	}
-	return result;
+	for ( blklist = alloclist->m_blkarray; blklist; blklist = blklist->m_next )
+		if ( !blklist->m_info.m_allocated )
+			return blklist->m_info.m_address << 8;
+	return 0;
 }
 
 u32 QueryMemSize()
 {
-	if ( sysmem_internals.alloclist )
-		return sysmem_internals.memsize;
-	else
-		return 0;
+	return g_sysmem_internals.m_alloclist ? g_sysmem_internals.m_memsize : 0;
 }
 
 u32 QueryMaxFreeMemSize()
 {
-	unsigned int v0;
-	const sysmem_alloc_element_t *list;
+	unsigned int retval;
+	const sysmem_alloc_block_t *blklist;
 	int state;
 
-	v0 = 0;
-	if ( !sysmem_internals.alloclist )
+	retval = 0;
+	if ( !g_sysmem_internals.m_alloclist )
 		return 0;
 	cCpuSuspendIntr(&state);
-	list = sysmem_internals.alloclist->list;
-	if ( sysmem_internals.alloclist != (sysmem_alloc_table_t *)-4 )
-	{
-		do
-		{
-			if ( (list->info & 1) == 0 && v0 < list->info >> 17 )
-				v0 = list->info >> 17;
-			list = list->next;
-		} while ( list );
-	}
+	for ( blklist = g_sysmem_internals.m_alloclist->m_blkarray; blklist; blklist = blklist->m_next )
+		if ( !blklist->m_info.m_allocated && retval < blklist->m_info.m_size )
+			retval = blklist->m_info.m_size;
 	cCpuResumeIntr(state);
-	return v0 << 8;
+	retval <<= 8;
+	return retval;
 }
 
 u32 QueryTotalFreeMemSize()
 {
-	int v0;
-	const sysmem_alloc_element_t *list;
+	int retval;
+	const sysmem_alloc_block_t *blklist;
 	int state;
 
-	v0 = 0;
-	if ( !sysmem_internals.alloclist )
+	if ( !g_sysmem_internals.m_alloclist )
 		return 0;
+	retval = 0;
 	cCpuSuspendIntr(&state);
-	list = sysmem_internals.alloclist->list;
-	if ( sysmem_internals.alloclist != (sysmem_alloc_table_t *)-4 )
-	{
-		do
-		{
-			unsigned int info;
-
-			info = list->info;
-			if ( (info & 1) == 0 )
-				v0 += info >> 17;
-			list = list->next;
-		} while ( list );
-	}
+	for ( blklist = g_sysmem_internals.m_alloclist->m_blkarray; blklist; blklist = blklist->m_next )
+		retval += !blklist->m_info.m_allocated ? blklist->m_info.m_size : 0;
 	cCpuResumeIntr(state);
-	return v0 << 8;
+	retval <<= 8;
+	return retval;
 }
 
 void *AllocSysMemory(int mode, int size, void *ptr)
 {
-	void *v6;
+	void *retval;
 	int state;
 
-	if ( !sysmem_internals.alloclist || (unsigned int)mode >= 3 )
-		return 0;
+	if ( !g_sysmem_internals.m_alloclist || (unsigned int)mode >= 3 )
+		return NULL;
 	cCpuSuspendIntr(&state);
-	v6 = (void *)allocSysMemory_internal(mode, size, ptr);
+	retval = allocSysMemory_internal(mode, size, ptr);
 	updateSmemCtlBlk();
 	cCpuResumeIntr(state);
-	return v6;
+	return retval;
 }
 
 int FreeSysMemory(void *ptr)
 {
 	const sysmem_alloc_table_t *alloclist;
-	int v4;
+	int retval;
 	int state;
 
-	alloclist = sysmem_internals.alloclist;
-	while ( alloclist && ptr != alloclist )
-	{
-		alloclist = alloclist->next;
-	}
+	for ( alloclist = g_sysmem_internals.m_alloclist; alloclist && ptr != alloclist; alloclist = alloclist->m_next )
+		;
 	if ( alloclist )
-	{
 		return -1;
-	}
 	cCpuSuspendIntr(&state);
-	v4 = freeSysMemory_internal(ptr);
-	if ( !v4 )
+	retval = freeSysMemory_internal(ptr);
+	if ( !retval )
 		updateSmemCtlBlk();
 	cCpuResumeIntr(state);
-	return v4;
+	return retval;
 }
 
 void *QueryBlockTopAddress(void *address)
 {
-	int v2;
-	const sysmem_alloc_element_t *v3;
+	int retval;
+	const sysmem_alloc_block_t *blk;
 	int state;
 
-	v2 = -1;
 	cCpuSuspendIntr(&state);
-	v3 = search_block(address);
-	if ( v3 )
-	{
-		unsigned int info;
-
-		info = v3->info;
-		if ( (info & 1) != 0 )
-			v2 = (u16)info >> 1 << 8;
-		else
-			v2 = ((u16)info >> 1 << 8) + 0x80000000;
-	}
+	blk = search_block(address);
+	retval = blk ? ((blk->m_info.m_address << 8) | (int)(!blk->m_info.m_allocated ? FREE : USED)) : -1;
 	cCpuResumeIntr(state);
-	return (void *)v2;
+	return (void *)retval;
 }
 
 int QueryBlockSize(void *address)
 {
-	int v2;
-	const sysmem_alloc_element_t *v3;
+	int retval;
+	const sysmem_alloc_block_t *blk;
 	int state;
 
-	v2 = -1;
 	cCpuSuspendIntr(&state);
-	v3 = search_block(address);
-	if ( v3 )
-	{
-		unsigned int info;
-
-		info = v3->info;
-		v2 = info >> 17 << 8;
-		if ( (info & 1) == 0 )
-			v2 |= 0x80000000;
-	}
+	blk = search_block(address);
+	retval = blk ? ((blk->m_info.m_size << 8) | (int)(!blk->m_info.m_allocated ? FREE : USED)) : -1;
 	cCpuResumeIntr(state);
-	return v2;
+	return retval;
 }
 
 void GetSysMemoryInfo(int flag, sysmem_info_t *info)
 {
-	sysmem_alloc_table_t *table_info;
-	void *memsize;
-	sysmem_alloc_table_t *v6;
-	u32 v7;
-	const sysmem_alloc_table_t *alloclist;
-	sysmem_alloc_table_t *next;
 	int state;
 
 	cCpuSuspendIntr(&state);
 	if ( flag )
 	{
-		info->meminfo.allocation_count = sysmem_internals.allocation_count;
-		info->meminfo.memsize = sysmem_internals.memsize;
-		info->meminfo.memlist_last = sysmem_internals.smemupdate_cur;
-		info->meminfo.memlist_first = (sysmem_alloc_table_t *)sysmem_internals.alloclist->list;
+		info->m_meminfo.m_allocation_count = g_sysmem_internals.m_allocation_count;
+		info->m_meminfo.m_memsize = g_sysmem_internals.m_memsize;
+		info->m_meminfo.m_memlist_last = g_sysmem_internals.m_smemupdate_cur;
+		info->m_meminfo.m_memlist_first = (sysmem_alloc_table_t *)g_sysmem_internals.m_alloclist->m_blkarray;
 		cCpuResumeIntr(state);
 		return;
 	}
-	if ( info->meminfo.memlist_last != sysmem_internals.smemupdate_cur )
+	if ( info->m_meminfo.m_memlist_last != g_sysmem_internals.m_smemupdate_cur )
 	{
-		info->blockinfo.block_address = (void *)-1;
-		info->blockinfo.flags_memsize = -1;
-		info->blockinfo.table_info = 0;
+		info->m_blockinfo.m_block_address = (void *)-1;
+		info->m_blockinfo.m_flags_memsize = -1;
+		info->m_blockinfo.m_table_info = NULL;
 		cCpuResumeIntr(state);
 		return;
 	}
-	table_info = info->blockinfo.table_info;
-	if ( !table_info )
+	if ( !info->m_blockinfo.m_table_info )
 	{
-		memsize = (void *)sysmem_internals.memsize;
-		info->blockinfo.flags_memsize = 1;
-		info->blockinfo.block_address = memsize;
+		info->m_blockinfo.m_flags_memsize = 1;
+		info->m_blockinfo.m_block_address = (void *)g_sysmem_internals.m_memsize;
 		cCpuResumeIntr(state);
 		return;
 	}
-	v6 = info->blockinfo.table_info;
-	info->blockinfo.block_address = (void *)((((unsigned int)table_info->list[0].next >> 1) & 0x7FFF) << 8);
-	v7 = (unsigned int)v6->list[0].next >> 17 << 8;
-	info->blockinfo.flags_memsize = v7;
-	if ( ((int)v6->list[0].next & 1) != 0 )
+	info->m_blockinfo.m_block_address =
+		(void *)((((unsigned int)info->m_blockinfo.m_table_info->m_blkarray[0].m_next >> 1) & 0x7FFF) << 8);
+	info->m_blockinfo.m_flags_memsize = (unsigned int)info->m_blockinfo.m_table_info->m_blkarray[0].m_next >> 17 << 8;
+	if ( ((int)info->m_blockinfo.m_table_info->m_blkarray[0].m_next & 1) )
 	{
-		alloclist = sysmem_internals.alloclist;
-		while ( alloclist && alloclist != info->blockinfo.block_address )
-		{
-			alloclist = alloclist->next;
-		}
-		if ( alloclist )
-		{
-			info->blockinfo.flags_memsize |= 2u;
-		}
+		const sysmem_alloc_table_t *alloclist;
+
+		for ( alloclist = g_sysmem_internals.m_alloclist; alloclist && alloclist != info->m_blockinfo.m_block_address;
+					alloclist = alloclist->m_next )
+			;
+		info->m_blockinfo.m_flags_memsize |= alloclist ? 2 : 0;
 	}
 	else
-	{
-		info->blockinfo.flags_memsize |= 1;
-	}
-	next = info->blockinfo.table_info->next;
-	info->blockinfo.table_info = next;
-	if ( !((unsigned int)next->list[0].next >> 17) )
-		info->blockinfo.table_info = 0;
+		info->m_blockinfo.m_flags_memsize |= 1;
+	info->m_blockinfo.m_table_info = ((unsigned int)info->m_blockinfo.m_table_info->m_blkarray[0].m_next >> 17) ?
+																		 info->m_blockinfo.m_table_info->m_next :
+																		 NULL;
 	cCpuResumeIntr(state);
 }
 
 sysmem_internals_t *GetSysmemInternalData(void)
 {
-	return &sysmem_internals;
+	return &g_sysmem_internals;
 }
 
-static int allocSysMemory_internal(int flags, int size, void *mem)
+static void *allocSysMemory_internal(int flags, int size, const void *mem)
 {
-	unsigned int v3;
-	int result;
-	sysmem_alloc_element_t *i;
-	unsigned int v6;
-	unsigned int v7;
-	sysmem_alloc_element_t *list;
-	sysmem_alloc_element_t *v9;
-	s16 v12;
-	sysmem_alloc_element_t *next;
-	int v16;
-	unsigned int v17;
-	unsigned int v18;
-	unsigned int v19;
-	unsigned int v20;
-	int v21;
-	int v22;
-	unsigned int v23;
-	unsigned int v24;
-	sysmem_alloc_element_t *v25;
-	sysmem_alloc_element_t *v26;
-	unsigned int v27;
-	int v28;
-	unsigned int v31;
-	unsigned int v32;
-	unsigned int v35;
-	unsigned int v36;
+	unsigned int size_rounded;
 
-	v31 = 0;
-	v3 = (unsigned int)(size + 255) >> 8;
-	result = 0;
-	if ( !v3 )
-		return result;
-	if ( flags == 1 )
+	size_rounded = (unsigned int)(size + 255) >> 8;
+	if ( !size_rounded )
+		return NULL;
+	switch ( flags )
 	{
-		list = sysmem_internals.alloclist->list;
-		v9 = 0;
-		if ( sysmem_internals.alloclist != (sysmem_alloc_table_t *)-4 )
+		case ALLOC_FIRST:
 		{
-			do
-			{
-				unsigned int info;
+			sysmem_alloc_block_t *i;
+			sysmem_alloc_block_t *next;
+			sysmem_alloc_block_info_t blkinfo;
 
-				info = list->info;
-				if ( (info & 1) == 0 && info >> 17 >= v3 )
-					v9 = list;
-				list = list->next;
-			} while ( list );
-		}
-		i = v9;
-		result = 0;
-		if ( v9 )
-		{
-			v7 = v9->info;
-			if ( v7 >> 17 != v3 )
+			// Unofficial: properly check if m_alloclist is not NULL
+			if ( !g_sysmem_internals.m_alloclist )
+				return NULL;
+			for ( i = g_sysmem_internals.m_alloclist->m_blkarray; i; i = i->m_next )
+				if ( !i->m_info.m_allocated && i->m_info.m_size >= size_rounded )
+					break;
+			if ( !i )
+				return NULL;
+			if ( i->m_info.m_size == size_rounded )
 			{
-				unsigned int v11;
-				int v13;
-				int v14;
-
-				++sysmem_internals.allocation_count;
-				v11 = (v9->info & 0x1FFFF) | (((v9->info >> 17) - v3) << 17);
-				v12 = (v11 >> 1) & 0x7FFF;
-				i->info = v11;
-				v11 >>= 17;
-				v13 = (v31 & 0x10001) | (u16)(2 * ((v12 + v11) & 0x7FFF)) | (v3 << 17) | 1;
-				v14 = (u16)((((u8 *)&v31)[0] & 1) | (2 * ((v12 + v11) & 0x7FFF)) | 1) >> 1;
-				v31 = v13;
-				next = i->next;
-				v16 = v14 << 8;
-				result = v16;
-				if ( v31 >> 17 )
-				{
-					do
-					{
-						v36 = next->info;
-						next->info = v31;
-						v31 = v36;
-						next = next->next;
-						result = v16;
-					} while ( v36 >> 17 );
-				}
-				return result;
+				i->m_info.m_allocated = 1;
+				return (void *)(uiptr)(i->m_info.m_address << 8);
 			}
-			i->info = v7 | 1;
-			return (((v7 | 1) >> 1) & 0x7FFF) << 8;
-		}
-	}
-	else if ( flags >= 2 )
-	{
-		result = 0;
-		if ( flags == 2 )
-		{
-			result = 0;
-			if ( (((uiptr)mem) & 0xFF) == 0 )
+			g_sysmem_internals.m_allocation_count += 1;
+			blkinfo.m_address = i->m_info.m_address + size_rounded;
+			blkinfo.m_size = i->m_info.m_size - size_rounded;
+			blkinfo.m_allocated = i->m_info.m_allocated;
+			blkinfo.m_pad = i->m_info.m_pad;
+			i->m_info.m_allocated = 1;
+			i->m_info.m_size = size_rounded;
+			// Unofficial: check next if not NULL
+			for ( next = i->m_next; next && blkinfo.m_size; next = next->m_next )
 			{
-				v17 = (unsigned int)mem >> 8;
-				for ( i = sysmem_internals.alloclist->list;; i = i->next )
+				sysmem_alloc_block_info_t blkinfo_tmp;
+
+				blkinfo_tmp = next->m_info;
+				next->m_info = blkinfo;
+				blkinfo = blkinfo_tmp;
+			}
+			return (void *)(uiptr)(i->m_info.m_address << 8);
+		}
+		case ALLOC_LAST:
+		{
+			sysmem_alloc_block_t *i;
+			sysmem_alloc_block_t *list;
+			sysmem_alloc_block_t *next;
+			unsigned int retaddr;
+			sysmem_alloc_block_info_t blkinfo;
+
+			// Unofficial: properly check if m_alloclist is not NULL
+			if ( !g_sysmem_internals.m_alloclist )
+				return NULL;
+			i = NULL;
+			for ( list = g_sysmem_internals.m_alloclist->m_blkarray; list; list = list->m_next )
+				if ( !list->m_info.m_allocated && list->m_info.m_size >= size_rounded )
+					i = list;
+			if ( !i )
+				return NULL;
+			if ( i->m_info.m_size == size_rounded )
+			{
+				i->m_info.m_allocated = 1;
+				return (void *)(uiptr)(i->m_info.m_address << 8);
+			}
+			g_sysmem_internals.m_allocation_count += 1;
+			i->m_info.m_size -= size_rounded;
+			retaddr = i->m_info.m_address + i->m_info.m_size;
+			blkinfo.m_address = retaddr;
+			blkinfo.m_size = size_rounded;
+			blkinfo.m_allocated = 1;
+			blkinfo.m_pad = 0;
+			// Unofficial: check next if not NULL
+			for ( next = i->m_next; next && blkinfo.m_size; next = next->m_next )
+			{
+				sysmem_alloc_block_info_t blkinfo_tmp;
+
+				blkinfo_tmp = next->m_info;
+				next->m_info = blkinfo;
+				blkinfo = blkinfo_tmp;
+			}
+			return (void *)(uiptr)(retaddr << 8);
+		}
+		case ALLOC_ADDRESS:
+		{
+			sysmem_alloc_block_t *i;
+			sysmem_alloc_block_t *next;
+			unsigned int mem_rounded;
+			sysmem_alloc_block_info_t blkinfo;
+
+			if ( (((uiptr)mem) & 0xFF) )
+				return NULL;
+			mem_rounded = (unsigned int)mem >> 8;
+			// Unofficial: properly check if m_alloclist is not NULL
+			if ( !g_sysmem_internals.m_alloclist )
+				return NULL;
+			for ( i = g_sysmem_internals.m_alloclist->m_blkarray; i; i = i->m_next )
+			{
+				if ( mem_rounded < i->m_info.m_address )
+					return NULL;
+				if ( !i->m_info.m_allocated && (u32)(i->m_info.m_address + i->m_info.m_size) >= mem_rounded + size_rounded )
+					break;
+			}
+			if ( !i )
+				return NULL;
+			if ( i->m_info.m_address < mem_rounded )
+			{
+				unsigned int sz_tmp;
+				sysmem_alloc_block_t *blk_tmp;
+				sysmem_alloc_block_info_t blkinfo_nest;
+
+				g_sysmem_internals.m_allocation_count += 1;
+				sz_tmp = i->m_info.m_address + i->m_info.m_size - mem_rounded;
+				i->m_info.m_size -= sz_tmp;
+				blkinfo_nest.m_address = i->m_info.m_address + i->m_info.m_size;
+				blkinfo_nest.m_size = sz_tmp;
+				blkinfo_nest.m_allocated = 0;
+				blkinfo_nest.m_pad = 0;
+				blk_tmp = i->m_next;
+				i = blk_tmp;
+				while ( blkinfo_nest.m_size )
 				{
-					result = 0;
-					if ( !i )
-						break;
-					v18 = i->info;
-					v19 = (u16)v18 >> 1;
-					result = 0;
-					if ( v17 < v19 )
-						break;
-					if ( (v18 & 1) == 0 && v19 + (v18 >> 17) >= ((unsigned int)mem >> 8) + v3 )
-					{
-						if ( ((i->info >> 1) & 0x7FFF) < v17 )
-						{
-							++sysmem_internals.allocation_count;
-							v20 = i->info;
-							v21 = v20 & 0x1FFFF;
-							v22 = (u16)v20 >> 1;
-							v20 >>= 17;
-							v23 = v22 + v20 - v17;
-							v24 = v21 | ((v20 - v23) << 17);
-							i->info = v24;
-							v32 = (u16)(2 * ((((v24 >> 1) & 0x7FFF) + (v24 >> 17)) & 0x7FFF)) | (v23 << 17);
-							v25 = i->next;
-							v26 = v25;
-							if ( v32 >> 17 )
-							{
-								do
-								{
-									v35 = v25->info;
-									v25->info = v32;
-									v32 = v35;
-									v25 = v25->next;
-								} while ( v35 >> 17 );
-							}
-							i = v26;
-						}
-						v7 = i->info;
-						if ( v7 >> 17 != v3 )
-						{
-							++sysmem_internals.allocation_count;
-							v27 = i->info;
-							i->info = (v27 & 0x1FFFE) | 1 | (v3 << 17);
-							v28 = 2 * ((((v27 >> 1) & 0x7FFF) + (u16)v3) & 0x7FFF);
-							v31 = (v27 & 0x10001) | (v28 & 0x1FFFF) | (((((v27 & 0xFFFF0001) | v28) >> 17) - v3) << 17);
-							next = i->next;
-							v16 = (u16)v27 >> 1 << 8;
-							result = v16;
-							if ( v31 >> 17 )
-							{
-								do
-								{
-									v36 = next->info;
-									next->info = v31;
-									v31 = v36;
-									next = next->next;
-									result = v16;
-								} while ( v36 >> 17 );
-							}
-							return result;
-						}
-						i->info = v7 | 1;
-						return (((v7 | 1) >> 1) & 0x7FFF) << 8;
-					}
+					sysmem_alloc_block_info_t blkinfo_tmp;
+
+					blkinfo_tmp = blk_tmp->m_info;
+					blk_tmp->m_info = blkinfo_nest;
+					blkinfo_nest = blkinfo_tmp;
+					blk_tmp = blk_tmp->m_next;
 				}
 			}
-		}
-	}
-	else
-	{
-		result = 0;
-		if ( !flags )
-		{
-			i = sysmem_internals.alloclist->list;
-			result = 0;
-			if ( sysmem_internals.alloclist != (sysmem_alloc_table_t *)-4 )
+			if ( i->m_info.m_size == size_rounded )
 			{
-				do
-				{
-					v6 = i->info;
-					if ( (v6 & 1) == 0 && v6 >> 17 >= v3 )
-						break;
-					i = i->next;
-				} while ( i );
-				result = 0;
-				if ( i )
-				{
-					v7 = i->info;
-					if ( v7 >> 17 != v3 )
-					{
-						++sysmem_internals.allocation_count;
-						v27 = i->info;
-						i->info = (v27 & 0x1FFFE) | 1 | (v3 << 17);
-						v28 = 2 * ((((v27 >> 1) & 0x7FFF) + (u16)v3) & 0x7FFF);
-						v31 = (v27 & 0x10001) | (v28 & 0x1FFFF) | (((((v27 & 0xFFFF0001) | v28) >> 17) - v3) << 17);
-						next = i->next;
-						v16 = (u16)v27 >> 1 << 8;
-						result = v16;
-						if ( v31 >> 17 )
-						{
-							do
-							{
-								v36 = next->info;
-								next->info = v31;
-								v31 = v36;
-								next = next->next;
-								result = v16;
-							} while ( v36 >> 17 );
-						}
-						return result;
-					}
-					i->info = v7 | 1;
-					return (((v7 | 1) >> 1) & 0x7FFF) << 8;
-				}
+				i->m_info.m_allocated = 1;
+				return (void *)(uiptr)(i->m_info.m_address << 8);
 			}
+			g_sysmem_internals.m_allocation_count += 1;
+			blkinfo.m_address = i->m_info.m_address + size_rounded;
+			blkinfo.m_size = i->m_info.m_size - size_rounded;
+			blkinfo.m_allocated = i->m_info.m_allocated;
+			blkinfo.m_pad = i->m_info.m_pad;
+			i->m_info.m_allocated = 1;
+			i->m_info.m_size = size_rounded;
+			// Unofficial: check next if not NULL
+			for ( next = i->m_next; next && blkinfo.m_size; next = next->m_next )
+			{
+				sysmem_alloc_block_info_t blkinfo_tmp;
+
+				blkinfo_tmp = next->m_info;
+				next->m_info = blkinfo;
+				blkinfo = blkinfo_tmp;
+			}
+			return (void *)(uiptr)(i->m_info.m_address << 8);
 		}
+		default:
+			return NULL;
 	}
-	return result;
 }
 
-static int freeSysMemory_internal(void *ptr)
+static int freeSysMemory_internal(const void *ptr)
 {
-	unsigned int v2;
-	sysmem_alloc_element_t *v4;
-	sysmem_alloc_element_t *v5;
-	unsigned int v7;
-	int v8;
-	sysmem_alloc_element_t *v9;
-	const sysmem_alloc_element_t *next;
-	int v12;
-	const sysmem_alloc_element_t *i;
+	unsigned int ptr_rounded;
+	sysmem_alloc_block_t *blklist;
+	sysmem_alloc_block_t *prev_blk;
+	int blk_modcnt;
+	sysmem_alloc_block_t *merge_blk;
+	const sysmem_alloc_block_t *next;
+	const sysmem_alloc_block_t *i;
 
-	v2 = (unsigned int)ptr >> 8;
-	if ( (((uiptr)ptr) & 0xFF) != 0 )
+	ptr_rounded = (unsigned int)ptr >> 8;
+	if ( (((uiptr)ptr) & 0xFF) )
 		return -1;
-	v4 = &sysmem_internals.alloclist->list[2];
-	v5 = 0;
-	if ( sysmem_internals.alloclist == (sysmem_alloc_table_t *)-20 )
+	prev_blk = NULL;
+	// Unofficial: properly check if m_alloclist is not NULL
+	if ( !g_sysmem_internals.m_alloclist )
 		return -1;
-	do
+	for ( blklist = &g_sysmem_internals.m_alloclist->m_blkarray[2]; blklist; blklist = blklist->m_next )
 	{
-		unsigned int info;
-
-		info = v4->info;
-		if ( info >> 17 && (u16)info >> 1 == v2 )
+		if ( blklist->m_info.m_size && blklist->m_info.m_address == ptr_rounded )
 			break;
-		v5 = v4;
-		v4 = v4->next;
-	} while ( v4 );
-	if ( !v4 )
-		return -1;
-	v7 = v4->info;
-	v8 = 0;
-	if ( (v7 & 1) == 0 )
-		return -1;
-	v9 = 0;
-	next = v4->next;
-	v4->info = v7 & 0xFFFFFFFE;
-	if ( v4->next != 0 )
-	{
-		unsigned int v11;
-
-		v11 = next->info;
-		if ( v11 >> 17 )
-		{
-			if ( (v11 & 1) == 0 )
-			{
-				v8 = 1;
-				--sysmem_internals.allocation_count;
-				v9 = v4->next;
-				v4->info = (v4->info & 0x1FFFF) | (((v4->info >> 17) + (v4->next->info >> 17)) << 17);
-			}
-		}
+		prev_blk = blklist;
 	}
-	if ( v5 && (v5->info & 1) == 0 )
+	if ( !blklist || !blklist->m_info.m_allocated )
+		return -1;
+	blk_modcnt = 0;
+	merge_blk = NULL;
+	next = blklist->m_next;
+	blklist->m_info.m_allocated = 0;
+	if ( next && next->m_info.m_size && !next->m_info.m_allocated )
 	{
-		v9 = v4;
-		++v8;
-		--sysmem_internals.allocation_count;
-		v5->info = (v5->info & 0x1FFFF) | (((v5->info >> 17) + (v4->info >> 17)) << 17);
+		blk_modcnt += 1;
+		g_sysmem_internals.m_allocation_count -= 1;
+		merge_blk = blklist->m_next;
+		blklist->m_info.m_size += merge_blk->m_info.m_size;
 	}
-	v12 = v8 - 1;
-	if ( v8 == 0 )
+	if ( prev_blk && !prev_blk->m_info.m_allocated )
+	{
+		merge_blk = blklist;
+		blk_modcnt += 1;
+		g_sysmem_internals.m_allocation_count -= 1;
+		prev_blk->m_info.m_size += blklist->m_info.m_size;
+	}
+	if ( !blk_modcnt )
 		return 0;
-	for ( i = v9; v12 != -1; --v12 )
-		i = i->next;
-	while ( i )
+	blk_modcnt -= 1;
+	for ( i = merge_blk; blk_modcnt != -1; blk_modcnt -= 1 )
+		i = i->m_next;
+	for ( ; i; i = i->m_next )
 	{
-		v9->info = i->info;
-		i = i->next;
-		v9 = v9->next;
+		merge_blk->m_info = i->m_info;
+		merge_blk = merge_blk->m_next;
 	}
 	return 0;
 }
@@ -621,140 +460,105 @@ static int freeSysMemory_internal(void *ptr)
 static void updateSmemCtlBlk(void)
 {
 	sysmem_alloc_table_t *alloclist;
-	sysmem_alloc_table_t *next;
-	sysmem_alloc_element_t *v6;
-	sysmem_alloc_table_t *v7;
 
-	alloclist = sysmem_internals.alloclist;
-	++sysmem_internals.smemupdate_cur;
-	if ( sysmem_internals.alloclist->next )
-	{
-		do
-			alloclist = alloclist->next;
-		while ( alloclist->next );
-	}
-	if ( alloclist->list[27].info >> 17 )
-	{
-		int v1;
-
-		v1 = allocSysMemory_internal(0, 256, 0);
-		alloclist->next = (sysmem_alloc_table_t *)v1;
-		if ( v1 )
+	g_sysmem_internals.m_smemupdate_cur += 1;
+	for ( alloclist = g_sysmem_internals.m_alloclist; alloclist->m_next; alloclist = alloclist->m_next )
+		if ( alloclist->m_blkarray[(sizeof(alloclist->m_blkarray) / sizeof(alloclist->m_blkarray[0])) - 4].m_info.m_size )
 		{
-			unsigned int v2;
-			int v4;
-			sysmem_alloc_table_t *v5;
-
-			v2 = 0;
-			alloclist->list[30].next = (sysmem_alloc_element_t *)(v1 + 4);
-			next = alloclist->next;
-			v4 = 12;
-			v5 = next;
-			next->next = 0;
-			do
+			alloclist->m_next =
+				(sysmem_alloc_table_t *)allocSysMemory_internal(ALLOC_FIRST, sizeof(sysmem_alloc_table_t), NULL);
+			if ( alloclist->m_next )
 			{
-				v6 = (sysmem_alloc_element_t *)((char *)next + v4);
-				v4 += 8;
-				v5->list[0].next = v6;
-				v5->list[0].info = 0;
-				++v2;
-				v5 = (sysmem_alloc_table_t *)((char *)v5 + 8);
-			} while ( v2 < 0x1F );
-			next->list[30].next = 0;
-		}
-	}
-	v7 = sysmem_internals.alloclist;
-	if ( sysmem_internals.alloclist->next )
-	{
-		sysmem_alloc_table_t *v8;
+				sysmem_alloc_table_t *next;
+				unsigned int i;
 
-		while ( v7->next->next )
-			v7 = v7->next;
-		v8 = v7->next;
-		if ( v7->next )
-		{
-			if ( !(v7->list[27].info >> 17) )
-			{
-				v7->list[30].next = 0;
-				v7->next = 0;
-				freeSysMemory_internal(v8);
+				next = alloclist->m_next;
+				alloclist->m_blkarray[(sizeof(alloclist->m_blkarray) / sizeof(alloclist->m_blkarray[0])) - 1].m_next =
+					&(next->m_blkarray[0]);
+				next->m_next = NULL;
+				for ( i = 0; i < (sizeof(next->m_blkarray) / sizeof(next->m_blkarray[0])); i += 1 )
+				{
+					next->m_blkarray[i].m_next = &(next->m_blkarray[i + 1]);
+					next->m_blkarray[i].m_info.m_allocated = 0;
+					next->m_blkarray[i].m_info.m_address = 0;
+					next->m_blkarray[i].m_info.m_pad = 0;
+					next->m_blkarray[i].m_info.m_size = 0;
+				}
+				next->m_blkarray[(sizeof(next->m_blkarray) / sizeof(next->m_blkarray[0])) - 1].m_next = NULL;
 			}
+		}
+	alloclist = g_sysmem_internals.m_alloclist;
+	// Unofficial: properly check if m_alloclist is not NULL
+	if ( alloclist && alloclist->m_next )
+	{
+		sysmem_alloc_table_t *next;
+
+		for ( ; alloclist->m_next->m_next; alloclist = alloclist->m_next )
+			;
+		next = alloclist->m_next;
+		if (
+			next
+			&& !alloclist->m_blkarray[(sizeof(alloclist->m_blkarray) / sizeof(alloclist->m_blkarray[0])) - 4].m_info.m_size )
+		{
+			alloclist->m_blkarray[(sizeof(alloclist->m_blkarray) / sizeof(alloclist->m_blkarray[0])) - 1].m_next = NULL;
+			alloclist->m_next = NULL;
+			freeSysMemory_internal(next);
 		}
 	}
 }
 
-static sysmem_alloc_element_t *search_block(void *a1)
+static sysmem_alloc_block_t *search_block(const void *address)
 {
-	sysmem_alloc_element_t *list;
+	sysmem_alloc_block_t *blklist;
 
-	list = sysmem_internals.alloclist->list;
-	if ( sysmem_internals.alloclist != (sysmem_alloc_table_t *)-4 )
-	{
-		do
-		{
-			unsigned int info;
-			int v3;
-
-			info = list->info;
-			v3 = (u16)info >> 1;
-			if ( (unsigned int)a1 >= (unsigned int)(v3 << 8) && (unsigned int)a1 < (v3 + (info >> 17)) << 8 )
-				break;
-			list = list->next;
-		} while ( list );
-	}
-	return list;
+	// Unofficial: properly check if m_alloclist is not NULL
+	if ( !g_sysmem_internals.m_alloclist )
+		return NULL;
+	for ( blklist = g_sysmem_internals.m_alloclist->m_blkarray; blklist; blklist = blklist->m_next )
+		if (
+			(uiptr)address >= (uiptr)(blklist->m_info.m_address << 8)
+			&& (uiptr)address < (uiptr)((blklist->m_info.m_address + blklist->m_info.m_size) << 8) )
+			break;
+	return blklist;
 }
 
 static int cCpuSuspendIntr(int *state)
 {
-	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(sysmem_internals.intr_suspend_tbl);
-	if ( intrman_callbacks && intrman_callbacks->cbCpuSuspendIntr )
-		return intrman_callbacks->cbCpuSuspendIntr(state);
-	else
-		return 0;
+	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(g_sysmem_internals.m_intr_suspend_tbl);
+	return (intrman_callbacks && intrman_callbacks->cbCpuSuspendIntr) ? intrman_callbacks->cbCpuSuspendIntr(state) : 0;
 }
 
 static int cCpuResumeIntr(int state)
 {
-	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(sysmem_internals.intr_suspend_tbl);
-	if ( intrman_callbacks && intrman_callbacks->cbCpuResumeIntr )
-		return intrman_callbacks->cbCpuResumeIntr(state);
-	else
-		return 0;
+	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(g_sysmem_internals.m_intr_suspend_tbl);
+	return (intrman_callbacks && intrman_callbacks->cbCpuResumeIntr) ? intrman_callbacks->cbCpuResumeIntr(state) : 0;
 }
 
 #if 0
 static int cQueryIntrContext(void)
 {
-	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(sysmem_internals.intr_suspend_tbl);
-	if ( intrman_callbacks && intrman_callbacks->cbQueryIntrContext )
-		return intrman_callbacks->cbQueryIntrContext();
-	else
-		return 0;
+	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(g_sysmem_internals.m_intr_suspend_tbl);
+	return ( intrman_callbacks && intrman_callbacks->cbQueryIntrContext ) ? intrman_callbacks->cbQueryIntrContext() : 0;
 }
 #endif
 
 int Kprintf(const char *format, ...)
 {
-	if ( kprintf_cb )
-	{
-		int ret;
-		va_list va;
+	int ret;
+	va_list va;
 
-		va_start(va, format);
-		ret = kprintf_cb(kprintf_cb_userdata, format, va);
-		va_end(va);
-		return ret;
-	}
-	return 0;
+	if ( !g_kprintf_cb )
+		return 0;
+	va_start(va, format);
+	ret = g_kprintf_cb(g_kprintf_cb_userdata, format, va);
+	va_end(va);
+	return ret;
 }
 
 void KprintfSet(KprintfHandler_t *new_cb, void *context)
 {
-	if ( kprintf_cb && new_cb )
-	{
-		new_cb(context, (const char *)Kprintf(NULL), NULL);
-	}
-	kprintf_cb = new_cb;
-	kprintf_cb_userdata = context;
+	if ( g_kprintf_cb && new_cb )
+		new_cb(context, (const char *)(uiptr)Kprintf(NULL), NULL);
+	g_kprintf_cb = new_cb;
+	g_kprintf_cb_userdata = context;
 }

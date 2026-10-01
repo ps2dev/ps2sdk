@@ -259,7 +259,7 @@ int _start(int argc, char *argv[])
 		sysmem_module = search_for_module_by_name("System_Memory_Manager");
 		if ( sysmem_module && sysmem_module->version >= 0x201u )
 		{
-			GetSysmemInternalData()->intr_suspend_tbl = (void *)&intrman_callbacks;
+			GetSysmemInternalData()->m_intr_suspend_tbl = (void *)&intrman_callbacks;
 		}
 		loadcore_module = search_for_module_by_name("Module_Manager");
 		if ( loadcore_module )
