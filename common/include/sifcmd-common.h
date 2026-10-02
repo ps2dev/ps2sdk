@@ -108,10 +108,12 @@ extern unsigned int isceSifSendCmd(int cid, void *packet, int packet_size, void 
 extern void sceSifWriteBackDCache(void *ptr, int size); // EE only
 #endif
 #ifdef _IOP
+extern void sceSifSetSif1CB(void (*func)(void *userdata), void *userdata);
+extern void sceSifClearSif1CB(void);
 extern unsigned int sceSifSendCmdIntr(int cid, void *packet, int packet_size, void *src_extra,
-    void *dest_extra, int size_extra, void (*completioncb)(void *userdata), void *userdata);
+    void *dest_extra, int size_extra, void (*completion_cb)(void *userdata), void *completion_cb_userdata);
 extern unsigned int isceSifSendCmdIntr(int cid, void *packet, int packet_size, void *src_extra,
-    void *dest_extra, int size_extra, void (*completioncb)(void *userdata), void *userdata);
+    void *dest_extra, int size_extra, void (*completion_cb)(void *userdata), void *completion_cb_userdata);
 #endif
 
 #ifdef __cplusplus

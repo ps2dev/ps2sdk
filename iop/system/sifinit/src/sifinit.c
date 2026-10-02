@@ -18,30 +18,23 @@ IRX_ID("SifInit", 1, 1);
 int _start(int ac, char **av)
 {
 	const int *BootMode3;
+	const int *BootMode1;
 
 	(void)ac;
 	(void)av;
 
 	BootMode3 = QueryBootMode(3);
-	if ( BootMode3 && (BootMode3[1] & 1) != 0 )
+	if ( BootMode3 && (BootMode3[1] & 1) )
 	{
 		printf(" Skip SIF init\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
-	else
+	BootMode1 = QueryBootMode(1);
+	if ( BootMode1 && *(const u16 *)BootMode1 == 1 )
 	{
-		const int *BootMode1;
-
-		BootMode1 = QueryBootMode(1);
-		if ( BootMode1 && *(const u16 *)BootMode1 == 1 )
-		{
-			printf(" Skip SIF init (it is DECI1)\n");
-			return 1;
-		}
-		else
-		{
-			sceSifInit();
-			return 1;
-		}
+		printf(" Skip SIF init (it is DECI1)\n");
+		return MODULE_NO_RESIDENT_END;
 	}
+	sceSifInit();
+	return MODULE_NO_RESIDENT_END;
 }
