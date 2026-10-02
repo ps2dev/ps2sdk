@@ -21,6 +21,9 @@
 
 // fileio common definitions
 
+/** Default size of the IOP buffer used for FILEIO read/write transfers. */
+#define FIO_DEFAULT_XFER_SIZE (16 * 1024)
+
 enum _fio_functions {
     FIO_F_OPEN = 0,
     FIO_F_CLOSE,

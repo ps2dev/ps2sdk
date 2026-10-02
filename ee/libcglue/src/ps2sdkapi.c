@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #define NEWLIB_PORT_AWARE
 #include <fileio.h>
+#include <fileio-common.h>
 #include "iox_stat.h"
 
 typedef struct _fio_file_info_
@@ -417,7 +418,7 @@ static void __fill_stat(struct stat *stat, const io_stat_t *fiostat)
         stat->st_atime = io_to_posix_time(fiostat->atime);
         stat->st_mtime = io_to_posix_time(fiostat->mtime);
         stat->st_ctime = io_to_posix_time(fiostat->ctime);
-        stat->st_blksize = 16*1024;
+        stat->st_blksize = S_ISREG(stat->st_mode) ? FIO_DEFAULT_XFER_SIZE : 0;
         stat->st_blocks = stat->st_size / 512;
 }
 

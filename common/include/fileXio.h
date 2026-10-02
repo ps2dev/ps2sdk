@@ -30,6 +30,10 @@
 #endif
 
 #define FILEXIO_IRX 0xb0b0b00
+
+/** Default size of the IOP buffer used for fileXio read/write transfers. */
+#define FILEXIO_DEFAULT_RW_BUFFER_SIZE (16 * 1024)
+
 enum FILEXIO_CMDS {
     FILEXIO_DOPEN = 0x01,
     FILEXIO_DREAD,

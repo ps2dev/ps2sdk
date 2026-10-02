@@ -48,9 +48,8 @@ IRX_ID("IOX/File_Manager_Rpc", 1, 2);
 #define MIN(a, b)	(((a)<(b))?(a):(b))
 #define RDOWN_64(a)	((unsigned int)(a)&~0x3F)
 
-#define DEFAULT_RWSIZE	16384
 static void *rwbuf = NULL;
-static unsigned int RWBufferSize=DEFAULT_RWSIZE;
+static unsigned int RWBufferSize=FILEXIO_DEFAULT_RW_BUFFER_SIZE;
 
 // 0x4800 bytes for DirEntry structures
 // 0x400 bytes for the filename string
@@ -985,7 +984,7 @@ static void fileXio_Thread(void* param)
 
 	sceSifInitRpc(0);
 
-	RWBufferSize=DEFAULT_RWSIZE;
+	RWBufferSize=FILEXIO_DEFAULT_RW_BUFFER_SIZE;
 	CpuSuspendIntr(&OldState);
 	rwbuf = AllocSysMemory(ALLOC_FIRST, RWBufferSize, NULL);
 	CpuResumeIntr(OldState);

@@ -25,6 +25,8 @@
 #include <fileXio_rpc.h>
 #include "iox_stat.h"
 
+int _ps2sdk_fileXio_get_block_size(void);
+
 typedef struct _fxio_file_info_
 {
     // cppcheck-suppress unusedStructMember
@@ -186,7 +188,7 @@ static void fill_stat(struct stat *stat, const iox_stat_t *fiostat)
         stat->st_atime = io_to_posix_time(fiostat->atime);
         stat->st_mtime = io_to_posix_time(fiostat->mtime);
         stat->st_ctime = io_to_posix_time(fiostat->ctime);
-        stat->st_blksize = 16*1024;
+        stat->st_blksize = S_ISREG(stat->st_mode) ? _ps2sdk_fileXio_get_block_size() : 0;
         stat->st_blocks = stat->st_size / 512;
 }
 
@@ -521,9 +523,22 @@ extern void __fileXioOpsInitializeImpl(void)
 #ifdef F__ps2sdk_fileXio_init_deinit
 /* Backup pointer functions to restore after exit fileXio */
 static _libcglue_fdman_path_ops_t *_backup_libcglue_fdman_path_ops;
+/* EE-side mirror of the active IOP read/write buffer size. */
+static int _fileXio_block_size = FILEXIO_DEFAULT_RW_BUFFER_SIZE;
+
+int _ps2sdk_fileXio_get_block_size(void)
+{
+    return _fileXio_block_size;
+}
+
+void _ps2sdk_fileXio_set_block_size(int size)
+{
+    _fileXio_block_size = size;
+}
 
 void _ps2sdk_fileXio_init()
 {
+    _fileXio_block_size = FILEXIO_DEFAULT_RW_BUFFER_SIZE;
     _backup_libcglue_fdman_path_ops = _libcglue_fdman_path_ops;
     _libcglue_fdman_path_ops = &__fileXio_fdman_path_ops;
 }

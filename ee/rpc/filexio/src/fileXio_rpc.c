@@ -31,6 +31,7 @@
 
 void _ps2sdk_fileXio_init();
 void _ps2sdk_fileXio_deinit();
+void _ps2sdk_fileXio_set_block_size(int size);
 
 #ifdef F___cd0
 SifRpcClientData_t __cd0;
@@ -1117,6 +1118,8 @@ int fileXioSetRWBufferSize(int size){
 	if((rv = sceSifCallRpc(&__cd0, FILEXIO_SETRWBUFFSIZE, 0, packet, sizeof(struct fxio_rwbuff), __sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
 		rv = __sbuff[0];
+		if (rv >= 0)
+			_ps2sdk_fileXio_set_block_size(size);
 	}
 	else
 		SignalSema(__fileXioCompletionSema);

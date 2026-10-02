@@ -337,6 +337,61 @@ static const char *test_stat_dir(void *arg)
     return 0;
 }
 
+static const char *test_stat_blksize_file(void *arg)
+{
+    struct stat st;
+    int fd;
+
+    if (stat((const char *)arg, &st) != 0)
+    {
+        return "failed to get stat for file";
+    }
+
+    if (!S_ISREG(st.st_mode) || st.st_blksize != 16 * 1024)
+    {
+        return "regular file has unexpected block size";
+    }
+
+    fd = open((const char *)arg, O_RDONLY);
+    if (fd < 0)
+    {
+        return "failed to open file for fstat";
+    }
+
+    if (fstat(fd, &st) != 0)
+    {
+        close(fd);
+        return "failed to fstat regular file";
+    }
+
+    close(fd);
+    if (!S_ISREG(st.st_mode) || st.st_blksize != 16 * 1024)
+    {
+        return "fstat regular file has unexpected block size";
+    }
+
+    printf("\nSUCCESS: all checks passed\n");
+    return 0;
+}
+
+static const char *test_stat_blksize_dir(void *arg)
+{
+    struct stat st;
+
+    if (stat((const char *)arg, &st) != 0)
+    {
+        return "failed to get stat for directory";
+    }
+
+    if (!S_ISDIR(st.st_mode) || st.st_blksize != 0)
+    {
+        return "directory has unexpected block size";
+    }
+
+    printf("\nSUCCESS: all checks passed\n");
+    return 0;
+}
+
 static const char *test_mkdir(void *arg)
 {
     mode_t mode = 0x0755;
@@ -466,6 +521,8 @@ int libc_add_tests(test_suite *p)
     add_test(p, "fseek, ftell\n", test_fseek_ftell, (void *)textfile);
     add_test(p, "stat file\n", test_stat_file, (void *)textfile);
     add_test(p, "stat dir\n", test_stat_dir, (void *)dir);
+    add_test(p, "stat block size file\n", test_stat_blksize_file, (void *)textfile);
+    add_test(p, "stat block size dir\n", test_stat_blksize_dir, (void *)dir);
     add_test(p, "mkdir\n", test_mkdir, (void *)dir2);
     add_test(p, "rmdir\n", test_rmdir, (void *)dir2);
     add_test(p, "opendir, closedir\n", test_opendir_closedir, (void *)dir);
