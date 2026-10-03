@@ -1,26 +1,11 @@
-/*
-# _____     ___ ____     ___ ____
-#  ____|   |    ____|   |        | |____|
-# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
-#-----------------------------------------------------------------------
-# Copyright ps2dev - http://www.ps2dev.org
-# Licenced under Academic Free License version 2.0
-# Review ps2sdk README & LICENSE files for further details.
-#
-# taken from MX4SIO driver for simplicity.
-# all credits go to maximus32
-*/
-
 #include "ioplib.h"
 #include <intrman.h>
 
-int ioplib_iterateByName(const char *name, ioplib_libiterate_cb_t cb, void *userdata)
+iop_library_t *ioplib_getByName(const char *name)
 {
     iop_library_t *libptr;
     int i;
-    int count;
 
-    count = 0;
     // Get first loaded library
     libptr = GetLoadcoreInternalData()->let_next;
     // Loop through all loaded libraries
@@ -31,19 +16,15 @@ int ioplib_iterateByName(const char *name, ioplib_libiterate_cb_t cb, void *user
                 break;
         }
 
-        // Call callback if match
-        if (i == 8) {
-            count += 1;
-            // Return early if requested
-            if (cb(libptr, userdata))
-                break;
-        }
+        // Return if match
+        if (i == 8)
+            return libptr;
 
         // Next library
         libptr = libptr->prev;
     }
 
-    return count;
+    return NULL;
 }
 
 unsigned int ioplib_getTableSize(iop_library_t *lib)
@@ -64,25 +45,24 @@ unsigned int ioplib_getTableSize(iop_library_t *lib)
     return size;
 }
 
-void *ioplib_hookSameExportEntries(iop_library_t *lib, unsigned int entry, void *func)
+void *ioplib_hookExportEntry(iop_library_t *lib, unsigned int entry, void *func)
 {
-    int table_size;
-    int oldstate;
-    void *oldfunc;
-    unsigned int i;
+    if (entry < ioplib_getTableSize(lib)) {
+        int oldstate;
+        void **exp, *temp;
 
-    table_size = ioplib_getTableSize(lib);
-    if (entry >= table_size)
-        return NULL;
+        exp = &lib->exports[entry];
 
-    CpuSuspendIntr(&oldstate);
-    oldfunc = lib->exports[entry];
-    for (i = 0; i < table_size; i += 1)
-        if (lib->exports[i] == oldfunc)
-            lib->exports[i] = func;
-    CpuResumeIntr(oldstate);
+        CpuSuspendIntr(&oldstate);
+        temp = *exp;
+        *exp = func;
+        func = temp;
+        CpuResumeIntr(oldstate);
 
-    return oldfunc;
+        return func;
+    }
+
+    return NULL;
 }
 
 void ioplib_relinkExports(iop_library_t *lib)
