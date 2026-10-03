@@ -1,0 +1,7 @@
+<map id="common/include/s147_mmio_hwport.h" name="common/include/s147_mmio_hwport.h">
+<area shape="rect" id="node1" title=" " alt="" coords="259,5,425,47"/>
+<area shape="rect" id="node2" href="$romwrite_8c_source.html" title=" " alt="" coords="5,95,159,136"/>
+<area shape="rect" id="node3" href="$s147ctrl_8c_source.html" title=" " alt="" coords="183,95,330,136"/>
+<area shape="rect" id="node4" href="$s147link_8c_source.html" title=" " alt="" coords="354,95,503,136"/>
+<area shape="rect" id="node5" href="$s147nand_8c_source.html" title=" " alt="" coords="527,95,685,136"/>
+</map>
