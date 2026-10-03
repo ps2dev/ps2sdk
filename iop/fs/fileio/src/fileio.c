@@ -85,7 +85,7 @@ static void *fileio_allocate_buffer_memory()
     int i;
 
     i         = 0;
-    xfer_size = 0x4000;
+    xfer_size = FIO_DEFAULT_XFER_SIZE;
     for (;;) {
         xfer_buffer = AllocSysMemory(1, xfer_size, 0);
         i += 1;
