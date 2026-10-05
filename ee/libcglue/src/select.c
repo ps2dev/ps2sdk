@@ -26,6 +26,12 @@ int	select(int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct t
 	fd_set ready_readfds, ready_writefds, ready_exceptfds;
 	fd_set iop_readfds, iop_writefds, iop_exceptfds;
 
+    if (n < 0 || n > FD_SETSIZE)
+{
+    errno = EINVAL;
+    return -1;
+}
+
 	if (_libcglue_fdman_socket_ops == NULL || _libcglue_fdman_socket_ops->select == NULL)
 	{
 		errno = ENOSYS;
