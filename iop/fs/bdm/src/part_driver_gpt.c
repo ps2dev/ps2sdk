@@ -23,7 +23,6 @@ int part_connect_gpt(struct block_device *bd)
     gpt_partition_table_header* pGptHeader;
     gpt_partition_table_entry* pGptPartitionEntry;
     int entriesPerSector;
-    int endOfTable = 0;
     char partName[37] = { 0 };
     int partIndex;
     int mountCount = 0;
@@ -68,7 +67,7 @@ int part_connect_gpt(struct block_device *bd)
 
     // Loop through all the partition table entries and attempt to mount each one.
     M_PRINTF("Found GPT disk '%08x...'\n", *(u32*)&pGptHeader->disk_guid);
-    for (int i = 0; i < pGptHeader->partition_count && endOfTable == 0; )
+    for (int i = 0; i < pGptHeader->partition_count; )
     {
         // Check if we need to buffer more data, GPT usually uses LBA 2-33 for partition table entries. Typically there will
         // only be a couple partitions at most, so we buffer one sector at a time to avoid making needless allocations for all sectors at once.
@@ -95,9 +94,8 @@ int part_connect_gpt(struct block_device *bd)
                 // we need to check if the entries are actually valid.
                 if (memcmp(pGptPartitionEntry[x].partition_type_guid, NULL_GUID, sizeof(NULL_GUID)) == 0)
                 {
-                    // Stop scanning for partitions.
-                    endOfTable = 1;
-                    break;
+                    // Skip unused entries and continue scanning the partition table.
+                    continue;
                 }
 
                 // Perform some sanity checks on the partition.
