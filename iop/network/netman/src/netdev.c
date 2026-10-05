@@ -145,7 +145,7 @@ static int NetDevAdaptorIoctl(unsigned int command, void *args, unsigned int arg
 			g_ops->control(g_ops->priv, sceInetNDCC_GET_LINK_STATUS, &ret2, sizeof(ret2));
 			result = (ret2 > 0) ? NETMAN_NETIF_ETH_LINK_STATE_UP : NETMAN_NETIF_ETH_LINK_STATE_DOWN;
 			((struct NetManEthStatus *)output)->LinkStatus = result;
-			g_ops->control(g_ops->priv, sceInetNDCC_GET_TX_ERRORS, &result, sizeof(result));
+			g_ops->control(g_ops->priv, sceInetNDCC_GET_RX_ERRORS, &result, sizeof(result));
 			((struct NetManEthStatus *)output)->stats.RxDroppedFrameCount = result;
 			// TODO: RxErrorCount not exposed through netdev ctrl
 			((struct NetManEthStatus *)output)->stats.RxErrorCount = 0;
