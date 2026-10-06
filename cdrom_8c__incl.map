@@ -1,0 +1,31 @@
+<map id="iop/sound/audsrv/src/cdrom.c" name="iop/sound/audsrv/src/cdrom.c">
+<area shape="rect" id="node1" title=" " alt="" coords="939,5,1095,47"/>
+<area shape="rect" id="node2" href="$stdio_8h.html" title=" " alt="" coords="9,95,76,121"/>
+<area shape="rect" id="node8" href="$thbase_8h.html" title=" " alt="" coords="429,95,507,121"/>
+<area shape="rect" id="node10" href="$thsemap_8h.html" title=" " alt="" coords="532,95,623,121"/>
+<area shape="rect" id="node11" href="$loadcore_8h.html" title=" " alt="" coords="204,95,295,121"/>
+<area shape="rect" id="node12" title=" " alt="" coords="767,95,857,121"/>
+<area shape="rect" id="node13" href="$intrman_8h.html" title=" " alt="" coords="319,95,404,121"/>
+<area shape="rect" id="node14" title=" " alt="" coords="882,95,961,121"/>
+<area shape="rect" id="node15" title=" " alt="" coords="985,95,1050,121"/>
+<area shape="rect" id="node16" href="$cdvdman_8h.html" title=" " alt="" coords="647,95,742,121"/>
+<area shape="rect" id="node18" href="$sysclib_8h.html" title=" " alt="" coords="101,95,179,121"/>
+<area shape="rect" id="node21" title=" " alt="" coords="1075,95,1152,121"/>
+<area shape="rect" id="node22" href="$cdrom_8h.html" title=" " alt="" coords="1176,95,1251,121"/>
+<area shape="rect" id="node23" href="$iop_2sound_2audsrv_2src_2common_8h.html" title=" " alt="" coords="1275,95,1365,121"/>
+<area shape="rect" id="node24" href="$iop_2sound_2audsrv_2src_2rpc__server_8h.html" title=" " alt="" coords="1389,95,1491,121"/>
+<area shape="rect" id="node25" href="$iop_2sound_2audsrv_2src_2rpc__client_8h.html" title=" " alt="" coords="1515,95,1613,121"/>
+<area shape="rect" id="node26" href="$upsamplers_8h.html" title=" " alt="" coords="1637,95,1747,121"/>
+<area shape="rect" id="node27" href="$spu_8h.html" title=" " alt="" coords="1771,95,1829,121"/>
+<area shape="rect" id="node28" href="$hw_8h.html" title=" " alt="" coords="1853,95,1905,121"/>
+<area shape="rect" id="node29" href="$sound_2audsrv_2src_2debug__printf_8h_source.html" title=" " alt="" coords="1929,95,2044,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,169,80,196"/>
+<area shape="rect" id="node4" href="$irx_8h.html" title=" " alt="" coords="336,169,387,196"/>
+<area shape="rect" id="node5" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="326,244,397,271"/>
+<area shape="rect" id="node6" title=" " alt="" coords="360,319,435,345"/>
+<area shape="rect" id="node7" href="$tamtypes_8h.html" title=" " alt="" coords="240,319,336,345"/>
+<area shape="rect" id="node9" title=" " alt="" coords="422,169,493,196"/>
+<area shape="rect" id="node17" href="$libcdvd-common_8h.html" title=" " alt="" coords="434,244,577,271"/>
+<area shape="rect" id="node19" href="$setjmp_8h.html" title=" " alt="" coords="199,244,278,271"/>
+<area shape="rect" id="node20" href="$ctype_8h.html" title=" " alt="" coords="105,169,175,196"/>
+</map>
