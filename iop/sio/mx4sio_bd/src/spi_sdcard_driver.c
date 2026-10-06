@@ -608,6 +608,7 @@ int spisd_read(struct block_device *bd, uint64_t sector, void *buffer, uint16_t 
         /* fail condition */
         if (sectors_left > 0) {
             buffer = (uint8_t *)buffer + (results * 512);
+            sector += results;
             M_DEBUG("ERROR: failed to read all sectors, read:%i, abort:%i\n", sectors_left, cmd.abort);
 
             if (cmd.abort == CMD_ABORT_NO_READ_TOKEN) {
@@ -655,7 +656,7 @@ int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, ui
     while (sectors_left > 0 && retries < MAX_RETRIES) {
 
         /* issue CMD25 to begin transfer */
-        results = spisd_write_multi_begin(sector, count);
+        results = spisd_write_multi_begin((uint32_t)sector, sectors_left);
         if (results != SPISD_RESULT_OK) {
             M_DEBUG("ERROR: failed to start multi-block write\n");
             break;
@@ -668,6 +669,7 @@ int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, ui
         /* fail condition */
         if (sectors_left > 0) {
             write_buffer = (uint8_t *)write_buffer + (results * 512); /* update buffer for next attempt */
+            sector += results;
             M_DEBUG("ERROR: failed to write all sectors, wrote: %i\n", results);
         }
 
