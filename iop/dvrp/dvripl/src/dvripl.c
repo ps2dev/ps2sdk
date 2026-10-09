@@ -35,6 +35,7 @@ extern int dvripl_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
 extern int dvripl_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvripl_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg);
+extern int iplioctl2_exec(iomanX_iop_file_t *a1, int cmd, void *arg);
 extern void dvr_ready(int a1, void *a2);
 
 IOMANX_RETURN_VALUE_IMPL(EUNSUP);
@@ -178,9 +179,17 @@ int dvripl_df_devctl(
 
     DPRINTF("dvripl_df_devctl\n");
     WaitSema(sema_id);
-    v11 = -EINVAL;
-    if (cmd == 0x5602)
-        v11 = iplioctl2_update(a1, 0x5602, arg);
+    switch (cmd) {
+        case 0x5602:
+            v11 = iplioctl2_update(a1, cmd, arg);
+            break;
+        case 0x10005603:
+            v11 = iplioctl2_exec(a1, cmd, arg);
+            break;
+        default:
+            v11 = -EINVAL;
+            break;
+    }
     SignalSema(sema_id);
     return v11;
 }
@@ -222,6 +231,8 @@ int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
     total_size = 0;
     retval     = 0;
     csum       = 0;
+    // Unofficial: explicitly clear timeout
+    cmdack.timeout = 0;
     DPRINTF("iplioctl2_update\n");
     DPRINTF("NOP\n");
     cmdack.command          = 0x101;
@@ -310,6 +321,8 @@ int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
             cmdack.input_word_count    = 2;
             cmdack.input_buffer        = SBUF;
             cmdack.input_buffer_length = chunk_size;
+            // Unofficial: wait 0.25 seconds, since DMA interrupt never get signaled
+            cmdack.timeout = 250 * 1000;
             if (DvrdrvExecCmdAckDmaSendComp(&cmdack)) {
                 retval = -EIO;
                 DPRINTF("Handshake error! (phase:%d)\n", cmdack.phase);
@@ -320,6 +333,8 @@ int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
                 goto LABEL_29;
             total_size += chunk_size;
         }
+        // Unofficial: explicitly clear timeout
+        cmdack.timeout = 0;
 #if 0
         system_clock = GetTimerCounter(hard_timer);
         DPRINTF("System Clock : %ld\n", system_clock);
@@ -366,4 +381,34 @@ void dvr_ready(int a1, void *a2)
     Kprintf("DVRRDY INTERRUPT\n");
     dvr_ready_flag = 1;
     iWakeupThread(*(u32 *)a2);
+}
+
+int iplioctl2_exec(iomanX_iop_file_t *a1, int cmd, void *arg)
+{
+    unsigned int entrypoint;
+    int cmdackerr1;
+    drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+
+    entrypoint     = *(u32 *)arg;
+    cmdack.timeout = 0;
+    DPRINTF("iplioctl2_exec\n");
+    DPRINTF("EXEC\n");
+    cmdack.command          = 0x104;
+    cmdack.input_word_count = 2;
+    cmdack.input_word[0]    = entrypoint >> 16;
+    cmdack.input_word[1]    = entrypoint;
+    cmdackerr1              = DvrdrvExecCmdAck(&cmdack);
+    DPRINTF("dvrcmd.ack_p[0]:%x\n", cmdack.ack_status_ack);
+    if (cmdackerr1) {
+        DPRINTF("EXEC -> Handshake error!\n");
+        return -EIO;
+    }
+    if (cmdack.ack_status_ack) {
+        DPRINTF("EXEC -> Status error!\n");
+        return -EIO;
+    }
+    return 0;
 }
