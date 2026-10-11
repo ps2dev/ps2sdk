@@ -27,7 +27,7 @@ static u64 DelayThreadWakeup_callback(s32 alarm_id, u64 scheduled_time, u64 actu
 	(void)actual_time;
 	(void)pc_value;
 
-	iSignalSema((s32)arg);
+	iWakeupThread((s32)arg);
 	ExitHandler();
 	return 0;
 }
@@ -35,31 +35,23 @@ static u64 DelayThreadWakeup_callback(s32 alarm_id, u64 scheduled_time, u64 actu
 s32 DelayThread(s32 microseconds)
 {
 	u32 eie;
-	s32 sema_id;
+	volatile s32 thread_id;
 	s32 timer_alarm_id;
-	ee_sema_t sema;
 
 	eie = get_mips_cop_reg(0, COP0_REG_Status);
 	if ((eie & 0x10000) == 0)
 	{
 		return 0x80008008; // ECPUDI
 	}
-	sema.max_count = 1;
-	sema.option = (u32)"DelayThread";
-	sema.init_count = 0;
-	sema_id = CreateSema(&sema);
-	if (sema_id < 0)
-	{
-		return 0x80008003; // ESEMAPHORE
-	}
-	timer_alarm_id = SetTimerAlarm(TimerUSec2BusClock(0, microseconds), DelayThreadWakeup_callback, (void *)sema_id);
+	thread_id = GetThreadId();
+	timer_alarm_id = SetTimerAlarm(TimerUSec2BusClock(0, microseconds), DelayThreadWakeup_callback, (void *)thread_id);
 	if (timer_alarm_id < 0)
 	{
-		DeleteSema(sema_id);
+		thread_id = -1;
 		return timer_alarm_id;
 	}
-	WaitSema(sema_id);
-	DeleteSema(sema_id);
+	SleepThread();
+	thread_id = -1;
 	return 0;
 }
 #endif

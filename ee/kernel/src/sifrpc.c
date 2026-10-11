@@ -112,7 +112,6 @@ void *_rpc_get_fpacket(struct rpc_data *rpc_data)
 #ifdef F_sceSifBindRpc
 int sceSifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
 {
-    ee_sema_t sema;
     SifRpcBindPkt_t *bind;
 
     bind = (SifRpcBindPkt_t *)_rpc_get_packet(&_sif_rpc_data);
@@ -138,22 +137,16 @@ int sceSifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
         return 0;
     }
 
-    sema.max_count  = 1;
-    sema.init_count = 0;
-    cd->hdr.sema_id = CreateSema(&sema);
-    if (cd->hdr.sema_id < 0) {
-        rpc_packet_free(bind);
-        return -E_LIB_SEMA_CREATE;
-    }
+    cd->hdr.sema_id = GetThreadId();
 
     if (!sceSifSendCmd(SIF_CMD_RPC_BIND, bind, RPC_PACKET_SIZE, NULL, NULL, 0)) {
         rpc_packet_free(bind);
-        DeleteSema(cd->hdr.sema_id);
+        cd->hdr.sema_id = -1;
         return -E_SIF_PKT_SEND;
     }
 
-    WaitSema(cd->hdr.sema_id);
-    DeleteSema(cd->hdr.sema_id);
+    SleepThread();
+    cd->hdr.sema_id = -1;
 
     return 0;
 }
@@ -163,7 +156,6 @@ int sceSifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
 int sceSifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode, void *sendbuf,
     int ssize, void *recvbuf, int rsize, SifRpcEndFunc_t end_function, void *end_param)
 {
-    ee_sema_t sema;
     SifRpcCallPkt_t *call;
 
     call = (SifRpcCallPkt_t *)_rpc_get_packet(&_sif_rpc_data);
@@ -204,22 +196,16 @@ int sceSifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode, void *sendbu
         return 0;
     }
 
-    sema.max_count  = 1;
-    sema.init_count = 0;
-    cd->hdr.sema_id = CreateSema(&sema);
-    if (cd->hdr.sema_id < 0) {
-        rpc_packet_free(call);
-        return -E_LIB_SEMA_CREATE;
-    }
+    cd->hdr.sema_id = GetThreadId();
 
     if (!sceSifSendCmd(SIF_CMD_RPC_CALL, call, RPC_PACKET_SIZE, sendbuf, cd->buf, ssize)) {
         rpc_packet_free(call);
-        DeleteSema(cd->hdr.sema_id);
+        cd->hdr.sema_id = -1;
         return -E_SIF_PKT_SEND;
     }
 
-    WaitSema(cd->hdr.sema_id);
-    DeleteSema(cd->hdr.sema_id);
+    SleepThread();
+    cd->hdr.sema_id = -1;
 
     return 0;
 }
@@ -228,7 +214,6 @@ int sceSifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode, void *sendbu
 #ifdef F_sceSifGetOtherData
 int sceSifGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest, int size, int mode)
 {
-    ee_sema_t sema;
     SifRpcOtherDataPkt_t *other;
 
     other = (SifRpcOtherDataPkt_t *)_rpc_get_packet(&_sif_rpc_data);
@@ -253,22 +238,16 @@ int sceSifGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest, int size,
         return 0;
     }
 
-    sema.max_count  = 1;
-    sema.init_count = 0;
-    rd->hdr.sema_id = CreateSema(&sema);
-    if (rd->hdr.sema_id < 0) {
-        rpc_packet_free(other);
-        return -E_LIB_SEMA_CREATE;
-    }
+    rd->hdr.sema_id = GetThreadId();
 
     if (!sceSifSendCmd(SIF_CMD_RPC_RDATA, other, RPC_PACKET_SIZE, NULL, NULL, 0)) {
         rpc_packet_free(other);
-        DeleteSema(rd->hdr.sema_id);
+        rd->hdr.sema_id = -1;
         return -E_SIF_PKT_SEND;
     }
 
-    WaitSema(rd->hdr.sema_id);
-    DeleteSema(rd->hdr.sema_id);
+    SleepThread();
+    rd->hdr.sema_id = -1;
 
     return 0;
 }
@@ -303,8 +282,10 @@ static void _request_end(SifRpcRendPkt_t *request, void *data)
         cd->cbuf   = request->cbuf;
     }
 
-    if (cd->hdr.sema_id >= 0)
-        iSignalSema(cd->hdr.sema_id);
+    if (cd->hdr.sema_id >= 0) {
+        iWakeupThread(cd->hdr.sema_id);
+        cd->hdr.sema_id = -1;
+    }
 
     rpc_packet_free(cd->hdr.pkt_addr);
     cd->hdr.pkt_addr = NULL;
