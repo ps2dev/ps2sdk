@@ -12,7 +12,7 @@
 
 #include <erl.h>
 
-char * erl_id = "libps2kit";
+char * erl_id = "libps2snd";
 
 char * erl_dependancies[] = {
     "libkernel",
