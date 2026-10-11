@@ -1,0 +1,5 @@
+add_executable(tlbsrc)
+target_sources(tlbsrc PRIVATE src/tlbsrc.c)
+target_compile_options(tlbsrc PRIVATE -mno-gpopt)
+target_include_directories(tlbsrc PRIVATE ${EE_INC})
+target_link_options(tlbsrc PRIVATE -nostdlib -nostartfiles -T${CMAKE_CURRENT_SOURCE_DIR}/linkfile -s)

@@ -1,0 +1,6 @@
+add_library(poweroff)
+target_include_directories(poweroff PUBLIC include)
+target_include_directories(poweroff PRIVATE ${EE_INC})
+target_sources(poweroff PRIVATE src/poweroff.c src/erl-support.c)
+install(TARGETS poweroff)
+target_add_erl(poweroff)

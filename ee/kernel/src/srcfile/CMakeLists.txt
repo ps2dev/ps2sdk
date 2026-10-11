@@ -1,0 +1,5 @@
+add_executable(srcfile)
+target_sources(srcfile PRIVATE src/srcfile.c src/alarm.c src/dispatch.s)
+target_compile_options(srcfile PRIVATE -mno-gpopt -fno-tree-loop-distribute-patterns)
+target_include_directories(srcfile PRIVATE ${EE_INC})
+target_link_options(srcfile PRIVATE -nostdlib -nostartfiles -T${CMAKE_CURRENT_SOURCE_DIR}/linkfile -s)

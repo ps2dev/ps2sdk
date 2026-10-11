@@ -1,0 +1,7 @@
+add_library(keyboard)
+target_include_directories(keyboard PUBLIC include)
+target_include_directories(keyboard PRIVATE ${EE_INC})
+target_sources(keyboard PRIVATE src/libkbd.c src/erl-support.c)
+target_link_libraries(keyboard PRIVATE cglue)
+install(TARGETS keyboard)
+target_add_erl(keyboard)

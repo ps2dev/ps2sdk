@@ -1,0 +1,6 @@
+add_library(camera)
+target_include_directories(camera PUBLIC include)
+target_include_directories(camera PRIVATE ${EE_INC})
+target_sources(camera PRIVATE src/ps2cam_rpc.c src/erl-support.c)
+install(TARGETS camera)
+target_add_erl(camera)
