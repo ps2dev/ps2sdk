@@ -35,45 +35,46 @@ extern int dvripl_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
 extern int dvripl_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvripl_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg);
+extern int iplioctl2_exec(iomanX_iop_file_t *a1, int cmd, void *arg);
 extern void dvr_ready(int a1, void *a2);
 
 IOMANX_RETURN_VALUE_IMPL(EUNSUP);
 
 static iomanX_iop_device_ops_t DvrFuncTbl =
     {
-        &dvripl_df_init, // init
-        &dvripl_df_exit, // deinit
-        IOMANX_RETURN_VALUE(EUNSUP), // format
-        IOMANX_RETURN_VALUE(EUNSUP), // open
-        IOMANX_RETURN_VALUE(EUNSUP), // close
-        IOMANX_RETURN_VALUE(EUNSUP), // read
-        IOMANX_RETURN_VALUE(EUNSUP), // write
-        IOMANX_RETURN_VALUE(EUNSUP), // lseek
-        &dvripl_df_ioctl, // ioctl
-        IOMANX_RETURN_VALUE(EUNSUP), // remove
-        IOMANX_RETURN_VALUE(EUNSUP), // mkdir
-        IOMANX_RETURN_VALUE(EUNSUP), // rmdir
-        IOMANX_RETURN_VALUE(EUNSUP), // dopen
-        IOMANX_RETURN_VALUE(EUNSUP), // dclose
-        IOMANX_RETURN_VALUE(EUNSUP), // dread
-        IOMANX_RETURN_VALUE(EUNSUP), // getstat
-        IOMANX_RETURN_VALUE(EUNSUP), // chstat
-        IOMANX_RETURN_VALUE(EUNSUP), // rename
-        IOMANX_RETURN_VALUE(EUNSUP), // chdir
-        IOMANX_RETURN_VALUE(EUNSUP), // sync
-        IOMANX_RETURN_VALUE(EUNSUP), // mount
-        IOMANX_RETURN_VALUE(EUNSUP), // umount
+        &dvripl_df_init,                 // init
+        &dvripl_df_exit,                 // deinit
+        IOMANX_RETURN_VALUE(EUNSUP),     // format
+        IOMANX_RETURN_VALUE(EUNSUP),     // open
+        IOMANX_RETURN_VALUE(EUNSUP),     // close
+        IOMANX_RETURN_VALUE(EUNSUP),     // read
+        IOMANX_RETURN_VALUE(EUNSUP),     // write
+        IOMANX_RETURN_VALUE(EUNSUP),     // lseek
+        &dvripl_df_ioctl,                // ioctl
+        IOMANX_RETURN_VALUE(EUNSUP),     // remove
+        IOMANX_RETURN_VALUE(EUNSUP),     // mkdir
+        IOMANX_RETURN_VALUE(EUNSUP),     // rmdir
+        IOMANX_RETURN_VALUE(EUNSUP),     // dopen
+        IOMANX_RETURN_VALUE(EUNSUP),     // dclose
+        IOMANX_RETURN_VALUE(EUNSUP),     // dread
+        IOMANX_RETURN_VALUE(EUNSUP),     // getstat
+        IOMANX_RETURN_VALUE(EUNSUP),     // chstat
+        IOMANX_RETURN_VALUE(EUNSUP),     // rename
+        IOMANX_RETURN_VALUE(EUNSUP),     // chdir
+        IOMANX_RETURN_VALUE(EUNSUP),     // sync
+        IOMANX_RETURN_VALUE(EUNSUP),     // mount
+        IOMANX_RETURN_VALUE(EUNSUP),     // umount
         IOMANX_RETURN_VALUE_S64(EUNSUP), // lseek64
-        &dvripl_df_devctl, // devctl
-        IOMANX_RETURN_VALUE(EUNSUP), // symlink
-        IOMANX_RETURN_VALUE(EUNSUP), // readlink
-        &dvripl_df_ioctl2, // ioctl2
-    };
+        &dvripl_df_devctl,               // devctl
+        IOMANX_RETURN_VALUE(EUNSUP),     // symlink
+        IOMANX_RETURN_VALUE(EUNSUP),     // readlink
+        &dvripl_df_ioctl2,               // ioctl2
+};
 s32 dvr_ready_flag;
 static iomanX_iop_device_t DVRMAN = {
     .name = "dvr_ipl",
     .desc = "Digital Video Recorder",
-    .ops = &DvrFuncTbl,
+    .ops  = &DvrFuncTbl,
     .type = (IOP_DT_FS | IOP_DT_FSEXT),
 };
 s32 sema_id;
@@ -127,11 +128,11 @@ int dvripl_df_init(iomanX_iop_device_t *dev)
     (void)dev;
 
     DPRINTF("dvripl_df_init\n");
-    v3.attr = 0;
+    v3.attr    = 0;
     v3.initial = 1;
-    v3.max = 1;
-    v3.option = 0;
-    v1 = CreateSema(&v3);
+    v3.max     = 1;
+    v3.option  = 0;
+    v1         = CreateSema(&v3);
     if (v1 < 0)
         return -1;
     sema_id = v1;
@@ -178,9 +179,17 @@ int dvripl_df_devctl(
 
     DPRINTF("dvripl_df_devctl\n");
     WaitSema(sema_id);
-    v11 = -EINVAL;
-    if (cmd == 0x5602)
-        v11 = iplioctl2_update(a1, 0x5602, arg);
+    switch (cmd) {
+        case 0x5602:
+            v11 = iplioctl2_update(a1, cmd, arg);
+            break;
+        case 0x10005603:
+            v11 = iplioctl2_exec(a1, cmd, arg);
+            break;
+        default:
+            v11 = -EINVAL;
+            break;
+    }
     SignalSema(sema_id);
     return v11;
 }
@@ -220,13 +229,15 @@ int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
     (void)cmd;
 
     total_size = 0;
-    retval = 0;
-    csum = 0;
+    retval     = 0;
+    csum       = 0;
+    // Unofficial: explicitly clear timeout
+    cmdack.timeout = 0;
     DPRINTF("iplioctl2_update\n");
     DPRINTF("NOP\n");
-    cmdack.command = 0x101;
+    cmdack.command          = 0x101;
     cmdack.input_word_count = 0;
-    cmdackerr1 = DvrdrvExecCmdAck(&cmdack);
+    cmdackerr1              = DvrdrvExecCmdAck(&cmdack);
     DPRINTF("dvrcmd.ack_p[0]:%x\n", cmdack.ack_status_ack);
     if (cmdackerr1)
         goto LABEL_2;
@@ -235,9 +246,9 @@ int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
         return -EIO;
     }
     DPRINTF("VERSION\n");
-    cmdack.command = 0x102;
+    cmdack.command          = 0x102;
     cmdack.input_word_count = 0;
-    cmdackerr2 = DvrdrvExecCmdAck(&cmdack);
+    cmdackerr2              = DvrdrvExecCmdAck(&cmdack);
     DPRINTF("dvrcmd.ack_p[0]:%x\n", cmdack.ack_status_ack);
     if (cmdackerr2) {
     LABEL_2:
@@ -251,17 +262,17 @@ int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
     DPRINTF("major : %04x\n", cmdack.output_word[0]);
     DPRINTF("minor : %04x\n", cmdack.output_word[1]);
     DPRINTF("CONFIG\n");
-    cmdack.command = 0x106;
-    cmdack.input_word[0] = 1;
-    cmdack.input_word[1] = 6;
-    cmdack.input_word[2] = 0x1000;
-    cmdack.input_word[3] = 0x8968;
-    cmdack.input_word[4] = 0x115A;
-    cmdack.input_word[5] = 0x6048;
-    cmdack.input_word[6] = 0xF;
-    cmdack.input_word[7] = 0x5353;
+    cmdack.command          = 0x106;
+    cmdack.input_word[0]    = 1;
+    cmdack.input_word[1]    = 6;
+    cmdack.input_word[2]    = 0x1000;
+    cmdack.input_word[3]    = 0x8968;
+    cmdack.input_word[4]    = 0x115A;
+    cmdack.input_word[5]    = 0x6048;
+    cmdack.input_word[6]    = 0xF;
+    cmdack.input_word[7]    = 0x5353;
     cmdack.input_word_count = 8;
-    cmdackerr3 = DvrdrvExecCmdAck(&cmdack);
+    cmdackerr3              = DvrdrvExecCmdAck(&cmdack);
     DPRINTF("dvrcmd.ack_p[0]:%x\n", cmdack.ack_status_ack);
     if (cmdackerr3) {
         DPRINTF("CONFIG -> Handshake error!(%d)\n", cmdackerr3);
@@ -288,7 +299,7 @@ int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
             s32 chunk_size;
             int read_size;
             DPRINTF("%08X\n", chunk_offset);
-            read_size = iomanX_read(update_fd, SBUF, 0x8000);
+            read_size  = iomanX_read(update_fd, SBUF, 0x8000);
             chunk_size = read_size;
             if (read_size < 0) {
                 retval = -EIO;
@@ -304,12 +315,14 @@ int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
                 read_buf_tmp = *read_buf++;
                 csum += (read_buf_tmp << 24) + ((read_buf_tmp & 0xFF00) << 8) + ((read_buf_tmp & 0xFF0000) >> 8) + ((read_buf_tmp & 0xff000000) >> 24);
             }
-            cmdack.command = 0x103;
-            cmdack.input_word[0] = chunk_offset >> 16;
-            cmdack.input_word[1] = chunk_offset;
-            cmdack.input_word_count = 2;
-            cmdack.input_buffer = SBUF;
+            cmdack.command             = 0x103;
+            cmdack.input_word[0]       = chunk_offset >> 16;
+            cmdack.input_word[1]       = chunk_offset;
+            cmdack.input_word_count    = 2;
+            cmdack.input_buffer        = SBUF;
             cmdack.input_buffer_length = chunk_size;
+            // Unofficial: wait 0.25 seconds, since DMA interrupt never get signaled
+            cmdack.timeout = 250 * 1000;
             if (DvrdrvExecCmdAckDmaSendComp(&cmdack)) {
                 retval = -EIO;
                 DPRINTF("Handshake error! (phase:%d)\n", cmdack.phase);
@@ -320,6 +333,8 @@ int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
                 goto LABEL_29;
             total_size += chunk_size;
         }
+        // Unofficial: explicitly clear timeout
+        cmdack.timeout = 0;
 #if 0
         system_clock = GetTimerCounter(hard_timer);
         DPRINTF("System Clock : %ld\n", system_clock);
@@ -329,15 +344,15 @@ int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
         DPRINTF("CHECK SUM\n");
         DPRINTF("total_size:%d\n", total_size);
         DPRINTF("csum : %x\n", csum);
-        cmdack.command = 0x105;
-        cmdack.input_word[0] = 0x1000;
-        cmdack.input_word[2] = total_size >> 16;
-        cmdack.input_word[4] = csum >> 16;
-        cmdack.input_word[1] = 0;
-        cmdack.input_word[3] = total_size;
-        cmdack.input_word[5] = csum;
+        cmdack.command          = 0x105;
+        cmdack.input_word[0]    = 0x1000;
+        cmdack.input_word[2]    = total_size >> 16;
+        cmdack.input_word[4]    = csum >> 16;
+        cmdack.input_word[1]    = 0;
+        cmdack.input_word[3]    = total_size;
+        cmdack.input_word[5]    = csum;
         cmdack.input_word_count = 6;
-        cmdackerr4 = DvrdrvExecCmdAck(&cmdack);
+        cmdackerr4              = DvrdrvExecCmdAck(&cmdack);
         DPRINTF("result: %d\n", cmdackerr4);
         DPRINTF("dvrcmd.ack_p[0]:%x\n", cmdack.ack_status_ack);
         DPRINTF("dvrcmd.ack_p[1]:%x\n", cmdack.output_word[0]);
@@ -366,4 +381,34 @@ void dvr_ready(int a1, void *a2)
     Kprintf("DVRRDY INTERRUPT\n");
     dvr_ready_flag = 1;
     iWakeupThread(*(u32 *)a2);
+}
+
+int iplioctl2_exec(iomanX_iop_file_t *a1, int cmd, void *arg)
+{
+    unsigned int entrypoint;
+    int cmdackerr1;
+    drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+
+    entrypoint     = *(u32 *)arg;
+    cmdack.timeout = 0;
+    DPRINTF("iplioctl2_exec\n");
+    DPRINTF("EXEC\n");
+    cmdack.command          = 0x104;
+    cmdack.input_word_count = 2;
+    cmdack.input_word[0]    = entrypoint >> 16;
+    cmdack.input_word[1]    = entrypoint;
+    cmdackerr1              = DvrdrvExecCmdAck(&cmdack);
+    DPRINTF("dvrcmd.ack_p[0]:%x\n", cmdack.ack_status_ack);
+    if (cmdackerr1) {
+        DPRINTF("EXEC -> Handshake error!\n");
+        return -EIO;
+    }
+    if (cmdack.ack_status_ack) {
+        DPRINTF("EXEC -> Status error!\n");
+        return -EIO;
+    }
+    return 0;
 }
