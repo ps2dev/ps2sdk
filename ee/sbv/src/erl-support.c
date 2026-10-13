@@ -12,7 +12,7 @@
 
 #include <erl.h>
 
-char * erl_id = "libsbv";
+char * erl_id = "libpatches";
 
 char * erl_dependancies[] = {
     "libkernel",

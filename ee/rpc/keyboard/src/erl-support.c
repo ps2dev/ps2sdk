@@ -12,7 +12,7 @@
 
 #include <erl.h>
 
-char * erl_id = "libkeyboard";
+char * erl_id = "libkbd";
 
 char * erl_dependancies[] = {
     "libkernel",
