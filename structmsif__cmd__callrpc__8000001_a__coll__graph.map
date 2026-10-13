@@ -1,0 +1,8 @@
+<map id="msif_cmd_callrpc_8000001A" name="msif_cmd_callrpc_8000001A">
+<area shape="rect" id="node1" title=" " alt="" coords="5,305,213,332"/>
+<area shape="rect" id="node2" href="$struct__sifm__client__data.html" title=" " alt="" coords="185,95,322,121"/>
+<area shape="rect" id="node3" href="$struct__sifm__serve__data.html" title=" " alt="" coords="257,185,394,212"/>
+<area shape="rect" id="node4" href="$struct__sifm__serve__entry.html" title=" " alt="" coords="238,305,381,332"/>
+<area shape="rect" id="node5" href="$struct__sifm__queue__data.html" title=" " alt="" coords="463,305,604,332"/>
+<area shape="rect" id="node6" href="$struct__sifm__rpc__data.html" title=" " alt="" coords="193,5,314,32"/>
+</map>

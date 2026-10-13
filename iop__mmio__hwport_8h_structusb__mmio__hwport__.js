@@ -1,0 +1,26 @@
+var iop__mmio__hwport_8h_structusb__mmio__hwport__ =
+[
+    [ "HcRevision", "iop__mmio__hwport_8h.html#a4f0bd4dc905f77471b94f03a5d0fda0f", null ],
+    [ "HcControl", "iop__mmio__hwport_8h.html#aed10ba967b1dbbc9d04a0506053bc486", null ],
+    [ "HcCommandStatus", "iop__mmio__hwport_8h.html#a30aed6c1c2bf9030f958c6463de3fc00", null ],
+    [ "HcInterruptStatus", "iop__mmio__hwport_8h.html#a2b6537e22765db402c2d71906f1945f2", null ],
+    [ "HcInterruptEnable", "iop__mmio__hwport_8h.html#a8a9a2e236d951c4cbf4072144a8fe1d4", null ],
+    [ "HcInterruptDisable", "iop__mmio__hwport_8h.html#a44293f1e01a8b9f70c01c6c0758e4ef4", null ],
+    [ "HcHCCA", "iop__mmio__hwport_8h.html#adc527fe531107bd2d36c473b2a3baab6", null ],
+    [ "HcPeriodCurrentEd", "iop__mmio__hwport_8h.html#a836440a014a4fe8ca49d5e9998bba113", null ],
+    [ "HcControlHeadEd", "iop__mmio__hwport_8h.html#a0ffa00ee2c31202e6fe17a1f66132fd8", null ],
+    [ "HcControlCurrentEd", "iop__mmio__hwport_8h.html#ad0337460c9ce6d22d9862bd3457a4220", null ],
+    [ "HcBulkHeadEd", "iop__mmio__hwport_8h.html#ab30012094dd531109a76d7f6ff98ad53", null ],
+    [ "HcBulkCurrentEd", "iop__mmio__hwport_8h.html#a2a9126ea772c139451a27844bdd3a3c5", null ],
+    [ "HcDoneHead", "iop__mmio__hwport_8h.html#ab24558aa11be48c4473a365e08c2d596", null ],
+    [ "HcFmInterval", "iop__mmio__hwport_8h.html#a4331330f73e48e383201480b68560d84", null ],
+    [ "HcFmRemaining", "iop__mmio__hwport_8h.html#a82edc977f78e386378f7ef159ef3d9e4", null ],
+    [ "HcFmNumber", "iop__mmio__hwport_8h.html#ab005ecdf1f9e35577e09e6bca3d7c53e", null ],
+    [ "HcPeriodicStart", "iop__mmio__hwport_8h.html#a95ea585a8942b6f89b26e8dc10a1f308", null ],
+    [ "HcLsThreshold", "iop__mmio__hwport_8h.html#ade088eb93dc206172c3566e3725bd7ef", null ],
+    [ "HcRhDescriptorA", "iop__mmio__hwport_8h.html#adf5324ed542681512715d745fb06aafc", null ],
+    [ "HcRhDescriptorB", "iop__mmio__hwport_8h.html#a21c97559031b1d53dd679143f06ca716", null ],
+    [ "HcRhStatus", "iop__mmio__hwport_8h.html#a683632b8d2008f15a67195f53cf5d1c9", null ],
+    [ "HcRhPortStatus", "iop__mmio__hwport_8h.html#a404c23b6d1e0dfe41d2e5cb66e4a19c8", null ],
+    [ "unused", "iop__mmio__hwport_8h.html#a05ab2f549fccee12b7490a806ea39f03", null ]
+];

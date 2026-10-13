@@ -1,0 +1,14 @@
+<map id="ee/kernel/src/libosd.c" name="ee/kernel/src/libosd.c">
+<area shape="rect" id="node1" title=" " alt="" coords="321,5,479,32"/>
+<area shape="rect" id="node2" href="$kernel_8h.html" title=" " alt="" coords="205,155,280,181"/>
+<area shape="rect" id="node8" href="$syscallnr_8h.html" title=" " alt="" coords="355,80,445,107"/>
+<area shape="rect" id="node9" href="$osd__config_8h.html" title=" " alt="" coords="499,80,602,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,229,80,256"/>
+<area shape="rect" id="node4" title=" " alt="" coords="104,229,179,256"/>
+<area shape="rect" id="node5" href="$sifdma_8h.html" title=" " alt="" coords="203,229,282,256"/>
+<area shape="rect" id="node7" href="$mipscopaccess_8h.html" title=" " alt="" coords="307,229,440,256"/>
+<area shape="rect" id="node6" href="$tamtypes_8h.html" title=" " alt="" coords="377,304,473,331"/>
+<area shape="rect" id="node10" href="$rom0__info_8h.html" title=" " alt="" coords="515,155,615,181"/>
+<area shape="rect" id="node11" href="$libcdvd_8h.html" title=" " alt="" coords="639,155,721,181"/>
+<area shape="rect" id="node12" href="$libcdvd-common_8h.html" title=" " alt="" coords="562,229,705,256"/>
+</map>

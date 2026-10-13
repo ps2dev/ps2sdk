@@ -1,0 +1,7 @@
+<map id="ac_atapi" name="ac_atapi">
+<area shape="rect" id="node1" title=" " alt="" coords="161,187,238,213"/>
+<area shape="rect" id="node2" href="$structac__ata__h.html" title=" " alt="" coords="101,97,181,124"/>
+<area shape="rect" id="node3" href="$structac__queue.html" title=" " alt="" coords="5,7,89,33"/>
+<area shape="rect" id="node4" href="$structac__ata__ops.html" title=" " alt="" coords="187,7,281,33"/>
+<area shape="rect" id="node5" href="$unionac__atapi__pkt.html" title=" " alt="" coords="205,97,311,124"/>
+</map>
