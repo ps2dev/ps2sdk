@@ -16,5 +16,4 @@ char *erl_id = "libcdvd";
 
 char *erl_dependancies[] = {
     "libkernel",
-    "libc",
     0};

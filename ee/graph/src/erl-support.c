@@ -16,6 +16,5 @@ char * erl_id = "libgraph";
 char * erl_dependancies[] =
 {
     "libkernel",
-	"libc",
     0
 };

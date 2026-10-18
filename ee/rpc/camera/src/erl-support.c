@@ -16,6 +16,5 @@ char * erl_id = "libps2cam";
 
 char * erl_dependancies[] = {
     "libkernel",
-    "libc",
     0
 };
