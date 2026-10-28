@@ -1,0 +1,28 @@
+var struct__hdrr =
+[
+    [ "magic", "struct__hdrr.html#a9512cfb8f9757de81c2cb64c4bc8f8e3", null ],
+    [ "vstamp", "struct__hdrr.html#a24e3671efc7b398f6e11c5e58c19489c", null ],
+    [ "ilineMax", "struct__hdrr.html#abc578ecca25289d36c3bffb8c943929b", null ],
+    [ "cbLine", "struct__hdrr.html#a4b5f24066b4ec13f569f258cb8ff6cc6", null ],
+    [ "cbLineOffset", "struct__hdrr.html#a40c66fa60349e1fca844b266f9c6c44e", null ],
+    [ "idnMax", "struct__hdrr.html#ac342d0144cd316fd394c05cb6322efb5", null ],
+    [ "cbDnOffset", "struct__hdrr.html#ae5886c5b3bfb77b03d02119b8f228a3c", null ],
+    [ "ipdMax", "struct__hdrr.html#ae5df425a08716ed885047dd2196cb2b6", null ],
+    [ "cbPdOffset", "struct__hdrr.html#a82d2733032e105095dcb46cd169ae0f3", null ],
+    [ "isymMax", "struct__hdrr.html#adb6ec9ac7e5de6cd3d8926a50417e93d", null ],
+    [ "cbSymOffset", "struct__hdrr.html#a8bf2f8364c2a68ca1a5411ce82314a5e", null ],
+    [ "ioptMax", "struct__hdrr.html#a055732e1e157d645464ba3ff1d668e40", null ],
+    [ "cbOptOffset", "struct__hdrr.html#add4729627a5ff08b3590aa435a1a5f63", null ],
+    [ "iauxMax", "struct__hdrr.html#a292a2333c60c80e7fb612b93021903e7", null ],
+    [ "cbAuxOffset", "struct__hdrr.html#aa0af3c367155cb205fbdd487d8a4c28d", null ],
+    [ "issMax", "struct__hdrr.html#a95ba02f581c9cc2707a839dead191124", null ],
+    [ "cbSsOffset", "struct__hdrr.html#a3064310472c748963fa6ee9d40fb3df1", null ],
+    [ "issExtMax", "struct__hdrr.html#a130cd67898041c9f248c087db192e219", null ],
+    [ "cbSsExtOffset", "struct__hdrr.html#a0ab150fb3e9675f02b07f04fc69d799f", null ],
+    [ "ifdMax", "struct__hdrr.html#a399fb40a0e06fa8b97f800d403832b24", null ],
+    [ "cbFdOffset", "struct__hdrr.html#af71a83350f912edb8dbdb95cc9f01510", null ],
+    [ "crfd", "struct__hdrr.html#a844d8fe5de093edcd7b08e99898e60a1", null ],
+    [ "cbRfdOffset", "struct__hdrr.html#a8efae1edb0fa0db58feccb47d7848df9", null ],
+    [ "iextMax", "struct__hdrr.html#ab1ed07e868461963c8a99436c70b50fd", null ],
+    [ "cbExtOffset", "struct__hdrr.html#a1ca33be76b79fa5cbd39450b998c3f03", null ]
+];
