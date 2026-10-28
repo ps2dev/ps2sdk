@@ -14,7 +14,5 @@
 
 char * erl_id = "libmath3d";
 char * erl_dependancies[] = {
-    "libmath",
-    "libc",
     0
 };

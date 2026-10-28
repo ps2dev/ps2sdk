@@ -15,7 +15,6 @@
 
 char * erl_id = "hello";
 char * erl_dependancies[] = {
-    "libc",
     0
 };
 

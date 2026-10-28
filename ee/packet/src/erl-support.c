@@ -14,6 +14,5 @@
 
 char * erl_id = "libpacket";
 char * erl_dependancies[] = {
-    "libc",
     0
 };

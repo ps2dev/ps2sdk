@@ -16,7 +16,6 @@ char * erl_id = "libhdd";
 
 char * erl_dependancies[] = {
     "libkernel",
-    "libc",
     "libfileXio",
     0
 };

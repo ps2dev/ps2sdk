@@ -16,6 +16,5 @@ char * erl_id = "libps2snd";
 
 char * erl_dependancies[] = {
     "libkernel",
-    "libc",
     0
 };

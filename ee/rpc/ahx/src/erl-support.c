@@ -16,6 +16,5 @@ char * erl_id = "libahx";
 
 char * erl_dependancies[] = {
     "libkernel",
-    "libc",
     0
 };

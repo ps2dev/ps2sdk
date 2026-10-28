@@ -20,6 +20,5 @@ char * erl_id = "libpad";
 
 char * erl_dependancies[] = {
     "libkernel",
-    "libc",
     0
 };

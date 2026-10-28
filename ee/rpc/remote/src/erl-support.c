@@ -16,5 +16,4 @@ char *erl_id             = "librm";
 
 char *erl_dependancies[] = {
     "libkernel",
-    "libc",
     0};

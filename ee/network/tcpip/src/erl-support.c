@@ -14,7 +14,6 @@
 
 char * erl_id = "libps2ip";
 char * erl_dependancies[] = {
-    "libc",
     "libnetman",
     0
 };
