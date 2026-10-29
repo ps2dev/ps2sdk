@@ -26,12 +26,10 @@
 #define ADPCM_LOOP          2  /* Set on all blocks (?that are inside the loop?) */
 #define ADPCM_LOOP_END      1  /* Set on last block to loop */
 
-#define PACKED __attribute__((packed))
-
 typedef struct
 {
-	unsigned shift:      4  PACKED;
-	unsigned predict:    4  PACKED;
+	uint8_t shift:      4;
+	uint8_t predict:    4;
 	uint8_t  flags;
 	uint8_t  sample[14]; /* 4bits each */
 } AdpcmBlock;
