@@ -133,16 +133,16 @@ static int getIndexWrite(cache_set *cache, unsigned int sector)
 {
     int minTax = 0x0FFFFFFF;
     unsigned int i, index = 0;
-
+    
     for (i = 0; i < CACHE_SIZE; i++) {
         if (cache->rec[i].tax < minTax) {
             index  = i;
             minTax = cache->rec[i].tax;
         }
     }
-
+    
     // this sector is dirty - we need to flush it first
-#ifdef BUILDING_USBHDFSD
+    #ifdef BUILDING_USBHDFSD
     {
         int ret;
         ret = scache_flushSector(cache, index);
@@ -151,7 +151,7 @@ static int getIndexWrite(cache_set *cache, unsigned int sector)
     }
 #else
     if (cache->rec[index].writeDirty) {
-    int ret;
+        int ret;
 
     XPRINTF("scache: getIndexWrite: sector is dirty : %d   index=%d \n", cache->rec[index].sector, index);
     ret = WRITE_SECTOR(DEV_ACCESSOR(cache), cache->rec[index].sector, cache->sectorBuf + (index * BLOCK_SIZE), BLOCK_SIZE / cache->sectorSize);
