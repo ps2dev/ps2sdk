@@ -2252,7 +2252,10 @@ static int fat_writeSingleSector(mass_dev *dev, unsigned int sector, const void 
         }
     } else {
         // Invalidate the block that the sector belongs to, in case it crosses another cluster.
-        INVALIDATE_SECTORS(dev, sector, 1);
+        ret = INVALIDATE_SECTORS(dev, sector, 1);
+        if (ret < 0) {
+            return ret;
+        }
 
         ret = WRITE_SECTORS_RAW(dev, sector, 1, buffer);
         if (ret != 0) {
