@@ -549,16 +549,42 @@ int audsrv_quit()
 }
 
 /** IRX _start function
+ * @param argc  number of module arguments
+ * @param argv  module arguments
  * @returns zero on success
  *
  * Initializes interrupts and the RPC thread. Oh, and greets the user.
+ *
+ * Arguments:
+ *   thpri=N    priority of the RPC server thread, 9 to 123 (default 40).
+ *              At the default it shares fileXio's priority, so an RPC that
+ *              arrives while a file read is in progress waits for the whole
+ *              read to finish. A value below 40 lets audsrv_available and
+ *              audsrv_play_audio preempt the read.
  */
 int _start(int argc, char *argv[])
 {
 	int err;
+	int i;
+	int rpc_thpri = 40;
 
-	(void)argc;
-	(void)argv;
+	for (i = 1; i < argc; i++)
+	{
+		if (strncmp(argv[i], "thpri=", 6) == 0)
+		{
+			char *end;
+			long prio = strtol(argv[i] + 6, &end, 10);
+
+			if (end != argv[i] + 6 && *end == '\0' && prio >= 9 && prio <= 123)
+			{
+				rpc_thpri = prio;
+			}
+			else
+			{
+				printf("audsrv: ignoring invalid argument '%s'\n", argv[i]);
+			}
+		}
+	}
 
 	FlushDcache();
 	CpuEnableIntr();
@@ -575,7 +601,7 @@ int _start(int argc, char *argv[])
 	audsrv_adpcm_init();
 
 	/* create RPC listener thread */
-	initialize_rpc_thread();
+	initialize_rpc_thread(rpc_thpri);
 
 	return MODULE_RESIDENT_END;
 }

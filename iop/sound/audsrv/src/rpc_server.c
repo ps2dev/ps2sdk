@@ -192,9 +192,9 @@ static void rpc_server_thread(void *arg)
 	sceSifRpcLoop(&qd);
 }
 
-int initialize_rpc_thread()
+int initialize_rpc_thread(int priority)
 {
-	int rpc_tid = create_thread(rpc_server_thread, 40, 0);
+	int rpc_tid = create_thread(rpc_server_thread, priority, 0);
 	DPRINTF("rpc server thread 0x%x started\n", rpc_tid);
 	return (rpc_tid > 0);
 }
