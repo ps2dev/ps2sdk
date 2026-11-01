@@ -59,7 +59,7 @@ extern int scache_readSector(cache_set *cache, unsigned int sector, void **buf);
 extern int scache_writeSector(cache_set *cache, unsigned int sector);
 extern int scache_flushSectors(cache_set *cache);
 #ifdef BUILDING_USBHDFSD
-extern void scache_invalidate(cache_set *cache, unsigned int sector, int count);
+extern int scache_invalidate(cache_set *cache, unsigned int sector, int count);
 #endif /* BUILDING_USBHDFSD */
 
 extern void scache_getStat(cache_set *cache, unsigned int *access, unsigned int *hits);
