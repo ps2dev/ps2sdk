@@ -262,8 +262,8 @@ s32 _mpeg_dmac_handler(s32 channel, void *arg, void *addr)
     cp->source += mbc * sizeof(_MPEGMacroBlock8);
     cp->dest += mbc * RGBA32_BLOCK_SIZE;
     cp->blocks    = cp->blocks - mbc;
-    *R_EE_D3_QWC  = (mbc * sizeof(_MPEGMacroBlock8)) >> 4;
-    *R_EE_D4_QWC  = (mbc * RGBA32_BLOCK_SIZE) >> 4;
+    *R_EE_D3_QWC  = (mbc * RGBA32_BLOCK_SIZE) >> 4;
+    *R_EE_D4_QWC  = (mbc * sizeof(_MPEGMacroBlock8)) >> 4;
     *R_EE_D4_CHCR = 0x101;
     *R_EE_IPU_CMD = IPU_COMMAND_CSC | mbc;
     *R_EE_D3_CHCR = 0x100;
