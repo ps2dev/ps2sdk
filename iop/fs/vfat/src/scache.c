@@ -133,7 +133,6 @@ static int getIndexWrite(cache_set *cache, unsigned int sector)
 {
     int minTax = 0x0FFFFFFF;
     unsigned int i, index = 0;
-    
     for (i = 0; i < CACHE_SIZE; i++) {
         if (cache->rec[i].tax < minTax) {
             index  = i;
