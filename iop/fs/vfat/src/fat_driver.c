@@ -1069,7 +1069,11 @@ int fat_readFile(fat_driver *fatd, fat_dir *fatDir, unsigned int filePos, unsign
             }
 
             if (toRead > 0) {
-                INVALIDATE_SECTORS(DEV_ACCESSOR(fatd), startSector, toRead);
+                ret = INVALIDATE_SECTORS(DEV_ACCESSOR(fatd), startSector, toRead);
+                if (ret < 0) {
+                    return ret;
+                }
+                
                 ret = READ_SECTORS_RAW(DEV_ACCESSOR(fatd), startSector, toRead, buffer + bufferPos);
                 if (ret != 0) {
                     XPRINTF("Read sectors failed ! sector=%u (%u)\n", startSector, toRead);
