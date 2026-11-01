@@ -50,7 +50,7 @@ extern cache_set *scache_init(struct SBP2Device *dev, int sectorSize);
 extern cache_set *scache_init(struct block_device *bd);
 #endif
 
-extern void scache_close(cache_set *cache);
+extern int scache_close(cache_set *cache);
 extern void scache_kill(cache_set *cache); // dlanor: added for disconnection events (flush impossible)
 #if 0
 extern int scache_allocSector(cache_set *cache, unsigned int sector, void **buf);
