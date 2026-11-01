@@ -151,16 +151,18 @@ static int getIndexWrite(cache_set *cache, unsigned int sector)
     }
 #else
     if (cache->rec[index].writeDirty) {
-        int ret;
+    int ret;
 
-        XPRINTF("scache: getIndexWrite: sector is dirty : %d   index=%d \n", cache->rec[index].sector, index);
-        ret                          = WRITE_SECTOR(DEV_ACCESSOR(cache), cache->rec[index].sector, cache->sectorBuf + (index * BLOCK_SIZE), BLOCK_SIZE / cache->sectorSize);
-        cache->rec[index].writeDirty = 0;
-        // TODO - error handling
-        if (ret < 0) {
-            M_PRINTF("scache: ERROR writing sector to disk! sector=%u\n", sector);
-        }
+    XPRINTF("scache: getIndexWrite: sector is dirty : %d   index=%d \n", cache->rec[index].sector, index);
+    ret = WRITE_SECTOR(DEV_ACCESSOR(cache), cache->rec[index].sector, cache->sectorBuf + (index * BLOCK_SIZE), BLOCK_SIZE / cache->sectorSize);
+
+    if (ret < 0) {
+        M_PRINTF("scache: ERROR writing sector to disk! sector=%u\n", cache->rec[index].sector);
+        return ret;
     }
+
+    cache->rec[index].writeDirty = 0;
+}
 #endif
     cache->rec[index].tax += 2;
     cache->rec[index].sector = sector;
@@ -184,7 +186,6 @@ static int scache_flushSector(cache_set *cache, int index)
             M_PRINTF("scache: ERROR writing sector to disk! sector=%u\n", cache->rec[index].sector);
             return ret;
         }
-
         cache->rec[index].writeDirty = 0;
     }
     return 1;
@@ -214,18 +215,12 @@ int scache_flushSectors(cache_set *cache)
         {
 #ifndef BUILDING_USBHDFSD
             XPRINTF("scache: flushSectors dirty index=%d sector=%u \n", i, cache->rec[i].sector);
-            ret                      = WRITE_SECTOR(DEV_ACCESSOR(cache), cache->rec[i].sector, cache->sectorBuf + (i * BLOCK_SIZE), BLOCK_SIZE);
-#if defined(BUILDING_IEEE1394_DISK) || defined(BUILDING_USBHDFSD)
-            cache->rec[i].writeDirty = 0;
-#endif
-            // TODO - error handling
+            ret = WRITE_SECTOR(DEV_ACCESSOR(cache), cache->rec[i].sector, cache->sectorBuf + (i * BLOCK_SIZE), BLOCK_SIZE);
             if (ret < 0) {
                 M_PRINTF("scache: ERROR writing sector to disk! sector=%d\n", cache->rec[i].sector);
                 return ret;
             }
-#if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
             cache->rec[i].writeDirty = 0;
-#endif
 #endif /* BUILDING_USBHDFSD */
             counter++;
         }
@@ -271,6 +266,9 @@ int scache_readSector(cache_set *cache, unsigned int sector, void **buf)
     // compute alignedSector - to prevent storage of duplicit sectors in slots
     alignedSector = (sector / cache->indexLimit) * cache->indexLimit;
     index         = getIndexWrite(cache, alignedSector);
+    if (index < 0) {
+        return index;
+    }
     XPRINTF("cache: indexWrite=%i slot=%d  alignedSector=%u\n", index, index / cache->indexLimit, alignedSector);
     ret = READ_SECTOR(DEV_ACCESSOR(cache), alignedSector, cache->sectorBuf + (index * cache->sectorSize), BLOCK_SIZE / cache->sectorSize);
 
@@ -358,27 +356,32 @@ int scache_writeSector(cache_set *cache, unsigned int sector)
 }
 
 #ifdef BUILDING_USBHDFSD
-void scache_invalidate(cache_set *cache, unsigned int sector, int count)
+int scache_invalidate(cache_set *cache, unsigned int sector, int count)
 {
     int i;
 
     XPRINTF("cache: invalidate devId = %i sector = %u count = %d \n", DEVID_ACCESSOR(cache), sector, count);
 
     for (i = 0; i < count; i++, sector++) {
-        int index; // index is given in single sectors not octal sectors
+        int index;
+        int ret;
 
         index = getSlot(cache, sector);
-        if (index >= 0) { // sector found in cache. Write back and invalidate the block it belongs to.
-            scache_flushSector(cache, index);
-
-            cache->rec[index].sector     = 0xFFFFFFF0;
-            cache->rec[index].tax        = 0;
+        if (index >= 0) {
+            ret = scache_flushSector(cache, index);
+            if (ret < 0) {
+                return ret;
+            }
+            
+            cache->rec[index].sector = 0xFFFFFFF0;
+            cache->rec[index].tax = 0;
             cache->rec[index].writeDirty = 0;
         }
     }
+
+    return 0;
 }
 #endif /* BUILDING_USBHDFSD */
-
 //---------------------------------------------------------------------------
 #if defined(BUILDING_USBHDFSD)
 cache_set *scache_init(mass_dev *dev, int sectSize)
@@ -453,11 +456,19 @@ void scache_kill(cache_set *cache) // dlanor: added for disconnection events (fl
     free(cache);
 }
 //---------------------------------------------------------------------------
-void scache_close(cache_set *cache)
+int scache_close(cache_set *cache)
 {
+    int ret;
+
     XPRINTF("cache: close devId = %i \n", DEVID_ACCESSOR(cache));
-    scache_flushSectors(cache);
+
+    ret = scache_flushSectors(cache);
+    if (ret < 0) {
+        return ret;
+    }
+
     scache_kill(cache);
+    return 0;
 }
 //---------------------------------------------------------------------------
 // End of file:  scache.c
