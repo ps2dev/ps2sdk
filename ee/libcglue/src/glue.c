@@ -449,7 +449,10 @@ int getdents(int fd, void *dd_buf, int count)
 
 	read = 0;
 	dirp = (struct dirent *)dd_buf;
-
+    if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+    }
 	{
 		_libcglue_fdman_fd_info_t *fdinfo;
 
@@ -975,7 +978,14 @@ int truncate(const char *path, off_t length)
 
 	res = write(fd, &buff, length);
 	close(fd);
-	return res;
+	if (res < 0) {
+		return -1;
+    }
+	if (res != length) {
+		errno = EIO;
+		return -1;
+	}
+    return 0;
 }
 #endif
 
