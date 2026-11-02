@@ -1,0 +1,6 @@
+add_library(multitap)
+target_include_directories(multitap PUBLIC include)
+target_include_directories(multitap PRIVATE ${EE_INC})
+target_sources(multitap PRIVATE src/libmtap.c src/erl-support.c)
+install(TARGETS multitap)
+target_add_erl(multitap)
