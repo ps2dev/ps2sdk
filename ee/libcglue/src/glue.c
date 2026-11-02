@@ -1437,7 +1437,7 @@ int _ps2sdk_ioctl2(int fd, int request, void *arg, unsigned int arglen, void *bu
 	{
 		return -EBADF;
 	}
-	if (fdinfo->ops == NULL || fdinfo->ops->ioctl == NULL)
+	if (fdinfo->ops == NULL || fdinfo->ops->ioctl2 == NULL)
 	{
 		return -ENOSYS;
 	}
