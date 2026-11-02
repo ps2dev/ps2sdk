@@ -170,17 +170,17 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 		if((dirEnt.name[0] == '_') && (dirEnt.name[1] == '_'))
 		{
 			hddFs[count].fileSystemGroup = FS_GROUP_SYSTEM;
-			strcpy(hddFs[count].name, &dirEnt.name[2]);
+			strlcpy(hddFs[count].name, &dirEnt.name[2], sizeof(hddFs[count].name));
 		}
 		else if(dirEnt.name[0] == FS_COMMON_PREFIX)
 		{
 			hddFs[count].fileSystemGroup = FS_GROUP_COMMON;
-			strcpy(hddFs[count].name, &dirEnt.name[1]);
+			strlcpy(hddFs[count].name, &dirEnt.name[1], sizeof(hddFs[count].name));
 		}
 		else
 		{
 			hddFs[count].fileSystemGroup = FS_GROUP_APPLICATION;
-			strcpy(hddFs[count].name, dirEnt.name);
+			strlcpy(hddFs[count].name, dirEnt.name, sizeof(hddFs[count].name));
 		}
 
 #ifdef	_OMIT_SYSTEM_PARTITION
@@ -210,7 +210,8 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 		for(i = 0, size = 0; (unsigned int)i < dirEnt.stat.private_0 + 1; i++)
 		{
 			rv = fileXioIoctl2(partitionFd, HIOCGETSIZE, &i, 4, NULL, 0);
-			size += (u32)rv / 2048; //Equal to, but avoids overflows of: rv * 512 / 1024 / 1024;
+			if(rv > 0)
+                size += (u32)rv / 2048; //Equal to, but avoids overflows of: rv * 512 / 1024 / 1024;
 		}
 
 		fileXioClose(partitionFd);
@@ -230,7 +231,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 				zoneFree = fileXioDevctl("pfs0:", PDIOC_ZONEFREE, NULL, 0, NULL, 0);
 				zoneSize = fileXioDevctl("pfs0:", PDIOC_ZONESZ, NULL, 0, NULL, 0);
 
-				hddFs[count].freeSpace = zoneFree * zoneSize / 1024 / 1024;
+				hddFs[count].freeSpace = (u32)(((u64)zoneFree * zoneSize) / 1024 / 1024);
 				hddFs[count].formatted = 1;
 
 				fileXioUmount("pfs0:");
