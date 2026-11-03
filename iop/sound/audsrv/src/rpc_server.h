@@ -15,6 +15,6 @@
 #ifndef __RPC_SERVER_H__
 #define __RPC_SERVER_H__
 
-extern int initialize_rpc_thread();
+extern int initialize_rpc_thread(int priority);
 
 #endif
