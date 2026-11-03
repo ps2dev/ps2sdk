@@ -1,0 +1,8 @@
+<map id="msif_data" name="msif_data">
+<area shape="rect" id="node1" title=" " alt="" coords="5,305,92,332"/>
+<area shape="rect" id="node2" href="$struct__sifm__serve__entry.html" title=" " alt="" coords="100,5,243,32"/>
+<area shape="rect" id="node3" href="$struct__sifm__serve__data.html" title=" " alt="" coords="179,96,316,123"/>
+<area shape="rect" id="node4" href="$struct__sifm__client__data.html" title=" " alt="" coords="328,216,465,243"/>
+<area shape="rect" id="node6" href="$struct__sifm__queue__data.html" title=" " alt="" coords="105,216,246,243"/>
+<area shape="rect" id="node5" href="$struct__sifm__rpc__data.html" title=" " alt="" coords="397,96,519,123"/>
+</map>

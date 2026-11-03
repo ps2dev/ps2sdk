@@ -1,0 +1,27 @@
+var structlibsnd2__svm__ =
+[
+    [ "m_sep_sep_no_tonecount", "structlibsnd2__svm__.html#a20f580e97ce382f607210488a844f3ad", null ],
+    [ "m_vab_id", "structlibsnd2__svm__.html#a4ec0c6a7b17fcb6880c93411c060ded0", null ],
+    [ "m_note", "structlibsnd2__svm__.html#a5d6febe4e2e2fd7a6b9ad250349e80c3", null ],
+    [ "m_fine", "structlibsnd2__svm__.html#aa3431219a5fa3d2eee538c82b760efe4", null ],
+    [ "m_voll", "structlibsnd2__svm__.html#a5307eccb82398a4eee0e10cf313ab132", null ],
+    [ "m_unk05", "structlibsnd2__svm__.html#a752db501689a3b7cfb449ad6868361d6", null ],
+    [ "m_program", "structlibsnd2__svm__.html#a4b8d2fc6534b8e560d96cbec01473a9c", null ],
+    [ "m_fake_program", "structlibsnd2__svm__.html#a18238e3416fb8762fa83ddc08e1feafe", null ],
+    [ "m_unknown", "structlibsnd2__svm__.html#abc45a32681a5b22cbdbb8ed4ca07dd7e", null ],
+    [ "m_pad09", "structlibsnd2__svm__.html#a9bff6958b4cc3a03b4c46622894f2657", null ],
+    [ "m_mvol", "structlibsnd2__svm__.html#a97bda1dd409f68486e6c82679b824915", null ],
+    [ "m_mpan", "structlibsnd2__svm__.html#a367451e0e2ed29cf1103bd70e225c581", null ],
+    [ "m_tone", "structlibsnd2__svm__.html#a89666be44dbe69a331ace0dc0f53d1e0", null ],
+    [ "m_vol", "structlibsnd2__svm__.html#aa345e50a2899c0dc52486d77c3270b68", null ],
+    [ "m_pan", "structlibsnd2__svm__.html#ad42bb3ff8c0b898f5cc245bb8a0428a9", null ],
+    [ "m_prior", "structlibsnd2__svm__.html#a1355d321e95b86580df7e3e172709697", null ],
+    [ "m_centre", "structlibsnd2__svm__.html#ad2e1533e44d35aa701c5264780381542", null ],
+    [ "m_shift", "structlibsnd2__svm__.html#a13f84155fd5b2fea2fadf5b8cdf17e80", null ],
+    [ "m_mode", "structlibsnd2__svm__.html#a4c2ea35a68d0bdef435b35d84b8d1b0a", null ],
+    [ "m_pad13", "structlibsnd2__svm__.html#a0b6ce83a90bdbb57657348a627011abb", null ],
+    [ "m_seq_sep_no", "structlibsnd2__svm__.html#a202ae170fe8fbbe6984c5302fcb88c60", null ],
+    [ "m_vag_idx2", "structlibsnd2__svm__.html#a8ce3b28aa6a63421788f0b99ce0b355d", null ],
+    [ "m_voice_idx", "structlibsnd2__svm__.html#acfd69ad01a2b5ebe34e008e8be10a566", null ],
+    [ "m_unk1c", "structlibsnd2__svm__.html#af2776def26202c99676e2b4bfdbf02ce", null ]
+];

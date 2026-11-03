@@ -1,0 +1,22 @@
+<map id="iop/usb/usbd/src/usbdpriv.h" name="iop/usb/usbd/src/usbdpriv.h">
+<area shape="rect" id="node1" title=" " alt="" coords="311,5,510,32"/>
+<area shape="rect" id="node2" href="$iop_2usb_2usbd_2src_2irx__imports_8h_source.html" title=" " alt="" coords="495,80,603,107"/>
+<area shape="rect" id="node8" title=" " alt="" coords="289,229,359,256"/>
+<area shape="rect" id="node19" href="$defs_8h.html" title=" " alt="" coords="846,80,909,107"/>
+<area shape="rect" id="node20" href="$usbd_8h.html" title=" " alt="" coords="23,155,89,181"/>
+<area shape="rect" id="node3" href="$irx_8h.html" title=" " alt="" coords="636,229,687,256"/>
+<area shape="rect" id="node7" href="$intrman_8h.html" title=" " alt="" coords="113,155,199,181"/>
+<area shape="rect" id="node9" href="$loadcore_8h.html" title=" " alt="" coords="223,155,313,181"/>
+<area shape="rect" id="node10" href="$stdio_8h.html" title=" " alt="" coords="935,155,1001,181"/>
+<area shape="rect" id="node12" href="$sysclib_8h.html" title=" " alt="" coords="831,155,910,181"/>
+<area shape="rect" id="node15" title=" " alt="" coords="447,155,537,181"/>
+<area shape="rect" id="node16" href="$thbase_8h.html" title=" " alt="" coords="677,155,755,181"/>
+<area shape="rect" id="node17" href="$thevent_8h.html" title=" " alt="" coords="338,155,422,181"/>
+<area shape="rect" id="node18" href="$thsemap_8h.html" title=" " alt="" coords="561,155,652,181"/>
+<area shape="rect" id="node4" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="863,304,934,331"/>
+<area shape="rect" id="node5" title=" " alt="" coords="867,379,941,405"/>
+<area shape="rect" id="node6" href="$tamtypes_8h.html" title=" " alt="" coords="747,379,843,405"/>
+<area shape="rect" id="node11" title=" " alt="" coords="928,229,1003,256"/>
+<area shape="rect" id="node13" href="$setjmp_8h.html" title=" " alt="" coords="755,304,834,331"/>
+<area shape="rect" id="node14" href="$ctype_8h.html" title=" " alt="" coords="833,229,903,256"/>
+</map>

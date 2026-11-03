@@ -1,0 +1,19 @@
+<map id="iop/input/padman/src/padInit.c" name="iop/input/padman/src/padInit.c">
+<area shape="rect" id="node1" title=" " alt="" coords="413,5,572,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="192,169,262,196"/>
+<area shape="rect" id="node3" href="$freepad_8h.html" title=" " alt="" coords="130,95,214,121"/>
+<area shape="rect" id="node8" href="$stdio_8h.html" title=" " alt="" coords="663,95,730,121"/>
+<area shape="rect" id="node10" href="$thevent_8h.html" title=" " alt="" coords="238,95,322,121"/>
+<area shape="rect" id="node11" href="$thbase_8h.html" title=" " alt="" coords="346,95,425,121"/>
+<area shape="rect" id="node12" href="$intrman_8h.html" title=" " alt="" coords="450,95,535,121"/>
+<area shape="rect" id="node13" href="$vblank_8h.html" title=" " alt="" coords="560,95,638,121"/>
+<area shape="rect" id="node14" href="$sifman_8h.html" title=" " alt="" coords="28,95,106,121"/>
+<area shape="rect" id="node15" href="$sio2_cmds_8h.html" title=" " alt="" coords="754,95,852,121"/>
+<area shape="rect" id="node16" title=" " alt="" coords="876,95,967,121"/>
+<area shape="rect" id="node17" href="$pad_data_8h.html" title=" " alt="" coords="992,95,1081,121"/>
+<area shape="rect" id="node4" href="$irx_8h.html" title=" " alt="" coords="360,169,411,196"/>
+<area shape="rect" id="node5" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="350,244,421,271"/>
+<area shape="rect" id="node6" title=" " alt="" coords="294,319,368,345"/>
+<area shape="rect" id="node7" href="$tamtypes_8h.html" title=" " alt="" coords="392,319,488,345"/>
+<area shape="rect" id="node9" title=" " alt="" coords="659,169,734,196"/>
+</map>

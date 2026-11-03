@@ -1,0 +1,13 @@
+<map id="common/include/ps2_debug.h" name="common/include/ps2_debug.h">
+<area shape="rect" id="node1" title=" " alt="" coords="405,5,562,47"/>
+<area shape="rect" id="node2" href="$ee__debug_8h.html" title=" " alt="" coords="54,95,203,136"/>
+<area shape="rect" id="node4" href="$iop__sbusdbg_8h.html" title=" " alt="" coords="250,95,421,136"/>
+<area shape="rect" id="node5" href="$sbus__dbg_8c_source.html" title=" " alt="" coords="229,184,399,225"/>
+<area shape="rect" id="node6" href="$sbus__tty_8c_source.html" title=" " alt="" coords="423,184,594,225"/>
+<area shape="rect" id="node7" href="$iopdebug_8h.html" title=" " alt="" coords="628,95,779,136"/>
+<area shape="rect" id="node10" href="$iop__debug_8c.html" title=" " alt="" coords="1183,184,1333,225"/>
+<area shape="rect" id="node3" href="$ee__debug_8c_source.html" title=" " alt="" coords="5,191,204,218"/>
+<area shape="rect" id="node8" href="$iop_2debug_2iop__sbusdbg_2src_2irx__imports_8h_source.html" title=" " alt="" coords="618,184,789,225"/>
+<area shape="rect" id="node9" href="$iop_2debug_2iop__sbusdbg_2src_2main_8c_source.html" title=" " alt="" coords="813,184,983,225"/>
+<area shape="rect" id="node11" href="$iop_2debug_2iopdebug_2src_2main_8c.html" title=" " alt="" coords="1008,184,1159,225"/>
+</map>
