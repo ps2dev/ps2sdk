@@ -188,7 +188,7 @@ _ee_load_frame:
                         mthi        $t0
 
                         lw          $t0,   0x218($s0)
-                        mthi        $t0
+                        mthi1       $t0
 
                         lw          $t0,   0x21C($s0)
                         mtlo        $t0
