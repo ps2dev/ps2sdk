@@ -301,6 +301,7 @@ static char *prepare_path(const char *path, char *full_path, int max_path)
 
     // Reserve space for 2 backslashes and a NULL.
     strncpy(full_path, smb_curdir, max_path - 3);
+    full_path[max_path - 3] = '\0';
     strcat(full_path, "\\");
 
     // Skip all leading slashes and backslashes.
@@ -358,7 +359,8 @@ int smb_open(iop_file_t *f, const char *filename, int flags, int mode)
                 fh->filesize = 0;
             else if (fh->mode & O_APPEND)
                 fh->position = filesize;
-            strncpy(fh->name, path, SMB_NAME_MAX);
+            strncpy(fh->name, path, SMB_NAME_MAX - 1);
+            fh->name[SMB_NAME_MAX - 1] = '\0';
             r = 0;
         }
     } else
@@ -647,6 +649,10 @@ int smb_dopen(iop_file_t *f, const char *dirname)
     if (!(info.FileAttributes & EXT_ATTR_DIRECTORY)) {
         r = -ENOTDIR;
         goto io_unlock;
+    }// The search pattern (path + optional backslash + '*') must fit in FHANDLE.name.
+    if (strlen(path) + 3 > SMB_NAME_MAX) {
+        r = -ENAMETOOLONG;
+        goto io_unlock;
     }
 
     fh = smbman_getfilefreeslot();
@@ -657,7 +663,8 @@ int smb_dopen(iop_file_t *f, const char *dirname)
         fh->filesize = 0;
         fh->position = 0;
 
-        strncpy(fh->name, path, 255);
+        strncpy(fh->name, path, SMB_NAME_MAX - 1);
+        fh->name[SMB_NAME_MAX - 1] = '\0';
         if (fh->name[strlen(fh->name) - 1] != '\\')
             strcat(fh->name, "\\");
         strcat(fh->name, "*");
@@ -711,7 +718,7 @@ int smb_dread(iop_file_t *f, iox_dirent_t *dirent)
 
     if (r == 1) {
         smb_statFiller(&info->fileInfo, &dirent->stat);
-        strncpy(dirent->name, info->FileName, SMB_NAME_MAX);
+        strncpy(dirent->name, info->FileName, sizeof(dirent->name) - 1);
     }
 
 io_unlock:
