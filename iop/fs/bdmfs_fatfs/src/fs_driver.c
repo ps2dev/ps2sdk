@@ -136,7 +136,7 @@ static int fatfs_fs_driver_find_mount_info_index_free(void)
 struct block_device *fatfs_fs_driver_get_mounted_bd_from_index(int mount_info_index)
 {
     struct block_device *mounted_bd;
-    if (mount_info_index > FATFS_FS_DRIVER_MOUNT_INFO_MAX) {
+    if (mount_info_index < 0 || mount_info_index >= FATFS_FS_DRIVER_MOUNT_INFO_MAX) {
         return NULL;
     }
     mounted_bd = fs_driver_mount_info[mount_info_index].mounted_bd;
@@ -709,6 +709,8 @@ static int get_frag_list(FIL *file, void *rdata, unsigned int rdatalen)
 
     // Get the block device backing the file so we can get the starting LBA of the file system.
     struct block_device* bd = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
+    if (bd == NULL)
+        return -ENXIO;
 
     DWORD iClusterStart = file->obj.sclust;
     DWORD iClusterCurrent = iClusterStart;
@@ -770,13 +772,22 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
 
             // Get the block device backing the file so we can get the starting LBA of the file system.
             struct block_device* bd = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
+            if (bd == NULL)
+            {
+                ret = -ENXIO;
+                break;
+            }
             
             *(u64*)rdata = clst2sect(file->obj.fs, file->obj.sclust) + bd->sectorOffset;
             ret = 0;
             break;
         case USBMASS_IOCTL_GET_DRIVERNAME: {
             struct block_device *mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
-            ret = (mounted_bd == NULL) ? -ENXIO : *(int *)(mounted_bd->name);
+            if (mounted_bd == NULL) {
+                ret = -ENXIO;
+                break;
+            }
+            ret = *(int *)(mounted_bd->name);
 
             // Check for a return buffer and copy the whole name.
             if (rdata != NULL)
