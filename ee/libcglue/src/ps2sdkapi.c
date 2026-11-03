@@ -93,6 +93,10 @@ int __fioOpenHelper(_libcglue_fdman_fd_info_t *info, const char *buf, int flags,
         userdata = malloc(sizeof(_fio_file_info_t) + buf_len + 1);
         if (userdata == NULL)
         {
+            if (is_dir)
+                fioDclose(iop_fd);
+            else
+                fioClose(iop_fd);
             return -ENOMEM;
         }
         userdata->fd = iop_fd;
