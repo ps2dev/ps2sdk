@@ -652,6 +652,7 @@ static int fs_dopen(iop_file_t *fd, const char *name)
 {
     fat_driver *fatd;
     int is_root = 0;
+    int status;
     fs_dir *rec;
 
     M_DEBUG("%s: unit %d name %s\n", __func__, fd->unit, name);
@@ -671,9 +672,13 @@ static int fs_dopen(iop_file_t *fd, const char *name)
         is_root = 1;
     }
 
-    fd->privdata = malloc(sizeof(fs_dir));
-    memset(fd->privdata, 0, sizeof(fs_dir)); // NB: also implies "file_flag = FS_FILE_FLAG_FOLDER;"
-    rec = (fs_dir *)fd->privdata;
+    rec = (fs_dir *)malloc(sizeof(fs_dir));
+    if (rec == NULL) {
+        _fs_unlock();
+        return -ENOMEM;
+    }
+    memset(rec, 0, sizeof(fs_dir)); // NB: also implies "file_flag = FS_FILE_FLAG_FOLDER;"
+    fd->privdata = rec;
 
     rec->status = fat_getFirstDirentry(fatd, name, &rec->fatdlist, &rec->dirent.fatdir, &rec->current_fatdir);
 
@@ -681,11 +686,14 @@ static int fs_dopen(iop_file_t *fd, const char *name)
     if (rec->status == 0 && !is_root)
         rec->status = -EFAULT;
 
-    if (rec->status < 0)
-        free(fd->privdata);
+    status = rec->status;
+    if (status < 0) {
+        free(rec);
+        fd->privdata = NULL;
+    }
 
     _fs_unlock();
-    return rec->status;
+    return status;
 }
 
 //---------------------------------------------------------------------------
