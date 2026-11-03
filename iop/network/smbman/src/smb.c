@@ -254,6 +254,9 @@ static int GetSMBServerReply(int shdrlen, void *spayload, int rhdrlen)
 
     // If rhdrlen is not specified, retrieve the whole packet. Otherwise, retrieve only the headers (caller will retrieve the payload separately).
     size     = (rhdrlen == 0) ? totalpkt_size : rhdrlen;
+    // The packet is received into SMB_buf.smb, so it must fit in it. The length comes from the server.
+    if (size < 0 || (u32)size > sizeof(SMB_buf.smb))
+        return -2;
     rcv_size = RecvData(main_socket, (char *)&SMB_buf.smb, size, 3000); // 3s before the packet is considered lost
     if (rcv_size <= 0)
         return -2;
@@ -1036,12 +1039,18 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int n
     // Skip any padding bytes.
     padding = RRsp->DataOffset - sizeof(ReadAndXResponse_t);
     if (padding > 0) {
+        // The padding is received into SMB_buf right after the response header, so it must fit there.
+        if (padding > (int)(sizeof(SMB_buf.smb) - sizeof(ReadAndXResponse_t)))
+            return -EIO;
         r = RecvData(main_socket, (char *)(RRsp + 1), padding, 3000); // 3s before the packet is considered lost
         if (r <= 0)
             return -2;
     }
 
     DataLength = (int)(((u32)RRsp->DataLengthHigh << 16) | RRsp->DataLengthLow);
+    // The server must not return more data than was requested, otherwise readbuf would overflow.
+    if (DataLength < 0 || DataLength > nbytes)
+        return -EIO;
     if (DataLength > 0) {
         r = RecvData(main_socket, readbuf, DataLength, 3000); // 3s before the packet is considered lost
         if (r <= 0)
