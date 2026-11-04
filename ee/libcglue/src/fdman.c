@@ -88,14 +88,28 @@ void __fdman_deinit()
 int __fdman_get_new_descriptor()
 {
 	int i = 0;
+    int j = 0;
+	int k = 0;
 
 	WaitSema(__fdman_sema); /* lock here to make thread safe */
 	for (i = 0; i < __FILENO_MAX; i++) {
-		if (__descriptormap[i] == NULL) {
-			__descriptormap[i] = &__descriptor_data_pool[i];
-			__descriptormap[i]->ref_count++;
-			SignalSema(__fdman_sema); /* release lock */
-			return i;
+		if (__descriptormap[i] != NULL) {
+			continue;
+		}
+		/* The pool entry with the same index can still be used by a duplicated descriptor, so use one that nobody points to. */
+		for (j = 0; j < __FILENO_MAX; j++) {
+			for (k = 0; k < __FILENO_MAX; k++) {
+				if (__descriptormap[k] == &__descriptor_data_pool[j]) {
+					break;
+				}
+			}
+			if (k == __FILENO_MAX) {
+				memset(&__descriptor_data_pool[j], 0, sizeof(__descriptormap_type));
+				__descriptormap[i] = &__descriptor_data_pool[j];
+				__descriptormap[i]->ref_count = 1;
+				SignalSema(__fdman_sema); /* release lock */
+				return i;
+			}
 		}
 	}
 	SignalSema(__fdman_sema); /* release lock */
@@ -119,7 +133,7 @@ int __fdman_get_dup_descriptor(int fd)
 	WaitSema(__fdman_sema); /* lock here to make thread safe */
 	for (i = 0; i < __FILENO_MAX; i++) {
 		if (__descriptormap[i] == NULL) {
-			__descriptormap[i] = &__descriptor_data_pool[fd];
+			__descriptormap[i] = __descriptormap[fd];
 			__descriptormap[i]->ref_count++;
 			SignalSema(__fdman_sema); /* release lock */
 			return i;
@@ -135,13 +149,13 @@ int __fdman_get_dup_descriptor(int fd)
 #ifdef F___fdman_get_dup_descriptor
 int __fdman_get_dup2_descriptor(int fd, int newfd)
 {	
-	if (!__IS_FD_VALID(fd)) {
+	if (!__IS_FD_VALID(fd) || newfd < 0 || newfd >= __FILENO_MAX) {
 		errno = EBADF;
 		return -1;
 	}
 
 	WaitSema(__fdman_sema); /* lock here to make thread safe */
-	__descriptormap[newfd] = &__descriptor_data_pool[fd];
+	__descriptormap[newfd] = __descriptormap[fd];
 	__descriptormap[newfd]->ref_count++;
 	SignalSema(__fdman_sema); /* release lock */
 	
