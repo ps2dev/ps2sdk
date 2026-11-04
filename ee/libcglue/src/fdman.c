@@ -111,7 +111,6 @@ int __fdman_get_new_descriptor()
 				return i;
 			}
 		}
-		}
 	}
 	SignalSema(__fdman_sema); /* release lock */
 		
