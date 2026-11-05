@@ -1,3 +1,4 @@
+#include <sysclib.h>
 #include <bdm.h>
 #include <stdint.h>
 #include <thevent.h>
@@ -577,6 +578,11 @@ static int spisd_write_multi_end()
  * BDM interface:
  * - BDM -> "spisd" library
  */
+/* DMA and reverse_buffer work on words: a buffer that is not word aligned
+ * (FatFs passes the caller's, at any offset) goes a sector at a time through
+ * this one */
+static uint32_t bounce[SECTOR_SIZE / 4];
+
 int spisd_read(struct block_device *bd, uint64_t sector, void *buffer, uint16_t count)
 {
     uint16_t sectors_left = count;
@@ -587,6 +593,16 @@ int spisd_read(struct block_device *bd, uint64_t sector, void *buffer, uint16_t 
 
     if (count == 0)
         return 0;
+
+    if ((uint32_t)buffer & 3) {
+        uint16_t i;
+        for (i = 0; i < count; i++) {
+            if (spisd_read(bd, sector + i, bounce, 1) != 1)
+                break;
+            memcpy((uint8_t *)buffer + i * SECTOR_SIZE, bounce, SECTOR_SIZE);
+        }
+        return i;
+    }
 
     M_DEBUG("%s: sector %i, count: %i \n", __FUNCTION__, (u32)sector, count);
 
@@ -641,6 +657,16 @@ int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, ui
 
     if (count == 0)
         return 0;
+
+    if ((uint32_t)buffer & 3) {
+        uint16_t i;
+        for (i = 0; i < count; i++) {
+            memcpy(bounce, (const uint8_t *)buffer + i * SECTOR_SIZE, SECTOR_SIZE);
+            if (spisd_write(bd, sector + i, bounce, 1) != 1)
+                break;
+        }
+        return i;
+    }
 
     M_DEBUG("%s: sector %i, count: %i \n", __FUNCTION__, (u32)sector, count);
 
