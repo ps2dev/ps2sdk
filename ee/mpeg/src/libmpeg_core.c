@@ -49,7 +49,7 @@ static int (*s_SetDMA_func)(void *userdata);
 static void *s_SetDMA_arg;
 static struct IPUState s_IPUState;
 static int *s_pEOF;
-static int s_Sema;
+static volatile s32 s_Thread;
 static struct CSCParam s_CSCParam;
 static int s_CSCID;
 static u8 s_CSCFlag;
@@ -126,7 +126,6 @@ extern s32 _mpeg_dmac_handler(s32 channel, void *arg, void *addr);
 void _MPEG_Initialize(_MPEGContext *mc, int (*data_cb)(void *userdata), void *cb_user, int *eof_flag)
 {
     (void)mc;
-    ee_sema_t sema;
 
     *R_EE_IPU_CTRL = IPU_CTRL_RST;
     while (*R_EE_IPU_CTRL & IPU_CTRL_BUSY)
@@ -142,11 +141,6 @@ void _MPEG_Initialize(_MPEGContext *mc, int (*data_cb)(void *userdata), void *cb
     s_pEOF        = eof_flag;
     *s_pEOF       = 0;
 
-    memset(&sema, 0, sizeof(sema));
-    sema.init_count = 0;
-    sema.max_count  = 1;
-    sema.option     = 0;
-    s_Sema          = CreateSema(&sema);
     s_CSCID         = AddDmacHandler2(3, _mpeg_dmac_handler, 0, &s_CSCParam);
     s_BitsBuffered  = 0;
     s_LocalBits     = 0;
@@ -157,7 +151,6 @@ void _MPEG_Destroy(void)
     while (READ_ONCE(s_CSCFlag) != 0)
         ;
     RemoveDmacHandler(3, s_CSCID);
-    DeleteSema(s_Sema);
 }
 
 void _ipu_suspend(void)
@@ -248,7 +241,7 @@ s32 _mpeg_dmac_handler(s32 channel, void *arg, void *addr)
 
     if (cp->blocks == 0) {
         iDisableDmac(3);
-        iSignalSema(s_Sema);
+        iWakeupThread(s_Thread);
         WRITE_ONCE(s_CSCFlag, 0);
         return -1;
     }
@@ -291,13 +284,15 @@ int _MPEG_CSCImage(void *source, void *dest, int mbcount)
 
     *R_EE_D4_QWC = (mbc * sizeof(_MPEGMacroBlock8)) >> 4;
     *R_EE_D3_QWC = (mbc * RGBA32_BLOCK_SIZE) >> 4;
+    s_Thread = GetThreadId();
     EnableDmac(3);
     *R_EE_D4_CHCR = 0x101;
     *R_EE_IPU_CMD = IPU_COMMAND_CSC | mbc;
     *R_EE_D3_CHCR = 0x100;
 
     WRITE_ONCE(s_CSCFlag, 1);
-    WaitSema(s_Sema);
+    SleepThread();
+    s_Thread = -1;
     _ipu_resume();
     return mbc;
 }
