@@ -366,13 +366,13 @@ void pfsBitmapShow(pfs_mount_t *pfsMount)
 void pfsBitmapFreeInodeBlocks(pfs_cache_t *clink)
 {
 	pfs_mount_t *pfsMount=clink->pfsMount;
-	u32 i;
+	u32 i, number_data=clink->u.inode->number_data;
 
 	pfsCacheUsedAdd(clink);
-	for(i=0;i < clink->u.inode->number_data; i++)
+	for(i=0;i < number_data; i++)
 	{
 		u32 index = pfsFixIndex(i);
-		pfs_blockinfo_t *bi=&clink->u.inode->data[index];
+		pfs_blockinfo_t *bi;
 		int err;
 
 		if(i!=0) {
@@ -381,6 +381,7 @@ void pfsBitmapFreeInodeBlocks(pfs_cache_t *clink)
 					return;
 		}
 
+		bi=&clink->u.inode->data[index];
 		pfsBitmapFreeBlockSegment(pfsMount, bi);
 		pfsCacheMarkClean(pfsMount, (u16)bi->subpart,  bi->number << pfsMount->inode_scale,
 			(bi->number + bi->count) << pfsMount->inode_scale);
