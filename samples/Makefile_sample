@@ -33,6 +33,7 @@ SUBDIRS += libgs/doublebuffer
 SUBDIRS += libgs/draw
 SUBDIRS += libprofglue/basic
 SUBDIRS += libprofglue/custom
+SUBDIRS += libpthreadglue/pthread
 #SUBDIRS += mpeg                #TODO: not modified for updated newlib
 SUBDIRS += network/tcpip-basic
 SUBDIRS += network/tcpip-dhcp
