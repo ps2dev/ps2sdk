@@ -1602,7 +1602,7 @@ int dup2(int oldfd, int newfd)
 	if (oldfd == newfd) {
 		return oldfd;
 	}
-	if (newfd < 0) {
+	if (newfd < 0 || newfd >= __FILENO_MAX) {
 		errno = EBADF;
 		return -1;
 	}
