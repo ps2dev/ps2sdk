@@ -8,8 +8,6 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#include <stdio.h>
-#include <tamtypes.h>
 #include <sifrpc.h>
 #include <debug.h>
 #include <unistd.h>
