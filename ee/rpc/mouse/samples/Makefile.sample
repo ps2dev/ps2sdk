@@ -7,7 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 EE_BIN = mouse.elf
-EE_OBJS = mouse.o
+EE_OBJS = mouse.o gfx.o square.o menu.o settings.o
 EE_LIBS = -lmouse -lpatches -ldebug -ldraw -lgraph -lmath3d -lpacket -ldma
 
 IRX_FILES += usbd.irx ps2mouse.irx
