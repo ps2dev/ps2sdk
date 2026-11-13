@@ -159,21 +159,22 @@ static inline int ee_get_opmode(void)
 
 static inline int ee_set_opmode(u32 opmode)
 {
-    u32 status;
+    u32 old_status, status;
 
-    status = (get_mips_cop_reg(0, COP0_REG_Status) & ~0x18) | opmode;
+    old_status = get_mips_cop_reg(0, COP0_REG_Status);
+    status     = (old_status & ~0x18) | opmode;
     set_mips_cop_reg(0, COP0_REG_Status, status);
     EE_SYNCP();
 
-    return ((status >> 3) & 3);
+    return (old_status & 0x18);
 }
 
 static inline int ee_kmode_enter()
 {
     u32 status;
 
-    status = (get_mips_cop_reg(0, COP0_REG_Status) & ~0x18);
-    set_mips_cop_reg(0, COP0_REG_Status, status);
+    status = get_mips_cop_reg(0, COP0_REG_Status);
+    set_mips_cop_reg(0, COP0_REG_Status, status & ~0x18);
     EE_SYNCP();
 
     return status;
