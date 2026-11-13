@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stddef.h>
+#include <string.h>
 #include <reent.h>
 #include <sys/lock.h>
 #include <kernel.h>
@@ -228,6 +230,36 @@ extern struct __lock __lock___tz_mutex;
 extern struct __lock __lock___dd_hash_mutex;
 extern struct __lock __lock___arc4random_mutex;
 
+/* libcglue is built once, against the full newlib headers, but it is also
+ * linked with newlib-nano (libc_nano). That one is built with _REENT_SMALL,
+ * where struct _reent has a different layout and __cleanup sits at a smaller
+ * offset. This mirrors the start of the _REENT_SMALL layout from
+ * <sys/reent.h>, up to __cleanup. */
+struct __reent_small_head {
+    int _errno;
+    void *_stdin, *_stdout, *_stderr;
+    int _inc;
+    void *_emergency;
+#ifdef _REENT_BACKWARD_BINARY_COMPAT
+    int _reserved_0;
+    int _reserved_1;
+#endif
+    void *_locale;
+    void *_mp;
+    void (*__cleanup)(struct _reent *);
+};
+
+#define __REENT_SMALL_CLEANUP_OFFSET offsetof(struct __reent_small_head, __cleanup)
+
+/* In the full layout, that slot lies inside the _emergency scratch buffer,
+ * so clearing it there does no harm. In the small layout, the full-layout
+ * __cleanup slot is _localtime_buf, a lazily allocated pointer that is NULL
+ * at a first start and points into the old heap after a restart. */
+_Static_assert(__REENT_SMALL_CLEANUP_OFFSET >= offsetof(struct _reent, _emergency) &&
+                   __REENT_SMALL_CLEANUP_OFFSET + sizeof(void *) <=
+                       offsetof(struct _reent, _emergency) + sizeof(((struct _reent *)0)->_emergency),
+               "the _REENT_SMALL __cleanup slot must lie inside _emergency of the full layout");
+
 void __locks_init()
 {
     /* Reset stdio initialization state so __sinit will reinitialize
@@ -236,6 +268,8 @@ void __locks_init()
      * ExecPS2), while FILE structs and locks live in .bss (zeroed).
      * Without this, __sinit skips reinitialization and uses NULL locks. */
     _REENT_CLEANUP(_REENT) = NULL;
+    /* The same for newlib-nano, see struct __reent_small_head above. */
+    memset((char *)_REENT + __REENT_SMALL_CLEANUP_OFFSET, 0, sizeof(void *));
 
     _LOCK_T lock_malloc = &__lock___malloc_recursive_mutex;
     _LOCK_T lock_atexit = &__lock___atexit_recursive_mutex;
