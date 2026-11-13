@@ -218,7 +218,7 @@ static int WaitSemaTimeout(int sema, unsigned int msec)
 	timeoutPtr = NULL;
 
 	if (msec > 0 && msec != UINT32_MAX) {
-		timeoutUsec = msec * 1000;
+		timeoutUsec = (u64)msec * 1000;
 		timeoutPtr = &timeoutUsec;
 	}
 
