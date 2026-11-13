@@ -1,8 +1,8 @@
 .pushsection .rodata
 
 .align 4
-init_vif_regs_12:	.word 0x10000404, 0x20000000, 0x00000000, 0x50000000
-			.word 0x60000000, 0x30000000, 0x20000000, 0x40000000
+init_vif_regs_12:	.word 0x01000404, 0x20000000, 0x00000000, 0x05000000
+			.word 0x06000000, 0x03000000, 0x02000000, 0x04000000
 .popsection
 
 .pushsection .text
