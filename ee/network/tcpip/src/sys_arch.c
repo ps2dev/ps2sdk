@@ -13,6 +13,7 @@
 #include <string.h>
 #include <kernel.h>
 #include <kernel_util.h>
+#include <timer.h>
 #include <time.h>
 #include <limits.h>
 
@@ -507,7 +508,9 @@ void sys_init(void)
 
 u32_t sys_now(void)
 {
-	return(clock()/1000);
+	/* clock() is a 32-bit count of microseconds and wraps after ~71.6 minutes;
+	   lwIP expects sys_now() to wrap only after 2^32 ms. */
+	return (u32_t)(GetTimerSystemTime() / (kBUSCLK / 1000));
 }
 
 void *ps2ip_calloc64(size_t n, size_t size)
