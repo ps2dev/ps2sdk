@@ -1,5 +1,6 @@
 .pushsection .rodata
 
+.align 4
 init_vif_regs_12:	.word 0x10000404, 0x20000000, 0x00000000, 0x50000000
 			.word 0x60000000, 0x30000000, 0x20000000, 0x40000000
 .popsection
@@ -26,10 +27,13 @@ GsResetPath:
 	lq	$a0, ($a1)
 	la	$v1, 0x10003000
 	sq	$a0, ($a2)
-	lq	$v0, 8($a1)
+	lq	$v0, 16($a1)
 	sq	$v0, ($a2)
+.set push
+.set noreorder
 	jr	$ra
 	sw	$a3, 0($v1)
+.set pop
 .end GsResetPath
 
 .popsection
