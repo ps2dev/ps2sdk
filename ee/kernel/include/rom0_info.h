@@ -35,14 +35,14 @@ extern void SetupRomInfo(void);
  * @return 1 if DESR-XXXX machine; 0 if not
  */
 extern int IsDESRMachine(void);
-static inline int IsDESRMachineWithIODriver(const _io_driver *driver) { return IsDESRMachine(); }
+static inline int IsDESRMachineWithIODriver(const _io_driver *driver) { (void)driver; return IsDESRMachine(); }
 
 /** check whether the PlayStation 2 is actually a TOOL DTL-T10000(H)
  *
  * @return 1 if DTL-T10000(H); 0 if not
  */
 extern int IsT10K(void);
-static inline int IsT10KWithIODriver(const _io_driver *driver) { return IsT10K(); }
+static inline int IsT10KWithIODriver(const _io_driver *driver) { (void)driver; return IsT10K(); }
 
 /** gets the romname from the current ps2
  * 14 chars - doesnt set a null terminator
@@ -51,7 +51,7 @@ static inline int IsT10KWithIODriver(const _io_driver *driver) { return IsT10K()
  * @return pointer to buffer containing romname
  */
 extern char *GetRomName(char *romname);
-static inline char *GetRomNameWithIODriver(char *romname, const _io_driver *driver) { return GetRomName(romname); }
+static inline char *GetRomNameWithIODriver(char *romname, const _io_driver *driver) { (void)driver; return GetRomName(romname); }
 
 #ifdef __cplusplus
 }
