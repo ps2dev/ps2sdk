@@ -30,6 +30,9 @@ sysclib_IMPORTS_end
 
 thbase_IMPORTS_start
 I_DelayThread
+I_GetThreadId
+I_WakeupThread
+I_SleepThread
 thbase_IMPORTS_end
 
 thsemap_IMPORTS_start
