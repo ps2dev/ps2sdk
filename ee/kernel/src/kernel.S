@@ -843,6 +843,7 @@ __errno:
 	.weak	errno
 
 	.data
+	.align	2
 errno:
 	.space	4
 #endif
