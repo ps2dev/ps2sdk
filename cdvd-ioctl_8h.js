@@ -1,0 +1,37 @@
+var cdvd_ioctl_8h =
+[
+    [ "cdrom_stm_devctl_", "cdvd-ioctl_8h.html#structcdrom__stm__devctl__", [
+      [ "m_posszarg1", "cdvd-ioctl_8h.html#ac60f014de1ed22d2511196e495543abb", null ],
+      [ "m_posszarg2", "cdvd-ioctl_8h.html#acc89b18b21ab03aac46ba97b86805d7c", null ],
+      [ "m_buffer", "cdvd-ioctl_8h.html#afcf57c89fb995ade33de60435d05b76e", null ],
+      [ "m_cmdid", "cdvd-ioctl_8h.html#a495672d8f72444593fd4ddf11865c670", null ],
+      [ "m_rmode", "cdvd-ioctl_8h.html#a48ea6f6dabc4da65e5b08b9ad87f99f3", null ],
+      [ "m_error", "cdvd-ioctl_8h.html#addc8095cf25d7d91dd75f8fbe9c7c7e3", null ]
+    ] ],
+    [ "CIOCSTREAMPAUSE", "cdvd-ioctl_8h.html#a59e50d946e098888f3ba972e80af0f0d", null ],
+    [ "CIOCSTREAMRESUME", "cdvd-ioctl_8h.html#aaece97bce69fa5921309678ef21f47d4", null ],
+    [ "CIOCSTREAMSTAT", "cdvd-ioctl_8h.html#a71b243624df35565d55d57bf3ef008c6", null ],
+    [ "CDIOC_READCLOCK", "cdvd-ioctl_8h.html#aa26de3d98c3d4fcb555658cc2a6fc08c", null ],
+    [ "CDIOC_GETDISKTYP", "cdvd-ioctl_8h.html#a1cea504d91c3e18e3afdb60feb32d918", null ],
+    [ "CDIOC_GETERROR", "cdvd-ioctl_8h.html#a0671989f20d9c36a9b7fc61c7f1b29d3", null ],
+    [ "CDIOC_TRAYREQ", "cdvd-ioctl_8h.html#acf3ce9595edadd66d509bb00f6008e62", null ],
+    [ "CDIOC_STATUS", "cdvd-ioctl_8h.html#a2ae060f2c48013d6999fee9abb1c811b", null ],
+    [ "CDIOC_POWEROFF", "cdvd-ioctl_8h.html#a2c17ebcc57831372c2300f3803e40b14", null ],
+    [ "CDIOC_MMODE", "cdvd-ioctl_8h.html#ac7d902ce0bd9bc38ef4028af3f26f34e", null ],
+    [ "CDIOC_DISKRDY", "cdvd-ioctl_8h.html#a0e8e6dd149888343ef6e11c087743219", null ],
+    [ "CDIOC_STREAMINIT", "cdvd-ioctl_8h.html#a73a17757fe49f16dc18bb4b4eb418f9c", null ],
+    [ "CDIOC_BREAK", "cdvd-ioctl_8h.html#a1077913626a782d0e62edbeb40ea9d1f", null ],
+    [ "CDIOC_SPINNOM", "cdvd-ioctl_8h.html#a88fe41b9ba27e8b400ada385cecdc20a", null ],
+    [ "CDIOC_SPINSTM", "cdvd-ioctl_8h.html#af52afe26ecd1bf0f8363fc1e5d389110", null ],
+    [ "CDIOC_TRYCNT", "cdvd-ioctl_8h.html#a5708dc5116814d28d419bafb4b3171db", null ],
+    [ "CDIOC_STANDBY", "cdvd-ioctl_8h.html#a92a4fa9661c22f87841917ce4645f372", null ],
+    [ "CDIOC_STOP", "cdvd-ioctl_8h.html#a37a634c2f741dc247e835e631dad3c8e", null ],
+    [ "CDIOC_PAUSE", "cdvd-ioctl_8h.html#aaf78c2e364330f952696e587b03bef05", null ],
+    [ "CDIOC_GETTOC", "cdvd-ioctl_8h.html#a73258870b8b78f0b9d0727124f117b5b", null ],
+    [ "CDIOC_SETTIMEOUT", "cdvd-ioctl_8h.html#a9477f8c70dfb93c7dff50b20c7d9e9c7", null ],
+    [ "CDIOC_READDVDDUALINFO", "cdvd-ioctl_8h.html#a8a304b7d8b87ff630b701316bcd867f5", null ],
+    [ "CDIOC_INIT", "cdvd-ioctl_8h.html#a19dbeb67f150f209331cd6da167fea59", null ],
+    [ "CDIOC_FSCACHEINIT", "cdvd-ioctl_8h.html#a25d911a9357d3809542ababd8a2b7949", null ],
+    [ "CDIOC_FSCACHEDELETE", "cdvd-ioctl_8h.html#ad7d73d74afa7044b8556ec9b731b2510", null ],
+    [ "cdrom_stm_devctl_t", "cdvd-ioctl_8h.html#ac18036822e56ce8d30b14c8d859ef2b4", null ]
+];
