@@ -1,0 +1,8 @@
+add_library(dma)
+target_include_directories(dma PUBLIC include)
+target_include_directories(dma PRIVATE ${EE_INC} ${PROJECT_SOURCE_DIR}/packet2/include)
+target_sources(dma PRIVATE src/dma.c src/erl-support.c)
+file(GLOB DMA_INCLUDE_FILES "include/*.h*")
+set_target_properties(dma PROPERTIES PUBLIC_HEADER "${DMA_INCLUDE_FILES}")
+install(TARGETS dma)
+target_add_erl(dma)

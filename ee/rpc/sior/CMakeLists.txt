@@ -1,0 +1,6 @@
+add_library(sior)
+target_include_directories(sior PUBLIC include)
+target_include_directories(sior PRIVATE ${EE_INC})
+target_sources(sior PRIVATE src/sior_rpc.c src/erl-support.c)
+install(TARGETS sior)
+target_add_erl(sior)
