@@ -46,6 +46,7 @@ SUBDIRS += rpc/audsrv/testcd
 SUBDIRS += rpc/filexio
 #SUBDIRS += rpc/camera          #TODO: not modified for updated newlib
 #SUBDIRS += rpc/memorycard      #TODO: not modified for updated newlib
+SUBDIRS += rpc/mouse
 SUBDIRS += rpc/mtap
 SUBDIRS += rpc/pad
 SUBDIRS += rpc/padx
