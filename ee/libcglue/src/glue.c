@@ -488,9 +488,26 @@ off_t _lseek(int fd, off_t offset, int whence)
 	_libcglue_fdman_fd_info_t *fdinfo;
 
 	fdinfo = &(__descriptormap[fd]->info);
-	if (fdinfo->ops == NULL || fdinfo->ops->lseek == NULL)
+	if (fdinfo->ops == NULL || (fdinfo->ops->lseek == NULL && fdinfo->ops->lseek64 == NULL))
 	{
 		errno = ENOSYS;
+		return -1;
+	}
+	// off_t is 64-bit, so use the 64-bit callback if there is one.
+	if (fdinfo->ops->lseek64 != NULL)
+	{
+		int64_t res;
+
+		res = fdinfo->ops->lseek64(fdinfo->userdata, offset, whence);
+		// Not every device supports 64-bit seeking (iomanX only supports it on IOP_DT_FSEXT devices),
+		// so fall back to the 32-bit callback only when the 64-bit one is unsupported (-EUNSUP); real lseek64 errors propagate.
+		if (res != -EUNSUP || fdinfo->ops->lseek == NULL)
+			return __transform64_errno(res);
+	}
+	// The 32-bit callback takes an int: do not silently truncate the offset.
+	if (offset < INT_MIN || offset > INT_MAX)
+	{
+		errno = EOVERFLOW;
 		return -1;
 	}
 	return __transform_errno(fdinfo->ops->lseek(fdinfo->userdata, offset, whence));
