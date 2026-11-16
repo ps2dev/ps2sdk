@@ -1282,6 +1282,9 @@ int mcman_correctdata(void *buf, void *ecc)
 		return 0;
 
 	if ((xor3 == 0x7f) && (xor4 == 0x7)) {
+		// Unofficial: return error if out of bounds
+		if (xor2 >= 0x80)
+			return -3;
 		p[xor2] ^= 1 << (xor0 >> 4);
 		return -1;
 	}
