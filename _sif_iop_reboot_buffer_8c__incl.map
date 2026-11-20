@@ -1,0 +1,23 @@
+<map id="ee/iopreboot/src/SifIopRebootBuffer.c" name="ee/iopreboot/src/SifIopRebootBuffer.c">
+<area shape="rect" id="node1" title=" " alt="" coords="324,5,539,47"/>
+<area shape="rect" id="node2" href="$kernel_8h.html" title=" " alt="" coords="238,169,313,196"/>
+<area shape="rect" id="node5" href="$sifdma_8h.html" title=" " alt="" coords="5,244,84,271"/>
+<area shape="rect" id="node8" href="$iopcontrol_8h.html" title=" " alt="" coords="382,95,481,121"/>
+<area shape="rect" id="node9" href="$iopcontrol__special_8h.html" title=" " alt="" coords="505,95,657,121"/>
+<area shape="rect" id="node10" href="$loadfile_8h.html" title=" " alt="" coords="109,244,191,271"/>
+<area shape="rect" id="node12" href="$iopheap_8h.html" title=" " alt="" coords="681,95,768,121"/>
+<area shape="rect" id="node13" title=" " alt="" coords="792,95,863,121"/>
+<area shape="rect" id="node14" href="$string_8h_source.html" title=" " alt="" coords="287,95,357,121"/>
+<area shape="rect" id="node21" href="$sbv__patches_8h.html" title=" " alt="" coords="887,95,1002,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="521,393,595,420"/>
+<area shape="rect" id="node4" title=" " alt="" coords="363,244,438,271"/>
+<area shape="rect" id="node7" href="$mipscopaccess_8h.html" title=" " alt="" coords="226,319,359,345"/>
+<area shape="rect" id="node6" href="$tamtypes_8h.html" title=" " alt="" coords="163,393,259,420"/>
+<area shape="rect" id="node11" href="$loadfile-common_8h.html" title=" " alt="" coords="58,319,202,345"/>
+<area shape="rect" id="node15" href="$sysclib_8h.html" title=" " alt="" coords="467,169,545,196"/>
+<area shape="rect" id="node16" title=" " alt="" coords="588,244,659,271"/>
+<area shape="rect" id="node17" href="$irx_8h.html" title=" " alt="" coords="513,244,563,271"/>
+<area shape="rect" id="node19" href="$setjmp_8h.html" title=" " alt="" coords="384,319,463,345"/>
+<area shape="rect" id="node20" href="$ctype_8h.html" title=" " alt="" coords="683,244,753,271"/>
+<area shape="rect" id="node18" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="487,319,557,345"/>
+</map>

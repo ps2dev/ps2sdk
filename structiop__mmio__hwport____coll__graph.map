@@ -1,0 +1,15 @@
+<map id="iop_mmio_hwport_" name="iop_mmio_hwport_">
+<area shape="rect" id="node1" title=" " alt="" coords="621,241,768,268"/>
+<area shape="rect" id="node2" href="$iop__mmio__hwport_8h.html#structdmac2__mmio__hwport__" title=" " alt="" coords="321,11,492,37"/>
+<area shape="rect" id="node3" href="$iop__mmio__hwport_8h.html#structdmac__channel__" title=" " alt="" coords="9,36,132,63"/>
+<area shape="rect" id="node7" href="$iop__mmio__hwport_8h.html#structdmac1__mmio__hwport__" title=" " alt="" coords="321,61,492,88"/>
+<area shape="rect" id="node4" href="$iop__mmio__hwport_8h.html#structusb__mmio__hwport__" title=" " alt="" coords="332,112,481,139"/>
+<area shape="rect" id="node5" href="$iop__mmio__hwport_8h.html#structiop__counter__mmio__hwport__" title=" " alt="" coords="305,163,508,189"/>
+<area shape="rect" id="node6" href="$iop__mmio__hwport_8h.html#structieee1394__mmio__hwport__" title=" " alt="" coords="313,213,500,240"/>
+<area shape="rect" id="node8" href="$iop__mmio__hwport_8h.html#structsio2__mmio__hwport__" title=" " alt="" coords="330,264,483,291"/>
+<area shape="rect" id="node9" href="$iop__mmio__hwport_8h.html#structssbus1__mmio__hwport__" title=" " alt="" coords="321,315,492,341"/>
+<area shape="rect" id="node10" href="$iop__mmio__hwport_8h.html#structssbus2__mmio__hwport__" title=" " alt="" coords="321,365,492,392"/>
+<area shape="rect" id="node11" href="$iop__mmio__hwport_8h.html#structsio0__1__mmio__hwport__" title=" " alt="" coords="323,417,491,444"/>
+<area shape="rect" id="node12" href="$iop__mmio__hwport_8h.html#structdmac3__mmio__hwport__" title=" " alt="" coords="321,468,492,495"/>
+<area shape="rect" id="node13" href="$iop__mmio__hwport_8h.html#structdmac__channel3__" title=" " alt="" coords="5,468,136,495"/>
+</map>

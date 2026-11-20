@@ -1,0 +1,15 @@
+<map id="_device" name="_device">
+<area shape="rect" id="node1" title=" " alt="" coords="637,239,709,266"/>
+<area shape="rect" id="node3" href="$usbdpriv_8h.html#struct__endpoint" title=" " alt="" coords="456,383,543,409"/>
+<area shape="rect" id="node2" href="$struct___usb_driver.html" title=" " alt="" coords="636,96,731,123"/>
+<area shape="rect" id="node9" href="$usbdpriv_8h.html#struct__io_request" title=" " alt="" coords="324,511,419,538"/>
+<area shape="rect" id="node4" href="$usbdpriv_8h.html#struct__hc_ed" title=" " alt="" coords="291,239,351,266"/>
+<area shape="rect" id="node5" href="$usbdpriv_8h.html#struct__hc_td" title=" " alt="" coords="107,96,167,123"/>
+<area shape="rect" id="node6" href="$usbdpriv_8h.html#union__hc_ed_hc_area_u" title=" " alt="" coords="269,96,386,123"/>
+<area shape="rect" id="node7" href="$usbdpriv_8h.html#struct__hc_ed_hc_area" title=" " alt="" coords="274,5,381,32"/>
+<area shape="rect" id="node8" href="$usbdpriv_8h.html#struct__timer_cb_struct" title=" " alt="" coords="416,96,535,123"/>
+<area shape="rect" id="node10" href="$usbd_8h.html#struct_usb_device_request" title=" " alt="" coords="5,383,151,409"/>
+<area shape="rect" id="node11" href="$usbd_8h.html#structsce_usbd_multi_isochronous_request" title=" " alt="" coords="175,383,416,409"/>
+<area shape="rect" id="node12" href="$usbd_8h.html#structsce_usbd_isochronous_psw_len" title=" " alt="" coords="63,239,267,266"/>
+<area shape="rect" id="node13" href="$usbdpriv_8h.html#struct__usbd_report_descriptor" title=" " alt="" coords="813,96,983,123"/>
+</map>

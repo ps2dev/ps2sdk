@@ -1,0 +1,9 @@
+<map id="iop/sound/audsrv/include/audsrv.h" name="iop/sound/audsrv/include/audsrv.h">
+<area shape="rect" id="node1" title=" " alt="" coords="467,5,651,47"/>
+<area shape="rect" id="node2" href="$audsrv__rpc_8c.html" title=" " alt="" coords="5,95,187,136"/>
+<area shape="rect" id="node3" href="$iop_2sound_2audsrv_2src_2adpcm_8c.html" title=" " alt="" coords="211,95,367,136"/>
+<area shape="rect" id="node4" href="$audsrv_8c.html" title=" " alt="" coords="391,95,547,136"/>
+<area shape="rect" id="node5" href="$cdrom_8c.html" title=" " alt="" coords="571,95,727,136"/>
+<area shape="rect" id="node6" href="$iop_2sound_2audsrv_2src_2rpc__client_8c_source.html" title=" " alt="" coords="751,95,907,136"/>
+<area shape="rect" id="node7" href="$iop_2sound_2audsrv_2src_2rpc__server_8c.html" title=" " alt="" coords="931,95,1087,136"/>
+</map>
