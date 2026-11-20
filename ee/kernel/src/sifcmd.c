@@ -178,11 +178,10 @@ static u8 pktbuf[CMD_PACKET_MAX] __attribute__((aligned(64)));
    to use it, it won't crash.  Otherwise unused.  */
 static u8 sif_unused[64] __attribute__((aligned(64)));
 
-static SifCmdSysHandlerData_t sys_cmd_handlers[SYS_CMD_HANDLER_MAX];
-static int sregs[32];
-
-struct cmd_data _sif_cmd_data;
-static int sif0_id;
+static int sif0_id __attribute__((no_reorder));
+struct cmd_data _sif_cmd_data __attribute__((no_reorder));
+static SifCmdSysHandlerData_t sys_cmd_handlers[SYS_CMD_HANDLER_MAX] __attribute__((no_reorder));
+static int sregs[32] __attribute__((no_reorder));
 
 struct ca_pkt
 {
