@@ -29,8 +29,8 @@ int pad_slot;
 u32 mainThreadCount2;
 u32 pad_portdata[2];
 /* It is very important that sif_buffer and padState are right after each other. */
-u32 sif_buffer[4] __attribute__((aligned(4)));
-padState_t padState[2][4];
+u32 sif_buffer[4] __attribute__((aligned(4))) __attribute__((no_reorder));
+padState_t padState[2][4] __attribute__((no_reorder));
 u32 openSlots[2];
 vblankData_t vblankData;
 int padman_init;
