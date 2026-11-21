@@ -32,7 +32,14 @@ static int PfsTempBitmapFD;
 pfs_cache_t *pfsBitmapReadPartition(pfs_mount_t *mount, u16 subpart, u32 chunk)
 {
     int result;
-    return pfsCacheGetData(mount, subpart, chunk + (1 << mount->inode_scale) + (0x2000 >> pfsBlockSize), PFS_CACHE_FLAG_BITMAP, &result);
+    u32 block = chunk + (1 << mount->inode_scale);
+
+    // Only the main partition has the 4MB APA area in front of its bitmap;
+    // the bitmap of a sub-partition starts at its zone 1.
+    if (subpart == 0)
+        block += 0x2000 >> pfsBlockSize;
+
+    return pfsCacheGetData(mount, subpart, block, PFS_CACHE_FLAG_BITMAP, &result);
 }
 
 // 0x000052c0

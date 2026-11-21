@@ -760,11 +760,11 @@ static void fsckCompareBitmap(pfs_mount_t *mount, void *buffer)
 {
     int hasUpdate;
     u32 i, NumZones, zone;
-    u32 *pBitmap, ZoneStartOffset, *pRawBitmap, RawSize, unaligned, length, offset;
+    u32 *pBitmap, ZoneStartOffset, *pRawBitmap, RawSize, unaligned, length;
 
     (void)buffer;
 
-    for (i = 0, offset = 0; i < mount->num_subs + 1; i++, offset++) {
+    for (i = 0; i < mount->num_subs + 1; i++) {
         RawSize   = ZoneSizes[i] >> mount->sector_scale;
         NumZones  = RawSize / (mount->zsize << 3);
         unaligned = RawSize % (mount->zsize << 3);
@@ -773,7 +773,8 @@ static void fsckCompareBitmap(pfs_mount_t *mount, void *buffer)
             length    = (zone == NumZones) ? unaligned : mount->zsize << 3;
             hasUpdate = 0;
 
-            pBitmap         = pfsGetBitmapEntry(offset + (zone * (mount->zsize << 3)));
+            // The computed bitmap holds all subparts one after another: subpart i starts at ZoneMap[i].
+            pBitmap         = pfsGetBitmapEntry(ZoneMap[i] + (zone * (mount->zsize << 3)));
             ZoneStartOffset = (i == 0) ? (0x2000 >> mount->sector_scale) + 1 : 1;
             if (mount->blockDev->transfer(mount->fd, IOBuffer, i, (ZoneStartOffset + zone) << mount->sector_scale, 1 << mount->sector_scale, PFS_IO_MODE_READ) < 0) {
                 break;
@@ -1008,8 +1009,8 @@ static int CheckSuperBlock(pfs_mount_t *pMainPFSMount)
     if ((result = pfsJournalRestore(pMainPFSMount)) < 0)
         return result;
 
-    memset(ZoneSizes, 0, 0x10);
-    memset(ZoneMap, 0, 0x10);
+    memset(ZoneSizes, 0, sizeof(ZoneSizes));
+    memset(ZoneMap, 0, sizeof(ZoneMap));
 
     for (i = 0; (u32)i < pMainPFSMount->num_subs + 1; i++) {
         ZoneSizes[i] = pMainPFSMount->blockDev->getSize(pMainPFSMount->fd, i);
