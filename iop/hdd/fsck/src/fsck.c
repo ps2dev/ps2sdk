@@ -335,53 +335,68 @@ static int fsckCheckFileBitmap(pfs_mount_t *mount, pfs_blockinfo_t *blockinfo)
 // 0x00005550
 static int fsckCheckZones(u32 number, u32 size)
 {
-    u32 index, zone, remaining, bit, startBit;
+    u32 index, zone, remaining, bit, startBit, pass;
     u32 *pZone;
     pfs_bitmap_t *pBitmap;
 
-    index    = number >> 20;
-    zone     = (number >> 5) & 0x7FFF; // Contains the index of the first zone to start checking from.
-    startBit = number & 31;
-    for (remaining = size; remaining != 0;) {
-        pBitmap = pfsBitmapRead(index);
-        index++;
+    // Pass 0 only looks for zones that are already in use, pass 1 marks them.
+    // Marking while checking would leave the first zones of an overlapping
+    // extent marked, although the caller then cuts the file before that extent,
+    // and they would stay allocated without an owner.
+    for (pass = 0; pass < 2; pass++) {
+        index    = number >> 20;
+        zone     = (number >> 5) & 0x7FFF; // Contains the index of the first zone to start checking from.
+        startBit = number & 31;
+        for (remaining = size; remaining != 0;) {
+            pBitmap = pfsBitmapRead(index);
+            index++;
 
-        if (pBitmap != NULL) { // startBit contains the first bit to start checking from.
-            for (pZone = &pBitmap->bitmap[zone]; (pZone < pBitmap->bitmap + 0x8000) && remaining != 0; pZone++) {
-                for (bit = startBit; bit < 32 && remaining != 0; bit++, remaining--) {
-                    if ((*pZone & (1 << bit)) != 0) {
-                        PFS_PRINTF("error: overlapped zone found.\n");
-                        return 1;
+            if (pBitmap != NULL) { // startBit contains the first bit to start checking from.
+                for (pZone = &pBitmap->bitmap[zone]; (pZone < pBitmap->bitmap + 0x8000) && remaining != 0; pZone++) {
+                    for (bit = startBit; bit < 32 && remaining != 0; bit++, remaining--) {
+                        if (pass == 0) {
+                            if ((*pZone & (1 << bit)) != 0) {
+                                pfsBitmapFree(pBitmap);
+                                PFS_PRINTF("error: overlapped zone found.\n");
+                                return 1;
+                            }
+                        } else {
+                            *pZone |= (1 << bit);
+                            pBitmap->isDirty = 1;
+                        }
                     }
 
-                    *pZone |= (1 << bit);
-                    pBitmap->isDirty = 1;
+                    startBit = 0;
                 }
 
-                startBit = 0;
+                pfsBitmapFree(pBitmap);
+                zone = 0;
+            } else {
+                return -EIO;
             }
-
-            pfsBitmapFree(pBitmap);
-            zone = 0;
-        } else {
-            return -EIO;
         }
     }
 
     return 0;
 }
 
-// 0x000009dc    - BUGBUG - if there's no next segment (blockClink == NULL), this function will end up dereferencing a NULL pointer.
+// 0x000009dc
+// "Remove rest of file": cut the zone list at entry `entries`; blockClink is the last descriptor kept.
 static void fsckFillInode(pfs_cache_t *inodeClink, pfs_cache_t *blockClink, u32 blocks, u32 entries, u32 segdesg)
 {
-    // non-SCE: if NULL, don't do anything
+    u64 capacity;
+
     if (blockClink == NULL) {
         return;
     }
     memset(&blockClink->u.inode->next_segment, 0, sizeof(blockClink->u.inode->next_segment));
 
-    inodeClink->u.inode->number_segdesg = (blocks - segdesg) * inodeClink->pfsMount->zsize;
-    inodeClink->u.inode->subpart        = 0;
+    // The size must not go beyond the zones that are left, otherwise the file
+    // cannot be read: the data zones are all zones except the descriptors.
+    capacity = (u64)(blocks - segdesg) * inodeClink->pfsMount->zsize;
+    if (inodeClink->u.inode->size > capacity)
+        inodeClink->u.inode->size = capacity;
+    inodeClink->u.inode->subpart = 0;
     if (!FIO_S_ISDIR(inodeClink->u.inode->mode)) {
         inodeClink->u.inode->attr &= ~PFS_FIO_ATTR_CLOSED;
     }
@@ -416,14 +431,18 @@ static int fsckCheckDirentryInode(pfs_cache_t *direntInodeClink)
         new_index = pfsFixIndex(index);
 
         if (index != 0 && new_index == 0) { // Read the next inode
-            pInodeInfo = &blockClink->u.inode->next_segment;
-            pfsCacheFree(blockClink);
+            pfs_cache_t *prevClink = blockClink;
+
+            pInodeInfo = &prevClink->u.inode->next_segment;
             if ((blockClink = pfsCacheGetData(direntInodeClink->pfsMount, pInodeInfo->subpart, pInodeInfo->number << direntInodeClink->pfsMount->inode_scale, PFS_CACHE_FLAG_SEGI, &result)) == NULL) {
+                // Keep the previous descriptor: the file is cut there.
+                blockClink = prevClink;
                 if ((result == -EIO) && (fsckPromptUserAction(" Remove rest of file", 1) != 0)) {
-                    fsckFillInode(direntInodeClink, NULL, blocks, index, segdesg); // bug?! This will cause a NULL-pointer to be dereferenced!
+                    fsckFillInode(direntInodeClink, blockClink, blocks, index, segdesg);
                 }
                 break;
             }
+            pfsCacheFree(prevClink);
 
             segdesg++;
         }
