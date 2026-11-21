@@ -151,6 +151,15 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 	while(part_end%params->size)
 	{
 		tempSize=params->size>>1;
+		// Non-SONY: an end that is not a multiple of the smallest size can never
+		// be aligned; give up instead of looping forever.
+		if(part_end%(minsize+1))
+		{
+			*err=-EINVAL;
+			apaCacheFree(clink_this);
+			apaCacheFree(clink_next);
+			return NULL;
+		}
 		while (minsize < tempSize) // 128MB
 		{
 			if(!(part_end%tempSize))
