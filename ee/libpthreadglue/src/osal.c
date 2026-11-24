@@ -38,6 +38,20 @@ extern unsigned int __threadDataKey;
 #endif
 
 extern void *__globalTls;
+extern pte_osMutexHandle __globalTlsLock;
+extern int *__keysUsed;
+
+/* Only reclaim the EE semaphores created through the pthread OSAL. */
+typedef struct ps2SemaphoreNode {
+  pte_osSemaphoreHandle handle;
+  struct ps2SemaphoreNode *next;
+} ps2SemaphoreNode;
+
+#ifdef F___semaphoreRegistry
+ps2SemaphoreNode *__semaphoreRegistry;
+#else
+extern ps2SemaphoreNode *__semaphoreRegistry;
+#endif
 
 /*
  * Data stored on a per-thread basis - allocated in pte_osThreadCreate
@@ -128,48 +142,92 @@ pte_osResult pte_osInit(void)
 
   /* Allocate and initialize TLS support */
   result = pteTlsGlobalInit(PS2_MAX_TLS);
+  if (result != PTE_OS_OK)
+    return result;
 
-  if (result == PTE_OS_OK) {
-    /* Allocate a key that we use to store control information (e.g. cancellation semaphore) per thread */
-    result = __pteTlsAlloc(&__threadDataKey);
+  __semaphoreRegistry = NULL;
+  /* Allocate a key for the implicit non-POSIX main thread's data. */
+  __threadDataKey = 0;
+  result = __pteTlsAlloc(&__threadDataKey);
+  if (result != PTE_OS_OK)
+    goto fail;
 
-    if (result == PTE_OS_OK) {
-      /* Initialize the structure used to emulate TLS for 
-        * non-POSIX threads 
-        */
-      __globalTls = pteTlsThreadInit();
-
-      /* Also create a "thread data" structure for a single non-POSIX thread. */
-
-      /* Allocate some memory for our per-thread control data.  We use this for:
-        * 1. Entry point and parameters for the user thread's main function.
-        * 2. Semaphore used for thread cancellation.
-        */
-      pThreadData = (ps2ThreadData *) malloc(sizeof(ps2ThreadData));
-
-      if (pThreadData == NULL) {
-        result = PTE_OS_NO_RESOURCES;
-      } else {
-        /* Save a pointer to our per-thread control data as a TLS value */
-        __pteTlsSetValue(__globalTls, __threadDataKey, pThreadData);
-
-        sema.init_count = 0;
-        sema.max_count  = 255;
-        sema.option     = 0;
-        pThreadData->cancelSem = CreateSema(&sema);
-
-        result = PTE_OS_OK;
-      }
-    }
+  __globalTls = pteTlsThreadInit();
+  if (__globalTls == NULL) {
+    result = PTE_OS_NO_RESOURCES;
+    goto fail;
   }
 
+  pThreadData = (ps2ThreadData *)malloc(sizeof(*pThreadData));
+  if (pThreadData == NULL) {
+    result = PTE_OS_NO_RESOURCES;
+    goto fail;
+  }
+
+  pThreadData->cancelSem = -1;
+  result = __pteTlsSetValue(__globalTls, __threadDataKey, pThreadData);
+  if (result != PTE_OS_OK) {
+    free(pThreadData);
+    goto fail;
+  }
+
+  sema.init_count = 0;
+  sema.max_count = 255;
+  sema.option = 0;
+  pThreadData->cancelSem = CreateSema(&sema);
+  if (pThreadData->cancelSem < 0) {
+    result = PTE_OS_NO_RESOURCES;
+    goto fail;
+  }
+
+  return PTE_OS_OK;
+
+fail:
+  pte_osTerminate();
   return result;
 }
 #endif
 
 #ifdef F_pte_osTerminate
-pte_osResult pte_osTerminate(void) {
+pte_osResult pte_osTerminate(void)
+{
+  ps2SemaphoreNode *node;
+
+  /* An unsuccessful initialization may leave no global TLS mutex. */
+  if (__keysUsed == NULL)
+    return PTE_OS_OK;
+
+  /* The application must finish its pthread workers before shutdown. */
+  pte_osMutexLock(__globalTlsLock);
+  node = __semaphoreRegistry;
+  __semaphoreRegistry = NULL;
+  pte_osMutexUnlock(__globalTlsLock);
+
+  while (node != NULL) {
+    ps2SemaphoreNode *next = node->next;
+    DeleteSema(node->handle);
+    free(node);
+    node = next;
+  }
+
+  /* The implicit native thread is not deleted by pthread termination, but
+   * its cancellation semaphore, TLS storage, and data are OSAL-owned. */
+  if (__globalTls != NULL) {
+    if (__threadDataKey != 0) {
+      ps2ThreadData *pThreadData =
+          (ps2ThreadData *)pteTlsGetValue(__globalTls, __threadDataKey);
+      if (pThreadData != NULL) {
+        if (pThreadData->cancelSem >= 0)
+          DeleteSema(pThreadData->cancelSem);
+        free(pThreadData);
+      }
+    }
+    pteTlsThreadDestroy(__globalTls);
+    __globalTls = NULL;
+  }
+
   pteTlsGlobalDestroy();
+  __threadDataKey = 0;
   return PTE_OS_OK;
 }
 #endif
@@ -597,8 +655,12 @@ pte_osResult pte_osMutexUnlock(pte_osMutexHandle handle)
 pte_osResult pte_osSemaphoreCreate(int initialValue, pte_osSemaphoreHandle *pHandle)
 {
   pte_osSemaphoreHandle handle;
+  ps2SemaphoreNode *node;
   ee_sema_t sema;
   static int semCtr = 0;
+
+  if (__keysUsed == NULL)
+    return PTE_OS_NO_RESOURCES;
 
   if (semCtr++ > MAX_PS2_UID) {
     semCtr = 0;
@@ -613,6 +675,18 @@ pte_osResult pte_osSemaphoreCreate(int initialValue, pte_osSemaphoreHandle *pHan
     return PTE_OS_NO_RESOURCES;
   }
 
+  node = (ps2SemaphoreNode *)malloc(sizeof(*node));
+  if (node == NULL) {
+    DeleteSema(handle);
+    return PTE_OS_NO_RESOURCES;
+  }
+
+  node->handle = handle;
+  pte_osMutexLock(__globalTlsLock);
+  node->next = __semaphoreRegistry;
+  __semaphoreRegistry = node;
+  pte_osMutexUnlock(__globalTlsLock);
+
   *pHandle = handle;
   return PTE_OS_OK;
 }
@@ -621,7 +695,24 @@ pte_osResult pte_osSemaphoreCreate(int initialValue, pte_osSemaphoreHandle *pHan
 #ifdef F_pte_osSemaphoreDelete
 pte_osResult pte_osSemaphoreDelete(pte_osSemaphoreHandle handle)
 {
+  ps2SemaphoreNode *node = NULL;
+
+  if (__keysUsed != NULL) {
+    ps2SemaphoreNode **link;
+
+    pte_osMutexLock(__globalTlsLock);
+    for (link = &__semaphoreRegistry; *link != NULL; link = &(*link)->next) {
+      if ((*link)->handle == handle) {
+        node = *link;
+        *link = node->next;
+        break;
+      }
+    }
+    pte_osMutexUnlock(__globalTlsLock);
+  }
+
   DeleteSema(handle);
+  free(node);
   return PTE_OS_OK;
 }
 #endif
