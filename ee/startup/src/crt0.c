@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdnoreturn.h>  // noreturn
 #include <string.h>
+#include <stdlib.h>
 #include <startup.h>
 
 extern char* _end;
@@ -115,6 +116,11 @@ static void _main()
     // Enable interruts
     EI();
 
+    // Register before constructors so their atexit handlers run before _fini.
+    // Newlib then flushes stdio before _exit() releases libcglue locks.
+    if (_fini)
+        atexit(_fini);
+
     // call global constructors (weak)
     if (_init)
         _init();
@@ -122,26 +128,15 @@ static void _main()
     // call main
     retval = main(pa->argc, pa->argv);
 
-    // call global destructors (weak)
-    if (_fini)
-        _fini();
-
-    // uninitialize libcglue
-    _libcglue_deinit();
-
-    // Exit
-    Exit(retval);
+    // Follow the C runtime exit path (atexit, destructors, stdio cleanup).
+    exit(retval);
 }
 
 noreturn void _exit(int status)
 {
-    // call global destructors (weak)
-    if (_fini)
-        _fini();
-
-    // uninitialize libcglue
+    // Called after newlib's exit handlers and stdio cleanup, or directly
+    // for an immediate exit that deliberately skips those handlers.
     _libcglue_deinit();
 
-    // Exit
     Exit(status);
 }

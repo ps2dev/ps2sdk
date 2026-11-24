@@ -13,6 +13,8 @@
  * The global init/deinit code for our crt0.
  */
 
+#include <stdlib.h>
+
 void __init_cwd(int argc, char ** argv);
 void _libcglue_timezone_update();
 void _libcglue_rtc_update();
@@ -80,6 +82,10 @@ void _libcglue_init()
 	/* Initialize pthread library */
 	__libpthreadglue_init();
 
+    /* Run pthread termination after C++ finalizers/atexit callbacks but
+     * before newlib closes streams and _exit releases libcglue locks. */
+    atexit(__libpthreadglue_deinit);
+
     _libcglue_timezone_update();
     _libcglue_rtc_update();
 	
@@ -92,7 +98,6 @@ __attribute__((weak))
 void _libcglue_deinit()
 {
 	__gprof_cleanup();
-	__libpthreadglue_deinit();
 	__fdman_deinit();
 	__locks_deinit();
 }

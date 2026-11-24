@@ -1,0 +1,20 @@
+# _____     ___ ____     ___ ____
+#  ____|   |    ____ ___|        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Licensed under the terms of the ps2sdk LICENSE file.
+
+EE_BIN = exit_lifecycle.elf
+EE_OBJS = main.o
+EE_LIBS = -lpatches
+
+# _init/_fini are provided by this test, not by crtbegin/crtend.
+EE_LDFLAGS += -nostartfiles $(PS2DEV)/ee/mips64r5900el-ps2-elf/lib/crt0.o
+
+all: $(EE_BIN)
+
+clean:
+	rm -f $(EE_BIN) $(EE_OBJS)
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
