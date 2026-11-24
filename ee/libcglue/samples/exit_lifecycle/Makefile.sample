@@ -8,9 +8,6 @@ EE_BIN = exit_lifecycle.elf
 EE_OBJS = main.o
 EE_LIBS = -lpatches
 
-# _init/_fini are provided by this test, not by crtbegin/crtend.
-EE_LDFLAGS += -nostartfiles $(PS2DEV)/ee/mips64r5900el-ps2-elf/lib/crt0.o
-
 all: $(EE_BIN)
 
 clean:

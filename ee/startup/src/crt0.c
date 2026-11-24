@@ -13,7 +13,6 @@
 #include <stdint.h>
 #include <stdnoreturn.h>  // noreturn
 #include <string.h>
-#include <stdlib.h>
 #include <startup.h>
 
 extern char* _end;
@@ -29,6 +28,7 @@ __attribute__((weak)) void _fini();
 void _libcglue_args_parse(int argc, char** argv);
 void _libcglue_init();
 void _libcglue_deinit();
+__attribute__((weak)) void __libcglue_exit(int status);
 int main(int argc, char** argv);
 
 static void _main();
@@ -116,11 +116,6 @@ static void _main()
     // Enable interruts
     EI();
 
-    // Register before constructors so their atexit handlers run before _fini.
-    // Newlib then flushes stdio before _exit() releases libcglue locks.
-    if (_fini)
-        atexit(_fini);
-
     // call global constructors (weak)
     if (_init)
         _init();
@@ -128,8 +123,16 @@ static void _main()
     // call main
     retval = main(pa->argc, pa->argv);
 
-    // Follow the C runtime exit path (atexit, destructors, stdio cleanup).
-    exit(retval);
+    // The standard libcglue provides the C runtime exit path. Programs that
+    // replace libcglue initialization (e.g. minimal ELF loaders) retain the
+    // direct path without pulling in newlib exit handling or uninitialized locks.
+    if (__libcglue_exit)
+        __libcglue_exit(retval);
+
+    if (_fini)
+        _fini();
+    _libcglue_deinit();
+    Exit(retval);
 }
 
 noreturn void _exit(int status)

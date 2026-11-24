@@ -14,6 +14,7 @@
  */
 
 #include <stdlib.h>
+#include <unistd.h>
 
 void __init_cwd(int argc, char ** argv);
 void _libcglue_timezone_update();
@@ -57,7 +58,7 @@ void __libpthreadglue_init();
 #endif
 
 #ifdef F___libpthreadglue_deinit
-/* Note: This function is being called from __libcglue_deinit.
+/* Note: This function is being registered by _libcglue_init as an exit handler.
 * It is a weak function because can be override by user program
 */
 __attribute__((weak))
@@ -70,6 +71,18 @@ void __libpthreadglue_deinit();
 #endif
 
 #ifdef F__libcglue_init
+extern void _fini(void) __attribute__((weak));
+
+/* Keep the normal exit path in the same archive member as libcglue init,
+ * so minimal startup overrides do not link newlib exit processing. */
+static int exit_initialized;
+
+void __libcglue_exit(int status)
+{
+    if (exit_initialized)
+        exit(status);
+}
+
 __attribute__((weak))
 void _libcglue_init()
 {
@@ -82,14 +95,16 @@ void _libcglue_init()
 	/* Initialize pthread library */
 	__libpthreadglue_init();
 
-    /* Run pthread termination after C++ finalizers/atexit callbacks but
-     * before newlib closes streams and _exit releases libcglue locks. */
-    atexit(__libpthreadglue_deinit);
-
     _libcglue_timezone_update();
     _libcglue_rtc_update();
 	
 	__gprof_init();
+
+    /* Register before crt0 runs constructors. LIFO order keeps pthreads
+     * available for user callbacks and finalizers, then newlib flushes stdio. */
+    if (atexit(__libpthreadglue_deinit) != 0 || (_fini && atexit(_fini) != 0))
+        _exit(EXIT_FAILURE);
+    exit_initialized = 1;
 }
 #endif
 
