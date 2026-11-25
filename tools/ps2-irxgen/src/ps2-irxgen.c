@@ -467,14 +467,11 @@ int process_relocs(void)
 			pReloc = &g_elfsections[i];
 			if((pReloc->iLink < g_elfhead.iShnum) && (g_elfsections[pReloc->iLink].iType == SHT_SYMTAB))
 			{
-				struct ElfSection *pStrings = NULL;
+				struct ElfSection *pStrings;
 				struct ElfSection *pSymbols;
 
 				pSymbols = &g_elfsections[pReloc->iLink];
-				if((pSymbols->iLink < g_elfhead.iShnum) && (g_elfsections[pSymbols->iLink].iType == SHT_STRTAB))
-				{
-					pStrings = &g_elfsections[pSymbols->iLink];
-				}
+				pStrings = ((pSymbols->iLink < g_elfhead.iShnum) && (g_elfsections[pSymbols->iLink].iType == SHT_STRTAB)) ? &g_elfsections[pSymbols->iLink] : NULL;
 
 				if(!remove_weak_relocs(pReloc, pSymbols, pStrings))
 				{
@@ -768,10 +765,7 @@ void output_sh(unsigned char *data)
 			if(g_elfsections[i].iType == SHT_REL)
 			{
 				SW(&shdr->sh_type, SHT_REL);
-				if (g_elfsections[i].pRef)
-					SW(&shdr->sh_info, g_elfsections[i].pRef->iIndex);
-				else
-					SW(&shdr->sh_info, 0);
+				SW(&shdr->sh_info, g_elfsections[i].pRef ? g_elfsections[i].pRef->iIndex : 0);
 				SW(&shdr->sh_offset, reloc_ofs);
 				reloc_ofs += g_elfsections[i].iSize;
 			}

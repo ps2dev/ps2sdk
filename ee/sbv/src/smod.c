@@ -33,14 +33,9 @@ int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
 	void *addr;
 
 	/* If cur_mod is 0, return the head of the list (typically IOP address 0x800).  */
-	if (!cur_mod) {
-		addr = (void *)0x800;
-	} else {
-		if (!cur_mod->next)
-			return 0;
-		else
-			addr = cur_mod->next;
-	}
+	addr = (!cur_mod) ? (void *)0x800 : cur_mod->next;
+	if (!addr)
+		return 0;
 
 	SyncDCache(&smem_buf, smem_buf.bytes+sizeof(smod_mod_info_t));
 	if(sceSifGetOtherData(&RData, addr, &smem_buf, sizeof(smod_mod_info_t), 0)>=0){

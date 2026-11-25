@@ -12,17 +12,5 @@
 
 int SsUtGetVagAddr(s16 vab_id, s16 vag_id)
 {
-	int m_vag_spu_addr;
-
-	if ( _SsVmVSetUp(vab_id, 0) == -1 )
-		return -1;
-	if ( (vag_id & 1) != 0 )
-	{
-		m_vag_spu_addr = _svm_pg[(vag_id - 1) / 2].m_vag_spu_addr_hi;
-	}
-	else
-	{
-		m_vag_spu_addr = _svm_pg[(vag_id - 1) / 2].m_vag_spu_addr_lo;
-	}
-	return (m_vag_spu_addr << 4) | (gVabOffet[_svm_cur.m_vab_id] << 20);
+	return ( _SsVmVSetUp(vab_id, 0) == -1 ) ? -1 : (((( (vag_id & 1) != 0 ) ? _svm_pg[(vag_id - 1) / 2].m_vag_spu_addr_hi : _svm_pg[(vag_id - 1) / 2].m_vag_spu_addr_lo) << 4) | (gVabOffet[_svm_cur.m_vab_id] << 20));
 }

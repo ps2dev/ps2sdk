@@ -34,11 +34,5 @@ int acMemEntry(int argc, char **argv)
 
 	ret = acMemModuleStart(argc, argv);
 	// cppcheck-suppress knownConditionTrueFalse
-	if ( ret < 0 )
-	{
-		return ret;
-	}
-	if ( RegisterLibraryEntries(&_exp_acmem) != 0 )
-		return -16;
-	return 0;
+	return ( ret < 0 ) ? ret : (( RegisterLibraryEntries(&_exp_acmem) != 0 ) ? -16 : 0);
 }

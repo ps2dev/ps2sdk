@@ -34,8 +34,7 @@ int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u3
 	size = blockDev->getSize(fd, sub);
 	sector = 1 << scale;
 	count = pfsGetBitmapSizeSectors(scale, size);
-	if (reserved>=2)
-		sector+=0x2000;
+	sector += (reserved >= 2) ? 0x2000 : 0;
 	reserved += pfsGetBitmapSizeBlocks(scale, size);
 
 	if((cache = pfsCacheAllocClean(&result)))

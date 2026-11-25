@@ -201,9 +201,7 @@ static int unlockDrive(s32 device)
 {
 	int rv;
 	u8 id[32];
-	if((rv=apaGetIlinkID(id))==0)
-		return sceAtaSecurityUnLock(device, id);
-	return rv;
+	return ((rv=apaGetIlinkID(id))==0) ? sceAtaSecurityUnLock(device, id) : rv;
 }
 #endif
 

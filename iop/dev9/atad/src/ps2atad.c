@@ -934,9 +934,7 @@ static int ata_device_pkt_identify(int device, void *info)
     int res;
 
     res = sceAtaExecCmd(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_PACKET_DEVICE);
-    if (!res)
-        return sceAtaWaitResult();
-    return res;
+    return (!res) ? sceAtaWaitResult() : res;
 }
 
 /* Export 14 */
@@ -1309,11 +1307,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 
         /* Save the total sector counts before we overwrite ata_param with the value of Sony identify drive command. */
         total_sectors_nonlba48 = (ata_param[ATA_ID_SECTOTAL_HI] << 16) | ata_param[ATA_ID_SECTOTAL_LO];
-        if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
-            total_sectors_lba48 = 0xffffffff;
-        } else {
-            total_sectors_lba48 = (ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16) | ata_param[ATA_ID_48BIT_SECTOTAL_LO];
-        }
+        total_sectors_lba48 = (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) ? 0xffffffff : ((ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16) | ata_param[ATA_ID_48BIT_SECTOTAL_LO]);
 
         devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
@@ -1343,29 +1337,23 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
         /* Set standby timer to 21min 15s.  */
         sceAtaIdle(i, 0xff);
 
-        if (devinfo[i].lba48) {
-            /* If this device is emulated through the DVRP, use the non-48-bit LBA size.  */
-            if (ata_dvrp_workaround) {
-                devinfo[i].total_sectors = total_sectors_nonlba48;
-                /* Check for "PS2LBA48" magic in reserved words 121-124 */
-                /* PS2 area size is still stored in the 28-bit LBA size */
-                if (ata_param[121] == 0x4456 &&
-                    ata_param[122] == 0x524c &&
-                    ata_param[123] == 0x4241 &&
-                    ata_param[124] == 0x3438) {
-                    M_PRINTF("LBA48-capable DVRP firmware detected, disabling the workaround\n");
-                    ata_dvrp_workaround = 0;
-                    devinfo[i].total_sectors_lba48 = total_sectors_nonlba48;
-                } else {
-                    devinfo[i].total_sectors_lba48 = total_sectors_lba48;
-                }
-            } else {
-                devinfo[i].total_sectors = total_sectors_lba48;
-                devinfo[i].total_sectors_lba48 = total_sectors_lba48;
+        devinfo[i].total_sectors       = devinfo[i].lba48 ? total_sectors_lba48 : total_sectors_nonlba48;
+        devinfo[i].total_sectors_lba48 = devinfo[i].lba48 ? total_sectors_lba48 : total_sectors_nonlba48;
+
+        /* If this device is emulated through the DVRP, use the non-48-bit LBA size.  */
+        if (devinfo[i].lba48 && ata_dvrp_workaround) {
+            devinfo[i].total_sectors = total_sectors_nonlba48;
+            devinfo[i].total_sectors_lba48 = total_sectors_lba48;
+            /* Check for "PS2LBA48" magic in reserved words 121-124 */
+            /* PS2 area size is still stored in the 28-bit LBA size */
+            if (ata_param[121] == 0x4456 &&
+                ata_param[122] == 0x524c &&
+                ata_param[123] == 0x4241 &&
+                ata_param[124] == 0x3438) {
+                M_PRINTF("LBA48-capable DVRP firmware detected, disabling the workaround\n");
+                ata_dvrp_workaround = 0;
+                devinfo[i].total_sectors_lba48 = total_sectors_nonlba48;
             }
-        } else {
-            devinfo[i].total_sectors       = total_sectors_nonlba48;
-            devinfo[i].total_sectors_lba48 = total_sectors_nonlba48;
         }
 
         /* Call the proprietary identify command. */

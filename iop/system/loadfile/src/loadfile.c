@@ -103,14 +103,13 @@ static int *loadfile_elfload(const struct _lf_elf_load_arg *in_packet, int lengt
 		if ( outbuffer[0] >= 0 )
 		{
 			outbuffer[2] = 0;
-			outbuffer[0] = result_out;
 			outbuffer[1] = result_module_out;
 		}
 		else
 		{
 			outbuffer[3] = outbuffer[0];
-			outbuffer[0] = 0;
 		}
+		outbuffer[0] = ( outbuffer[0] >= 0 ) ? result_out : 0;
 	}
 	return outbuffer;
 }
@@ -188,13 +187,9 @@ static int *loadfile_mg_elfload(const struct _lf_elf_load_arg *in_packet, int le
 	if ( outbuffer[0] >= 0 )
 	{
 		outbuffer[2] = 0;
-		outbuffer[0] = result_out;
 		outbuffer[1] = result_module_out;
 	}
-	else
-	{
-		outbuffer[0] = 0;
-	}
+	outbuffer[0] = ( outbuffer[0] >= 0 ) ? result_out : 0;
 	return outbuffer;
 }
 
@@ -206,14 +201,7 @@ static int *loadfile_loadmodulebuffer(const struct _lf_module_buffer_load_arg *i
 	(void)length;
 
 	ModuleBuffer = LoadModuleBuffer(in_packet->p.ptr);
-	if ( ModuleBuffer >= 0 )
-	{
-		outbuffer[0] = StartModule(ModuleBuffer, "LBbyEE", in_packet->q.arg_len, in_packet->args, &outbuffer[1]);
-	}
-	else
-	{
-		outbuffer[0] = ModuleBuffer;
-	}
+	outbuffer[0] = ( ModuleBuffer >= 0 ) ? StartModule(ModuleBuffer, "LBbyEE", in_packet->q.arg_len, in_packet->args, &outbuffer[1]) : ModuleBuffer;
 	return outbuffer;
 }
 

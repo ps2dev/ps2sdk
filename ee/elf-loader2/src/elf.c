@@ -112,17 +112,7 @@ int elf_loader_is_elf_valid_for_loading(const void *buf, size_t buf_size)
 			ph_count += 1;
 		}
 	}
-	if ( !ph_count || ph_count > ELF_LOADER_MAX_PROGRAM_HEADERS )
-	{
-		return -21;
-	}
-	if ( !entrypoint_in_ph )
-	{
-		return -22;
-	}
-	if ( buf_size < highest_offset )
-		return -32;
-	return 0;
+	return ( !ph_count || ph_count > ELF_LOADER_MAX_PROGRAM_HEADERS ) ? -21 : (( !entrypoint_in_ph ) ? -22 : (( buf_size < highest_offset ) ? -32 : 0));
 }
 
 int elf_loader_exec_elf_prepare_loadinfo(elf_loader_execinfo_t *execinfo, const void *buf, size_t buf_size)

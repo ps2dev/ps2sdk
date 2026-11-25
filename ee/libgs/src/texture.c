@@ -132,19 +132,12 @@ int GsVramAllocFrameBuffer(s16 w, s16 h, s16 psm)
 		return -EINVAL;
 	}
 
-	if(byte_pp > 0)		// 8 to 32 bit
-	{
-		size = ((w*h)*byte_pp)/4;
-	}
-	else			// 4 bit
-	{
-		size = (w*h)/2;
-	}
+	// 8 to 32 bit, or 4 bit
+	size = (byte_pp > 0) ? (((w*h)*byte_pp)/4) : ((w*h)/2);
 
 	remainder = (vr_addr % (2048));
 
-	if(remainder)
-		vr_addr += ((2048)-remainder);
+	vr_addr += (remainder) ? ((2048)-remainder) : 0;
 
 	ret = vr_addr/(2048);
 	vr_addr += size;
@@ -180,22 +173,15 @@ int GsVramAllocTextureBuffer(s16 w, s16 h, s16 psm)
 		return -EINVAL;
 	}
 
-	if(byte_pp > 0)		// 8 to 32 bit
-	{
-		size = ((w*h)*byte_pp)/4;
-	}
-	else			// 4 bit
-	{
-		size = (w*h)/2;
-	}
+	// 8 to 32 bit, or 4 bit
+	size = (byte_pp > 0) ? (((w*h)*byte_pp)/4) : ((w*h)/2);
 
 	remainder = (vr_addr % (64));
 
 	//---
 	vr_2ndtolast_alloc = vr_addr;
 
-	if(remainder)
-		vr_addr += ((64)-remainder);
+	vr_addr += (remainder) ? ((64)-remainder) : 0;
 
 	ret = vr_addr/(64);
 	vr_addr += size;

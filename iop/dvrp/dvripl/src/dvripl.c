@@ -84,10 +84,7 @@ IRX_ID(MODNAME, 1, 1);
 
 int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-    if (argc >= 0)
-        return module_start(argc, argv, startaddr, mi);
-    else
-        return module_stop(argc, argv, startaddr, mi);
+    return ((argc >= 0) ? module_start : module_stop)(argc, argv, startaddr, mi);
 }
 
 int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
@@ -114,9 +111,7 @@ int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
     (void)startaddr;
     (void)mi;
 
-    if (iomanX_DelDrv(DVRMAN.name) != 0)
-        return MODULE_REMOVABLE_END;
-    return MODULE_NO_RESIDENT_END;
+    return (iomanX_DelDrv(DVRMAN.name) != 0) ? MODULE_REMOVABLE_END : MODULE_NO_RESIDENT_END;
 }
 
 int dvripl_df_init(iomanX_iop_device_t *dev)
@@ -143,9 +138,7 @@ int dvripl_df_exit(iomanX_iop_device_t *dev)
     (void)dev;
 
     DPRINTF("dvripl_df_exit\n");
-    if (DeleteSema(sema_id) != 0)
-        return -1;
-    return 0;
+    return (DeleteSema(sema_id) != 0) ? -1 : 0;
 }
 
 int dvripl_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param)
@@ -178,9 +171,7 @@ int dvripl_df_devctl(
 
     DPRINTF("dvripl_df_devctl\n");
     WaitSema(sema_id);
-    v11 = -EINVAL;
-    if (cmd == 0x5602)
-        v11 = iplioctl2_update(a1, 0x5602, arg);
+    v11 = (cmd == 0x5602) ? iplioctl2_update(a1, 0x5602, arg) : -EINVAL;
     SignalSema(sema_id);
     return v11;
 }

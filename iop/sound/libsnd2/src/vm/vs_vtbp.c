@@ -41,9 +41,7 @@ s16 SsVabTransBodyPartly(u8 *addr, unsigned int bufsize, s16 vab_id)
 		_spu_setInTransfer(0);
 		return -1;
 	}
-	bufsize_tmp = bufsize;
-	if ( (unsigned int)_svm_vab_not_send_size < bufsize )
-		bufsize_tmp = _svm_vab_not_send_size;
+	bufsize_tmp = ( (unsigned int)_svm_vab_not_send_size < bufsize ) ? _svm_vab_not_send_size : bufsize;
 	_spu_setInTransfer(1);
 	SpuWritePartly(addr, bufsize_tmp);
 	_svm_vab_not_send_size -= bufsize_tmp;

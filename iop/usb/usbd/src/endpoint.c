@@ -110,9 +110,7 @@ setupBandwidthInterruptScheduling(UsbdEndpoint_t *ep, const UsbEndpointDescripto
 		}
 		endpType += schedulingIndex;
 	}
-	packetSizeForScheduling = maxPacketSize + 13;
-	if ( maxPacketSize >= 65 )
-		packetSizeForScheduling = 77;
+	packetSizeForScheduling = ( maxPacketSize >= 65 ) ? 77 : (maxPacketSize + 13);
 	ep->m_schedulingIndex = schedulingIndex;
 	ep->m_waitHigh = waitHigh;
 	ep->m_waitLow = waitLow;
@@ -137,8 +135,7 @@ static void removeEndpointFromQueue(const UsbdEndpoint_t *ep, int isLowSpeedDevi
 	for ( i = 0; i < ep->m_waitHigh; i += 1 )
 	{
 		*value_ptr -= (ep->m_packetSizeForScheduling * (isLowSpeedDevice ? 8 : 1));
-		if ( (int)*value_ptr < 0 )
-			*value_ptr = 0;
+		*value_ptr = ( (int)*value_ptr < 0 ) ? 0 : *value_ptr;
 		value_ptr += ep->m_waitLow;
 	}
 }
@@ -207,10 +204,8 @@ UsbdEndpoint_t *openDeviceEndpoint(UsbdDevice_t *dev, const UsbEndpointDescripto
 			hcMaxPktSize = 62;
 		}
 		flags = (hcMaxPktSize << 16) & 0x7FF0000;
-		if ( endpType == TYPE_ISOCHRON )
-			flags |= HCED_ISOC;
-		if ( dev->m_isLowSpeedDevice )
-			flags |= HCED_SPEED;
+		flags |= ( endpType == TYPE_ISOCHRON ) ? HCED_ISOC : 0;
+		flags |= ( dev->m_isLowSpeedDevice ) ? HCED_SPEED : 0;
 		flags |= ((endpDesc->bEndpointAddress & 0x1F) << 7)
 					 | ((endpDesc->bEndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_IN ? HCED_DIR_IN : HCED_DIR_OUT);
 		newEp->m_hcEd->m_hcArea.asu32 = flags | (dev->m_functionAddress & 0x7F);
@@ -276,34 +271,19 @@ static void killEndpoint(UsbdEndpoint_t *ep)
 	hcEd->m_tdHead = NULL;
 	for ( req = ep->m_ioReqListStart; req; req = ep->m_ioReqListStart )
 	{
-		if ( req->m_next )
-			req->m_next->m_prev = req->m_prev;
-		else
-			ep->m_ioReqListEnd = req->m_prev;
-		if ( req->m_prev )
-			req->m_prev->m_next = req->m_next;
-		else
-			ep->m_ioReqListStart = req->m_next;
+		*( req->m_next ? &(req->m_next->m_prev) : &(ep->m_ioReqListEnd) ) = req->m_prev;
+		*( req->m_prev ? &(req->m_prev->m_next) : &(ep->m_ioReqListStart) ) = req->m_next;
 		freeIoRequest(req);
 	}
 	removeEndpointFromQueue(ep, ep->m_correspDevice->m_isLowSpeedDevice);
 	if ( ep->m_inTdQueue != NOTIN_QUEUE )
 	{
-		if ( ep->m_busyNext )
-			ep->m_busyNext->m_busyPrev = ep->m_busyPrev;
-		else
-			memPool->m_tdQueueEnd = ep->m_busyPrev;
-		if ( ep->m_busyPrev )
-			ep->m_busyPrev->m_busyNext = ep->m_busyNext;
-		else
-			memPool->m_tdQueueStart = ep->m_busyNext;
+		*( ep->m_busyNext ? &(ep->m_busyNext->m_busyPrev) : &(memPool->m_tdQueueEnd) ) = ep->m_busyPrev;
+		*( ep->m_busyPrev ? &(ep->m_busyPrev->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep->m_busyNext;
 		ep->m_inTdQueue = NOTIN_QUEUE;
 	}
 	ep->m_prev = memPool->m_freeEpListEnd;
-	if ( memPool->m_freeEpListEnd )
-		memPool->m_freeEpListEnd->m_next = ep;
-	else
-		memPool->m_freeEpListStart = ep;
+	*( memPool->m_freeEpListEnd ? &(memPool->m_freeEpListEnd->m_next) : &(memPool->m_freeEpListStart) ) = ep;
 	ep->m_next = NULL;
 	memPool->m_freeEpListEnd = ep;
 }
@@ -312,14 +292,8 @@ int removeEndpointFromDevice(UsbdDevice_t *dev, UsbdEndpoint_t *ep)
 {
 	ep->m_hcEd->m_hcArea.stru.m_hcArea |= HCED_SKIP;
 	removeHcEdFromList(ep->m_endpointType, ep->m_hcEd);
-	if ( ep->m_next )
-		ep->m_next->m_prev = ep->m_prev;
-	else
-		dev->m_endpointListEnd = ep->m_prev;
-	if ( ep->m_prev )
-		ep->m_prev->m_next = ep->m_next;
-	else
-		dev->m_endpointListStart = ep->m_next;
+	*( ep->m_next ? &(ep->m_next->m_prev) : &(dev->m_endpointListEnd) ) = ep->m_prev;
+	*( ep->m_prev ? &(ep->m_prev->m_next) : &(dev->m_endpointListStart) ) = ep->m_next;
 	ep->m_correspDevice = NULL;
 	addTimerCallback(&ep->m_timer, (TimerCallback)killEndpoint, ep, 200);
 	return 0;

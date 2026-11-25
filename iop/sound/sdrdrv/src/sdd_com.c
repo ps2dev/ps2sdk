@@ -27,8 +27,7 @@ static int AutoDmaStatusCB(void *data)
 {
 	(void)data;
 
-	if ( g_AutoDmaIntrCount < 4 && g_AutoDmaIntrCount >= 0 )
-		g_AutoDmaIntrCount += 1;
+	g_AutoDmaIntrCount += ( g_AutoDmaIntrCount < 4 && g_AutoDmaIntrCount >= 0 ) ? 1 : 0;
 	return 0;
 }
 #endif

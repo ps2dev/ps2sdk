@@ -1092,9 +1092,7 @@ static int do_write_memcard_files(const char *fpath, const char *icon_value, con
 		return result;
 	do_safe_make_pathname(cur_combpath, sizeof(cur_combpath), cur_basepath, "icon.sys");
 	result = do_copy_netcnf_path(iconsys_value, cur_combpath);
-	if ( result < 0 )
-		return result;
-	return 0;
+	return ( result < 0 ) ? result : 0;
 }
 
 static int do_handle_fname(char *fpath, size_t maxlen, const char *fname)
@@ -1496,8 +1494,7 @@ static int do_add_entry_inner(
 				i = 0;
 				for ( curentry1 = g_add_entry_heapptr; *curentry1; curentry1 = do_get_str_line(curentry1) )
 				{
-					if ( do_type_check(type, curentry1) == 1 )
-						i += 1;
+					i += ( do_type_check(type, curentry1) == 1 ) ? 1 : 0;
 				}
 				switch ( type )
 				{
@@ -1521,8 +1518,7 @@ static int do_add_entry_inner(
 				i = 0;
 				for ( curentry2 = g_add_entry_heapptr; *curentry2; curentry2 = do_get_str_line(curentry2) )
 				{
-					if ( do_type_check(type, curentry2) == 1 )
-						i += 1;
+					i += ( do_type_check(type, curentry2) == 1 ) ? 1 : 0;
 				}
 				switch ( type )
 				{
@@ -2515,10 +2511,7 @@ static int do_check_nameserver(sceNetCnfEnv_t *e, struct sceNetCnfInterface *ifc
 	if ( do_netcnfname2address_wrap(e, opt_argv[2], &nameservermem_1->address) )
 		return -1;
 	nameservermem_1->cmd.back = ifc->cmd_tail;
-	if ( ifc->cmd_tail )
-		ifc->cmd_tail->forw = &nameservermem_1->cmd;
-	else
-		ifc->cmd_head = &nameservermem_1->cmd;
+	*( ifc->cmd_tail ? &(ifc->cmd_tail->forw) : &(ifc->cmd_head) ) = &nameservermem_1->cmd;
 	nameservermem_1->cmd.forw = 0;
 	ifc->cmd_tail = &nameservermem_1->cmd;
 	return 0;
@@ -2580,10 +2573,7 @@ static int do_check_route(sceNetCnfEnv_t *e, struct sceNetCnfInterface *ifc, int
 		}
 	}
 	route_mem_1->cmd.back = ifc->cmd_tail;
-	if ( ifc->cmd_tail )
-		ifc->cmd_tail->forw = &route_mem_1->cmd;
-	else
-		ifc->cmd_head = &route_mem_1->cmd;
+	*( ifc->cmd_tail ? &(ifc->cmd_tail->forw) : &(ifc->cmd_head)) = &route_mem_1->cmd;
 	route_mem_1->cmd.forw = 0;
 	ifc->cmd_tail = &route_mem_1->cmd;
 	return 0;
@@ -2641,10 +2631,7 @@ static int do_check_args(sceNetCnfEnv_t *e, struct sceNetCnfUnknownList *unknown
 		cpydst_1 = (struct sceNetCnfUnknown *)&((char *)cpydst_1)[cpysz + 1];
 	}
 	listtmp->back = unknown_list->tail;
-	if ( unknown_list->tail )
-		unknown_list->tail->forw = listtmp;
-	else
-		unknown_list->head = listtmp;
+	*( unknown_list->tail ? &(unknown_list->tail->forw) : &(unknown_list->head) ) = listtmp;
 	listtmp->forw = 0;
 	unknown_list->tail = listtmp;
 	return 0;
@@ -2708,10 +2695,7 @@ static int do_check_other_keywords(
 					}
 					*((u8 *)cnfdata + options->m_offset) = (u8)numval;
 				}
-				if ( !strcmp("want.auth", (const char *)e->av[0]) )
-					*((u8 *)cnfdata + 171) = !wasprefixed;
-				else
-					*((u8 *)cnfdata + 247) = !wasprefixed;
+				*((u8 *)cnfdata + (!strcmp("want.auth", (const char *)e->av[0]) ? 171 : 247)) = !wasprefixed;
 				return 0;
 			case 'C':
 				if ( !wasprefixed )
@@ -2720,10 +2704,7 @@ static int do_check_other_keywords(
 						break;
 					*(u32 *)((char *)cnfdata + options->m_offset) = numval;
 				}
-				if ( !strcmp("want.accm", (const char *)e->av[0]) )
-					*((u8 *)cnfdata + 170) = !wasprefixed;
-				else
-					*((u8 *)cnfdata + 246) = !wasprefixed;
+				*((u8 *)cnfdata + (!strcmp("want.accm", (const char *)e->av[0]) ? 170 : 246)) = !wasprefixed;
 				return 0;
 			case 'D':
 				numval = 0xFFFFFFFF;
@@ -2763,10 +2744,7 @@ static int do_check_other_keywords(
 						break;
 					*(u16 *)((char *)cnfdata + options->m_offset) = (u16)numval;
 				}
-				if ( !strcmp("want.mru", (const char *)e->av[0]) )
-					*((u8 *)cnfdata + 169) = !wasprefixed;
-				else
-					*((u8 *)cnfdata + 245) = !wasprefixed;
+				*((u8 *)cnfdata + (!strcmp("want.mru", (const char *)e->av[0]) ? 169 : 245)) = !wasprefixed;
 				return 0;
 			case 'P':
 				numval = 0xFFFFFFFF;
@@ -3034,8 +3012,7 @@ do_check_line_buffer(sceNetCnfEnv_t *e, u8 *lbuf, int (*readcb)(sceNetCnfEnv_t *
 			{
 				if ( *j == '\\' )
 				{
-					if ( j[1] )
-						j += 1;
+					j += ( j[1] ) ? 1 : 0;
 				}
 				else
 				{
@@ -3072,8 +3049,7 @@ static int do_read_netcnf(sceNetCnfEnv_t *e, const char *netcnf_path, char **net
 
 	result = (!is_attach_cnf || e->f_no_decode) ? do_read_netcnf_no_decode(netcnf_path, netcnf_heap_ptr) :
 																								do_read_netcnf_decode(netcnf_path, netcnf_heap_ptr);
-	if ( result < 0 )
-		e->file_err += 1;
+	e->file_err += ( result < 0 ) ? 1 : 0;
 	return result;
 }
 
@@ -3103,24 +3079,7 @@ static int do_netcnf_read_related(
 		return -1;
 	if ( e->f_verbose )
 	{
-		printf("netcnf: reading \"%s\" as ", fullpath);
-		if ( (char *)readcb == (char *)do_handle_net_cnf )
-		{
-			printf("NET_CNF");
-		}
-		else if ( (char *)readcb == (char *)do_handle_attach_cnf )
-		{
-			printf("ATTACH_CNF");
-		}
-		else if ( (char *)readcb == (char *)do_handle_dial_cnf )
-		{
-			printf("DIAL_CNF");
-		}
-		else
-		{
-			printf("???");
-		}
-		printf("\n");
+		printf("netcnf: reading \"%s\" as %s\n", fullpath, ( (char *)readcb == (char *)do_handle_net_cnf ) ? "NET_CNF" : (( (char *)readcb == (char *)do_handle_attach_cnf ) ? "ATTACH_CNF" : (( (char *)readcb == (char *)do_handle_dial_cnf ) ? "DIAL_CNF" : "???")));
 	}
 	e->fname = fullpath;
 	read_res1 = do_read_netcnf(e, fullpath, &ptr, readcb == do_handle_attach_cnf);
@@ -3166,8 +3125,7 @@ static int do_netcnf_read_related(
 			}
 		}
 	}
-	if ( e->lbuf < lbuf )
-		cur_linelen += do_check_line_buffer(e, lbuf, readcb, userdata);
+	cur_linelen += ( e->lbuf < lbuf ) ? do_check_line_buffer(e, lbuf, readcb, userdata) : 0;
 	do_free_heapmem(ptr);
 	return cur_linelen;
 }
@@ -3471,8 +3429,7 @@ static int do_netcnf_vsprintf_buffer(sceNetCnfEnv_t *e, const char *fmt, va_list
 			{
 				strlened = 10 * strlened - '0' + *fmt;
 			}
-			if ( *fmt == 'l' )
-				fmt += 1;
+			fmt += ( *fmt == 'l' ) ? 1 : 0;
 			fmt_flag_str = -1;
 			strpad1 = 0;
 			switch ( *fmt )
@@ -4086,12 +4043,7 @@ static int do_write_netcnf(sceNetCnfEnv_t *e, const char *path, int is_attach_cn
 		return -1;
 	if ( e->f_verbose )
 	{
-		printf("netcnf: writing \"%s\" as ", fullpath);
-		if ( is_attach_cnf )
-			printf("ATTACH_CNF");
-		else
-			printf("NET_CNF");
-		printf("\n");
+		printf("netcnf: writing \"%s\" as %s\n", fullpath, is_attach_cnf ? "ATTACH_CNF" : "NET_CNF");
 	}
 	if ( !is_attach_cnf || e->f_no_decode )
 	{
@@ -4148,9 +4100,7 @@ static int do_export_netcnf_inner(sceNetCnfEnv_t *e, const char *arg_fname, stru
 		if ( result < 0 )
 			return result;
 		result = do_netcnf_unknown_write(e, &ifc->unknown_list);
-		if ( result < 0 )
-			return result;
-		return do_write_netcnf(e, arg_fname, 1);
+		return ( result < 0 ) ? result : do_write_netcnf(e, arg_fname, 1);
 	}
 	for ( pair_head = e->root->pair_head; pair_head; pair_head = pair_head->forw )
 	{
@@ -4163,9 +4113,7 @@ static int do_export_netcnf_inner(sceNetCnfEnv_t *e, const char *arg_fname, stru
 	if ( result < 0 )
 		return result;
 	result = do_netcnf_unknown_write(e, &e->root->unknown_list);
-	if ( result < 0 )
-		return result;
-	return do_write_netcnf(e, arg_fname, 0);
+	return ( result < 0 ) ? result : do_write_netcnf(e, arg_fname, 0);
 }
 
 static int do_export_netcnf(sceNetCnfEnv_t *e)
@@ -4240,9 +4188,7 @@ static int do_name_2_address_inner(unsigned int *dst, const char *buf)
 			offsbase1 = *buf - '0';
 			if ( !isdigit(*buf) )
 			{
-				offsbase1 = *buf - '7';
-				if ( !isupper(*buf) )
-					offsbase1 = *buf - 'W';
+				offsbase1 = *buf - (( !isupper(*buf) ) ? 'W' : '7');
 			}
 			if ( offsbase1 >= (int)base )
 				break;
@@ -4436,8 +4382,7 @@ static int do_check_aolnet(const char *auth_name)
 	for ( i = 0; periodpos; i += 1 )
 	{
 		periodpos = strchr(periodpos, '.');
-		if ( periodpos )
-			periodpos += 1;
+		periodpos += ( periodpos ) ? 1 : 0;
 	}
 	return (i != 5) ? 0 : -20;
 }
@@ -4460,8 +4405,7 @@ static int do_check_authnet(char *argst, char *arged)
 			;
 		for ( ; *j && isspace(*j); j += 1 )
 			;
-		if ( *j == '"' )
-			j += 1;
+		j += ( *j == '"' ) ? 1 : 0;
 		result = do_check_aolnet(j);
 		if ( result < 0 )
 			return result;
@@ -4603,20 +4547,14 @@ static const char *do_handle_netcnf_dirname(const char *fpath, const char *entry
 	{
 		for ( ; fpath < fpath_1_minus_1 && *fpath_1_minus_1 != ':'; fpath_1_minus_1 -= 1 )
 			;
-		if ( fpath <= fpath_1_minus_1 && (*fpath_1_minus_1 == ':' || *fpath_1_minus_1 == '/' || *fpath_1_minus_1 == '\\') )
-		{
-			fpath_1_minus_1 += 1;
-		}
+		fpath_1_minus_1 += ( fpath <= fpath_1_minus_1 && (*fpath_1_minus_1 == ':' || *fpath_1_minus_1 == '/' || *fpath_1_minus_1 == '\\') ) ? 1 : 0;
 	}
 	else if ( fpath <= fpath_1_minus_1 && *fpath_1_minus_1 != ':' )
 	{
 		for ( ; fpath < fpath_1_minus_1 && *fpath_1_minus_1 != ':' && *fpath_1_minus_1 != '/' && *fpath_1_minus_1 != '\\';
 					fpath_1_minus_1 -= 1 )
 			;
-		if ( *fpath_1_minus_1 == ':' || *fpath_1_minus_1 == '/' || *fpath_1_minus_1 == '\\' )
-		{
-			fpath_1_minus_1 += 1;
-		}
+		fpath_1_minus_1 += ( *fpath_1_minus_1 == ':' || *fpath_1_minus_1 == '/' || *fpath_1_minus_1 == '\\' ) ? 1 : 0;
 	}
 	fpath_2 = fpath;
 	for ( i = netcnf_file_path; fpath_2 < fpath_1_minus_1; i += 1 )

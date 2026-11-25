@@ -60,11 +60,7 @@ int __ps2ipeeFcntlfsetflHelper(void *userdata, int newfl)
 
     val = (newfl & O_NONBLOCK) ? 1 : 0;
     res = lwip_ioctl(fd, FIONBIO, &val);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipeeAcceptHelper(void *userdata, _libcglue_fdman_fd_info_t *info, struct sockaddr *addr, int *addrlen)
@@ -100,11 +96,7 @@ int __ps2ipeeBindHelper(void *userdata, const struct sockaddr *name, int namelen
     }
 
     res = lwip_bind(fd, name, namelen);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeCloseHelper(void *userdata)
@@ -119,11 +111,7 @@ int __ps2ipeeCloseHelper(void *userdata)
     }
 
     res = lwip_close(fd);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeConnectHelper(void *userdata, const struct sockaddr *name, int namelen)
@@ -138,11 +126,7 @@ int __ps2ipeeConnectHelper(void *userdata, const struct sockaddr *name, int name
     }
 
     res = lwip_connect(fd, name, namelen);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeListenHelper(void *userdata, int backlog)
@@ -157,11 +141,7 @@ int __ps2ipeeListenHelper(void *userdata, int backlog)
     }
 
     res = lwip_listen(fd, backlog);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeRecvHelper(void *userdata, void *mem, size_t len, int flags)
@@ -176,11 +156,7 @@ int __ps2ipeeRecvHelper(void *userdata, void *mem, size_t len, int flags)
     }
 
     res = lwip_recv(fd, mem, len, flags);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeRecvfromHelper(void *userdata, void *mem, size_t len, int flags, struct sockaddr *from, int *fromlen)
@@ -195,11 +171,7 @@ int __ps2ipeeRecvfromHelper(void *userdata, void *mem, size_t len, int flags, st
     }
 
     res = lwip_recvfrom(fd, mem, len, flags, from, fromlen);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeRecvmsgHelper(void *userdata, struct msghdr *msg, int flags)
@@ -220,11 +192,7 @@ int __ps2ipeeSendHelper(void *userdata, const void *dataptr, size_t size, int fl
     }
 
     res = lwip_send(fd, dataptr, size, flags);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeSendtoHelper(void *userdata, const void *dataptr, size_t size, int flags, const struct sockaddr *to, int tolen)
@@ -239,11 +207,7 @@ int __ps2ipeeSendtoHelper(void *userdata, const void *dataptr, size_t size, int 
     }
 
     res = lwip_sendto(fd, dataptr, size, flags, to, tolen);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeSendmsgHelper(void *userdata, const struct msghdr *msg, int flags) {
@@ -263,11 +227,7 @@ int __ps2ipeeIoctlHelper(void *userdata, int cmd, void *argp)
     }
 
     res = lwip_ioctl(fd, cmd, argp);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeGetsocknameHelper(void *userdata, struct sockaddr* name, int* namelen)
@@ -282,11 +242,7 @@ int __ps2ipeeGetsocknameHelper(void *userdata, struct sockaddr* name, int* namel
     }
 
     res = lwip_getsockname(fd, name, namelen);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeGetpeernameHelper(void *userdata, struct sockaddr *name, int *namelen)
@@ -301,11 +257,7 @@ int __ps2ipeeGetpeernameHelper(void *userdata, struct sockaddr *name, int *namel
     }
 
     res = lwip_getpeername(fd, name, namelen);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeGetsockoptHelper(void *userdata, int level, int optname, void* optval, socklen_t* optlen)
@@ -320,11 +272,7 @@ int __ps2ipeeGetsockoptHelper(void *userdata, int level, int optname, void* optv
     }
 
     res = lwip_getsockopt(fd, level, optname, optval, optlen);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeSetsockoptHelper(void *userdata, int level, int optname, const void *optval, socklen_t optlen)
@@ -339,11 +287,7 @@ int __ps2ipeeSetsockoptHelper(void *userdata, int level, int optname, const void
     }
 
     res = lwip_setsockopt(fd, level, optname, optval, optlen);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeShutdownHelper(void *userdata, int how)
@@ -358,11 +302,7 @@ int __ps2ipeeShutdownHelper(void *userdata, int how)
     }
 
     res = lwip_shutdown(fd, how);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeReadHelper(void *userdata, void *mem, int len)
@@ -377,11 +317,7 @@ int __ps2ipeeReadHelper(void *userdata, void *mem, int len)
     }
 
     res = lwip_read(fd, mem, len);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 int __ps2ipeeWriteHelper(void *userdata, const void *mem, int len)
@@ -396,11 +332,7 @@ int __ps2ipeeWriteHelper(void *userdata, const void *mem, int len)
     }
 
     res = lwip_write(fd, mem, len);
-    if (res < 0)
-    {
-        return -errno;
-    }
-    return res;
+    return (res < 0) ? -errno : res;
 }
 
 struct hostent *ps2ip_gethostbyaddr(const void *addr, int len, int type) {

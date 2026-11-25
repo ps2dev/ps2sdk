@@ -309,22 +309,7 @@ int acUartWait(acUartFlag rw, int usec)
 	}
 	result_v7 = 0;
 	v7 = (usec > 0 ? WaitEventFlag : PollEventFlag)(Uartc.eve, rw, 17, &result_v7);
-	if ( v7 == -418 )
-	{
-		ret = -116;
-	}
-	else if ( v7 >= -417 )
-	{
-		ret = -5;
-		if ( !v7 )
-			ret = 0;
-	}
-	else
-	{
-		ret = -5;
-		if ( v7 == -425 )
-			ret = -6;
-	}
+	ret = ( v7 == -418 ) ? -116 : (( v7 >= -417 ) ? (!v7 ? 0 : -5) : ((v7 == -425) ? -6 : -5));
 	CancelAlarm(uart_timedout, (void *)thid);
 	if ( !ret )
 	{
@@ -403,17 +388,7 @@ static void uart_attr_set(struct uart_softc *uartc, acUartReg uartreg)
 
 	v3 = 36864000 / (signed int)(16 * uartc->speed);
 	trigger = uartc->fifo;
-	if ( trigger < 14 )
-	{
-		if ( trigger < 8 )
-			v6 = ((trigger >= 4) << 6 & 0xFFFF);
-		else
-			v6 = 128;
-	}
-	else
-	{
-		v6 = 192;
-	}
+	v6 = ( trigger < 14 ) ? (( trigger < 8 ) ? ((trigger >= 4) << 6 & 0xFFFF) : 128) : 192;
 	v7 = 16 * (uartc->loopback != 0);
 	uartreg[1] = 0;
 	uartreg[2] = 6;
@@ -448,23 +423,7 @@ int acUartSetAttr(const acUartAttrData *attr)
 	fifo = attr->ua_fifo;
 	Uartc.speed = attr->ua_speed;
 	Uartc.loopback = attr->ua_loopback != 0;
-	if ( fifo < 14 )
-	{
-		if ( fifo < 8 )
-		{
-			fifo_v2 = 4;
-			if ( fifo < 4 )
-				fifo_v2 = 1;
-		}
-		else
-		{
-			fifo_v2 = 8;
-		}
-	}
-	else
-	{
-		fifo_v2 = 14;
-	}
+	fifo_v2 = ( fifo < 14 ) ? (( fifo < 8 ) ? (( fifo < 4 ) ? 1 : 4) : 8) : 14;
 	Uartc.fifo = fifo_v2;
 	uart_attr_set(&Uartc, (acUartReg)0xB2418000);
 	return 0;
@@ -503,9 +462,7 @@ static int uart_optarg(const char *str, int default_value)
 	char *next;
 
 	result = strtol(str, &next, 0);
-	if ( next == str )
-		return default_value;
-	return result;
+	return ( next == str ) ? default_value : result;
 }
 
 int acUartModuleStart(int argc, char **argv)
@@ -524,15 +481,11 @@ int acUartModuleStart(int argc, char **argv)
 		return -16;
 	}
 	Uartc.loopback = 0;
-	if ( !Uartc.speed )
-		Uartc.speed = 9600;
-	if ( !Uartc.fifo )
-		Uartc.fifo = 1;
-	if ( !Uartc.xmit.ub_size )
-		Uartc.xmit.ub_size = 256;
+	Uartc.speed = ( !Uartc.speed ) ? 9600 : Uartc.speed;
+	Uartc.fifo = ( !Uartc.fifo ) ? 1 : Uartc.fifo;
+	Uartc.xmit.ub_size = ( !Uartc.xmit.ub_size ) ? 256 : Uartc.xmit.ub_size;
 	index = 1;
-	if ( !Uartc.recv.ub_size )
-		Uartc.recv.ub_size = 512;
+	Uartc.recv.ub_size = ( !Uartc.recv.ub_size ) ? 512 : Uartc.recv.ub_size;
 	v7 = argv + 1;
 	while ( index < argc )
 	{

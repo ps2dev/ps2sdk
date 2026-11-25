@@ -65,8 +65,7 @@ u32 packet2_vif_close_unpack_auto(packet2_t *packet2, u32 wl, u32 cl)
     {
         u32 wl_blocks_count = (quads_count / cl);
         u32 last_block_quads = quads_count - wl_blocks_count * cl;
-        if (last_block_quads == cl)
-            last_block_quads = wl;
+        last_block_quads = (last_block_quads == cl) ? wl : last_block_quads;
         quads_count = wl_blocks_count * wl + last_block_quads;
     }
 

@@ -24,21 +24,12 @@
 static int SmapDmaTransfer(volatile u8 *smap_regbase, void *buffer, unsigned int size, int direction)
 {
     unsigned int NumBlocks;
-    int result;
 
     (void)smap_regbase;
 
     /*  Non-Sony: the original block size was (32*4 = 128) bytes.
         However, that resulted in slightly lower performance due to the IOP needing to copy more data.    */
-    if ((NumBlocks = size >> 6) > 0) {
-        if (SpdDmaTransfer(1, buffer, NumBlocks << 16 | 0x10, direction) >= 0) {
-            result = NumBlocks << 6;
-        } else
-            result = 0;
-    } else
-        result = 0;
-
-    return result;
+    return ((NumBlocks = size >> 6) > 0) ? ((SpdDmaTransfer(1, buffer, NumBlocks << 16 | 0x10, direction) >= 0) ? (NumBlocks << 6) : 0) : 0;
 }
 
 static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigned int length, u16 RxBdPtr)

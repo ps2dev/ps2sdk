@@ -39,15 +39,7 @@
 ModuleInfo_t *smod_get_next_mod(ModuleInfo_t *cur_mod)
 {
   /* If cur_mod is 0, return the head of the list.  */
-  if (!cur_mod) {
-    return GetLoadcoreInternalData()->image_info;
-  } else {
-    if (!cur_mod->next)
-      return 0;
-    else
-      return cur_mod->next;
-  }
-  return 0;
+  return (!cur_mod) ? GetLoadcoreInternalData()->image_info : ((!cur_mod->next) ? 0 : cur_mod->next);
 }
 
 /** Get pointer to module structure for named module.
@@ -116,10 +108,7 @@ int smod_get_modversion_by_name(const char *name)
 {
   ModuleInfo_t *modptr = 0;
   modptr = smod_get_mod_by_name(name);
-  if (modptr != 0)
-    return (int)modptr->version;
-  else
-    return -1;
+  return (modptr != 0) ? (int)modptr->version : -1;
 }
 
 /** Unload the named module.

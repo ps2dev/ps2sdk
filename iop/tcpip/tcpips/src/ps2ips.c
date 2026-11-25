@@ -129,17 +129,7 @@ static void do_recv( void * rpcBuffer, int size )
 
 	(void)size;
 
-	if(recv_pkt->length <= 64)
-	{
-		srest = recv_pkt->length;
-
-	} else {
-
-		if( ((int)recv_pkt->ee_addr & 0x3F) == 0 ) // ee address is aligned
-			srest = 0;
-		else
-			srest = RDOWN_64((int)recv_pkt->ee_addr) - (int)recv_pkt->ee_addr + 64;
-	}
+	srest = (recv_pkt->length <= 64) ? recv_pkt->length : (( ((int)recv_pkt->ee_addr & 0x3F) == 0 ) /* ee address is aligned */ ? 0 : (RDOWN_64((int)recv_pkt->ee_addr) - (int)recv_pkt->ee_addr + 64));
 
 	s_offset = 64 - srest;
 	recvlen = MIN(BUFF_SIZE, recv_pkt->length);
@@ -225,17 +215,7 @@ static void do_recvfrom( void * rpcBuffer, int size )
 
 	(void)size;
 
-	if(recv_pkt->length <= 64)
-	{
-		srest = recv_pkt->length;
-
-	} else {
-
-		if( ((int)recv_pkt->ee_addr & 0x3F) == 0 ) // ee address is aligned
-			srest = 0;
-		else
-			srest = RDOWN_64((int)recv_pkt->ee_addr) - (int)recv_pkt->ee_addr + 64;
-	}
+	srest = (recv_pkt->length <= 64) ? recv_pkt->length : (( ((int)recv_pkt->ee_addr & 0x3F) == 0 ) /* ee address is aligned */ ? 0 : (RDOWN_64((int)recv_pkt->ee_addr) - (int)recv_pkt->ee_addr + 64));
 
 	s_offset = 64 - srest;
 	recvlen = MIN(BUFF_SIZE, recv_pkt->length);
@@ -319,14 +299,12 @@ static void do_send( void * rpcBuffer, int size )
 
 	(void)size;
 
-	if(pkt->malign)
+	s_offset = 64 - pkt->malign;
+	if (pkt->malign)
 	{
-//		printf("send: misaligned = %d\n", pkt->malign);
-
-		s_offset = 64 - pkt->malign;
+//	printf("send: misaligned = %d\n", pkt->malign);
 		memcpy((void *)(lwip_buffer + s_offset), pkt->malign_buff, pkt->malign);
-
-	} else s_offset = 64;
+	}
 
 	ee_pos = pkt->ee_addr + pkt->malign;
 
@@ -352,14 +330,12 @@ static void do_sendto( void * rpcBuffer, int size )
 
 	(void)size;
 
-	if(pkt->malign)
+	s_offset = 64 - pkt->malign;
+	if (pkt->malign)
 	{
-//		printf("send: misaligned = %d\n", pkt->malign);
-
-		s_offset = 64 - pkt->malign;
+//	printf("send: misaligned = %d\n", pkt->malign);
 		memcpy((void *)(lwip_buffer + s_offset), pkt->malign_buff, pkt->malign);
-
-	} else s_offset = 64;
+	}
 
 	ee_pos = pkt->ee_addr + pkt->malign;
 

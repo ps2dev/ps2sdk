@@ -662,9 +662,7 @@ padGetState(int port, int slot)
             pdata = padGetDmaStrOld(port, slot);
             state = pdata->state;
 
-            if (state == PAD_STATE_STABLE && padGetReqState(port, slot) == PAD_RSTAT_BUSY) // Ok
-                return PAD_STATE_EXECCMD;
-            return state;
+            return (state == PAD_STATE_STABLE && padGetReqState(port, slot) == PAD_RSTAT_BUSY) /* Ok */ ? PAD_STATE_EXECCMD : state;
         }
     case 2:
         {
@@ -674,12 +672,7 @@ padGetState(int port, int slot)
             pdata = padGetDmaStrNew(port, slot);
             state = pdata->state;
 
-            if (state == PAD_STATE_ERROR && pdata->findPadRetries)
-                return PAD_STATE_FINDPAD;
-
-            if (state == PAD_STATE_STABLE && padGetReqState(port, slot) == PAD_RSTAT_BUSY) // Ok
-                return PAD_STATE_EXECCMD;
-            return state;
+            return (state == PAD_STATE_ERROR && pdata->findPadRetries) ? PAD_STATE_FINDPAD : ((state == PAD_STATE_STABLE && padGetReqState(port, slot) == PAD_RSTAT_BUSY) /* Ok */ ? PAD_STATE_EXECCMD : state);
         }
     default:
         return 0;
@@ -759,10 +752,7 @@ padGetPortMax(void)
         return -1;
     }
 
-    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, sizeof(buffer), &buffer, sizeof(buffer), NULL, NULL) < 0)
-        return -1;
-
-    return buffer.padResult.result;
+    return (sceSifCallRpc(&padsif[0], 1, 0, &buffer, sizeof(buffer), &buffer, sizeof(buffer), NULL, NULL) < 0) ? -1 : buffer.padResult.result;
 }
 
 int
@@ -785,10 +775,7 @@ padGetSlotMax(int port)
     }
     buffer.padSlotMaxArgs.port = port;
 
-    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, sizeof(buffer), &buffer, sizeof(buffer), NULL, NULL) < 0)
-        return -1;
-
-    return buffer.padResult.result;
+    return (sceSifCallRpc(&padsif[0], 1, 0, &buffer, sizeof(buffer), &buffer, sizeof(buffer), NULL, NULL) < 0) ? -1 : buffer.padResult.result;
 }
 
 int
@@ -798,10 +785,7 @@ padGetModVersion()
         return 1; // Well.. return a low version #
     buffer.command = PAD_RPCCMD_GET_MODVER;
 
-    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, sizeof(buffer), &buffer, sizeof(buffer), NULL, NULL) < 0)
-        return -1;
-
-    return buffer.padResult.result;
+    return (sceSifCallRpc(&padsif[0], 1, 0, &buffer, sizeof(buffer), &buffer, sizeof(buffer), NULL, NULL) < 0) ? -1 : buffer.padResult.result;
 }
 
 int
@@ -849,13 +833,7 @@ padInfoMode(int port, int slot, int infoMode, int index)
             case PAD_MODECUROFFS:
                 return (pdata->modeConfig == 0) ? 0 : pdata->modeCurOffs;
             case PAD_MODETABLE:
-                if (pdata->modeConfig != 0) {
-                    if (index == -1)
-                        return pdata->nrOfModes;
-                    else if (index < pdata->nrOfModes && ((unsigned int)index <= (sizeof(pdata->modeTable)/sizeof(pdata->modeTable[0]))))
-                        return pdata->modeTable[index];
-                }
-                return 0;
+                return (pdata->modeConfig != 0) ? ((index == -1) ? pdata->nrOfModes : ((index < pdata->nrOfModes && ((unsigned int)index <= (sizeof(pdata->modeTable)/sizeof(pdata->modeTable[0])))) ? pdata->modeTable[index] : 0)) : 0;
             default:
                 return 0;
             }
@@ -935,10 +913,7 @@ padGetButtonMask(int port, int slot)
 	buffer.padGetButtonMaskArgs.port = port;
 	buffer.padGetButtonMaskArgs.slot = slot;
 
-    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, sizeof(buffer), &buffer, sizeof(buffer), NULL, NULL) < 0)
-        return 0;
-
-    return buffer.padResult.result;
+    return (sceSifCallRpc(&padsif[0], 1, 0, &buffer, sizeof(buffer), &buffer, sizeof(buffer), NULL, NULL) < 0) ? 0 : buffer.padResult.result;
 }
 
 int
@@ -1078,10 +1053,7 @@ padSetActDirect(int port, int slot, const char actAlign[6])
 
     memcpy(buffer.padActDirAlignArgs.align, actAlign, sizeof(buffer.padActDirAlignArgs.align));
 
-    if (sceSifCallRpc(&padsif[0], 1, 0, &buffer, sizeof(buffer), &buffer, sizeof(buffer), NULL, NULL) < 0)
-        return 0;
-
-    return buffer.padModeResult.result;
+    return (sceSifCallRpc(&padsif[0], 1, 0, &buffer, sizeof(buffer), &buffer, sizeof(buffer), NULL, NULL) < 0) ? 0 : buffer.padModeResult.result;
 }
 
 /*
@@ -1095,7 +1067,5 @@ padGetConnection(int port, int slot)
     if (padInitialised != 2)
         return 1;
     oslt = padGetConnDmaStr();
-    if ((unsigned int)slot >= (sizeof(oslt->openSlots)/sizeof(oslt->openSlots[0])))
-        return 1;
-    return ((oslt->openSlots[port] >> slot) & 0x1);
+    return ((unsigned int)slot >= (sizeof(oslt->openSlots)/sizeof(oslt->openSlots[0]))) ? 1 : ((oslt->openSlots[port] >> slot) & 0x1);
 }

@@ -14,9 +14,7 @@ unsigned int SpuWritePartly(u8 *addr, unsigned int size)
 {
 	unsigned int size_tmp;
 
-	size_tmp = size;
-	if ( size > 0x1FAFF0 )
-		size_tmp = 0x1FAFF0;
+	size_tmp = ( size > 0x1FAFF0 ) ? 0x1FAFF0 : size;
 	_spu_Fw(addr, size_tmp);
 	_spu_tsa[1] = ((2 * _spu_tsa[1]) + size_tmp) >> 1;
 	if ( !_spu_transferCallback )

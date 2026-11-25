@@ -277,8 +277,7 @@ static void BuildConfigurationROM(void)
 
     TotalExtraCROMUnitSize = 0;
     for (i = 0; i < 16; i++)
-        if (ExtraCROMUnits[i] != NULL)
-            TotalExtraCROMUnitSize += ExtraCROMUnitsSize[i];
+        TotalExtraCROMUnitSize += (ExtraCROMUnits[i] != NULL) ? ExtraCROMUnitsSize[i] : 0;
 
     TotalRootDirectorySizeInQuads = (sizeof(struct Root_Directory) + TotalExtraCROMUnitSize) / 4;
 

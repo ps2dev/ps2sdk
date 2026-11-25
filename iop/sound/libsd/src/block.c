@@ -222,10 +222,7 @@ u32 sceSdBlockTransStatus(s16 chan, s16 flag)
 
 	chan &= 1;
 
-	if(U16_REGISTER_READ(U16_REGISTER(0x1B0 + (chan * 1024))) == 0)
-		retval = 0;
-	else
-		retval = U32_REGISTER_READ(SD_DMA_ADDR(chan));
+	retval = (U16_REGISTER_READ(U16_REGISTER(0x1B0 + (chan * 1024))) == 0) ? 0 : U32_REGISTER_READ(SD_DMA_ADDR(chan));
 
 	retval = (BlockTransBuff[chan] << 24) | (retval & 0xFFFFFF);
 

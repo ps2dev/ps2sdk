@@ -69,12 +69,8 @@ static int flash_erase_0(flash_addr_t addr)
 			++pass;
 		--i;
 	}
-	v9 = -116;
-	if ( pass == 2 )
-		v9 = count;
-	if ( v9 < 0 )
-		return -116;
-	return 0x20000;
+	v9 = ( pass == 2 ) ? count : -116;
+	return ( v9 < 0 ) ? -116 : 0x20000;
 }
 
 static int flash_program_0(flash_addr_t addr, const flash_data_t *buf, int size)
@@ -134,9 +130,7 @@ static int flash_program_0(flash_addr_t addr, const flash_data_t *buf, int size)
 				++pass;
 			shift = 8 * --i;
 		}
-		tmp_v12 = -116;
-		if ( pass == 2 )
-			tmp_v12 = count;
+		tmp_v12 = ( pass == 2 ) ? count : -116;
 		if ( tmp_v12 < 0 )
 			return rest - v4;
 		++buf;
@@ -160,9 +154,7 @@ static int flash_status_0(flash_addr_t addr)
 	pass = 0;
 	for ( i = 1; i >= 0; --i )
 		++pass;
-	if ( pass == 2 )
-		return 1;
-	return 2;
+	return ( pass == 2 ) ? 1 : 2;
 }
 
 flash_ops_t flash_probe_mbm29f033c(flash_addr_t addr)
@@ -179,9 +171,5 @@ flash_ops_t flash_probe_mbm29f033c(flash_addr_t addr)
 	device = *(volatile acUint16 *)(addr + 2);
 	flash_reset_0(addr);
 	// cppcheck-suppress knownConditionTrueFalse
-	if ( vendor != 0x404 || device != 0xD4D4 )
-	{
-		return 0;
-	}
-	return &ops_22;
+	return ( vendor != 0x404 || device != 0xD4D4 ) ? 0 : &ops_22;
 }

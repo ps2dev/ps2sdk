@@ -141,18 +141,8 @@ static void DESEncryptPassword(u32 id_lo, u32 id_hi, char *password_out, const c
 	{
 		shift = PC1[i] - 1;
 
-		if((shift << 26) >= 0)
-		{	//0 to 31-bit shift
-			if((shift << 26) > 0)	//Shift all bits left by shift (hi,lo >> shift)
-				key1 = (BitMask_lo >> shift) | (BitMask_hi << (-shift));
-			else	//0-bit shift, which should not happen.
-				key1 = BitMask_lo >> shift;
-
-			key2 = BitMask_hi >> shift;
-		} else {	//>31-bit shift
-			key2 = 0;
-			key1 = BitMask_hi >> shift;
-		}
+		key1 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (((shift << 26) > 0) ? /* Shift all bits left by shift (hi,lo >> shift) */ ((BitMask_lo >> shift) | (BitMask_hi << (-shift))) : /* 0-bit shift, which should not happen. */ (BitMask_lo >> shift)) : /* >31-bit shift */ (BitMask_hi >> shift);
+		key2 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (BitMask_hi >> shift) : /* >31-bit shift */ 0;
 
 		//If bit (shift) is set, set the current bit.
 		if(((password_lo & key1) | (password_hi & key2)) != 0)
@@ -187,64 +177,36 @@ static void DESEncryptPassword(u32 id_lo, u32 id_hi, char *password_out, const c
 	//Calculate all Cn and Dn.
 	for(i = 0; i < 16; i++)
 	{
-		if(Rotations[i] != 1)
-		{	//Rotate left twice
-			//hi 26:0 | lo 31:26
-			key1 = ((pairC[i].hi << 6) | (pairC[i].lo >> 26)) & Rot2Mask_lo;
-			//lo 29:0
-			//key1|key 4 results in: LLLLLLLLLLLLLLLLLLLLLLLLLLLLLXX, where X is from key1
-			key4 = pairC[i].lo << 2;
-			//hi 31:26
-			//This part is discarded.
-			key2 = (pairC[i].hi >> 26) & Rot2Mask_hi;
-			//hi 29:2 | lo 31:30
-			//key2|key3 results in: HHHHHHHHHHHHHHHHHHHHHHHHHHHHHLL
-			key3 = (pairC[i].hi << 2) | (pairC[i].lo >> 30);
-		} else {	//Rotate left once
-			//hi 27:0 | lo 31:27
-			key1 = ((pairC[i].hi << 5) | (pairC[i].lo >> 27)) & Rot1Mask_lo;
-			//lo 30:0
-			//key1|key4 results in: LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLX, where X is from key1
-			key4 = pairC[i].lo << 1;
-			//hi 31:27
-			//This part is discarded.
-			key2 = (pairC[i].hi >> 27) & Rot1Mask_hi;
-			//hi 30:0 | lo 31:31
-			//key2:key3 results in: HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHL
-			key3 = (pairC[i].hi << 1) | (pairC[i].lo >> 31);
-		}
+		//Rotate left twice / Rotate left once
+		//hi 26:0 | lo 31:26 / hi 27:0 | lo 31:27
+		key1 = (Rotations[i] != 1) ? (((pairC[i].hi << 6) | (pairC[i].lo >> 26)) & Rot2Mask_lo) : (((pairC[i].hi << 5) | (pairC[i].lo >> 27)) & Rot1Mask_lo);
+		//lo 29:0 / lo 30:0
+		//key1|key 4 results in: LLLLLLLLLLLLLLLLLLLLLLLLLLLLLXX, where X is from key1 / key1|key4 results in: LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLX, where X is from key1
+		key4 = (Rotations[i] != 1) ? (pairC[i].lo << 2) : (pairC[i].lo << 1);
+		//hi 31:26 / hi 31:27
+		//This part is discarded. / This part is discarded.
+		key2 = (Rotations[i] != 1) ? ((pairC[i].hi >> 26) & Rot2Mask_hi) : ((pairC[i].hi >> 27) & Rot1Mask_hi);
+		//hi 29:2 | lo 31:30 / hi 30:0 | lo 31:31
+		//key2|key3 results in: HHHHHHHHHHHHHHHHHHHHHHHHHHHHHLL / key2:key3 results in: HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHL
+		key3 = (Rotations[i] != 1) ? ((pairC[i].hi << 2) | (pairC[i].lo >> 30)) : ((pairC[i].hi << 1) | (pairC[i].lo >> 31));
 
 		//Merge the two rotated parts together, for the hi and low pair.
 		//Note: hi contains nothing.
 		pairC[i + 1].lo = (key1 | key4) & PermutedKeyMask_lo;
 		pairC[i + 1].hi = (key2 | key3) & PermutedKeyMask_hi;
 
-		if(Rotations[i] != 1)
-		{	//Rotate left twice
-			//hi 26:0 | lo 31:26
-			key1 = ((pairD[i].hi << 6) | (pairD[i].lo >> 26)) & Rot2Mask_lo;
-			//lo 29:0
-			//key1|key 4 results in: LLLLLLLLLLLLLLLLLLLLLLLLLLLLLXX, where X is from key1
-			key4 = pairD[i].lo << 2;
-			//hi 31:26
-			//This part is discarded.
-			key2 = (pairD[i].hi >> 26) & Rot2Mask_hi;
-			//hi 29:2 | lo 31:30
-			//key2|key3 results in: HHHHHHHHHHHHHHHHHHHHHHHHHHHHHLL
-			key3 = (pairD[i].hi << 2) | (pairD[i].lo >> 30);
-		} else {	//Rotate left once
-			//hi 27:0 | lo 31:27
-			key1 = ((pairD[i].hi << 5) | (pairD[i].lo >> 27)) & Rot1Mask_lo;
-			//lo 30:0
-			//key1|key4 results in: LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLX, where X is from key1
-			key4 = pairD[i].lo << 1;
-			//hi 31:27
-			//This part is discarded.
-			key2 = (pairD[i].hi >> 27) & Rot1Mask_hi;
-			//hi 30:0 | lo 31:31
-			//key2:key3 results in: HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHL
-			key3 = (pairD[i].hi << 1) | (pairD[i].lo >> 31);
-		}
+		//Rotate left twice / Rotate left once
+		//hi 26:0 | lo 31:26 / hi 27:0 | lo 31:27
+		key1 = (Rotations[i] != 1) ? (((pairD[i].hi << 6) | (pairD[i].lo >> 26)) & Rot2Mask_lo) : (((pairD[i].hi << 5) | (pairD[i].lo >> 27)) & Rot1Mask_lo);
+		//lo 29:0 / lo 30:0
+		//key1|key 4 results in: LLLLLLLLLLLLLLLLLLLLLLLLLLLLLXX, where X is from key1 / key1|key4 results in: LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLX, where X is from key1
+		key4 = (Rotations[i] != 1) ? (pairD[i].lo << 2) : (pairD[i].lo << 1);
+		//hi 31:26 / hi 31:27
+		//This part is discarded. / This part is discarded.
+		key2 = (Rotations[i] != 1) ? ((pairD[i].hi >> 26) & Rot2Mask_hi) : ((pairD[i].hi >> 27) & Rot1Mask_hi);
+		//hi 29:2 | lo 31:30 / hi 30:0 | lo 31:31
+		//key2|key3 results in: HHHHHHHHHHHHHHHHHHHHHHHHHHHHHLL / key2:key3 results in: HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHL
+		key3 = (Rotations[i] != 1) ? ((pairD[i].hi << 2) | (pairD[i].lo >> 30)) : ((pairD[i].hi << 1) | (pairD[i].lo >> 31));
 
 		//Merge the two rotated parts together, for the hi and low pair.
 		//Note: hi contains nothing.
@@ -283,18 +245,8 @@ static void DESEncryptPassword(u32 id_lo, u32 id_hi, char *password_out, const c
 		{
 			shift = PC2[i] - 1;
 
-			if((shift << 26) >= 0)
-			{	//0 to 31-bit shift
-				if((shift << 26) > 0)	//Shift all bits left by shift (hi,lo >> shift)
-					key1 = (BitMask_lo >> shift) | (BitMask_hi << (-shift));
-				else	//0-bit shift, which should not happen.
-					key1 = BitMask_lo >> shift;
-
-				key2 = BitMask_hi >> shift;
-			} else {	//>31-bit shift
-				key2 = 0;
-				key1 = BitMask_hi >> shift;
-			}
+			key1 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (((shift << 26) > 0) ? /* Shift all bits left by shift (hi,lo >> shift) */ ((BitMask_lo >> shift) | (BitMask_hi << (-shift))) : /* 0-bit shift, which should not happen. */ (BitMask_lo >> shift)) : /* >31-bit shift */ (BitMask_hi >> shift);
+			key2 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (BitMask_hi >> shift) : /* >31-bit shift */ 0;
 
 			//If bit (shift) is set, set the current bit.
 			if(((input_lo & key1) | (input_hi & key2)) != 0)
@@ -325,18 +277,8 @@ static void DESEncryptPassword(u32 id_lo, u32 id_hi, char *password_out, const c
 	{
 		shift = IP[i] - 1;
 
-		if((shift << 26) >= 0)
-		{	//0 to 31-bit shift
-			if((shift << 26) > 0)	//Shift all bits left by shift (hi,lo >> shift)
-				key1 = (BitMask_lo >> shift) | (BitMask_hi << (-shift));
-			else	//0-bit shift, which should not happen.
-				key1 = BitMask_lo >> shift;
-
-			key2 = BitMask_hi >> shift;
-		} else {	//>31-bit shift
-			key2 = 0;
-			key1 = BitMask_hi >> shift;
-		}
+		key1 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (((shift << 26) > 0) ? /* Shift all bits left by shift (hi,lo >> shift) */ ((BitMask_lo >> shift) | (BitMask_hi << (-shift))) : /* 0-bit shift, which should not happen. */ (BitMask_lo >> shift)) : /* >31-bit shift */ (BitMask_hi >> shift);
+		key2 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (BitMask_hi >> shift) : /* >31-bit shift */ 0;
 
 		//If bit (shift) is set, set the current bit.
 		if(((id_lo & key1) | (id_hi & key2)) != 0)
@@ -376,18 +318,8 @@ static void DESEncryptPassword(u32 id_lo, u32 id_hi, char *password_out, const c
 		for(i = 0; i < 48; i++)
 		{
 			shift = Expansion[i] - 1;
-			if((shift << 26) >= 0)
-			{	//0 to 31-bit shift
-				if((shift << 26) > 0)	//Shift all bits left by shift (hi,lo >> shift)
-					key1 = (BitMask_lo >> shift) | (BitMask_hi << (-shift));
-				else	//0-bit shift, which should not happen.
-					key1 = BitMask_lo >> shift;
-
-				key2 = BitMask_hi >> shift;
-			} else {	//>31-bit shift
-				key2 = 0;
-				key1 = BitMask_hi >> shift;
-			}
+			key1 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (((shift << 26) > 0) ? /* Shift all bits left by shift (hi,lo >> shift) */ ((BitMask_lo >> shift) | (BitMask_hi << (-shift))) : /* 0-bit shift, which should not happen. */ (BitMask_lo >> shift)) : /* >31-bit shift */ (BitMask_hi >> shift);
+			key2 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (BitMask_hi >> shift) : /* >31-bit shift */ 0;
 
 			//If bit (shift) is set, set the current bit.
 			if(((input_lo & key1) | (input_hi & key2)) != 0)
@@ -420,18 +352,8 @@ static void DESEncryptPassword(u32 id_lo, u32 id_hi, char *password_out, const c
 			eVal_hi >>= 6;
 
 			input_hi = 0;
-			if((s32)((u32)shift << 26) >= 0)
-			{	//0 to 31-bit shift
-				if((shift << 26) > 0)	//Shift all bits right by shift (hi,lo >> shift)
-					key3 = (input_hi << shift) | (input_lo >> (-shift));
-				else	//0-bit shift, which should not happen.
-					key3 = input_hi << shift;
-
-				key4 = input_lo << shift;
-			} else {	//>31-bit shift
-				key3 = input_lo << shift;
-				key4 = 0;
-			}
+			key3 = ((s32)((u32)shift << 26) >= 0) ? /* 0 to 31-bit shift */ (((shift << 26) > 0) ? /* Shift all bits right by shift (hi,lo >> shift) */ ((input_hi << shift) | (input_lo >> (-shift))) : /* 0-bit shift, which should not happen. */ (input_hi << shift)) : /* >31-bit shift */ (input_lo << shift);
+			key4 = ((s32)((u32)shift << 26) >= 0) ? /* 0 to 31-bit shift */ (input_lo << shift) : /* >31-bit shift */ 0;
 
 			sVal_lo |= key4;
 			sVal_hi |= key3;
@@ -447,18 +369,8 @@ static void DESEncryptPassword(u32 id_lo, u32 id_hi, char *password_out, const c
 		for(i = 0; i < 32; i++)
 		{
 			shift = Permutation[i] - 1;
-			if((shift << 26) >= 0)
-			{	//0 to 31-bit shift
-				if((shift << 26) > 0)	//Shift all bits left by shift (hi,lo >> shift)
-					key1 = (BitMask_lo >> shift) | (BitMask_hi << (-shift));
-				else	//0-bit shift, which should not happen.
-					key1 = BitMask_lo >> shift;
-
-				key2 = BitMask_hi >> shift;
-			} else {	//>31-bit shift
-				key1 = BitMask_hi >> shift;
-				key2 = 0;
-			}
+			key1 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (((shift << 26) > 0) ? /* Shift all bits left by shift (hi,lo >> shift) */ ((BitMask_lo >> shift) | (BitMask_hi << (-shift))) : /* 0-bit shift, which should not happen. */ (BitMask_lo >> shift)) : /* >31-bit shift */ (BitMask_hi >> shift);
+			key2 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (BitMask_hi >> shift) : /* >31-bit shift */ 0;
 
 			//If bit (shift) is set, set the current bit.
 			if(((sVal_lo & key1) | (sVal_hi & key2)) != 0)
@@ -491,18 +403,8 @@ static void DESEncryptPassword(u32 id_lo, u32 id_hi, char *password_out, const c
 	for(i = 0; i < 64; i++)
 	{
 		shift = FP[i] - 1;
-		if((shift << 26) >= 0)
-		{	//0 to 31-bit shift
-			if((shift << 26) > 0)	//Shift all bits left by shift (hi,lo >> shift)
-				key1 = (BitMask_lo >> shift) | (BitMask_hi << (-shift));
-			else	//0-bit shift, which should not happen.
-				key1 = BitMask_lo >> shift;
-
-			key2 = BitMask_hi >> shift;
-		} else {	//>31-bit shift
-			key1 = BitMask_hi >> shift;
-			key2 = 0;
-		}
+		key1 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (((shift << 26) > 0) ? /* Shift all bits left by shift (hi,lo >> shift) */ ((BitMask_lo >> shift) | (BitMask_hi << (-shift))) : /* 0-bit shift, which should not happen. */ (BitMask_lo >> shift)) : /* >31-bit shift */ (BitMask_hi >> shift);
+		key2 = ((shift << 26) >= 0) ? /* 0 to 31-bit shift */ (BitMask_hi >> shift) : /* >31-bit shift */ 0;
 
 		//If bit (shift) is set, set the current bit.
 		if(((input_lo & key1) | (input_hi & key2)) != 0)

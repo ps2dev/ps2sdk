@@ -14,9 +14,7 @@ unsigned int SpuRead(u8 *addr, unsigned int size)
 {
 	unsigned int size_tmp;
 
-	size_tmp = size;
-	if ( size > 0x1FAFF0 )
-		size_tmp = 0x1FAFF0;
+	size_tmp = ( size > 0x1FAFF0 ) ? 0x1FAFF0 : size;
 	_spu_Fr(addr, size_tmp);
 	if ( !_spu_transferCallback )
 		_spu_inTransfer = 0;

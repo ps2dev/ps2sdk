@@ -66,10 +66,7 @@ int doRegisterDriver(sceUsbdLddOps *drv, void *drvGpSeg)
 	}
 	drv->gp = drvGpSeg;
 	drv->prev = drvListEnd;
-	if ( drvListEnd )
-		drvListEnd->next = drv;
-	else
-		drvListStart = drv;
+	*(drvListEnd ? &(drvListEnd->next) : &(drvListStart)) = drv;
 	drv->next = NULL;
 	drvListEnd = drv;
 	if ( drv->probe )
@@ -133,14 +130,8 @@ int doUnregisterDriver(sceUsbdLddOps *drv)
 	}
 	if ( !pos )
 		return USB_RC_BADDRIVER;
-	if ( drv->next )
-		drv->next->prev = drv->prev;
-	else
-		drvListEnd = drv->prev;
-	if ( drv->prev )
-		drv->prev->next = drv->next;
-	else
-		drvListStart = drv->next;
+	*(drv->next ? &(drv->next->prev) : &(drvListEnd)) = drv->prev;
+	*(drv->prev ? &(drv->prev->next) : &(drvListStart)) = drv->next;
 	disconnectDriver(getDeviceTreeRoot(), drv);
 	return USB_RC_OK;
 }

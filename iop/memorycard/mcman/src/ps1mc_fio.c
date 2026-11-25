@@ -86,8 +86,7 @@ int mcman_open1(int port, int slot, const char *filename, int flags)
 
 	DPRINTF("mcman_open1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
 
-	if ((flags & sceMcFileCreateFile) != 0)
-		flags |= sceMcFileAttrWriteable;
+	flags |= ((flags & sceMcFileCreateFile) != 0) ? sceMcFileAttrWriteable : 0;
 
 	for (fd = 0; fd < MAX_FDHANDLES; fd++) {
 		fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
@@ -119,14 +118,7 @@ int mcman_open1(int port, int slot, const char *filename, int flags)
 
 	fh->freeclink = r;
 
-	if (r >= 0) {
-		if (fse->field_7d == 1)
-			fh->filesize = fse->field_38;
-		else
-			fh->filesize = fse->length;
-	}
-	else
-		fh->filesize = 0;
+	fh->filesize = (r >= 0) ? ((fse->field_7d == 1) ? fse->field_38 : fse->length) : 0;
 
 	fh->rdflag = flags & sceMcFileAttrReadable;
 	fh->wrflag = flags & sceMcFileAttrWriteable;
@@ -272,17 +264,11 @@ int mcman_read1(int fd, void *buffer, int nbyte)
 		do {
 			register int r, size, temp, offset, maxsize;
 
-			if ((int)(fh->position) < 0)
-				temp = fh->position + 0x3ff;
-			else
-				temp = fh->position;
+			temp = ((int)(fh->position) < 0) ? (fh->position + 0x3ff) : fh->position;
 
 			offset = (fh->position - (temp & ~0x000003ff));
 			maxsize = MCMAN_CLUSTERSIZE - offset;
-			if (maxsize < nbyte)
-				size = maxsize;
-			else
-				size = nbyte;
+			size = (maxsize < nbyte) ? maxsize : nbyte;
 
 			r = mcman_fatRseekPS1(fd);
 			if (r < 0)
@@ -350,17 +336,11 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 			if (r != sceMcResSucceed)
 				return r;
 
-			if ((int)(fh->position) < 0)
-				temp = fh->position + 0x3ff;
-			else
-				temp = fh->position;
+			temp = ((int)(fh->position) < 0) ? (fh->position + 0x3ff) : fh->position;
 
 			offset = fh->position - (temp & ~0x000003ff);
 			maxsize = MCMAN_CLUSTERSIZE - offset;
-			if (maxsize < nbyte)
-				size = maxsize;
-			else
-				size = nbyte;
+			size = (maxsize < nbyte) ? maxsize : nbyte;
 
 			memcpy((void *)(mce->cl_data + offset), &p[wpos], size);
 
@@ -415,19 +395,15 @@ int mcman_dread1(int fd, MC_IO_DRE_T *dirent)
 #if !MCMAN_ENABLE_EXTENDED_DEV_OPS
 	dirent->stat.mode |= sceMcFileAttrDupProhibit | sceMcFileAttrPS1;
 
-	if (fse->field_7e == 1)
-		dirent->stat.mode |= sceMcFileAttrPDAExec;
+	dirent->stat.mode |= (fse->field_7e == 1) ? sceMcFileAttrPDAExec : 0;
 #endif
 
 	if (fse->field_7d == 1) {
 		memcpy(dirent->stat.ctime, &fse->created, sizeof(sceMcStDateTime));
 		memcpy(dirent->stat.mtime, &fse->modified, sizeof(sceMcStDateTime));
-		dirent->stat.size = fse->field_38;
 		dirent->stat.attr = fse->field_28;
 	}
-	else {
-		dirent->stat.size = fse->length;
-	}
+	dirent->stat.size = (fse->field_7d == 1) ? fse->field_38 : fse->length;
 
 	return 1;
 }
@@ -459,8 +435,7 @@ int mcman_getstat1(int port, int slot, const char *filename, MC_IO_STA_T *stat)
 	if (fse->field_7d == 1) {
 
 #if !MCMAN_ENABLE_EXTENDED_DEV_OPS
-		if ((fse->field_2c & sceMcFileAttrClosed) != 0)
-			stat->mode |= sceMcFileAttrClosed;
+		stat->mode |= ((fse->field_2c & sceMcFileAttrClosed) != 0) ? sceMcFileAttrClosed : 0;
 #endif
 
 		memcpy(stat->ctime, &fse->created, sizeof(sceMcStDateTime));
@@ -544,10 +519,7 @@ int mcman_setinfo1(int port, int slot, const char *filename, sceMcTblGetDir *inf
 #endif
 
 	if ((flags & sceMcFileAttrExecutable) != 0) {
-		if ((info->AttrFile & sceMcFileAttrPDAExec) != 0)
-			fse2->field_7e = 1;
-		else
-			fse2->field_7e = 0;
+		fse2->field_7e = ((info->AttrFile & sceMcFileAttrPDAExec) != 0) ? 1 : 0;
 	}
 
 	//Special fix clause for file managers (like uLaunchELF)
@@ -627,24 +599,16 @@ int mcman_getdir1(int port, int slot, const char *dirname, int flags, int maxent
 
 			memset((void *)info, 0, sizeof (sceMcTblGetDir));
 
-			info->AttrFile = 0x9417;
-
-			if (fse->field_7e == 1)
-				info->AttrFile = 0x9c17; //MC_ATTR_PDAEXEC set !!!
+			info->AttrFile = (fse->field_7e == 1) ? 0x9c17 /* MC_ATTR_PDAEXEC set !!! */ : 0x9417;
 
 			if (fse->field_7d == 1) {
-				if ((fse->field_2c & sceMcFileAttrClosed) != 0) {
-					info->AttrFile |= sceMcFileAttrClosed;
-				}
+				info->AttrFile |= ((fse->field_2c & sceMcFileAttrClosed) != 0) ? sceMcFileAttrClosed : 0;
 				info->Reserve1 = fse->field_2e;
 				info->_Create = fse->created;
 				info->_Modify = fse->modified;
-				info->FileSizeByte = fse->field_38;
 				info->Reserve2 = fse->field_28;
 			}
-			else {
-				info->FileSizeByte = fse->length;
-			}
+			info->FileSizeByte = (fse->field_7d == 1) ? fse->field_38 : fse->length;
 
 			strncpy(info->EntryName, fse->name, 20);
 			info->EntryName[20] = 0;
@@ -692,10 +656,7 @@ int mcman_close1(int fd)
 
 	mce = mcman_get1stcacheEntp();
 
-	if ((int)(fh->freeclink + 1) < 0)
-		temp = fh->freeclink + 8;
-	else
-		temp = fh->freeclink + 1;
+	temp = ((int)(fh->freeclink + 1) < 0) ? (fh->freeclink + 8) : fh->freeclink + 1;
 
 	temp &= ~0x00000007;
 	temp = (fh->freeclink + 1) - temp;
@@ -704,18 +665,7 @@ int mcman_close1(int fd)
 
 	mce->wr_flag |= 1 << temp;
 
-	if (fh->filesize == 0) {
-		fse->length = 0x2000;
-	}
-	else {
-		if ((int)(fh->filesize - 1) < 0)
-			temp = (fh->filesize + 8190) >> 13;
-		else
-			temp = (fh->filesize - 1) >> 13;
-
-		temp++;
-		fse->length = temp << 13;
-	}
+	fse->length = (fh->filesize == 0) ? 0x2000 : ((((int)(fh->filesize - 1) < 0) ? ((fh->filesize + 8190) >> 13) : ((fh->filesize - 1) >> 13) + 1) << 13);
 
 #ifdef BUILDING_XMCMAN
 	fse->field_7d = 0; // <--- To preserve for XMCMAN

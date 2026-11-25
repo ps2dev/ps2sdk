@@ -30,11 +30,5 @@ int acAtaEntry(int argc, char **argv)
 	int ret;
 
 	ret = acAtaModuleStart(argc, argv);
-	if ( ret < 0 )
-	{
-		return ret;
-	}
-	if ( RegisterLibraryEntries(&_exp_acata) != 0 )
-		return -16;
-	return 0;
+	return ( ret < 0 ) ? ret : (( RegisterLibraryEntries(&_exp_acata) != 0 ) ? -16 : 0);
 }

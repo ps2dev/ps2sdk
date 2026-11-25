@@ -247,9 +247,7 @@ static int fs_driver_resolve_volume(const char *driver_name, int unit)
     int i, count;
 
     if (strcmp(driver_name, "mass") == 0) {
-        if (unit >= 0 && unit < FATFS_FS_DRIVER_MOUNT_INFO_MAX)
-            return unit;
-        return -1;
+        return (unit >= 0 && unit < FATFS_FS_DRIVER_MOUNT_INFO_MAX) ? unit : -1;
     }
 
     count = 0;
@@ -363,16 +361,11 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
     }
 
     // translate mode
-    if (flags & O_RDONLY)
-        f_mode |= FA_READ;
-    if (flags & O_WRONLY)
-        f_mode |= FA_WRITE;
-    if (flags & O_CREAT)
-        f_mode |= FA_OPEN_ALWAYS;
-    if (flags & O_TRUNC)
-        f_mode |= FA_CREATE_ALWAYS;
-    if (flags & O_APPEND)
-        f_mode |= FA_OPEN_APPEND;
+    f_mode |= (flags & O_RDONLY) ? FA_READ : 0;
+    f_mode |= (flags & O_WRONLY) ? FA_WRITE : 0;
+    f_mode |= (flags & O_CREAT) ? FA_OPEN_ALWAYS : 0;
+    f_mode |= (flags & O_TRUNC) ? FA_CREATE_ALWAYS : 0;
+    f_mode |= (flags & O_APPEND) ? FA_OPEN_APPEND : 0;
 
     ret = f_open(fd->privdata, modified_name, f_mode);
 
@@ -595,14 +588,8 @@ static void fileInfoToStat(FILINFO *fno, iox_stat_t *stat)
     stat->hisize         = (unsigned int)(fno->fsize>>32);
 
     stat->mode = FIO_S_IROTH | FIO_S_IXOTH;
-    if (fno->fattrib & AM_DIR) {
-        stat->mode |= FIO_S_IFDIR;
-    } else {
-        stat->mode |= FIO_S_IFREG;
-    }
-    if (!(fno->fattrib & AM_RDO)) {
-        stat->mode |= FIO_S_IWOTH;
-    }
+    stat->mode |= (fno->fattrib & AM_DIR) ? FIO_S_IFDIR : FIO_S_IFREG;
+    stat->mode |= (!(fno->fattrib & AM_RDO)) ? FIO_S_IWOTH : 0;
 
     // Since the VFAT file system does not support timezones, the timezone offset will not be applied.
     // exFAT does support timezones, but the feature is not used/exposed in the FatFs library.

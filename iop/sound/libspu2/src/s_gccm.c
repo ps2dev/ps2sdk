@@ -12,7 +12,5 @@
 
 void SpuGetCommonCDMix(int *cd_mix)
 {
-	*cd_mix = SPU_OFF;
-	if ( (_spu_RXX[512 * _spu_core + 205] & 1) != 0 )
-		*cd_mix = SPU_ON;
+	*cd_mix = ( (_spu_RXX[512 * _spu_core + 205] & 1) != 0 ) ? SPU_ON : SPU_OFF;
 }

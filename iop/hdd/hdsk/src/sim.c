@@ -34,9 +34,7 @@ void hdskSimGetFreeSectors(s32 device, struct hdskStat *stat, apa_device_t *devi
 #endif
     for (i = 0; hdskBitmap[i].next != hdskBitmap; sectors += hdskBitmap[i].length, i++) {
         if (hdskBitmap[i].type == 0) {
-            if ((maxsize < hdskBitmap[i].length) || ((stat->free & hdskBitmap[i].length) == 0)) {
-                stat->free += hdskBitmap[i].length;
-            }
+            stat->free += ((maxsize < hdskBitmap[i].length) || ((stat->free & hdskBitmap[i].length) == 0)) ? hdskBitmap[i].length : 0;
             sectors += hdskBitmap[i].length;
         }
     }
@@ -45,9 +43,7 @@ void hdskSimGetFreeSectors(s32 device, struct hdskStat *stat, apa_device_t *devi
         for (; minsize < partMax; partMax /= 2) {
             // Non-SONY: Perform 64-bit arithmetic here to avoid overflows when dealing with large disks.
             if ((sectors % partMax == 0) && ((u64)sectors + partMax < deviceinfo[device].totalLBA)) {
-                if ((maxsize < partMax) || (stat->free & partMax) == 0) {
-                    stat->free += partMax;
-                }
+                stat->free += ((maxsize < partMax) || (stat->free & partMax) == 0) ? partMax : 0;
                 sectors += partMax;
                 break;
             }
@@ -229,19 +225,7 @@ static int hdskCheckIsLastPart(struct hdskBitmap *part, u32 size, int mode)
         }
     }
 
-    if (PartSize == size) {
-        if (mode != 0) {
-            if (part->start % (size * 2) != 0) {
-                return (hdskCheckIfPrevPartEmpty(part, size) == 0 ? 0 : 1);
-            } else {
-                return (CurrPart != hdskBitmap[0].prev ? (hdskCheckIfNextPartEmpty(CurrPart, size) != 0) : 1);
-            }
-        } else {
-            return 1;
-        }
-    }
-
-    return 0;
+    return (PartSize == size) ? ((mode != 0) ? ((part->start % (size * 2) != 0) ? (hdskCheckIfPrevPartEmpty(part, size) == 0 ? 0 : 1) : (CurrPart != hdskBitmap[0].prev ? (hdskCheckIfNextPartEmpty(CurrPart, size) != 0) : 1)) : 1) : 0;
 }
 
 struct hdskBitmap *hdskSimFindLastUsedBlock(u32 size, u32 start, int mode)

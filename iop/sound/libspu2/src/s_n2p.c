@@ -54,16 +54,9 @@ u16 _spu_note2pitch(u16 cen_note_high, u16 cen_note_low, u16 note_high, u16 note
 	calc_note_div12_min12 = calc_note / 12 - 2;
 	calc_note_mod12 = calc_note % 12;
 	calc_note_mod12_idx = calc_note_mod12;
-	if ( (calc_note_mod12 & 0x8000) != 0 )
-	{
-		calc_note_mod12_idx = calc_note_mod12 + 12;
-		calc_note_div12_min12 = calc_note_div12 - 3;
-	}
-	if ( (calc_note_div12_min12 & 0x8000u) == 0 )
-		return 0x3FFF;
-	return (unsigned int)(((_spu_NTable[calc_note_mod12_idx] * (u16)_spu_FTable[max_lo_idx]) >> 16)
-												+ (1 << (-(s16)calc_note_div12_min12 - 1)))
-			>> -(s16)calc_note_div12_min12;
+	calc_note_mod12_idx += ( (calc_note_mod12 & 0x8000) != 0 ) ? 12 : 0;
+	calc_note_div12_min12 = ( (calc_note_mod12 & 0x8000) != 0 ) ? (calc_note_div12 - 3) : calc_note_div12_min12;
+	return ( (calc_note_div12_min12 & 0x8000u) == 0 ) ? 0x3FFF : ((unsigned int)(((_spu_NTable[calc_note_mod12_idx] * (u16)_spu_FTable[max_lo_idx]) >> 16) + (1 << (-(s16)calc_note_div12_min12 - 1))) >> -(s16)calc_note_div12_min12);
 }
 
 int _spu_pitch2note(s16 note_high, s16 note_low, u16 pitch)
@@ -79,8 +72,7 @@ int _spu_pitch2note(s16 note_high, s16 note_low, u16 pitch)
 	v3 = 0;
 	v4 = 0;
 	v5 = 0;
-	if ( pitch >= 0x4000u )
-		pitch = 0x3FFF;
+	pitch = ( pitch >= 0x4000u ) ? 0x3FFF : pitch;
 	for ( v6 = 0; v6 < 14; v6 += 1 )
 	{
 		if ( (((int)pitch >> v6) & 1) != 0 )

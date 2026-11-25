@@ -36,8 +36,7 @@ static int g_AutoDmaBufSize;
 #ifndef LIB_OSD_100
 static void AutoDmaStatusCB(void)
 {
-	if ( g_AutoDmaIntrCount < 4 && g_AutoDmaIntrCount >= 0 )
-		g_AutoDmaIntrCount += 1;
+	g_AutoDmaIntrCount += ( g_AutoDmaIntrCount < 4 && g_AutoDmaIntrCount >= 0 ) ? 1 : 0;
 }
 
 #ifdef LIB_OSD_110
@@ -74,10 +73,7 @@ int AutoDmaWaitForCompletion(unsigned int played_size, int start_wait_count)
 		unsigned int v4;
 
 		v3 = SpuAutoDMAGetStatus();
-		if ( (((v3 >> 24)) & 0xFF) == 1 )
-			v4 = (v3 & 0xFFFFFF) - (u32)g_AutoDmaBuf - g_AutoDmaBufSize / 2;
-		else
-			v4 = (v3 & 0xFFFFFF) - (u32)g_AutoDmaBuf;
+		v4 = ( (((v3 >> 24)) & 0xFF) == 1 ) ? ((v3 & 0xFFFFFF) - (u32)g_AutoDmaBuf - g_AutoDmaBufSize / 2) : ((v3 & 0xFFFFFF) - (u32)g_AutoDmaBuf);
 		if ( v4 >= played_size )
 			break;
 		__asm__ __volatile__("" : "+g"(start_wait_count) : :);
@@ -309,10 +305,7 @@ void *spuFunc(unsigned int command, void *data, int size)
 			if ( g_AutoDmaInProcessing )
 			{
 				v11 = SpuAutoDMAGetStatus();
-				if ( v11 >> 24 == 1 )
-					v5 = (v11 & 0xFFFFFF) - (u32)g_AutoDmaBuf - g_AutoDmaBufSize / 2;
-				else
-					v5 = (v11 & 0xFFFFFF) - (u32)g_AutoDmaBuf;
+				v5 = ( v11 >> 24 == 1 ) ? ((v11 & 0xFFFFFF) - (u32)g_AutoDmaBuf - g_AutoDmaBufSize / 2) : ((v11 & 0xFFFFFF) - (u32)g_AutoDmaBuf);
 #ifdef LIB_OSD_110
 				if ( v5 > 0xbfff )
 #else
@@ -322,10 +315,7 @@ void *spuFunc(unsigned int command, void *data, int size)
 					while ( v5 <= 0xefff )
 					{
 						v5 = SpuAutoDMAGetStatus();
-						if ( v5 >> 24 == 1 )
-							v5 = (v5 & 0xFFFFFF) - (u32)g_AutoDmaBuf - g_AutoDmaBufSize / 2;
-						else
-							v5 = (v5 & 0xFFFFFF) - (u32)g_AutoDmaBuf;
+						v5 = ( v5 >> 24 == 1 ) ? ((v5 & 0xFFFFFF) - (u32)g_AutoDmaBuf - g_AutoDmaBufSize / 2) : ((v5 & 0xFFFFFF) - (u32)g_AutoDmaBuf);
 					}
 #ifndef LIB_OSD_110
 					v19 = 0;
@@ -333,16 +323,8 @@ void *spuFunc(unsigned int command, void *data, int size)
 					sizea = 0x2000;
 					g_AutoDmaIntrCount = 0;
 #endif
-					if ( v11 >> 24 == 1 )
-					{
-						v3 = (u32 *)g_AutoDmaBuf;
-						v4 = (void *)(g_AutoDmaBufSize / 2 + g_AutoDmaBuf);
-					}
-					else
-					{
-						v3 = (u32 *)(g_AutoDmaBufSize / 2 + g_AutoDmaBuf);
-						v4 = (void *)g_AutoDmaBuf;
-					}
+					v3 = ( v11 >> 24 == 1 ) ? (u32 *)g_AutoDmaBuf : (u32 *)(g_AutoDmaBufSize / 2 + g_AutoDmaBuf);
+					v4 = ( v11 >> 24 == 1 ) ? (void *)(g_AutoDmaBufSize / 2 + g_AutoDmaBuf) : (void *)g_AutoDmaBuf;
 				}
 				else
 				{
@@ -352,16 +334,8 @@ void *spuFunc(unsigned int command, void *data, int size)
 					sizea = 0;
 					g_AutoDmaIntrCount = 0;
 #endif
-					if ( v11 >> 24 == 1 )
-					{
-						v3 = (u32 *)(g_AutoDmaBufSize / 2 + g_AutoDmaBuf);
-						v4 = (void *)g_AutoDmaBuf;
-					}
-					else
-					{
-						v3 = (u32 *)g_AutoDmaBuf;
-						v4 = (void *)(g_AutoDmaBufSize / 2 + g_AutoDmaBuf);
-					}
+					v3 = ( v11 >> 24 == 1 ) ? (u32 *)(g_AutoDmaBufSize / 2 + g_AutoDmaBuf) : (u32 *)g_AutoDmaBuf;
+					v4 = ( v11 >> 24 == 1 ) ? (void *)g_AutoDmaBuf : (void *)(g_AutoDmaBufSize / 2 + g_AutoDmaBuf);
 				}
 #ifdef LIB_OSD_110
 				for ( j = 0; j < 0x2000; j += 128 )

@@ -167,8 +167,8 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 
 		// Setup flags
 		flags=openFlagArray[openFlags & FIO_O_RDWR];
-		if (openFlags & FIO_O_TRUNC)	flags |= 2;
-		if (openFlags & PFS_FDIRO)		flags |= 4;
+	    flags |= (openFlags & FIO_O_TRUNC) ? 2 : 0;
+	    flags |= (openFlags & PFS_FDIRO) ? 4 : 0;
 		if ((mode & 0x10000) ||
 		   ((openFlags & (FIO_O_CREAT|FIO_O_EXCL)) == (FIO_O_CREAT|FIO_O_EXCL))){
 			result=-EEXIST;
@@ -284,10 +284,7 @@ label:
 	if ((result==0) && freeSlot && fileInode)
 	{
 		freeSlot->clink=fileInode;
-		if (openFlags & FIO_O_APPEND)
-			freeSlot->position = fileInode->u.inode->size;
-		else
-			freeSlot->position = 0;
+		freeSlot->position = (openFlags & FIO_O_APPEND) ? fileInode->u.inode->size : 0;
 
 		result=pfsBlockInitPos(freeSlot->clink, &freeSlot->block_pos, freeSlot->position);
 		if (result==0)
@@ -1126,8 +1123,7 @@ int pfsFioRename(iomanX_iop_file_t *ff, const char *old, const char *new_)
 			if (strcmp(path1, ".") && strcmp(path1, "..") &&
 			    strcmp(path2, ".") && strcmp(path2, "..")){
 				result=pfsCheckAccess(parentOld, 3);
-				if (result==0)
-					result=pfsCheckAccess(parentNew, 3);
+				result=(result==0) ? pfsCheckAccess(parentNew, 3) : result;
 			}else
 				result=-EINVAL;
 
@@ -1156,8 +1152,7 @@ int pfsFioRename(iomanX_iop_file_t *ff, const char *old, const char *new_)
 			parentNew->pfsMount=NULL;
 		}else{
 			if (sameParent){
-				if (removeOld!=addNew)
-					removeOld->flags |= PFS_CACHE_FLAG_DIRTY;
+				removeOld->flags |= (removeOld!=addNew) ? PFS_CACHE_FLAG_DIRTY : 0;
 			}else
 			{
 				pfsInodeSetTimeParent(parentOld, removeOld);
@@ -1365,8 +1360,7 @@ int pfsFioReadlink(iomanX_iop_file_t *f, const char *path, char *buf, unsigned i
 		else
 		{
 			rv=strlen((char *)&clink->u.inode->data[1]);
-			if(buflen < (unsigned int)rv)
-				rv=(int)buflen;
+			rv=(buflen < (unsigned int)rv) ? (int)buflen : rv;
 			memcpy(buf, &clink->u.inode->data[1], rv);
 		}
 		pfsCacheFree(clink);

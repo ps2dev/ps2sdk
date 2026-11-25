@@ -32,11 +32,5 @@ int acMemeEntry(int argc, char **argv)
 	int ret;
 
 	ret = acMemeModuleStart(argc, argv);
-	if ( ret < 0 )
-	{
-		return ret;
-	}
-	if ( RegisterLibraryEntries(&_exp_acmeme) != 0 )
-		return -16;
-	return 0;
+	return ( ret < 0 ) ? ret : (( RegisterLibraryEntries(&_exp_acmeme) != 0 ) ? -16 : 0);
 }

@@ -237,9 +237,7 @@ static void do_dma_stop(int which_core)
 static int do_dma_get_status(int which_core)
 {
 	// Unofficial: Apply fixed variables
-	if ( *(vu16 *)((which_core << 10) + 0xBF9001B0) )
-		return (*(vu32 *)(1088 * which_core + 0xBF8010C0)) & 0xFFFFFF;
-	return 0;
+	return ( *(vu16 *)((which_core << 10) + 0xBF9001B0) ) ? ((*(vu32 *)(1088 * which_core + 0xBF8010C0)) & 0xFFFFFF) : 0;
 }
 
 static void do_dma_start(void *addr, int size, int which_core)

@@ -130,10 +130,7 @@ static int Kprintf_Handler(void *context, const char *format, va_list ap)
 
     res = CpuInvokeInKmode(Kprnt, kpa, format, ap);
 
-    if (QueryIntrContext())
-        iSetEventFlag(kpa->eflag, 1);
-    else
-        SetEventFlag(kpa->eflag, 1);
+    (QueryIntrContext() ? iSetEventFlag : SetEventFlag)(kpa->eflag, 1);
 
     return res;
 }

@@ -294,10 +294,7 @@ static int do_parse_config_file(const char *fn)
 				{
 					if ( devstr )
 					{
-						if ( g_usbm_entry_list_cur )
-							g_usbm_entry_list_cur->forw = devstr;
-						else
-							g_usbm_entry_list_end = devstr;
+						*(g_usbm_entry_list_cur ? &(g_usbm_entry_list_cur->forw) : &(g_usbm_entry_list_end)) = devstr;
 						devstr->forw = 0;
 						g_usbm_entry_list_cur = devstr;
 						if ( g_param_debug > 0 )
@@ -458,10 +455,7 @@ static int do_parse_config_file(const char *fn)
 	}
 	if ( devstr )
 	{
-		if ( g_usbm_entry_list_cur )
-			g_usbm_entry_list_cur->forw = devstr;
-		else
-			g_usbm_entry_list_end = devstr;
+		*(g_usbm_entry_list_cur ? &(g_usbm_entry_list_cur->forw) : &(g_usbm_entry_list_end)) = devstr;
 		devstr->forw = 0;
 		g_usbm_entry_list_cur = devstr;
 		if ( g_param_debug > 0 )
@@ -964,10 +958,7 @@ int sceUsbmlRegisterDevice(USBDEV_t *device)
 		}
 		return -1;
 	}
-	if ( g_usbm_entry_list_cur )
-		g_usbm_entry_list_cur->forw = devinfo;
-	else
-		g_usbm_entry_list_end = devinfo;
+	*(g_usbm_entry_list_cur ? &(g_usbm_entry_list_cur->forw) : &(g_usbm_entry_list_end)) = devinfo;
 	devinfo->forw = 0;
 	g_usbm_entry_list_cur = devinfo;
 	return 0;

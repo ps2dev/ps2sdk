@@ -29,17 +29,12 @@ qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame, z
 	dtest.pass = DRAW_DISABLE;
 
 	// Enable or Disable ZBuffer
-	if (z->enable)
-	{
-		ztest.enable = DRAW_ENABLE;
-		ztest.method = z->method;
-	}
-	else
+	if (!z->enable)
 	{
 		z->mask = 1;
-		ztest.enable = DRAW_ENABLE;
-		ztest.method = ZTEST_METHOD_ALLPASS;
 	}
+	ztest.enable = DRAW_ENABLE;
+	ztest.method = z->enable ? z->method : ZTEST_METHOD_ALLPASS;
 
 	// Setup alpha blending
 	blend.color1 = BLEND_COLOR_SOURCE;
@@ -96,16 +91,8 @@ qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame, z
 	PACK_GIFTAG(q,GS_SET_COLCLAMP(GS_ENABLE),GS_REG_COLCLAMP);
 	q++;
 	// Alpha Correction
-	if ((frame->psm == GS_PSM_16) || (frame->psm == GS_PSM_16S))
-	{
-		PACK_GIFTAG(q,GS_SET_FBA(ALPHA_CORRECT_RGBA16),GS_REG_FBA + context);
-		q++;
-	}
-	else
-	{
-		PACK_GIFTAG(q,GS_SET_FBA(ALPHA_CORRECT_RGBA32),GS_REG_FBA + context);
-		q++;
-	}
+	PACK_GIFTAG(q,GS_SET_FBA((((frame->psm == GS_PSM_16) || (frame->psm == GS_PSM_16S)) ? ALPHA_CORRECT_RGBA16 : ALPHA_CORRECT_RGBA32)),GS_REG_FBA + context);
+	q++;
 	// Texture wrapping/clamping
 	PACK_GIFTAG(q, GS_SET_CLAMP(wrap.horizontal,wrap.vertical,wrap.minu,
 								wrap.maxu,wrap.minv,wrap.maxv), GS_REG_CLAMP + context);

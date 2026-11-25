@@ -146,10 +146,7 @@ static void SelectDisplayContext(int context_id)
 
 static void ClearDrawingContext(int context_id)
 {
-	if(context_id==0)
-		GsClearDrawEnv1(&draw_env[0]);
-	else
-		GsClearDrawEnv2(&draw_env[1]);
+	((context_id==0) ? GsClearDrawEnv1 : GsClearDrawEnv2)(&draw_env[0]);
 }
 
 static int point_x=100,point_y=100;
@@ -214,11 +211,11 @@ static int DrawTriangles(GS_PACKET_TABLE *table, int context_index)
 
 static void MovePoint(void)
 {
-	if(dir_x==0)point_x -= 6;
-	if(dir_x==1)point_x += 6;
+	point_x -= (dir_x==0) ? 6 : 0;
+	point_x += (dir_x==1) ? 6 : 0;
 
-	if(dir_y==0)point_y -= 8;
-	if(dir_y==1)point_y += 8;
+	point_y -= (dir_y==0) ? 8 : 0;
+	point_y += (dir_y==1) ? 8 : 0;
 
 	if(point_x >SCREEN_WIDTH)
 	{

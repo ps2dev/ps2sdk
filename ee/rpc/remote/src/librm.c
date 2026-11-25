@@ -42,14 +42,7 @@ static struct rmEEData *rmGetDmaStr(int port, int slot)
     pdata = ports[port].rmData;
     SyncDCache(pdata, (u8 *)pdata + 256);
 
-    if (pdata[0].frame < pdata[1].frame)
-    {
-        return &pdata[1];
-    }
-    else
-    {
-        return &pdata[0];
-    }
+    return (pdata[0].frame < pdata[1].frame) ? &pdata[1] : &pdata[0];
 }
 
 static void RMMan_Cleanup(void)

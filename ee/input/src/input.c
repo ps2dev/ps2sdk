@@ -217,14 +217,7 @@ void pad_set_mode(pad_t *pad, int mode, int lock)
 
 	int status = 0;
 
-	if (lock == PAD_MMODE_LOCK)
-	{
-		pad->lock = lock;
-	}
-	else
-	{
-		pad->lock = PAD_MMODE_UNLOCK;
-	}
+	pad->lock = (lock == PAD_MMODE_LOCK) ? lock : PAD_MMODE_UNLOCK;
 
 	if ((mode == PAD_MMODE_DUALSHOCK) || (mode == PAD_TYPE_DUALSHOCK))
 	{
@@ -273,15 +266,7 @@ void pad_set_sensitivity(pad_t *pad, int enable)
 		return;
 	}
 
-	if (enable)
-	{
-		padEnterPressMode(pad->port,pad->slot);
-	}
-	else
-	{
-		padExitPressMode(pad->port,pad->slot);
-	}
-
+	(enable ? padEnterPressMode : padExitPressMode)(pad->port,pad->slot);
 
 }
 
@@ -326,14 +311,7 @@ void pad_init_actuators(pad_t *pad)
 void pad_set_actuators(pad_t *pad, int small, unsigned char large)
 {
 
-	if (!small)
-	{
-		pad->actuator->small = small;
-	}
-	else
-	{
-		pad->actuator->small = 0x01;
-	}
+	pad->actuator->small = (!small) ? small : 0x01;
 
 	pad->actuator->large = large;
 

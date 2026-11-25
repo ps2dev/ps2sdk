@@ -130,11 +130,7 @@ static void *_init_seq(void)
     }
 
     lMBWidth = (s_MPEG12Ctx.m_SI.m_Width + 15) / 16;
-    if (s_MPEG12Ctx.m_fMPEG2 && !s_MPEG12Ctx.m_fProgSeq) {
-        lMBHeight = 2 * ((s_MPEG12Ctx.m_SI.m_Height + 31) / 32);
-    } else {
-        lMBHeight = (s_MPEG12Ctx.m_SI.m_Height + 15) / 16;
-    }
+    lMBHeight = (s_MPEG12Ctx.m_fMPEG2 && !s_MPEG12Ctx.m_fProgSeq) ? (2 * ((s_MPEG12Ctx.m_SI.m_Height + 31) / 32)) : ((s_MPEG12Ctx.m_SI.m_Height + 15) / 16);
 
     if (lMBWidth != s_MPEG12Ctx.m_MBWidth || lMBHeight != s_MPEG12Ctx.m_MBHeight) {
         unsigned int lAllocSize;
@@ -232,15 +228,8 @@ static void _seq_header(void)
     _MPEG_GetBits(10); /* vbv_buffer_size             */
     _MPEG_GetBits(1);  /* constrained_parameters_flag */
 
-    if (_MPEG_GetBits(1))
-        _MPEG_SetQM(0);
-    else
-        _MPEG_SetDefQM(0);
-
-    if (_MPEG_GetBits(1))
-        _MPEG_SetQM(1);
-    else
-        _MPEG_SetDefQM(1);
+    (_MPEG_GetBits(1) ? _MPEG_SetQM : _MPEG_SetDefQM)(0);
+    (_MPEG_GetBits(1) ? _MPEG_SetQM : _MPEG_SetDefQM)(1);
 
     _ext_and_ud();
 }
@@ -372,17 +361,8 @@ static void _ext_seq(void)
 #endif /* _DEBUG */
     s_MPEG12Ctx.m_SI.m_MSPerFrame = (int)((1000.0F / (s_FrameRate[s_MPEG12Ctx.m_FRCode] * ((lFRXn + 1.0F) / (lFRXd + 1.0F)))) + 0.5F);
 
-    if ((lProfLevel >> 7) & 1) {
-        if ((lProfLevel & 15) == 5) {
-            s_MPEG12Ctx.m_SI.m_Profile = MPEG_PROFILE_422;
-            s_MPEG12Ctx.m_SI.m_Level   = MPEG_LEVEL_MAIN;
-        } else {
-            s_MPEG12Ctx.m_SI.m_Profile = s_MPEG12Ctx.m_SI.m_Level = -1;
-        }
-    } else {
-        s_MPEG12Ctx.m_SI.m_Profile = lProfLevel >> 4;
-        s_MPEG12Ctx.m_SI.m_Level   = lProfLevel & 0xF;
-    }
+    s_MPEG12Ctx.m_SI.m_Profile = ((lProfLevel >> 7) & 1) ? (((lProfLevel & 15) == 5) ? MPEG_PROFILE_422 : -1) : (lProfLevel >> 4);
+    s_MPEG12Ctx.m_SI.m_Level   = ((lProfLevel >> 7) & 1) ? (((lProfLevel & 15) == 5) ? MPEG_LEVEL_MAIN : -1) : (lProfLevel & 0xF);
 
     s_MPEG12Ctx.m_SI.m_Width  = (lHSzX << 12) | (s_MPEG12Ctx.m_SI.m_Width & 0x0FFF);
     s_MPEG12Ctx.m_SI.m_Height = (lVSzX << 12) | (s_MPEG12Ctx.m_SI.m_Height & 0x0FFF);
@@ -459,18 +439,7 @@ static void _ext_pic_dsp(void)
     int i;
     int lnFCO;
 
-    if (s_MPEG12Ctx.m_fProgSeq) {
-        if (s_MPEG12Ctx.m_fRepFF)
-            lnFCO = s_MPEG12Ctx.m_fTopFF ? 3 : 2;
-        else
-            lnFCO = 1;
-    } else {
-        if (s_MPEG12Ctx.m_PictStruct != _MPEG_PS_FRAME)
-            lnFCO = 1;
-        else
-            lnFCO = s_MPEG12Ctx.m_fRepFF ? 3 : 2;
-    }
-
+    lnFCO = s_MPEG12Ctx.m_fProgSeq ? ((s_MPEG12Ctx.m_fRepFF) ? (s_MPEG12Ctx.m_fTopFF ? 3 : 2) : 1) : (s_MPEG12Ctx.m_PictStruct != _MPEG_PS_FRAME) ? 1 : (s_MPEG12Ctx.m_fRepFF ? 3 : 2);
 
     for (i = 0; i < lnFCO; ++i) {
         _MPEG_GetBits(16); /* frame_center_horizontal_offset[ i ] */
@@ -561,13 +530,8 @@ static int _get_next_picture(void *apData, s64 *apPTS)
             if ((s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME || s_MPEG12Ctx.m_fSecField) && s_MPEG12Ctx.m_SI.m_FrameCnt) {
                 void *lpData;
 
-                if (s_MPEG12Ctx.m_PictCodingType == _MPEG_PT_B) {
-                    lpData = s_MPEG12Ctx.m_pAuxFrame;
-                    *apPTS = s_MPEG12Ctx.m_AuxPTS;
-                } else {
-                    lpData = s_MPEG12Ctx.m_pFwdFrame;
-                    *apPTS = s_MPEG12Ctx.m_FwdPTS;
-                }
+                lpData = (s_MPEG12Ctx.m_PictCodingType == _MPEG_PT_B) ? s_MPEG12Ctx.m_pAuxFrame : s_MPEG12Ctx.m_pFwdFrame;
+                *apPTS = (s_MPEG12Ctx.m_PictCodingType == _MPEG_PT_B) ? s_MPEG12Ctx.m_AuxPTS : s_MPEG12Ctx.m_FwdPTS;
 
                 lfPic = _MPEG_CSCImage(lpData, apData, s_MPEG12Ctx.m_MBCount);
             }
@@ -666,14 +630,12 @@ static void _mpeg12_decode_motion_vector(int *apPred, int aRSize, int aMotionCod
     if (aMotionCode > 0) {
         lVec += ((aMotionCode - 1) << aRSize) + aMotionResidual + 1;
 
-        if (lVec >= lLim)
-            lVec -= lLim + lLim;
+        lVec -= (lVec >= lLim) ? (lLim + lLim) : 0;
 
     } else if (aMotionCode < 0) {
         lVec -= ((-aMotionCode - 1) << aRSize) + aMotionResidual + 1;
 
-        if (lVec < -lLim)
-            lVec += lLim + lLim;
+        lVec += (lVec < -lLim) ? (lLim + lLim) : 0;
     }
 
     *apPred = aFullPelVector ? lVec << 1 : lVec;
@@ -683,19 +645,11 @@ static void _mpeg12_decode_motion_vector(int *apPred, int aRSize, int aMotionCod
 static void _mpeg12_dual_prime_vector(int aDMV[][2], const int *apDMVector, int aMVX, int aMVY)
 {
     if (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) {
-        if (s_MPEG12Ctx.m_fTopFF) {
-            aDMV[0][0] = ((aMVX + (aMVX > 0)) >> 1) + apDMVector[0];
-            aDMV[0][1] = ((aMVY + (aMVY > 0)) >> 1) + apDMVector[1] - 1;
+        aDMV[0][0] = s_MPEG12Ctx.m_fTopFF ? (((aMVX + (aMVX > 0)) >> 1) + apDMVector[0]) : (((3 * aMVX + (aMVX > 0)) >> 1) + apDMVector[0]);
+        aDMV[0][1] = s_MPEG12Ctx.m_fTopFF ? (((aMVY + (aMVY > 0)) >> 1) + apDMVector[1] - 1) : (((3 * aMVY + (aMVY > 0)) >> 1) + apDMVector[1] - 1);
 
-            aDMV[1][0] = ((3 * aMVX + (aMVX > 0)) >> 1) + apDMVector[0];
-            aDMV[1][1] = ((3 * aMVY + (aMVY > 0)) >> 1) + apDMVector[1] + 1;
-        } else {
-            aDMV[0][0] = ((3 * aMVX + (aMVX > 0)) >> 1) + apDMVector[0];
-            aDMV[0][1] = ((3 * aMVY + (aMVY > 0)) >> 1) + apDMVector[1] - 1;
-
-            aDMV[1][0] = ((aMVX + (aMVX > 0)) >> 1) + apDMVector[0];
-            aDMV[1][1] = ((aMVY + (aMVY > 0)) >> 1) + apDMVector[1] + 1;
-        }
+        aDMV[1][0] = s_MPEG12Ctx.m_fTopFF ? (((3 * aMVX + (aMVX > 0)) >> 1) + apDMVector[0]) : (((aMVX + (aMVX > 0)) >> 1) + apDMVector[0]);
+        aDMV[1][1] = s_MPEG12Ctx.m_fTopFF ? (((3 * aMVY + (aMVY > 0)) >> 1) + apDMVector[1] + 1) : (((aMVY + (aMVY > 0)) >> 1) + apDMVector[1] + 1);
     } else {
         aDMV[0][0] = ((aMVX + (aMVX > 0)) >> 1) + apDMVector[0];
         aDMV[0][1] = ((aMVY + (aMVY > 0)) >> 1) + apDMVector[1];
@@ -789,21 +743,13 @@ static int _mpeg12_dec_mb(
 
     if (lMBType & (_MPEG_MBT_MOTION_FORWARD | _MPEG_MBT_MOTION_BACKWARD)) {
 
-        if (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME)
-            lMotionType = s_MPEG12Ctx.m_fFPFrmDCT ? _MPEG_MC_FRAME : _MPEG_GetBits(2);
-        else
-            lMotionType = _MPEG_GetBits(2);
+        lMotionType = (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) ? (s_MPEG12Ctx.m_fFPFrmDCT ? _MPEG_MC_FRAME : _MPEG_GetBits(2)) : _MPEG_GetBits(2);
 
     } else if (lfIntra && s_MPEG12Ctx.m_fConsMV)
         lMotionType = (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) ? _MPEG_MC_FRAME : _MPEG_MC_FIELD;
 
-    if (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) {
-        lnMV   = lMotionType == _MPEG_MC_FIELD ? 2 : 1;
-        lMVFmt = lMotionType == _MPEG_MC_FRAME ? _MPEG_MV_FRAME : _MPEG_MV_FIELD;
-    } else {
-        lnMV   = (lMotionType == _MPEG_MC_16X8) ? 2 : 1;
-        lMVFmt = _MPEG_MV_FIELD;
-    }
+    lnMV   = (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) ? (lMotionType == _MPEG_MC_FIELD ? 2 : 1) : ((lMotionType == _MPEG_MC_16X8) ? 2 : 1);
+    lMVFmt = (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) ? (lMotionType == _MPEG_MC_FRAME ? _MPEG_MV_FRAME : _MPEG_MV_FIELD) : _MPEG_MV_FIELD;
 
     lDMV     = lMotionType == _MPEG_MC_DMV;
     lMVScale = lMVFmt == _MPEG_MV_FIELD && s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME;
@@ -857,10 +803,8 @@ static int _mpeg12_dec_mb(
         aPMV[1][0][0] = 0;
         aPMV[1][0][1] = 0;
 
-        if (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) {
-            lMotionType = _MPEG_MC_FRAME;
-        } else {
-            lMotionType = _MPEG_MC_FIELD;
+        lMotionType = (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) ? _MPEG_MC_FRAME : _MPEG_MC_FIELD;
+        if (s_MPEG12Ctx.m_PictStruct != _MPEG_PS_FRAME) {
             aMVFS[0][0] = s_MPEG12Ctx.m_PictStruct == _MPEG_PS_BOTTOM_FIELD;
         }
     }
@@ -1137,10 +1081,8 @@ static int _mpeg12_slice(int aMBAMax)
                 lPMV[1][0][1] = 0;
             }
 
-            if (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) {
-                lMotionType = _MPEG_MC_FRAME;
-            } else {
-                lMotionType = _MPEG_MC_FIELD;
+            lMotionType = (s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME) ? _MPEG_MC_FRAME : _MPEG_MC_FIELD;
+            if (s_MPEG12Ctx.m_PictStruct != _MPEG_PS_FRAME) {
                 lMVFS[0][0] = s_MPEG12Ctx.m_PictStruct == _MPEG_PS_BOTTOM_FIELD;
                 lMVFS[0][1] = s_MPEG12Ctx.m_PictStruct == _MPEG_PS_BOTTOM_FIELD;
             }

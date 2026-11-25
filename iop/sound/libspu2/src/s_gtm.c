@@ -12,9 +12,6 @@
 
 int SpuGetTransferMode(void)
 {
-	if ( _spu_transMode == SPU_TRANSFER_BY_IO )
-		_spu_trans_mode = SPU_TRANSFER_BY_IO;
-	else
-		_spu_trans_mode = SPU_TRANSFER_BY_DMA;
+	_spu_trans_mode = ( _spu_transMode == SPU_TRANSFER_BY_IO ) ? SPU_TRANSFER_BY_IO : SPU_TRANSFER_BY_DMA;
 	return _spu_trans_mode;
 }

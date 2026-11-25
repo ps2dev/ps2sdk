@@ -129,36 +129,28 @@ void SetAutoPan(int vc)
 		int v22;
 
 		v22 = (u16)v18 * (127 - mpan);
-		v18 = (unsigned int)v22 >> 6;
-		if ( v22 < 0 )
-			v18 = (unsigned int)(v22 + 63) >> 6;
+		v18 = ( v22 < 0 ) ? ((unsigned int)(v22 + 63) >> 6) : ((unsigned int)v22 >> 6);
 	}
 	else
 	{
 		int v21;
 
 		v21 = (u16)v19 * mpan;
-		v19 = (unsigned int)v21 >> 6;
-		if ( v21 < 0 )
-			v19 = (unsigned int)(v21 + 63) >> 6;
+		v19 = ( v21 < 0 ) ? ((unsigned int)(v21 + 63) >> 6) : ((unsigned int)v21 >> 6);
 	}
 	if ( m_auto_pan_start >= 64 )
 	{
 		int v24;
 
 		v24 = (u16)v18 * (127 - m_auto_pan_start);
-		v18 = (unsigned int)v24 >> 6;
-		if ( v24 < 0 )
-			v18 = (unsigned int)(v24 + 63) >> 6;
+		v18 = ( v24 < 0 ) ? ((unsigned int)(v24 + 63) >> 6) : ((unsigned int)v24 >> 6);
 	}
 	else
 	{
 		int v23;
 
 		v23 = (u16)v19 * m_auto_pan_start;
-		v19 = (unsigned int)v23 >> 6;
-		if ( v23 < 0 )
-			v19 = (unsigned int)(v23 + 63) >> 6;
+		v19 = ( v23 < 0 ) ? ((unsigned int)(v23 + 63) >> 6) : ((unsigned int)v23 >> 6);
 	}
 	if ( _svm_stereo_mono == 1 )
 	{

@@ -34,15 +34,7 @@ SLink *add_ring_tail(SLink *tailp, SLink *elementp)
 	SLink *tailpa;
 
 	tailpa = add_ring_top(tailp, elementp);
-	if ( !elementp )
-	{
-		return tailpa;
-	}
-	if ( tailpa )
-	{
-		return tailpa->next;
-	}
-	return 0;
+	return ( !elementp ) ? tailpa : (( tailpa ) ? tailpa->next : 0);
 }
 
 SLink *joint_ring(SLink *tailp, SLink *otherring)

@@ -66,17 +66,9 @@ void SetOsdConfigParam2(void *config, int size, int offset)
     u8 *ptr;
 
     ptr = config;
-    if ((WriteEnd = offset + size) >= 0x81) {
-        unsigned int AmountToWrite;
-        if (offset < 0x80) {
-            AmountToWrite = 0x80 - offset;
-        } else {
-            offset        = 0x80;
-            AmountToWrite = 0;
-        }
-
-        WriteEnd = AmountToWrite + offset;
-    }
+    WriteEnd = offset + size;
+    offset   = (WriteEnd >= 0x81 && offset >= 0x80) ? 0x80 : offset;
+    WriteEnd = (WriteEnd >= 0x81) ? 0x80 : WriteEnd;
 
     for (i = 0; offset < WriteEnd; i++, offset++) {
         OSDConfig2[offset] = ptr[i];
@@ -89,15 +81,9 @@ int GetOsdConfigParam2(void *config, int size, int offset)
     u8 *ptr;
 
     ptr = config;
-    if ((ReadEnd = offset + size) >= 0x81) {
-        if (offset < 0x80) {
-            AmountToRead = 0x80 - offset;
-        } else {
-            offset       = 0x80;
-            AmountToRead = 0;
-        }
-    } else
-        AmountToRead = size;
+    ReadEnd = offset + size;
+    offset       = (ReadEnd >= 0x81 && offset >= 0x80) ? 0x80 : offset;
+    AmountToRead = (ReadEnd >= 0x81) ? (0x80 - offset) : size;
 
     ReadEnd = AmountToRead + offset;
     for (i = 0; offset < ReadEnd; i++, offset++) {

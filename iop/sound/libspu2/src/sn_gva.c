@@ -95,14 +95,8 @@ void SpuNGetVoiceAttr(int v_num, SpuVoiceAttr *arg)
 		}
 		v7 &= ~0xF000;
 	}
-	if ( v6 < 0x4000u )
-		arg->volume.left = v6;
-	else
-		arg->volume.left = v6 + 0x8000;
-	if ( v7 < 0x4000u )
-		arg->volume.right = v7;
-	else
-		arg->volume.right = v7 + 0x8000;
+	arg->volume.left = ( v6 < 0x4000u ) ? v6 : (v6 + 0x8000);
+	arg->volume.right = ( v7 < 0x4000u ) ? v7 : (v7 + 0x8000);
 	arg->volmode.left = v3;
 	arg->volmode.right = v10;
 	v14 = &_spu_RXX[512 * _spu_core + v4];
@@ -111,10 +105,7 @@ void SpuNGetVoiceAttr(int v_num, SpuVoiceAttr *arg)
 	arg->pitch = v14[2];
 	v15 = _spu_pitch2note(
 		(_spu_voice_centerNote[_spu_core][v_num] >> 8) & 0xFF, (u8)_spu_voice_centerNote[_spu_core][v_num], arg->pitch);
-	if ( v15 < 0 )
-		arg->note = 0;
-	else
-		arg->note = v15;
+	arg->note = ( v15 < 0 ) ? 0 : v15;
 	arg->sample_note = _spu_voice_centerNote[_spu_core][v_num];
 	arg->envx = _spu_RXX[512 * _spu_core + v4 + 5];
 	arg->addr = _spu_MGFgetRXX2(224);
@@ -122,9 +113,7 @@ void SpuNGetVoiceAttr(int v_num, SpuVoiceAttr *arg)
 	v19 = &_spu_RXX[512 * _spu_core + v4];
 	v20 = v19[3];
 	v21 = v19[4];
-	v22 = SPU_VOICE_EXPIncN;
-	if ( (v20 & 0x8000) == 0 )
-		v22 = SPU_VOICE_LINEARIncN;
+	v22 = ( (v20 & 0x8000) == 0 ) ? SPU_VOICE_LINEARIncN : SPU_VOICE_EXPIncN;
 	arg->a_mode = v22;
 	switch ( v21 & 0xE000 )
 	{
@@ -142,9 +131,7 @@ void SpuNGetVoiceAttr(int v_num, SpuVoiceAttr *arg)
 			break;
 	}
 	arg->s_mode = v24;
-	v25 = SPU_VOICE_EXPDec;
-	if ( (v21 & 0x20) == 0 )
-		v25 = SPU_VOICE_LINEARDecN;
+	v25 = ( (v21 & 0x20) == 0 ) ? SPU_VOICE_LINEARDecN : SPU_VOICE_EXPDec;
 	arg->r_mode = v25;
 	arg->ar = (v20 >> 8) & 0x3F;
 	arg->dr = (u8)(v20 & 0xF0) >> 4;

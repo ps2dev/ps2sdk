@@ -46,8 +46,7 @@ unsigned int SpuWrite0(unsigned int size)
 		{
 			bsize_2 = bsize_1 << 6;
 			ck_2 = 0;
-			if ( (unsigned int)bsize_2 < size )
-				bsize_2 += 64;
+			bsize_2 += ( (unsigned int)bsize_2 < size ) ? 64 : 0;
 		}
 		else
 		{

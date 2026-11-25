@@ -164,11 +164,8 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 	adpcm = adpcm_loaded(id);
 	if (adpcm == NULL)
 	{
-		int spu2_addr = 0x5010; /* Need to change this so it considers to PCM streaming space usage :) */
-		if (adpcm_list_tail != NULL)
-		{
-			spu2_addr = adpcm_list_tail->spu2_addr + adpcm_list_tail->size;
-		}
+		int spu2_addr; 
+		spu2_addr = (adpcm_list_tail != NULL) ? (adpcm_list_tail->spu2_addr + adpcm_list_tail->size) : 0x5010 /* Need to change this so it considers to PCM streaming space usage :) */;
 		if (spu2_addr + size - 16 > 2097152)
 		{
 			sbuffer[0] = -AUDSRV_ERR_OUT_OF_MEMORY;

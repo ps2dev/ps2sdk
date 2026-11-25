@@ -345,15 +345,9 @@ static void _request_bind(SifRpcBindPkt_t *bind, void *data)
     rend->cid      = SIF_CMD_RPC_BIND;
 
     sd = search_svdata(bind->sid, data);
-    if (!sd) {
-        rend->sd = NULL;
-        rend->buf    = NULL;
-        rend->cbuf   = NULL;
-    } else {
-        rend->sd     = sd;
-        rend->buf    = sd->buf;
-        rend->cbuf   = sd->cbuf;
-    }
+    rend->sd     = sd ? sd : NULL;
+    rend->buf    = sd ? sd->buf : NULL;
+    rend->cbuf   = sd ? sd->cbuf : NULL;
 
     isceSifSendCmd(SIF_CMD_RPC_END, rend, RPC_PACKET_SIZE, NULL, NULL, 0);
 }
@@ -366,10 +360,7 @@ static void _request_call(SifRpcCallPkt_t *request, void *data)
 
     (void)data;
 
-    if (base->start)
-        base->end->next = sd;
-    else
-        base->start = sd;
+    *(base->start ? &(base->end->next) : &(base->start)) = sd;
 
     base->end      = sd;
     sd->pkt_addr   = request->pkt_addr;
@@ -584,12 +575,9 @@ SifRpcServerData_t *sceSifGetNextRequest(SifRpcDataQueue_t *qd)
     DI();
 
     sd = qd->start;
-    if (sd != NULL) {
-        qd->active = 1;
+    qd->active = sd ? 1 : 0;
+    if (sd)
         qd->start  = sd->next;
-    } else {
-        qd->active = 0;
-    }
 
     EI();
 
@@ -600,10 +588,7 @@ SifRpcServerData_t *sceSifGetNextRequest(SifRpcDataQueue_t *qd)
 #ifdef F_sceSifExecRequest
 static void *_rpc_get_fpacket2(struct rpc_data *rpc_data, int rid)
 {
-    if (rid < 0 || rid < rpc_data->client_table_len)
-        return _rpc_get_fpacket(rpc_data);
-    else
-        return rpc_data->client_table + (rid * RPC_PACKET_SIZE);
+    return (rid < 0 || rid < rpc_data->client_table_len) ? _rpc_get_fpacket(rpc_data) : (rpc_data->client_table + (rid * RPC_PACKET_SIZE));
 }
 void sceSifExecRequest(SifRpcServerData_t *sd)
 {
@@ -621,12 +606,7 @@ void sceSifExecRequest(SifRpcServerData_t *sd)
 
     DI();
 
-    if (sd->rid & 4)
-        rend = (SifRpcRendPkt_t *)
-            _rpc_get_fpacket2(&_sif_rpc_data, (sd->rid >> 16) & 0xffff);
-    else
-        rend = (SifRpcRendPkt_t *)
-            _rpc_get_fpacket(&_sif_rpc_data);
+    rend = (sd->rid & 4) ? (SifRpcRendPkt_t *) _rpc_get_fpacket2(&_sif_rpc_data, (sd->rid >> 16) & 0xffff) : (SifRpcRendPkt_t *)_rpc_get_fpacket(&_sif_rpc_data);
 
     EI();
 
@@ -642,17 +622,10 @@ void sceSifExecRequest(SifRpcServerData_t *sd)
     rend->rpc_id = 0;
     rend->rec_id = 0;
 
-    if (sd->rsize) {
-        dmat.src  = rec;
-        dmat.dest = sd->recvbuf;
-        dmat.size = sd->rsize;
-        dmat.attr = 0;
-    } else {
-        dmat.src  = rend;
-        dmat.dest = sd->pkt_addr;
-        dmat.size = 64;
-        dmat.attr = 0;
-    }
+    dmat.src  = sd->rsize ? rec : rend;
+    dmat.dest = sd->rsize ? sd->recvbuf : sd->pkt_addr;
+    dmat.size = sd->rsize ? sd->rsize : 64;
+    dmat.attr = 0;
 
     while (!sceSifSetDma(&dmat, 1))
         nopdelay();

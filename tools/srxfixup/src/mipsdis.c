@@ -427,14 +427,7 @@ static void getczfs(unsigned int data, Operand *opr)
 static void getbroff(unsigned int addr, unsigned int data, Operand *opr)
 {
 	opr->tag = OprTag_jtarget;
-	if ( (data & 0x8000) != 0 )
-	{
-		opr->data = 4 * (uint16_t)data - 0x40000;
-	}
-	else
-	{
-		opr->data = 4 * (uint16_t)data;
-	}
+	opr->data = ( (data & 0x8000) != 0 ) ? (4 * (uint16_t)data - 0x40000) : (4 * (uint16_t)data);
 	opr->data += 4 + addr;
 }
 
@@ -504,14 +497,7 @@ static void Rsseimm(Disasm_result *result)
 	unsigned int imm;
 
 	getrs(result->data, result->operands);
-	if ( (int16_t)(result->data & 0xFFFF) < 0 )
-	{
-		imm = (result->data & 0xFFFF) - 0x10000;
-	}
-	else
-	{
-		imm = (result->data & 0xFFFF);
-	}
+	imm = ( (int16_t)(result->data & 0xFFFF) < 0 ) ? ((result->data & 0xFFFF) - 0x10000) : (result->data & 0xFFFF);
 	result->operands[1].tag = OprTag_imm;
 	result->operands[1].data = imm;
 }
@@ -522,14 +508,7 @@ static void Rtrsseimm(Disasm_result *result)
 
 	getrt(result->data, result->operands);
 	getrs(result->data, &result->operands[1]);
-	if ( (int16_t)(result->data & 0xFFFF) < 0 )
-	{
-		imm = (result->data & 0xFFFF) - 0x10000;
-	}
-	else
-	{
-		imm = (result->data & 0xFFFF);
-	}
+	imm = ( (int16_t)(result->data & 0xFFFF) < 0 ) ? ((result->data & 0xFFFF) - 0x10000) : (result->data & 0xFFFF);
 	result->operands[2].tag = OprTag_imm;
 	result->operands[2].data = imm;
 }
@@ -582,14 +561,7 @@ static void Rtoffbase(Disasm_result *result)
 {
 	unsigned int off;
 
-	if ( (int16_t)(result->data & 0xFFFF) < 0 )
-	{
-		off = (result->data & 0xFFFF) - 0x10000;
-	}
-	else
-	{
-		off = (result->data & 0xFFFF);
-	}
+	off = ( (int16_t)(result->data & 0xFFFF) < 0 ) ? ((result->data & 0xFFFF) - 0x10000) : (result->data & 0xFFFF);
 	getrt(result->data, result->operands);
 	result->operands[1].tag = OprTag_regoffset;
 	result->operands[1].data = off;
@@ -644,22 +616,8 @@ static void Bcft(Disasm_result *result)
 	result->mnemonic[0] = 'b';
 	result->mnemonic[1] = 'c';
 	result->mnemonic[2] = result->mnemonic[3];
-	if ( (result->data & 0x10000) != 0 )
-	{
-		result->mnemonic[3] = 't';
-	}
-	else
-	{
-		result->mnemonic[3] = 'f';
-	}
-	if ( (result->data & 0x20000) != 0 )
-	{
-		result->mnemonic[4] = 'l';
-	}
-	else
-	{
-		result->mnemonic[4] = '\x00';
-	}
+	result->mnemonic[3] = ( (result->data & 0x10000) != 0 ) ? 't' : 'f';
+	result->mnemonic[4] = ( (result->data & 0x20000) != 0 ) ? 'l' : '\x00';
 	result->mnemonic[5] = '\x00';
 	getbroff(result->addr, result->data, result->operands);
 }

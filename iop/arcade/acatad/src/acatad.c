@@ -266,10 +266,7 @@ int sceAtaDmaTransfer(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
 	int err;
 
-	if ( dir == 1 )
-		err = do_dma_xfer_write(device, lba, buf, nsectors);
-	else
-		err = do_dma_xfer_read(device, lba, buf, nsectors);
+	err = (( dir == 1 ) ? do_dma_xfer_write : do_dma_xfer_read)(device, lba, buf, nsectors);
 	if ( err != 1 )
 	{
 		printf("dma error\n");

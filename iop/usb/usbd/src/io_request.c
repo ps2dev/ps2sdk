@@ -22,18 +22,8 @@ static int setupControlTransfer(UsbdEndpoint_t *ep)
 		// endpoint error
 		if ( ep->m_inTdQueue == NOTIN_QUEUE )
 			return 0;
-		if ( ep->m_busyNext )
-			ep->m_busyNext->m_busyPrev = ep->m_busyPrev;
-		else
-			memPool->m_tdQueueEnd = ep->m_busyPrev;
-		if ( ep->m_busyPrev )
-		{
-			ep->m_busyPrev->m_busyNext = ep->m_busyNext;
-		}
-		else
-		{
-			memPool->m_tdQueueStart = ep->m_busyNext;
-		}
+		*( ep->m_busyNext ? &(ep->m_busyNext->m_busyPrev) : &(memPool->m_tdQueueEnd) ) = ep->m_busyPrev;
+		*( ep->m_busyPrev ? &(ep->m_busyPrev->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep->m_busyNext;
 		ep->m_inTdQueue = NOTIN_QUEUE;
 		return 0;
 	}
@@ -47,14 +37,7 @@ static int setupControlTransfer(UsbdEndpoint_t *ep)
 			if ( ep->m_inTdQueue != NOTIN_QUEUE )
 				return 0;
 			ep->m_busyPrev = memPool->m_tdQueueEnd;
-			if ( memPool->m_tdQueueEnd )
-			{
-				memPool->m_tdQueueEnd->m_busyNext = ep;
-			}
-			else
-			{
-				memPool->m_tdQueueStart = ep;
-			}
+			*( memPool->m_tdQueueEnd ? &(memPool->m_tdQueueEnd->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep;
 			ep->m_busyNext = NULL;
 			memPool->m_tdQueueEnd = ep;
 			ep->m_inTdQueue = GENTD_QUEUE;
@@ -71,27 +54,14 @@ static int setupControlTransfer(UsbdEndpoint_t *ep)
 		if ( ep->m_inTdQueue != NOTIN_QUEUE )
 			return 0;
 		ep->m_busyPrev = memPool->m_tdQueueEnd;
-		if ( memPool->m_tdQueueEnd )
-		{
-			memPool->m_tdQueueEnd->m_busyNext = ep;
-		}
-		else
-		{
-			memPool->m_tdQueueStart = ep;
-		}
+		*( memPool->m_tdQueueEnd ? &(memPool->m_tdQueueEnd->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep;
 		ep->m_busyNext = NULL;
 		memPool->m_tdQueueEnd = ep;
 		ep->m_inTdQueue = GENTD_QUEUE;
 		return 0;
 	}
-	if ( curIoReq->m_next )
-		curIoReq->m_next->m_prev = curIoReq->m_prev;
-	else
-		ep->m_ioReqListEnd = curIoReq->m_prev;
-	if ( curIoReq->m_prev )
-		curIoReq->m_prev->m_next = curIoReq->m_next;
-	else
-		ep->m_ioReqListStart = curIoReq->m_next;
+	*( curIoReq->m_next ? &(curIoReq->m_next->m_prev) : &(ep->m_ioReqListEnd) ) = curIoReq->m_prev;
+	*( curIoReq->m_prev ? &(curIoReq->m_prev->m_next) : &(ep->m_ioReqListStart) ) = curIoReq->m_next;
 	// first stage: setup
 	ep->m_hcEd->m_tdTail->m_hcArea = TD_HCAREA(USB_RC_NOTACCESSED, 2, 7, TD_SETUP, 0) << 16;
 	ep->m_hcEd->m_tdTail->m_curBufPtr = &curIoReq->m_devReq;
@@ -128,14 +98,8 @@ static int setupControlTransfer(UsbdEndpoint_t *ep)
 		return 1;
 	}
 	// remove endpoint from busy list if there are no IoRequests left
-	if ( ep->m_busyNext )
-		ep->m_busyNext->m_busyPrev = ep->m_busyPrev;
-	else
-		memPool->m_tdQueueEnd = ep->m_busyPrev;
-	if ( ep->m_busyPrev )
-		ep->m_busyPrev->m_busyNext = ep->m_busyNext;
-	else
-		memPool->m_tdQueueStart = ep->m_busyNext;
+	*( ep->m_busyNext ? &(ep->m_busyNext->m_busyPrev) : &(memPool->m_tdQueueEnd) ) = ep->m_busyPrev;
+	*( ep->m_busyPrev ? &(ep->m_busyPrev->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep->m_busyNext;
 	ep->m_inTdQueue = NOTIN_QUEUE;
 	return 1;
 }
@@ -154,18 +118,8 @@ static int setupIsocronTransfer(UsbdEndpoint_t *ep)
 		// endpoint error
 		if ( ep->m_inTdQueue == NOTIN_QUEUE )
 			return 0;
-		if ( ep->m_busyNext )
-			ep->m_busyNext->m_busyPrev = ep->m_busyPrev;
-		else
-			memPool->m_tdQueueEnd = ep->m_busyPrev;
-		if ( ep->m_busyPrev )
-		{
-			ep->m_busyPrev->m_busyNext = ep->m_busyNext;
-		}
-		else
-		{
-			memPool->m_tdQueueStart = ep->m_busyNext;
-		}
+		*( ep->m_busyNext ? &(ep->m_busyNext->m_busyPrev) : &(memPool->m_tdQueueEnd) ) = ep->m_busyPrev;
+		*( ep->m_busyPrev ? &(ep->m_busyPrev->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep->m_busyNext;
 		ep->m_inTdQueue = NOTIN_QUEUE;
 		return 0;
 	}
@@ -177,60 +131,33 @@ static int setupIsocronTransfer(UsbdEndpoint_t *ep)
 		if ( ep->m_inTdQueue != NOTIN_QUEUE )
 			return 0;
 		ep->m_busyPrev = memPool->m_tdQueueEnd;
-		if ( memPool->m_tdQueueEnd )
-			memPool->m_tdQueueEnd->m_busyNext = ep;
-		else
-			memPool->m_tdQueueStart = ep;
+		*( memPool->m_tdQueueEnd ? &(memPool->m_tdQueueEnd->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep;
 		ep->m_busyNext = NULL;
 		memPool->m_tdQueueEnd = ep;
 		ep->m_inTdQueue = ISOTD_QUEUE;
 		return 0;
 	}
-	if ( curIoReq->m_next )
-		curIoReq->m_next->m_prev = curIoReq->m_prev;
-	else
-		ep->m_ioReqListEnd = curIoReq->m_prev;
-	if ( curIoReq->m_prev )
-		curIoReq->m_prev->m_next = curIoReq->m_next;
-	else
-		ep->m_ioReqListStart = curIoReq->m_next;
-	if ( (UsbdHcTD_t *)((uiptr)ed->m_tdHead & ~0xF) == ed->m_tdTail )
-		frameNo = (memPool->m_hcHCCA->FrameNumber + 2) & 0xFFFF;
-	else
-		frameNo = (ep->m_isochronLastFrameNum) & 0xFFFF;
+	*( curIoReq->m_next ? &(curIoReq->m_next->m_prev) : &(ep->m_ioReqListEnd) ) = curIoReq->m_prev;
+	*( curIoReq->m_prev ? &(curIoReq->m_prev->m_next) : &(ep->m_ioReqListStart) ) = curIoReq->m_next;
+	frameNo = ( (UsbdHcTD_t *)((uiptr)ed->m_tdHead & ~0xF) == ed->m_tdTail ) ? ((memPool->m_hcHCCA->FrameNumber + 2) & 0xFFFF) : ((ep->m_isochronLastFrameNum) & 0xFFFF);
 	frameNo = (u16)(frameNo + (curIoReq->m_waitFrames & 0xFFFF));
 	ep->m_isochronLastFrameNum = (curIoReq->m_req.bNumPackets ? (curIoReq->m_req.bNumPackets & 0xFFFF) : 1) + frameNo;
+	curTd->m_hcArea = (curIoReq->m_req.bNumPackets ? ((curIoReq->m_req.bNumPackets - 1) << 24) : 0) | frameNo | (USB_RC_NOTACCESSED << 28);
+	curTd->m_next = newTd;
+	curTd->m_bufferPage0 = (void *)((uiptr)curIoReq->m_destPtr & ~0xFFF);
+	curTd->m_bufferEnd = ( curIoReq->m_destPtr && (int)(curIoReq->m_length) > 0 ) ? ((u8 *)curIoReq->m_destPtr + ((int)curIoReq->m_length - 1)) : NULL;
+	curTd->m_psw[0] = ((uiptr)curIoReq->m_destPtr & 0xFFF) | (USB_RC_NOTACCESSED << 12);
 	if ( curIoReq->m_req.bNumPackets )
 	{
 		int psw0_tmp;
 		int i;
 
-		curTd->m_hcArea = ((curIoReq->m_req.bNumPackets - 1) << 24) | frameNo | (USB_RC_NOTACCESSED << 28);
-		curTd->m_next = newTd;
-		curTd->m_bufferPage0 = (void *)((uiptr)curIoReq->m_destPtr & ~0xFFF);
-		curTd->m_bufferEnd = NULL;
-		if ( curIoReq->m_destPtr && (int)(curIoReq->m_length) > 0 )
-		{
-			curTd->m_bufferEnd = (u8 *)curIoReq->m_destPtr + ((int)curIoReq->m_length - 1);
-		}
-		psw0_tmp = ((uiptr)curIoReq->m_destPtr & 0xFFF) | (USB_RC_NOTACCESSED << 12);
+		psw0_tmp = curTd->m_psw[0];
 		for ( i = 0; i < (int)curIoReq->m_req.bNumPackets; i += 1 )
 		{
 			curTd->m_psw[i] = psw0_tmp;
 			psw0_tmp += curIoReq->m_req.Packets[i].bLength;
 		}
-	}
-	else
-	{
-		curTd->m_hcArea = frameNo | (USB_RC_NOTACCESSED << 28);
-		curTd->m_next = newTd;
-		curTd->m_bufferPage0 = (void *)((uiptr)curIoReq->m_destPtr & ~0xFFF);
-		curTd->m_bufferEnd = NULL;
-		if ( curIoReq->m_destPtr && (int)(curIoReq->m_length) > 0 )
-		{
-			curTd->m_bufferEnd = (u8 *)curIoReq->m_destPtr + ((int)curIoReq->m_length - 1);
-		}
-		curTd->m_psw[0] = ((uiptr)curIoReq->m_destPtr & 0xFFF) | (USB_RC_NOTACCESSED << 12);
 	}
 	memPool->m_hcIsoTdToIoReqLUT[curTd - memPool->m_hcIsoTdBuf] = curIoReq;
 	ed->m_tdTail = (UsbdHcTD_t *)newTd;
@@ -243,14 +170,8 @@ static int setupIsocronTransfer(UsbdEndpoint_t *ep)
 		return 1;
 	}
 	// remove endpoint from busy list if there are no IoRequests left
-	if ( ep->m_busyNext )
-		ep->m_busyNext->m_busyPrev = ep->m_busyPrev;
-	else
-		memPool->m_tdQueueEnd = ep->m_busyPrev;
-	if ( ep->m_busyPrev )
-		ep->m_busyPrev->m_busyNext = ep->m_busyNext;
-	else
-		memPool->m_tdQueueStart = ep->m_busyNext;
+	*( ep->m_busyNext ? &(ep->m_busyNext->m_busyPrev) : &(memPool->m_tdQueueEnd) ) = ep->m_busyPrev;
+	*( ep->m_busyPrev ? &(ep->m_busyPrev->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep->m_busyNext;
 	ep->m_inTdQueue = NOTIN_QUEUE;
 	return 1;
 }
@@ -269,18 +190,8 @@ static int setupBulkTransfer(UsbdEndpoint_t *ep)
 		dbg_printf("ERROR UsbdEndpoint_t error\n");
 		if ( ep->m_inTdQueue == NOTIN_QUEUE )
 			return 0;
-		if ( ep->m_busyNext )
-			ep->m_busyNext->m_busyPrev = ep->m_busyPrev;
-		else
-			memPool->m_tdQueueEnd = ep->m_busyPrev;
-		if ( ep->m_busyPrev )
-		{
-			ep->m_busyPrev->m_busyNext = ep->m_busyNext;
-		}
-		else
-		{
-			memPool->m_tdQueueStart = ep->m_busyNext;
-		}
+		*( ep->m_busyNext ? &(ep->m_busyNext->m_busyPrev) : &(memPool->m_tdQueueEnd) ) = ep->m_busyPrev;
+		*( ep->m_busyPrev ? &(ep->m_busyPrev->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep->m_busyNext;
 		ep->m_inTdQueue = NOTIN_QUEUE;
 		return 0;
 	}
@@ -292,31 +203,18 @@ static int setupBulkTransfer(UsbdEndpoint_t *ep)
 		if ( ep->m_inTdQueue != NOTIN_QUEUE )
 			return 0;
 		ep->m_busyPrev = memPool->m_tdQueueEnd;
-		if ( memPool->m_tdQueueEnd )
-			memPool->m_tdQueueEnd->m_busyNext = ep;
-		else
-			memPool->m_tdQueueStart = ep;
+		*( memPool->m_tdQueueEnd ? &(memPool->m_tdQueueEnd->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep;
 		ep->m_busyNext = NULL;
 		memPool->m_tdQueueEnd = ep;
 		ep->m_inTdQueue = GENTD_QUEUE;
 		return 0;
 	}
-	if ( curIoReq->m_next )
-		curIoReq->m_next->m_prev = curIoReq->m_prev;
-	else
-		ep->m_ioReqListEnd = curIoReq->m_prev;
-	if ( curIoReq->m_prev )
-		curIoReq->m_prev->m_next = curIoReq->m_next;
-	else
-		ep->m_ioReqListStart = curIoReq->m_next;
+	*( curIoReq->m_next ? &(curIoReq->m_next->m_prev) : &(ep->m_ioReqListEnd) ) = curIoReq->m_prev;
+	*( curIoReq->m_prev ? &(curIoReq->m_prev->m_next) : &(ep->m_ioReqListStart) ) = curIoReq->m_next;
 	curTd->m_hcArea = TD_HCAREA(USB_RC_NOTACCESSED, 0, 0, 3, 1) << 16;
 	curTd->m_next = newTd;
 	curTd->m_curBufPtr = curIoReq->m_destPtr;
-	curTd->m_bufferEnd = NULL;
-	if ( curIoReq->m_destPtr && (int)curIoReq->m_length > 0 )
-	{
-		curTd->m_bufferEnd = (u8 *)curIoReq->m_destPtr + ((int)curIoReq->m_length - 1);
-	}
+	curTd->m_bufferEnd = ( curIoReq->m_destPtr && (int)curIoReq->m_length > 0 ) ? ((u8 *)curIoReq->m_destPtr + ((int)curIoReq->m_length - 1)) : NULL;
 	memPool->m_hcTdToIoReqLUT[curTd - memPool->m_hcTdBuf] = curIoReq;
 	ed->m_tdTail = newTd;
 	if ( ep->m_endpointType == TYPE_BULK )
@@ -330,14 +228,8 @@ static int setupBulkTransfer(UsbdEndpoint_t *ep)
 		return 1;
 	}
 	// remove endpoint from busy list if there are no IoRequests left
-	if ( ep->m_busyNext )
-		ep->m_busyNext->m_busyPrev = ep->m_busyPrev;
-	else
-		memPool->m_tdQueueEnd = ep->m_busyPrev;
-	if ( ep->m_busyPrev )
-		ep->m_busyPrev->m_busyNext = ep->m_busyNext;
-	else
-		memPool->m_tdQueueStart = ep->m_busyNext;
+	*( ep->m_busyNext ? &(ep->m_busyNext->m_busyPrev) : &(memPool->m_tdQueueEnd) ) = ep->m_busyPrev;
+	*( ep->m_busyPrev ? &(ep->m_busyPrev->m_busyNext) : &(memPool->m_tdQueueStart) ) = ep->m_busyNext;
 	ep->m_inTdQueue = NOTIN_QUEUE;
 	return 1;
 }

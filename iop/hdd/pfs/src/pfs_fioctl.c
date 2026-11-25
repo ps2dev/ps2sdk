@@ -267,11 +267,7 @@ static pfs_aentry_t *getAentry(pfs_cache_t *clink, char *key, char *value, int m
 	pfs_aentry_t *end;
 
 	kLen=strlen(key);
-	fullsize = 0;
-	if (value != NULL)
-	{
-		fullsize=(kLen+strlen(value)+7) & ~3;
-	}
+	fullsize=(value != NULL) ? ((kLen+strlen(value)+7) & ~3) : 0;
 	for(end=(pfs_aentry_t *)((u8*)aentry+1024);aentry < end; aentry=(pfs_aentry_t *)((u8*)aentry+aentry->aLen))
 	{	//Other than critical errors, do nothing about the filesystem errors.
 		if(aentry->aLen & 3)
@@ -347,10 +343,7 @@ static int ioctl2AttrAdd(pfs_cache_t *clink, pfs_ioctl2attr_t *attr)
 	if((aentry=getAentry(clink, attr->key, attr->value, PFS_AENTRY_MODE_ADD)) == NULL)
 		return -ENOSPC;
 
-	if(aentry->kLen==0)
-		tmp=aentry->aLen;
-	else
-		tmp=aentry->aLen-((aentry->kLen+(aentry->vLen + 7)) & 0x3FC);	//The only case that uses 0x3FC within the whole PFS driver.
+	tmp=aentry->aLen-((aentry->kLen==0) ? 0 : ((aentry->kLen+(aentry->vLen + 7)) & 0x3FC));	//The only case that uses 0x3FC within the whole PFS driver.
 
 	aentry->aLen-=tmp;
 	aentry = (pfs_aentry_t*)((u8 *)aentry + aentry->aLen);

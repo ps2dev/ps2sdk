@@ -207,9 +207,7 @@ int configGetLanguage(void)
         return g_t10KConfig.language;
 
     GetOsdConfigParam(&config);
-    if (IsEarlyJap(config))
-        return config.japLanguage;
-    return config.language;
+    return (IsEarlyJap(config)) ? config.japLanguage : config.language;
 }
 #endif
 

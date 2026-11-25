@@ -15,8 +15,7 @@ void _spu_setReverbAttr(const libspu2_reverb_param_entry_t *p_rev_param_entry)
 	u32 flags;
 
 	flags = p_rev_param_entry->flags;
-	if ( flags == 0 )
-		flags = 0xFFFFFFFF;
+	flags = ( flags == 0 ) ? 0xFFFFFFFF : flags;
 	if ( (flags & 1) != 0 )
 		_spu_MGFsetRXX2(370, p_rev_param_entry->dAPF1);
 	if ( (flags & 2) != 0 )

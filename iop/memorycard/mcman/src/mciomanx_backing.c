@@ -95,12 +95,7 @@ int mcman_iomanx_backing_mount(int port, int slot, const char *filename)
 
 		read_result = iomanX_read(fd, &superblock, sizeof(superblock));
 		if (read_result != sizeof(superblock)) {
-			if (read_result >= 0) {
-				r = -EINVAL;
-			}
-			else {
-				r = read_result;
-			}
+			r = (read_result >= 0) ? -EINVAL : read_result;
 			goto cleanup;
 		}
 		// Check magic
@@ -323,10 +318,7 @@ int mcman_iomanx_backing_read(int port, int slot, int page, void *pagebuf, void 
 
 			i = 0;	//s1
 			do {
-				if (pagesize < 0)
-					ecc_count = (pagesize + 0x7f) >> 7;
-				else
-					ecc_count = pagesize >> 7;
+				ecc_count = ((pagesize < 0) ? (pagesize + 0x7f) : pagesize) >> 7;
 
 				if (i >= ecc_count)
 					break;

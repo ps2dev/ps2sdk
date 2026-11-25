@@ -175,8 +175,7 @@ static int InitPHY(struct SmapDriverData *SmapDrivPrivData)
 
         LinkSpeed100M = 0 < (SmapConfiguration & 0x180); /* Toggles between SMAP_PHY_BMCR_10M and SMAP_PHY_BMCR_100M. */
         value         = LinkSpeed100M << 13;
-        if (SmapConfiguration & 0x140)
-            value |= SMAP_PHY_BMCR_DUPM;
+        value |= (SmapConfiguration & 0x140) ? SMAP_PHY_BMCR_DUPM : 0;
         _smap_write_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_BMCR, value);
 
     WaitLink:
@@ -358,23 +357,17 @@ static int InitPHY(struct SmapDriverData *SmapDrivPrivData)
         FlowControlEnabled = SmapConfiguration >> 10 & 1;
     }
 
-    if (LinkSpeed100M)
-        result = LinkFDX ? 8 : 4;
-    else
-        result = LinkFDX ? 2 : 1;
+    result = (LinkSpeed100M) ? (LinkFDX ? 8 : 4) : (LinkFDX ? 2 : 1);
 
     SmapDrivPrivData->LinkMode = result;
-    if (FlowControlEnabled)
-        SmapDrivPrivData->LinkMode |= 0x40;
+    SmapDrivPrivData->LinkMode |= FlowControlEnabled ? 0x40 : 0;
 
     DEBUG_PRINTF("%s %s Duplex Mode %s Flow Control\n", LinkSpeed100M ? "100BaseTX" : "10BaseT", LinkFDX ? "Full" : "Half", FlowControlEnabled ? "with" : "without");
 
     emac3_regbase = SmapDrivPrivData->emac3_regbase;
     emac3_value   = SMAP_EMAC3_GET32(SMAP_R_EMAC3_MODE1) & 0x67FFFFFF;
-    if (LinkFDX)
-        emac3_value |= SMAP_E3_FDX_ENABLE;
-    if (FlowControlEnabled)
-        emac3_value |= SMAP_E3_FLOWCTRL_ENABLE | SMAP_E3_ALLOW_PF;
+    emac3_value |= LinkFDX ? SMAP_E3_FDX_ENABLE : 0;
+    emac3_value |= FlowControlEnabled ? (SMAP_E3_FLOWCTRL_ENABLE | SMAP_E3_ALLOW_PF) : 0;
     SMAP_EMAC3_SET32(SMAP_R_EMAC3_MODE1, emac3_value);
 
     return 0;
@@ -822,10 +815,7 @@ void SMAPXmit(void)
 #endif
 
     if (SmapDriverData.LinkStatus) {
-        if (QueryIntrContext())
-            iSetEventFlag(SmapDrivPrivData->Dev9IntrEventFlag, SMAP_EVENT_XMIT);
-        else
-            SetEventFlag(SmapDrivPrivData->Dev9IntrEventFlag, SMAP_EVENT_XMIT);
+        (QueryIntrContext() ? iSetEventFlag : SetEventFlag)(SmapDrivPrivData->Dev9IntrEventFlag, SMAP_EVENT_XMIT);
     } else {
         // No link. Clear the packet queue.
         ClearPacketQueue(SmapDrivPrivData);
@@ -863,8 +853,7 @@ static int SMAPGetLinkMode(void)
             result = NETMAN_NETIF_ETH_LINK_MODE_10M_FDX; /* 10Base-TX FDX */
         if (value & 0x01)
             result = NETMAN_NETIF_ETH_LINK_MODE_10M_HDX; /* 10Base-TX HDX */
-        if (!(value & 0x40))
-            result |= NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE;
+        result |= (!(value & 0x40)) ? NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE : 0;
     }
 
     return result;
@@ -909,8 +898,7 @@ static int SMAPSetLinkMode(int mode)
         }
 
         if (result == 0) {
-            if (!(mode & NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE))
-                SmapConfiguration |= 0x400; // Enable flow control.
+            SmapConfiguration |= (!(mode & NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE)) ? 0x400 : 0; // Enable flow control.
 
             SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_STOP | SMAP_EVENT_START);
             SmapDriverData.NetDevStopFlag = 1;
@@ -1017,9 +1005,7 @@ static int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, vo
             result = sceInetNDIFT_ETHERNET;
             break;
         case sceInetNDCC_GET_NEGO_STATUS: {
-            result = 0;
-            if ((int)(SmapDrivPrivData->LinkStatus) > 0)
-                result = SmapDrivPrivData->LinkMode;
+            result = ((int)(SmapDrivPrivData->LinkStatus) > 0) ? SmapDrivPrivData->LinkMode : 0;
             break;
         }
         case sceInetNDCC_GET_LINK_STATUS:
@@ -1041,18 +1027,12 @@ static int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, vo
         }
         case sceInetNDCC_GET_NEGO_MODE: {
             bufasint = 0;
-            if (EnableAutoNegotiation != 0)
-                bufasint |= sceInetNDNEGO_AUTO;
-            if ((SmapConfiguration & 0x400) != 0)
-                bufasint |= sceInetNDNEGO_PAUSE;
-            if ((SmapConfiguration & 0x100) != 0)
-                bufasint |= sceInetNDNEGO_TX_FD;
-            if ((SmapConfiguration & 0x80) != 0)
-                bufasint |= sceInetNDNEGO_TX;
-            if ((SmapConfiguration & 0x40) != 0)
-                bufasint |= sceInetNDNEGO_10_FD;
-            if ((SmapConfiguration & 0x20) != 0)
-                bufasint |= sceInetNDNEGO_10;
+            bufasint |= (EnableAutoNegotiation != 0) ? sceInetNDNEGO_AUTO : 0;
+            bufasint |= ((SmapConfiguration & 0x400) != 0) ? sceInetNDNEGO_PAUSE : 0;
+            bufasint |= ((SmapConfiguration & 0x100) != 0) ? sceInetNDNEGO_TX_FD : 0;
+            bufasint |= ((SmapConfiguration & 0x80) != 0) ? sceInetNDNEGO_TX : 0;
+            bufasint |= ((SmapConfiguration & 0x40) != 0) ? sceInetNDNEGO_10_FD : 0;
+            bufasint |= ((SmapConfiguration & 0x20) != 0) ? sceInetNDNEGO_10 : 0;
             tmpoutptr = &bufasint;
             break;
         }
@@ -1063,16 +1043,11 @@ static int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, vo
                 tmpconfig = 0;
                 memcpy(&bufasint, in_out_ptr, 4);
                 EnableAutoNegotiation = ((bufasint & sceInetNDNEGO_AUTO) != 0 ? 1 : 0);
-                if ((bufasint & sceInetNDNEGO_PAUSE) != 0)
-                    tmpconfig |= 0x400;
-                if ((bufasint & sceInetNDNEGO_TX_FD) != 0)
-                    tmpconfig |= 0x100;
-                if ((bufasint & sceInetNDNEGO_TX) != 0)
-                    tmpconfig |= 0x80;
-                if ((bufasint & sceInetNDNEGO_10_FD) != 0)
-                    tmpconfig |= 0x40;
-                if ((bufasint & sceInetNDNEGO_10) != 0)
-                    tmpconfig |= 0x20;
+                tmpconfig |= ((bufasint & sceInetNDNEGO_PAUSE) != 0) ? 0x400 : 0;
+                tmpconfig |= ((bufasint & sceInetNDNEGO_TX_FD) != 0) ? 0x100 : 0;
+                tmpconfig |= ((bufasint & sceInetNDNEGO_TX) != 0) ? 0x80 : 0;
+                tmpconfig |= ((bufasint & sceInetNDNEGO_10_FD) != 0) ? 0x40 : 0;
+                tmpconfig |= ((bufasint & sceInetNDNEGO_10) != 0) ? 0x20 : 0;
                 SmapConfiguration = tmpconfig;
                 result            = 0;
             }

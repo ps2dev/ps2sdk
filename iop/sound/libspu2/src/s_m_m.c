@@ -26,10 +26,7 @@ int SpuMalloc(int size)
 	libspu2_malloc_t *p_last_block_3;
 
 	found_block_idx = -1;
-	if ( _spu_rev_reserve_wa )
-		rev_size_zero = 0x200000 - _spu_rev_offsetaddr;
-	else
-		rev_size_zero = 0;
+	rev_size_zero = _spu_rev_reserve_wa ? (0x200000 - _spu_rev_offsetaddr) : 0;
 	size_adjusted = 2 * (size >> 1);
 	if ( (_spu_memList->addr_area & 0x40000000) != 0 )
 	{

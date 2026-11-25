@@ -100,11 +100,9 @@ static int GetExtInfoStat(const struct ROMImgStat *ImageStat, struct RomDirFileF
 					BytesToCopy = ExtInfoEntry->ExtLength;
 					result = 0;
 				} else {
-					if (*buffer != NULL) {
-						BytesToCopy = nbytes;
-					} else {
+					BytesToCopy = *buffer ? nbytes : ExtInfoEntry->ExtLength;
+					if (*buffer == NULL) {
 						*buffer = malloc(ExtInfoEntry->ExtLength);
-						BytesToCopy = ExtInfoEntry->ExtLength;
 					}
 					result = ExtInfoEntry->ExtLength;
 				}

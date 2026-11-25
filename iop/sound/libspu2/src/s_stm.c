@@ -14,10 +14,7 @@ int SpuSetTransferMode(int mode)
 {
 	int result;
 
-	if ( mode == SPU_TRANSFER_BY_DMA )
-		result = SPU_TRANSFER_BY_DMA;
-	else
-		result = (mode == SPU_TRANSFER_BY_IO) ? SPU_TRANSFER_BY_IO : SPU_TRANSFER_BY_DMA;
+	result = ( mode == SPU_TRANSFER_BY_DMA ) ? SPU_TRANSFER_BY_DMA : ((mode == SPU_TRANSFER_BY_IO) ? SPU_TRANSFER_BY_IO : SPU_TRANSFER_BY_DMA);
 	_spu_trans_mode = mode;
 	_spu_transMode = result;
 	return result;

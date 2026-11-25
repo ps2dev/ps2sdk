@@ -475,13 +475,8 @@ static unsigned char *DES_createkeys(const unsigned char *key)
     for (i = 0; i < ITERATIONS; i++) {
         unsigned int s;
 
-        if (shifts[i]) {
-            c = ((c >> 2) | (c << 26));
-            d = ((d >> 2) | (d << 26));
-        } else {
-            c = ((c >> 1) | (c << 27));
-            d = ((d >> 1) | (d << 27));
-        }
+        c = shifts[i] ? ((c >> 2) | (c << 26)) : ((c >> 1) | (c << 27));
+        d = shifts[i] ? ((d >> 2) | (d << 26)) : ((d >> 1) | (d << 27));
         c &= 0x0fffffff;
         d &= 0x0fffffff;
         /* could be a few less shifts but I am to lazy at this

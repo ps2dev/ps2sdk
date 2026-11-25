@@ -102,9 +102,7 @@ static void _main()
     _InitSys();
 
     // Use arguments sent through start if sent (by ps2link for instance)
-    pa = &args;
-    if (args.argc == 0 && args_start != NULL && args_start->args.argc != 0)
-        pa = &args_start->args;
+    pa = (args.argc == 0 && args_start != NULL && args_start->args.argc != 0) ? &args_start->args : &args;
 
     // call libcglue argument parsing
     _libcglue_args_parse(pa->argc, pa->argv);

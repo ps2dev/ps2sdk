@@ -524,9 +524,7 @@ int iRotateThreadReadyQueue(int priority)
         }
     } else {
         priority = readyq_highest();
-        if ((int)thread->priority < (int)priority) {
-            priority = thread->priority;
-        }
+        priority = ((int)thread->priority < (int)priority) ? thread->priority : priority;
     }
 
     if (list_empty(&thctx.ready_queue[priority])) {

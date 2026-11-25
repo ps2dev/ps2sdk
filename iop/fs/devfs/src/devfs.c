@@ -119,9 +119,7 @@ const char *devfs_subdev_to_str(int subdev)
       name[loop++] = 0;
    }
 
-   loop = 0;
-   if(name[0] == '0') loop = 1;
-   if((name[0] == '0') && (name[1] == '0')) loop = 2;
+   loop = (name[0] == '0') ? 1 : (((name[0] == '0') && (name[1] == '0')) ? 2 : 0);
 
    return &name[loop];
 }
@@ -165,14 +163,8 @@ int devfs_fill_dirent(iox_dirent_t *dirent, int devno)
            dirent->stat.size = dev_scan->subdevs[subdev_loop].extent.loc32[0];
            dirent->stat.hisize = dev_scan->subdevs[subdev_loop].extent.loc32[1];
            dirent->stat.mode = FIO_S_IFREG;
-           if(dev_scan->subdevs[subdev_loop].mode & DEVFS_MODE_R)
-           {
-              dirent->stat.mode |= FIO_S_IRUSR;
-           }
-           if(dev_scan->subdevs[subdev_loop].mode & DEVFS_MODE_W)
-           {
-              dirent->stat.mode |= FIO_S_IWUSR;
-           }
+           dirent->stat.mode |= (dev_scan->subdevs[subdev_loop].mode & DEVFS_MODE_R) ? FIO_S_IRUSR : 0;
+           dirent->stat.mode |= (dev_scan->subdevs[subdev_loop].mode & DEVFS_MODE_W) ? FIO_S_IWUSR : 0;
            dirent->name[0] = 0;
            strcpy(dirent->name, dev_scan->node.name);
            strcat(dirent->name, devfs_subdev_to_str(subdev_loop));
@@ -660,10 +652,7 @@ int devfs_read(iop_file_t *file, void *buf, int len)
          dev_info.mode = data->mode;
          dev_info.loc = data->loc;
          bytes_read = dev->node.read(&dev_info, buf, len);
-         if(bytes_read > 0)
-         {
-            data->loc.loc64 += (u64) bytes_read;
-         }
+         data->loc.loc64 += (bytes_read > 0) ? (u64) bytes_read : 0;
          return bytes_read;
       }
    }
@@ -707,10 +696,7 @@ int devfs_write(iop_file_t *file, void *buf, int len)
          dev_info.mode = data->mode;
          dev_info.loc = data->loc;
          bytes_written = dev->node.write(&dev_info, buf, len);
-         if(bytes_written > 0)
-         {
-            data->loc.loc64 += (u64) bytes_written;
-         }
+         data->loc.loc64 += (bytes_written > 0) ? (u64) bytes_written : 0;
          return bytes_written;
       }
    }
@@ -966,14 +952,8 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
       stat->size = dev->subdevs[subdev].extent.loc32[0];
       stat->hisize = dev->subdevs[subdev].extent.loc32[1];
       stat->mode = FIO_S_IFREG;
-      if(dev->subdevs[subdev].mode & DEVFS_MODE_R)
-      {
-         stat->mode |= FIO_S_IRUSR;
-      }
-      if(dev->subdevs[subdev].mode & DEVFS_MODE_W)
-      {
-         stat->mode |= FIO_S_IWUSR;
-      }
+      stat->mode |= (dev->subdevs[subdev].mode & DEVFS_MODE_R) ? FIO_S_IRUSR : 0;
+      stat->mode |= (dev->subdevs[subdev].mode & DEVFS_MODE_W) ? FIO_S_IWUSR : 0;
    }
 
    return 0;

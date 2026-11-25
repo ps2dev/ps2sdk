@@ -43,11 +43,7 @@ void SpuSetVoiceAttr(SpuVoiceAttr *arg)
 	s16 attr_r_mode_converted;
 	unsigned int attr_sl;
 
-	attr_mask = arg->mask;
-	if ( attr_mask == 0 )
-	{
-		attr_mask = 0xFFFFFFFF;
-	}
+	attr_mask = ( arg->mask == 0 ) ? 0xFFFFFFFF : arg->mask;
 	for ( voice_num = 0; voice_num < 24; voice_num += 1 )
 	{
 		if ( (arg->voice & (1 << voice_num)) != 0 )
@@ -172,28 +168,20 @@ void SpuSetVoiceAttr(SpuVoiceAttr *arg)
 				_spu_RXX[512 * _spu_core + 4 + converted_voice_num] = arg->adsr2;
 			if ( (attr_mask & SPU_VOICE_ADSR_AR) != 0 )
 			{
-				attr_ar = arg->ar;
-				if ( attr_ar >= 0x80 )
-					attr_ar = 127;
-				adsr_ar_part = 0;
-				if ( ((attr_mask & SPU_VOICE_ADSR_AMODE) != 0) && arg->a_mode == SPU_VOICE_EXPIncN )
-					adsr_ar_part = 128;
+				attr_ar = ( arg->ar >= 0x80 ) ? 127 : arg->ar;
+				adsr_ar_part = ( ((attr_mask & SPU_VOICE_ADSR_AMODE) != 0) && arg->a_mode == SPU_VOICE_EXPIncN ) ? 128 : 0;
 				_spu_RXX[512 * _spu_core + 3 + converted_voice_num] =
 					(u8)_spu_RXX[512 * _spu_core + 3 + converted_voice_num] | (u16)(((u16)attr_ar | (u16)adsr_ar_part) << 8);
 			}
 			if ( (attr_mask & SPU_VOICE_ADSR_DR) != 0 )
 			{
-				adsr_dr_part = arg->dr;
-				if ( adsr_dr_part >= 0x10 )
-					adsr_dr_part = 15;
+				adsr_dr_part = ( arg->dr >= 0x10 ) ? 15 : arg->dr;
 				_spu_RXX[512 * _spu_core + 3 + converted_voice_num] =
 					(_spu_RXX[512 * _spu_core + 3 + converted_voice_num] & ~0xf0) | (16 * adsr_dr_part);
 			}
 			if ( (attr_mask & SPU_VOICE_ADSR_SR) != 0 )
 			{
-				adsr_sr_part = arg->sr;
-				if ( adsr_sr_part >= 0x80 )
-					adsr_sr_part = 127;
+				adsr_sr_part = ( arg->sr >= 0x80 ) ? 127 : arg->sr;
 				converted_s_mode = 256;
 				if ( (attr_mask & SPU_VOICE_ADSR_SMODE) != 0 )
 				{
@@ -218,23 +206,14 @@ void SpuSetVoiceAttr(SpuVoiceAttr *arg)
 			}
 			if ( (attr_mask & SPU_VOICE_ADSR_RR) != 0 )
 			{
-				adsr_rr_part = arg->rr;
-				if ( adsr_rr_part >= 0x20 )
-					adsr_rr_part = 31;
-				attr_r_mode_converted = 0;
-				if ( (attr_mask & SPU_VOICE_ADSR_RMODE) != 0 )
-				{
-					if ( arg->r_mode == SPU_VOICE_EXPDec )
-						attr_r_mode_converted = 32;
-				}
+				adsr_rr_part = ( arg->rr >= 0x20 ) ? 31 : arg->rr;
+				attr_r_mode_converted = ( (attr_mask & SPU_VOICE_ADSR_RMODE) != 0 && arg->r_mode == SPU_VOICE_EXPDec ) ? 32 : 0;
 				_spu_RXX[512 * _spu_core + 4 + converted_voice_num] =
 					(_spu_RXX[512 * _spu_core + 4 + converted_voice_num] & ~0x3f) | adsr_rr_part | attr_r_mode_converted;
 			}
 			if ( (attr_mask & SPU_VOICE_ADSR_SL) != 0 )
 			{
-				attr_sl = arg->sl;
-				if ( attr_sl >= 0x10 )
-					attr_sl = 15;
+				attr_sl = ( arg->sl >= 0x10 ) ? 15 : arg->sl;
 				_spu_RXX[512 * _spu_core + 3 + converted_voice_num] =
 					(_spu_RXX[512 * _spu_core + 3 + converted_voice_num] & ~0xF) | attr_sl;
 			}

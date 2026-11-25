@@ -267,10 +267,7 @@ static int cde_op_sync(void *arg)
 	argr->fno = cdc_getfno();
 	v3 = cdc_sync(mode);
 	argr->result = v3;
-	if ( mode < 0 && v3 )
-		argr->rpos = cdc_getpos();
-	else
-		argr->rpos = 0;
+	argr->rpos = ( mode < 0 && v3 ) ? cdc_getpos() : 0;
 	return 0;
 }
 
@@ -381,12 +378,8 @@ static int cde_reads_xfer(void *dst, void *src, int len, enum cdc_xfer_dir dir)
 	{
 		int index_v3;
 
-		index_v3 = Cdec.st_index - 1;
-		if ( Cdec.st_index - 1 < 0 )
-			index_v3 = 1;
-		if ( acMemWait(&Cdec.st_mem[index_v3], 100, 120) < 0 )
-			return -116;
-		return 9;
+		index_v3 = ( Cdec.st_index - 1 < 0 ) ? 1 : (Cdec.st_index - 1);
+		return ( acMemWait(&Cdec.st_mem[index_v3], 100, 120) < 0 ) ? -116 : 9;
 	}
 	index = Cdec.st_index;
 	mem = &Cdec.st_mem[Cdec.st_index];
@@ -520,14 +513,10 @@ static void *cde_request(unsigned int fno, struct cde_softc *data, int size)
 		return rpl;
 	}
 	CpuSuspendIntr(&state);
-	if ( data->fno )
-	{
-		ret = 1;
-	}
-	else
+	ret = data->fno ? 1 : 0;
+	if ( !data->fno )
 	{
 		data->fno = fno;
-		ret = 0;
 	}
 	CpuResumeIntr(state);
 	if ( ret )
@@ -543,10 +532,7 @@ static void *cde_request(unsigned int fno, struct cde_softc *data, int size)
 	v11 = func(rpl);
 	if ( v11 >= 0 )
 	{
-		if ( v11 )
-			rpl->error = 0;
-		else
-			rpl->error = cdc_error();
+		rpl->error = v11 ? 0 : cdc_error();
 	}
 	data->fno = AC_CDVDSIF_ID_NOP;
 	return rpl;
@@ -629,10 +615,7 @@ int acCdvdeModuleStatus()
 	int state;
 
 	CpuSuspendIntr(&state);
-	if ( Cdec.fno )
-		ret = 2;
-	else
-		ret = Cdec.thid != 0;
+	ret = Cdec.fno ? 2 : (Cdec.thid != 0);
 	CpuResumeIntr(state);
 	return ret;
 }
@@ -646,7 +629,6 @@ int acCdvdeModuleStart(int argc, char **argv)
 	int v10;
 	const char *opt_v7;
 	int value;
-	int inited;
 	char *next;
 
 	if ( acCdvdeModuleStatus() != 0 )
@@ -674,10 +656,7 @@ int acCdvdeModuleStart(int argc, char **argv)
 		++v8;
 	}
 	memset(&Cdec, 0, sizeof(Cdec));
-	inited = cde_init_thread(&Cdec, prio);
-	if ( inited <= 0 )
-		return -6;
-	return 0;
+	return ( cde_init_thread(&Cdec, prio) <= 0 ) ? -6 : 0;
 }
 
 int acCdvdeModuleStop()

@@ -121,8 +121,7 @@ int _SsVabOpenHeadWithMode(u8 *addr, int vab_id, libsnd2_vab_allocate_callback a
 		{
 			v24 = &prog_atr_ptr[v21];
 			v24->m_fake_prog_idx = fake_prog_idx;
-			if ( v24->tones )
-				fake_prog_idx += 1;
+			fake_prog_idx += ( v24->tones ) ? 1 : 0;
 		}
 		total_vags_size = 0;
 		_svm_vab_tn[vab_id_tmp] = vag_attr_ptr1;
@@ -132,9 +131,7 @@ int _SsVabOpenHeadWithMode(u8 *addr, int vab_id, libsnd2_vab_allocate_callback a
 			if ( vab_hdr_ptr->vs >= v27 )
 			{
 				v31 = *(u16 *)&vag_attr_ptr2->prior;
-				v32 = 4 * v31;
-				if ( vab_hdr_ptr->ver >= 5 )
-					v32 = 8 * v31;
+				v32 = ( vab_hdr_ptr->ver >= 5 ) ? (8 * v31) : (4 * v31);
 				vag_lens[v27] = v32;
 				total_vags_size += vag_lens[v27];
 			}
@@ -156,10 +153,7 @@ int _SsVabOpenHeadWithMode(u8 *addr, int vab_id, libsnd2_vab_allocate_callback a
 		for ( vag_idx = 0; vag_idx <= vab_hdr_ptr->vs; vag_idx += 1 )
 		{
 			total_vag_size_1 += vag_lens[vag_idx];
-			if ( (vag_idx & 1) != 0 )
-				prog_atr_ptr[vag_idx / 2].m_vag_spu_addr_lo = (spu_alloc_mem + total_vag_size_1) >> 4;
-			else
-				prog_atr_ptr[vag_idx / 2].m_vag_spu_addr_hi = (spu_alloc_mem + total_vag_size_1) >> 4;
+			*(( (vag_idx & 1) != 0 ) ? &(prog_atr_ptr[vag_idx / 2].m_vag_spu_addr_lo) : &(prog_atr_ptr[vag_idx / 2].m_vag_spu_addr_hi)) = (spu_alloc_mem + total_vag_size_1) >> 4;
 		}
 		_svm_vab_total[(s16)vab_id_tmp] = total_vag_size_1;
 		_svm_vab_used[(s16)vab_id_tmp] = 2;

@@ -33,10 +33,7 @@ void NetManUpdateStackNIFLinkState(void)
 {
 	if(IsNetStackInitialized)
 	{
-		if(NIFLinkState)
-			MainNetProtStack.LinkStateUp();
-		else
-			MainNetProtStack.LinkStateDown();
+		(NIFLinkState ? MainNetProtStack.LinkStateUp : MainNetProtStack.LinkStateDown)();
 	}
 }
 

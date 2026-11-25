@@ -12,9 +12,5 @@
 
 unsigned int SsUtGetVBaddrInSB(s16 vab_id)
 {
-	if ( (u16)vab_id >= 0x11u )
-		return -1;
-	if ( _svm_vab_used[vab_id] != 1 )
-		return -1;
-	return _svm_vab_start[vab_id];
+	return ( (u16)vab_id >= 0x11u || _svm_vab_used[vab_id] != 1 ) ? -1 : _svm_vab_start[vab_id];
 }

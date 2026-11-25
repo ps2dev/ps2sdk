@@ -293,12 +293,8 @@ int fioWrite(int fd, const void *ptr, int size)
     arg.size = size;
 
     /* Copy the unaligned (16-byte) portion into the argument */
-    mis = 0;
-    if ((u32)ptr & 0xf) {
-        mis = 16 - ((u32)ptr & 0xf);
-        if (mis > size)
-            mis = size;
-    }
+    mis = ((u32)ptr & 0xf) ? (16 - ((u32)ptr & 0xf)) : 0;
+    mis = (mis > size) ? size : mis;
     arg.mis = mis;
 
     if (mis)

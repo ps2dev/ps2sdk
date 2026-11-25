@@ -16,9 +16,6 @@ void SpuSetCommonCDReverb(int cd_reverb)
 	u16 v2;
 
 	v1 = &_spu_RXX[512 * _spu_core];
-	if ( cd_reverb )
-		v2 = v1[205] | 4;
-	else
-		v2 = v1[205] & ~4;
+	v2 = cd_reverb ? (v1[205] | 4) : (v1[205] & ~4);
 	v1[205] = v2;
 }

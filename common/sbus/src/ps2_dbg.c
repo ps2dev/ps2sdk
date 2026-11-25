@@ -33,10 +33,7 @@ void _sif2_cmd_puts(SIF2_CmdPkt *cmd, void *param)
 
         while (left > 0) {
             int toget;
-            toget = left;
-            if (toget > sizeof(_dbg_cmd_dma_buf)) {
-                toget = sizeof(_dbg_cmd_dma_buf);
-            }
+            toget = (left > sizeof(_dbg_cmd_dma_buf)) ? sizeof(_dbg_cmd_dma_buf) : left;
 
             // sio_printf("getting %d of %d bytes left\n", toget, left);
 

@@ -41,9 +41,7 @@ s16 note2pitch(void)
 {
 	u8 m_shift;
 
-	m_shift = _svm_cur.m_shift;
-	if ( (m_shift & 0x80u) != 0 )
-		m_shift = 127;
+	m_shift = ( (_svm_cur.m_shift & 0x80u) != 0 ) ? 127 : _svm_cur.m_shift;
 	return SsPitchFromNote(_svm_cur.m_note, 0, _svm_cur.m_centre, m_shift);
 }
 
@@ -71,21 +69,13 @@ u16 SsPitchFromNote(s16 note, s16 fine, u8 center, u8 shift)
 	shift_plus_fine_div_minus_tmp = shift_plus_fine_div_minus;
 	shift_plus_fine_mod = shift_plus_fine % 128;
 	shift_plus_fine_mod_tmp = shift_plus_fine_mod;
-	if ( (shift_plus_fine_mod & 0x8000) != 0 )
-	{
-		shift_plus_fine_mod_tmp = shift_plus_fine_mod + 128;
-		shift_plus_fine_div_minus_tmp = shift_plus_fine_div_minus - 1 + (s16)(shift_plus_fine_mod + 128) / 128;
-	}
+	shift_plus_fine_mod_tmp += ( (shift_plus_fine_mod & 0x8000) != 0 ) ? 128 : 0;
+	shift_plus_fine_div_minus_tmp -= (( (shift_plus_fine_mod & 0x8000) != 0 ) ? (1 + (s16)(shift_plus_fine_mod + 128) / 128) : 0);
 	shift_plus_fine_mul_minus = ((int)((u64)(0x2AAAAAABLL * (s16)shift_plus_fine_div_minus_tmp) >> 32) >> 1)
 														- ((int)(shift_plus_fine_div_minus_tmp << 16 >> 31));
 	v10 = (s16)shift_plus_fine_div_minus_tmp / 12 - 2;
 	v11 = (s16)shift_plus_fine_div_minus_tmp - 12 * shift_plus_fine_mul_minus;
-	if ( (v11 & 0x8000) != 0 )
-	{
-		v11 += 12;
-		v10 = shift_plus_fine_mul_minus - 3;
-	}
-	if ( v10 >= 0 )
-		return 0x3FFF;
-	return (unsigned int)(((_svm_ntable[v11] * _svm_ftable[shift_plus_fine_mod_tmp]) >> 16) + (1 << (-v10 - 1))) >> -v10;
+	v11 += ( (v11 & 0x8000) != 0 ) ? 12 : 0;
+	v10 = ( (v11 & 0x8000) != 0 ) ? (shift_plus_fine_mul_minus - 3) : v10;
+	return ( v10 >= 0 ) ? 0x3FFF : ((unsigned int)(((_svm_ntable[v11] * _svm_ftable[shift_plus_fine_mod_tmp]) >> 16) + (1 << (-v10 - 1))) >> -v10);
 }

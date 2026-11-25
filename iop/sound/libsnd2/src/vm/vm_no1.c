@@ -24,26 +24,14 @@ void vmNoiseOn(u8 vc)
 
 	right_vol_calc = _svm_cur.m_voll * 0x3FFF * _svm_vh->mvol / 0x3F01 * _svm_cur.m_mvol * _svm_cur.m_vol / 0x3F01u;
 	left_vol_calc = right_vol_calc;
-	score_struct = NULL;
-	if ( _svm_cur.m_seq_sep_no != 33 )
-	{
-		score_struct = &_ss_score[(_svm_cur.m_seq_sep_no & 0xFF)][(_svm_cur.m_seq_sep_no & 0xFF00) >> 8];
-	}
+	score_struct = ( _svm_cur.m_seq_sep_no != 33 ) ? &_ss_score[(_svm_cur.m_seq_sep_no & 0xFF)][(_svm_cur.m_seq_sep_no & 0xFF00) >> 8] : NULL;
 	if ( score_struct != NULL )
 	{
 		left_vol_calc = right_vol_calc * (u16)score_struct->m_voll / 0x7F;
 		right_vol_calc = right_vol_calc * (u16)score_struct->m_volr / 0x7F;
 	}
-	if ( (unsigned int)_svm_cur.m_pan >= 0x40 )
-	{
-		right_vol_final = right_vol_calc;
-		left_vol_final = left_vol_calc * (127 - _svm_cur.m_pan) / 0x3F;
-	}
-	else
-	{
-		left_vol_final = left_vol_calc;
-		right_vol_final = right_vol_calc * _svm_cur.m_pan / 0x3F;
-	}
+	left_vol_final = ( (unsigned int)_svm_cur.m_pan >= 0x40 ) ? (left_vol_calc * (127 - _svm_cur.m_pan) / 0x3F) : left_vol_calc;
+	right_vol_final = ( (unsigned int)_svm_cur.m_pan >= 0x40 ) ? right_vol_calc : (right_vol_calc * _svm_cur.m_pan / 0x3F);
 	if ( (unsigned int)_svm_cur.m_mpan >= 0x40 )
 		left_vol_final = left_vol_final * (127 - _svm_cur.m_mpan) / 0x3F;
 	else
@@ -68,16 +56,8 @@ void vmNoiseOn(u8 vc)
 	_svm_sreg_buf[vc].m_vol_left = left_vol_final;
 	_svm_sreg_buf[vc].m_vol_right = right_vol_final;
 	_svm_sreg_dirty[vc] |= 3;
-	if ( vc >= 0x10u )
-	{
-		v8 = 0;
-		v9 = 1 << (vc - 16);
-	}
-	else
-	{
-		v8 = 1 << vc;
-		v9 = 0;
-	}
+	v8 = ( vc >= 0x10u ) ? 0 : (1 << vc);
+	v9 = ( vc >= 0x10u ) ? (1 << (vc - 16)) : 0;
 	voice_struct = &_svm_voice[vc];
 	voice_struct->m_pitch = 10;
 	for ( v11 = 0; (s16)v11 < _SsVmMaxVoice; v11 += 1 )
