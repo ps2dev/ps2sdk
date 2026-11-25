@@ -9,15 +9,11 @@ sysmem_IMPORTS_end
 
 thbase_IMPORTS_start
 I_SetAlarm
+I_GetThreadId
+I_iWakeupThread
+I_SleepThread
 thbase_IMPORTS_end
 
 thevent_IMPORTS_start
 I_iSetEventFlag
 thevent_IMPORTS_end
-
-thsemap_IMPORTS_start
-I_CreateSema
-I_DeleteSema
-I_iSignalSema
-I_WaitSema
-thsemap_IMPORTS_end
