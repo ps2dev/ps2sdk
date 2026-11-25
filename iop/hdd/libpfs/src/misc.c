@@ -92,7 +92,7 @@ int pfsGetTime(pfs_datetime_t *tm)
 
 		DelayThread(100000);
 	}
-	memcpy(tm, &timeBuf, sizeof(pfs_datetime_t));
+	*tm = timeBuf;
 #else
 	time_t rawtime;
 	struct tm timeinfo;

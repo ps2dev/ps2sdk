@@ -669,7 +669,7 @@ int fioChstat(const char *name, io_stat_t *buf, u32 cbit)
     WaitSema(_fio_completion_sema);
 
     arg.p.cbit = cbit;
-    memcpy(&arg.stat, buf, sizeof(io_stat_t));
+    arg.stat = *buf;
     strncpy(arg.name, name, sizeof(arg.name));
     arg.name[sizeof(arg.name) - 1] = 0;
 

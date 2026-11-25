@@ -32,7 +32,7 @@ int SpuSetReverbModeType(int mode)
 	}
 	_spu_rev_attr.mode = v1;
 	_spu_rev_offsetaddr = SpuGetReverbEndAddr() - (8 * _spu_rev_workareasize[v1] - 2);
-	memcpy(&v7, &_spu_rev_param[v1], 0x44u);
+	v7 = _spu_rev_param[v1];
 	v7.flags = 0;
 	switch ( v1 )
 	{

@@ -365,8 +365,8 @@ void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo_t *bi, u16 mode, u16 uid, u16 g
 	ci->u.inode->number_blocks=val;
 
 	pfsGetTime(&ci->u.inode->ctime);
-	memcpy(&ci->u.inode->atime, &ci->u.inode->ctime, sizeof(pfs_datetime_t));
-	memcpy(&ci->u.inode->mtime, &ci->u.inode->ctime, sizeof(pfs_datetime_t));
+	ci->u.inode->atime = ci->u.inode->ctime;
+	ci->u.inode->mtime = ci->u.inode->ctime;
 
 	ci->u.inode->number_segdesg=1;
 	ci->u.inode->data[0].number =bi->number;

@@ -304,8 +304,8 @@ int mcman_dread2(int fd, MC_IO_DRE_T *dirent)
 
 	dirent->stat.attr = fse->attr;
 	dirent->stat.size = fse->length;
-	memcpy(dirent->stat.ctime, &fse->created, sizeof(sceMcStDateTime));
-	memcpy(dirent->stat.mtime, &fse->modified, sizeof(sceMcStDateTime));
+	*(sceMcStDateTime *)(dirent->stat.ctime) = fse->created;
+	*(sceMcStDateTime *)(dirent->stat.mtime) = fse->modified;
 
 	return 1;
 }
@@ -348,8 +348,8 @@ int mcman_getstat2(int port, int slot, const char *filename, MC_IO_STA_T *stat)
 	if (!(fse->mode & sceMcFileAttrSubdir))
 		stat->size = fse->length;
 
-	memcpy(stat->ctime, &fse->created, sizeof(sceMcStDateTime));
-	memcpy(stat->mtime, &fse->modified, sizeof(sceMcStDateTime));
+	*(sceMcStDateTime *)(stat->ctime) = fse->created;
+	*(sceMcStDateTime *)(stat->mtime) = fse->modified;
 
 	return sceMcResSucceed;
 }

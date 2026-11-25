@@ -103,12 +103,12 @@ void elf_loader_reader_read_elf_file(elf_loader_reader_info_t *info)
 			int j;
 			elf_loader_elf32_phdr_t phdr_tmp;
 
-			memcpy(&phdr_tmp, &elf_pheader[i], sizeof(elf_loader_elf32_phdr_t));
+			phdr_tmp = elf_pheader[i];
 			for ( j = i - 1; j >= 0 && phdr_tmp.p_vaddr < elf_pheader[j].p_vaddr; j -= 1 )
 			{
-				memcpy(&elf_pheader[j + 1], &elf_pheader[j], sizeof(elf_loader_elf32_phdr_t));
+				elf_pheader[j + 1] = elf_pheader[j];
 			}
-			memcpy(&elf_pheader[j + 1], &phdr_tmp, sizeof(elf_loader_elf32_phdr_t));
+			elf_pheader[j + 1] = phdr_tmp;
 		}
 		offs_sum = sizeof(elf_loader_elf32_ehdr_t) + (sizeof(elf_loader_elf32_phdr_t) * elf_header->e_phnum);
 		for ( i = 0; i < elf_header->e_phnum; i += 1 )
@@ -144,12 +144,12 @@ void elf_loader_reader_read_elf_file(elf_loader_reader_info_t *info)
 			int j;
 			elf_loader_reader_segment_info_t segment_info_tmp;
 
-			memcpy(&segment_info_tmp, &elf_segment_info[i], sizeof(elf_loader_reader_segment_info_t));
+			segment_info_tmp = elf_segment_info[i];
 			for ( j = i - 1; j >= 0 && segment_info_tmp.m_segment_offset < elf_segment_info[j].m_segment_offset; j -= 1 )
 			{
-				memcpy(&elf_segment_info[j + 1], &elf_segment_info[j], sizeof(elf_loader_reader_segment_info_t));
+				elf_segment_info[j + 1] = elf_segment_info[j];
 			}
-			memcpy(&elf_segment_info[j + 1], &segment_info_tmp, sizeof(elf_loader_reader_segment_info_t));
+			elf_segment_info[j + 1] = segment_info_tmp;
 		}
 		if ( !info->m_read_callback(
 					 info->m_userdata, ELF_LOADER_READER_STAGE_SEGMENTS, &elf_segment_info[0], elf_header->e_phnum) )

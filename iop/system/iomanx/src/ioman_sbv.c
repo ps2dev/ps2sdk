@@ -50,7 +50,7 @@ static int smod_get_next_mod(ModuleInfo_t *cur_mod, ModuleInfo_t *next_mod)
 			addr = cur_mod->next;
 	}
 
-	memcpy(next_mod, addr, sizeof(ModuleInfo_t));
+	*next_mod = *(ModuleInfo_t *)addr;
 	return next_mod->id;
 }
 

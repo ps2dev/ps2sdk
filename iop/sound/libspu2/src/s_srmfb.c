@@ -19,7 +19,7 @@ void SpuSetReverbModeFeedback(int feedback)
 		case SPU_REV_MODE_DELAY:
 		case SPU_REV_MODE_ECHO:
 		{
-			memcpy(&v2, &_spu_rev_param[_spu_rev_attr.mode], 0x44u);
+			v2 = _spu_rev_param[_spu_rev_attr.mode];
 			v2.flags = 128;
 			_spu_rev_attr.feedback = feedback;
 			v2.vWALL = 33024 * feedback / 127;

@@ -111,7 +111,7 @@ int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack){
 	WaitSema(NetManIOSemaID);
 
 	if(!IsInitialized){
-		memcpy(&MainNetProtStack, stack, sizeof(MainNetProtStack));
+		MainNetProtStack = *stack;
 		IsInitialized=1;
 
 		NetManUpdateStackNIFLinkState();
@@ -202,7 +202,7 @@ int NetManRegisterNetIF(struct NetManNetIF *NetIF){
 				EventFlag.option = 0;
 				EventFlag.bits = 0;
 				if((result = NetIF->EventFlagID = CreateEventFlag(&EventFlag)) >= 0){
-					memcpy(&NetIFs[i], NetIF, sizeof(NetIFs[i]));
+					NetIFs[i] = *NetIF;
 					NetIFs[i].flags|=NETMAN_NETIF_IN_USE;
 					result=NetIFs[i].id=((unsigned int)NextNetIFID)<<8|i;
 

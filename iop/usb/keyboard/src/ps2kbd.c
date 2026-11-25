@@ -825,7 +825,7 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
 	  SignalSema(lineSema);
 	}
 
-      memcpy(&dev->oldData, &dev->data, sizeof(kbd_data_recv));
+      dev->oldData = dev->data;
     }
 
   sceUsbdInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2kbd_data_recv, arg);

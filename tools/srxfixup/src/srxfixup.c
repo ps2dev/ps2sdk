@@ -468,7 +468,7 @@ static void convert_relative_branch_an_section(elf_section *relsect)
 		{
 			if ( s->type )
 			{
-				memcpy(d, s, sizeof(elf_rel));
+				*d = *s;
 				d += 1;
 			}
 			s += 1;

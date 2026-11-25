@@ -660,7 +660,7 @@ static int xx_stat(int op, const char *name, iox_stat_t *stat, unsigned int stat
 			{
 				iox_stat_t stat_tmp;
 
-				memcpy(&stat_tmp, stat, sizeof(stat_tmp));
+				stat_tmp = *stat;
 				stat_tmp.mode = modex2mode(stat->mode);
 				return handle_result(
 					f->device->ops->chstat(f, parsefile_res, &stat_tmp, statmask),

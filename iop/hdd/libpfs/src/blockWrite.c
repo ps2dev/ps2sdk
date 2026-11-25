@@ -74,16 +74,16 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 		memset(clink2->u.inode, 0, sizeof(pfs_inode_t));
 		clink2->u.inode->magic=PFS_SEGI_MAGIC;
 
-		memcpy(&clink2->u.inode->inode_block, &clink->u.inode->inode_block, sizeof(pfs_blockinfo_t));
-		memcpy(&clink2->u.inode->last_segment, &blockpos->inode->u.inode->data[0], sizeof(pfs_blockinfo_t));
-		memcpy(&clink2->u.inode->data[0], &bi, sizeof(pfs_blockinfo_t));
+		clink2->u.inode->inode_block = clink->u.inode->inode_block;
+		clink2->u.inode->last_segment = blockpos->inode->u.inode->data[0];
+		clink2->u.inode->data[0] = bi;
 
 		clink2->flags |= PFS_CACHE_FLAG_DIRTY;
 
 		clink->u.inode->number_blocks+=bi.count;
 		clink->u.inode->number_data++;
 
-		memcpy(&clink->u.inode->last_segment, &bi, sizeof(pfs_blockinfo_t));
+		clink->u.inode->last_segment = bi;
 
 		clink->u.inode->number_segdesg++;
 
@@ -91,7 +91,7 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 		blockpos->block_segment++;
 		blockpos->block_offset=0;
 
-		memcpy(&blockpos->inode->u.inode->next_segment, &bi, sizeof(pfs_blockinfo_t));
+		blockpos->inode->u.inode->next_segment = bi;
 
 		blockpos->inode->flags |= PFS_CACHE_FLAG_DIRTY;
 		pfsCacheFree(blockpos->inode);
@@ -117,7 +117,7 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 	blockpos->block_segment++;
 
 	i = pfsFixIndex(clink->u.inode->number_data-1);
-	memcpy(&blockpos->inode->u.inode->data[i], &bi, sizeof(pfs_blockinfo_t));
+	blockpos->inode->u.inode->data[i] = bi;
 
 	blockpos->inode->flags |= PFS_CACHE_FLAG_DIRTY;
 	blocks -= bi.count;

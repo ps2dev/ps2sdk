@@ -858,7 +858,7 @@ static void setSfnEntryFromOld(const char *shortName, fat_direntry_sfn *dsfn, co
 {
     int i;
 
-    memcpy(dsfn, orig_dsfn, sizeof(fat_direntry_sfn));
+    *dsfn = *orig_dsfn;
 
     // name + ext
     for (i = 0; i < 8; i++)
@@ -2173,7 +2173,7 @@ int fat_renameFile(fat_driver *fatd, fat_dir *fatdir, const char *fname)
         XPRINTF("E: I/O error! %d\n", ret);
         return ret;
     }
-    memcpy(&OriginalSFN, (fat_direntry_sfn *)(sbuf + sfnOffset), sizeof(fat_direntry_sfn));
+    OriginalSFN = *(fat_direntry_sfn *)(sbuf + sfnOffset);
     srcIsDirectory = ((fat_direntry_sfn *)(sbuf + sfnOffset))->attr & FAT_ATTR_DIRECTORY;
 
     ret = fat_fillDirentryInfo(fatd, lname, sname, srcIsDirectory, &dDirCluster, &new_sfnSector, &new_sfnOffset);

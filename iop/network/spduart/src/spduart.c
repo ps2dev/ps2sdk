@@ -906,6 +906,8 @@ static int spduart_op_send(void *userdata, void *ptr, int len)
 	return v7;
 }
 
+typedef int int_unaligned_t __attribute__((aligned(1)));
+
 static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 {
 	int v22;
@@ -932,13 +934,13 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 	{
 		case sceModemCC_GET_THPRI:
 		{
-			bcopy(&priv->spduart_thpri_, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_thpri_;
 			return 0;
 		}
 		case sceModemCC_GET_IF_TYPE:
 		{
 			v22 = sceModemIFT_SERIAL;
-			bcopy(&v22, ptr, 4);
+			*(int_unaligned_t *)ptr = v22;
 			return 0;
 		}
 		case sceModemCC_FLUSH_RXBUF:
@@ -975,32 +977,32 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 		}
 		case sceModemCC_GET_RX_COUNT:
 		{
-			bcopy(&priv->spduart_rx_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_rx_count;
 			return 0;
 		}
 		case sceModemCC_GET_TX_COUNT:
 		{
-			bcopy(&priv->spduart_tx_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_tx_count;
 			return 0;
 		}
 		case sceModemCC_GET_OE_COUNT:
 		{
-			bcopy(&priv->spduart_overrun_error_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_overrun_error_count;
 			return 0;
 		}
 		case sceModemCC_GET_PE_COUNT:
 		{
-			bcopy(&priv->spduart_parity_error_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_parity_error_count;
 			return 0;
 		}
 		case sceModemCC_GET_FE_COUNT:
 		{
-			bcopy(&priv->spduart_framing_error_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_framing_error_count;
 			return 0;
 		}
 		case sceModemCC_GET_BO_COUNT:
 		{
-			bcopy(&priv->spduart_buffer_overflow_count, ptr, 4);
+			*(int_unaligned_t *)ptr = priv->spduart_buffer_overflow_count;
 			return 0;
 		}
 		case sceModemCC_GET_PARAM:
@@ -1010,20 +1012,20 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			v25 |= ((priv->spduart_mcr_cached << 28) & sceModemPARAM_CSIZE);
 			v25 |= priv->spduart_baud_;
 			v25 |= ( (priv->spduart_mcr_cached & 4) != 0 ) ? sceModemPARAM_STOP2 : sceModemPARAM_STOP1;
-			bcopy((int *)&v25, ptr, 4);
+			*(int_unaligned_t *)ptr = v25;
 			return 0;
 		}
 		case sceModemCC_GET_LINE:
 		{
 			v26 = ((priv->spduart_signal_pin << 4) & (sceModemLINE_DTR | sceModemLINE_RTS)) | (((u8)priv->spduart_msr_cached >> 4) & (sceModemLINE_CTS | sceModemLINE_DSR | sceModemLINE_RI | sceModemLINE_DCD));
-			bcopy(&v26, ptr, 4);
+			*(int_unaligned_t *)ptr = v26;
 			return 0;
 		}
 		case sceModemCC_SET_THPRI:
 		{
 			int v6;
 
-			bcopy(ptr, &priority, 4);
+			priority = *(int_unaligned_t *)ptr;
 			v6 = 0;
 			if ( priv->spduart_thread > 0 )
 			{
@@ -1042,7 +1044,7 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 		{
 			int v17;
 
-			bcopy(ptr, &v25, 4);
+			v25 = *(int_unaligned_t *)ptr;
 			v17 = spduart_set_baud(v25 & sceModemPARAM_SPEED);
 			if ( !v17 )
 				return -512;
@@ -1065,7 +1067,7 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 		}
 		case sceModemCC_SET_LINE:
 		{
-			bcopy(ptr, &v26, 4);
+			v26 = *(int_unaligned_t *)ptr;
 			if ( (v26 & ~(sceModemLINE_DTR | sceModemLINE_RTS)) != 0 )
 				return -512;
 			priv->spduart_signal_pin &= ~3;

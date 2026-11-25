@@ -566,7 +566,7 @@ int sceNetCnfName2Address(sceNetCnfAddress_t *paddr, const char *buf)
 		return -1;
 	}
 	memset(paddr, 0, sizeof(sceNetCnfAddress_t));
-	memcpy(paddr->data, &paddr_tmp, sizeof(paddr_tmp));
+	*(unsigned int *)(paddr->data) = paddr_tmp;
 	return 0;
 }
 
@@ -580,7 +580,7 @@ int sceNetCnfAddress2String(char *buf, int len, const sceNetCnfAddress_t *paddr)
 	{
 		return -1;
 	}
-	memcpy(&srcintx, paddr->data, sizeof(srcintx));
+	srcintx = *(unsigned int *)(paddr->data);
 	do_address_to_string_inner(buf_tmp, srcintx);
 	buflen = (u32)strlen(buf_tmp) + 1;
 	if ( (unsigned int)len < buflen )

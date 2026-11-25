@@ -544,7 +544,7 @@ void do_ps2mouse_read(u8 *data, int size)
   (void)size;
 
   //printf("PS2MOUSE read\n");
-  memcpy(data, &mouse, sizeof(mouse_data));
+  *(mouse_data *)data = mouse;
 
   //printf("%d %d %d %d\n", mouse.x, mouse.y, mouse.buttons, mouse.wheel);
   if(mouse_readmode == PS2MOUSE_READMODE_DIFF)
