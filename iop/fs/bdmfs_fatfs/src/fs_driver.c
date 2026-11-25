@@ -643,7 +643,7 @@ static int fs_dread(iop_file_t *fd, iox_dirent_t *buffer)
     ret = f_readdir(fd->privdata, &fno);
 
     if (ret == FR_OK && fno.fname[0]) {
-        strncpy(buffer->name, fno.fname, 255);
+        strncpy(buffer->name, fno.fname, sizeof(buffer->name) - 1);
         fileInfoToStat(&fno, &(buffer->stat));
         ret = 1;
     } else {

@@ -269,9 +269,6 @@ int __fioDreadHelper(void *userdata, struct dirent *dir)
     int fd;
     io_dirent_t iodir;
 
-    // Took from io_dirent_t
-    #define __MAXNAMLEN 256
-
     fd = __fioGetFdHelper(userdata);
     if (fd < 0)
     {
@@ -432,7 +429,7 @@ int __fioGetstatHelper(const char *path, struct stat *buf)
 
     if (strncmp(path, "tty", 3) == 0 && path[3] >= '0' && path[3] <= '9' && path[4] == ':')
     {
-        memset(buf, 0, sizeof(struct stat));
+        memset(buf, 0, sizeof(*buf));
         buf->st_mode = S_IFCHR;
         return 0;
     }

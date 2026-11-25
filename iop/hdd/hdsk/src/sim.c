@@ -63,7 +63,7 @@ void hdskSimGetFreeSectors(s32 device, struct hdskStat *stat, apa_device_t *devi
 
 static void hdskSimClearHeader(struct hdskBitmap *header)
 {
-    memset(header, 0, sizeof(struct hdskBitmap));
+    memset(header, 0, sizeof(*header));
 }
 
 static struct hdskBitmap *hdskSimDeleteFixPrev(struct hdskBitmap *part)

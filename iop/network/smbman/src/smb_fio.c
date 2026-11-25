@@ -359,8 +359,8 @@ int smb_open(iop_file_t *f, const char *filename, int flags, int mode)
                 fh->filesize = 0;
             else if (fh->mode & O_APPEND)
                 fh->position = filesize;
-            strncpy(fh->name, path, SMB_NAME_MAX - 1);
-            fh->name[SMB_NAME_MAX - 1] = '\0';
+            strncpy(fh->name, path, sizeof(fh->name) - 1);
+            fh->name[sizeof(fh->name) - 1] = '\0';
             r = 0;
         }
     } else
@@ -389,7 +389,7 @@ int smb_close(iop_file_t *f)
                 goto io_unlock;
             }
         }
-        memset(fh, 0, sizeof(FHANDLE));
+        memset(fh, 0, sizeof(*fh));
         fh->smb_fid = -1;
         r           = 0;
     }
@@ -663,8 +663,8 @@ int smb_dopen(iop_file_t *f, const char *dirname)
         fh->filesize = 0;
         fh->position = 0;
 
-        strncpy(fh->name, path, SMB_NAME_MAX - 1);
-        fh->name[SMB_NAME_MAX - 1] = '\0';
+        strncpy(fh->name, path, sizeof(fh->name) - 1);
+        fh->name[sizeof(fh->name) - 1] = '\0';
         if (fh->name[strlen(fh->name) - 1] != '\\')
             strcat(fh->name, "\\");
         strcat(fh->name, "*");
@@ -696,7 +696,7 @@ int smb_dread(iop_file_t *f, iox_dirent_t *dirent)
 
     smb_io_lock();
 
-    memset((void *)dirent, 0, sizeof(iox_dirent_t));
+    memset((void *)dirent, 0, sizeof(*dirent));
 
     SearchInfo_t *info = (SearchInfo_t *)SearchBuf;
 
@@ -745,7 +745,7 @@ int smb_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
 
     smb_io_lock();
 
-    memset((void *)stat, 0, sizeof(iox_stat_t));
+    memset((void *)stat, 0, sizeof(*stat));
 
     r = smb_QueryPathInformation(UID, TID, &info, path);
     if (r < 0) {

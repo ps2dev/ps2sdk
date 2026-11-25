@@ -462,8 +462,8 @@ int mcman_setinfo2(int port, int slot, const char *filename, sceMcTblGetDir *inf
 		fse->modified = info->_Modify;
 
 	if ((flags & sceMcFileAttrFile) != 0) {
-		strncpy(fse->name, info->EntryName, 32);
-		fse->name[31] = 0;
+		strncpy(fse->name, info->EntryName, sizeof(fse->name) - 1);
+		fse->name[sizeof(fse->name) - 1] = 0;
 	}
 
 	return sceMcResSucceed;
@@ -936,7 +936,7 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 
 	mcman_wmemset((void *)fse2, sizeof (McFsEntry), 0);
 
-	strncpy(fse2->name, p, 32);
+	strncpy(fse2->name, p, sizeof(fse2->name));
 
 	fse2->created = mcman_dircache[2].modified;
 	fse2->modified = mcman_dircache[2].modified;
@@ -1085,8 +1085,8 @@ lbl1:
 			strncpy(currentdir, fse->name, len);
 		}
 		else {
-			strncpy(currentdir, fse->name, 32);
-			currentdir[32] = 0;
+			strncpy(currentdir, fse->name, sizeof(fse->name) - 1);
+			currentdir[sizeof(fse->name) - 1] = 0;
 		}
 
 		r = McReadDirEntry(port, slot, cluster, 0, &fse);
@@ -1130,9 +1130,9 @@ int mcman_getdir2(int port, int slot, const char *dirname, int flags, int maxent
 	if (!flags) {
 		register int pos;
 
+		strncpy(mcman_curdirpath, dirname, sizeof(mcman_curdirpath) - 1);
+		mcman_curdirpath[sizeof(mcman_curdirpath) - 1] = 0;
 		p = mcman_curdirpath;
-		strncpy(p, dirname, 1023);
-		mcman_curdirpath[1023] = 0;
 
 		pos = -1; 	// s1
 		p++; 		//s0
@@ -1231,7 +1231,7 @@ int mcman_getdir2(int port, int slot, const char *dirname, int flags, int maxent
 				info->EntryName[1] = '\0';
 			}
 			else {
-				strncpy(info->EntryName, fse->name, 32);
+				strncpy(info->EntryName, fse->name, sizeof(fse->name));
 			}
 
 			info->AttrFile = fse->mode;

@@ -94,8 +94,8 @@ int devscan_setup(int devtype)
         if ((devinfo_table[i]->type & devtype))
         {
           dev_info_list[count].devtype = IOPMGR_DEVTYPE_IOMAN;
-          strncpy(dev_info_list[count].name,devinfo_table[i]->name,255);
-          dev_info_list[count].name[255] = '\0';
+          strncpy(dev_info_list[count].name,devinfo_table[i]->name,sizeof(dev_info_list[count].name) - 1);
+          dev_info_list[count].name[sizeof(dev_info_list[count].name) - 1] = '\0';
           dev_info_list[count].len = strlen(dev_info_list[count].name);
           DPRINTF("ioman '%s'\n",dev_info_list[count].name);
           count++;
@@ -117,8 +117,8 @@ int devscan_setup(int devtype)
         if ((devinfo_table[i]->type & IOP_DT_FSEXT) && (devinfo_table[i]->type & devtype))
         {
           dev_info_list[count].devtype = IOPMGR_DEVTYPE_IOMANX;
-          strncpy(dev_info_list[count].name,devinfo_table[i]->name,255);
-          dev_info_list[count].name[255] = '\0';
+          strncpy(dev_info_list[count].name,devinfo_table[i]->name,sizeof(dev_info_list[count].name) - 1);
+          dev_info_list[count].name[sizeof(dev_info_list[count].name) - 1] = '\0';
           dev_info_list[count].len = strlen(dev_info_list[count].name);
           DPRINTF("iomanx '%s'\n",dev_info_list[count].name);
           count++;

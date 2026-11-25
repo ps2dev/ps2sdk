@@ -637,9 +637,9 @@ static elf_section *add_iopmod(elf_file *elf)
 	elf_section *modsect;
 
 	modsect = (elf_section *)malloc(sizeof(elf_section));
-	memset(modsect, 0, sizeof(elf_section));
+	memset(modsect, 0, sizeof(*modsect));
 	iopmodp = (Elf32_IopMod *)malloc(sizeof(Elf32_IopMod));
-	memset(iopmodp, 0, sizeof(Elf32_IopMod));
+	memset(iopmodp, 0, sizeof(*iopmodp));
 	iopmodp->moduleinfo = -1;
 	modsect->name = strdup(".iopmod");
 	modsect->data = (uint8_t *)iopmodp;
@@ -657,9 +657,9 @@ static elf_section *add_eemod(elf_file *elf)
 	elf_section *modsect;
 
 	modsect = (elf_section *)malloc(sizeof(elf_section));
-	memset(modsect, 0, sizeof(elf_section));
+	memset(modsect, 0, sizeof(*modsect));
 	eemodp = (Elf32_EeMod *)malloc(sizeof(Elf32_EeMod));
-	memset(eemodp, 0, sizeof(Elf32_EeMod));
+	memset(eemodp, 0, sizeof(*eemodp));
 	eemodp->moduleinfo = -1;
 	modsect->name = strdup(".eemod");
 	modsect->data = (uint8_t *)eemodp;

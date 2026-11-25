@@ -122,7 +122,7 @@ int slib_get_exp_lib(const char *name, slib_exp_lib_t *library)
 					count++;
 
 				if (library)
-					memcpy(library, exp_lib, sizeof(slib_exp_lib_t) + count * 4);
+					memcpy(library, exp_lib, sizeof(slib_exp_lib_t) + count * sizeof(exp_lib->exports[0]));
 
 				return count;
 			}

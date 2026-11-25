@@ -145,7 +145,7 @@ int flash_get_info(flash_info_t *info)
 	id = SPD_REG16(0x4814);
 	SPD_REG16(0x480c) = 0;
 
-	memset(info, 0, sizeof(flash_info_t));
+	memset(info, 0, sizeof(*info));
 
 	for (i = 0; (u32)i < NUM_DEVICES; i++) {
 		if (id != devices[i].id)

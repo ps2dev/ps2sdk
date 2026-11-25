@@ -996,7 +996,7 @@ int fileXioIoctl(int fd, int cmd, void *arg){
 	_lock();
 	WaitSema(__fileXioCompletionSema);
 
-	memcpy(packet->arg, arg, IOCTL_BUF_SIZE);
+	memcpy(packet->arg, arg, sizeof(packet->arg));
 
 	packet->fd = fd;
 	packet->cmd = cmd;

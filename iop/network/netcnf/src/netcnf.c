@@ -535,7 +535,7 @@ int sceNetCnfInitIFC(sceNetCnfInterface_t *ifc)
 {
 	if ( ifc )
 	{
-		memset(ifc, 0, sizeof(sceNetCnfInterface_t));
+		memset(ifc, 0, sizeof(*ifc));
 		do_init_ifc_inner(ifc);
 	}
 	return 0;
@@ -565,7 +565,7 @@ int sceNetCnfName2Address(sceNetCnfAddress_t *paddr, const char *buf)
 	{
 		return -1;
 	}
-	memset(paddr, 0, sizeof(sceNetCnfAddress_t));
+	memset(paddr, 0, sizeof(*paddr));
 	*(unsigned int *)(paddr->data) = paddr_tmp;
 	return 0;
 }

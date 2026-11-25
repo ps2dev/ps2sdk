@@ -1180,7 +1180,7 @@ static int ps2netfs_op_dread(char *buf, int len)
 
   // get response structure ready for filling
   dreadrly = (ps2netfs_pkt_dread_rly *)&ps2netfs_send_packet[0];
-  memset(dreadrly,0,sizeof(ps2netfs_pkt_dread_rly));
+  memset(dreadrly,0,sizeof(*dreadrly));
 
   // do the stuff here
   fdptr = fdh_get(ntohl(cmd->fd));
@@ -1196,11 +1196,11 @@ static int ps2netfs_op_dread(char *buf, int len)
         dreadrly->attr   = htonl(dirent.stat.attr);
         dreadrly->size   = htonl(dirent.stat.size);
         dreadrly->hisize = htonl(0);
-        memcpy(dreadrly->ctime,dirent.stat.ctime,8);
-        memcpy(dreadrly->atime,dirent.stat.atime,8);
-        memcpy(dreadrly->mtime,dirent.stat.mtime,8);
-        strncpy(dreadrly->name,dirent.name,255);
-        dreadrly->name[255] = '\0';
+        memcpy(dreadrly->ctime,dirent.stat.ctime,sizeof(dreadrly->ctime));
+        memcpy(dreadrly->atime,dirent.stat.atime,sizeof(dreadrly->atime));
+        memcpy(dreadrly->mtime,dirent.stat.mtime,sizeof(dreadrly->mtime));
+        strncpy(dreadrly->name,dirent.name,sizeof(dreadrly->name) - 1);
+        dreadrly->name[sizeof(dreadrly->name) - 1] = '\0';
       }
     }
     else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -1213,11 +1213,11 @@ static int ps2netfs_op_dread(char *buf, int len)
         dreadrly->attr   = htonl(dirent.stat.attr);
         dreadrly->size   = htonl(dirent.stat.size);
         dreadrly->hisize = htonl(0);
-        memcpy(dreadrly->ctime,dirent.stat.ctime,8);
-        memcpy(dreadrly->atime,dirent.stat.atime,8);
-        memcpy(dreadrly->mtime,dirent.stat.mtime,8);
-        strncpy(dreadrly->name,dirent.name,255);
-        dreadrly->name[255] = '\0';
+        memcpy(dreadrly->ctime,dirent.stat.ctime,sizeof(dreadrly->ctime));
+        memcpy(dreadrly->atime,dirent.stat.atime,sizeof(dreadrly->atime));
+        memcpy(dreadrly->mtime,dirent.stat.mtime,sizeof(dreadrly->mtime));
+        strncpy(dreadrly->name,dirent.name,sizeof(dreadrly->name) - 1);
+        dreadrly->name[sizeof(dreadrly->name) - 1] = '\0';
       }
     }
   }

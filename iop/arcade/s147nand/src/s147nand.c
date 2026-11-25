@@ -197,7 +197,7 @@ static int nand_mdev_op_open(iop_file_t *f, const char *name, int flags)
 	if ( retres >= 0 )
 	{
 		privdat = (s147nand_mdev_privdata_t *)f->privdata;
-		memset(privdat, 0, sizeof(s147nand_mdev_privdata_t));
+		memset(privdat, 0, sizeof(*privdat));
 		retres = do_nand_open_inner1(privdat, f->unit, name);
 	}
 	if ( retres < 0 )
@@ -715,7 +715,7 @@ static int nand_mdev_open_special(iop_file_t *f, const char *name)
 		return -ENOENT;
 	}
 	privdat = (s147nand_mdev_privdata_t *)f->privdata;
-	memset(privdat, 0, sizeof(s147nand_mdev_privdata_t));
+	memset(privdat, 0, sizeof(*privdat));
 	privdat->m_seek_cur = 0;
 	if ( !strcmp(name, "watchdog-enable") )
 	{

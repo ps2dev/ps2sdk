@@ -101,7 +101,7 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop,
 				samples[i] <<= 8;
 			}
 		} else {
-			memcpy(samples, wave, BUFFER_SIZE*2);
+			memcpy(samples, wave, sizeof(samples));
 		}
 
 		// i = num of samples with size 28

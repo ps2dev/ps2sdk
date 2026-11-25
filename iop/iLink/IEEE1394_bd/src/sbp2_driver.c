@@ -414,8 +414,8 @@ static int ieee1394_SendManagementORB(int mode, struct SBP2Device *dev)
     struct management_ORB new_management_ORB;
 
     memset((void *)&statusFIFO, 0, sizeof(statusFIFO));
-    memset(&login_result, 0, sizeof(struct sbp2_login_response));
-    memset(&new_management_ORB, 0, sizeof(struct management_ORB));
+    memset(&login_result, 0, sizeof(login_result));
+    memset(&new_management_ORB, 0, sizeof(new_management_ORB));
 
     new_management_ORB.status_FIFO.low = (u32)&statusFIFO;
     new_management_ORB.flags           = (u32)(ORB_NOTIFY | ORB_REQUEST_FORMAT(0) | MANAGEMENT_ORB_FUNCTION(mode));
