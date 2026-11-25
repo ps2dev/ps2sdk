@@ -87,7 +87,7 @@ int _start(int ac, char **av)
     int main_thread_id;
 
     margen_val = 10;
-    if (ac >= 2 && !strncmp(av[1], "-th=", 4)) {
+    if (ac >= 2 && !memcmp(av[1], "-th=", 4)) {
         margen_val = strtol(av[1] + 4, 0, 10) + 10;
         printf("margen = %d\n", margen_val);
     }

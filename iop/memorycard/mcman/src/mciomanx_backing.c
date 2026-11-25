@@ -104,7 +104,7 @@ int mcman_iomanx_backing_mount(int port, int slot, const char *filename)
 			goto cleanup;
 		}
 		// Check magic
-		if (strncmp(superblock.magic, SUPERBLOCK_MAGIC, 28) != 0) {
+		if (memcmp(superblock.magic, SUPERBLOCK_MAGIC, 28) != 0) {
 			r = -EINVAL;
 			goto cleanup;
 		}

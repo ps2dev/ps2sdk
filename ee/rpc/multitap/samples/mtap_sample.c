@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 
     printf("libmtap sample");
 
-	if((argc == 2) && (strncmp(argv[1], "free", 4) == 0))
+	if((argc == 2) && (memcmp(argv[1], "free", 4) == 0))
 	{
 		printf(" - Using PS2SDK sio2man.irx, mtapman.irx and padman.irx modules.\n");
 		loadmodules(1);

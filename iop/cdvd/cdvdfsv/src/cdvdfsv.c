@@ -298,7 +298,7 @@ static void cdvdfsv_parseargs(int ac, char **av)
 	g_cdvdfsv_def_pri = 81;
 	for ( i = 1; i < ac; i += 1 )
 	{
-		if ( !strncmp(av[i], "thpri=", 6) )
+		if ( !memcmp(av[i], "thpri=", 6) )
 		{
 			g_cdvdfsv_def_pri = strtol(av[i] + 6, 0, 10);
 			if ( (unsigned int)(g_cdvdfsv_def_pri - 9) >= 0x73 )

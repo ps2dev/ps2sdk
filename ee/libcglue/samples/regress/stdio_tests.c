@@ -133,7 +133,7 @@ static const char *test_fseek_ftell(void *arg)
     }
 
     ret = fread(buf, 2, 1, fp);
-    if (ret != 1 || strncmp(buf, "he", 2) != 0)
+    if (ret != 1 || memcmp(buf, "he", 2) != 0)
     {
         error = "failed to read first two bytes";
         goto failed;
@@ -149,7 +149,7 @@ static const char *test_fseek_ftell(void *arg)
     }
 
     ret = fread(buf, 2, 1, fp);
-    if (ret != 1 || strncmp(buf, "o ", 2) != 0)
+    if (ret != 1 || memcmp(buf, "o ", 2) != 0)
     {
         error = "error reading from test file";
         goto failed;
@@ -165,7 +165,7 @@ static const char *test_fseek_ftell(void *arg)
     }
 
     ret = fread(buf, 2, 1, fp);
-    if (ret != 1 || strncmp(buf, "o ", 2) != 0)
+    if (ret != 1 || memcmp(buf, "o ", 2) != 0)
     {
         error = "error reading from test file";
         goto failed;
@@ -203,7 +203,7 @@ static const char *test_fread(void *arg)
 
     /* test of reading one chunk */
     ret = fread(buf, 3, 1, fp);
-    if (ret != 1 || strncmp(buf, "hel", 3) != 0)
+    if (ret != 1 || memcmp(buf, "hel", 3) != 0)
     {
         error = "failed to read one block";
         goto failed;
@@ -211,7 +211,7 @@ static const char *test_fread(void *arg)
 
     /* three chunks */
     ret = fread(buf, 2, 3, fp);
-    if (ret != 3 || strncmp(buf, "lo wor", 6) != 0)
+    if (ret != 3 || memcmp(buf, "lo wor", 6) != 0)
     {
         error = "failed to read three blocks";
         goto failed;
@@ -219,7 +219,7 @@ static const char *test_fread(void *arg)
 
     /* until end of file */
     ret = fread(buf, 1, sizeof(buf), fp);
-    if (ret < 2 || strncmp(buf, "ld", 2) != 0)
+    if (ret < 2 || memcmp(buf, "ld", 2) != 0)
     {
         error = "failed to read until eof";
         goto failed;
@@ -265,7 +265,7 @@ static const char *test_fwrite(void *arg)
 
     fseek(fp, 0, SEEK_SET);
     ret = fread(buf2, 2, 1, fp);
-    if (ret != 1 || strncmp(buf2, "he", 2) != 0)
+    if (ret != 1 || memcmp(buf2, "he", 2) != 0)
     {
         fclose(fp);
         printf("buf2 = %s ret = %d\n", buf2, ret);
@@ -281,7 +281,7 @@ static const char *test_fwrite(void *arg)
 
     fseek(fp, 0, SEEK_SET);
     ret = fread(buf2, 1, sizeof(buf2), fp);
-    if (ret != 13 || strncmp(buf2, "hehello world", 13))
+    if (ret != 13 || memcmp(buf2, "hehello world", 13))
     {
         fclose(fp);
         return "failed to write rest of file";

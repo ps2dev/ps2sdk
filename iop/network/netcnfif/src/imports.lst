@@ -58,7 +58,7 @@ I_strcat
 I_strcmp
 I_strcpy
 I_strlen
-I_strncmp
+I_memcmp
 I_strtol
 sysclib_IMPORTS_end
 

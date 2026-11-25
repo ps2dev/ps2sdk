@@ -1503,7 +1503,7 @@ int smap_init(int argc, char *argv[])
             EnablePinStrapConfig = 1;
         } else if (strcmp("-no_strap", *argv) == 0) {
             EnablePinStrapConfig = 0;
-        } else if (strncmp("thpri=", *argv, 6) == 0) {
+        } else if (memcmp("thpri=", *argv, 6) == 0) {
             CmdString = &(*argv)[6];
             if (isdigit(CmdString[0])) {
                 ThreadPriority = strtoul(&(*argv)[6], NULL, 10);
@@ -1520,7 +1520,7 @@ int smap_init(int argc, char *argv[])
                 }
             } else
                 return DisplayHelpMessage();
-        } else if (strncmp("thstack=", *argv, 8) == 0) {
+        } else if (memcmp("thstack=", *argv, 8) == 0) {
             CmdString = &(*argv)[8];
             if (isdigit(CmdString[0])) {
                 ThreadStackSize = strtoul(&(*argv)[8], NULL, 10);
