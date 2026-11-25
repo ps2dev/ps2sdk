@@ -47,7 +47,6 @@ I_WaitSema
 thsemap_IMPORTS_end
 
 sysclib_IMPORTS_start
-I_bcopy
 I_bzero
 I_memset // added
 I_memcpy // added

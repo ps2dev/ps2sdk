@@ -27,7 +27,7 @@ stdio_IMPORTS_end
 
 sysclib_IMPORTS_start
 I_look_ctype_table
-I_bcopy
+I_memcpy
 I_bzero
 I_sprintf
 I_strcmp
