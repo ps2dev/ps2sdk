@@ -114,9 +114,7 @@ int SetEventFlag(int ef, u32 bits)
         }
 
         shared_bits = thread->event_bits & evt->bits;
-        if ((thread->event_mode & WEF_OR) == 0) {
-            shared_bits = shared_bits == thread->event_bits;
-        }
+        shared_bits = ((thread->event_mode & WEF_OR) == 0) ? (shared_bits == thread->event_bits) : shared_bits;
 
         if (shared_bits) {
             // We stored the WaitEventFlag resbits arg
@@ -182,9 +180,7 @@ int iSetEventFlag(int ef, u32 bits)
         }
 
         shared_bits = thread->event_bits & evt->bits;
-        if ((thread->event_mode & WEF_OR) == 0) {
-            shared_bits = shared_bits == thread->event_bits;
-        }
+        shared_bits = ((thread->event_mode & WEF_OR) == 0) ? (shared_bits == thread->event_bits) : shared_bits;
 
         if (shared_bits) {
             // We stored the WaitEventFlag resbits arg
@@ -289,10 +285,7 @@ int WaitEventFlag(int ef, u32 bits, int mode, u32 *resbits)
         return KE_EVF_MULTI;
     }
 
-    shared_bits = evt->bits & bits;
-    if ((mode & WEF_OR) == 0) {
-        shared_bits = shared_bits == bits;
-    }
+    shared_bits = (mode & WEF_OR) ? (evt->bits & bits) : ((evt->bits & bits) == bits);
 
     if (shared_bits) {
         if (resbits) {
@@ -353,10 +346,7 @@ int PollEventFlag(int ef, u32 bits, int mode, u32 *resbits)
         return KE_EVF_MULTI;
     }
 
-    shared_bits = evt->bits & bits;
-    if ((mode & WEF_OR) == 0) {
-        shared_bits = shared_bits == bits;
-    }
+    shared_bits = (mode & WEF_OR) ? (evt->bits & bits) : ((evt->bits & bits) == bits);
 
     if (shared_bits == 0) {
         CpuResumeIntr(state);

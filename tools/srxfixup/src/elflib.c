@@ -367,11 +367,7 @@ elf_file *read_elf(const char *filename)
 
 static int is_in_range(unsigned int top, unsigned int size, unsigned int pos)
 {
-	if ( pos >= top && pos < size + top )
-	{
-		return 1;
-	}
-	return 0;
+	return ( pos >= top && pos < size + top ) ? 1 : 0;
 }
 
 static void read_symtab(elf_file *elf, int sctindex, FILE *fp)
@@ -396,19 +392,8 @@ static void read_symtab(elf_file *elf, int sctindex, FILE *fp)
 		swapmemory(result[i], "lllccs", 1);
 		result[i]->bind = result[i]->sym.st_info >> 4;
 		result[i]->type = result[i]->sym.st_info & 0xF;
-		result[i]->name = 0;
-		if ( result[i]->sym.st_name )
-		{
-			result[i]->name = strdup((char *)&sp_x->link->data[result[i]->sym.st_name]);
-		}
-		if ( result[i]->sym.st_shndx && result[i]->sym.st_shndx <= 0xFEFF )
-		{
-			result[i]->shptr = elf->scp[result[i]->sym.st_shndx];
-		}
-		else
-		{
-			result[i]->shptr = 0;
-		}
+		result[i]->name = ( result[i]->sym.st_name ) ? strdup((char *)&sp_x->link->data[result[i]->sym.st_name]) : 0;
+		result[i]->shptr = ( result[i]->sym.st_shndx && result[i]->sym.st_shndx <= 0xFEFF ) ? elf->scp[result[i]->sym.st_shndx] : 0;
 	}
 }
 
@@ -1098,19 +1083,7 @@ elf_syment *search_global_symbol(const char *name, elf_file *elf)
 
 int is_defined_symbol(const elf_syment *sym)
 {
-	if ( !sym )
-	{
-		return 0;
-	}
-	if ( !sym->sym.st_shndx )
-	{
-		return 0;
-	}
-	if ( sym->sym.st_shndx <= 0xFEFF )
-	{
-		return 1;
-	}
-	return sym->sym.st_shndx == SHN_ABS;
+	return ( !sym || !sym->sym.st_shndx ) ? 0 : (( sym->sym.st_shndx <= 0xFEFF ) ? 1 : (sym->sym.st_shndx == SHN_ABS));
 }
 
 elf_syment *add_symbol(elf_file *elf, const char *name, int bind, int type, int value, elf_section *scp, int st_shndx)
@@ -1140,28 +1113,13 @@ elf_syment *add_symbol(elf_file *elf, const char *name, int bind, int type, int 
 	sym->sym.st_info = (type & 0xF) + 16 * bind;
 	sym->sym.st_value = value;
 	sym->shptr = scp;
-	if ( scp )
-	{
-		sym->sym.st_shndx = 1;
-	}
-	else
-	{
-		sym->sym.st_shndx = st_shndx;
-	}
+	sym->sym.st_shndx = scp ? 1 : st_shndx;
 	return sym;
 }
 
 unsigned int get_symbol_value(const elf_syment *sym, const elf_file *elf)
 {
-	if ( !is_defined_symbol(sym) )
-	{
-		return 0;
-	}
-	if ( sym->sym.st_shndx != SHN_ABS && elf->ehp->e_type == ET_REL )
-	{
-		return sym->shptr->shr.sh_addr + sym->sym.st_value;
-	}
-	return sym->sym.st_value;
+	return ( !is_defined_symbol(sym) ) ? 0 : (( sym->sym.st_shndx != SHN_ABS && elf->ehp->e_type == ET_REL ) ? (sym->shptr->shr.sh_addr + sym->sym.st_value) : sym->sym.st_value);
 }
 
 static void reorder_an_symtab(elf_file *elf, elf_section *scp)
@@ -1368,71 +1326,7 @@ static int comp_Elf_file_slot(const void *a1, const void *a2)
 	p1 = a1;
 	p2 = a2;
 
-	if ( p1->type == EFS_TYPE_ELF_HEADER && p2->type == EFS_TYPE_ELF_HEADER )
-	{
-		return 0;
-	}
-	if ( p1->type == EFS_TYPE_ELF_HEADER )
-	{
-		return -1;
-	}
-	if ( p2->type == EFS_TYPE_ELF_HEADER )
-	{
-		return 1;
-	}
-	if ( p1->type == EFS_TYPE_PROGRAM_HEADER_TABLE && p2->type == EFS_TYPE_PROGRAM_HEADER_TABLE )
-	{
-		return 0;
-	}
-	if ( p1->type == EFS_TYPE_PROGRAM_HEADER_TABLE )
-	{
-		return -1;
-	}
-	if ( p2->type == EFS_TYPE_PROGRAM_HEADER_TABLE )
-	{
-		return 1;
-	}
-	if ( !p1->type && !p2->type )
-	{
-		return 0;
-	}
-	if ( !p1->type )
-	{
-		return 1;
-	}
-	if ( !p2->type )
-	{
-		return -1;
-	}
-	if ( p1->type == EFS_TYPE_END && p2->type == EFS_TYPE_END )
-	{
-		return 0;
-	}
-	if ( p1->type == EFS_TYPE_END )
-	{
-		return 1;
-	}
-	if ( p2->type == EFS_TYPE_END )
-	{
-		return -1;
-	}
-	if ( p1->type == EFS_TYPE_PROGRAM_HEADER_ENTRY && p2->type == EFS_TYPE_SECTION_HEADER_TABLE )
-	{
-		return -1;
-	}
-	if ( p1->type == EFS_TYPE_SECTION_HEADER_TABLE && p2->type == EFS_TYPE_PROGRAM_HEADER_ENTRY )
-	{
-		return 1;
-	}
-	if ( p2->offset == p1->offset )
-	{
-		return 0;
-	}
-	if ( p2->offset >= p1->offset )
-	{
-		return -1;
-	}
-	return 1;
+	return ( p1->type == EFS_TYPE_ELF_HEADER && p2->type == EFS_TYPE_ELF_HEADER ) ? 0 : (( p1->type == EFS_TYPE_ELF_HEADER ) ? -1 : (( p2->type == EFS_TYPE_ELF_HEADER ) ? 1 : (( p1->type == EFS_TYPE_PROGRAM_HEADER_TABLE && p2->type == EFS_TYPE_PROGRAM_HEADER_TABLE ) ? 0 : (( p1->type == EFS_TYPE_PROGRAM_HEADER_TABLE ) ? -1 : (( p2->type == EFS_TYPE_PROGRAM_HEADER_TABLE ) ? 1 : (( !p1->type && !p2->type ) ? 0 : (( !p1->type ) ? 1 : (( !p2->type ) ? -1 : (( p1->type == EFS_TYPE_END && p2->type == EFS_TYPE_END ) ? 0 : (( p1->type == EFS_TYPE_END ) ? 1 : (( p2->type == EFS_TYPE_END ) ? -1 : (( p1->type == EFS_TYPE_PROGRAM_HEADER_ENTRY && p2->type == EFS_TYPE_SECTION_HEADER_TABLE ) ? -1 : (( p1->type == EFS_TYPE_SECTION_HEADER_TABLE && p2->type == EFS_TYPE_PROGRAM_HEADER_ENTRY ) ? 1 : (( p2->offset == p1->offset ) ? 0 : (( p2->offset >= p1->offset ) ? -1 : 1)))))))))))))));
 }
 
 Elf_file_slot *build_file_order_list(const elf_file *elf)
@@ -1448,11 +1342,7 @@ Elf_file_slot *build_file_order_list(const elf_file *elf)
 	sections = elf->ehp->e_shnum;
 	scp = (elf_section **)calloc(sections + 1, sizeof(elf_section *));
 	memcpy(scp, elf->scp, sections * sizeof(elf_section *));
-	maxent = elf->ehp->e_shnum + 2;
-	if ( elf->ehp->e_phnum )
-	{
-		maxent = elf->ehp->e_phnum + elf->ehp->e_shnum + 3;
-	}
+	maxent = ( elf->ehp->e_phnum ) ? (elf->ehp->e_phnum + elf->ehp->e_shnum + 3) : (elf->ehp->e_shnum + 2);
 	resolt = (Elf_file_slot *)calloc(maxent, sizeof(Elf_file_slot));
 	resolt->type = EFS_TYPE_ELF_HEADER;
 	resolt->offset = 0;
@@ -1555,10 +1445,7 @@ void writeback_file_order_list(elf_file *elf, Elf_file_slot *efs)
 						segoffset = scp[i]->shr.sh_addr + efs->offset - (*scp)->shr.sh_addr;
 					}
 					scp[i]->shr.sh_offset = segoffset;
-					if ( scp[i]->shr.sh_type != SHT_NOBITS )
-					{
-						segoffset += scp[i]->shr.sh_size;
-					}
+					segoffset += ( scp[i]->shr.sh_type != SHT_NOBITS ) ? scp[i]->shr.sh_size : 0;
 				}
 				break;
 			case EFS_TYPE_SECTION_HEADER_TABLE:
@@ -1594,14 +1481,7 @@ void dump_file_order_list(const elf_file *elf, const Elf_file_slot *efs)
 
 		oldend_1 = slot->size;
 		startpos_1 = slot->offset;
-		if ( oldend_1 == 0 )
-		{
-			offset = slot->offset;
-		}
-		else
-		{
-			offset = oldend_1 + startpos_1 - 1;
-		}
+		offset = ( oldend_1 == 0 ) ? slot->offset : (oldend_1 + startpos_1 - 1);
 		size_1 = offset;
 		switch ( slot->type )
 		{
@@ -1643,14 +1523,7 @@ void dump_file_order_list(const elf_file *elf, const Elf_file_slot *efs)
 				unsigned int size_2;
 				unsigned int startpos_2;
 
-				if ( scp[i]->shr.sh_type == SHT_NOBITS )
-				{
-					oldend_2 = 0;
-				}
-				else
-				{
-					oldend_2 = scp[i]->shr.sh_size;
-				}
+				oldend_2 = ( scp[i]->shr.sh_type == SHT_NOBITS ) ? 0 : scp[i]->shr.sh_size;
 				startpos_2 = scp[i]->shr.sh_offset;
 				size_2 = (oldend_2 == 0) ? (scp[i]->shr.sh_offset) : (Elf32_Off)(oldend_2 + startpos_2 - 1);
 				snprintf(tmp, sizeof(tmp), "(%s)", scp[i]->name);

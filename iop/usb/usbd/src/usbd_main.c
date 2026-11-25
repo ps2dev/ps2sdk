@@ -113,14 +113,8 @@ static void callbackThreadFunc(void *arg)
 			req = cbListStart;
 			if ( req )
 			{
-				if ( req->m_next )
-					req->m_next->m_prev = req->m_prev;
-				else
-					cbListEnd = req->m_prev;
-				if ( req->m_prev )
-					req->m_prev->m_next = req->m_next;
-				else
-					cbListStart = req->m_next;
+				*(req->m_next ? &(req->m_next->m_prev) : &(cbListEnd)) = req->m_prev;
+				*(req->m_prev ? &(req->m_prev->m_next) : &(cbListStart)) = req->m_next;
 			}
 			CpuResumeIntr(state);
 			if ( !req )

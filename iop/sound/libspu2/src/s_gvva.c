@@ -87,12 +87,6 @@ void SpuGetVoiceVolumeAttr(int v_num, s16 *voll, s16 *volr, s16 *voll_mode, s16 
 	}
 	*voll_mode = v8;
 	*volr_mode = v10;
-	if ( v6 < 0x4000u )
-		*voll = v6;
-	else
-		*voll = v6 + 0x8000;
-	if ( v7 < 0x4000u )
-		*volr = v7;
-	else
-		*volr = v7 + 0x8000;
+	*voll = ( v6 < 0x4000u ) ? v6 : (v6 + 0x8000);
+	*volr = ( v7 < 0x4000u ) ? v7 : (v7 + 0x8000);
 }

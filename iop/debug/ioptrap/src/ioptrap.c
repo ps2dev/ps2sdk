@@ -64,11 +64,7 @@ jmp_buf dbg_jmp_buf;
 exception_type_t dbg_setjmp()
 {
     int v;
-    if (0 == (v = setjmp(dbg_jmp_buf))) {
-        dbg_jmp_buf_setup = 1;
-    } else {
-        dbg_jmp_buf_setup = 0;
-    }
+    dbg_jmp_buf_setup = (0 == (v = setjmp(dbg_jmp_buf))) ? 1 : 0;
     return v;
 }
 
@@ -98,15 +94,7 @@ typedef struct _smod_mod_info
 smod_mod_info_t *smod_get_next_mod(smod_mod_info_t *cur_mod)
 {
     /* If cur_mod is 0, return the head of the list (IOP address 0x800).  */
-    if (!cur_mod) {
-        return (smod_mod_info_t *)0x800;
-    } else {
-        if (!cur_mod->next)
-            return 0;
-        else
-            return cur_mod->next;
-    }
-    return 0;
+    return (!cur_mod) ? ((smod_mod_info_t *)0x800) : ((!cur_mod->next) ? 0 : cur_mod->next);
 }
 
 char *ExceptionGetModuleName(u32 epc, u32 *r_epc)

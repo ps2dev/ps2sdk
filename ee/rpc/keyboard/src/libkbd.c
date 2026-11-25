@@ -87,78 +87,46 @@ int PS2KbdSetBlockingMode(u32 blockmode)
 
 int PS2KbdSetRepeatRate(u32 repeat)
 {
-  if(kbd_fd >= 0)
-    {
-      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETREPEATRATE, &repeat);
-    }
-  return 0;
+  return (kbd_fd >= 0) ? _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETREPEATRATE, &repeat) : 0;
 }
 
 int PS2KbdSetLeds(u8 leds)
 {
-  if(kbd_fd >= 0)
-    {
-      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETLEDS, &leds);
-    }
-  return 0;
+  return (kbd_fd >= 0) ? _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETLEDS, &leds) : 0;
 }
 
 int PS2KbdSetKeymap(PS2KbdKeyMap *keymaps)
 {
-  if(kbd_fd >= 0)
-    {
-      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETKEYMAP, keymaps);
-    }
-  return 0;
+  return (kbd_fd >= 0) ? _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETKEYMAP, keymaps) : 0;
 }
 
 int PS2KbdSetCtrlmap(u8 *ctrlmap)
 {
-  if(kbd_fd >= 0)
-    {
-      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETCTRLMAP, ctrlmap);
-    }
-  return 0;
+  return (kbd_fd >= 0) ? _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETCTRLMAP, ctrlmap) : 0;
 }
 
 int PS2KbdSetAltmap(u8 *altmap)
 {
-  if(kbd_fd >= 0)
-    {
-      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETALTMAP, altmap);
-    }
-  return 0;
+  return (kbd_fd >= 0) ? _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETALTMAP, altmap) : 0;
 }
 
 int PS2KbdSetSpecialmap(u8 *special)
 {
-  if(kbd_fd >= 0)
-    {
-      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETSPECIALMAP, special);
-    }
-  return 0;
+  return (kbd_fd >= 0) ? _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETSPECIALMAP, special) : 0;
 }
 
 int PS2KbdFlushBuffer(void)
 {
   int dummy;
 
-  if(kbd_fd >= 0)
-    {
-      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_FLUSHBUFFER, &dummy);
-    }
-  return 0;
+  return (kbd_fd >= 0) ? _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_FLUSHBUFFER, &dummy) : 0;
 }
 
 int PS2KbdResetKeymap(void)
 {
   int dummy;
 
-  if(kbd_fd >= 0)
-    {
-      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_RESETKEYMAP, &dummy);
-    }
-  return 0;
+  return (kbd_fd >= 0) ? _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_RESETKEYMAP, &dummy) : 0;
 }
 
 int PS2KbdClose(void)

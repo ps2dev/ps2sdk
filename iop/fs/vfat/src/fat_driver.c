@@ -73,10 +73,8 @@ int strEqual(const char *s1, const char *s2)
 
         u1 = *s1++;
         u2 = *s2++;
-        if (u1 > 64 && u1 < 91)
-            u1 += 32;
-        if (u2 > 64 && u2 < 91)
-            u2 += 32;
+        u1 += (u1 > 64 && u1 < 91) ? 32 : 0;
+        u2 += (u2 > 64 && u2 < 91) ? 32 : 0;
 
         if (u1 != u2) {
             return -1;
@@ -103,11 +101,7 @@ unsigned int fat_getClusterRecord12(const unsigned char *buf, int type)
 {
     M_DEBUG("%s\n", __func__);
 
-    if (type) { // 1
-        return ((buf[1] << 4) + (buf[0] >> 4));
-    } else { // 0
-        return (((buf[1] & 0x0F) << 8) + buf[0]);
-    }
+    return type ? ((buf[1] << 4) + (buf[0] >> 4)) : (((buf[1] & 0x0F) << 8) + buf[0]);
 }
 
 //---------------------------------------------------------------------------
@@ -143,10 +137,7 @@ static int fat_getClusterChain12(fat_driver *fatd, unsigned int cluster, unsigne
 
         recordOffset = (cluster * 3) / 2; // offset of the cluster record (in bytes) from the FAT start
         fatSector    = recordOffset / fatd->partBpb.sectorSize;
-        sectorSpan   = 0;
-        if ((recordOffset % fatd->partBpb.sectorSize) == (fatd->partBpb.sectorSize - 1)) {
-            sectorSpan = 1;
-        }
+        sectorSpan   = ((recordOffset % fatd->partBpb.sectorSize) == (fatd->partBpb.sectorSize - 1)) ? 1 : 0;
         if (lastFatSector != fatSector || sectorSpan) {
             ret = READ_SECTOR(DEV_ACCESSOR(fatd), fatd->partBpb.partStart + fatd->partBpb.resSectors + fatSector, sbuf);
             if (ret < 0) {
@@ -167,11 +158,7 @@ static int fat_getClusterChain12(fat_driver *fatd, unsigned int cluster, unsigne
                 xbuf[3] = sbuf[1];
             }
         }
-        if (sectorSpan) { // use xbuf as source buffer
-            cluster = fat_getClusterRecord12(xbuf + (recordOffset % fatd->partBpb.sectorSize) - (fatd->partBpb.sectorSize - 2), cluster % 2);
-        } else { // use sector buffer as source buffer
-            cluster = fat_getClusterRecord12(sbuf + (recordOffset % fatd->partBpb.sectorSize), cluster % 2);
-        }
+        cluster = fat_getClusterRecord12(sectorSpan ? (xbuf + (recordOffset % fatd->partBpb.sectorSize) - (fatd->partBpb.sectorSize - 2)) /* use xbuf as source buffer */ : (sbuf + (recordOffset % fatd->partBpb.sectorSize)) /* use sector buffer as source buffer */, cluster % 2);
 
         if ((cluster & 0xFFF) >= 0xFF8) {
             cont = 0; // continue = false
@@ -347,13 +334,7 @@ static void fat_determineFatType(fat_bpb *partBpb)
     clusterCount = sector / partBpb->clusterSize;
     // XPRINTF("Data cluster count = %u \n", clusterCount);
 
-    if (clusterCount < 4085) {
-        partBpb->fatType = FAT12;
-    } else if (clusterCount < 65525) {
-        partBpb->fatType = FAT16;
-    } else {
-        partBpb->fatType = FAT32;
-    }
+    partBpb->fatType = (clusterCount < 4085) ? FAT12 : ((clusterCount < 65525) ? FAT16 : FAT32);
 }
 
 //---------------------------------------------------------------------------
@@ -408,9 +389,7 @@ static int fat_getPartitionBootSector(struct block_device *bd, unsigned int sect
     partBpb->trackSize   = getUI16(bpb_raw->trackSize);
     partBpb->headCount   = getUI16(bpb_raw->headCount);
     partBpb->sectorCount = getUI16(bpb_raw->sectorCountO);
-    if (partBpb->sectorCount == 0) {
-        partBpb->sectorCount = getUI32(bpb_raw->sectorCount); // large partition
-    }
+    partBpb->sectorCount = (partBpb->sectorCount == 0) ? getUI32(bpb_raw->sectorCount) : partBpb->sectorCount; // large partition
     partBpb->partStart    = sector;
     partBpb->rootDirStart = partBpb->partStart + (partBpb->fatCount * partBpb->fatSize) + partBpb->resSectors;
     for (ret = 0; ret < 8; ret++) {
@@ -426,11 +405,7 @@ static int fat_getPartitionBootSector(struct block_device *bd, unsigned int sect
     if (partBpb->fatType == FAT32 && partBpb->fatSize == 0) {
         partBpb->fatSize   = getUI32(bpb32_raw->fatSize32);
         partBpb->activeFat = getUI16(bpb32_raw->fatStatus);
-        if (partBpb->activeFat & 0x80) { // fat not synced
-            partBpb->activeFat = (partBpb->activeFat & 0xF);
-        } else {
-            partBpb->activeFat = 0;
-        }
+        partBpb->activeFat = (partBpb->activeFat & 0x80) /* fat not synced */ ? (partBpb->activeFat & 0xF) : 0;
         partBpb->rootDirStart   = partBpb->partStart + (partBpb->fatCount * partBpb->fatSize) + partBpb->resSectors;
         partBpb->rootDirCluster = getUI32(bpb32_raw->rootDirCluster);
         for (ret = 0; ret < 8; ret++) {
@@ -533,10 +508,7 @@ int fat_getDirentry(unsigned char fatType, fat_direntry *dir_entry, fat_direntry
         for (i = 0; i < 8 && dir_entry->sfn.name[i] != ' '; i++) {
             dir->sname[i] = dir_entry->sfn.name[i];
             // NT-adaption for LaunchELF
-            if (dir_entry->sfn.reservedNT & 0x08 &&
-                dir->sname[i] >= 'A' && dir->sname[i] <= 'Z') {
-                dir->sname[i] += 0x20; // Force standard letters in name to lower case
-            }
+            dir->sname[i] += (dir_entry->sfn.reservedNT & 0x08 && dir->sname[i] >= 'A' && dir->sname[i] <= 'Z') ? 0x20 : 0; // Force standard letters in name to lower case
         }
         for (j = 0; j < 3 && dir_entry->sfn.ext[j] != ' '; j++) {
             if (j == 0) {
@@ -545,10 +517,7 @@ int fat_getDirentry(unsigned char fatType, fat_direntry *dir_entry, fat_direntry
             }
             dir->sname[i + j] = dir_entry->sfn.ext[j];
             // NT-adaption for LaunchELF
-            if (dir_entry->sfn.reservedNT & 0x10 &&
-                dir->sname[i + j] >= 'A' && dir->sname[i + j] <= 'Z') {
-                dir->sname[i + j] += 0x20; // Force standard letters in ext to lower case
-            }
+            dir->sname[i + j] += (dir_entry->sfn.reservedNT & 0x10 && dir->sname[i + j] >= 'A' && dir->sname[i + j] <= 'Z') ? 0x20 : 0; // Force standard letters in ext to lower case
         }
         dir->sname[i + j] = 0;   // terminate
         if (dir->name[0] == 0) { // long name desn't exit
@@ -640,10 +609,8 @@ static void fat_setFatDir(fat_driver *fatd, fat_dir *fatDir, unsigned int parent
 
     M_DEBUG("%s\n", __func__);
     XPRINTF("setting fat dir...\n");
-    srcName = dir->sname;
-    if (dir->name[0] != 0) { // long filename not empty
-        srcName = dir->name;
-    }
+    // long filename not empty
+    srcName = (dir->name[0] != 0) ? dir->name : dir->sname;
     // copy name
     for (i = 0; srcName[i] != 0; i++)
         fatDir->name[i] = srcName[i];
@@ -990,13 +957,8 @@ int fat_readFile(fat_driver *fatd, fat_dir *fatDir, unsigned int filePos, unsign
             j      = (size + dataSkip) / fatd->partBpb.sectorSize + sectorSkip;
             toRead = 0;
             while (1) {
-                if (j >= fatd->partBpb.clusterSize) {
-                    toRead += fatd->partBpb.clusterSize;
-                    j -= fatd->partBpb.clusterSize;
-                } else {
-                    toRead += j;
-                    j = 0;
-                }
+                toRead += (j >= fatd->partBpb.clusterSize) ? fatd->partBpb.clusterSize : j;
+                j -= (j >= fatd->partBpb.clusterSize) ? fatd->partBpb.clusterSize : j;
 
                 // Check that the next cluster is adjacent to this one, so we can read across.
                 if ((i >= (unsigned int)(chainSize - 1)) || (fatd->cbuf[i] != (fatd->cbuf[i + 1] - 1)))
@@ -1051,8 +1013,7 @@ int fat_readFile(fat_driver *fatd, fat_dir *fatDir, unsigned int filePos, unsign
 #ifdef BUILDING_USBHDFSD
             if (dataSkip > 0) {
                 bufSize = mass_device->sectorSize - dataSkip;
-                if (size < bufSize)
-                    bufSize = size;
+                bufSize = (size < bufSize) ? size : bufSize;
 
                 ret = fat_readSingleSector(fatd->dev, startSector, buffer + bufferPos, bufSize, dataSkip);
                 if (ret != 1) {

@@ -449,9 +449,7 @@ int apaReadHeader(s32 device, apa_header_t *header, u32 lba)
 
 int apaWriteHeader(s32 device, apa_header_t *header, u32 lba)
 {
-    if (blkIoDmaTransfer(device, header, lba, 2, BLKIO_DIR_WRITE))
-        return -EIO;
-    return 0;
+    return (blkIoDmaTransfer(device, header, lba, 2, BLKIO_DIR_WRITE)) ? -EIO : 0;
 }
 
 int apaGetFormat(s32 device, int *format)

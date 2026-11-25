@@ -33,10 +33,7 @@ static int ata_dma_xfer(acDmaT dma, int intr, acDmaOp op)
 	}
 	thid = dmatmp->ad_thid;
 	dmatmp->ad_state = 3;
-	if ( intr )
-		iWakeupThread(thid);
-	else
-		WakeupThread(thid);
+	(intr ? iWakeupThread : WakeupThread)(thid);
 	return 0;
 }
 
@@ -64,10 +61,7 @@ static void ata_dma_error(acDmaT dma, int intr, acDmaState state, int result)
 	dmatmp->ad_result = result;
 	if ( thid )
 	{
-		if ( intr )
-			iWakeupThread(thid);
-		else
-			WakeupThread(thid);
+		(intr ? iWakeupThread : WakeupThread)(thid);
 	}
 	Kprintf("acata:A:dma_error: state=%d ret=%d\n", state, result);
 }
@@ -125,9 +119,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 				{
 					printf("acata:A:dma_wait: TIMEDOUT %d\n", ret_v5);
 					acDmaCancel(&dma_data.ad_dma, -116);
-					ret = ret_v5;
-					if ( ret_v5 >= 0 )
-						ret = -116;
+					ret = ( ret_v5 >= 0 ) ? -116 : ret_v5;
 					if ( ret < 0 )
 					{
 						return ret;
@@ -193,23 +185,13 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					int sr;
 					int ret_v20;
 
-					xlen = 512;
-					if ( a_size < 513 )
-						xlen = a_size;
+					xlen = ( a_size < 513 ) ? a_size : 512;
 					a_size -= xlen;
 					xlen_v15 = (unsigned int)xlen >> 1;
 					xlen_v16 = xlen_v15 - 1;
 					while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_DRQ) != 0 )
 					{
-						int ret_v17;
-
-						ret_v17 = 0;
-						if ( xlen_v16 >= 0 )
-						{
-							ret_v17 = *a_buf;
-							a_buf++;
-						}
-						*((volatile acUint16 *)0xB6000000) = ret_v17;
+						*((volatile acUint16 *)0xB6000000) = ( xlen_v16 >= 0 ) ? *a_buf++ : 0;
 						--xlen_v16;
 					}
 					if ( (flag_v8 & 2) != 0 )
@@ -277,13 +259,9 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					}
 					if ( sr_v25 < 0 )
 						break;
-					xlen_v27 = 512;
-					if ( rest < 513 )
-						xlen_v27 = rest;
+					xlen_v27 = ( rest < 513 ) ? rest : 512;
 					rest -= xlen_v27;
-					xlen_v28 = (unsigned int)xlen_v27 >> 1;
-					if ( (sr_v25 & 1) != 0 )
-						xlen_v28 = 0;
+					xlen_v28 = ( (sr_v25 & 1) != 0 ) ? 0 : ((unsigned int)xlen_v27 >> 1);
 					(void)(*((volatile acUint16 *)0xB6070000) & ATA_STAT_BUSY);
 					xlen_v30 = xlen_v28 - 1;
 					while ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_DRQ) != 0 )
@@ -323,9 +301,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 					*((volatile acUint16 *)0xB6010000));
 				if ( state < 1023 )
 					acDmaCancel(&dma_data.ad_dma, -116);
-				ret = 0;
-				if ( !v38 )
-					ret = -116;
+				ret = ( !v38 ) ? -116 : 0;
 				break;
 			}
 			state = dma_data.ad_state;
@@ -336,9 +312,7 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 			}
 			if ( SleepThread() )
 			{
-				state = 511;
-				if ( dma_data.ad_state == 31 )
-					state = 1023;
+				state = ( dma_data.ad_state == 31 ) ? 1023 : 511;
 			}
 		}
 	}
@@ -383,14 +357,10 @@ static int ata_ops_command(struct ac_ata_h *atah, int cmdpri, int pri)
 	sr_v34 = *((volatile acUint16 *)0xB6070000);
 	if ( (*((volatile acUint16 *)0xB6070000) & ATA_STAT_ERR) != 0 )
 		return -((sr_v34 << 8) + *((volatile acUint16 *)0xB6010000));
+	ret_v35 = ( atah->a_state < 0x1FFu ) ? 0 : -116;
 	if ( atah->a_state < 0x1FFu )
 	{
 		atah->a_state = 127;
-		ret_v35 = 0;
-	}
-	else
-	{
-		ret_v35 = -116;
 	}
 	cmd_v36 = ata->ac_command;
 	if ( ret_v35 < 0 )
@@ -436,9 +406,7 @@ acAtaT acAtaSetup(acAtaData *ata, acAtaDone done, void *arg, unsigned int tmout)
 
 acAtaCommandData *acAtaReply(acAtaT ata)
 {
-	if ( ata == 0 )
-		return 0;
-	return ata->ac_command;
+	return ( ata == 0 ) ? 0 : ata->ac_command;
 }
 
 int acAtaRequest(acAtaT ata, int flag, acAtaCommandData *cmd, int item, void *buf, int size)
@@ -510,11 +478,5 @@ int acAtaStatus(acAtaT ata)
 		return -22;
 	}
 	state = ata->ac_h.a_state;
-	if ( (unsigned int)(state - 1) >= 0x7E )
-	{
-		return 0;
-	}
-	if ( state != 1 )
-		return 2;
-	return 1;
+	return ( (unsigned int)(state - 1) >= 0x7E ) ? 0 : (( state != 1 ) ? 2 : 1);
 }

@@ -75,9 +75,7 @@ int _start(int ac, char *av[])
 	CpuSuspendIntr(&state);
 	tmpbuf = AllocSysMemory(ALLOC_LAST, 0x4000, NULL);
 	CpuResumeIntr(state);
-	if ( tmpbuf == NULL )
-		return MODULE_NO_RESIDENT_END;
-	return (AddDrv(&subfile_dev) < 0) ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
+	return ( tmpbuf == NULL ) ? MODULE_NO_RESIDENT_END : ((AddDrv(&subfile_dev) < 0) ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END);
 }
 
 static int subfile_op_open(iop_file_t *f, const char *name, int mode)
@@ -103,10 +101,7 @@ static int subfile_op_open(iop_file_t *f, const char *name, int mode)
 			case 0:
 			{
 				curfilename[i] = (name[i] != ',') ? name[i] : '\x00';
-				if ( curfilename[i] == '\x00' )
-				{
-					arrind += 1;
-				}
+				arrind += ( curfilename[i] == '\x00' ) ? 1 : 0;
 				break;
 			}
 			case 1:
@@ -207,21 +202,12 @@ static int subfile_op_read(iop_file_t *f, void *ptr, int size)
 		baseoffs_plus_curpos = privdata->m_baseoffset + privdata->m_curpos + i;
 		baseoffs_plus_curpos_chunk = baseoffs_plus_curpos & ~0x1FF;
 		baseoffs_plus_curpos_sub = privdata->m_baseoffset + privdata->m_totalsize - baseoffs_plus_curpos_chunk;
+		baseoffs_plus_curpos_sub = ( (u32)(size_tmp + 0x400) < baseoffs_plus_curpos_sub ) ? (size_tmp + 0x400) : baseoffs_plus_curpos_sub;
 		baseoffs_plus_curpos_mask = baseoffs_plus_curpos_sub & 0x1FF;
-		if ( (u32)(size_tmp + 0x400) < baseoffs_plus_curpos_sub )
-		{
-			baseoffs_plus_curpos_sub = size_tmp + 0x400;
-			baseoffs_plus_curpos_mask = baseoffs_plus_curpos_sub & 0x1FF;
-		}
-		if ( baseoffs_plus_curpos_mask )
-			baseoffs_plus_curpos_sub = (baseoffs_plus_curpos_sub + 0x1FF) & ~0x1FF;
-		if ( baseoffs_plus_curpos_sub > 0x4000 )
-		{
-			baseoffs_plus_curpos_sub = 0x4000;
-		}
+		baseoffs_plus_curpos_sub = baseoffs_plus_curpos_mask ? ((baseoffs_plus_curpos_sub + 0x1FF) & ~0x1FF) : baseoffs_plus_curpos_sub;
+		baseoffs_plus_curpos_sub = ( baseoffs_plus_curpos_sub > 0x4000 ) ? 0x4000 : baseoffs_plus_curpos_sub;
 		baseoffs_plus_curpos_size = (baseoffs_plus_curpos_chunk + baseoffs_plus_curpos_sub) - baseoffs_plus_curpos;
-		if ( size_tmp < baseoffs_plus_curpos_size )
-			baseoffs_plus_curpos_size = size_tmp;
+		baseoffs_plus_curpos_size = ( size_tmp < baseoffs_plus_curpos_size ) ? size_tmp : baseoffs_plus_curpos_size;
 		lseek(privdata->m_fd, baseoffs_plus_curpos_chunk, FIO_SEEK_SET);
 		read(privdata->m_fd, tmpbuf, baseoffs_plus_curpos_sub);
 		memcpy((u8 *)ptr + i, (u8 *)tmpbuf + (baseoffs_plus_curpos & 0x1FF), baseoffs_plus_curpos_size);
@@ -256,12 +242,7 @@ static int subfile_op_lseek(iop_file_t *f, int pos, int mode)
 	}
 	m_totalsize = privdata->m_totalsize;
 	pos_plus_curpos = pos + offs_relative;
-	if ( (int)m_totalsize >= pos_plus_curpos )
-	{
-		m_totalsize = 0;
-		if ( pos_plus_curpos >= 0 )
-			m_totalsize = pos_plus_curpos;
-	}
+	m_totalsize = ( (int)m_totalsize >= pos_plus_curpos ) ? (( pos_plus_curpos >= 0 ) ? pos_plus_curpos : 0) : m_totalsize;
 	privdata->m_curpos = m_totalsize;
 	return m_totalsize;
 }

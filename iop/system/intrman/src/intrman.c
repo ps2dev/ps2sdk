@@ -140,15 +140,7 @@ int RegisterIntrHandler(int irq, int mode, int (*handler)(void *arg), void *arg)
 		CpuResumeIntr(state);
 		return KE_FOUND_HANDLER;
 	}
-	if ( irq < IOP_IRQ_DMA_MDEC_IN || irq > IOP_IRQ_DMA_SIO2_OUT )
-	{
-		intrman_internals.interrupt_handler_table[intr_handler_offset].handler =
-			(int (*)(void *arg))((uiptr)handler | (mode & 3));
-	}
-	else
-	{
-		intrman_internals.interrupt_handler_table[intr_handler_offset].handler = handler;
-	}
+	intrman_internals.interrupt_handler_table[intr_handler_offset].handler = ( irq < IOP_IRQ_DMA_MDEC_IN || irq > IOP_IRQ_DMA_SIO2_OUT ) ? (int (*)(void *arg))((uiptr)handler | (mode & 3)) : handler;
 	intrman_internals.interrupt_handler_table[intr_handler_offset].userdata = arg;
 	CpuResumeIntr(state);
 	return 0;
@@ -415,11 +407,9 @@ int DisableIntr(int irq, int *res)
 		if ( (dicr_tmp & (1 << (irq_index - 16))) != 0 )
 		{
 			res_temp = irq_index;
-			if ( ((dicr_tmp >> (irq_index - 32)) & 1) != 0 )
-				res_temp |= 0x100;
+			res_temp |= ( ((dicr_tmp >> (irq_index - 32)) & 1) != 0 ) ? 0x100 : 0;
 #ifndef BUILDING_INTRMANP
-			if ( iop_mmio_hwport->dmac2.dicr2 & (1 << (irq_index - 32)) )
-				res_temp |= 0x200;
+			res_temp |= ( iop_mmio_hwport->dmac2.dicr2 & (1 << (irq_index - 32)) ) ? 0x200 : 0;
 #endif
 			iop_mmio_hwport->dmac1.dicr1 = dicr_tmp & ~(1 << (irq_index - 16));
 		}
@@ -435,8 +425,7 @@ int DisableIntr(int irq, int *res)
 		if ( (dicr_tmp & (1 << (irq_index - 24))) != 0 )
 		{
 			res_temp = irq_index;
-			if ( (dicr_tmp >> (irq_index - 33)) & 1 )
-				res_temp |= 0x200;
+			res_temp |= ( (dicr_tmp >> (irq_index - 33)) & 1 ) ? 0x200 : 0;
 			iop_mmio_hwport->dmac2.dicr2 = dicr_tmp & ~(1 << (irq_index - 24));
 		}
 		else

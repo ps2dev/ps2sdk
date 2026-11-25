@@ -157,10 +157,7 @@ IRX_ID(MODNAME, 1, 1);
 
 int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-    if (argc >= 0)
-        return module_start(argc, argv, startaddr, mi);
-    else
-        return module_stop(argc, argv, startaddr, mi);
+    return ((argc >= 0) ? module_start : module_stop)(argc, argv, startaddr, mi);
 }
 
 int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
@@ -199,9 +196,7 @@ int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
     (void)startaddr;
     (void)mi;
 
-    if (iomanX_DelDrv(DVR.name) != 0)
-        return MODULE_REMOVABLE_END;
-    return MODULE_NO_RESIDENT_END;
+    return (iomanX_DelDrv(DVR.name) != 0) ? MODULE_REMOVABLE_END : MODULE_NO_RESIDENT_END;
 }
 
 int dvr_df_init(iomanX_iop_device_t *dev)
@@ -226,9 +221,7 @@ int dvr_df_exit(iomanX_iop_device_t *dev)
 {
     (void)dev;
 
-    if (DeleteSema(sema_id) != 0)
-        return -1;
-    return 0;
+    return (DeleteSema(sema_id) != 0) ? -1 : 0;
 }
 
 int dvr_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param)

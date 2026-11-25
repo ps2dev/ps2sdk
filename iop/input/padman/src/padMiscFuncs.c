@@ -192,39 +192,13 @@ s32 padInfoMode(u32 port, u32 slot, s32 term, u32 offs)
 	switch(term)
 	{
 		case 2:
-			if(padState[port][slot].modeConfig == MODE_CONFIG_QUERY_PAD)
-				return 0;
-			else
-				return padState[port][slot].modeTable.data[padState[port][slot].modeCurOffs];
+			return (padState[port][slot].modeConfig == MODE_CONFIG_QUERY_PAD) ? 0 : padState[port][slot].modeTable.data[padState[port][slot].modeCurOffs];
 		case 1:
-			if( padState[port][slot].modeCurId != PAD_ID_CONFIG)
-				return (PAD_ID_HI(PAD_ID_CONFIG));
-			else
-				return 0;
+			return ( padState[port][slot].modeCurId != PAD_ID_CONFIG) ? (PAD_ID_HI(PAD_ID_CONFIG)) : 0;
 		case 3:
-			if(padState[port][slot].modeConfig == MODE_CONFIG_QUERY_PAD)
-				return 0;
-			else
-				return padState[port][slot].modeCurOffs;
+			return (padState[port][slot].modeConfig == MODE_CONFIG_QUERY_PAD) ? 0 : padState[port][slot].modeCurOffs;
 		case 4:
-			if(padState[port][slot].modeConfig == MODE_CONFIG_QUERY_PAD)
-				return 0;
-			else
-			{
-				if(offs == (u32)(-1))
-				{
-					return padState[port][slot].numModes;
-				}
-				else
-				{
-					u16* mode = padState[port][slot].modeTable.data;
-
-					if(offs < padState[port][slot].numModes)
-						return mode[offs];
-					else
-						return 0;
-				}
-			}
+			return (padState[port][slot].modeConfig == MODE_CONFIG_QUERY_PAD) ? 0 : ((offs == (u32)(-1)) ? padState[port][slot].numModes : ((offs < padState[port][slot].numModes) ? ((u16 *)(padState[port][slot].modeTable.data))[offs] : 0));
 	}
 
 	return -1;

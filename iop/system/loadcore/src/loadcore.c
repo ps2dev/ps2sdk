@@ -289,8 +289,6 @@ void loadcore_init(boot_params *in_params)
 	void *curmodaddr_align;
 	elf_header_t **cur_module_addr;
 	int executable_type;
-	int memalloctype;
-	void *memallocaddr;
 	int entrypoint_ret;
 	ModuleInfo_t *mi;
 	int *frame_pointer_curfunc;
@@ -430,9 +428,7 @@ void loadcore_init(boot_params *in_params)
 					{
 						iop_init_entry_t next;
 
-						next.callback = (void *)*stack_reboot_handlers;
-						if ( i == 3 )
-							next.callback = (void *)*reboot_handler_ptr;
+						next.callback = ( i == 3 ) ? (void *)*reboot_handler_ptr : (void *)*stack_reboot_handlers;
 						SetGP((void *)reboot_handler_ptr[1]);
 						((BootupCallback_t)(*reboot_handler_ptr & (~3)))(&next, 1);
 					}
@@ -465,17 +461,7 @@ void loadcore_init(boot_params *in_params)
 			executable_type = ProbeExecutableObject(*cur_module_addr, &fi);
 			if ( executable_type == IOP_MOD_TYPE_IRX )
 			{
-				if ( curmodaddr_align )
-				{
-					memalloctype = 2;
-					memallocaddr = curmodaddr_align;
-				}
-				else
-				{
-					memalloctype = 0;
-					memallocaddr = 0;
-				}
-				fi.text_start = AllocSysMemory(memalloctype, fi.MemSize + 0x30, memallocaddr);
+				fi.text_start = AllocSysMemory(curmodaddr_align ? 2 : 0, fi.MemSize + 0x30, curmodaddr_align);
 				if ( !fi.text_start )
 					break;
 				fi.text_start = (char *)fi.text_start + 0x30;
@@ -498,8 +484,7 @@ void loadcore_init(boot_params *in_params)
 				{
 					RegisterModule(mi);
 					mi->newflags = 3;
-					if ( (entrypoint_ret & 3) == 2 )
-						mi->newflags |= 0x10;
+					mi->newflags |= ( (entrypoint_ret & 3) == 2 ) ? 0x10 : 0;
 					if ( (entrypoint_ret & (~3)) != 0 )
 						AddRebootNotifyHandler((BootupCallback_t)(entrypoint_ret & (~3)), 2, 0);
 				}
@@ -968,9 +953,7 @@ static int CheckCallerStub(const struct irx_import_table *imp)
 	{
 		stubs += 2;
 	}
-	if ( stubs[0] || stubs[1] )
-		return 0;
-	return (const void **)(imp->stubs) < stubs;
+	return ( stubs[0] || stubs[1] ) ? 0 : ((const void **)(imp->stubs) < stubs);
 }
 
 static int aLinkLibEntries(struct irx_import_table *imp)
@@ -1110,29 +1093,20 @@ static void lc_memmove(char *dst, const char *src, int len)
 static int cCpuSuspendIntr(int *state)
 {
 	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(loadcore_internals.intr_suspend_tbl);
-	if ( intrman_callbacks && intrman_callbacks->cbCpuSuspendIntr )
-		return intrman_callbacks->cbCpuSuspendIntr(state);
-	else
-		return 0;
+	return ( intrman_callbacks && intrman_callbacks->cbCpuSuspendIntr ) ? intrman_callbacks->cbCpuSuspendIntr(state) : 0;
 }
 
 static int cCpuResumeIntr(int state)
 {
 	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(loadcore_internals.intr_suspend_tbl);
-	if ( intrman_callbacks && intrman_callbacks->cbCpuResumeIntr )
-		return intrman_callbacks->cbCpuResumeIntr(state);
-	else
-		return 0;
+	return ( intrman_callbacks && intrman_callbacks->cbCpuResumeIntr ) ? intrman_callbacks->cbCpuResumeIntr(state) : 0;
 }
 
 #if 0
 static int cQueryIntrContext(void)
 {
 	intrman_callbacks_t *intrman_callbacks = (intrman_callbacks_t *)(loadcore_internals.intr_suspend_tbl);
-	if ( intrman_callbacks && intrman_callbacks->cbQueryIntrContext )
-		return intrman_callbacks->cbQueryIntrContext();
-	else
-		return 0;
+	return ( intrman_callbacks && intrman_callbacks->cbQueryIntrContext ) ? intrman_callbacks->cbQueryIntrContext() : 0;
 }
 #endif
 

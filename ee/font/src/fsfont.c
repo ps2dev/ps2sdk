@@ -537,14 +537,8 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 						line++;
 						line_num[line] = 0;
 					}
-					if (utf8[i] == TAB)
-					{
-						line_num[line] += font->spacewidth * 4;
-					}
-					if (utf8[i] == SPACE)
-					{
-						line_num[line] += font->spacewidth;
-					}
+					line_num[line] += (utf8[i] == TAB) ? (font->spacewidth * 4) : 0;
+					line_num[line] += (utf8[i] == SPACE) ? font->spacewidth : 0;
 					i++;
 				}
 
@@ -574,14 +568,8 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 						line++;
 						line_num[line] = 0;
 					}
-					if (utf8[i] == TAB)
-					{
-						line_num[line] += font->spacewidth * 4;
-					}
-					if (utf8[i] == SPACE)
-					{
-						line_num[line] += font->spacewidth;
-					}
+					line_num[line] += (utf8[i] == TAB) ? (font->spacewidth * 4) : 0;
+					line_num[line] += (utf8[i] == SPACE) ? font->spacewidth : 0;
 					i++;
 				}
 
@@ -617,14 +605,8 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 				v_pos.y += font->height*font->scale;
 				v_pos.x = x_orig[line];
 			}
-			if (utf8[j] == TAB)
-			{
-				v_pos.x += font->spacewidth*font->scale * 4.0f;
-			}
-			if (utf8[j] == SPACE)
-			{
-				v_pos.x += font->spacewidth*font->scale;
-			}
+			v_pos.x += (utf8[j] == TAB) ? (font->spacewidth*font->scale * 4.0f) : 0;
+			v_pos.x += (utf8[j] == SPACE) ? (font->spacewidth*font->scale) : 0;
 			j++;
 		}
 

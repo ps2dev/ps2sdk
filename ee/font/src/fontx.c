@@ -268,20 +268,9 @@ int fontx_load(const char *path, fontx_t* fontx, int type, int wmargin, int hmar
 
 	if (!strcmp("rom0:KROM",path) || !strcmp("rom0:/KROM",path))
 	{
-		int ret = -1;
+		int ret;
 
-		if (type == SINGLE_BYTE)
-		{
-
-			ret = fontx_load_single_krom(fontx);
-
-		}
-		else
-		{
-
-			ret = fontx_load_double_krom(fontx);
-
-		}
+		ret = (type == SINGLE_BYTE) ? fontx_load_single_krom(fontx) : fontx_load_double_krom(fontx);
 
 		if (ret < 0)
 		{
@@ -361,19 +350,8 @@ int fontx_load(const char *path, fontx_t* fontx, int type, int wmargin, int hmar
 	fontx->bold = bold;
 
 	// This is the offset that character data starts
-	if (fontx_header->type == SINGLE_BYTE)
-	{
-
-		fontx->offset = 17;
-
-	}
-	else
-	{
-
-		// 17 + 1 + (number of tables * 4) bytes
-		fontx->offset = 18 + (fontx_header->table_num * 4);
-
-	}
+	// 17 + 1 + (number of tables * 4) bytes
+	fontx->offset = (fontx_header->type == SINGLE_BYTE) ? 17 : (18 + (fontx_header->table_num * 4));
 
 	return 0;
 
@@ -465,22 +443,9 @@ u64 *draw_fontx_row(u64 *dw, unsigned char byte, int x, int y, int z, int bold)
 	{
 
 		// if there's a bit
-		if (byte & mask)
-		{
-
+		if (!(byte & mask) || (bold && px))
 			*dw++ = GS_SET_XYZ((x+(i<<4)) + 32768,y+32768,z);
-			px = 1;
-
-		}
-		else
-		{
-
-			if (bold && px)
-				*dw++ = GS_SET_XYZ((x+(i<<4)) + 32768,y+32768,z);
-
-			px = 0;
-
-		}
+		px = (byte & mask) ? 1 : 0;
 
 		mask >>= 1;
 
@@ -622,10 +587,7 @@ qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, in
 				while (str[i] == '\t' || str[i] == '\n')
 				{
 
-					if (str[i] == '\t')
-					{
-						line_num[line] += 4;
-					}
+					line_num[line] += (str[i] == '\t') ? 4 : 0;
 
 					if (str[i] == '\n')
 					{
@@ -659,10 +621,7 @@ qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, in
 				while (str[i] == '\t' || str[i] == '\n')
 				{
 
-					if (str[i] == '\t')
-					{
-						line_num[line] += 4;
-					}
+					line_num[line] += (str[i] == '\t') ? 4 : 0;
 
 					if (str[i] == '\n')
 					{
@@ -706,10 +665,7 @@ qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, in
 				v_pos.y += h + hm;
 				v_pos.x = x_orig[line];
 			}
-			if (str[j] == '\t')
-			{
-				v_pos.x += w * 5.0f;
-			}
+			v_pos.x += (str[j] == '\t') ? (w * 5.0f) : 0;
 			j++;
 		}
 
@@ -774,10 +730,7 @@ qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int
 
 				while (str[i] == '\t'|| str[i] == '\n')
 				{
-					if (str[i] == '\t')
-					{
-						halfwidth[line] += 4;
-					}
+					halfwidth[line] += (str[i] == '\t') ? 4 : 0;
 					if (str[i] == '\n')
 					{
 						x_orig[line] = v_pos.x;
@@ -806,10 +759,7 @@ qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int
 
 				while (str[i] == '\t'|| str[i] == '\n')
 				{
-					if (str[i] == '\t')
-					{
-						halfwidth[line] += 4;
-					}
+					halfwidth[line] += (str[i] == '\t') ? 4 : 0;
 					if (str[i] == '\n')
 					{
 						x_orig[line] = v_pos.x - ((halfwidth[line] * (hw+wm)) + (fullwidth[line] * (fw + wm)));;
@@ -854,10 +804,7 @@ qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int
 
 				while (str[i] == '\t'|| str[i] == '\n')
 				{
-					if (str[i] == '\t')
-					{
-						halfwidth[line] += 4;
-					}
+					halfwidth[line] += (str[i] == '\t') ? 4 : 0;
 					if (str[i] == '\n')
 					{
 						x_orig[line] = v_pos.x - ((halfwidth[line] * (hw+wm)) + (fullwidth[line] * (fw + wm)))/2.0f;
@@ -915,10 +862,7 @@ qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int
 				v_pos.y += h + hm;
 				v_pos.x = x_orig[line];
 			}
-			if (str[j] == '\t')
-			{
-				v_pos.x += hw * 5.0f;
-			}
+			v_pos.x += (str[j] == '\t') ? (hw * 5.0f) : 0;
 			j++;
 		}
 

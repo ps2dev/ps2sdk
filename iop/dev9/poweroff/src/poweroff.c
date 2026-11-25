@@ -216,10 +216,7 @@ void* poweroff_rpc_server(int fno, void *data, int size)
 		InitPowerOffThread();
 
 		int* sbuff = data;
-		if (sbuff[0])
-			SetPowerButtonHandler(Shutdown, 0);
-		else
-			SetPowerButtonHandler(SendCmd, 0);
+		SetPowerButtonHandler(sbuff[0] ? Shutdown : SendCmd, 0);
 		sbuff[0] = 1;
 		return sbuff;
 	}

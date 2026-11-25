@@ -41,14 +41,9 @@ static int smod_get_next_mod(ModuleInfo_t *cur_mod, ModuleInfo_t *next_mod)
 	void *addr;
 
 	/* If cur_mod is 0, return the head of the list (IOP address 0x800).  */
-	if (!cur_mod) {
-		addr = GetLoadcoreInternalData()->image_info;
-	} else {
-		if (!cur_mod->next)
-			return 0;
-		else
-			addr = cur_mod->next;
-	}
+	addr = !cur_mod ? GetLoadcoreInternalData()->image_info : cur_mod->next;
+	if (!addr)
+		return 0;
 
 	memcpy(next_mod, addr, sizeof(ModuleInfo_t));
 	return next_mod->id;

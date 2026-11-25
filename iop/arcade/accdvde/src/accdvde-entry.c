@@ -32,11 +32,5 @@ int acCdvdeEntry(int argc, char **argv)
 	int ret;
 
 	ret = acCdvdeModuleStart(argc, argv);
-	if ( ret < 0 )
-	{
-		return ret;
-	}
-	if ( RegisterLibraryEntries(&_exp_accdvde) != 0 )
-		return -16;
-	return 0;
+	return ( ret < 0 ) ? ret : (( RegisterLibraryEntries(&_exp_accdvde) != 0 ) ? -16 : 0);
 }

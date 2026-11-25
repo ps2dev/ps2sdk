@@ -141,16 +141,13 @@ static inline int convmode_to_iomanx(int stat)
 {
   int mode = 0;
 
-  if (FIO_SO_ISLNK(stat)) mode |= FIO_S_IFLNK; // Symbolic link
-  if (FIO_SO_ISREG(stat)) mode |= FIO_S_IFREG; // regular file
-  if (FIO_SO_ISDIR(stat)) mode |= FIO_S_IFDIR; // directory
+  mode |= (FIO_SO_ISLNK(stat)) ? FIO_S_IFLNK : 0; // Symbolic link
+  mode |= (FIO_SO_ISREG(stat)) ? FIO_S_IFREG : 0; // regular file
+  mode |= (FIO_SO_ISDIR(stat)) ? FIO_S_IFDIR : 0; // directory
 
-  if (((stat) & FIO_SO_IROTH) == FIO_SO_IROTH) // read
-    mode |= FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH;
-  if (((stat) & FIO_SO_IWOTH) == FIO_SO_IWOTH) // write
-    mode |= FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH;
-  if (((stat) & FIO_SO_IXOTH) == FIO_SO_IXOTH) // execute
-    mode |= FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH;
+  mode |= (((stat) & FIO_SO_IROTH) == FIO_SO_IROTH) /* read */ ? (FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH) : 0;
+  mode |= (((stat) & FIO_SO_IWOTH) == FIO_SO_IWOTH) /* write */ ? (FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH) : 0;
+  mode |= (((stat) & FIO_SO_IXOTH) == FIO_SO_IXOTH) /* execute */ ? (FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH) : 0;
 
   return mode;
 }
@@ -501,10 +498,7 @@ static int ps2netfs_op_open(char *buf, int len)
   devtype = devscan_gettype(cmd->path);
   if (devtype != IOPMGR_DEVTYPE_INVALID)
   {
-    if (devtype == IOPMGR_DEVTYPE_IOMAN)
-      retval = io_open(cmd->path,ntohl(cmd->flags));
-    else if (devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = open(cmd->path,ntohl(cmd->flags),0644);
+    retval = (devtype == IOPMGR_DEVTYPE_IOMAN) ? io_open(cmd->path,ntohl(cmd->flags)) : ((devtype == IOPMGR_DEVTYPE_IOMANX) ? open(cmd->path,ntohl(cmd->flags),0644) : retval);
     if (retval > 0)
       retval = fdh_getfd(devtype,retval);
   }
@@ -562,10 +556,7 @@ static int ps2netfs_op_close(char *buf, int len)
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
   {
-    if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
-      retval = io_close(fdptr->realfd);
-    else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = close(fdptr->realfd);
+    retval = (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN) ? io_close(fdptr->realfd) : ((fdptr->devtype == IOPMGR_DEVTYPE_IOMANX) ? close(fdptr->realfd) : retval);
     fdh_freefd(ntohl(cmd->fd));
   }
 
@@ -626,10 +617,7 @@ static int ps2netfs_op_read(char *buf, int len)
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
   {
-    if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
-      retval = io_read(fdptr->realfd,ps2netfs_fiobuffer,nbytes);
-    else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = read(fdptr->realfd,ps2netfs_fiobuffer,nbytes);
+    retval = (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN) ? io_read(fdptr->realfd,ps2netfs_fiobuffer,nbytes) : ((fdptr->devtype == IOPMGR_DEVTYPE_IOMANX) ? read(fdptr->realfd,ps2netfs_fiobuffer,nbytes) : retval);
   }
 
   // now build the response
@@ -704,10 +692,7 @@ static int ps2netfs_op_write(char *buf, int len)
         return -1;
       }
 
-      if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
-        retval = io_write(fdptr->realfd,ps2netfs_fiobuffer,towrite);
-      else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
-        retval = write(fdptr->realfd,ps2netfs_fiobuffer,towrite);
+      retval = (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN) ? io_write(fdptr->realfd,ps2netfs_fiobuffer,towrite) : ((fdptr->devtype == IOPMGR_DEVTYPE_IOMANX) ? write(fdptr->realfd,ps2netfs_fiobuffer,towrite) : retval);
 
       if (retval > 0) { written += retval; left -= retval; }
     }
@@ -767,10 +752,7 @@ static int ps2netfs_op_lseek(char *buf, int len)
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
   {
-    if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
-      retval = io_lseek(fdptr->realfd,ntohl(cmd->offset),ntohl(cmd->whence));
-    else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = lseek(fdptr->realfd,ntohl(cmd->offset),ntohl(cmd->whence));
+    retval = (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN) ? io_lseek(fdptr->realfd,ntohl(cmd->offset),ntohl(cmd->whence)) : ((fdptr->devtype == IOPMGR_DEVTYPE_IOMANX) ? lseek(fdptr->realfd,ntohl(cmd->offset),ntohl(cmd->whence)) : retval);
   }
 
   // now build the response
@@ -828,10 +810,7 @@ static int ps2netfs_op_ioctl(char *buf, int len)
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
   {
-    if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
-      retval = io_ioctl(fdptr->realfd,ntohl(cmd->command),(void *)ioctlrly->buf);
-    else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = ioctl(fdptr->realfd,ntohl(cmd->command),(void *)ioctlrly->buf);
+    retval = (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN) ? io_ioctl(fdptr->realfd,ntohl(cmd->command),(void *)ioctlrly->buf) : ((fdptr->devtype == IOPMGR_DEVTYPE_IOMANX) ? ioctl(fdptr->realfd,ntohl(cmd->command),(void *)ioctlrly->buf) : retval);
   }
 
   // Build packet
@@ -884,10 +863,7 @@ static int ps2netfs_op_remove(char *buf, int len)
   devtype = devscan_gettype(cmd->path);
   if (devtype != IOPMGR_DEVTYPE_INVALID)
   {
-    if (devtype == IOPMGR_DEVTYPE_IOMAN)
-      retval = io_remove(cmd->path);
-    else if (devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = remove(cmd->path);
+    retval = (devtype == IOPMGR_DEVTYPE_IOMAN) ? io_remove(cmd->path) : ((devtype == IOPMGR_DEVTYPE_IOMANX) ? remove(cmd->path) : retval);
   }
 
   // now build the response
@@ -943,10 +919,7 @@ static int ps2netfs_op_mkdir(char *buf, int len)
   devtype = devscan_gettype(cmd->path);
   if (devtype != IOPMGR_DEVTYPE_INVALID)
   {
-    if (devtype == IOPMGR_DEVTYPE_IOMAN)
-      retval = io_mkdir(cmd->path);
-    else if (devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = mkdir(cmd->path,0644);
+    retval = (devtype == IOPMGR_DEVTYPE_IOMAN) ? io_mkdir(cmd->path) : ((devtype == IOPMGR_DEVTYPE_IOMANX) ? mkdir(cmd->path,0644) : retval);
   }
 
   // now build the response
@@ -1002,10 +975,7 @@ static int ps2netfs_op_rmdir(char *buf, int len)
   devtype = devscan_gettype(cmd->path);
   if (devtype != IOPMGR_DEVTYPE_INVALID)
   {
-    if (devtype == IOPMGR_DEVTYPE_IOMAN)
-      retval = io_rmdir(cmd->path);
-    else if (devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = rmdir(cmd->path);
+    retval = (devtype == IOPMGR_DEVTYPE_IOMAN) ? io_rmdir(cmd->path) : ((devtype == IOPMGR_DEVTYPE_IOMANX) ? rmdir(cmd->path) : retval);
   }
 
   // now build the response
@@ -1061,10 +1031,7 @@ static int ps2netfs_op_dopen(char *buf, int len)
   devtype = devscan_gettype(cmd->path);
   if (devtype != IOPMGR_DEVTYPE_INVALID)
   {
-    if (devtype == IOPMGR_DEVTYPE_IOMAN)
-      retval = io_dopen(cmd->path,0);
-    else if (devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = dopen(cmd->path);
+    retval = (devtype == IOPMGR_DEVTYPE_IOMAN) ? io_dopen(cmd->path,0) : ((devtype == IOPMGR_DEVTYPE_IOMANX) ? dopen(cmd->path) : retval);
     if (retval > 0)
       retval = fdh_getfd(devtype,retval);
   }
@@ -1122,10 +1089,7 @@ static int ps2netfs_op_dclose(char *buf, int len)
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
   {
-    if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
-      retval = io_dclose(fdptr->realfd);
-    else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = dclose(fdptr->realfd);
+    retval = (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN) ? io_dclose(fdptr->realfd) : ((fdptr->devtype == IOPMGR_DEVTYPE_IOMANX) ? dclose(fdptr->realfd) : retval);
     if (retval == 0) fdh_freefd(ntohl(cmd->fd));
   }
 
@@ -1327,12 +1291,8 @@ static int ps2netfs_op_format(char *buf, int len)
   devtype = devscan_gettype(cmd->dev);
   if (devtype == IOPMGR_DEVTYPE_IOMANX)
   { // if other end has not set args, add some standard ones (hdd use only for mo)
-    if (ntohl(cmd->arglen) == 0)
-    {
-      int Arg[3] = { PFS_ZONE_SIZE, 0x2d66, PFS_FRAGMENT };
-      retval = format(cmd->dev,cmd->blockdev,(char*)&Arg,sizeof(Arg));
-    }
-    else retval = format(cmd->dev,cmd->blockdev,cmd->arg,ntohl(cmd->arglen));
+    int Arg[3] = { PFS_ZONE_SIZE, 0x2d66, PFS_FRAGMENT };
+    retval = (ntohl(cmd->arglen) == 0) ? format(cmd->dev,cmd->blockdev,(char*)&Arg,sizeof(Arg)) : format(cmd->dev,cmd->blockdev,cmd->arg,ntohl(cmd->arglen));
   }
 
   // now build the response
@@ -1391,9 +1351,7 @@ static int ps2netfs_op_rename(char *buf, int len)
   if (devtype == IOPMGR_DEVTYPE_IOMANX)
   {
     devtype = devscan_gettype(cmd->newpath);
-    if (devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = rename(cmd->oldpath,cmd->newpath);
-    else retval = -1;
+    retval = (devtype == IOPMGR_DEVTYPE_IOMANX) ? rename(cmd->oldpath,cmd->newpath) : -1;
   }
   // now build the response
   renamerly = (ps2netfs_pkt_file_rly *)&ps2netfs_send_packet[0];
@@ -1713,9 +1671,7 @@ static int ps2netfs_op_symlink(char *buf, int len)
   if (devtype == IOPMGR_DEVTYPE_IOMANX)
   {
     devtype = devscan_gettype(cmd->newpath);
-    if (devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = symlink(cmd->oldpath,cmd->newpath);
-    else retval = -1;
+    retval = (devtype == IOPMGR_DEVTYPE_IOMANX) ? symlink(cmd->oldpath,cmd->newpath) : -1;
   }
   // now build the response
   symlinkrly = (ps2netfs_pkt_file_rly *)&ps2netfs_send_packet[0];

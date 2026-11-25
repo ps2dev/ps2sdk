@@ -84,48 +84,20 @@ void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, u16 psm, u16 w, u16 h, u16 dx, 
 	switch(pGParams->omode)
 	{
 		case GS_MODE_NTSC:
-			if(pGParams->interlace)
-			{
-				dispenv->disp.display_y	= dy+gs_DY+0x32;
-				dispenv->disp.display_x	= (gs_DX+0x27C) + dx*((w+0x9FF)/w);
-				dispenv->disp.magnify_h	= (w+0x9FF)/w - 1;
-				dispenv->disp.magnify_v	= 0;
-				dispenv->disp.display_w	= (w+0x9FF)/w*w - 1;
-
-				if(pGParams->ffmode)
-					dispenv->disp.display_h = (h<<1) - 1;
-				else
-					dispenv->disp.display_h = h - 1;
-			} else {
-				dispenv->disp.display_h = h-1;
-				dispenv->disp.display_x = gs_DX+0x27C + dx*((w+0x9FF)/w);
-				dispenv->disp.display_y = gs_DY+dy+0x19;
-				dispenv->disp.magnify_h = (w+0x9FF)/w - 1;
-				dispenv->disp.magnify_v	= 0;
-				dispenv->disp.display_w = (w+0x9FF)/w*w - 1;
-			}
+			dispenv->disp.display_h = (pGParams->interlace) ? ((pGParams->ffmode) ? ((h<<1) - 1) : (h - 1)) : (h-1);
+			dispenv->disp.display_y	= (pGParams->interlace) ? (gs_DY+dy+0x32) : (gs_DY+dy+0x19);
+			dispenv->disp.display_x = gs_DX+0x27C + dx*((w+0x9FF)/w);
+			dispenv->disp.magnify_h = (w+0x9FF)/w - 1;
+			dispenv->disp.magnify_v	= 0;
+			dispenv->disp.display_w = (w+0x9FF)/w*w - 1;
 			break;
 		case GS_MODE_PAL:
-			if(pGParams->interlace)
-			{
-				dispenv->disp.display_y	= gs_DY+dy+0x48;
-				dispenv->disp.display_x	= gs_DX+0x290 + dx*((w+0x9FF)/w);
-				dispenv->disp.magnify_h	= (w+0x9FF)/w - 1;
-				dispenv->disp.magnify_v	= 0;
-				dispenv->disp.display_w	= (w+0x9FF)/w*w - 1;
-
-				if(pGParams->ffmode)
-					dispenv->disp.display_h = (h<<1) - 1;
-				else
-					dispenv->disp.display_h = h - 1;
-			} else {
-				dispenv->disp.display_h = h-1;
-				dispenv->disp.display_x = gs_DX+0x290 + dx*((w+0x9FF)/w);
-				dispenv->disp.display_y = dy+gs_DY+0x48;
-				dispenv->disp.magnify_h = (w+0x9FF)/w - 1;
-				dispenv->disp.magnify_v	= 0;
-				dispenv->disp.display_w = (w+0x9FF)/w*w - 1;
-			}
+			dispenv->disp.display_h = (pGParams->interlace) ? ((pGParams->ffmode) ? ((h<<1) - 1) : (h - 1)) : (h-1);
+			dispenv->disp.display_x = gs_DX+0x290 + dx*((w+0x9FF)/w);
+			dispenv->disp.display_y = gs_DY+dy+0x48;
+			dispenv->disp.magnify_h = (w+0x9FF)/w - 1;
+			dispenv->disp.magnify_v	= 0;
+			dispenv->disp.display_w = (w+0x9FF)/w*w - 1;
 			break;
 		case GS_MODE_DTV_480P:
 			dispenv->disp.display_x = gs_DX+((0x2D0-w) + ((0x2D0-w)>>31))/2*2 + (dx<<1)+0xE8;

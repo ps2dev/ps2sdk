@@ -63,18 +63,7 @@ static void cdfs_ready_done(struct acd *acd, const struct cdfs_softc *arg, int r
 		int delay;
 
 		asc = (acUint16) - (ret & 0xFFFF);
-		if ( -ret >> 16 == 6 )
-		{
-			delay = 0;
-			if ( asc == 10496 )
-				delay = acd_delay();
-		}
-		else
-		{
-			delay = -1;
-			if ( asc == 1025 )
-				delay = 1000000;
-		}
+		delay = ( -ret >> 16 == 6 ) ? (( asc == 10496 ) ? acd_delay() : 0) : (( asc == 1025 ) ? 1000000 : -1);
 		if ( delay < 0 )
 			flg = 1;
 		else
@@ -123,10 +112,7 @@ static int cdfs_attach(struct cdfs_softc *cdfsc, struct acd *acd, int remount)
 	struct cdfs_ptable *ptable_v19;
 
 	semid = cdfsc->semid;
-	if ( semid <= 0 )
-		active = -9;
-	else
-		active = WaitSema(semid);
+	active = ( semid <= 0 ) ? -9 : WaitSema(semid);
 	if ( active >= 0 )
 	{
 		acd_setup((struct acd *)cdfsc->buf, (acd_done_t)cdfs_ready_done, cdfsc, -5000000);
@@ -136,9 +122,7 @@ static int cdfs_attach(struct cdfs_softc *cdfsc, struct acd *acd, int remount)
 				SignalSema(cdfsc->semid);
 		}
 	}
-	active_v3 = -9;
-	if ( cdfsc->semid > 0 )
-		active_v3 = WaitSema(cdfsc->semid);
+	active_v3 = ( cdfsc->semid > 0 ) ? WaitSema(cdfsc->semid) : -9;
 	if ( active_v3 < 0 )
 	{
 		return -6;
@@ -210,13 +194,8 @@ static int cdfs_attach(struct cdfs_softc *cdfsc, struct acd *acd, int remount)
 			FlushDcache();
 			pcache_v17 = (struct iso9660_path *)AllocSysMemory(0, ret_v16 << 11, 0);
 			cdfsc->pcache = pcache_v17;
-			if ( pcache_v17 == 0 )
+				ret = ( pcache_v17 == 0 ) ? -12 : acd_read(acd, lsn, pcache_v17, ret_v16);
 			{
-				ret = -12;
-			}
-			else
-			{
-				ret = acd_read(acd, lsn, pcache_v17, ret_v16);
 				if ( ret >= 0 )
 				{
 					int active_v18;
@@ -377,9 +356,7 @@ int cdfs_lookup(struct cdfs_dirent *result, const char *path, int pathlen)
 		int v6;
 		int v8;
 
-		v6 = -9;
-		if ( Cdfsc.semid > 0 )
-			v6 = WaitSema(Cdfsc.semid);
+		v6 = ( Cdfsc.semid > 0 ) ? WaitSema(Cdfsc.semid) : -9;
 		if ( v6 < 0 )
 			return -6;
 		if ( Cdfsc.all )
@@ -465,10 +442,7 @@ int cdfs_lookup(struct cdfs_dirent *result, const char *path, int pathlen)
 											path_v36 = (struct iso9660_path *)AllocSysMemory(0, n << 11, 0);
 											dirent_v37 = path_v36;
 											Cdfsc.dcache = (struct iso9660_dirent *)path_v36;
-											if ( path_v36 )
-												Cdfsc.dcsize = n;
-											else
-												Cdfsc.dcsize = 0;
+											Cdfsc.dcsize = path_v36 ? n : 0;
 											if ( !path_v36 )
 												lsn = 0;
 										}
@@ -562,9 +536,7 @@ int cdfs_lookup(struct cdfs_dirent *result, const char *path, int pathlen)
 										break;
 									}
 									dirent_v38 = Cdfsc.dcache;
-									v55 = size_v29 + 2047;
-									if ( size_v29 + 2047 < 0 )
-										v55 = size_v29 + 4094;
+									v55 = ( size_v29 + 2047 < 0 ) ? (size_v29 + 4094) : (size_v29 + 2047);
 									n_v39 = v55 >> 11;
 								}
 							}
@@ -625,8 +597,7 @@ int cdfs_lookup(struct cdfs_dirent *result, const char *path, int pathlen)
 								{
 									len_v19 = path_v16->name_len[0] | (path_v16->name_len[1] << 8);
 									s2 = path_v16->name;
-									if ( namlen_v9 < len_v19 )
-										len_v19 = namlen_v9;
+									len_v19 = ( namlen_v9 < len_v19 ) ? namlen_v9 : len_v19;
 									idx_v21 = len_v19 - 1;
 									dirent_v22 = name_v8;
 									while ( idx_v21 >= 0 )
@@ -736,9 +707,7 @@ int cdfs_read(struct cdfs_file *file, void *buf, int size)
 		{
 			int ret_v8;
 
-			ret_v8 = -9;
-			if ( Cdfsc.semid > 0 )
-				ret_v8 = WaitSema(Cdfsc.semid);
+			ret_v8 = ( Cdfsc.semid > 0 ) ? WaitSema(Cdfsc.semid) : -9;
 			ret = -6;
 			if ( ret_v8 >= 0 )
 			{
@@ -781,9 +750,7 @@ int cdfs_read(struct cdfs_file *file, void *buf, int size)
 		return ret;
 	rest = size - ret;
 	cpos_v14 = file->f_pos;
-	npos_v15 = cpos_v14 + rest;
-	if ( file->f_size < cpos_v14 + rest )
-		npos_v15 = file->f_size;
+	npos_v15 = ( file->f_size < cpos_v14 + rest ) ? file->f_size : (cpos_v14 + rest);
 	npos_v16 = npos_v15 - (npos_v15 & 0x7FF);
 	lsn_v17 = file->f_lsn + (cpos_v14 >> 11);
 	len_v18 = npos_v16 - cpos_v14;
@@ -824,9 +791,7 @@ int cdfs_read(struct cdfs_file *file, void *buf, int size)
 					flg = 1;
 					break;
 				}
-				ret_v21 = -9;
-				if ( Cdfsc.semid > 0 )
-					ret_v21 = WaitSema(Cdfsc.semid);
+				ret_v21 = ( Cdfsc.semid > 0 ) ? WaitSema(Cdfsc.semid) : -9;
 				ret = -6;
 				if ( ret_v21 < 0 )
 					break;
@@ -872,9 +837,7 @@ int cdfs_read(struct cdfs_file *file, void *buf, int size)
 		return ret;
 	rest_v34 = rest - ret;
 	cpos_v35 = file->f_pos;
-	npos_v36 = cpos_v35 + rest_v34;
-	if ( file->f_size < cpos_v35 + rest_v34 )
-		npos_v36 = file->f_size;
+	npos_v36 = ( file->f_size < cpos_v35 + rest_v34 ) ? file->f_size : (cpos_v35 + rest_v34);
 	len_v37 = npos_v36 - cpos_v35;
 	lsn_v38 = file->f_lsn + (cpos_v35 >> 11);
 	ret = len_v37;
@@ -882,9 +845,7 @@ int cdfs_read(struct cdfs_file *file, void *buf, int size)
 	{
 		int ret_v39;
 
-		ret_v39 = -9;
-		if ( Cdfsc.semid > 0 )
-			ret_v39 = WaitSema(Cdfsc.semid);
+		ret_v39 = ( Cdfsc.semid > 0 ) ? WaitSema(Cdfsc.semid) : -9;
 		if ( ret_v39 < 0 )
 		{
 			ret = -6;
@@ -925,9 +886,7 @@ int cdfs_read(struct cdfs_file *file, void *buf, int size)
 		}
 	}
 	rest_v42 = rest_v34 - ret;
-	if ( ret >= 0 )
-		return size - rest_v42;
-	return ret;
+	return ( ret >= 0 ) ? (size - rest_v42) : ret;
 }
 
 int cdfs_module_status()

@@ -51,11 +51,7 @@ int mx_sio2_dma_isr_rx(void *arg)
     /* NOTE: Some cards respond with 0xFE immediately after the CRC16, others do not.
      * Try to get 0xFE regardless of whether the transfers complete as it's
      * needed for correct alignment of CMD12 (STOP_TRANSMISSION) later */
-    if (inl_sio2_data_in() != 0xFE) {
-        cmd.response = mx_sio2_wait_equal(0xFE, READ_TOKEN_TIMEOUT);
-    } else {
-        cmd.response = SPISD_RESULT_OK;
-    }
+    cmd.response = (inl_sio2_data_in() != 0xFE) ? mx_sio2_wait_equal(0xFE, READ_TOKEN_TIMEOUT) : SPISD_RESULT_OK;
 
     cmd.sectors_transferred++;
 
@@ -834,8 +830,5 @@ int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
     M_PRINTF("MX4SIO v1.2\n");
 
-    if (argc >= 0)
-        return module_start(argc, argv, startaddr, mi);
-    else
-        return module_stop(-argc, argv, startaddr, mi);
+    return (argc >= 0) ? module_start(argc, argv, startaddr, mi) : module_stop(-argc, argv, startaddr, mi);
 }

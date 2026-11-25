@@ -33,10 +33,8 @@ void _SsUtBuildADSR(const u16 *adsr_buf, u16 *adsr1, u16 *adsr2)
 	v5 = adsr_buf[6] != 0 ? 0xFFFF8000 : 0;
 	v6 = v5;
 	v7 = adsr_buf[5] != 0 ? 0xFFFF8000 : 0;
-	if ( adsr_buf[8] )
-		v6 = v5 | 0x4000;
-	if ( adsr_buf[7] )
-		v6 |= 0x20u;
+	v6 |= ( adsr_buf[8] ) ? 0x4000 : 0;
+	v6 |= ( adsr_buf[7] ) ? 0x20u : 0;
 	v8 = v6 | ((adsr_buf[3] << 6) & 0x1FC0) | (adsr_buf[4] & 0x1F);
 	*adsr1 = v7 | ((*adsr_buf << 8) & 0x7F00) | ((16 * adsr_buf[1]) & 0xF0) | (adsr_buf[2] & 0xF);
 	*adsr2 = v8;

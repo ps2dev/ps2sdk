@@ -59,11 +59,7 @@ int __ps2ipcFcntlfsetflHelper(void *userdata, int newfl)
 
     val = (newfl & O_NONBLOCK) ? 1 : 0;
     res = ps2ipc_ioctl(fd, FIONBIO, &val);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcAcceptHelper(void *userdata, _libcglue_fdman_fd_info_t *info, struct sockaddr *addr, int *addrlen)
@@ -99,11 +95,7 @@ int __ps2ipcBindHelper(void *userdata, const struct sockaddr *name, int namelen)
     }
 
     res = ps2ipc_bind(fd, name, namelen);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcCloseHelper(void *userdata)
@@ -118,11 +110,7 @@ int __ps2ipcCloseHelper(void *userdata)
     }
 
     res = ps2ipc_disconnect(fd);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcConnectHelper(void *userdata, const struct sockaddr *name, int namelen)
@@ -137,11 +125,7 @@ int __ps2ipcConnectHelper(void *userdata, const struct sockaddr *name, int namel
     }
 
     res = ps2ipc_connect(fd, name, namelen);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcListenHelper(void *userdata, int backlog)
@@ -156,11 +140,7 @@ int __ps2ipcListenHelper(void *userdata, int backlog)
     }
 
     res = ps2ipc_listen(fd, backlog);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcRecvHelper(void *userdata, void *mem, size_t len, int flags)
@@ -175,11 +155,7 @@ int __ps2ipcRecvHelper(void *userdata, void *mem, size_t len, int flags)
     }
 
     res = ps2ipc_recv(fd, mem, len, flags);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcRecvfromHelper(void *userdata, void *mem, size_t len, int flags, struct sockaddr *from, int *fromlen)
@@ -194,11 +170,7 @@ int __ps2ipcRecvfromHelper(void *userdata, void *mem, size_t len, int flags, str
     }
 
     res = ps2ipc_recvfrom(fd, mem, len, flags, from, fromlen);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcRecvmsgHelper(void *userdata, struct msghdr *msg, int flags)
@@ -219,11 +191,7 @@ int __ps2ipcSendHelper(void *userdata, const void *dataptr, size_t len, int flag
     }
 
     res = ps2ipc_send(fd, dataptr, len, flags);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcSendtoHelper(void *userdata, const void *dataptr, size_t len, int flags, const struct sockaddr *to, int tolen)
@@ -238,11 +206,7 @@ int __ps2ipcSendtoHelper(void *userdata, const void *dataptr, size_t len, int fl
     }
 
     res = ps2ipc_sendto(fd, dataptr, len, flags, to, tolen);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcSendmsgHelper(void *userdata, const struct msghdr *msg, int flags) {
@@ -263,11 +227,7 @@ int __ps2ipcIoctlHelper(void *userdata, int cmd, void *argp)
     }
 
     res = ps2ipc_ioctl(fd, cmd, argp);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcGetsocknameHelper(void *userdata, struct sockaddr* name, int* namelen)
@@ -282,11 +242,7 @@ int __ps2ipcGetsocknameHelper(void *userdata, struct sockaddr* name, int* namele
     }
 
     res = ps2ipc_getsockname(fd, name, namelen);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcGetpeernameHelper(void *userdata, struct sockaddr *name, int *namelen)
@@ -301,11 +257,7 @@ int __ps2ipcGetpeernameHelper(void *userdata, struct sockaddr *name, int *namele
     }
 
     res = ps2ipc_getpeername(fd, name, namelen);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcGetsockoptHelper(void *userdata, int level, int optname, void* optval, socklen_t* optlen)
@@ -320,11 +272,7 @@ int __ps2ipcGetsockoptHelper(void *userdata, int level, int optname, void* optva
     }
 
     res = ps2ipc_getsockopt(fd, level, optname, optval, optlen);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 int __ps2ipcSetsockoptHelper(void *userdata, int level, int optname, const void *optval, socklen_t optlen)
@@ -339,11 +287,7 @@ int __ps2ipcSetsockoptHelper(void *userdata, int level, int optname, const void 
     }
 
     res = ps2ipc_setsockopt(fd, level, optname, optval, optlen);
-    if (res < 0)
-    {
-        return -ENFILE;
-    }
-    return res;
+    return (res < 0) ? -ENFILE : res;
 }
 
 struct hostent *ps2ipc_gethostbyaddr(const void *addr, int len, int type) {

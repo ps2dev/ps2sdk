@@ -444,9 +444,8 @@ static void do_rtlist_handle_priority(int is_flag_v_or_c, int int_value)
 
         curelem1 = g_rtlist_nondormant;
         list_for_each (thread, &g_ThbaseInternal->thread_list, thread_list) {
-            curelem1->m_thread_ptr = 0;
-            if (thread->status != 16) {
-                curelem1->m_thread_ptr    = thread;
+            curelem1->m_thread_ptr = (thread->status != 16) ? thread : 0;
+            if (curelem1->m_thread_ptr) {
                 curelem1->m_thread_id     = thread->tag.id;
                 curelem1->m_old_clocks.hi = thread->run_clocks_hi;
                 curelem1->m_old_clocks.lo = thread->run_clocks_lo;
@@ -522,10 +521,8 @@ static void rtlist_cmd_handler(char *cmdparam)
             *EndOfString = 0;
             EndOfString  = RemoveLeadingWhitespaces(EndOfString + 1);
         }
-        if (!strcmp(cmdparam_cur, "-v"))
-            is_flag_v_or_c |= 1u;
-        if (!strcmp(cmdparam_cur, "-c"))
-            is_flag_v_or_c |= 2u;
+        is_flag_v_or_c |= (!strcmp(cmdparam_cur, "-v")) ? 1u : 0;
+        is_flag_v_or_c |= (!strcmp(cmdparam_cur, "-c")) ? 2u : 0;
         if (*cmdparam_cur != '-')
             int_value = strtol(cmdparam_cur, 0, 10);
     }

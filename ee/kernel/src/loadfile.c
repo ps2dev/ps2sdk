@@ -77,12 +77,8 @@ int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
 
     strlcpy(arg.path, path, sizeof(arg.path));
 
-    if (args && arg_len) {
-        arg.p.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
-        memcpy(arg.args, args, arg.p.arg_len);
-    } else {
-        arg.p.arg_len = 0;
-    }
+    arg.p.arg_len = (args && arg_len) ? (arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len) : 0;
+    memcpy(arg.args, args, arg.p.arg_len);
 
     if (sceSifCallRpc(&_lf_cd, fno, dontwait, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
         return -SCE_ECALLMISS;
@@ -125,12 +121,8 @@ int SifStopModule(int id, int arg_len, const char *args, int *mod_res)
 
     arg.p.id = id;
 
-    if (args && arg_len) {
-        arg.q.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
-        memcpy(arg.args, args, arg.q.arg_len);
-    } else {
-        arg.q.arg_len = 0;
-    }
+    arg.q.arg_len = (args && arg_len) ? (arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len) : 0;
+    memcpy(arg.args, args, arg.q.arg_len);
 
     if (sceSifCallRpc(&_lf_cd, LF_F_MOD_STOP, 0, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
         return -SCE_ECALLMISS;
@@ -316,12 +308,8 @@ int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres)
     memset(&arg, 0, sizeof arg);
 
     arg.p.ptr = ptr;
-    if (args && arg_len) {
-        arg.q.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
-        memcpy(arg.args, args, arg.q.arg_len);
-    } else {
-        arg.q.arg_len = 0;
-    }
+    arg.q.arg_len = (args && arg_len) ? (arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len) : 0;
+    memcpy(arg.args, args, arg.q.arg_len);
 
     if (sceSifCallRpc(&_lf_cd, LF_F_MOD_BUF_LOAD, 0, &arg, sizeof arg, &arg, 8,
                    NULL, NULL) < 0)

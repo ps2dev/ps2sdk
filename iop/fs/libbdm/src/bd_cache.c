@@ -26,19 +26,13 @@ struct bd_cache
 /* cache overlaps with requested area ? */
 static int _overlaps(u64 csector, u16 ccount, u64 sector, u16 count)
 {
-    if (ccount != 0 && (sector < (csector + ccount)) && ((sector + count) > csector))
-        return 1;
-    else
-        return 0;
+    return  (ccount != 0 && (sector < (csector + ccount)) && ((sector + count) > csector)) ? 1 : 0;
 }
 
 /* cache contains requested area ? */
 static int _contains(u64 csector, u16 ccount, u64 sector, u16 count)
 {
-    if (ccount != 0 && (sector >= csector) && ((sector + count) <= (csector + ccount)))
-        return 1;
-    else
-        return 0;
+    return  (ccount != 0 && (sector >= csector) && ((sector + count) <= (csector + ccount))) ? 1 : 0;
 }
 
 static void _invalidate(struct bd_cache *c, u64 sector, u16 count)

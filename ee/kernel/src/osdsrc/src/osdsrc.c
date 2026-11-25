@@ -34,18 +34,12 @@ int _start(int syscall) __attribute__((section(".start")));
 int _start(int syscall)
 {
     unsigned int i;
-    int result;
 
     InitSystemConfig(&SystemConfiguration, 0x26);
 
     for (i = 0; i < 5; i++) {
         if (SyscallPatchData[i].syscall == syscall) {
-            if (syscall == 0xFFFFC402) {
-                result = ((unsigned int)SyscallPatchData[i].function >> 2 & 0x03FFFFFF) | 0x0C000000; // Creates a JAL instruction to the function.
-            } else
-                result = (unsigned int)SyscallPatchData[i].function;
-
-            return result;
+            return (syscall == 0xFFFFC402) ? ((unsigned int)SyscallPatchData[i].function >> 2 & 0x03FFFFFF) | 0x0C000000 /* Creates a JAL instruction to the function. */ : (unsigned int)SyscallPatchData[i].function;
         }
     }
 

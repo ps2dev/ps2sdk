@@ -26,10 +26,7 @@ IRX_ID("Stdio", 1, 1);
 
 int _start(int argc, char *argv[])
 {
-    if (RegisterLibraryEntries(&_exp_stdio) != 0) {
-        return MODULE_NO_RESIDENT_END;
-    }
-    return MODULE_RESIDENT_END;
+    return (RegisterLibraryEntries(&_exp_stdio) != 0) ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
 }
 
 void stdio_prnt_callback(void *userdata, int c)
@@ -57,9 +54,8 @@ void stdio_prnt_callback(void *userdata, int c)
 
     tmp_buf[current_length] = c;
     current_length += 1;
-    context->current_length = current_length;
+    context->current_length = (current_length == 64) ? 0 : current_length;
     if (current_length == 64) {
-        context->current_length = 0;
     write_now:
         io_write(context->fd, tmp_buf, current_length);
     }
@@ -116,9 +112,7 @@ int fdputc(int c, int fd)
         io_write(fd, "\r\n", 2);
         tab_stop_padding = 0;
     } else {
-        if (isprint(c) != 0) {
-            tab_stop_padding += 1;
-        }
+        tab_stop_padding += (isprint(c) != 0) ? 1 : 0;
         io_write(fd, buf, 1);
     }
     return c;
@@ -133,10 +127,7 @@ int fdputs(const char *s, int fd)
 {
     const char *s_s;
 
-    s_s = s;
-    if (s == NULL) {
-        s_s = "<NULL>";
-    }
+    s_s = (s == NULL) ? "<NULL>" : s;
     while (*s_s != '\x00') {
         fdputc(*s_s, fd);
         s_s += 1;
@@ -169,11 +160,7 @@ char *fdgets(char *buf, int fd)
     char v6;
     int v7;
     char v8;
-    int v9;
     int v10;
-    int v11;
-    int v13;
-    int v14;
 
     v4 = buf;
     v5 = buf + 125;
@@ -184,33 +171,22 @@ char *fdgets(char *buf, int fd)
         }
         if (v6 < '\v') {
             if (v6 != '\b') {
-                if (v6 == '\t') {
-                    v6 = ' ';
-                    v7 = ' ';
-                } else {
-                    v7 = v6;
-                }
+                v6 = (v6 == '\t') ? ' ' : v6;
+                v7 = v6;
                 goto LABEL_31;
             }
             goto LABEL_21;
         }
         if (v6 == '\x16') {
             v8 = fdgetc(fd);
-            v9 = fd;
             if (v4 >= v5) {
-                if (!fd) {
-                    v9 = 1;
-                }
                 v10 = 7;
                 goto LABEL_29;
             }
             *v4++ = v8;
             v10   = v8;
-            if (!fd) {
-                v9 = 1;
-            }
         LABEL_29:
-            fdputc(v10, v9);
+            fdputc(v10, (!fd) ? 1 : fd);
         } else {
             if (v6 < '\x17') {
                 if (v6 == '\r') {
@@ -223,52 +199,28 @@ char *fdgets(char *buf, int fd)
                 v7 = v6;
             LABEL_31:
                 if (isprint(v7) == 0) {
-                    v9 = fd;
                 LABEL_37:
-                    if (!v9) {
-                        v9 = 1;
-                    }
                     v10 = 7;
                     goto LABEL_29;
                 }
-                v9 = fd;
                 if (v4 >= v5) {
                     goto LABEL_37;
                 }
                 *v4++ = v6;
-                if (!fd) {
-                    v9 = 1;
-                }
                 v10 = v7;
                 goto LABEL_29;
             }
         LABEL_21:
             if (buf < v4) {
                 --v4;
-                v13 = fd;
-                if (!fd) {
-                    v13 = 1;
-                }
-                fdputc('\b', v13);
-                v14 = fd;
-                if (!fd) {
-                    v14 = 1;
-                }
-                fdputc(' ', v14);
-                v9 = fd;
-                if (!fd) {
-                    v9 = 1;
-                }
+                fdputc('\b', (!fd) ? 1 : fd);
+                fdputc(' ', (!fd) ? 1 : fd);
                 v10 = 8;
                 goto LABEL_29;
             }
         }
     }
-    v11 = fd;
-    if (!fd) {
-        v11 = 1;
-    }
-    fdputc('\n', v11);
+    fdputc('\n', (!fd) ? 1 : fd);
     *v4 = 0;
     return buf;
 }

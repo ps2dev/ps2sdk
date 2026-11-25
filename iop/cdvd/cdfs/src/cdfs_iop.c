@@ -440,10 +440,7 @@ static enum PathMatch comparePath(const char *path) {
 
     // if requested path is longer, and next char is a dir seperator
     // then report sub-dir match
-    if ((path[length] == '/') || (path[length] == '\\'))
-        return SUBDIR;
-    else
-        return NOT_MATCH;
+    return ((path[length] == '/') || (path[length] == '\\')) ? SUBDIR : NOT_MATCH;
 }
 
 // Find, and cache, the requested directory, for use by GetDir or  (and thus open)
@@ -538,9 +535,7 @@ static int cdfs_cacheDir(const char *pathname, enum Cache_getMode getMode) {
                 // then we will need to re-load it before starting search
                 if (cacheInfoDir.cache_offset != 0) {
                     cacheInfoDir.cache_offset = 0;
-                    cacheInfoDir.cache_size = cacheInfoDir.sector_num;
-                    if (cacheInfoDir.cache_size > MAX_DIR_CACHE_SECTORS)
-                        cacheInfoDir.cache_size = MAX_DIR_CACHE_SECTORS;
+                    cacheInfoDir.cache_size = (cacheInfoDir.sector_num > MAX_DIR_CACHE_SECTORS) ? MAX_DIR_CACHE_SECTORS : cacheInfoDir.sector_num;
 
                     // Now fill the cache with the specified sectors
                     if (!cdfs_readSect(cacheInfoDir.sector_start + cacheInfoDir.cache_offset, cacheInfoDir.cache_size, cacheInfoDir.cache)) {
@@ -799,10 +794,7 @@ int cdfs_readSect(u32 lsn, u32 sectors, u8 *buf) {
     cdReadMode.trycount = 32;
 
     for (retry = 0; retry < 32; retry++) { // 32 retries
-        if (retry <= 8)
-            cdReadMode.spindlctrl = 1;  // Try fast reads for first 8 tries
-        else
-            cdReadMode.spindlctrl = 0;  // Then try slow reads
+        cdReadMode.spindlctrl = (retry <= 8) ? 1 /* Try fast reads for first 8 tries */ : 0 /* Then try slow reads */;
 
         if (!isValidDisc())
             return FALSE;
@@ -1040,9 +1032,7 @@ int cdfs_getDir(const char *pathname, struct TocEntry tocEntry[], unsigned int r
 int cdfs_checkDiskChanged(enum Cdvd_Changed_Index index) {
     u32 res = 0;
     sceCdTrayReq(SCECdTrayCheck, &res);
-    if (res) {
-        cdvdChangedMagic += 1;
-    }
+    cdvdChangedMagic += (res) ? 1 : 0;
     if (cdvdChangedMagic != cdvdChangedMagicLast[index]) {
         cdvdChangedMagicLast[index] = cdvdChangedMagic;
         return TRUE;

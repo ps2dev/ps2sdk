@@ -251,13 +251,8 @@ int flash_page_read(flash_info_t *info, u32 page, u32 count, void *buf)
 
 	SPD_REG16(0x480c) = func;
 
-	if (info->page_bytes == 16) {
-		SPD_REG16(0x4804) = SM_CMD_READ3;
-		byteofs = pageofs & 0x0f;
-	} else {
-		SPD_REG16(0x4804) = SM_CMD_READ1;
-		byteofs = pageofs & 0x1ff;
-	}
+	SPD_REG16(0x4804) = (info->page_bytes == 16) ? SM_CMD_READ3 : SM_CMD_READ1;
+	byteofs = pageofs & ((info->page_bytes == 16) ? 0x0f : 0x1ff);
 
 	SPD_REG16(0x4808) = (byteofs & 0xff) | 0x100;
 	/* Set the rest of the page info.  */

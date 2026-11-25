@@ -165,10 +165,7 @@ static int module_stop(int ac, char *av[], void *startaddr, ModuleInfo_t *mi);
 
 int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-	if ( argc >= 0 )
-		return module_start(argc, argv, startaddr, mi);
-	else
-		return module_stop(argc, argv, startaddr, mi);
+	return (( argc >= 0 ) ? module_start : module_stop)(argc, argv, startaddr, mi);
 }
 
 static void spduart_dump_msr(u8 msr)
@@ -234,10 +231,7 @@ static int spduart_send(struct spduart_internals_ *priv)
 					spduart_internals.dev9_uart_reg_area->r_wrthr_rdrbr = v7;
 					++v4;
 				} while ( v6 > 0 );
-				if ( priv->send_buf_struct.m_cur_xfer_len > 0 )
-				{
-					priv->spduart_fcr_cached |= 2;
-				}
+				priv->spduart_fcr_cached |= ( priv->send_buf_struct.m_cur_xfer_len > 0 ) ? 2 : 0;
 			}
 			else
 			{
@@ -276,10 +270,7 @@ static int spduart_dev9_intr_cb(int flag)
 				}
 				if ( (spduart_internals.dev9_uart_reg_area->r_scr & 1) != 0 )
 				{
-					if ( ((spduart_internals.dev9_uart_reg_area->r_scr >> 4) & sceModemLINE_CTS) != 0 )
-					{
-						v2 |= 4u;
-					}
+					v2 |=  ( ((spduart_internals.dev9_uart_reg_area->r_scr >> 4) & sceModemLINE_CTS) != 0 ) ? 4u : 0;
 				}
 				if ( r_scr & 2 )
 				{
@@ -656,8 +647,7 @@ static void spduart_init_hw(struct spduart_internals_ *priv)
 			{
 				buf1data += 1;
 			}
-			if ( *buf1data == '\n' )
-				buf1data += 1;
+			buf1data += ( *buf1data == '\n' ) ? 1 : 0;
 		}
 		sprintf(priv->buf2data, "AT+GCI=%c%c\r", (u8)*buf1data, (u8)buf1data[1]);
 		sceInetPrintf("spduart: sending \"%S\"\n", priv->buf2data);
@@ -828,14 +818,10 @@ static int spduart_op_recv(void *userdata, void *ptr, int len)
 	struct spduart_internals_ *priv;
 
 	priv = (struct spduart_internals_ *)userdata;
-	m_cur_xfer_len = len;
 	v7 = 0;
-	if ( priv->recv_buf_struct.m_cur_xfer_len < len )
-		m_cur_xfer_len = priv->recv_buf_struct.m_cur_xfer_len;
+	m_cur_xfer_len = ( priv->recv_buf_struct.m_cur_xfer_len < len ) ? priv->recv_buf_struct.m_cur_xfer_len : len;
 	v8 = priv->recv_buf_struct.m_offset2 & 0x3FF;
-	v9 = 1024 - v8;
-	if ( m_cur_xfer_len < 1024 - v8 )
-		v9 = m_cur_xfer_len;
+	v9 = ( m_cur_xfer_len < 1024 - v8 ) ? m_cur_xfer_len : (1024 - v8);
 	if ( v9 > 0 )
 	{
 		size_t v10;
@@ -875,14 +861,10 @@ static int spduart_op_send(void *userdata, void *ptr, int len)
 	struct spduart_internals_ *priv;
 
 	priv = (struct spduart_internals_ *)userdata;
-	v4 = len;
 	v7 = 0;
-	if ( 1024 - priv->send_buf_struct.m_cur_xfer_len < len )
-		v4 = 1024 - priv->send_buf_struct.m_cur_xfer_len;
+	v4 = ( 1024 - priv->send_buf_struct.m_cur_xfer_len < len ) ? (1024 - priv->send_buf_struct.m_cur_xfer_len) : len;
 	v8 = priv->send_buf_struct.m_offset1 & 0x3FF;
-	v9 = 1024 - v8;
-	if ( (unsigned int)v4 < v9 )
-		v9 = v4;
+	v9 = ( (unsigned int)v4 < (1024 - v8) ) ? v4 : (1024 - v8);
 	if ( v9 > 0 )
 	{
 		size_t v10;
@@ -1024,13 +1006,9 @@ static int spduart_op_control(void *userdata, int code, void *ptr, int len)
 			int v6;
 
 			bcopy(ptr, &priority, 4);
-			v6 = 0;
-			if ( priv->spduart_thread > 0 )
-			{
-				v6 = ChangeThreadPriority(priv->spduart_thread, priority);
-				if ( !v6 )
-					priv->spduart_thpri_ = priority;
-			}
+			v6 = ( priv->spduart_thread > 0 ) ? ChangeThreadPriority(priv->spduart_thread, priority) : 0;
+			if ( !v6 )
+				priv->spduart_thpri_ = priority;
 			if ( priv->spduart_thread <= 0 || v6 == -413 )
 			{
 				if ( (unsigned int)(priority - 9) < 0x73 )

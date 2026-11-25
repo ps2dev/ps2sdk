@@ -117,16 +117,11 @@ int main(int argc, char *argv[])
 	}
 
 
-	if (!strcmp(infile, "-"))
-		fi = stdin;
-	else
+	fi = (!strcmp(infile, "-")) ? stdin : fopen(infile, "rb");
+	if (fi==NULL)
 	{
-		fi = fopen(infile, "rb");
-		if (fi==NULL)
-		{
-			dprintf("Failed to open input file '%s' (%s)\n", infile, strerror(errno));
-			return(1);
-		}
+		dprintf("Failed to open input file '%s' (%s)\n", infile, strerror(errno));
+		return(1);
 	}
 
 	fo = fopen(outfile, "wb");

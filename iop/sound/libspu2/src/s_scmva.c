@@ -49,13 +49,7 @@ void SpuSetCommonMasterVolumeAttr(s16 mvol_left, s16 mvol_right, s16 mvolmode_le
 	}
 	if ( v6 )
 	{
-		v4 = 127;
-		if ( mvol_left < 128 )
-		{
-			v4 = mvol_left;
-			if ( mvol_left < 0 )
-				v4 = 0;
-		}
+		v4 = ( mvol_left < 128 ) ? (( mvol_left < 0 ) ? 0 : mvol_left) : 127;
 	}
 	_spu_RXX[20 * _spu_core + 944] = (v4 & ~0x8000) | v6;
 	switch ( mvolmode_right )
@@ -86,13 +80,7 @@ void SpuSetCommonMasterVolumeAttr(s16 mvol_left, s16 mvol_right, s16 mvolmode_le
 	}
 	if ( v7 )
 	{
-		v5 = 127;
-		if ( mvol_right < 128 )
-		{
-			v5 = mvol_right;
-			if ( mvol_right < 0 )
-				v5 = 0;
-		}
+		v5 = ( mvol_right < 128 ) ? (( mvol_right < 0 ) ? 0 : mvol_right) : 127;
 	}
 	_spu_RXX[20 * _spu_core + 945] = (v5 & ~0x8000) | v7;
 }

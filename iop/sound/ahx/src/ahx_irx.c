@@ -196,10 +196,7 @@ void AHX_PlayThread(void *param)
                         AHXOutput_MixBuffer((short *)(pcmbuf + (0xF00 * i))); // remix
                     }
                     seg_done[i] = 1; // mark segment as mixed and ready
-                    if (i > 0)
-                        seg_done[i - 1] = 0;
-                    else
-                        seg_done[7] = 0; // catch end segment
+                    seg_done[(i > 0) ? (i - 1) : 7 /* catch end segment */] = 0;
                 }
             }
         }

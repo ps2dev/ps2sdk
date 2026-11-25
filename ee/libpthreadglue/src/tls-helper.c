@@ -108,11 +108,7 @@ void *pteTlsGetValue(void *pTlsThreadStruct, unsigned int index)
 {
     void **pTls = (void **)pTlsThreadStruct;
 
-    if (__keysUsed[index - 1] && pTls != NULL) {
-        return pTls[index - 1];
-    } else {
-        return NULL;
-    }
+    return (__keysUsed[index - 1] && pTls != NULL) ? pTls[index - 1] : NULL;
 }
 #else
 void *pteTlsGetValue(void *pTlsThreadStruct, unsigned int index);
@@ -147,11 +143,7 @@ void *__getTlsStructFromThread(s32 thid)
     * was created.  Otherwise, we were called from a non-pthread, so use the
     * "global".  This is a pretty bad hack, but necessary due to lack of TLS on PS2.
     */
-    if (threadInfo->tlsPtr) {
-        pTls = threadInfo->tlsPtr;
-    } else {
-        pTls = __globalTls;
-    }
+    pTls = (threadInfo->tlsPtr) ? threadInfo->tlsPtr : __globalTls;
 
   return pTls;
 }

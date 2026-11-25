@@ -131,8 +131,7 @@ void _SsVmFlush(void)
 
 		voice_struct = &_svm_voice[v1];
 		SpuGetVoiceEnvelope(v1, &(voice_struct->m_key_stat));
-		if ( !voice_struct->m_key_stat )
-			_svm_envx_hist[_svm_envx_ptr] |= 1 << v1;
+		_svm_envx_hist[_svm_envx_ptr] |= ( !voice_struct->m_key_stat ) ? (1 << v1) : 0;
 	}
 	if ( !_svm_auto_kof_mode )
 	{
@@ -156,13 +155,8 @@ void _SsVmFlush(void)
 					int mask_1;
 					int mask2;
 
-					mask_1 = 1 << v7;
-					mask2 = 0;
-					if ( v7 >= 16 )
-					{
-						mask_1 = 0;
-						mask2 = 1 << (v7 - 16);
-					}
+					mask_1 = ( v7 >= 16 ) ? 0 : (1 << v7);
+					mask2 = ( v7 >= 16 ) ? (1 << (v7 - 16)) : 0;
 					SpuSetNoiseVoice(SPU_OFF, ((u8)mask2 << 16) | (s16)mask_1);
 				}
 				voice_struct->m_unk1d = 0;
@@ -189,11 +183,9 @@ void _SsVmFlush(void)
 		{
 			voice_attr.mask |= SPU_VOICE_VOLL | SPU_VOICE_VOLR;
 			voice_attr.volume.left = _svm_sreg_buf[v12].m_vol_left;
+			voice_attr.volume.left = ( voice_attr.volume.left == 614 ) ? 615 : voice_attr.volume.left;
 			voice_attr.volume.right = _svm_sreg_buf[v12].m_vol_right;
-			if ( voice_attr.volume.left == 614 )
-				voice_attr.volume.left = 615;
-			if ( voice_attr.volume.right == 614 )
-				voice_attr.volume.right = 615;
+			voice_attr.volume.right = ( voice_attr.volume.right == 614 ) ? 615 : voice_attr.volume.right;
 		}
 		if ( (_svm_sreg_dirty[v12] & 4) != 0 )
 		{

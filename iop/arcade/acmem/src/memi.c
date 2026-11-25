@@ -111,9 +111,7 @@ int acMemReceive(acMemT mem, acMemEEaddr addr, int size)
 	if ( size > 0 )
 	{
 		mem->m_id = 0;
-		if ( sceSifGetOtherData(&recv_data, (void *)addr, m_buf, size, 0) < 0 )
-			return -5;
-		return size;
+		return ( sceSifGetOtherData(&recv_data, (void *)addr, m_buf, size, 0) < 0 ) ? -5 : size;
 	}
 	return 0;
 }

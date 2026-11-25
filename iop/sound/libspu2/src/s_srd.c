@@ -14,9 +14,7 @@ int SpuSetReverbDepth(SpuReverbAttr *attr)
 {
 	unsigned int mask;
 
-	mask = attr->mask;
-	if ( mask == 0 )
-		mask = 0xFFFFFFFF;
+	mask = ( attr->mask == 0 ) ? 0xFFFFFFFF : attr->mask;
 	if ( (mask & SPU_REV_DEPTHL) != 0 )
 	{
 		_spu_RXX[20 * _spu_core + 946] = attr->depth.left;

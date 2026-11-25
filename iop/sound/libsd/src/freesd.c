@@ -423,16 +423,8 @@ void InitCoreVolume(s32 flag)
 {
 	U16_REGISTER_WRITE(SD_C_SPDIF_OUT, 0xC032);
 
-	if(flag)
-	{
-		U16_REGISTER_WRITE(SD_CORE_ATTR(0), SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE);
-		U16_REGISTER_WRITE(SD_CORE_ATTR(1), SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE | SD_ENABLE_EX_INPUT);
-	}
-	else
-	{
-		U16_REGISTER_WRITE(SD_CORE_ATTR(0), SD_SPU2_ON | SD_MUTE);
-		U16_REGISTER_WRITE(SD_CORE_ATTR(1), SD_SPU2_ON | SD_MUTE | SD_ENABLE_EX_INPUT);
-	}
+	U16_REGISTER_WRITE(SD_CORE_ATTR(0), SD_SPU2_ON | (flag ? SD_ENABLE_EFFECTS : 0) | SD_MUTE);
+	U16_REGISTER_WRITE(SD_CORE_ATTR(1), SD_SPU2_ON | (flag ? SD_ENABLE_EFFECTS : 0) | SD_MUTE | SD_ENABLE_EX_INPUT);
 
 	// HIgh is voices 0-15, LOw is 16-23, representing voices 0..23 (24)
 	U16_REGISTER_WRITE(SD_S_VMIXL_HI(0), 0xFFFF);
@@ -524,10 +516,7 @@ void sceSdSetParam(u16 reg, u16 val)
 	core = reg & 1;
 
 	// Determine the channel offset
-	if(reg & 0x80)
-		offs = (40 * core) >> 1;
-	else
-		offs = (1024 * core) >> 1;
+	offs = (reg & 0x80) ? ((40 * core) >> 1) : ((1024 * core) >> 1);
 
 	reg_index = (reg >> 8) & 0xFF;
 	voice = (reg & 0x3E) << 2;
@@ -547,10 +536,7 @@ u16 sceSdGetParam(u16 reg)
 	core = reg & 1;
 
 	// Determine the channel offset
-	if(reg & 0x80)
-		offs = (40 * core) >> 1;
-	else
-		offs = (1024 * core) >> 1;
+	offs = (reg & 0x80) ? ((40 * core) >> 1) : ((1024 * core) >> 1);
 
 	reg_index = (reg >> 8) & 0xFF;
 	voice = (reg & 0x3E) << 2;
@@ -593,10 +579,7 @@ u32 DmaStop(u32 core)
 
 	core &= 1;
 
-	if(U16_REGISTER_READ(U16_REGISTER(0x1B0 + (core * 1024))) == 0)
-		retval = 0;
-	else
-		retval = U32_REGISTER_READ(SD_DMA_ADDR(core));
+	retval = (U16_REGISTER_READ(U16_REGISTER(0x1B0 + (core * 1024))) == 0) ? 0 : U32_REGISTER_READ(SD_DMA_ADDR(core));
 
 	U32_REGISTER_WRITEAND(SD_DMA_CHCR(core), ~SD_DMA_START);
 	U16_REGISTER_WRITE(U16_REGISTER(0x1B0 + (core * 1024)), 0);
@@ -642,7 +625,7 @@ u16 sceSdNote2Pitch (u16 center_note, u16 center_fine, u16 note, short fine)
 
 	offset2 = _fine - _fine2 * 128;
 
-	if(_note < 0) val2 = -1; else val2 = 0;
+	val2 = (_note < 0) ? -1 : 0;
 	if(val3 < 0) val3--;
 
 	val2 = (val3 / 2) - val2;

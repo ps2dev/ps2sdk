@@ -28,14 +28,7 @@ void GsOverridePrimAttributes(s8 override, s8 iip, s8 tme, s8 fge, s8 abe, s8 aa
 	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 2,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 
 	//override. (0 = use PRIM)(1 = use PRMODE)
-	if(override)
-	{
-		gs_setR_PRMODECONT(((GS_R_PRMODECONT *)&p[1]), 0);
-	}
-	else
-	{
-		gs_setR_PRMODECONT(((GS_R_PRMODECONT *)&p[1]), 1);
-	}
+	gs_setR_PRMODECONT(((GS_R_PRMODECONT *)&p[1]), override ? 0 : 1);
 
 	gs_setR_PRMODE(((GS_R_PRMODE *)&p[2]), iip,tme,fge,abe,aa1,fst,ctxt,fix);
 
@@ -50,23 +43,18 @@ void GsEnableDithering(u8 enable, int mode)
 	(void)mode;
 
 	p=UNCACHED_SEG(GsPrimWorkArea);
+	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), enable ? 3 : 2,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
+	gs_setR_DTHE(((GS_R_DTHE *)&p[1]), enable ? 1 : 0);
 	if(enable)
 	{
-		gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 3,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
-		gs_setR_DTHE(((GS_R_DTHE *)&p[1]), 1);
 		gs_setR_DIMX(((GS_R_DIMX *)&p[2]), 4,2,5,3,0,6,1,7,5,3,4,2,1,7,0,6); //thanks to:"Maximus32" on ps2dev.org
 		gs_setR_COLCLAMP(((GS_R_COLCLAMP *)&p[3]), 1);
-
-		GsDmaSend(GsPrimWorkArea, 4);
 	}
 	else
 	{
-		gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 2,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
-		gs_setR_DTHE(((GS_R_DTHE *)&p[1]), 0);
 		gs_setR_DIMX(((GS_R_DIMX *)&p[2]), 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-
-		GsDmaSend(GsPrimWorkArea, 3);
 	}
+	GsDmaSend(GsPrimWorkArea, enable ? 4 : 3);
 
 	GsDmaWait();
 }
@@ -143,14 +131,7 @@ void GsEnableAlphaBlending1(u16 enable)
 	p=UNCACHED_SEG(GsPrimWorkArea);
 	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 4,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 
-	if(enable)
-	{
-		gs_setR_ALPHA_1(((GS_R_ALPHA *)&p[1]), 0,1,0,1,0x00); //last arg(0x00) is not used bceause of other settings
-	}
-	else
-	{
-		gs_setR_ALPHA_1(((GS_R_ALPHA *)&p[1]), 0,0,0,0,0x80);
-	}
+	gs_setR_ALPHA_1(((GS_R_ALPHA *)&p[1]), 0,enable ? 1 : 0,0,enable ? 1 : 0,enable ? 0x00 : 0x80); //last arg(0x00) is not used bceause of other settings
 	gs_setR_PABE(((GS_R_PABE *)&p[2]), 0);
 	gs_setR_FBA_1(((GS_R_FBA *)&p[3]), 0);
 	gs_setR_TEXA(((GS_R_TEXA *)&p[4]), 0x80, 0, 0x00);
@@ -166,14 +147,7 @@ void GsEnableAlphaBlending2(u16 enable)
 	p=UNCACHED_SEG(GsPrimWorkArea);
 	gs_setGIF_TAG(((GS_GIF_TAG*)&p[0]), 4,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 
-	if(enable)
-	{
-		gs_setR_ALPHA_2(((GS_R_ALPHA*)&p[1]), 0,1,0,1,0x00); //last arg(0x00) is not used bceause of other settings
-	}
-	else
-	{
-		gs_setR_ALPHA_2(((GS_R_ALPHA *)&p[1]), 0,0,0,0,0x80);
-	}
+	gs_setR_ALPHA_2(((GS_R_ALPHA*)&p[1]), 0,enable ? 1 : 0,0,enable ? 1 : 0,enable ? 0x00 : 0x80); //last arg(0x00) is not used bceause of other settings
 	gs_setR_PABE(((GS_R_PABE *)&p[2]), 0);
 	gs_setR_FBA_2(((GS_R_FBA *)&p[3]), 0);
 	gs_setR_TEXA(((GS_R_TEXA *)&p[4]), 0x80, 0, 0x00);

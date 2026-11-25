@@ -1110,10 +1110,7 @@ static int cdrom_internal_write_cache(const iop_file_t *f, unsigned int nbytes)
 		return -EBUSY;
 	}
 	fh = &g_cdvdman_fhinfo[(uiptr)f->privdata];
-	if ( nbytes > fh->m_file_size - fh->m_read_pos )
-	{
-		nbytes = fh->m_file_size - fh->m_read_pos;
-	}
+	nbytes = ( nbytes > fh->m_file_size - fh->m_read_pos ) ? fh->m_file_size - fh->m_read_pos : nbytes;
 	if ( !nbytes )
 	{
 		return 0;
@@ -1358,10 +1355,7 @@ static int cdrom_open(iop_file_t *f, const char *name, int mode, int arg4)
 		if ( g_cache_path_fd != -1 )
 		{
 			devready_tmp = cdvd_odcinit(fh, 1, (int)f->privdata);
-			if ( devready_tmp >= 0 )
-			{
-				fh->m_fd_flags |= 4;
-			}
+			fh->m_fd_flags |= ( devready_tmp >= 0 ) ? 4 : 0;
 		}
 	}
 	if ( devready_tmp < 0 )
@@ -1518,10 +1512,7 @@ static int cdrom_internal_read(const iop_file_t *f, char *addr, int nbytes)
 			}
 		}
 		buf = g_cdvdman_temp_buffer_ptr;
-		if ( (unsigned int)(sectors) > filesize_bsr_11 - lbn )
-		{
-			sectors = filesize_bsr_11 - lbn;
-		}
+		sectors = ( (unsigned int)(sectors) > filesize_bsr_11 - lbn ) ? (filesize_bsr_11 - lbn) : sectors;
 		VERBOSE_PRINTF(1, "sce_Read LBN= %d sectors= %d\n", (int)lbn, (int)sectors);
 		if (
 			g_cdvdman_iocache && (lbn >= g_cdvdman_lcn_offset)
@@ -1532,10 +1523,7 @@ static int cdrom_internal_read(const iop_file_t *f, char *addr, int nbytes)
 		else if ( ((uiptr)(addr + i) & 3) || pos_extra || (nbytes_segment != 0x4000) )
 		{
 			sec = (sectors >= 8) ? sectors : 8;
-			if ( sec > filesize_bsr_11 - lbn )
-			{
-				sec = filesize_bsr_11 - lbn;
-			}
+			sec = ( sec > filesize_bsr_11 - lbn ) ? (filesize_bsr_11 - lbn) : sec;
 			VERBOSE_PRINTF(1, "FIO Cache LSN:%d SEC:%d ADDR:%08x\n", (int)lbn, (int)sec, (unsigned int)(uiptr)buf);
 			sectors_count = (sec >= 9) ? (sec - 8) : 0;
 			if ( sectors_count )
@@ -2368,10 +2356,7 @@ int sceCdStatus(void)
 		if ( !g_cdvdman_istruct.m_tray_is_open && cdvdman_scmd_sender_03_30(&rdata_tmp, &status_tmp) == 1 && !status_tmp )
 		{
 			reg_00A_tmp &= ~SCECdStatShellOpen;
-			if ( (rdata_tmp & 8) )
-			{
-				reg_00A_tmp |= SCECdStatShellOpen;
-			}
+			reg_00A_tmp |= ( (rdata_tmp & 8) ) ? SCECdStatShellOpen : 0;
 		}
 		if ( (reg_00A_tmp & 0x1E) )
 		{
@@ -2383,11 +2368,7 @@ int sceCdStatus(void)
 	{
 		reg_00A_tmp &= ~SCECdStatShellOpen;
 	}
-	if ( g_cdvdman_istruct.m_power_flag )
-	{
-		return -1;
-	}
-	return reg_00A_tmp;
+	return ( g_cdvdman_istruct.m_power_flag ) ? -1 : reg_00A_tmp;
 }
 
 #ifdef CDVD_VARIANT_OSD
@@ -3766,14 +3747,7 @@ static int get_cdvd_register(int regnr)
 		{
 			if ( g_cd_atapi_evfid != -1 )
 			{
-				if ( IntrContext )
-				{
-					iReferEventFlagStatus(g_cd_atapi_evfid, &efinfo);
-				}
-				else
-				{
-					ReferEventFlagStatus(g_cd_atapi_evfid, &efinfo);
-				}
+				(IntrContext ? iReferEventFlagStatus : ReferEventFlagStatus)(g_cd_atapi_evfid, &efinfo);
 				if ( !(efinfo.currBits & 3) )
 				{
 					return -1;
@@ -3781,14 +3755,7 @@ static int get_cdvd_register(int regnr)
 			}
 			if ( g_adma_evfid != -1 )
 			{
-				if ( IntrContext )
-				{
-					iReferEventFlagStatus(g_adma_evfid, &efinfo);
-				}
-				else
-				{
-					ReferEventFlagStatus(g_adma_evfid, &efinfo);
-				}
+				(IntrContext ? iReferEventFlagStatus : ReferEventFlagStatus)(g_adma_evfid, &efinfo);
 				if ( !(efinfo.currBits & 1) )
 				{
 					return -1;
@@ -3796,14 +3763,7 @@ static int get_cdvd_register(int regnr)
 			}
 			if ( g_acmd_evfid != -1 )
 			{
-				if ( IntrContext )
-				{
-					iReferEventFlagStatus(g_acmd_evfid, &efinfo);
-				}
-				else
-				{
-					ReferEventFlagStatus(g_acmd_evfid, &efinfo);
-				}
+				(IntrContext ? iReferEventFlagStatus : ReferEventFlagStatus)(g_acmd_evfid, &efinfo);
 			}
 			if ( !(efinfo.currBits & 1) )
 			{
@@ -6056,14 +6016,7 @@ cdvdman_send_ncmd(int ncmd, const void *ndata, int ndlen, int func, cdvdman_dma3
 	g_cdvdman_istruct.m_last_error = SCECdErNO;
 	g_cdvdman_istruct.m_wait_flag = 0;
 	g_cdvdman_istruct.m_thread_id = GetThreadId();
-	if ( QueryIntrContext() )
-	{
-		iClearEventFlag(g_cdvdman_intr_evfid, ~1);
-	}
-	else
-	{
-		ClearEventFlag(g_cdvdman_intr_evfid, ~1);
-	}
+	(QueryIntrContext() ? iClearEventFlag : ClearEventFlag)(g_cdvdman_intr_evfid, ~1);
 	for ( i = 0; i < ndlen; i += 1 )
 	{
 		dev5_mmio_hwport->m_dev5_reg_005 = ((u8 *)ndata)[i];
@@ -6389,23 +6342,7 @@ u32 sceCdGetReadPos(void)
 	sector_sizes[0] = 0x800;
 	sector_sizes[1] = 0x918;
 	sector_sizes[2] = 0x924;
-	if ( g_cdvdman_istruct.m_recover_status && g_cdvdman_istruct.m_recover_status != 3 )
-	{
-		return 0;
-	}
-	if ( g_cdvdman_cmdfunc == SCECdFuncReadCDDA || g_cdvdman_cmdfunc == 12 )
-	{
-		return dmac_ch_get_madr(3) - (uiptr)g_cdvdman_readbuf;
-	}
-	if ( g_cdvdman_istruct.m_read2_flag )
-	{
-		return g_cdvdman_readptr * sector_sizes[g_cdvdman_istruct.m_cdvdman_pattern];
-	}
-	if ( g_cdvdman_cmdfunc == SCECdFuncRead )
-	{
-		return dmac_ch_get_madr(3) - (uiptr)g_cdvdman_readbuf;
-	}
-	return 0;
+	return ( g_cdvdman_istruct.m_recover_status && g_cdvdman_istruct.m_recover_status != 3 ) ? 0 : (( g_cdvdman_cmdfunc == SCECdFuncReadCDDA || g_cdvdman_cmdfunc == 12 ) ? (dmac_ch_get_madr(3) - (uiptr)g_cdvdman_readbuf) : (( g_cdvdman_istruct.m_read2_flag ) ? (g_cdvdman_readptr * sector_sizes[g_cdvdman_istruct.m_cdvdman_pattern]) : (( g_cdvdman_cmdfunc == SCECdFuncRead ) ? (dmac_ch_get_madr(3) - (uiptr)g_cdvdman_readbuf) : 0)));
 }
 
 static int cdvdman_speedctl(u32 spindlctrl, int dvdflag, u32 maxlsn)

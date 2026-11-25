@@ -25,16 +25,8 @@ void vmNoiseOn2(u8 vc, u16 voll, u16 volr, u16 arg3, u16 arg4)
 	_svm_sreg_buf[vc].m_vol_left = voll;
 	_svm_sreg_buf[vc].m_vol_right = volr;
 	_svm_sreg_dirty[vc] |= 3;
-	if ( vc >= 0x10u )
-	{
-		vc_mask_tmp1 = 0;
-		vc_mask_tmp2 = 1 << (vc - 16);
-	}
-	else
-	{
-		vc_mask_tmp1 = 1 << vc;
-		vc_mask_tmp2 = 0;
-	}
+	vc_mask_tmp1 = ( vc >= 0x10u ) ? 0 : (1 << vc);
+	vc_mask_tmp2 = ( vc >= 0x10u ) ? (1 << (vc - 16)) : 0;
 	voice_struct->m_pitch = 10;
 	voice_struct->m_unk1d = 2;
 	okon1_tmp = _svm_okon1;

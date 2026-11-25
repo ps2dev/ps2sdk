@@ -332,16 +332,7 @@ void print_elf_sections(const elf_file *elf, unsigned int flag)
 		{
 			if ( (elf->scp[i]->shr.sh_flags & SHF_EXECINSTR) != 0 && elf->ehp->e_machine == EM_MIPS )
 			{
-				if (
-					((elf->ehp->e_flags & EF_MIPS_MACH) == EF_MIPS_MACH_5900)
-					&& ((elf->ehp->e_flags & EF_MIPS_ARCH) == EF_MIPS_ARCH_3) )
-				{
-					initdisasm(2, -1, 0, 0, 0);
-				}
-				else
-				{
-					initdisasm(1, -1, 0, 0, 0);
-				}
+				initdisasm(( ((elf->ehp->e_flags & EF_MIPS_MACH) == EF_MIPS_MACH_5900) && ((elf->ehp->e_flags & EF_MIPS_ARCH) == EF_MIPS_ARCH_3) ) ? 2 : 1, -1, 0, 0, 0);
 				print_elf_disasm(elf, elf->scp[i], flag);
 			}
 			else
@@ -517,11 +508,11 @@ static void search_rel_section(
 			break;
 		}
 	}
+	*result = ( i < elf->ehp->e_shnum ) ? (elf_rel *)relscp->data : 0;
+	*relentries = ( i < elf->ehp->e_shnum ) ? (relscp->shr.sh_size / relscp->shr.sh_entsize) : 0;
+	*baseoff = 0;
 	if ( i < elf->ehp->e_shnum )
 	{
-		*result = (elf_rel *)relscp->data;
-		*relentries = relscp->shr.sh_size / relscp->shr.sh_entsize;
-		*baseoff = 0;
 		switch ( elf->ehp->e_type )
 		{
 			case ET_SCE_IOPRELEXEC:
@@ -533,12 +524,6 @@ static void search_rel_section(
 			default:
 				break;
 		}
-	}
-	else
-	{
-		*result = 0;
-		*relentries = 0;
-		*baseoff = 0;
 	}
 }
 
@@ -586,18 +571,9 @@ static void dumpb(const char *head, unsigned int address, unsigned int size, con
 			if ( data[off1] > 0x1F && data[off1] <= 0x7E )
 			{
 				unsigned int v4;
-				uint8_t *v5;
 
 				v4 = addr & 0xF;
-				if ( v4 <= 7 )
-				{
-					v5 = &cbuf[v4];
-				}
-				else
-				{
-					v5 = &cbuf[v4 + 1];
-				}
-				*v5 = data[off1];
+				cbuf[v4 + (( v4 <= 7 ) ? 0 : 1)] = data[off1];
 			}
 		}
 		if ( (((uint8_t)addr + 1) & 3) == 0 )
@@ -610,10 +586,7 @@ static void dumpb(const char *head, unsigned int address, unsigned int size, con
 			printf("\n");
 			strcpy((char *)cbuf, "........ ........");
 		}
-		if ( address <= addr )
-		{
-			off1 += 1;
-		}
+		off1 += ( address <= addr ) ? 1 : 0;
 	}
 	for ( ; (addr & 0xF) != 0; addr += 1 )
 	{
@@ -662,10 +635,7 @@ static void dumph(const char *head, unsigned int address, unsigned int size, con
 		{
 			printf("\n");
 		}
-		if ( address <= off2 )
-		{
-			off1 += 2;
-		}
+		off1 += ( address <= off2 ) ? 2 : 0;
 	}
 	for ( ; (off2 & 0xF) != 0; off2 += 2 )
 	{
@@ -706,10 +676,7 @@ static void dumpw(const char *head, unsigned int address, unsigned int size, con
 		{
 			printf("\n");
 		}
-		if ( address <= addr )
-		{
-			off1 += 4;
-		}
+		off1 += ( address <= addr ) ? 4 : 0;
 	}
 	for ( ; (addr & 0xF) != 0; addr += 4 )
 	{

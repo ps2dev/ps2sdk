@@ -543,9 +543,8 @@ static void fsckFixDEntry(pfs_cache_t *clink, pfs_dentry_t *dentry)
     pfs_dentry_t *pDEntryNew, *pDEntry;
 
     dEntrySize = (u32)((u8 *)dentry - (u8 *)clink->u.dentry);
-    // if((s32)dEntrySize < 0)
-    if (clink->u.dentry > dentry)
-        dEntrySize += 0x1FF;
+    // ((s32)dEntrySize < 0)
+    dEntrySize += (clink->u.dentry > dentry) ? 0x1FF : 0;
 
     dEntrySize = dEntrySize >> 9 << 9; // Round off
     pDEntryNew = (pfs_dentry_t *)((u8 *)clink->u.dentry + dEntrySize);
@@ -905,9 +904,7 @@ static int fsckCheckBitmap(pfs_mount_t *mount, void *buffer)
         block = 0;
         for (block = 0, count = pfsGetBitmapSizeBlocks(mount->sector_scale, ZoneSizes[i]); block < count; block++) {
             BitmapStart = block + 1;
-            if (i == 0) {
-                BitmapStart += 0x2000 >> mount->sector_scale;
-            }
+            BitmapStart += (i == 0) ? (0x2000 >> mount->sector_scale) : 0;
 
             if ((result = mount->blockDev->transfer(mount->fd, buffer, i, BitmapStart << mount->sector_scale, 1 << mount->sector_scale, PFS_IO_MODE_READ)) < 0) {
                 PFS_PRINTF("cannot read bitmap\n");
@@ -1107,9 +1104,7 @@ static int FsckOpen(iomanX_iop_file_t *fd, const char *name, int flags, int mode
         fsckRuntimeData.status.zoneUsed = MainPFSMount.total_zones - MainPFSMount.zfree;
         for (i = 0; (u32)i < MainPFSMount.num_subs + 1; fsckRuntimeData.status.inodeBlockCount += count, i++) {
             count = pfsGetBitmapSizeBlocks(MainPFSMount.sector_scale, ZoneSizes[i]) + 1;
-            if (i == 0) {
-                count += (0x2000 >> MainPFSMount.sector_scale) + MainPFSMount.log.count;
-            }
+            count += (i == 0) ? ((0x2000 >> MainPFSMount.sector_scale) + MainPFSMount.log.count) : 0;
 
             if (fsckCheckZones(ZoneMap[i], count) < 0) {
                 break;

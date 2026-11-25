@@ -259,10 +259,7 @@ int ps2mouse_connect(int devId)
   currDev->configEndp = sceUsbdOpenPipe(devId, NULL);
   currDev->dataEndp = sceUsbdOpenPipe(devId, endp);
   currDev->packetSize = endp->wMaxPacketSizeLB | ((int) endp->wMaxPacketSizeHB << 8);
-  if((unsigned int)(currDev->packetSize) > sizeof(mouse_data_recv))
-    {
-      currDev->packetSize = sizeof(mouse_data_recv);
-    }
+  currDev->packetSize = ((unsigned int)(currDev->packetSize) > sizeof(mouse_data_recv)) ? sizeof(mouse_data_recv) : currDev->packetSize;
 
   currDev->devId = devId;
 
@@ -486,10 +483,10 @@ void ps2mouse_data_recv(int resultCode, int bytes, void *arg)
       mouse.buttons = dev->data.buttons | buttonData;
       if(mouse_readmode == PS2MOUSE_READMODE_ABS)
 	{
-	  if(mouse.x < mousex_min) mouse.x = mousex_min;
-	  if(mouse.x > mousex_max) mouse.x = mousex_max;
-	  if(mouse.y < mousey_min) mouse.y = mousey_min;
-	  if(mouse.y > mousey_max) mouse.y = mousey_max;
+	  mouse.x = (mouse.x < mousex_min) ? mousex_min : mouse.x;
+	  mouse.x = (mouse.x > mousex_max) ? mousex_max : mouse.x;
+	  mouse.y = (mouse.y < mousey_min) ? mousey_min : mouse.y;
+	  mouse.y = (mouse.y > mousey_max) ? mousey_max : mouse.y;
 	}
 
       SignalSema(mouse_sema);
@@ -678,31 +675,8 @@ void do_ps2mouse_setposition(const s32 *data, int size)
 
   WaitSema(mouse_sema);
 
-  if(data[0] < mousex_min)
-    {
-      mouse.x = mousex_min;
-    }
-  else if(data[0] > mousex_max)
-    {
-      mouse.x = mousex_max;
-    }
-  else
-    {
-      mouse.x = data[0];
-    }
-
-  if(data[1] < mousey_min)
-    {
-      mouse.y = mousey_min;
-    }
-  else if(data[1] > mousey_max)
-    {
-      mouse.y = mousey_max;
-    }
-  else
-    {
-      mouse.y = data[1];
-    }
+  mouse.x = (data[0] < mousex_min) ? mousex_min : ((data[0] > mousex_max) ? mousex_max : data[0]);
+  mouse.y = (data[1] < mousey_min) ? mousey_min : ((data[1] > mousey_max) ? mousey_max : data[1]);
   SignalSema(mouse_sema);
 }
 

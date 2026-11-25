@@ -55,10 +55,7 @@ int _start(int ac, char **av)
 		u32 cur_instruction;
 
 		cur_instruction = exception_handler_shellcode_start[i];
-		if ( cur_instruction == 0x8F5A0000 || cur_instruction == 0x8F7B0000 )
-		{
-			cur_instruction |= (u16)(uiptr)exception_table;
-		}
+		cur_instruction |= ( cur_instruction == 0x8F5A0000 || cur_instruction == 0x8F7B0000 ) ? (u16)(uiptr)exception_table : 0;
 		// cppcheck-suppress nullPointer
 		dst_ptr[i] = cur_instruction;
 	}
@@ -190,10 +187,7 @@ static void update_exception_handler_table(void)
 	for ( i = 0; i < (sizeof(exception_handlers) / sizeof(exception_handlers[0])); i += 1 )
 	{
 		exception_handler = exception_handlers[i];
-		if ( exception_handler )
-			exception_table[i] = (exception_handler->info & 0xFFFFFFFC) + 8;
-		else
-			exception_table[i] = (uiptr)default_handler_funccode;
+		exception_table[i] = exception_handler ? ((exception_handler->info & 0xFFFFFFFC) + 8) : (uiptr)default_handler_funccode;
 	}
 }
 

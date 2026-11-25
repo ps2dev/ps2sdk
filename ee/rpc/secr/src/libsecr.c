@@ -213,12 +213,9 @@ static void store_kbit(void *buffer, const void *kbit)
     const SecrKELFHeader_t *header = buffer;
     int offset                     = 0x20, kbit_offset;
 
-    if (header->BIT_count > 0)
-        offset += header->BIT_count * sizeof(SecrBitBlockData_t);
-    if (((header->flags) & 1) != 0)
-        offset += ((unsigned char *)buffer)[offset] + 1;
-    if (((header->flags) & 0xF000) == 0)
-        offset += 8;
+    offset += (header->BIT_count > 0) ? (header->BIT_count * sizeof(SecrBitBlockData_t)) : 0;
+    offset += (((header->flags) & 1) != 0) ? (((unsigned char *)buffer)[offset] + 1) : 0;
+    offset += (((header->flags) & 0xF000) == 0) ? (8) : 0;
 
     kbit_offset = (unsigned int)buffer + offset;
     memcpy((void *)kbit_offset, kbit, 16);
@@ -230,12 +227,9 @@ static void store_kc(void *buffer, const void *kc)
     const SecrKELFHeader_t *header = buffer;
     int offset                     = 0x20, kc_offset;
 
-    if (header->BIT_count > 0)
-        offset += header->BIT_count * sizeof(SecrBitBlockData_t);
-    if (((header->flags) & 1) != 0)
-        offset += ((unsigned char *)buffer)[offset] + 1;
-    if (((header->flags) & 0xF000) == 0)
-        offset += 8;
+    offset += (header->BIT_count > 0) ? (header->BIT_count * sizeof(SecrBitBlockData_t)) : 0;
+    offset += (((header->flags) & 1) != 0) ? (((unsigned char *)buffer)[offset] + 1) : 0;
+    offset += (((header->flags) & 0xF000) == 0) ? (8) : 0;
 
     kc_offset = (unsigned int)buffer + offset + 0x10; // Goes after Kbit.
     memcpy((void *)kc_offset, kc, 16);
@@ -261,12 +255,9 @@ static unsigned int get_BitTableOffset(const void *buffer)
     const SecrKELFHeader_t *header = buffer;
     int offset                     = sizeof(SecrKELFHeader_t);
 
-    if (header->BIT_count > 0)
-        offset += header->BIT_count * sizeof(SecrBitBlockData_t); // They used a loop for this. D:
-    if ((header->flags & 1) != 0)
-        offset += ((const unsigned char *)buffer)[offset] + 1;
-    if ((header->flags & 0xF000) == 0)
-        offset += 8;
+    offset += (header->BIT_count > 0) ? (header->BIT_count * sizeof(SecrBitBlockData_t)) : 0; // They used a loop for this. D:
+    offset += ((header->flags & 1) != 0) ? (((const unsigned char *)buffer)[offset] + 1) : 0;
+    offset += ((header->flags & 0xF000) == 0) ? (8) : 0;
     return (offset + 0x20); // Goes after Kbit and Kc.
 }
 

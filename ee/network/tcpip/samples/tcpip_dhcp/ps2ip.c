@@ -85,10 +85,7 @@ static int ethGetDHCPStatus(void)
 
 	if ((result = ps2ip_getconfig("sm0", &ip_info)) >= 0)
 	{	//Check for a successful state if DHCP is enabled.
-		if (ip_info.dhcp_enabled)
-			result = (ip_info.dhcp_status == DHCP_STATE_BOUND || (ip_info.dhcp_status == DHCP_STATE_OFF));
-		else
-			result = -1;
+		result = ip_info.dhcp_enabled ? (ip_info.dhcp_status == DHCP_STATE_BOUND || (ip_info.dhcp_status == DHCP_STATE_OFF)) : -1;
 	}
 
 	return result;
@@ -120,17 +117,12 @@ static int ethApplyIPConfig(int use_dhcp, const struct ip4_addr *ip, const struc
 			 !ip_addr_cmp(gateway, (struct ip4_addr *)&ip_info.gw) ||
 			 !ip_addr_cmp(dns, dns_curr))))
 		{
-			if (use_dhcp)
-			{
-				ip_info.dhcp_enabled = 1;
-			}
-			else
+			ip_info.dhcp_enabled = use_dhcp ? 1 : 0;
+			if (!use_dhcp)
 			{	//Copy over new settings if DHCP is not used.
 				ip_addr_set((struct ip4_addr *)&ip_info.ipaddr, ip);
 				ip_addr_set((struct ip4_addr *)&ip_info.netmask, netmask);
 				ip_addr_set((struct ip4_addr *)&ip_info.gw, gateway);
-
-				ip_info.dhcp_enabled = 0;
 			}
 
 			//Update settings.
@@ -199,10 +191,7 @@ static void ethPrintLinkStatus(void)
 
 	//SMAP is registered as the "sm0" device to the TCP/IP stack.
 	scr_printf("Link:\t");
-	if (NetManIoctl(NETMAN_NETIF_IOCTL_GET_LINK_STATUS, NULL, 0, NULL, 0) == NETMAN_NETIF_ETH_LINK_STATE_UP)
-		scr_printf("Up\n");
-	else
-		scr_printf("Down\n");
+	scr_printf(NetManIoctl(NETMAN_NETIF_IOCTL_GET_LINK_STATUS, NULL, 0, NULL, 0) == NETMAN_NETIF_ETH_LINK_STATE_UP ? "Up\n" : "Down\n");
 
 	scr_printf("Mode:\t");
 	mode = NetManIoctl(NETMAN_NETIF_IOCTL_ETH_GET_LINK_MODE, NULL, 0, NULL, 0);
@@ -226,10 +215,7 @@ static void ethPrintLinkStatus(void)
 		default:
 			scr_printf("Unknown");
 	}
-	if(!(mode & NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE))
-		scr_printf(" with ");
-	else
-		scr_printf(" without ");
+	scr_printf(!(mode & NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE) ? " with " : " without ");
 	scr_printf("Flow Control\n");
 }
 

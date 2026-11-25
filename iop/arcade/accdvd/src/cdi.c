@@ -56,9 +56,7 @@ static int cdi_xfer(void *dst, void *src, int len, enum cdc_xfer_dir dir)
 
 int sceCdGetToc(unsigned char *toc)
 {
-	if ( !toc )
-		return cdc_seterrno(34);
-	return cdc_readtoc(toc, cdi_xfer);
+	return ( !toc ) ? cdc_seterrno(34) : cdc_readtoc(toc, cdi_xfer);
 }
 
 int sceCdInit(int mode)
@@ -97,13 +95,7 @@ int sceCdPause()
 
 int sceCdRead(u32 lbn, u32 sectors, void *buffer, sceCdRMode *mode)
 {
-	if ( !mode || !buffer || ((uiptr)buffer & 3) != 0 )
-	{
-		return cdc_seterrno(34);
-	}
-	if ( !sectors )
-		return cdc_seterrno(0);
-	return cdc_read(lbn, buffer, sectors, mode, 0, Cdic.done);
+	return ( !mode || !buffer || ((uiptr)buffer & 3) != 0 ) ? cdc_seterrno(34) : (( !sectors ) ? cdc_seterrno(0) : cdc_read(lbn, buffer, sectors, mode, 0, Cdic.done));
 }
 
 int sceCdSync(int mode)
@@ -134,9 +126,7 @@ int sceCdSearchFile(sceCdlFILE *file, const char *name)
 		if ( namlen >= 1024 )
 			namlen = 0;
 	}
-	if ( !namlen )
-		return cdc_seterrno(34);
-	return cdc_lookup(file, name, namlen, cdi_xfer);
+	return ( !namlen ) ? cdc_seterrno(34) : cdc_lookup(file, name, namlen, cdi_xfer);
 }
 
 int sceCdSeek(u32 lbn)
@@ -170,9 +160,7 @@ int sceCdStInit(u32 bufmax, u32 bankmax, void *buffer)
 
 	if ( !bufmax || !bankmax || !buffer || ((uiptr)buffer & 3) != 0 )
 		return cdc_seterrno(34);
-	v4 = bufmax / bankmax;
-	if ( !(bufmax / bankmax) )
-		v4 = 1;
+	v4 = ( !(bufmax / bankmax) ) ? 1 : (bufmax / bankmax);
 	return cdc_inits((void *)buffer, bufmax, v4);
 }
 
@@ -201,9 +189,7 @@ int sceCdStSeek(u32 lbn)
 
 int sceCdStStart(u32 lbn, sceCdRMode *mode)
 {
-	if ( !mode )
-		return cdc_seterrno(34);
-	return cdc_starts(lbn, mode);
+	return ( !mode ) ? cdc_seterrno(34) : cdc_starts(lbn, mode);
 }
 
 int sceCdStStat()

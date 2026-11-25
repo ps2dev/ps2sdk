@@ -48,8 +48,7 @@ void elf_loader_reader_read_elf_file(elf_loader_reader_info_t *info)
 		int ret;
 
 		ret = elf_loader_is_elf_ehdr_valid(ptr);
-		if ( ret )
-			ptr = info->m_alloc_callback(info->m_userdata, ptr, cur_alloc_block_size, 0);
+		ptr = ret ? info->m_alloc_callback(info->m_userdata, ptr, cur_alloc_block_size, 0) : ptr;
 	}
 	if ( ptr )
 	{

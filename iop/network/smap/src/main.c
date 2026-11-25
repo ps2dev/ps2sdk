@@ -161,11 +161,9 @@ int SMapTxPacketNext(void **payload)
 {
     int len;
 
-    if (TxTail != NULL) {
+    if (TxTail != NULL)
         *payload = TxTail->payload;
-        len      = TxTail->len;
-    } else
-        len = 0;
+    len = (TxTail != NULL) ? TxTail->len : 0;
 
     return len;
 }

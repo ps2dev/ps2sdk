@@ -81,12 +81,7 @@ int NetManGetGlobalNetIFLinkState(void){
 
 void NetManUpdateStackNIFLinkState(void){
 	if(IsInitialized){
-		if(NIFLinkState){
-			MainNetProtStack.LinkStateUp();
-		}
-		else{
-			MainNetProtStack.LinkStateDown();
-		}
+		(NIFLinkState ? MainNetProtStack.LinkStateUp : MainNetProtStack.LinkStateDown)();
 	}
 }
 
@@ -151,10 +146,7 @@ int NetManIoctl(unsigned int command, void *args, unsigned int args_len, void *o
 
 	WaitSema(NetManIOSemaID);
 
-	if(MainNetIF!=NULL){
-		result=MainNetIF->ioctl(command, args, args_len, output, length);
-	}
-	else result=-1;
+	result = (MainNetIF != NULL) ? MainNetIF->ioctl(command, args, args_len, output, length) : -1;
 
 	SignalSema(NetManIOSemaID);
 
@@ -250,12 +242,11 @@ void NetManToggleNetIFLinkState(int NetIFID, unsigned char state){
 
 		if(state){
 			pNetIF->flags|=NETMAN_NETIF_LINK_UP;
-			SetEventFlag(pNetIF->EventFlagID, NETMAN_NETIF_EVF_UP);
 		}
 		else{
 			pNetIF->flags&=~NETMAN_NETIF_LINK_UP;
-			SetEventFlag(pNetIF->EventFlagID, NETMAN_NETIF_EVF_DOWN);
 		}
+		SetEventFlag(pNetIF->EventFlagID, state ? NETMAN_NETIF_EVF_UP : NETMAN_NETIF_EVF_DOWN);
 
 		UpdateNetIFStatus();
 	}

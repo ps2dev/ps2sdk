@@ -18,9 +18,7 @@ void _SsVmSetProgVol(s16 vab_id, s16 prog, u8 vol)
 
 int _SsVmGetProgVol(s16 vab_id, s16 prog)
 {
-	if ( _SsVmVSetUp(vab_id, prog) != 0 )
-		return -1;
-	return _svm_pg[prog].mvol;
+	return ( _SsVmVSetUp(vab_id, prog) != 0 ) ? -1 : _svm_pg[prog].mvol;
 }
 
 int _SsVmSetProgPan(s16 vab_id, s16 prog, char mpan)
@@ -35,7 +33,5 @@ int _SsVmSetProgPan(s16 vab_id, s16 prog, char mpan)
 
 int _SsVmGetProgPan(s16 vab_id, s16 prog)
 {
-	if ( _SsVmVSetUp(vab_id, prog) != 0 )
-		return -1;
-	return _svm_pg[prog].mpan;
+	return ( _SsVmVSetUp(vab_id, prog) != 0 ) ? -1 : _svm_pg[prog].mpan;
 }

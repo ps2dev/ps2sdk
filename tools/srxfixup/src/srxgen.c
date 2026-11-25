@@ -115,10 +115,7 @@ int convert_rel2srx(elf_file *elf, const char *entrysym, int needoutput, int cau
 
 		module_info_symbol = "Module";
 		syp = search_global_symbol("_irx_id", elf);
-		if ( is_defined_symbol(syp) != 0 )
-		{
-			module_info_symbol = "_irx_id";
-		}
+		module_info_symbol = ( is_defined_symbol(syp) != 0 ) ? "_irx_id" : module_info_symbol;
 		setup_module_info(elf, modinfo, module_info_symbol);
 	}
 	return layout_srx_file(elf);
@@ -141,10 +138,7 @@ static int setup_start_entry(elf_file *elf, const char *entrysym, elf_section *m
 	else
 	{
 		syp = search_global_symbol("start", elf);
-		if ( !syp )
-		{
-			syp = search_global_symbol("_start", elf);
-		}
+		syp = ( !syp ) ? search_global_symbol("_start", elf) : syp;
 		if ( !is_defined_symbol(syp) )
 		{
 			if ( modinfo->shr.sh_type == SHT_SCE_EEMOD )
@@ -539,10 +533,7 @@ void fixlocation_elf(elf_file *elf, unsigned int startaddr)
 		Elf32_IopMod *iopmodinfo;
 
 		iopmodinfo = (Elf32_IopMod *)modsect_1->data;
-		if ( iopmodinfo->moduleinfo != (Elf32_Word)(-1) )
-		{
-			iopmodinfo->moduleinfo += startaddr;
-		}
+		iopmodinfo->moduleinfo += ( iopmodinfo->moduleinfo != (Elf32_Word)(-1) ) ? startaddr : 0;
 		iopmodinfo->entry += startaddr;
 		iopmodinfo->gp_value += startaddr;
 	}
@@ -552,10 +543,7 @@ void fixlocation_elf(elf_file *elf, unsigned int startaddr)
 		Elf32_EeMod *eemodinfo;
 
 		eemodinfo = (Elf32_EeMod *)modsect_2->data;
-		if ( eemodinfo->moduleinfo != (Elf32_Word)(-1) )
-		{
-			eemodinfo->moduleinfo += startaddr;
-		}
+		eemodinfo->moduleinfo += ( eemodinfo->moduleinfo != (Elf32_Word)(-1) ) ? startaddr : 0;
 		eemodinfo->entry += startaddr;
 		eemodinfo->gp_value += startaddr;
 	}
@@ -589,10 +577,7 @@ void fixlocation_elf(elf_file *elf, unsigned int startaddr)
 	syp = (elf_syment **)scp->data;
 	for ( k = 1; k < entrise; k += 1 )
 	{
-		if ( syp[k]->sym.st_shndx == SHN_RADDR || (syp[k]->sym.st_shndx && syp[k]->sym.st_shndx <= 0xFEFF) )
-		{
-			syp[k]->sym.st_value += startaddr;
-		}
+		syp[k]->sym.st_value += ( syp[k]->sym.st_shndx == SHN_RADDR || (syp[k]->sym.st_shndx && syp[k]->sym.st_shndx <= 0xFEFF) ) ? startaddr : 0;
 		if ( syp[k]->sym.st_shndx == SHN_RADDR )
 		{
 			syp[k]->sym.st_shndx = -15;
@@ -602,21 +587,12 @@ void fixlocation_elf(elf_file *elf, unsigned int startaddr)
 
 static void save_org_addrs(elf_file *elf)
 {
-	Elf32_RegInfo *data;
 	const Elf32_RegInfo *reginfop;
 	elf_section *reginfosec;
 	int i;
 
 	reginfosec = search_section(elf, SHT_MIPS_REGINFO);
-	if ( reginfosec )
-	{
-		data = (Elf32_RegInfo *)reginfosec->data;
-	}
-	else
-	{
-		data = 0;
-	}
-	reginfop = data;
+	reginfop = reginfosec ? (Elf32_RegInfo *)reginfosec->data : 0;
 	for ( i = 1; i < elf->ehp->e_shnum; i += 1 )
 	{
 		Sect_org_data *org;
@@ -683,27 +659,11 @@ static void modify_eemod(elf_file *elf, elf_section *eemod)
 	}
 	moddata = (Elf32_EeMod *)eemod->data;
 	scp_1 = search_section_by_name(elf, ".erx.lib");
-	if ( scp_1 )
-	{
-		moddata->erx_lib_addr = scp_1->shr.sh_addr;
-		moddata->erx_lib_size = scp_1->shr.sh_size;
-	}
-	else
-	{
-		moddata->erx_lib_addr = -1;
-		moddata->erx_lib_size = 0;
-	}
+	moddata->erx_lib_addr = scp_1 ? scp_1->shr.sh_addr : -1;
+	moddata->erx_lib_size = scp_1 ? scp_1->shr.sh_size : 0;
 	scp_2 = search_section_by_name(elf, ".erx.stub");
-	if ( scp_2 )
-	{
-		moddata->erx_stub_addr = scp_2->shr.sh_addr;
-		moddata->erx_stub_size = scp_2->shr.sh_size;
-	}
-	else
-	{
-		moddata->erx_stub_addr = -1;
-		moddata->erx_stub_size = 0;
-	}
+	moddata->erx_stub_addr = scp_2 ? scp_2->shr.sh_addr : -1;
+	moddata->erx_stub_size = scp_2 ? scp_2->shr.sh_size : 0;
 }
 
 static void add_reserved_symbol_table(
@@ -868,11 +828,7 @@ static int sect_name_match(const char *pattern, const char *name)
 		return strcmp(pattern, name);
 	}
 	pattern += 1;
-	if ( strlen(name) < strlen(pattern) )
-	{
-		return strcmp(pattern, name);
-	}
-	return strcmp(pattern, &name[strlen(name) - strlen(pattern)]);
+	return ( strlen(name) < strlen(pattern) ) ? strcmp(pattern, name) : strcmp(pattern, &name[strlen(name) - strlen(pattern)]);
 }
 
 static int reorder_section_table(elf_file *elf)
@@ -1010,13 +966,7 @@ static void segment_end_setup(SegConf *seglist, unsigned int bitid, unsigned int
 	{
 		if ( (seglist->bitid & bitid) != 0 )
 		{
-			if ( ee )
-			{
-				if ( !strcmp(seglist->name, "TEXT") )
-				{
-					*moffset += 32;
-				}
-			}
+			*moffset += ( ee && !strcmp(seglist->name, "TEXT") ) ? 32 : 0;
 			seglist->size = *moffset - seglist->addr;
 		}
 	}
@@ -1355,10 +1305,7 @@ static int check_undef_symboles(elf_file *elf)
 	err = 0;
 	for ( s = 1; s < elf->ehp->e_shnum; s += 1 )
 	{
-		if ( elf->scp[s]->shr.sh_type == SHT_REL )
-		{
-			err += check_undef_symboles_an_reloc(elf->scp[s]);
-		}
+		err += ( elf->scp[s]->shr.sh_type == SHT_REL ) ? check_undef_symboles_an_reloc(elf->scp[s]) : 0;
 	}
 	return err;
 }
@@ -1436,10 +1383,7 @@ static int create_reserved_symbols(elf_file *elf)
 #endif
 				{
 					sym->bind = csyms->bind;
-					if ( !sym->type )
-					{
-						sym->type = csyms->type;
-					}
+					sym->type = ( !sym->type ) ? csyms->type : sym->type;
 					sym->sym.st_info = ((csyms->bind & 0xFF) << 4) + (csyms->type & 0xF);
 					if ( csyms->shindex > 0xFEFF )
 					{
@@ -1526,13 +1470,7 @@ static void symbol_value_update(elf_file *elf)
 	syp = (elf_syment **)scp->data;
 	for ( i = 1; i < entrise; i += 1 )
 	{
-		if ( syp[i]->sym.st_shndx )
-		{
-			if ( syp[i]->sym.st_shndx <= 0xFEFF )
-			{
-				syp[i]->sym.st_value += syp[i]->shptr->shr.sh_addr;
-			}
-		}
+		syp[i]->sym.st_value += ( syp[i]->sym.st_shndx && syp[i]->sym.st_shndx <= 0xFEFF ) ? syp[i]->shptr->shr.sh_addr : 0;
 	}
 }
 
@@ -1745,14 +1683,7 @@ static void rebuild_an_relocation(elf_section *relsect, unsigned int gpvalue, in
 				break;
 			case R_MIPS_26:
 				data_2 = *(uint32_t *)daddr_1;
-				if ( rp->symptr && rp->symptr->bind != STB_LOCAL )
-				{
-					data_33 = data_2 << 6 >> 4;
-				}
-				else
-				{
-					data_33 = ((relsect->info->shr.sh_addr + rp->rel.r_offset) & 0xF0000000) | (4 * (data_2 & 0x3FFFFFF));
-				}
+				data_33 = ( rp->symptr && rp->symptr->bind != STB_LOCAL ) ? (data_2 << 6 >> 4) : (((relsect->info->shr.sh_addr + rp->rel.r_offset) & 0xF0000000) | (4 * (data_2 & 0x3FFFFFF)));
 				*(uint32_t *)daddr_1 &= 0xFC000000;
 				*(uint32_t *)daddr_1 |= (16 * (symvalue + data_33)) >> 6;
 				if ( !v4 )

@@ -14,24 +14,14 @@ s16 SsUtSetReverbType(s16 type)
 {
 	int flag_tmp;
 	int type_tmp1;
-	int type_mode_flag_tmp;
 	s16 type_tmp2;
 
-	flag_tmp = 0;
-	type_tmp1 = type;
-	if ( (type & 0x8000) != 0 )
-	{
-		flag_tmp = 1;
-		type_tmp1 = -type;
-	}
+	flag_tmp = ( (type & 0x8000) != 0 ) ? 1 : 0;
+	type_tmp1 = ( (type & 0x8000) != 0 ) ? -type : type;
 	if ( (u16)type_tmp1 >= SS_REV_TYPE_MAX )
 		return -1;
 	_svm_rattr.mask = SPU_REV_MODE;
-	if ( flag_tmp )
-		type_mode_flag_tmp = (type_tmp1 | SPU_REV_MODE_CLEAR_WA);
-	else
-		type_mode_flag_tmp = type_tmp1;
-	_svm_rattr.mode = type_mode_flag_tmp;
+	_svm_rattr.mode = flag_tmp ? (type_tmp1 | SPU_REV_MODE_CLEAR_WA) : type_tmp1;
 	type_tmp2 = type_tmp1;
 	if ( !(u16)type_tmp1 )
 		SpuSetReverb(SPU_OFF);

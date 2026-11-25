@@ -404,8 +404,7 @@ static void *sceNetcnfifInterfaceServer(int fno, sceNetcnfifArg_t *buf, int size
 															 / sizeof(env.root->pair_head->ifc->phone_numbers[0]));
 							i += 1 )
 				{
-					if ( i < 3 && i >= 0 && env.root->pair_head->ifc->phone_numbers[i] )
-						redial_count += 1;
+					redial_count += ( i < 3 && i >= 0 && env.root->pair_head->ifc->phone_numbers[i] ) ? 1 : 0;
 				}
 				env.root->pair_head->ifc->redial_count = redial_count - 1;
 				if ( env.root->pair_head->ifc->pppoe != 1 && env.root->pair_head->ifc->type != 2 )
@@ -692,71 +691,46 @@ static int put_gw(sceNetCnfEnv_t *e, const char *gw)
 	memset(&gateway, 0, sizeof(gateway));
 	gateway.cmd.code = 3;
 	gateway.cmd.back = e->ifc->cmd_tail;
-	if ( gateway.cmd.back )
-		gateway.cmd.back->forw = &gateway.cmd;
-	else
-		e->ifc->cmd_head = &gateway.cmd;
+	*(gateway.cmd.back ? &(gateway.cmd.back->forw) : &(e->ifc->cmd_head)) = &gateway.cmd;
 	gateway.cmd.forw = 0;
 	e->ifc->cmd_tail = &gateway.cmd;
-	if ( gw )
-	{
-		retres = sceNetCnfName2Address(&gateway.re.dstaddr, 0);
-		if ( retres < 0 )
-			return retres;
-		retres = sceNetCnfName2Address(&gateway.re.gateway, gw);
-		if ( retres < 0 )
-			return retres;
-		retres = sceNetCnfName2Address(&gateway.re.genmask, 0);
-		if ( retres < 0 )
-			return retres;
-		gateway.re.flags |= 4u;
-	}
-	else
-	{
-		retres = sceNetCnfName2Address(&gateway.re.dstaddr, 0);
-		if ( retres < 0 )
-			return retres;
-		retres = sceNetCnfName2Address(&gateway.re.gateway, 0);
-		if ( retres < 0 )
-			return retres;
-		retres = sceNetCnfName2Address(&gateway.re.genmask, 0);
-		if ( retres < 0 )
-			return retres;
-		gateway.re.flags = 0;
-	}
+	retres = sceNetCnfName2Address(&gateway.re.dstaddr, 0);
+	if ( retres < 0 )
+		return retres;
+	retres = sceNetCnfName2Address(&gateway.re.gateway, gw);
+	if ( retres < 0 )
+		return retres;
+	retres = sceNetCnfName2Address(&gateway.re.genmask, 0);
+	if ( retres < 0 )
+		return retres;
+	gateway.re.flags = gw ? 4 : 0;
 	return retres;
 }
 
 static int put_ns(sceNetCnfEnv_t *e, const char *ns, int ns_count)
 {
-	nameserver_t *ns1;
-	nameserver_t *ns2;
+	nameserver_t *nsp;
 
-	ns1 = 0;
+	nsp = 0;
 	switch ( ns_count )
 	{
 		case 1:
-			ns1 = &dns1;
-			ns2 = &dns1;
+			nsp = &dns1;
 			break;
 		case 2:
-			ns1 = &dns2;
-			ns2 = &dns2;
+			nsp = &dns2;
 			break;
 		default:
 			// Unofficial: return error instead of writing 1 to 0x00000008
 			return -1;
 	}
-	memset(ns2, 0, sizeof(nameserver_t));
-	ns1->cmd.code = 1;
-	ns1->cmd.back = e->ifc->cmd_tail;
-	if ( e->ifc->cmd_tail )
-		e->ifc->cmd_tail->forw = &ns1->cmd;
-	else
-		e->ifc->cmd_head = &ns1->cmd;
-	ns1->cmd.forw = 0;
-	e->ifc->cmd_tail = &ns1->cmd;
-	return sceNetCnfName2Address(&ns1->address, ns);
+	memset(nsp, 0, sizeof(nameserver_t));
+	nsp->cmd.code = 1;
+	nsp->cmd.back = e->ifc->cmd_tail;
+	*(e->ifc->cmd_tail ? &(e->ifc->cmd_tail->forw) : &(e->ifc->cmd_head)) = &nsp->cmd;
+	nsp->cmd.forw = 0;
+	e->ifc->cmd_tail = &nsp->cmd;
+	return sceNetCnfName2Address(&nsp->address, ns);
 }
 
 static int put_cmd(sceNetCnfEnv_t *e, sceNetcnfifData_t *data)

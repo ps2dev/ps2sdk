@@ -16,7 +16,5 @@ s16 SsUtPitchBend(s16 vc, s16 vab_id, s16 prog, s16 note, s16 pbend)
 
 	_SsVmVSetUp(vab_id, prog);
 	_svm_cur.m_seq_sep_no = 33;
-	if ( _SsVmPBVoice(vc, 33, vab_id, prog, pbend) == 0 )
-		return -1;
-	return 0;
+	return ( _SsVmPBVoice(vc, 33, vab_id, prog, pbend) == 0 ) ? -1 : 0;
 }

@@ -542,8 +542,7 @@ static int sbp2_queue_cmd(struct scsi_interface *scsi, const unsigned char *cmd,
 
     cdb.misc = ORB_NOTIFY | ORB_REQUEST_FORMAT(0) | CDB_MAX_PAYLOAD(dev->max_payload) | CDB_SPEED(dev->speed);
     cdb.misc |= data_wr ? CDB_DIRECTION(READ_TRANSACTION) : CDB_DIRECTION(WRITE_TRANSACTION); // flipped
-    if (data_len > 0)
-        cdb.misc |= CDB_DATA_SIZE(data_len);
+    cdb.misc |= (data_len > 0) ? CDB_DATA_SIZE(data_len) : 0;
 
     cdb.DataDescriptor.low    = data_wr ? (u32)writeBuffer : (u32)data;
     cdb.DataDescriptor.high   = 0;

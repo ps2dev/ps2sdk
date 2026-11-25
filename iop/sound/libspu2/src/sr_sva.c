@@ -45,18 +45,11 @@ int SpuRSetVoiceAttr(int min_, int max_, SpuVoiceAttr *arg)
 	s16 v26;
 	unsigned int sl;
 
-	attr_mask = arg->mask;
-	if ( attr_mask == 0 )
-	{
-		attr_mask = 0xFFFFFFFF;
-	}
-	v5 = max_;
-	if ( min_ < 0 )
-		min_ = 0;
+	attr_mask = ( arg->mask == 0 ) ? 0xFFFFFFFF : arg->mask;
+	min_ = ( min_ < 0 ) ? 0 : min_;
 	if ( min_ >= 24 )
 		return SPU_INVALID_ARGS;
-	if ( max_ >= 24 )
-		v5 = 23;
+	v5 = ( max_ >= 24 ) ? 23 : max_;
 	if ( v5 < 0 )
 	{
 		return SPU_INVALID_ARGS;
@@ -188,27 +181,19 @@ int SpuRSetVoiceAttr(int min_, int max_, SpuVoiceAttr *arg)
 				_spu_RXX[512 * _spu_core + 4 + v11] = arg->adsr2;
 			if ( (attr_mask & SPU_VOICE_ADSR_AR) != 0 )
 			{
-				ar = arg->ar;
-				if ( ar >= 0x80 )
-					ar = 127;
-				v20 = 0;
-				if ( ((attr_mask & SPU_VOICE_ADSR_AMODE) != 0) && arg->a_mode == SPU_VOICE_EXPIncN )
-					v20 = 128;
+				ar = ( arg->ar >= 0x80 ) ? 127 : arg->ar;
+				v20 = ( ((attr_mask & SPU_VOICE_ADSR_AMODE) != 0) && arg->a_mode == SPU_VOICE_EXPIncN ) ? 128 : 0;
 				_spu_RXX[512 * _spu_core + 3 + v11] =
 					(u8)_spu_RXX[512 * _spu_core + 3 + v11] | (u16)(((u16)ar | (u16)v20) << 8);
 			}
 			if ( (attr_mask & SPU_VOICE_ADSR_DR) != 0 )
 			{
-				dr = arg->dr;
-				if ( dr >= 0x10 )
-					dr = 15;
+				dr = ( arg->dr >= 0x10 ) ? 15 : arg->dr;
 				_spu_RXX[512 * _spu_core + 3 + v11] = (_spu_RXX[512 * _spu_core + 3 + v11] & ~0xf0) | (16 * dr);
 			}
 			if ( (attr_mask & SPU_VOICE_ADSR_SR) != 0 )
 			{
-				sr = arg->sr;
-				if ( sr >= 0x80 )
-					sr = 127;
+				sr = ( arg->sr >= 0x80 ) ? 127 : arg->sr;
 				v23 = 256;
 				if ( (attr_mask & SPU_VOICE_ADSR_SMODE) != 0 )
 				{
@@ -232,22 +217,13 @@ int SpuRSetVoiceAttr(int min_, int max_, SpuVoiceAttr *arg)
 			}
 			if ( (attr_mask & SPU_VOICE_ADSR_RR) != 0 )
 			{
-				rr = arg->rr;
-				if ( rr >= 0x20 )
-					rr = 31;
-				v26 = 0;
-				if ( (attr_mask & SPU_VOICE_ADSR_RMODE) != 0 )
-				{
-					if ( arg->r_mode == SPU_VOICE_EXPDec )
-						v26 = 32;
-				}
+				rr = ( arg->rr >= 0x20 ) ? 31 : arg->rr;
+				v26 = ( (attr_mask & SPU_VOICE_ADSR_RMODE) != 0 && arg->r_mode == SPU_VOICE_EXPDec ) ? 32 : 0;
 				_spu_RXX[512 * _spu_core + 4 + v11] = (_spu_RXX[512 * _spu_core + 4 + v11] & ~0x3f) | rr | v26;
 			}
 			if ( (attr_mask & SPU_VOICE_ADSR_SL) != 0 )
 			{
-				sl = arg->sl;
-				if ( sl >= 0x10 )
-					sl = 15;
+				sl = ( arg->sl >= 0x10 ) ? 15 : arg->sl;
 				_spu_RXX[512 * _spu_core + 3 + v11] = (_spu_RXX[512 * _spu_core + 3 + v11] & ~0xF) | sl;
 			}
 		}

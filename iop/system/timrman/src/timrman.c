@@ -352,11 +352,7 @@ u32 GetTimerCounter(int timid)
 {
     u32 addr = timid << 4;
 
-    if (addr & 0x400) {
-        return _lw(addr);
-    } else {
-        return _lh(addr);
-    }
+    return (addr & 0x400) ? _lw(addr) : _lh(addr);
 }
 
 void SetTimerCompare(int timid, u32 compare)
@@ -374,11 +370,7 @@ u32 GetTimerCompare(int timid)
 {
     u32 addr = timid << 4;
 
-    if (addr & 0x400) {
-        return _lw(addr + 8);
-    } else {
-        return _lh(addr + 8);
-    }
+    return (addr & 0x400) ? _lw(addr + 8) : _lh(addr + 8);
 }
 
 void SetHoldMode(int holdnum, int mode)
@@ -451,11 +443,7 @@ int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeup
     timer->compare_value  = comparevalue;
     timer->timeup_handler = timeuphandler;
     timer->timeup_common  = common;
-    if (timeuphandler) {
-        timer->timeup_flags = TMR_CTRL_ZERO_RETURN | TMR_CTRL_CMP_IRQ_ENABLE | TMR_CTRL_IRQ_REPEAT;
-    } else {
-        timer->timeup_flags = 0;
-    }
+    timer->timeup_flags = timeuphandler ? (TMR_CTRL_ZERO_RETURN | TMR_CTRL_CMP_IRQ_ENABLE | TMR_CTRL_IRQ_REPEAT) : 0;
 
     CpuResumeIntr(oldstat);
     return 0;
@@ -481,11 +469,7 @@ int SetOverflowHandler(int timid, unsigned int (*handler)(void *userdata), void 
 
     timer->overflow_handler = handler;
     timer->overflow_common  = common;
-    if (handler != NULL) {
-        timer->overflow_flags = TMR_CTRL_OVFL_IRQ_ENABLE | TMR_CTRL_IRQ_REPEAT;
-    } else {
-        timer->overflow_flags = 0;
-    }
+    timer->overflow_flags = handler ? (TMR_CTRL_OVFL_IRQ_ENABLE | TMR_CTRL_IRQ_REPEAT) : 0;
 
     return 0;
 }

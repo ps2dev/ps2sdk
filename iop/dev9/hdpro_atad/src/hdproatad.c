@@ -825,21 +825,9 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
         /* This section is to detect whether the HDD supports 48-bit LBA
            (IDENITFY DEVICE bit 10 word 83) and get the total sectors from
            either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
-        if (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400) {
-            atad_devinfo[i].lba48 = 1;
-            /* I don't think anyone would use a >2TB HDD but just in case.  */
-            if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
-                devinfo[i].total_sectors = 0xffffffff;
-            } else {
-                devinfo[i].total_sectors =
-                    (ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16) |
-                    ata_param[ATA_ID_48BIT_SECTOTAL_LO];
-            }
-        } else {
-            atad_devinfo[i].lba48    = 0;
-            devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16) |
-                                       ata_param[ATA_ID_SECTOTAL_LO];
-        }
+        atad_devinfo[i].lba48 = (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400) ? 1 : 0;
+        /* I don't think anyone would use a >2TB HDD but just in case.  */
+        devinfo[i].total_sectors = atad_devinfo[i].lba48 ? (ata_param[ATA_ID_48BIT_SECTOTAL_HI] ? 0xffffffff : ((ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16) | ata_param[ATA_ID_48BIT_SECTOTAL_LO])) : ((ata_param[ATA_ID_SECTOTAL_HI] << 16) | ata_param[ATA_ID_SECTOTAL_LO]);
         devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
         /* PIO mode 0 (flow control).  */

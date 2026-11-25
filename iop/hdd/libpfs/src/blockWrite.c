@@ -121,8 +121,7 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 
 	blockpos->inode->flags |= PFS_CACHE_FLAG_DIRTY;
 	blocks -= bi.count;
-	if (blocks)
-		blocks -= pfsBlockExpandSegment(clink, blockpos, blocks);
+	blocks -= (blocks) ? pfsBlockExpandSegment(clink, blockpos, blocks) : 0;
 
 	return old_blocks - blocks;
 }

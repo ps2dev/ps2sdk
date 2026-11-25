@@ -25,9 +25,7 @@ static void acd_done(struct acd *acd, struct acd_softc *arg, int ret)
 	tmout = arg->active;
 	arg->sense = ret;
 	tmout--;
-	arg->active = tmout;
-	if ( tmout < 0 )
-		arg->active = 0;
+	arg->active = ( tmout < 0 ) ? 0 : tmout;
 	CpuResumeIntr(state);
 	thid = acd->c_thid;
 	tmout_v2 = acd->c_tmout;
@@ -66,14 +64,10 @@ acd_request_in(struct acd *acd, int flag, acAtapiPacketT packet, void *buffer, i
 	if ( (Acdc.status & 1) == 0 )
 		return -6;
 	ret = acd->c_tmout;
+	acd->c_thid = ( ret <= 0 ) ? 0 : GetThreadId();
 	if ( ret <= 0 )
 	{
-		acd->c_thid = 0;
 		ret = -ret;
-	}
-	else
-	{
-		acd->c_thid = GetThreadId();
 	}
 	acAtapiSetup(&acd->c_atapi, done ? done : acd_atapi_done, &Acdc, ret);
 	CpuSuspendIntr(&state);
@@ -163,9 +157,7 @@ int acd_read(struct acd *acd, acd_lsn_t lsn, void *buf, int sectors)
 		return 0;
 	}
 	memset(&u, 0, sizeof(u));
-	flag = 2;
-	if ( Acdc.dma )
-		flag = 3;
+	flag = ( Acdc.dma ) ? 3 : 2;
 	u.opcode = 40;
 	u.lun = 0;
 	u.lba[0] = (lsn & 0xFF000000) >> 24;
@@ -271,9 +263,7 @@ int acd_ioctl(struct acd *acd, int cmd)
 		u.op = cmd & 3;
 		if ( (cmd & 2) != 0 )
 		{
-			done = (acAtapiDone)acd_opentray_done;
-			if ( (cmd & 1) != 0 )
-				done = (acAtapiDone)acd_closetray_done;
+			done = ( (cmd & 1) != 0 ) ? (acAtapiDone)acd_closetray_done : (acAtapiDone)acd_opentray_done;
 		}
 		name = "ioctl:startstop";
 	}
@@ -323,10 +313,7 @@ static void acd_getmedium_done(acAtapiT atapi, struct acd_softc *arg, int ret)
 		h_mtype = arg->retry.me_h.h_mtype;
 		status = arg->status | 6;
 		arg->medium = h_mtype;
-		if ( h_mtype == 113 )
-			v7 = status ^ 4;
-		else
-			v7 = status ^ 2;
+		v7 = status ^ (( h_mtype == 113 ) ? 4 : 2);
 		arg->status = v7 | 0xA00;
 		CpuResumeIntr(state);
 	}
@@ -341,9 +328,7 @@ int acd_getmedium(struct acd *acd)
 	if ( acd )
 		return acd_mode_sense(acd, 1, &Acdc.retry, 20, (acAtapiDone)acd_getmedium_done, "getmedium");
 	CpuSuspendIntr(&state);
-	ret = -61;
-	if ( (Acdc.status & 0x800) != 0 )
-		ret = Acdc.medium;
+	ret = ( (Acdc.status & 0x800) != 0 ) ? Acdc.medium : -61;
 	CpuResumeIntr(state);
 	return ret;
 }
@@ -364,10 +349,7 @@ static void acd_retry_done(acAtapiT atapi, struct acd_softc *arg, int ret)
 		h_mtype = arg->retry.me_h.h_mtype;
 		status = arg->status | 6;
 		arg->medium = h_mtype;
-		if ( h_mtype == 113 )
-			v8 = status ^ 4;
-		else
-			v8 = status ^ 2;
+		v8 = status ^ (( h_mtype == 113 ) ? 4 : 2);
 		arg->status = v8 | 0xA00;
 		me_rretry = arg->retry.me_rretry;
 		CpuResumeIntr(state);
@@ -377,9 +359,7 @@ static void acd_retry_done(acAtapiT atapi, struct acd_softc *arg, int ret)
 
 int acd_getretry(struct acd *acd)
 {
-	if ( !acd )
-		return -22;
-	return acd_mode_sense(acd, 1, &Acdc.retry, 20, (acAtapiDone)acd_retry_done, "getretry");
+	return ( !acd ) ? -22 : acd_mode_sense(acd, 1, &Acdc.retry, 20, (acAtapiDone)acd_retry_done, "getretry");
 }
 
 int acd_setretry(struct acd *acd, int rretry)
@@ -403,9 +383,7 @@ int acd_setretry(struct acd *acd, int rretry)
 		size = (Acdc.retry.me_h.h_len[0] << 8) + Acdc.retry.me_h.h_len[1] + 2;
 	}
 	CpuResumeIntr(state);
-	if ( !size )
-		return rretry;
-	return acd_mode_select(acd, &Acdc.retry, size, (acAtapiDone)acd_retry_done, "setretry");
+	return ( !size ) ? rretry : acd_mode_select(acd, &Acdc.retry, size, (acAtapiDone)acd_retry_done, "setretry");
 }
 
 static void acd_getspeed_done(acAtapiT atapi, struct acd_softc *arg, int ret)
@@ -425,10 +403,7 @@ static void acd_getspeed_done(acAtapiT atapi, struct acd_softc *arg, int ret)
 		v4 = (arg->speed.mc_speed[0] << 8) + arg->speed.mc_speed[1];
 		status = arg->status | 6;
 		arg->medium = speed;
-		if ( speed == 113 )
-			v8 = status ^ 4;
-		else
-			v8 = status ^ 2;
+		v8 = status ^ (( speed == 113 ) ? 4 : 2);
 		arg->status = v8 | 0xC00;
 		CpuResumeIntr(state);
 	}
@@ -452,10 +427,7 @@ static void acd_getmaxspeed_done(acAtapiT atapi, struct acd_softc *arg, int ret)
 		v4 = (arg->speed.mc_maxspeed[0] << 8) + arg->speed.mc_maxspeed[1];
 		status = arg->status | 6;
 		arg->medium = speed;
-		if ( speed == 113 )
-			v8 = status ^ 4;
-		else
-			v8 = status ^ 2;
+		v8 = status ^ (( speed == 113 ) ? 4 : 2);
 		arg->status = v8 | 0xC00;
 		CpuResumeIntr(state);
 	}
@@ -470,9 +442,7 @@ int acd_getspeed(struct acd *acd, int maxspeed)
 	{
 		return -22;
 	}
-	done = (acAtapiDone)acd_getspeed_done;
-	if ( maxspeed )
-		done = (acAtapiDone)acd_getmaxspeed_done;
+	done = ( maxspeed ) ? (acAtapiDone)acd_getmaxspeed_done : (acAtapiDone)acd_getspeed_done;
 	return acd_mode_sense(acd, 42, &Acdc.speed, 28, done, "getspeed");
 }
 
@@ -498,10 +468,7 @@ int acd_setspeed(struct acd *acd, int speed)
 	if ( speed < 0 )
 		return -22;
 	CpuSuspendIntr(&state);
-	if ( (Acdc.status & 0x400) != 0 )
-		ospeed = (Acdc.speed.mc_speed[0] << 8) + Acdc.speed.mc_speed[1];
-	else
-		ospeed = -1;
+	ospeed = ( (Acdc.status & 0x400) != 0 ) ? ((Acdc.speed.mc_speed[0] << 8) + Acdc.speed.mc_speed[1]) : -1;
 	CpuResumeIntr(state);
 	if ( v3 > 0xFFFF )
 		v3 = 0xFFFF;
@@ -531,10 +498,7 @@ static void acd_timer_done(acAtapiT atapi, struct acd_softc *arg, int ret)
 		h_mtype = arg->timer.md_h.h_mtype;
 		status = arg->status | 6;
 		arg->medium = h_mtype;
-		if ( h_mtype == 113 )
-			status_v3 = status ^ 4;
-		else
-			status_v3 = status ^ 2;
+		status_v3 = status ^ (( h_mtype == 113 ) ? 4 : 2);
 		arg->status = status_v3 | 0x900;
 		v4 = arg->timer.md_timer & 0xF;
 		CpuResumeIntr(state);
@@ -544,9 +508,7 @@ static void acd_timer_done(acAtapiT atapi, struct acd_softc *arg, int ret)
 
 int acd_gettimer(struct acd *acd)
 {
-	if ( !acd )
-		return -22;
-	return acd_mode_sense(acd, 13, &Acdc.timer, 16, (acAtapiDone)acd_timer_done, "gettimer");
+	return ( !acd ) ? -22 : acd_mode_sense(acd, 13, &Acdc.timer, 16, (acAtapiDone)acd_timer_done, "gettimer");
 }
 
 int acd_settimer(struct acd *acd, int time)
@@ -621,9 +583,7 @@ int acd_delay()
 
 	GetSystemTime(&t);
 	SysClock2USec(&t, &s, &us);
-	if ( s >= 0xD )
-		return 0;
-	return 1000000 * (13 - s) - us;
+	return ( s >= 0xD ) ? 0 : (1000000 * (13 - s) - us);
 }
 
 int acd_getsense()
@@ -633,11 +593,7 @@ int acd_getsense()
 
 acCdvdsifId acd_gettray()
 {
-	if ( (Acdc.status & 8) != 0 )
-		return 3;
-	if ( (Acdc.status & 2) != 0 )
-		return 1;
-	return (Acdc.status >> 1) & 2;
+	return ( (Acdc.status & 8) != 0 ) ? 3 : (( (Acdc.status & 2) != 0 ) ? 1 : ((Acdc.status >> 1) & 2));
 }
 
 struct acd *acd_setup(struct acd *acd, acd_done_t done, void *arg, int tmout)
@@ -647,9 +603,7 @@ struct acd *acd_setup(struct acd *acd, acd_done_t done, void *arg, int tmout)
 		acd->c_done = done;
 		acd->c_arg = arg;
 		acd->c_thid = 0;
-		acd->c_tmout = tmout;
-		if ( !tmout )
-			acd->c_tmout = 5000000;
+		acd->c_tmout = ( !tmout ) ? 5000000 : tmout;
 	}
 	return acd;
 }
@@ -845,13 +799,7 @@ static int acd_identify(int drive)
 		SleepThread();
 		ret = acdata.a_result;
 	}
-	if ( ret < 0 )
-	{
-		return ret;
-	}
-	if ( (ident[0] & 0xFF00) != 0x8500 )
-		return -6;
-	return ((ident[62] & 0xFF) << 8) | ((ident[63] & 0xFF) << 16) | ((ident[88] & 0xFF) << 24);
+	return ( ret < 0 ) ? ret : (( (ident[0] & 0xFF00) != 0x8500 ) ? -6 : (((ident[62] & 0xFF) << 8) | ((ident[63] & 0xFF) << 16) | ((ident[88] & 0xFF) << 24)));
 }
 
 static int acd_softreset(int drive)
@@ -867,13 +815,7 @@ int acd_module_status()
 	int state;
 
 	CpuSuspendIntr(&state);
-	ret = 0;
-	if ( (Acdc.status & 1) != 0 )
-	{
-		ret = 1;
-		if ( Acdc.active > 0 )
-			ret = 2;
-	}
+	ret = ( (Acdc.status & 1) != 0 ) ? (( Acdc.active > 0 ) ? 2 : 1) : 0;
 	CpuResumeIntr(state);
 	return ret;
 }
@@ -903,10 +845,7 @@ int acd_module_start(int argc, char **argv)
 		if ( drive >= 2 )
 			return ret;
 	}
-	if ( drive )
-		Acdc.drive = 16;
-	else
-		Acdc.drive = 0;
+	Acdc.drive = drive ? 16 : 0;
 	Acdc.status = 1;
 	Acdc.medium = -1;
 	Acdc.dmamap = ret_v2;

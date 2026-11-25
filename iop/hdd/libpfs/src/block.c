@@ -86,13 +86,7 @@ int pfsBlockInitPos(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u64 position)
 	blockpos->inode=pfsCacheUsedAdd(clink);
 	blockpos->byte_offset=0;
 
-	if (clink->u.inode->size)
-	{
-		blockpos->block_segment=1;
-		blockpos->block_offset=0;
-	}else{
-		blockpos->block_segment=0;
-		blockpos->block_offset=1;
-	}
+	blockpos->block_segment=clink->u.inode->size ? 1 : 0;
+	blockpos->block_offset=clink->u.inode->size ? 0 : 1;
 	return pfsInodeSync(blockpos, position, clink->u.inode->number_data);
 }

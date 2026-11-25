@@ -438,11 +438,7 @@ pte_osResult pte_osThreadCancel(pte_osThreadHandle threadHandle)
   pThreadData = __getThreadData(threadHandle);
   osResult = SignalSema(pThreadData->cancelSem);
 
-  if (osResult == pThreadData->cancelSem) {
-    result = PTE_OS_OK;
-  } else {
-    result = PTE_OS_GENERAL_FAILURE;
-  }
+  result = (osResult == pThreadData->cancelSem) ? PTE_OS_OK : PTE_OS_GENERAL_FAILURE;
 
   return result;
 }
@@ -460,16 +456,7 @@ pte_osResult pte_osThreadCheckCancel(pte_osThreadHandle threadHandle)
   if (pThreadData != NULL) {
     osResult = ReferSemaStatus(pThreadData->cancelSem, &semInfo);
 
-    if (osResult == pThreadData->cancelSem) {
-      if (semInfo.count > 0) {
-        result = PTE_OS_INTERRUPTED;
-      } else {
-        result = PTE_OS_OK;
-      }
-    } else {
-      /* sceKernelReferSemaStatus returned an error */
-      result = PTE_OS_GENERAL_FAILURE;
-    }
+    result = (osResult == pThreadData->cancelSem) ? ((semInfo.count > 0) ? PTE_OS_INTERRUPTED : PTE_OS_OK) : /* sceKernelReferSemaStatus returned an error */ PTE_OS_GENERAL_FAILURE;
   } else {
     /* For some reason, we couldn't get thread data */
     result = PTE_OS_GENERAL_FAILURE;
@@ -568,13 +555,7 @@ pte_osResult pte_osMutexTimedLock(pte_osMutexHandle handle, unsigned int timeout
   pte_osResult result;
   int32_t timeout = timeoutMsecs * 1000;
   int status = SemWaitTimeout(handle, timeout);
-  if (status > 0) {
-    result = PTE_OS_OK;
-  } else if (status == -1) {
-    result = PTE_OS_TIMEOUT;
-  } else {
-    result = PTE_OS_GENERAL_FAILURE;
-  }
+  result = (status > 0) ? PTE_OS_OK : ((status == -1) ? PTE_OS_TIMEOUT : PTE_OS_GENERAL_FAILURE);
 
   return result;
 }
@@ -644,20 +625,10 @@ pte_osResult pte_osSemaphorePend(pte_osSemaphoreHandle handle, unsigned int *pTi
   int32_t result;
   pte_osResult osResult;
   
-  if (pTimeoutMsecs == NULL) {
-    timeout = UINT32_MAX;
-  } else {
-    timeout = *pTimeoutMsecs * 1000;
-  }
+  timeout = (pTimeoutMsecs == NULL) ? UINT32_MAX : *pTimeoutMsecs * 1000;
 
   result = SemWaitTimeout(handle, timeout);
-  if (result > 0) {
-    osResult = PTE_OS_OK;
-  } else if (result == -1) {
-    osResult = PTE_OS_TIMEOUT;
-  } else {
-    osResult = PTE_OS_GENERAL_FAILURE;
-  }
+  osResult = (result > 0) ? PTE_OS_OK : ((result == -1) ? PTE_OS_TIMEOUT : PTE_OS_GENERAL_FAILURE);
 
   return osResult;
 }
@@ -684,11 +655,7 @@ pte_osResult pte_osSemaphoreCancellablePend(pte_osSemaphoreHandle semHandle, uns
   start_time = clock();
 
   // clock() is in microseconds, timeout as passed in was in milliseconds
-  if (pTimeout == NULL) {
-    timeout = 0;
-  } else {
-    timeout = *pTimeout * 1000;
-  }
+  timeout = (pTimeout == NULL) ? 0 : (*pTimeout * 1000);
 
   while (1) {
     int32_t status;

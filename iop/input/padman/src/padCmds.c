@@ -172,10 +172,7 @@ u32 ReadData(padState_t *pstate)
 
 	for(i=0; i < (u32)(pstate->ee_actDirectSize); i++)
 	{
-		if(pstate->ee_actAlignData.data[i] == 0xFF)
-			pstate->inbuffer[i+3] = pstate->ee_actAlignData.data[i];
-		else
-			pstate->inbuffer[i+3] = pstate->ee_actDirectData.data[i];
+		pstate->inbuffer[i+3] = (pstate->ee_actAlignData.data[i] == 0xFF) ? pstate->ee_actAlignData.data[i] : pstate->ee_actDirectData.data[i];
 	}
 
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
@@ -674,20 +671,10 @@ u32 QueryButtonMask(padState_t *pstate)
 
 		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
 
-		if(pstate->outbuffer[8] == 0x5A)
-		{
-			pstate->buttonMask[0] = pstate->outbuffer[3];
-			pstate->buttonMask[1] = pstate->outbuffer[4];
-			pstate->buttonMask[2] = pstate->outbuffer[5];
-			pstate->buttonMask[3] = pstate->outbuffer[6];
-		}
-		else
-		{
-			pstate->buttonMask[0] = 0;
-			pstate->buttonMask[1] = 0;
-			pstate->buttonMask[2] = 0;
-			pstate->buttonMask[3] = 0;
-		}
+		pstate->buttonMask[0] = (pstate->outbuffer[8] == 0x5A) ? pstate->outbuffer[3] : 0;
+		pstate->buttonMask[1] = (pstate->outbuffer[8] == 0x5A) ? pstate->outbuffer[4] : 0;
+		pstate->buttonMask[2] = (pstate->outbuffer[8] == 0x5A) ? pstate->outbuffer[5] : 0;
+		pstate->buttonMask[3] = (pstate->outbuffer[8] == 0x5A) ? pstate->outbuffer[6] : 0;
 
 		ret = 1;
 	}

@@ -17,16 +17,8 @@ unsigned int _SpuSetAnyVoice(int on_off_flags, unsigned int voice_bits, int word
 	int p_register_2;
 	unsigned int ret_bits;
 
-	if ( (_spu_env & 1) != 0 )
-	{
-		p_register_1 = _spu_RQ[word_idx1 - 188];
-		p_register_2 = (u8)_spu_RQ[word_idx2 - 188];
-	}
-	else
-	{
-		p_register_1 = _spu_RXX[512 * _spu_core + word_idx1];
-		p_register_2 = (u8)_spu_RXX[512 * _spu_core + word_idx2];
-	}
+	p_register_1 = ( (_spu_env & 1) != 0 ) ? _spu_RQ[word_idx1 - 188] : _spu_RXX[512 * _spu_core + word_idx1];
+	p_register_2 = ( (_spu_env & 1) != 0 ) ? (u8)_spu_RQ[word_idx2 - 188] : (u8)_spu_RXX[512 * _spu_core + word_idx2];
 	ret_bits = p_register_1 | (p_register_2 << 16);
 	switch ( on_off_flags )
 	{
@@ -36,10 +28,7 @@ unsigned int _SpuSetAnyVoice(int on_off_flags, unsigned int voice_bits, int word
 				_spu_RQ[word_idx1 - 188] &= ~(u16)voice_bits;
 				_spu_RQ[word_idx2 - 188] &= ~((voice_bits >> 16) & 0xFF);
 				_spu_RQmask |= 1 << ((word_idx1 - 190) >> 1);
-				if ( (1 << ((word_idx1 - 190) >> 1)) == 16 )
-				{
-					_spu_RQmask |= 8;
-				}
+				_spu_RQmask |= ( (1 << ((word_idx1 - 190) >> 1)) == 16 ) ? 8 : 0;
 			}
 			else
 			{
@@ -54,10 +43,7 @@ unsigned int _SpuSetAnyVoice(int on_off_flags, unsigned int voice_bits, int word
 				_spu_RQ[word_idx1 - 188] |= voice_bits;
 				_spu_RQ[word_idx2 - 188] |= (voice_bits >> 16) & 0xFF;
 				_spu_RQmask |= 1 << ((word_idx1 - 190) >> 1);
-				if ( (1 << ((word_idx1 - 190) >> 1)) == 16 )
-				{
-					_spu_RQmask |= 8;
-				}
+				_spu_RQmask |= ( (1 << ((word_idx1 - 190) >> 1)) == 16 ) ? 8 : 0;
 			}
 			else
 			{
@@ -72,10 +58,7 @@ unsigned int _SpuSetAnyVoice(int on_off_flags, unsigned int voice_bits, int word
 				_spu_RQ[word_idx1 - 188] = voice_bits;
 				_spu_RQ[word_idx2 - 188] = (voice_bits >> 16) & 0xFF;
 				_spu_RQmask |= 1 << ((word_idx1 - 190) >> 1);
-				if ( (1 << ((word_idx1 - 190) >> 1)) == 16 )
-				{
-					_spu_RQmask |= 8;
-				}
+				_spu_RQmask |= ( (1 << ((word_idx1 - 190) >> 1)) == 16 ) ? 8 : 0;
 			}
 			else
 			{

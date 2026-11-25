@@ -212,9 +212,7 @@ static int fsckBitmapSearchFreeZoneSpecial(pfs_mount_t *pfsMount, pfs_blockinfo_
         num++;
     }
     count = (max_count < 33) ? max_count : 32;
-    if (count < bi->count) {
-        count = bi->count;
-    }
+    count = (count < bi->count) ? bi->count : count;
 
     for (--num; num >= 0; num--) {
         for (i = count; i != 0; i /= 2) {

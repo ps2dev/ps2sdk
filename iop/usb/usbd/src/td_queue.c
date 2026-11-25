@@ -98,10 +98,7 @@ void processDoneQueue_GenTd(UsbdHcTD_t *arg)
 			}
 			req_2->m_resultCode = USB_RC_ABORTED;
 			req_2->m_prev = lastElem;
-			if ( lastElem )
-				lastElem->m_next = req_2;
-			else
-				firstElem = req_2;
+			*(lastElem ? &(lastElem->m_next) : &(firstElem)) = req_2;
 			req_2->m_next = NULL;
 			lastElem = req_2;
 		}
@@ -176,20 +173,10 @@ void processDoneQueue_IsoTd(UsbdHcIsoTD_t *arg)
 		bcopy(arg->m_psw, req_1->m_req.Packets, 16);
 	freeIsoTd(arg);
 	req_1->m_transferedBytes = 0;
-	if ( req_1->m_req.bNumPackets )
+	req_1->m_resultCode = req_1->m_req.bNumPackets ? tdHcRes : (tdHcRes | (pswRes << 4));
+	if ( !req_1->m_req.bNumPackets && tdHcRes == USB_RC_OK && (pswRes == USB_RC_OK || pswRes == USB_RC_DATAUNDER) )
 	{
-		req_1->m_resultCode = tdHcRes;
-	}
-	else
-	{
-		req_1->m_resultCode = tdHcRes | (pswRes << 4);
-		if ( tdHcRes == USB_RC_OK && (pswRes == USB_RC_OK || pswRes == USB_RC_DATAUNDER) )
-		{
-			if ( (req_1->m_correspEndpoint->m_hcEd->m_hcArea.stru.m_hcArea & HCED_DIR_MASK) == HCED_DIR_IN )
-				req_1->m_transferedBytes = pswOfs;
-			else
-				req_1->m_transferedBytes = req_1->m_length;
-		}
+		req_1->m_transferedBytes = ( (req_1->m_correspEndpoint->m_hcEd->m_hcArea.stru.m_hcArea & HCED_DIR_MASK) == HCED_DIR_IN ) ? pswOfs : req_1->m_length;
 	}
 	req_1->m_prev = NULL;
 	listStart = req_1;
@@ -220,10 +207,7 @@ void processDoneQueue_IsoTd(UsbdHcIsoTD_t *arg)
 				}
 				req_2->m_resultCode = USB_RC_ABORTED;
 				req_2->m_prev = listEnd;
-				if ( listEnd )
-					listEnd->m_next = req_2;
-				else
-					listStart = req_2;
+				*(listEnd ? &(listEnd->m_next) : &(listStart)) = req_2;
 				req_2->m_next = NULL;
 				listEnd = req_2;
 			}

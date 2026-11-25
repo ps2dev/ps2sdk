@@ -89,14 +89,8 @@ static fs_rec fsRec[MAX_FILES]; // file info record
 static void fillStat(iox_stat_t *stat, const fat_dir *fatdir)
 {
     stat->mode = FIO_S_IROTH | FIO_S_IXOTH;
-    if (fatdir->attr & FAT_ATTR_DIRECTORY) {
-        stat->mode |= FIO_S_IFDIR;
-    } else {
-        stat->mode |= FIO_S_IFREG;
-    }
-    if (!(fatdir->attr & FAT_ATTR_READONLY)) {
-        stat->mode |= FIO_S_IWOTH;
-    }
+    stat->mode |= (fatdir->attr & FAT_ATTR_DIRECTORY) ? FIO_S_IFDIR : FIO_S_IFREG;
+    stat->mode |= (!(fatdir->attr & FAT_ATTR_READONLY)) ? FIO_S_IWOTH : 0;
 
     stat->size = fatdir->size;
 
@@ -539,9 +533,8 @@ static int fs_read(iop_file_t *fd, void *buffer, int size)
     }
 
     result = fat_readFile(fatd, &rec->dirent.fatdir, rec->filePos, (unsigned char *)buffer, size);
-    if (result > 0) { // read succesful
-        rec->filePos += result;
-    }
+    // read succesful
+    rec->filePos += (result > 0) ? result : 0;
 
     _fs_unlock();
     return result;

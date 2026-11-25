@@ -65,16 +65,8 @@ static int dma_xfer(acDmaT dma, void *ioptr, void *buf, int count)
 	int state;
 
 	slice = dma->d_slice;
-	if ( count >= 4 << slice )
-	{
-		ret = count >> (slice + 2);
-		slice_v2 = 1 << slice;
-	}
-	else
-	{
-		ret = count >> 2;
-		slice_v2 = 1;
-	}
+	ret = count >> (( count >= 4 << slice ) ? (slice + 2) : 2);
+	slice_v2 = 1 << (( count >= 4 << slice ) ? slice : 0);
 	CpuSuspendIntr(&state);
 	if ( dma == (acDmaT)Dmac.requestq.q_next && dma->d_state == 2 )
 	{
@@ -375,12 +367,8 @@ int acDmaModuleStart(int argc, char **argv)
 			return 0;
 		}
 		ReleaseIntrHandler(41);
-		msg = "dma_intr_enable";
 	}
-	else
-	{
-		msg = "dma_intr_register";
-	}
+	msg = ( !ret || ret == -104 ) ? "dma_intr_enable" : "dma_intr_register";
 	printf("accore:dma_init:%s: error %d\n", msg, ret);
 	return -6;
 }

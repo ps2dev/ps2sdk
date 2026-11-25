@@ -87,14 +87,8 @@ void SpuGetCommonAttr(SpuCommonAttr *attr)
 		}
 		v5 &= ~0xF000;
 	}
-	if ( v4 < 0x4000u )
-		attr->mvol.left = v4;
-	else
-		attr->mvol.left = v4 + 0x8000;
-	if ( v5 < 0x4000u )
-		attr->mvol.right = v5;
-	else
-		attr->mvol.right = v5 + 0x8000;
+	attr->mvol.left = ( v4 < 0x4000u ) ? v4 : (v4 + 0x8000);
+	attr->mvol.right = ( v5 < 0x4000u ) ? v5 : (v5 + 0x8000);
 	attr->mvolmode.right = v6;
 	attr->mvolmode.left = v2;
 	v11 = &_spu_RXX[20 * _spu_core];

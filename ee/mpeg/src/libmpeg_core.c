@@ -253,10 +253,8 @@ s32 _mpeg_dmac_handler(s32 channel, void *arg, void *addr)
         return -1;
     }
 
-    u32 mbc = cp->blocks;
-    if (mbc > 0x3ff) {
-        mbc = 0x3ff;
-    }
+    u32 mbc;
+    mbc = (cp->blocks > 0x3ff) ? 0x3ff : cp->blocks;
     *R_EE_D3_MADR = cp->dest;
     *R_EE_D4_MADR = cp->source;
     cp->source += mbc * sizeof(_MPEGMacroBlock8);
@@ -277,10 +275,8 @@ int _MPEG_CSCImage(void *source, void *dest, int mbcount)
     _ipu_suspend();
     *R_EE_IPU_CMD = IPU_COMMAND_BCLR;
     *R_EE_D_STAT  = 8; // ack ch3
-    int mbc       = mbcount;
-    if (mbc > 0x3ff) {
-        mbc = 0x3ff;
-    }
+    int mbc;
+    mbc = (mbcount > 0x3ff) ? 0x3ff : mbcount;
 
     *R_EE_D3_MADR = (u32)dest;
     *R_EE_D4_MADR = (u32)source;
@@ -533,9 +529,7 @@ int _MPEG_GetMBAI(void)
         }
 
         // MB escape
-        if (ret == 0x23) {
-            mbai += 0x21;
-        }
+        mbai += (ret == 0x23) ? 0x21 : 0;
 
         if (ret < 0x22) {
             mbai += ret;

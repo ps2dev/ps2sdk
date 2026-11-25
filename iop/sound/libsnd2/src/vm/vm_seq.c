@@ -24,12 +24,8 @@ void _SsVmSetSeqVol(s16 seq_sep_num, s16 voll, s16 volr)
 	unsigned int m_pan;
 
 	score_struct = &_ss_score[(u8)seq_sep_num][(seq_sep_num & 0xFF00) >> 8];
-	score_struct->m_voll = voll;
-	score_struct->m_volr = volr;
-	if ( (u16)voll >= 0x7Fu )
-		score_struct->m_voll = 127;
-	if ( (u16)score_struct->m_volr >= 0x7Fu )
-		score_struct->m_volr = 127;
+	score_struct->m_voll = ( (u16)voll >= 0x7Fu ) ? 127 : voll;
+	score_struct->m_volr = ( (u16)score_struct->m_volr >= 0x7Fu ) ? 127 : volr;
 	for ( v5 = 0; (s16)v5 < _SsVmMaxVoice; v5 += 1 )
 	{
 		if ( (_snd_vmask & (1 << v5)) == 0 )
