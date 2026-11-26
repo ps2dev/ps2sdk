@@ -343,13 +343,18 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 	{
 		if(hddDevices[i].status<2)
 		{
-			if((hddDevices[i].status != 1) && apaJournalRestore(i) != 0)
-			{
-				APA_PRINTF(APA_DRV_NAME": error: log check failed.\n");
-				return hddInitError();
-			}
+			// Non-SONY: check the format before replaying the journal, so a disk that is not APA-formatted is never written to (#726). An unformatted drive's journal buffer is only set up in memory.
 			if(apaGetFormat(i, &hddDevices[i].format))
+			{
+				if(apaJournalRestore(i) != 0)
+				{
+					APA_PRINTF(APA_DRV_NAME": error: log check failed.\n");
+					return hddInitError();
+				}
 				hddDevices[i].status--;
+			}
+			else
+				apaJournalInit();
 			APA_PRINTF(APA_DRV_NAME": drive status %d, format version %08x\n",
 				hddDevices[i].status, hddDevices[i].format);
 		}

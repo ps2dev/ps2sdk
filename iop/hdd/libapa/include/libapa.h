@@ -189,6 +189,7 @@ typedef struct
 } apa_journal_t;
 
 #define journalCheckSum(header) apaCheckSum((apa_header_t *)header, 1)
+extern void apaJournalInit(void);
 extern int apaJournalReset(s32 device);
 extern int apaJournalFlush(s32 device);
 extern int apaJournalWrite(apa_cache_t *clink);
