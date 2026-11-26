@@ -28,7 +28,7 @@ extern u32 pfsMetaSize;
 int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u32 scale, u32 fragment)
 {
 	pfs_cache_t *cache;
-	u32 sector, count, size;
+	u32 sector, count, size, first;
 	int result = 0;
 
 	size = blockDev->getSize(fd, sub);
@@ -40,29 +40,22 @@ int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u3
 
 	if((cache = pfsCacheAllocClean(&result)))
 	{
-		int i;
-		unsigned int j;
-		u32 *b;
-
-		// fill with fragment pattern
-		for (i=127; i>=0; i--)
-			cache->u.bitmap[i]=fragment;
-
-		// set as allocated the sectors up to reserved, for the first part of the bitmap
-		// this will mark the area the bitmaps themselves occupy as used
-		for (j=0, b=cache->u.bitmap; j<reserved; j++)
-		{
-			if (j && ((j & 0x1F)==0))
-				b++;
-			*b |= 1 << (j & 0x1F);
-		}
-
 		PFS_PRINTF(PFS_DRV_NAME": Format sub: sub = %ld, sector start = %ld, ", sub, sector);
 
-		// set the rest of the bitmap to the fragment
-		while (count-- && ((result=blockDev->transfer(fd, cache->u.bitmap, sub, sector++, 1, 1))>=0))
-			for (i=127; i>=0; i--)
-				cache->u.bitmap[i]=fragment;
+		// Each bitmap sector covers 4096 zones. Fill it with the fragment pattern
+		// and mark the reserved zones that fall into it (the APA area, the
+		// superblock and the bitmap itself), which may span several sectors.
+		for (first = 0; count-- && result >= 0; first += 4096)
+		{
+			u32 j;
+
+			for (j = 0; j < 128; j++)
+				cache->u.bitmap[j]=fragment;
+			for (j = first; j < reserved && j < first + 4096; j++)
+				cache->u.bitmap[(j - first) >> 5] |= 1 << (j & 0x1F);
+
+			result=blockDev->transfer(fd, cache->u.bitmap, sub, sector++, 1, 1);
+		}
 
 		PFS_PRINTF("sector end = %ld\n", sector - 1);
 
