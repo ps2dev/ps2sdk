@@ -28,6 +28,7 @@ __attribute__((weak)) void _fini();
 void _libcglue_args_parse(int argc, char** argv);
 void _libcglue_init();
 void _libcglue_deinit();
+__attribute__((weak)) void __libcglue_exit(int status);
 int main(int argc, char** argv);
 
 static void _main();
@@ -122,26 +123,23 @@ static void _main()
     // call main
     retval = main(pa->argc, pa->argv);
 
-    // call global destructors (weak)
+    // The standard libcglue provides the C runtime exit path. Programs that
+    // replace libcglue initialization (e.g. minimal ELF loaders) retain the
+    // direct path without pulling in newlib exit handling or uninitialized locks.
+    if (__libcglue_exit)
+        __libcglue_exit(retval);
+
     if (_fini)
         _fini();
-
-    // uninitialize libcglue
     _libcglue_deinit();
-
-    // Exit
     Exit(retval);
 }
 
 noreturn void _exit(int status)
 {
-    // call global destructors (weak)
-    if (_fini)
-        _fini();
-
-    // uninitialize libcglue
+    // Called after newlib's exit handlers and stdio cleanup, or directly
+    // for an immediate exit that deliberately skips those handlers.
     _libcglue_deinit();
 
-    // Exit
     Exit(status);
 }

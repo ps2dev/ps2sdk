@@ -10,10 +10,21 @@
 
 #include <ps2_osal.h>
 
+/* Track all allocated TLS blocks, including the implicit native thread.
+ * Key deletion clears the slot in every block before the index can be
+ * reused. The existing global TLS lock serializes list and key changes. */
+struct tls_block {
+    struct tls_block *prev;
+    struct tls_block *next;
+    void *values[];
+};
+
 #ifdef F___keysUsed
 int *__keysUsed;
+struct tls_block *__tlsBlocks;
 #else
 extern int *__keysUsed;
+extern struct tls_block *__tlsBlocks;
 #endif
 
 #ifdef F___maxTlsValues
@@ -43,7 +54,10 @@ pte_osResult pteTlsGlobalInit(int maxEntries)
     int i;
     pte_osResult result;
 
-    pte_osMutexCreate(&__globalTlsLock);
+    result = pte_osMutexCreate(&__globalTlsLock);
+    if (result != PTE_OS_OK)
+        return result;
+
     __keysUsed = (int *)malloc(maxEntries * sizeof(int));
 
     if (__keysUsed != NULL) {
@@ -55,6 +69,7 @@ pte_osResult pteTlsGlobalInit(int maxEntries)
         result = PTE_OS_OK;
     } else {
         result = PTE_OS_NO_RESOURCES;
+        pte_osMutexDelete(__globalTlsLock);
     }
 
     return result;
@@ -64,17 +79,20 @@ pte_osResult pteTlsGlobalInit(int maxEntries)
 #ifdef F_pteTlsThreadInit
 void *pteTlsThreadInit(void)
 {
-    void **pTlsStruct;
-    int i;
+    struct tls_block *block;
 
-    pTlsStruct = (void **)malloc(__maxTlsValues * sizeof(void *));
+    block = calloc(1, sizeof(*block) + __maxTlsValues * sizeof(void *));
+    if (block == NULL)
+        return NULL;
 
-    // PTE library assumes that keys are initialized to zero
-    for (i = 0; i < __maxTlsValues; i++) {
-        pTlsStruct[i] = 0;
-    }
+    pte_osMutexLock(__globalTlsLock);
+    block->next = __tlsBlocks;
+    if (__tlsBlocks != NULL)
+        __tlsBlocks->prev = block;
+    __tlsBlocks = block;
+    pte_osMutexUnlock(__globalTlsLock);
 
-    return (void *)pTlsStruct;
+    return block;
 }
 #endif
 
@@ -106,13 +124,13 @@ pte_osResult __pteTlsAlloc(unsigned int *pKey);
 #ifdef F_pteTlsGetValue
 void *pteTlsGetValue(void *pTlsThreadStruct, unsigned int index)
 {
-    void **pTls = (void **)pTlsThreadStruct;
+    struct tls_block *block = pTlsThreadStruct;
 
-    if (__keysUsed[index - 1] && pTls != NULL) {
-        return pTls[index - 1];
-    } else {
+    if (block == NULL || __keysUsed == NULL || index == 0 ||
+        index > (unsigned int)__maxTlsValues || !__keysUsed[index - 1])
         return NULL;
-    }
+
+    return block->values[index - 1];
 }
 #else
 void *pteTlsGetValue(void *pTlsThreadStruct, unsigned int index);
@@ -121,17 +139,14 @@ void *pteTlsGetValue(void *pTlsThreadStruct, unsigned int index);
 #ifdef F___pteTlsSetValue
 pte_osResult __pteTlsSetValue(void *pTlsThreadStruct, unsigned int index, void *value)
 {
-    pte_osResult result;
-    void **pTls = (void **)pTlsThreadStruct;
+    struct tls_block *block = pTlsThreadStruct;
 
-    if (pTls != NULL) {
-        pTls[index - 1] = value;
-        result = PTE_OS_OK;
-    } else {
-        result = PTE_OS_INVALID_PARAM;
-    }
+    if (block == NULL || __keysUsed == NULL || index == 0 ||
+        index > (unsigned int)__maxTlsValues || !__keysUsed[index - 1])
+        return PTE_OS_INVALID_PARAM;
 
-    return result;
+    block->values[index - 1] = value;
+    return PTE_OS_OK;
 }
 #else
 pte_osResult __pteTlsSetValue(void *pTlsThreadStruct, unsigned int index, void *value);
@@ -162,17 +177,20 @@ void *__getTlsStructFromThread(s32 thid);
 #ifdef F_pteTlsFree
 pte_osResult pteTlsFree(unsigned int index)
 {
-    pte_osResult result;
+    struct tls_block *block;
+    pte_osResult result = PTE_OS_INVALID_PARAM;
 
-    if (__keysUsed != NULL) {
-        pte_osMutexLock(__globalTlsLock);
+    if (__keysUsed == NULL || index == 0 || index > (unsigned int)__maxTlsValues)
+        return result;
+
+    pte_osMutexLock(__globalTlsLock);
+    if (__keysUsed[index - 1]) {
+        for (block = __tlsBlocks; block != NULL; block = block->next)
+            block->values[index - 1] = NULL;
         __keysUsed[index - 1] = 0;
-        pte_osMutexUnlock(__globalTlsLock);
-
         result = PTE_OS_OK;
-    } else {
-        result = PTE_OS_GENERAL_FAILURE;
     }
+    pte_osMutexUnlock(__globalTlsLock);
 
     return result;
 }
@@ -183,7 +201,20 @@ pte_osResult pteTlsFree(unsigned int index);
 #ifdef F_pteTlsThreadDestroy
 void pteTlsThreadDestroy(void *pTlsThreadStruct)
 {
-    free(pTlsThreadStruct);
+    struct tls_block *block = pTlsThreadStruct;
+
+    if (block == NULL)
+        return;
+
+    pte_osMutexLock(__globalTlsLock);
+    if (block->prev != NULL)
+        block->prev->next = block->next;
+    else
+        __tlsBlocks = block->next;
+    if (block->next != NULL)
+        block->next->prev = block->prev;
+    pte_osMutexUnlock(__globalTlsLock);
+    free(block);
 }
 #endif
 
@@ -192,6 +223,8 @@ void pteTlsGlobalDestroy(void)
 {
     pte_osMutexDelete(__globalTlsLock);
     free(__keysUsed);
+    __keysUsed = NULL;
+    __maxTlsValues = 0;
 }
 #endif
 

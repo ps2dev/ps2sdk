@@ -28,6 +28,27 @@
 
 #if F___threadInfo
 struct OsalThreadInfo __threadInfo[MAX_THREADS];
+int __pte_creating_threads;
+int __pte_closing;
+
+/* On the single EE, interrupt masking protects this snapshot and creation
+ * gate without acquiring a mutex that may be held by an exiting worker. */
+int __pte_osBeginTerminate(void)
+{
+  int intc = DIntr();
+  int ready = __pte_creating_threads == 0;
+  for (int i = 0; ready && i < MAX_THREADS; ++i) {
+    if (__threadInfo[i].tlsPtr != NULL)
+      ready = 0;
+  }
+  if (ready)
+    __pte_closing = 1;
+  if (intc) EIntr();
+  return ready;
+}
+#else
+extern int __pte_creating_threads;
+extern int __pte_closing;
 #endif
 
 /* TLS key used to access ps2ThreadData struct for reach thread. */
@@ -38,6 +59,7 @@ extern unsigned int __threadDataKey;
 #endif
 
 extern void *__globalTls;
+extern int *__keysUsed;
 
 /*
  * Data stored on a per-thread basis - allocated in pte_osThreadCreate
@@ -126,50 +148,79 @@ pte_osResult pte_osInit(void)
   pte_osResult result;
   ps2ThreadData *pThreadData;
 
+  __pte_closing = 0;
   /* Allocate and initialize TLS support */
   result = pteTlsGlobalInit(PS2_MAX_TLS);
+  if (result != PTE_OS_OK)
+    return result;
 
-  if (result == PTE_OS_OK) {
-    /* Allocate a key that we use to store control information (e.g. cancellation semaphore) per thread */
-    result = __pteTlsAlloc(&__threadDataKey);
+  /* Allocate a key for the implicit non-POSIX main thread's data. */
+  __threadDataKey = 0;
+  result = __pteTlsAlloc(&__threadDataKey);
+  if (result != PTE_OS_OK)
+    goto fail;
 
-    if (result == PTE_OS_OK) {
-      /* Initialize the structure used to emulate TLS for 
-        * non-POSIX threads 
-        */
-      __globalTls = pteTlsThreadInit();
-
-      /* Also create a "thread data" structure for a single non-POSIX thread. */
-
-      /* Allocate some memory for our per-thread control data.  We use this for:
-        * 1. Entry point and parameters for the user thread's main function.
-        * 2. Semaphore used for thread cancellation.
-        */
-      pThreadData = (ps2ThreadData *) malloc(sizeof(ps2ThreadData));
-
-      if (pThreadData == NULL) {
-        result = PTE_OS_NO_RESOURCES;
-      } else {
-        /* Save a pointer to our per-thread control data as a TLS value */
-        __pteTlsSetValue(__globalTls, __threadDataKey, pThreadData);
-
-        sema.init_count = 0;
-        sema.max_count  = 255;
-        sema.option     = 0;
-        pThreadData->cancelSem = CreateSema(&sema);
-
-        result = PTE_OS_OK;
-      }
-    }
+  __globalTls = pteTlsThreadInit();
+  if (__globalTls == NULL) {
+    result = PTE_OS_NO_RESOURCES;
+    goto fail;
   }
 
+  pThreadData = (ps2ThreadData *)malloc(sizeof(*pThreadData));
+  if (pThreadData == NULL) {
+    result = PTE_OS_NO_RESOURCES;
+    goto fail;
+  }
+
+  pThreadData->cancelSem = -1;
+  result = __pteTlsSetValue(__globalTls, __threadDataKey, pThreadData);
+  if (result != PTE_OS_OK) {
+    free(pThreadData);
+    goto fail;
+  }
+
+  sema.init_count = 0;
+  sema.max_count = 255;
+  sema.option = 0;
+  pThreadData->cancelSem = CreateSema(&sema);
+  if (pThreadData->cancelSem < 0) {
+    result = PTE_OS_NO_RESOURCES;
+    goto fail;
+  }
+
+  return PTE_OS_OK;
+
+fail:
+  pte_osTerminate();
   return result;
 }
 #endif
 
 #ifdef F_pte_osTerminate
-pte_osResult pte_osTerminate(void) {
+pte_osResult pte_osTerminate(void)
+{
+  /* An unsuccessful initialization may leave no global TLS state. */
+  if (__keysUsed == NULL)
+    return PTE_OS_OK;
+
+  /* The implicit native thread is not deleted by pthread termination, but
+   * its cancellation semaphore, TLS storage, and data are OSAL-owned. */
+  if (__globalTls != NULL) {
+    if (__threadDataKey != 0) {
+      ps2ThreadData *pThreadData =
+          (ps2ThreadData *)pteTlsGetValue(__globalTls, __threadDataKey);
+      if (pThreadData != NULL) {
+        if (pThreadData->cancelSem >= 0)
+          DeleteSema(pThreadData->cancelSem);
+        free(pThreadData);
+      }
+    }
+    pteTlsThreadDestroy(__globalTls);
+    __globalTls = NULL;
+  }
+
   pteTlsGlobalDestroy();
+  __threadDataKey = 0;
   return PTE_OS_OK;
 }
 #endif
@@ -186,6 +237,13 @@ static inline int invert_priority(int priority)
 }
 
 #ifdef F_pte_osThreadCreate
+static void end_thread_create(void)
+{
+  int intc = DIntr();
+  --__pte_creating_threads;
+  if (intc) EIntr();
+}
+
 pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
                                 int stackSize,
                                 int initialPriority,
@@ -201,6 +259,14 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   s32 threadId;
   ps2ThreadData *pThreadData;
 
+  int intc = DIntr();
+  if (__pte_closing) {
+    if (intc) EIntr();
+    return PTE_OS_NO_RESOURCES;
+  }
+  ++__pte_creating_threads;
+  if (intc) EIntr();
+
   if (++threadNum > MAX_PS2_UID) {
     threadNum = 0;
   }
@@ -214,6 +280,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   pTls = pteTlsThreadInit();
   if (pTls == NULL) {
     PS2_DEBUG("pteTlsThreadInit: PTE_OS_NO_RESOURCES\n");
+    end_thread_create();
     return PTE_OS_NO_RESOURCES;
   }
 
@@ -226,6 +293,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   if (pThreadData == NULL) {
     pteTlsThreadDestroy(pTls);
     PS2_DEBUG("malloc(ps2ThreadData): PTE_OS_NO_RESOURCES\n");
+    end_thread_create();
     return PTE_OS_NO_RESOURCES;
   }
 
@@ -243,6 +311,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
     free(pThreadData);
     pteTlsThreadDestroy(pTls);
     PS2_DEBUG("CreateSema(cancelSem): PTE_OS_NO_RESOURCES\n");
+    end_thread_create();
     return PTE_OS_NO_RESOURCES;
   }
 
@@ -256,6 +325,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
     free(pThreadData);
     pteTlsThreadDestroy(pTls);
     PS2_DEBUG("malloc(stack): PTE_OS_NO_RESOURCES\n");
+    end_thread_create();
     return PTE_OS_NO_RESOURCES;
   }
 
@@ -277,6 +347,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
     free(pThreadData);
     pteTlsThreadDestroy(pTls);
     PS2_DEBUG("CreateThread: PTE_OS_GENERAL_FAILURE\n");
+    end_thread_create();
     return PTE_OS_GENERAL_FAILURE;
   }
 
@@ -290,6 +361,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   threadInfo->tlsPtr = pTls;
 
   *ppte_osThreadHandle = threadId;
+  end_thread_create();
   return PTE_OS_OK;
 }
 #endif

@@ -176,7 +176,9 @@ void gprof_stop(const char *filename, int should_dump)
     ReleaseTimerAlarm(gp.timerId);
 
     if (should_dump) {
-        fp           = fopen(filename, "wb");
+        fp = fopen(filename, "wb");
+        if (fp == NULL)
+            goto release_buffers;
         hdr.lpc      = gp.lowpc;
         hdr.hpc      = gp.highpc;
         hdr.ncnt     = sizeof(hdr) + (sizeof(unsigned int) * gp.nsamples);
@@ -197,19 +199,27 @@ void gprof_stop(const char *filename, int should_dump)
         fclose(fp);
     }
 
+release_buffers:
     // free memory
     free(gp.arcs);
     free(gp.samples);
 }
 
 /** Writes gmon.out dump file and stops profiling
-    Called from _libcglue_deinit() function; will dump out a gmon.out file 
+    Called during normal exit before stdio cleanup; will dump out a gmon.out file
     at cwd with all collected information.
 */
 __attribute__((__no_instrument_function__, __no_profile_instrument_function__))
-void __gprof_cleanup()
+void __gprof_cleanup(void)
 {
     gprof_stop("gmon.out", 1);
+}
+
+/* Immediate exit cancels profiling without opening stdio streams. */
+__attribute__((__no_instrument_function__, __no_profile_instrument_function__))
+void __gprof_abort(void)
+{
+    gprof_stop(NULL, 0);
 }
 
 /** Internal C handler for _mcount()
