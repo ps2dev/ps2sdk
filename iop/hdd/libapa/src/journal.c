@@ -44,6 +44,12 @@ int apaJournalReset(s32 device)
 	return apaJournalFlush(device);
 }
 
+void apaJournalInit(void)
+{	// sets up the journal buffer in memory only; nothing is written to the HDD.
+	memset(&journalBuf, 0, sizeof(apa_journal_t));
+	journalBuf.magic=APAL_MAGIC;
+}
+
 int apaJournalWrite(apa_cache_t *clink)
 {
 	clink->header->checksum=journalCheckSum(clink->header);
