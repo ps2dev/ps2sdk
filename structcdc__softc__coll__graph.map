@@ -1,0 +1,11 @@
+<map id="cdc_softc" name="cdc_softc">
+<area shape="rect" id="node1" title=" " alt="" coords="164,365,247,392"/>
+<area shape="rect" id="node2" href="$structcdc__read__stru.html" title=" " alt="" coords="5,276,117,303"/>
+<area shape="rect" id="node3" href="$structcdc__stream__stru.html" title=" " alt="" coords="141,276,270,303"/>
+<area shape="rect" id="node4" href="$structacd.html" title=" " alt="" coords="295,276,340,303"/>
+<area shape="rect" id="node5" href="$structac__atapi.html" title=" " alt="" coords="279,187,356,213"/>
+<area shape="rect" id="node6" href="$structac__ata__h.html" title=" " alt="" coords="219,97,299,124"/>
+<area shape="rect" id="node7" href="$structac__queue.html" title=" " alt="" coords="123,7,207,33"/>
+<area shape="rect" id="node8" href="$structac__ata__ops.html" title=" " alt="" coords="305,7,399,33"/>
+<area shape="rect" id="node9" href="$unionac__atapi__pkt.html" title=" " alt="" coords="323,97,429,124"/>
+</map>
