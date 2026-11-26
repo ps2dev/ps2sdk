@@ -160,9 +160,15 @@ extern int __path_absolute(const char *in, char *out, int len);
 #define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576
 
 /* Disable the auto start of pthread on init for reducing binary size if not used. */
+#ifdef __cplusplus
 #define PS2_DISABLE_AUTOSTART_PTHREAD() \
-	void __libpthreadglue_init() {} \
-    void __libpthreadglue_deinit() {}
+    extern "C" void __libpthreadglue_init(void) {} \
+    extern "C" void __libpthreadglue_deinit(void) {}
+#else
+#define PS2_DISABLE_AUTOSTART_PTHREAD() \
+    void __libpthreadglue_init(void) {} \
+    void __libpthreadglue_deinit(void) {}
+#endif
 
 /* Namco system 246/256 dont have CDVDFSV module loaded on iop reboot. therefore, any libcglue code calling CDVDMAN RPCs will freeze*/
 #define LIBCGLUE_SUPPORT_NAMCO_SYSTEM_2x6() \

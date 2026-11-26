@@ -28,6 +28,27 @@
 
 #if F___threadInfo
 struct OsalThreadInfo __threadInfo[MAX_THREADS];
+int __pte_creating_threads;
+int __pte_closing;
+
+/* On the single EE, interrupt masking protects this snapshot and creation
+ * gate without acquiring a mutex that may be held by an exiting worker. */
+int __pte_osBeginTerminate(void)
+{
+  int intc = DIntr();
+  int ready = __pte_creating_threads == 0;
+  for (int i = 0; ready && i < MAX_THREADS; ++i) {
+    if (__threadInfo[i].tlsPtr != NULL)
+      ready = 0;
+  }
+  if (ready)
+    __pte_closing = 1;
+  if (intc) EIntr();
+  return ready;
+}
+#else
+extern int __pte_creating_threads;
+extern int __pte_closing;
 #endif
 
 /* TLS key used to access ps2ThreadData struct for reach thread. */
@@ -127,6 +148,7 @@ pte_osResult pte_osInit(void)
   pte_osResult result;
   ps2ThreadData *pThreadData;
 
+  __pte_closing = 0;
   /* Allocate and initialize TLS support */
   result = pteTlsGlobalInit(PS2_MAX_TLS);
   if (result != PTE_OS_OK)
@@ -215,6 +237,13 @@ static inline int invert_priority(int priority)
 }
 
 #ifdef F_pte_osThreadCreate
+static void end_thread_create(void)
+{
+  int intc = DIntr();
+  --__pte_creating_threads;
+  if (intc) EIntr();
+}
+
 pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
                                 int stackSize,
                                 int initialPriority,
@@ -230,6 +259,14 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   s32 threadId;
   ps2ThreadData *pThreadData;
 
+  int intc = DIntr();
+  if (__pte_closing) {
+    if (intc) EIntr();
+    return PTE_OS_NO_RESOURCES;
+  }
+  ++__pte_creating_threads;
+  if (intc) EIntr();
+
   if (++threadNum > MAX_PS2_UID) {
     threadNum = 0;
   }
@@ -243,6 +280,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   pTls = pteTlsThreadInit();
   if (pTls == NULL) {
     PS2_DEBUG("pteTlsThreadInit: PTE_OS_NO_RESOURCES\n");
+    end_thread_create();
     return PTE_OS_NO_RESOURCES;
   }
 
@@ -255,6 +293,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   if (pThreadData == NULL) {
     pteTlsThreadDestroy(pTls);
     PS2_DEBUG("malloc(ps2ThreadData): PTE_OS_NO_RESOURCES\n");
+    end_thread_create();
     return PTE_OS_NO_RESOURCES;
   }
 
@@ -272,6 +311,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
     free(pThreadData);
     pteTlsThreadDestroy(pTls);
     PS2_DEBUG("CreateSema(cancelSem): PTE_OS_NO_RESOURCES\n");
+    end_thread_create();
     return PTE_OS_NO_RESOURCES;
   }
 
@@ -285,6 +325,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
     free(pThreadData);
     pteTlsThreadDestroy(pTls);
     PS2_DEBUG("malloc(stack): PTE_OS_NO_RESOURCES\n");
+    end_thread_create();
     return PTE_OS_NO_RESOURCES;
   }
 
@@ -306,6 +347,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
     free(pThreadData);
     pteTlsThreadDestroy(pTls);
     PS2_DEBUG("CreateThread: PTE_OS_GENERAL_FAILURE\n");
+    end_thread_create();
     return PTE_OS_GENERAL_FAILURE;
   }
 
@@ -319,6 +361,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   threadInfo->tlsPtr = pTls;
 
   *ppte_osThreadHandle = threadId;
+  end_thread_create();
   return PTE_OS_OK;
 }
 #endif
