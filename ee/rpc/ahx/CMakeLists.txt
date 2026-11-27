@@ -1,0 +1,6 @@
+add_library(ahx)
+target_include_directories(ahx PUBLIC include)
+target_include_directories(ahx PRIVATE ${EE_INC})
+target_sources(ahx PRIVATE src/ahx_rpc.c src/erl-support.c)
+install(TARGETS ahx)
+target_add_erl(ahx)
