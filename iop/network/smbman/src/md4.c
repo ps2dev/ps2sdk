@@ -160,7 +160,7 @@ unsigned char *MD4(unsigned char *message, int len, unsigned char *cipher)
         len -= 64;
     }
 
-    memset(buffer.ucbuff, 0, 128);
+    memset(buffer.ucbuff, 0, sizeof(buffer.ucbuff));
     memcpy(buffer.ucbuff, message, len);
     buffer.ucbuff[len] = 0x80;
 

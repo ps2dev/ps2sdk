@@ -270,7 +270,7 @@ static void RecoverSubPartition(apa_cache_t *clink, u32 lba, u32 previous, u32 s
 
     APA_PRINTF("found this sub partition's main, so I recover it.\n");
 
-    memset(clink2->header, 0, sizeof(apa_header_t));
+    memset(clink2->header, 0, sizeof(*(clink2->header)));
     clink2->header->magic = APA_MAGIC;
     clink2->header->start = lba;
     if (lba < clink->header->prev) {

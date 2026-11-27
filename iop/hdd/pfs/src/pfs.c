@@ -118,7 +118,7 @@ static int freeMountBuffer()
 
 void pfsClearMount(pfs_mount_t *pfsMount)
 {
-	memset(pfsMount, 0, sizeof(pfs_mount_t));
+	memset(pfsMount, 0, sizeof(*pfsMount));
 }
 
 pfs_mount_t *pfsGetMountedUnit(s32 unit)

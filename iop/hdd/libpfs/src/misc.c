@@ -92,7 +92,7 @@ int pfsGetTime(pfs_datetime_t *tm)
 
 		DelayThread(100000);
 	}
-	memcpy(tm, &timeBuf, sizeof(pfs_datetime_t));
+	*tm = timeBuf;
 #else
 	time_t rawtime;
 	struct tm timeinfo;
@@ -147,7 +147,7 @@ void pfsPrintBitmap(const u32 *bitmap) {
 
 	b[16]=0;
 	for (i=0; i < 32; i++){
-		memset(a, 0, 49);
+		memset(a, 0, sizeof(a));
 		for (j=0; j < 16; j++){
 			const char *c=(const char*)bitmap+j+i*16;
 

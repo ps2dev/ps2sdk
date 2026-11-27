@@ -579,7 +579,7 @@ int dvrf_df_dread(iomanX_iop_file_t *f, iox_dirent_t *buf)
     if (check_cmdack_err(&DvrdrvExecCmdAckDmaRecvComp, &cmdack, &retval, __func__)) {
         goto finish;
     }
-    memcpy(buf, RBUF, sizeof(*buf));
+    *buf = *(iox_dirent_t *)RBUF;
     buf->stat.mode = bswap32(buf->stat.mode);
     buf->stat.attr = bswap32(buf->stat.attr);
     buf->stat.size = bswap32(buf->stat.size);

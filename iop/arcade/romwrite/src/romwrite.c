@@ -726,7 +726,7 @@ static int do_write_partition(int part)
 					err = 1;
 				if ( !err )
 				{
-					if ( strncmp(g_page_buf, "S147INFO", 8) )
+					if ( memcmp(g_page_buf, "S147INFO", 8) )
 					{
 						STATUS_PRINTF(" Error: \"%s\" is not a S147INFO-image file\n", g_atfile_info_image);
 						err = 1;
@@ -761,7 +761,7 @@ static int do_write_partition(int part)
 					err = 1;
 				if ( !err )
 				{
-					if ( strncmp(g_page_buf, "S147ROM", 8) )
+					if ( memcmp(g_page_buf, "S147ROM", 8) )
 					{
 						STATUS_PRINTF(" Error: \"%s\" is not a S147ROM-image file\n", g_atfile_part_image[part]);
 						err = 1;
@@ -981,7 +981,7 @@ static int do_list_files(int part)
 		{
 			if ( (xind1 << 6) - 1 + i == -1 )
 			{
-				if ( strncmp(g_nand_partbuf.m_dir.m_sig, "S147ROM", 8) )
+				if ( memcmp(g_nand_partbuf.m_dir.m_sig, "S147ROM", 8) )
 				{
 					STATUS_PRINTF(" \"%s%d:\" ... No data\n", "atfile", part);
 					STATUS_PRINTF(" -----------------------------\n\n");

@@ -988,6 +988,8 @@ static int do_set_multicast_list_helper(const struct SmapDriverData *SmapDrivPri
 }
 #endif
 
+typedef int int_unaligned_t __attribute__((aligned(1)));
+
 #if defined(BUILDING_SMAP_NETMAN) || defined(BUILDING_SMAP_NETDEV)
 #ifdef BUILDING_SMAP_NETDEV
 static int SMAPIoctl(void *priv, int command, void *in_out_ptr, int in_out_len)
@@ -998,8 +1000,8 @@ static int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, vo
     int result;
 #ifdef BUILDING_SMAP_NETDEV
     struct SmapDriverData *SmapDrivPrivData;
-    const void *tmpoutptr;
-    int bufasint;
+    u32 *tmpoutptr;
+    u32 bufasint;
 #endif
 #if USE_GP_REGISTER
     void *OldGP;
@@ -1031,7 +1033,7 @@ static int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, vo
         case sceInetNDCC_SET_THPRI: {
             if (in_out_ptr && in_out_len == 4) {
                 result = -403;
-                memcpy(&bufasint, in_out_ptr, 4);
+                bufasint = *(int_unaligned_t *)in_out_ptr;
                 if ((unsigned int)(bufasint - 9) < 0x73) {
                     ThreadPriority = bufasint;
                     result         = ChangeThreadPriority(SmapDrivPrivData->IntrHandlerThreadID, bufasint);
@@ -1061,7 +1063,7 @@ static int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, vo
                 int tmpconfig;
 
                 tmpconfig = 0;
-                memcpy(&bufasint, in_out_ptr, 4);
+                bufasint = *(int_unaligned_t *)in_out_ptr;
                 EnableAutoNegotiation = ((bufasint & sceInetNDNEGO_AUTO) != 0 ? 1 : 0);
                 if ((bufasint & sceInetNDNEGO_PAUSE) != 0)
                     tmpconfig |= 0x400;
@@ -1172,8 +1174,8 @@ static int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, vo
             break;
     }
 
-    if (tmpoutptr && in_out_ptr && in_out_len == 4) {
-        memcpy(in_out_ptr, tmpoutptr, in_out_len);
+    if (tmpoutptr && in_out_ptr && in_out_len == sizeof(int)) {
+        *(int_unaligned_t *)in_out_ptr = *tmpoutptr;
         result = 0;
     }
 #else
@@ -1501,7 +1503,7 @@ int smap_init(int argc, char *argv[])
             EnablePinStrapConfig = 1;
         } else if (strcmp("-no_strap", *argv) == 0) {
             EnablePinStrapConfig = 0;
-        } else if (strncmp("thpri=", *argv, 6) == 0) {
+        } else if (memcmp("thpri=", *argv, 6) == 0) {
             CmdString = &(*argv)[6];
             if (isdigit(CmdString[0])) {
                 ThreadPriority = strtoul(&(*argv)[6], NULL, 10);
@@ -1518,7 +1520,7 @@ int smap_init(int argc, char *argv[])
                 }
             } else
                 return DisplayHelpMessage();
-        } else if (strncmp("thstack=", *argv, 8) == 0) {
+        } else if (memcmp("thstack=", *argv, 8) == 0) {
             CmdString = &(*argv)[8];
             if (isdigit(CmdString[0])) {
                 ThreadStackSize = strtoul(&(*argv)[8], NULL, 10);
@@ -1593,7 +1595,7 @@ int smap_init(int argc, char *argv[])
     SMAP_REG16(SMAP_R_INTR_CLR) = DEV9_SMAP_ALL_INTR_MASK;
 
     /* Retrieve the MAC address and verify it's integrity. */
-    bzero(eeprom_data, 8);
+    bzero(eeprom_data, sizeof(eeprom_data));
     if ((result = SpdGetEthernetID(eeprom_data)) < 0) {
         return (result == -1 ? -7 : -4);
     }

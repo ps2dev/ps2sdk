@@ -858,7 +858,7 @@ static void setSfnEntryFromOld(const char *shortName, fat_direntry_sfn *dsfn, co
 {
     int i;
 
-    memcpy(dsfn, orig_dsfn, sizeof(fat_direntry_sfn));
+    *dsfn = *orig_dsfn;
 
     // name + ext
     for (i = 0; i < 8; i++)
@@ -1055,7 +1055,7 @@ static int setShortNameSequence(fat_driver *fatd, char *sname)
         }                                         // ends "if mask byte has any bit free"
     }                                             // ends "for each mask byte"
 
-    memset(number, 0, 8);
+    memset(number, 0, sizeof(number));
     sprintf(number, "%d", seq);
     j = strlen(number);
 
@@ -1185,8 +1185,8 @@ static int fat_fillDirentryInfo(fat_driver *fatd, const char *lname, const char 
 #endif /* BUILDING_IEEE1394_DISK */
 #endif
 
-    memset(fatd->dir_used_mask, 0, DIR_MASK_SIZE / 8);
-    memset(fatd->seq_mask, 0, SEQ_MASK_SIZE / 8);
+    memset(fatd->dir_used_mask, 0, sizeof(fatd->dir_used_mask));
+    memset(fatd->seq_mask, 0, sizeof(fatd->seq_mask));
 
     cont = 1;
     // clear name strings
@@ -2173,7 +2173,7 @@ int fat_renameFile(fat_driver *fatd, fat_dir *fatdir, const char *fname)
         XPRINTF("E: I/O error! %d\n", ret);
         return ret;
     }
-    memcpy(&OriginalSFN, (fat_direntry_sfn *)(sbuf + sfnOffset), sizeof(fat_direntry_sfn));
+    OriginalSFN = *(fat_direntry_sfn *)(sbuf + sfnOffset);
     srcIsDirectory = ((fat_direntry_sfn *)(sbuf + sfnOffset))->attr & FAT_ATTR_DIRECTORY;
 
     ret = fat_fillDirentryInfo(fatd, lname, sname, srcIsDirectory, &dDirCluster, &new_sfnSector, &new_sfnOffset);

@@ -833,7 +833,7 @@ int fat_getFileStartCluster(fat_driver *fatd, const char *fname, unsigned int *s
 
     *startCluster = 0;
     if (fatDir != NULL) {
-        memset(fatDir, 0, sizeof(fat_dir));
+        memset(fatDir, 0, sizeof(*fatDir));
         fatDir->attr = FAT_ATTR_DIRECTORY;
     }
     if (fname[i] == '/') {

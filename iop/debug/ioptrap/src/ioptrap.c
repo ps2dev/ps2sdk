@@ -275,7 +275,7 @@ int _start(int argc, char *argv[])
     if (RegisterLibraryEntries(&_exp_ioptrap) != 0)
         return MODULE_NO_RESIDENT_END;
 
-    memset(handlers, 0, sizeof(trap_exception_handler_t) * 16);
+    memset(handlers, 0, sizeof(handlers));
     printf("ioptrap starts.\n");
     if ((rv = RegisterDefaultExceptionHandler((exception_handler_t)def_exc_handler)) < 0) {
         printf("RegisterDefaultExceptionHandler failed, rv=%d\n", rv);

@@ -66,7 +66,7 @@ void _sif2_cmd_dbg_control(SIF2_CmdPkt *cmd, void *param)
         else { frame = _iop_ex_dbg_frame; }
 
         // update the register frame and release the CPU.
-        memcpy(frame, &params->reg_frame, sizeof(IOP_RegFrame));
+        *frame = params->reg_frame;
 
         FlushIcache();
         FlushDcache();

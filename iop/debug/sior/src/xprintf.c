@@ -1043,7 +1043,7 @@ static int npm_puts_init()
 int npmPuts(const char *buf)
 {
 	u8 puts_buf[512]; /* Implicitly aligned. */
-	void *p = puts_buf;
+	void *p;
 
 	if (npm_puts_init() < 0)
 		return -E_LIB_API_INIT;
@@ -1054,8 +1054,9 @@ int npmPuts(const char *buf)
 	if (((u32)buf & 15) == 0)
 		p = (void *)buf;
 	else {
-		strncpy(p, buf, 511);
-		((char *) p)[511] = '\0';
+    p = puts_buf;
+		strncpy((void *)puts_buf, buf, sizeof(puts_buf) - 1);
+		puts_buf[sizeof(puts_buf) - 1] = '\0';
 	}
 
 	if (sceSifCallRpc(&npm_cd, NPM_RPC_PUTS, 0, p, 512, NULL, 0, NULL, NULL) < 0)

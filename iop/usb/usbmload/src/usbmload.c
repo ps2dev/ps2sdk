@@ -901,8 +901,8 @@ int sceUsbmlRegisterDevice(USBDEV_t *device)
 	}
 	if ( !failed )
 	{
-		// The following memcpy was inlined
-		memcpy(devinfo, device, sizeof(USBDEV_t));
+		// The following structure copy was inlined
+		*devinfo = *device;
 		CpuSuspendIntr(&state);
 		devinfo->dispname = (char *)AllocSysMemory(0, strlen(device->dispname) + 1, 0);
 		CpuResumeIntr(state);

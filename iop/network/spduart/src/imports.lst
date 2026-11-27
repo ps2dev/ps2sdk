@@ -27,13 +27,13 @@ stdio_IMPORTS_end
 
 sysclib_IMPORTS_start
 I_look_ctype_table
-I_bcopy
+I_memcpy
 I_bzero
 I_sprintf
 I_strcmp
 I_strcpy
 I_strlen
-I_strncmp
+I_memcmp
 I_strtol
 I_memset
 sysclib_IMPORTS_end

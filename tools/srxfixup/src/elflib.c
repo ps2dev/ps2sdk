@@ -798,7 +798,7 @@ static void write_symtab(elf_file *elf, int sctindex, FILE *fp)
 	fseek(fp, sp_x->shr.sh_offset, SEEK_SET);
 	for ( i = 0; entrise > i; i += 1 )
 	{
-		memcpy(&sym, syp[i], sizeof(sym));
+		sym = *(Elf32_Sym *)(syp[i]);
 		if ( syp[i]->shptr )
 		{
 			sym.st_shndx = syp[i]->shptr->number;
@@ -822,7 +822,7 @@ static void write_rel(elf_file *elf, int sctindex, FILE *fp)
 	fseek(fp, sp_x->shr.sh_offset, SEEK_SET);
 	for ( i = 0; entrise > i; i += 1 )
 	{
-		memcpy(&rel, &rp[i], sizeof(rel));
+		rel = *(Elf32_Rel *)&rp[i];
 		if ( rp[i].symptr && rp[i].symptr->number == (unsigned int)(-1) )
 		{
 			fprintf(stderr, "Internal error !!\n");

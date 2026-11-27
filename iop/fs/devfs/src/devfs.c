@@ -161,7 +161,7 @@ int devfs_fill_dirent(iox_dirent_t *dirent, int devno)
 
         if(subdev_loop < DEVFS_MAX_SUBDEVS)
         {
-           memset(dirent, 0, sizeof(iox_dirent_t));
+           memset(dirent, 0, sizeof(*dirent));
            dirent->stat.size = dev_scan->subdevs[subdev_loop].extent.loc32[0];
            dirent->stat.hisize = dev_scan->subdevs[subdev_loop].extent.loc32[1];
            dirent->stat.mode = FIO_S_IFREG;
@@ -212,8 +212,8 @@ devfs_device_t *devfs_create_device(const devfs_node_t *node)
       return NULL;
    }
 
-   memset(dev, 0, sizeof(devfs_device_t));
-   memcpy(&dev->node, node, sizeof(devfs_node_t));
+   memset(dev, 0, sizeof(*dev));
+   dev->node = *node;
    if(dev->node.name != NULL)
    {
       dev->node.name = AllocSysMemory(ALLOC_FIRST, strlen(node->name) + 1, NULL);
@@ -958,11 +958,7 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
         return -EPERM;
       }
 
-#ifdef USE_IOMAN
-      memset(stat, 0, sizeof(fio_stat_t));
-#else
-      memset(stat, 0, sizeof(iox_stat_t));
-#endif
+      memset(stat, 0, sizeof(*stat));
       stat->size = dev->subdevs[subdev].extent.loc32[0];
       stat->hisize = dev->subdevs[subdev].extent.loc32[1];
       stat->mode = FIO_S_IFREG;
@@ -1029,7 +1025,7 @@ int init_devfs(void)
    root_device = NULL;
    dev_count = 0;
 
-   memset(open_dirfiles, 0, sizeof(directory_file_t) * MAX_OPEN_DIRFILES);
+   memset(open_dirfiles, 0, sizeof(open_dirfiles));
 
    DelDrv(devfs_device.name);
 
@@ -1236,7 +1232,7 @@ int DevFSAddSubDevice(HDEV hDev, u32 subdev_no, s32 mode, devfs_loc_t extent, vo
       dev->subdevs[subdev_no].mode = mode;
       dev->subdevs[subdev_no].open_refcount = 0;
       dev->subdevs[subdev_no].extent = extent;
-      memset(dev->subdevs[subdev_no].open_files, 0, sizeof(ioman_data_t *) * MAX_OPENFILES);
+      memset(dev->subdevs[subdev_no].open_files, 0, sizeof(dev->subdevs[subdev_no].open_files));
       dev->subdev_count++;
    }
    else

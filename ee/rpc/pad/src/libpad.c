@@ -359,7 +359,7 @@ padInit(int mode)
                     default:
                         break;
                     }
-                    memcpy(&padsif[0], &rpciftmp[i], sizeof(padsif[0]));
+                    padsif[0] = rpciftmp[i];
                     break;
                 }
             }

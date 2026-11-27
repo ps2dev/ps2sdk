@@ -52,8 +52,8 @@ pfs_cache_t *pfsInodeGetData(pfs_mount_t *pfsMount, u16 sub, u32 inode, int *res
 void pfsInodeSetTime(pfs_cache_t *clink)
 {	// set the inode time's in cache
 	pfsGetTime(&clink->u.inode->mtime);
-	memcpy(&clink->u.inode->ctime, &clink->u.inode->mtime, sizeof(pfs_datetime_t));
-	memcpy(&clink->u.inode->atime, &clink->u.inode->mtime, sizeof(pfs_datetime_t));
+	clink->u.inode->ctime = clink->u.inode->mtime;
+	clink->u.inode->atime = clink->u.inode->mtime;
 	clink->flags|=PFS_CACHE_FLAG_DIRTY;
 }
 

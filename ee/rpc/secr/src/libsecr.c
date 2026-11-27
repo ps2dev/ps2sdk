@@ -66,13 +66,13 @@ int SecrInit(void)
 
 void SecrDeinit(void)
 {
-    memset(&SifRpcClient01, 0, sizeof(SifRpcClientData_t));
-    memset(&SifRpcClient02, 0, sizeof(SifRpcClientData_t));
-    memset(&SifRpcClient03, 0, sizeof(SifRpcClientData_t));
-    memset(&SifRpcClient04, 0, sizeof(SifRpcClientData_t));
-    memset(&SifRpcClient05, 0, sizeof(SifRpcClientData_t));
-    memset(&SifRpcClient06, 0, sizeof(SifRpcClientData_t));
-    memset(&SifRpcClient07, 0, sizeof(SifRpcClientData_t));
+    memset(&SifRpcClient01, 0, sizeof(SifRpcClient01));
+    memset(&SifRpcClient02, 0, sizeof(SifRpcClient02));
+    memset(&SifRpcClient03, 0, sizeof(SifRpcClient03));
+    memset(&SifRpcClient04, 0, sizeof(SifRpcClient04));
+    memset(&SifRpcClient05, 0, sizeof(SifRpcClient05));
+    memset(&SifRpcClient06, 0, sizeof(SifRpcClient06));
+    memset(&SifRpcClient07, 0, sizeof(SifRpcClient07));
 }
 
 int SecrDownloadHeader(int port, int slot, void *buffer, SecrBitTable_t *BitTable, s32 *pSize)

@@ -23,7 +23,7 @@ static void sceSifCmdLoop2(SifRpcClientData_t *cd, SdrEECBInfo *cbi)
 			SleepThread();
 		CpuSuspendIntr(&state);
 		// Unofficial: was inlined
-		memcpy(&eeCBDataSend, &cbi->m_eeCBData, sizeof(eeCBDataSend));
+		eeCBDataSend = cbi->m_eeCBData;
 		CpuResumeIntr(state);
 #if SDRDRV_EECB_COMPAT
 		if ( eeCBDataSend.mode )

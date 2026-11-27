@@ -187,7 +187,7 @@ static int fsckCheckExtendedAttribute(pfs_mount_t *mount)
                 break;
             }
 
-            memset(IOBuffer, 0, IO_BUFFER_SIZE_BYTES);
+            memset(IOBuffer, 0, sizeof(IOBuffer));
             iomanX_lseek(mount->fd, 0, SEEK_SET);
             for (remaining = 0x1FF8; remaining != 0; remaining -= size) {
                 size = (remaining > IO_BUFFER_SIZE) ? IO_BUFFER_SIZE : remaining;
@@ -598,7 +598,7 @@ static void fsckCheckFiles(pfs_cache_t *ParentInodeClink, pfs_cache_t *InodeClin
 static void fsckCheckFile(pfs_cache_t *FileInodeClink, pfs_cache_t *FileInodeDataClink, pfs_dentry_t *dentry)
 {
     if (fsckRuntimeData.status.PWDLevel < FSCK_MAX_PATH_LEVELS - 1) {
-        memset(fsckPathBuffer[fsckRuntimeData.status.PWDLevel], 0, FSCK_MAX_PATH_SEG_LENGTH);
+        memset(fsckPathBuffer[fsckRuntimeData.status.PWDLevel], 0, sizeof(fsckPathBuffer[fsckRuntimeData.status.PWDLevel]));
         strncpy(fsckPathBuffer[fsckRuntimeData.status.PWDLevel], dentry->path, dentry->pLen);
         fsckRuntimeData.status.PWDLevel++;
 
@@ -996,9 +996,9 @@ static int CheckSuperBlock(pfs_mount_t *pMainPFSMount)
     pMainPFSMount->sector_scale = pfsGetScale(super->zone_size, 512);
     pMainPFSMount->inode_scale  = pfsGetScale(super->zone_size, 1024);
 
-    memcpy(&pMainPFSMount->root_dir, &super->root, sizeof(pMainPFSMount->root_dir));
-    memcpy(&pMainPFSMount->log, &super->log, sizeof(pMainPFSMount->log));
-    memcpy(&pMainPFSMount->current_dir, &super->root, sizeof(pMainPFSMount->current_dir));
+    pMainPFSMount->root_dir = super->root;
+    pMainPFSMount->log = super->log;
+    pMainPFSMount->current_dir = super->root;
     pMainPFSMount->total_zones = 0;
 
     if (fsckVerbosityLevel) {
@@ -1196,7 +1196,7 @@ static int FsckIoctl2(iomanX_iop_file_t *fd, int cmd, void *arg, unsigned int ar
             }
             break;
         case FSCK_IOCTL2_CMD_GET_STATUS: // 0x000025a8
-            memcpy(buf, &fsckRuntimeData.status, sizeof(struct fsckStatus));
+            *(struct fsckStatus *)buf = fsckRuntimeData.status;
             result = 0;
             break;
         case FSCK_IOCTL2_CMD_STOP: // 0x0000262c

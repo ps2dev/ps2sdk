@@ -186,7 +186,7 @@ int CreateSave(void)
 	// in the PS2 browser screen. It contains info on the bg colour, lighting, save name
 	// and icon filenames. Please note that the save name is sjis encoded.
 
-	memset(&icon_sys, 0, sizeof(mcIcon));
+	memset(&icon_sys, 0, sizeof(icon_sys));
 	strcpy(icon_sys.head, "PS2D");
 	strcpy_sjis((short *)&icon_sys.title, "Memcard Example\nPS2Dev r0x0rs");
 	icon_sys.nlOffset = 16;

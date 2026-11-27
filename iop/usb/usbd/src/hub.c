@@ -506,9 +506,9 @@ static int hubDrvConnect(int devId)
 	hubCalculateMagicPowerValue(hubDevice);
 	if ( hubDesc )
 	{
-		bcopy(
-			hubDesc,
+		memcpy(
 			&hubDevice->m_desc,
+			hubDesc,
 			(hubDesc->bLength < sizeof(UsbHubDescriptor)) ? hubDesc->bLength : sizeof(UsbHubDescriptor));
 	}
 	hubControlTransfer(

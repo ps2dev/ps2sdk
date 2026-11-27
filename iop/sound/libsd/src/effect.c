@@ -130,7 +130,7 @@ int sceSdSetEffectAttr(int core, const sceSdEffectAttr *attr)
 
 	memcpy(mode_data, &EffectParams[mode * 16], 64);
 
-	memcpy(&EffectAttr[core], attr, sizeof(sceSdEffectAttr));
+	EffectAttr[core] = *attr;
 	EffectAttr[core].core = core;
 
 	switch(mode)

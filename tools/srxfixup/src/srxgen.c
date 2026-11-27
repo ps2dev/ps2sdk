@@ -188,7 +188,7 @@ static Elf_file_slot *search_order_slots(const char *ordstr, const elf_file *elf
 		}
 		return 0;
 	}
-	if ( !strncmp(ordstr, "@Program_header_data ", 0x15) )
+	if ( !memcmp(ordstr, "@Program_header_data ", 0x15) )
 	{
 		long n;
 
@@ -265,12 +265,12 @@ int layout_srx_file(elf_file *elf)
 		;
 	}
 	neworder = (Elf_file_slot *)calloc(maxslot + 1, sizeof(Elf_file_slot));
-	memcpy(neworder, order, sizeof(Elf_file_slot));
+	*neworder = *order;
 	nslotp = neworder + 1;
 	order->type = EFS_TYPE_NONE;
 	if ( elf->ehp->e_phnum )
 	{
-		memcpy(nslotp, &order[1], sizeof(Elf_file_slot));
+		*nslotp = order[1];
 		nslotp = neworder + 2;
 		order[1].type = EFS_TYPE_NONE;
 	}
@@ -283,7 +283,7 @@ int layout_srx_file(elf_file *elf)
 			{
 				break;
 			}
-			memcpy(nslotp, slotp_1, sizeof(Elf_file_slot));
+			*nslotp = *slotp_1;
 			nslotp += 1;
 			slotp_1->type = EFS_TYPE_NONE;
 		}
@@ -637,9 +637,9 @@ static elf_section *add_iopmod(elf_file *elf)
 	elf_section *modsect;
 
 	modsect = (elf_section *)malloc(sizeof(elf_section));
-	memset(modsect, 0, sizeof(elf_section));
+	memset(modsect, 0, sizeof(*modsect));
 	iopmodp = (Elf32_IopMod *)malloc(sizeof(Elf32_IopMod));
-	memset(iopmodp, 0, sizeof(Elf32_IopMod));
+	memset(iopmodp, 0, sizeof(*iopmodp));
 	iopmodp->moduleinfo = -1;
 	modsect->name = strdup(".iopmod");
 	modsect->data = (uint8_t *)iopmodp;
@@ -657,9 +657,9 @@ static elf_section *add_eemod(elf_file *elf)
 	elf_section *modsect;
 
 	modsect = (elf_section *)malloc(sizeof(elf_section));
-	memset(modsect, 0, sizeof(elf_section));
+	memset(modsect, 0, sizeof(*modsect));
 	eemodp = (Elf32_EeMod *)malloc(sizeof(Elf32_EeMod));
-	memset(eemodp, 0, sizeof(Elf32_EeMod));
+	memset(eemodp, 0, sizeof(*eemodp));
 	eemodp->moduleinfo = -1;
 	modsect->name = strdup(".eemod");
 	modsect->data = (uint8_t *)eemodp;
@@ -1970,7 +1970,7 @@ static void rebuild_an_relocation(elf_section *relsect, unsigned int gpvalue, in
 		{
 			if ( s->type )
 			{
-				memcpy(d, s, sizeof(elf_rel));
+				*d = *s;
 				d += 1;
 				newentrise += 1;
 			}

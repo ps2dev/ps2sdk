@@ -38,7 +38,7 @@ static int module_start(int ac, char **av)
 	g_eeCBInfo.m_thid_cb = 0;
 	for ( i = 1; i < ac; i += 1 )
 	{
-		if ( !strncmp("thpri=", av[i], 6) )
+		if ( !memcmp("thpri=", av[i], 6) )
 		{
 			const char *p;
 

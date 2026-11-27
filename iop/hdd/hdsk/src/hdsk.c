@@ -92,7 +92,7 @@ static int hdskRemoveTmp(int device)
 
         apaDelete(clink);
         clink = apaCacheAlloc();
-        memset(clink->header, 0, sizeof(apa_header_t));
+        memset(clink->header, 0, sizeof(*(clink->header)));
         sceAtaDmaTransfer(device, clink->header, start, 2, ATA_DIR_WRITE);
         apaCacheFree(clink);
     }
@@ -341,14 +341,14 @@ static int SwapPartition(int device, apa_cache_t *dest, apa_cache_t *start)
 
     APA_PRINTF("swap %s partition start...", (start->header->flags & APA_FLAG_SUB) ? "sub" : "main");
 
-    memcpy(dest->header, start->header, sizeof(apa_header_t));
+    dest->header = start->header;
     dest->header->start = StartSector;
     dest->header->next  = next;
     dest->header->prev  = prev;
     StartSector         = start->header->start;
     next                = start->header->next;
     prev                = start->header->prev;
-    memset(start->header, 0, sizeof(apa_header_t));
+    memset(start->header, 0, sizeof(*(start->header)));
 
     start->header->magic  = APA_MAGIC;
     start->header->start  = StartSector;

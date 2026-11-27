@@ -53,7 +53,7 @@ int harvest_ar(const char *filename, int (*call_symbol)(void *user, int type, co
 
 	char armag[SARMAG];
 	read(fdi, armag, SARMAG);
-	if (memcmp(armag, ARMAG, SARMAG))
+	if (memcmp(armag, ARMAG, sizeof(armag)))
 	{
 		close(fdi);
 		printf("%s: not an AR file!\n", filename);

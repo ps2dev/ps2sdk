@@ -173,18 +173,18 @@ static pfs_cache_t *fsskCreateIndirectSeg(pfs_cache_t *clink, pfs_cache_t *clink
         if ((*result = pfsBitmapSearchFreeZone(clink->pfsMount, &block, clink->u.inode->number_blocks)) >= 0) {
             clinkfree = pfsCacheGetData(clink->pfsMount, block.subpart, block.number << clink->pfsMount->inode_scale, PFS_CACHE_FLAG_SEGI | PFS_CACHE_FLAG_NOLOAD, result);
 
-            memset(clinkfree->u.inode, 0, sizeof(pfs_inode_t));
+            memset(clinkfree->u.inode, 0, sizeof(*(clinkfree->u.inode)));
             clinkfree->u.inode->magic = PFS_SEGI_MAGIC;
-            memcpy(&clinkfree->u.inode->inode_block, &clink->u.inode->inode_block, sizeof(pfs_blockinfo_t));
-            memcpy(&clinkfree->u.inode->last_segment, &clink2->u.inode->data[0], sizeof(pfs_blockinfo_t));
-            memcpy(&clinkfree->u.inode->data[0], &block, sizeof(pfs_blockinfo_t));
+            clinkfree->u.inode->inode_block = clink->u.inode->inode_block;
+            clinkfree->u.inode->last_segment = clink2->u.inode->data[0];
+            clinkfree->u.inode->data[0] = block;
             clinkfree->flags |= PFS_CACHE_FLAG_DIRTY;
             clink->u.inode->number_blocks += block.count;
             clink->u.inode->number_data++;
-            memcpy(&clink->u.inode->last_segment, &block, sizeof(pfs_blockinfo_t));
+            clink->u.inode->last_segment = block;
             clink->u.inode->number_segdesg++;
             clink->flags |= PFS_CACHE_FLAG_DIRTY;
-            memcpy(&clink2->u.inode->next_segment, &block, sizeof(pfs_blockinfo_t));
+            clink2->u.inode->next_segment = block;
             clink2->flags |= PFS_CACHE_FLAG_DIRTY;
             pfsCacheFree(clink2);
 
@@ -247,7 +247,7 @@ static int fsskMoveInode(pfs_mount_t *mount, pfs_cache_t *dest, pfs_cache_t *sta
         block.subpart = fsskCalcLastSub(mount);
         block.number  = 0;
     } else {
-        memcpy(&block, &dest->u.inode->inode_block, sizeof(pfs_blockinfo_t));
+        block = dest->u.inode->inode_block;
     }
 
     block.count = 1;
@@ -256,10 +256,10 @@ static int fsskMoveInode(pfs_mount_t *mount, pfs_cache_t *dest, pfs_cache_t *sta
             (clink = pfsCacheGetData(mount, block.subpart, block.number << mount->inode_scale, PFS_CACHE_FLAG_SEGD | PFS_CACHE_FLAG_NOLOAD, &result)) != NULL) {
             int i;
 
-            memcpy(clink->u.inode, start->u.inode, sizeof(pfs_inode_t));
-            memcpy(&clink->u.inode->inode_block, &block, sizeof(pfs_blockinfo_t));
-            memcpy(&clink->u.inode->last_segment, &block, sizeof(pfs_blockinfo_t));
-            memcpy(&clink->u.inode->data[0], &block, sizeof(pfs_blockinfo_t));
+            clink->u.inode = start->u.inode;
+            clink->u.inode->inode_block = block;
+            clink->u.inode->last_segment = block;
+            clink->u.inode->data[0] = block;
             clink->u.inode->number_segdesg = 1;
             clink->u.inode->number_data    = 1;
             clink->u.inode->number_blocks  = 1;
@@ -272,7 +272,7 @@ static int fsskMoveInode(pfs_mount_t *mount, pfs_cache_t *dest, pfs_cache_t *sta
                         break;
                     }
                 } else {
-                    memcpy(&block2, &clink2->u.inode->data[pfsFixIndex(i)], sizeof(pfs_blockinfo_t));
+                    block2 = clink2->u.inode->data[pfsFixIndex(i)];
                     if (pfsFixIndex(clink->u.inode->number_data - 1) != 0) {
                         int value;
                         if ((value = pfsBitmapAllocateAdditionalZones(mount, clink3->u.inode->data, block2.count)) != 0) {
@@ -304,7 +304,7 @@ static int fsskMoveInode(pfs_mount_t *mount, pfs_cache_t *dest, pfs_cache_t *sta
                             break;
                         }
 
-                        memcpy(&clink3->u.inode->data[pfsFixIndex(start->u.inode->number_data)], &block, sizeof(pfs_blockinfo_t));
+                        clink3->u.inode->data[pfsFixIndex(start->u.inode->number_data)] = block;
 
                         clink->u.inode->number_data++;
                         if ((result = fsskCopyBlock(mount, &block, &block2, block.count)) < 0) {
@@ -370,7 +370,7 @@ static int fsskCheckFile(pfs_cache_t *InodeClink, pfs_cache_t *DEntryClink, pfs_
 
     if ((FileInodeDataClink = pfsInodeGetData(InodeClink->pfsMount, dentry->sub, dentry->inode, &result)) != NULL) {
         if (fsskRuntimeData.status.PWDLevel < FSSK_MAX_PATH_LEVELS - 1) {
-            memset(fsskPathBuffer[fsskRuntimeData.status.PWDLevel], 0, FSSK_MAX_PATH_SEG_LENGTH);
+            memset(fsskPathBuffer[fsskRuntimeData.status.PWDLevel], 0, sizeof(fsskPathBuffer[fsskRuntimeData.status.PWDLevel]));
             strncpy(fsskPathBuffer[fsskRuntimeData.status.PWDLevel], dentry->path, dentry->pLen);
             fsskRuntimeData.status.PWDLevel++;
 
@@ -508,7 +508,7 @@ static void FsskThread(pfs_mount_t *mount)
                         if ((result = mount->blockDev->transfer(mount->fd, IOBuffer, 0, PFS_SUPER_SECTOR, 1, PFS_IO_MODE_READ)) == 0) {
                             mount->root_dir.subpart = dentry.sub;
                             mount->root_dir.number  = dentry.inode;
-                            memcpy(&((pfs_super_block_t *)IOBuffer)->root, &mount->root_dir, sizeof(pfs_blockinfo_t));
+                            ((pfs_super_block_t *)IOBuffer)->root = mount->root_dir;
                             if ((result = mount->blockDev->transfer(mount->fd, IOBuffer, 0, PFS_SUPER_BACKUP_SECTOR, 1, PFS_IO_MODE_WRITE)) == 0) {
                                 result = mount->blockDev->transfer(mount->fd, IOBuffer, 0, PFS_SUPER_SECTOR, 1, PFS_IO_MODE_WRITE);
                             }
@@ -692,7 +692,7 @@ static int FsskIoctl2(iomanX_iop_file_t *fd, int cmd, void *arg, unsigned int ar
             }
             break;
         case FSSK_IOCTL2_CMD_GET_STATUS:
-            memcpy(buf, &fsskRuntimeData.status, sizeof(struct fsskStatus));
+            *(struct fsskStatus *)buf = fsskRuntimeData.status;
             result = 0;
             break;
         case FSSK_IOCTL2_CMD_STOP:

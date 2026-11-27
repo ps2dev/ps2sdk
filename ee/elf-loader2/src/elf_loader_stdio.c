@@ -98,6 +98,6 @@ int elf_loader_reader_read_elf_file_stdio(
 		procinfo.m_fp = NULL;
 	}
 	if ( resultbuf )
-		memcpy(resultbuf, &procinfo.m_resultbuf, sizeof(elf_loader_reader_info_stdio_resultbuf_t));
+		*resultbuf = procinfo.m_resultbuf;
 	return procinfo.m_resultbuf.m_result;
 }

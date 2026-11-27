@@ -865,7 +865,7 @@ static int cdvd_odcinit(cdvdman_fhinfo_t *fh, int open_or_close, int id)
 			{
 				fh->m_fd_rcvbuf[i] = 0;
 			}
-			if ( !strncmp(cache_filename, "pfs", 3) )
+			if ( !memcmp(cache_filename, "pfs", 3) )
 			{
 				cache_result = ioctl2(cache_file_fd_new, PIOCALLOC, &ioctl_arg, 4, 0, 0);
 			}
@@ -921,11 +921,11 @@ static int cdvd_odcinit(cdvdman_fhinfo_t *fh, int open_or_close, int id)
 			VERBOSE_KPRINTF(1, "Cache File Close: %d\n", cache_remove_result);
 			if ( cache_remove_result >= 0 )
 			{
-				if ( !strncmp(cache_filename, "pfs", 3) )
+				if ( !memcmp(cache_filename, "pfs", 3) )
 				{
 					cache_remove_result = remove(cache_filename);
 				}
-				else if ( !strncmp(cache_filename, "host", 4) )
+				else if ( !memcmp(cache_filename, "host", 4) )
 				{
 					cache_remove_result = 0;
 					remove(cache_filename);
@@ -1273,7 +1273,7 @@ static int cdrom_open(iop_file_t *f, const char *name, int mode, int arg4)
 	}
 	else
 	{
-		if ( !strncmp(name, "sce_cdvd_lsn", 12) )
+		if ( !memcmp(name, "sce_cdvd_lsn", 12) )
 		{
 			strncpy(filename, name, sizeof(filename));
 			// Unofficial: Avoid out of bounds access
@@ -2732,8 +2732,8 @@ static int CdSearchFileInner(cdvdman_filetbl_entry_t *fp, const char *name, int 
 		if ( cdvdman_cmpname(g_cdvdman_filetbl[j].m_file_struct.name, name_buf) )
 		{
 			VERBOSE_PRINTF(2, "%s:\t found\n", name_buf);
-			// The following memcpy was inlined
-			memcpy(fp, &g_cdvdman_filetbl[j], sizeof(cdvdman_filetbl_entry_t));
+			// The following structure copy was inlined
+			*(cdvdman_filetbl_entry_t *)fp = g_cdvdman_filetbl[j];
 			fp->m_file_struct.lsn += layer ? g_cdvdman_fs_base2 : 0;
 			return 1;
 		}
@@ -2771,8 +2771,8 @@ static int sceCdReadDir(sceCdlFILE *fp, int dsec, int index, int layer)
 	if ( g_cdvdman_filetbl[index].m_file_struct.name[0] )
 	{
 		VERBOSE_PRINTF(1, "%s:\t found dir_point %d\n", g_cdvdman_filetbl[index].m_file_struct.name, index);
-		// The following memcpy was inlined
-		memcpy(fp, &g_cdvdman_filetbl[index], sizeof(cdvdman_filetbl_entry_t));
+		// The following structure copy was inlined
+		*(cdvdman_filetbl_entry_t *)fp = g_cdvdman_filetbl[index];
 		return 1;
 	}
 	return 0;
@@ -2840,7 +2840,7 @@ static int CD_newmedia(int arg)
 	g_cache_table = 0;
 	g_cache_path_size = 0;
 	CpuResumeIntr(state);
-	if ( strncmp((char *)((iso9660_desc_t *)g_cdvdman_fs_rbuf)->m_id, "CD001", 5) )
+	if ( memcmp((char *)((iso9660_desc_t *)g_cdvdman_fs_rbuf)->m_id, "CD001", 5) )
 	{
 		VERBOSE_PRINTF(1, "CD_newmedia: Disc format error in cd_read(PVD)\n");
 		return 0;
@@ -3181,7 +3181,7 @@ static int path_tbl_init(u32 blocks, char *fname, int action)
 			u32 i;
 
 			g_cache_path_fd = v;
-			if ( !strncmp(cachedir, "pfs", 3) )
+			if ( !memcmp(cachedir, "pfs", 3) )
 			{
 				blocksbs = blocks << 11;
 				ioctl2(g_cache_path_fd, PIOCALLOC, &blocksbs, sizeof(blocksbs), 0, 0);
@@ -3220,11 +3220,11 @@ static int path_tbl_init(u32 blocks, char *fname, int action)
 		num = close(g_cache_path_fd);
 		if ( num >= 0 )
 		{
-			if ( !strncmp(cachedir, "pfs", 3) )
+			if ( !memcmp(cachedir, "pfs", 3) )
 			{
 				num = remove(cachedir);
 			}
-			else if ( !strncmp(cachedir, "host", 4) )
+			else if ( !memcmp(cachedir, "host", 4) )
 			{
 				num = 0;
 				remove(cachedir);
@@ -7940,12 +7940,12 @@ int sceCdReadClock(sceCdCLOCK *clock)
 	clock->month &= 0x7F;
 	if ( retval && !clock->stat )
 	{
-		memcpy(&g_cdvdman_clock, clock, sizeof(g_cdvdman_clock));
+		g_cdvdman_clock = *clock;
 		g_cdvdman_clk_flg = 1;
 	}
 	else if ( g_cdvdman_clk_flg )
 	{
-		memcpy(clock, &g_cdvdman_clock, sizeof(g_cdvdman_clock));
+		*clock = g_cdvdman_clock;
 	}
 	else
 	{

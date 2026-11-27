@@ -37,7 +37,7 @@ void list_all_libraries()
     /* We only have a 8-char buffer for the name, so we need to convert it into a C
        string just in case the name is 8 chars.  */
     memset(name, 0, sizeof(name));
-    memcpy(name, libptr->name, 8);
+    memcpy(name, libptr->name, sizeof(name) - 1);
     printf("    %-20s v%d.%d\n",name,
      (libptr->version&0xff00)>>8,libptr->version&0xff);
     libptr = libptr->prev;

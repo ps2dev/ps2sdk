@@ -190,7 +190,7 @@ check_valid_ee_elf(loadfile_allocate_handler_struct_t *allocate_info, loadfile_f
 		printf("File is not ELF format(%d)\n", hdrchkres);
 		return KE_ILLEGAL_OBJECT;
 	}
-	memcpy(ehdr, *pehdr, sizeof(*ehdr));
+	*ehdr = **pehdr;
 	hdrchkres = check_elf_architecture(flhs);
 	if ( hdrchkres < 0 )
 	{

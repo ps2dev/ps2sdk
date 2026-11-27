@@ -204,7 +204,7 @@ static void hdd_blkio_vhdd_clear_slot(int slot)
     if (diskinfo->fd >= 0) {
         iomanX_close(diskinfo->fd);
     }
-    memset(diskinfo, 0, sizeof(vhdd_diskinfo_t));
+    memset(diskinfo, 0, sizeof(*diskinfo));
     diskinfo->fd = -1;
 }
 

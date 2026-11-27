@@ -223,7 +223,7 @@ static int generateIOPBTCONF_img(void *output, void *ioprp)
             // Copy IOPBTCONF into the new image.
             ptr_out = (u8 *)output;
             ptr_in  = (u8 *)ioprp;
-            memcpy(ptr_out, &iopbtconf_img_base, sizeof(iopbtconf_img_base));
+            *(struct iopbtconf_img *)ptr_out = iopbtconf_img_base;
             memcpy(ptr_out + sizeof(iopbtconf_img_base), &ptr_in[offset], romdir->size);
             ((romdir_t *)ptr_out)[3].size = romdir->size; // Update the size of IOPBTCONF within the generated IOPRP image.
             return romdir->size + sizeof(iopbtconf_img_base);

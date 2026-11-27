@@ -91,7 +91,7 @@ int apaGetTime(apa_ps2time_t *tm)
 		DelayThread(100000);
 	}
 
-	memcpy(tm, &timeBuf, sizeof(apa_ps2time_t));
+	*tm = timeBuf;
 #else
 	time_t rawtime;
 	struct tm timeinfo;

@@ -393,7 +393,7 @@ static int cl_write_custom(int node, u8 *srcptr, int cpVal)
 		CpuResumeIntr(state);
 		return 0;
 	}
-	memcpy(tx_buff[cl_info.T_in], srcptr, sizeof(u8[64]));
+	memcpy(tx_buff[cl_info.T_in], srcptr, sizeof(tx_buff[cl_info.T_in]));
 	tx_buff[cl_info.T_in][0] = cl_info.mynode;
 	tx_buff[cl_info.T_in][1] = node & 0xFF;
 	tx_buff[cl_info.T_in][2] = cpVal & 0xFF;

@@ -172,7 +172,7 @@ static int cdfs_attach(struct cdfs_softc *cdfsc, struct acd *acd, int remount)
 				printf("cdfs:super:read: error %d\n", active_v12);
 				break;
 			}
-			if ( !strncmp((const char *)buf + 1, "CD001", 5u) )
+			if ( !memcmp((const char *)buf + 1, "CD001", 5u) )
 			{
 				int active_v13;
 

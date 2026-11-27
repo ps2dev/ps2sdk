@@ -77,7 +77,7 @@ int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack)
 		{
 			if((result=NetManRPCRegisterNetworkStack())==0)
 			{
-				memcpy(&MainNetProtStack, stack, sizeof(MainNetProtStack));
+				MainNetProtStack = *stack;
 				IsNetStackInitialized=1;
 				if((result=NetManRPCAllocRxBuffers()) == 0)
 					NetManUpdateStackNIFLinkState();

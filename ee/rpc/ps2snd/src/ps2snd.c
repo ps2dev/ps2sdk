@@ -205,7 +205,7 @@ int sceSdSetEffectAttr (int core, const sceSdEffectAttr *attr)
 {
 	s32 buf[1+((sizeof(sceSdEffectAttr)+3)/4)] ALIGNED(64);
 	buf[0] = core;
-	memcpy(&buf[1], attr, sizeof(sceSdEffectAttr));
+	*(sceSdEffectAttr *)(&buf[1]) = *attr;
 	sceSifCallRpc(&sd_client, PS2SND_SetEffectAttr, 0, buf, 4+sizeof(sceSdEffectAttr), buf, 4, NULL, NULL);
 	return(buf[0]);
 }
@@ -215,7 +215,7 @@ void sceSdGetEffectAttr (int core, sceSdEffectAttr *attr)
 	s32 buf[((sizeof(sceSdEffectAttr)+3)/4)] ALIGNED(64);
 	buf[0] = core;
 	sceSifCallRpc(&sd_client, PS2SND_GetEffectAttr, 0, buf, 4, buf, sizeof(sceSdEffectAttr), NULL, NULL);
-	memcpy(attr, buf, sizeof(sceSdEffectAttr));
+	*attr = *(sceSdEffectAttr *)buf;
 }
 
 int sceSdClearEffectWorkArea (int core, int channel, int effect_mode)

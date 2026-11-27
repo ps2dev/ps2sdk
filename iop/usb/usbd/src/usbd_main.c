@@ -125,7 +125,7 @@ static void callbackThreadFunc(void *arg)
 			CpuResumeIntr(state);
 			if ( !req )
 				break;
-			bcopy(req, &reqCopy, sizeof(UsbdIoRequest_t));
+			reqCopy = *req;
 			usbdLock();
 			freeIoRequest(req);
 			usbdUnlock();

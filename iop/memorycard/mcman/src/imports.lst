@@ -51,6 +51,7 @@ intrman_IMPORTS_end
 sysclib_IMPORTS_start
 I_memcpy
 I_memset
+I_memcmp
 I_strcat
 I_strcmp
 I_strcpy
