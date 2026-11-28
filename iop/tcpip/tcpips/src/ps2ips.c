@@ -46,7 +46,12 @@ static SifRpcDataQueue_t ps2ips_queue;
 static SifRpcServerData_t ps2ips_server;
 static u8 _rpc_buffer[512 * 4] __attribute__((__aligned__(4)));
 
-static char lwip_buffer[BUFF_SIZE + 32];
+/* do_recv() and do_recvfrom() receive up to BUFF_SIZE bytes at lwip_buffer + 64 - srest (srest 0 to 63),
+   do_send() and do_sendto() fetch up to BUFF_SIZE - malign bytes from the EE to lwip_buffer + 64: either
+   way up to 64 + BUFF_SIZE bytes. With BUFF_SIZE + 32, a full 1 KiB from or to an EE address on a cache
+   line ran 32 bytes past the end and overwrote what followed (the EE then got DMAs to addresses it does
+   not have). */
+static char lwip_buffer[64 + BUFF_SIZE];
 static rests_pkt rests;
 
 static void do_accept( void * rpcBuffer, int size )
