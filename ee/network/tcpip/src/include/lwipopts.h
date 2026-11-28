@@ -50,7 +50,16 @@
  * aligned. That is why MEM_ALIGNMENT must match the underlying
  * allocator's alignment — see MEM_ALIGNMENT below.
  */
-#define MEM_LIBC_MALLOC		1
+/* lwIP 2.2.1 hard-wires plain malloc()/calloc()/free() when MEM_LIBC_MALLOC is 1 (opt.h), so the
+   memalign() hooks in arch/sys_arch.h (mem_clib_malloc, mem_clib_calloc: the names before 2.2) were no
+   longer used. MEM_CUSTOM_ALLOCATOR takes them under 2.2.1's names: 64-byte aligned, as MEM_ALIGNMENT. */
+#define MEM_CUSTOM_ALLOCATOR	1
+#include <stddef.h>
+#include <malloc.h>
+extern void *ps2ip_calloc64(size_t n, size_t size); /* sys_arch.c */
+#define MEM_CUSTOM_MALLOC(size)		memalign(64, (size))
+#define MEM_CUSTOM_CALLOC(n, size)	ps2ip_calloc64((n), (size))
+#define MEM_CUSTOM_FREE			free
 
 /* MEM_ALIGNMENT: must equal the alignment libc's malloc returns,
    because pbuf_alloc(PBUF_RAM) computes
@@ -81,7 +90,15 @@
    writeback, where misalignment harmlessly over-flushes extra cache
    lines. The IOP-side lwipopts has used MEM_ALIGNMENT=4 forever for
    the same reason. */
-#define MEM_ALIGNMENT		16
+/* 64 again, as before the lwIP 2.2.1 upgrade ("SP193: must be 64, to deal with the EE cache design").
+   The IOP DMAs each received frame into a PBUF_POOL pbuf, and netman writes the next pbuf's header in the
+   EE's cache. With 16 a pbuf's header and payload are 16-byte aligned, wherever the linker places the pool:
+   a full-size frame reaches into the cache line of the next pbuf's header, and when that dirty line is
+   written back it overwrites the frame's last bytes (26 of them in one build). TCP checksums are not
+   checked (CHECKSUM_CHECK_TCP 0), so bulk received data was corrupted now and then, silently. With 64
+   every pbuf header has a cache line of its own and every payload starts and ends on one; the allocator
+   above returns the same alignment, as the comment above requires. */
+#define MEM_ALIGNMENT		64
 
 /**
  * MEM_SIZE: the size of the heap memory. If the application will send
