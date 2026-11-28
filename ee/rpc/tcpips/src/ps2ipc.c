@@ -49,7 +49,21 @@ static struct {
 		u8 buffer[512];
 	};
 } _rpc_buffer __attribute__((aligned(64)));
-static int _intr_data[32] __attribute__((aligned(64)));
+/* The IOP DMAs a whole rests_pkt (144 bytes) here at the end of every recv() and recvfrom(): 32 ints
+   (128 bytes) let it overwrite the start of what the linker put next (__ps2ipc_fdman_ops_socket: getfd()
+   and others: select() then failed for every socket). Whole cache lines, so that no EE data shares one. */
+static int _intr_data[(sizeof(rests_pkt) + 63) / 64 * 16] __attribute__((aligned(64)));
+
+/* The IOP sends no rests_pkt back when recv() returns nothing (it would block, or end of file), but
+   recv_intr() runs anyway: with the previous call's rests_pkt still here it copied that call's head and
+   tail into that call's buffer once more, memory its caller may have freed and reused by then. */
+static void clear_rests(void)
+{
+	rests_pkt *rests = UNCACHED_SEG(_intr_data);
+
+	rests->ssize = 0;
+	rests->esize = 0;
+}
 
 static ip_addr_t dns_servers[DNS_MAX_SERVERS];
 
@@ -263,6 +277,7 @@ int ps2ipc_recv(int s, void *mem, int len, unsigned int flags)
 	send_pkt->flags = flags;
 	send_pkt->ee_addr = mem;
 	send_pkt->intr_data = _intr_data;
+	clear_rests();
 
 	if( !IS_UNCACHED_SEG(mem))
 		sceSifWriteBackDCache(mem, len);
@@ -297,6 +312,7 @@ int ps2ipc_recvfrom(int s, void *mem, int len, unsigned int flags,
 	send_pkt->flags = flags;
 	send_pkt->ee_addr = mem;
 	send_pkt->intr_data = _intr_data;
+	clear_rests();
 
 	if( !IS_UNCACHED_SEG(mem))
 		sceSifWriteBackDCache(mem, len);
